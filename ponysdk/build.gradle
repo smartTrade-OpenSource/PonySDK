@@ -1,0 +1,136 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.6
+
+srcCore = 'src-core/main/java';
+srcDefaultimpl = 'src-defaultimpl/main/java';
+srcGenerator = 'src-generator/main/java';
+srcGenerated = 'src-generated/main/java';
+
+gwtOutputDirName = buildDir.name + '/gwt';
+
+sourceSets {
+	main {
+		java {
+			srcDir srcCore
+			srcDir srcDefaultimpl
+			srcDir srcGenerator
+			srcDir srcGenerated
+		}
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	xjc
+	gwt
+}
+
+dependencies {
+	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
+	gwt 'com.google.gwt:gwt-user:2.4.0'
+	gwt 'com.google.gwt:gwt-dev:2.4.0'
+	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
+	compile 'com.google.gwt:gwt-user:2.4.0'
+	compile 'org.springframework:spring-context:3.0.6.RELEASE'
+	compile 'org.springframework:spring-web:3.0.6.RELEASE'
+	compile	'org.slf4j:slf4j-api:1.6.2'
+	compile 'org.hibernate:hibernate-core:3.6.7.Final'
+	compile 'ar.com.fdvs:DynamicJasper:3.0.13'
+	compile 'com.google.gwt:gwt-dev:2.4.0'
+}
+
+manifest {
+	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
+}
+
+
+jar {
+	baseName = 'ponysdk'
+	doLast {
+		tasks.jarSource.execute()
+		tasks.jarStandalone.execute()
+	}
+}
+
+
+task cleanGenerate << {
+	new File(srcGenerated).deleteDir();
+}
+
+task generate {
+	description = 'Model generation'
+	srcFile = file('src-core/main/resources/spec/project_schema.xsd')
+	destDir = file(srcGenerated)
+	inputs.file srcFile
+	outputs.dir destDir
+	doLast {
+		file(srcGenerated).mkdirs();
+		ant {
+			taskdef(name: 'xjc',
+			classname: 'com.sun.tools.xjc.XJCTask',
+			classpath: configurations.xjc.asPath)
+			xjc(destdir:srcGenerated, package:'com.ponysdk.generator') {
+				schema(dir:'src-core/main/resources/spec', includes: 'project_schema.xsd')
+			}
+		}
+	}
+}
+
+task cleanGwtc << {
+	new File(gwtOutputDirName).deleteDir();
+}
+
+task gwtc(type: JavaExec) {
+	description = 'GWT compile'
+	main = 'com.google.gwt.dev.Compiler'
+	maxHeapSize = '512M'
+	workingDir = buildDir
+	workers = Runtime.getRuntime().availableProcessors()
+	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
+	inputs.dir file('src-core/main/java')
+	outputs.dir file(gwtOutputDirName)
+	classpath {
+		[
+			sourceSets.main.java.srcDirs,
+			sourceSets.main.classes,
+			configurations.gwt
+		]
+	}
+	args = [
+		'-war',
+		'gwt',
+		'-localWorkers',
+		workers,
+		'com.ponysdk.ui.PonyTerminal'
+	]
+}
+
+task jarSource(type: Jar){
+	baseName = 'ponysdk-src'
+	from sourceSets.main.allJava
+}
+
+task jarStandalone(type: Jar){
+	baseName = 'ponysdk-standalone'
+	from sourceSets.main.classes
+	from gwtOutputDirName
+}
+
+task zipStarter(type: Zip) {
+	archiveName = 'starter.zip'
+	from jarStandalone.outputs.files
+	into('libs') {
+		from configurations.runtime
+	}
+}
+
+
+clean.dependsOn(cleanGenerate)
+compileJava.dependsOn(generate)
+jar.dependsOn(gwtc)
+
