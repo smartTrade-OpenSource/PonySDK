@@ -3,5 +3,10 @@ apply plugin: 'eclipse'
 
 sourceCompatibility = 1.6
 
-//dependsOn(':ponysdk')
+repositories {
+	mavenCentral()
+}
 
+dependencies {
+	compile project(':ponysdk')
+}
