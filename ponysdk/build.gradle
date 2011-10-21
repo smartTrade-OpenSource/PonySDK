@@ -10,6 +10,7 @@ srcGenerated = 'src-generated/main/java';
 
 gwtOutputDirName = buildDir.name + '/gwt';
 warResources = 'src-core/main/resources/war';
+confResources = 'src-core/main/resources/conf';
 
 sourceSets {
 	main {
@@ -65,6 +66,15 @@ jar {
 	doLast {
 		tasks.jarSource.execute()
 		tasks.jarStandalone.execute()
+	}
+	into('conf') {
+		from confResources
+	}
+	into('images') {
+		from warResources + '/images'
+	}
+	into('css') {
+		from warResources + '/css'
 	}
 }
 
@@ -134,6 +144,7 @@ task jarStandalone(type: Jar){
 	from sourceSets.main.classes
 	from gwtOutputDirName
 	from warResources
+	from confResources
 }
 
 task zipStarter(type: Zip) {
