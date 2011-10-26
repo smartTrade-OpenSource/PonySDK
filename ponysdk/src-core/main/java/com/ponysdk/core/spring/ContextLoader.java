@@ -38,7 +38,7 @@ public class ContextLoader {
     private XmlWebApplicationContext context;
 
     public void initWebApplicationContext(ServletContext servletContext) {
-        final String configFiles = "classpath:com/ponysdk/core/conf/server_application.inc.xml," + servletContext.getInitParameter(org.springframework.web.context.ContextLoader.CONFIG_LOCATION_PARAM);
+        final String configFiles = "classpath:conf/server_application.inc.xml," + servletContext.getInitParameter(org.springframework.web.context.ContextLoader.CONFIG_LOCATION_PARAM);
         context = new XmlWebApplicationContext();
         context.setServletContext(servletContext);
         context.setConfigLocations(StringUtils.tokenizeToStringArray(configFiles, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));

@@ -9,6 +9,8 @@ srcGenerator = 'src-generator/main/java';
 srcGenerated = 'src-generated/main/java';
 
 gwtOutputDirName = buildDir.name + '/gwt';
+warResources = 'src-core/main/resources/war';
+confResources = 'src-core/main/resources/conf';
 
 sourceSets {
 	main {
@@ -35,13 +37,23 @@ dependencies {
 	gwt 'com.google.gwt:gwt-user:2.4.0'
 	gwt 'com.google.gwt:gwt-dev:2.4.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
-	compile 'com.google.gwt:gwt-user:2.4.0'
-	compile 'org.springframework:spring-context:3.0.6.RELEASE'
-	compile 'org.springframework:spring-web:3.0.6.RELEASE'
-	compile	'org.slf4j:slf4j-api:1.6.2'
-	compile 'org.hibernate:hibernate-core:3.6.7.Final'
-	compile 'ar.com.fdvs:DynamicJasper:3.0.13'
-	compile 'com.google.gwt:gwt-dev:2.4.0'
+	
+	compile(
+		'com.google.gwt:gwt-user:2.4.0',
+		'org.springframework:spring-context:3.0.6.RELEASE',
+		'org.springframework:spring-web:3.0.6.RELEASE',
+		'org.slf4j:slf4j-api:1.6.2',
+		'org.hibernate:hibernate-core:3.6.7.Final',
+		'ar.com.fdvs:DynamicJasper:3.0.13',
+		'com.google.gwt:gwt-dev:2.4.0'
+    )
+	runtime(
+		'org.springframework:spring-context:3.0.6.RELEASE',
+		'org.springframework:spring-web:3.0.6.RELEASE',
+		'org.slf4j:slf4j-api:1.6.2',
+		'org.hibernate:hibernate-core:3.6.7.Final',
+		'ar.com.fdvs:DynamicJasper:3.0.13',
+	)
 }
 
 manifest {
@@ -53,6 +65,15 @@ jar {
 	doLast {
 		tasks.jarSource.execute()
 		tasks.jarStandalone.execute()
+	}
+	into('conf') {
+		from confResources
+	}
+	into('images') {
+		from warResources + '/images'
+	}
+	into('css') {
+		from warResources + '/css'
 	}
 }
 
@@ -120,6 +141,10 @@ task jarStandalone(type: Jar){
 	baseName = 'ponysdk-standalone'
 	from sourceSets.main.classes
 	from gwtOutputDirName
+	from warResources
+	into('conf') {
+		from confResources
+	}
 }
 
 task zipStarter(type: Zip) {

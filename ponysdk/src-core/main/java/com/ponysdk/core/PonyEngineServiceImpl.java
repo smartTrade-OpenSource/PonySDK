@@ -75,7 +75,7 @@ public class PonyEngineServiceImpl extends PonyRemoteServiceServlet implements P
                 final long ponySessionID = applicationSession.registerPonySession(ponySession);
                 PonySession.setCurrent(ponySession);
 
-                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { "com/ponysdk/core/conf/client_application.inc.xml",
+                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { "conf/client_application.inc.xml",
                         "client_application.xml" });
 
                 final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
