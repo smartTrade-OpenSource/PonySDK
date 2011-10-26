@@ -144,7 +144,9 @@ task jarStandalone(type: Jar){
 	from sourceSets.main.classes
 	from gwtOutputDirName
 	from warResources
-	from confResources
+	into('conf') {
+		from confResources
+	}
 }
 
 task zipStarter(type: Zip) {
