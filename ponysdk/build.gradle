@@ -48,7 +48,6 @@ manifest {
 	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
 }
 
-
 jar {
 	baseName = 'ponysdk'
 	doLast {
@@ -56,7 +55,6 @@ jar {
 		tasks.jarStandalone.execute()
 	}
 }
-
 
 task cleanGenerate << {
 	new File(srcGenerated).deleteDir();
@@ -113,6 +111,9 @@ task gwtc(type: JavaExec) {
 task jarSource(type: Jar){
 	baseName = 'ponysdk-src'
 	from sourceSets.main.allJava
+	from(srcCore) {
+		include '*.xml'
+	}
 }
 
 task jarStandalone(type: Jar){
