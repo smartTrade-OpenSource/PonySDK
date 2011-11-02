@@ -142,6 +142,11 @@ task jarStandalone(type: Jar){
 	from sourceSets.main.classes
 	from gwtOutputDirName
 	from warResources
+	
+	metaInf {
+        from 'src-core/main/resources/META-INF'
+    }
+	
 	into('conf') {
 		from confResources
 	}
