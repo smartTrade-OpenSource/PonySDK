@@ -75,6 +75,9 @@ jar {
 	into('css') {
 		from warResources + '/css'
 	}
+	metaInf {
+        from 'src-core/main/resources/META-INF'
+    }
 }
 
 task cleanGenerate << {
