@@ -100,10 +100,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 	protected final ComplexListView complexListView;
 	protected ComplexListCommandFactory<D> commandFactory;
 	protected final List<ListColumnDescriptor<D, ?>> listColumnDescriptors;
-	protected Map<String, FormField> formFieldsByPojoProperty = new HashMap<String, FormField>();
-	protected Map<String, CriterionField> criterionFieldsByPojoProperty = new HashMap<String, CriterionField>();
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-
+	
+	private Map<CriterionField,FormField> formFieldsByCriterionFields = new HashMap<CriterionField,FormField>();
+	
 	private PagingActivity pagingActivity;
 	protected final ComplexListConfiguration<D> complexListConfiguration;
 
@@ -548,7 +548,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 	}
 
 	public void reset() {
-		for (final FormField formField : formFieldsByPojoProperty.values()) {
+		for (final FormField formField : formFieldsByCriterionFields.values()) {
 			formField.reset();
 		}
 
@@ -593,11 +593,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
 	protected Query createQuery(int page) {
 		final List<CriterionField> criteria = new ArrayList<CriterionField>();
-		for (final Entry<String, FormField> entry : formFieldsByPojoProperty.entrySet()) {
+		for (final Entry<CriterionField, FormField> entry : formFieldsByCriterionFields.entrySet()) {
 			final FormField formField = entry.getValue();
 
 			if (formField.getValue() != null) {
-				final CriterionField criterionField = criterionFieldsByPojoProperty.get(entry.getKey());
+				final CriterionField criterionField = entry.getKey();
 				criterionField.setValue(formField.getValue());
 				criteria.add(criterionField);
 			}
@@ -629,8 +629,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 	}
 
 	public void registerSearchCriteria(final CriterionField criterionField, final FormField formField) {
-		formFieldsByPojoProperty.put(criterionField.getPojoProperty(), formField);
-		criterionFieldsByPojoProperty.put(criterionField.getPojoProperty(), criterionField);
+		formFieldsByCriterionFields.put(criterionField, formField);
 	}
 
 	@Override
