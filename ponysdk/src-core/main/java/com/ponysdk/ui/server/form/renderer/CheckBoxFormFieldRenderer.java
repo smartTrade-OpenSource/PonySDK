@@ -70,7 +70,7 @@ public class CheckBoxFormFieldRenderer implements FormFieldRenderer, PValueChang
         formFieldComponent.getInput().addValueChangeHandler(this);
         formFieldComponent.getInput().setValue(value);
         formFieldComponent.getInput().setEnabled(enabled);
-        formFieldComponent.setCaption(caption);
+		formFieldComponent.setCaption(caption);
 
         return formFieldComponent;
     }
@@ -149,6 +149,7 @@ public class CheckBoxFormFieldRenderer implements FormFieldRenderer, PValueChang
 
 	@Override
 	public void onValueChange(Boolean value) {
+		this.value = value;
 		for (PValueChangeHandler<Boolean> handler : valuesHandlers) {
 			handler.onValueChange(value);
 		}
