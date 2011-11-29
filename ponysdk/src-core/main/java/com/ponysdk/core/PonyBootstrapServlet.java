@@ -21,9 +21,11 @@
  * the License.
  */package com.ponysdk.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,9 +66,10 @@ public class PonyBootstrapServlet extends HttpServlet {
     }
 
     private void handleRequest(HttpServletRequest request, HttpServletResponse response, String path) throws ServletException, IOException {
-
         // Try to load from webapp context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
+        String type;
+
         if (inputStream == null) {
             // Try to load from jar
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -77,8 +80,13 @@ public class PonyBootstrapServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
+            
+            type = new MimetypesFileTypeMap().getContentType(new File(jarPath));
+        } else {
+        	type = new MimetypesFileTypeMap().getContentType(new File(path));
         }
-
+        
+        response.setContentType(type);
         FileCopyUtils.copy(inputStream, response.getOutputStream());
     }
 
