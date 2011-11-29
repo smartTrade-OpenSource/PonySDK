@@ -53,6 +53,7 @@ dependencies {
 		'org.slf4j:slf4j-api:1.6.2',
 		'org.hibernate:hibernate-core:3.6.7.Final',
 		'ar.com.fdvs:DynamicJasper:3.0.13',
+		'ch.qos.logback:logback-classic:1.0.0'
 	)
 }
 

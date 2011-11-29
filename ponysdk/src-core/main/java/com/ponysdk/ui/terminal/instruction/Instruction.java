@@ -72,10 +72,6 @@ public class Instruction implements Serializable {
         return parentID;
     }
 
-    public void setParentID(Long parentID) {
-        this.parentID = parentID;
-    }
-
     public void setObjectID(long objectID) {
         this.objectID = objectID;
     }
