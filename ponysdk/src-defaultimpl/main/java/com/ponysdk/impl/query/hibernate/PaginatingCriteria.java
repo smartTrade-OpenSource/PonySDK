@@ -252,8 +252,8 @@ public class PaginatingCriteria implements OrderingCriteria {
     @Override
     public int count() throws HibernateException {
         cloneCriteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
-        final Integer count = (Integer) cloneCriteria.uniqueResult();
-        return count == null ? 0 : count;
+        final Long count = (Long) cloneCriteria.uniqueResult();
+        return count == null ? 0 : count.intValue();
     }
 
     @Override
