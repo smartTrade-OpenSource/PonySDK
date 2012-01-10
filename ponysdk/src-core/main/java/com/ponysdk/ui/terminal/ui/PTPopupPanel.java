@@ -20,9 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -35,8 +39,16 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTPopupPanel extends PTSimplePanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         init(new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
+        popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
+            }
+        });
     }
 
     @Override
@@ -69,8 +81,7 @@ public class PTPopupPanel extends PTSimplePanel {
 
         if (PropertyKey.ANIMATION.equals(propertyKey)) {
             popup.setAnimationEnabled(property.getBooleanValue());
-        } else if (PropertyKey.WORD_WRAP.equals(propertyKey)) {
-        } else if (PropertyKey.POPUP_CENTER.equals(propertyKey)) {
+        } else if (PropertyKey.WORD_WRAP.equals(propertyKey)) {} else if (PropertyKey.POPUP_CENTER.equals(propertyKey)) {
             popup.center();
         } else if (PropertyKey.POPUP_SHOW.equals(propertyKey)) {
             popup.show();

@@ -20,10 +20,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -35,14 +40,24 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositionCallback {
 
     private final boolean autoHide;
+
     private boolean glassEnabled;
+
     private boolean animationEnabled;
+
     private String glassStyleName;
+
     private boolean center;
-    private boolean showing;
+
     private PPositionCallback positionCallback;
+
     private int leftPosition;
+
     private int topPosition;
+
+    private boolean showing;
+
+    private final List<PCloseHandler> listeners = new ArrayList<PCloseHandler>();
 
     public PPopupPanel() {
         this(false);
@@ -143,8 +158,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     public void setPopupPositionAndShow(PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-        final AddHandler handler = new AddHandler(ID, HandlerType.POPUP_POSITION_CALLBACK); // remove ordinal ?
+        final AddHandler handler = new AddHandler(ID, HandlerType.POPUP_POSITION_CALLBACK); // remove ordinal
+                                                                                            // ?
         getPonySession().stackInstruction(handler);
+    }
+
+    public void addCloseHandler(PCloseHandler handler) {
+        listeners.add(handler);
     }
 
     @Override
@@ -155,8 +175,17 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
             final Integer clientWith = instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_WIDTH);
             final Integer clientHeight = instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
+        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getHandlerType())) {
+            this.showing = false;
+            fireOnClose();
         } else {
             super.onEventInstruction(instruction);
+        }
+    }
+
+    private void fireOnClose() {
+        for (PCloseHandler handler : listeners) {
+            handler.onClose();
         }
     }
 

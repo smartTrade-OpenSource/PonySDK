@@ -20,32 +20,47 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import java.io.Serializable;
 
 public class HandlerType implements Serializable {
 
-	private static final long serialVersionUID = -5429044523491075556L;
+    private static final long serialVersionUID = -5429044523491075556L;
 
-	public HandlerType() {
+    HandlerType() {
 
     }
 
     public static HandlerType SELECTION_HANDLER = new HandlerType("SELECTION_HANDLER");
+
     public static HandlerType STRING_VALUE_CHANGE_HANDLER = new HandlerType("STRING_VALUE_CHANGE_HANDLER");
+
     public static HandlerType BOOLEAN_VALUE_CHANGE_HANDLER = new HandlerType("BOOLEAN_VALUE_CHANGE_HANDLER");
+
     public static HandlerType COMMAND = new HandlerType("COMMAND");
+
     public static HandlerType BEFORE_SELECTION_HANDLER = new HandlerType("BEFORE_SELECTION_HANDLER");
+
     public static HandlerType DATE_VALUE_CHANGE_HANDLER = new HandlerType("DATE_VALUE_CHANGE_HANDLER");
+
     public static HandlerType STREAM_REQUEST_HANDLER = new HandlerType("STREAM_REQUEST_HANDLER");
+
     public static HandlerType EMBEDED_STREAM_REQUEST_HANDLER = new HandlerType("EMBEDED_STREAM_REQUEST_HANDLER");
+
     public static HandlerType CHANGE_HANDLER = new HandlerType("CHANGE_HANDLER");
+
     public static HandlerType TIMER = new HandlerType("TIMER");
+
     public static HandlerType HISTORY = new HandlerType("HISTORY");
+
     public static HandlerType POPUP_POSITION_CALLBACK = new HandlerType("POPUP_POSITION_CALLBACK");
+
     public static HandlerType CLOSE_HANDLER = new HandlerType("CLOSE_HANDLER");
+
     public static HandlerType DOM_HANDLER = new HandlerType("DOM_HANDLER");
+
     public static HandlerType SUBMIT_COMPLETE_HANDLER = new HandlerType("SUBMIT_COMPLETE_HANDLER");
 
     private String key;

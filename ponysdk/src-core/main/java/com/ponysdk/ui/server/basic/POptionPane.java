@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
@@ -81,6 +82,7 @@ public class POptionPane extends PComposite {
             button.setText(option);
             button.ensureDebugId("optionpane[" + option + "]");
             button.addClickHandler(new PClickHandler() {
+
                 @Override
                 public void onClick(PClickEvent clickEvent) {
                     handler.onAction(dialogBox, option);
@@ -102,26 +104,28 @@ public class POptionPane extends PComposite {
 
     private static String[] getOptions(POptionType optionType) {
         switch (optionType) {
-        case DEFAULT_OPTION:
-            return new String[] { POption.OK_OPTION.getName() };
-        case OK_CANCEL_OPTION:
-            return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-        case YES_NO_CANCEL_OPTION:
-            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-        case YES_NO_OPTION:
-            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
-        default:
-            break;
+            case DEFAULT_OPTION:
+                return new String[] { POption.OK_OPTION.getName() };
+            case OK_CANCEL_OPTION:
+                return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_CANCEL_OPTION:
+                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_OPTION:
+                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
+            default:
+                break;
         }
         return null;
     }
 
     public interface PActionHandler {
+
         public void onAction(PDialogBox dialogBox, String option);
     }
 
     public enum POption {
         CANCEL_OPTION("CANCEL"), CLOSED_OPTION("CLOSED"), NO_OPTION("NO"), OK_OPTION("OK"), YES_OPTION("YES");
+
         private final String name;
 
         private POption(String name) {

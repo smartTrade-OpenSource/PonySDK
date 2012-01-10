@@ -20,23 +20,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.addon;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PDecoratedPopupPanel;
-import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.dialogbox.PCDialogBoxAddon;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PDialogBox extends PDecoratedPopupPanel implements PAddOn {
 
     private String text;
+
     private IsPWidget closeWidget;
+
     private boolean closable;
+
     private IsPWidget contentWidget;
 
     public PDialogBox() {
@@ -93,15 +95,6 @@ public class PDialogBox extends PDecoratedPopupPanel implements PAddOn {
     @Override
     public String getSignature() {
         return PCDialogBoxAddon.SIGNATURE;
-    }
-
-    @Override
-    public void onEventInstruction(EventInstruction instruction) {
-        if (HandlerType.CLOSE_HANDLER.equals(instruction.getHandlerType())) {
-            hide();
-        } else {
-            super.onEventInstruction(instruction);
-        }
     }
 
 }

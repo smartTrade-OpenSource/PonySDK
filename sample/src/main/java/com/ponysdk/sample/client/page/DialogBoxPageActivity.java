@@ -20,22 +20,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.POptionPane;
+import com.ponysdk.ui.server.basic.POptionPane.PActionHandler;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.POptionPane.PActionHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
 
 public class DialogBoxPageActivity extends PageActivity {
 
@@ -44,22 +47,20 @@ public class DialogBoxPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
         final PVerticalPanel verticalPanel = new PVerticalPanel();
         final PAnchor anchor = new PAnchor("Closable Dialog");
         anchor.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 final PDialogBox dialogBox = new PDialogBox(true);
@@ -77,6 +78,7 @@ public class DialogBoxPageActivity extends PageActivity {
 
         final PAnchor anchor2 = new PAnchor("Popup top left");
         anchor2.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
 
@@ -103,6 +105,7 @@ public class DialogBoxPageActivity extends PageActivity {
 
         final PAnchor anchor3 = new PAnchor("Custom close dialog widget");
         anchor3.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 final PDialogBox dialogBox = new PDialogBox(true);
@@ -123,6 +126,7 @@ public class DialogBoxPageActivity extends PageActivity {
 
         final PAnchor anchor4 = new PAnchor("POptionPane showConfirmDialog");
         anchor4.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 POptionPane.showConfirmDialog(new PActionHandler() {
@@ -136,6 +140,30 @@ public class DialogBoxPageActivity extends PageActivity {
             }
         });
         verticalPanel.add(anchor4);
+
+        final PAnchor anchor5 = new PAnchor("POptionPane with close handler");
+        anchor5.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(PClickEvent clickEvent) {
+                POptionPane dialodBox = POptionPane.showConfirmDialog(new PActionHandler() {
+
+                    @Override
+                    public void onAction(PDialogBox dialogBox, String option) {
+                        dialogBox.hide();
+                    }
+                }, "showConfirmDialog");
+
+                dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
+
+                    @Override
+                    public void onClose() {
+                        fireEvent(new DemoBusinessEvent(this));
+                    }
+                });
+            }
+        });
+        verticalPanel.add(anchor5);
 
         pageView.getBody().setWidget(verticalPanel);
     }

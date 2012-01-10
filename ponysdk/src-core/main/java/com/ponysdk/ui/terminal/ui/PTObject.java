@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
@@ -33,38 +34,21 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTObject implements com.ponysdk.ui.terminal.UIObject {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        // TODO Auto-generated method stub
-
-    }
+    public void create(Create create, UIService uiService) {}
 
     @Override
-    public void update(Update update, UIService uiService) {
-        // TODO Auto-generated method stub
-
-    }
+    public void update(Update update, UIService uiService) {}
 
     @Override
-    public void add(Add add, UIService uiService) {
-        // TODO Auto-generated method stub
-
-    }
+    public void add(Add add, UIService uiService) {}
 
     @Override
-    public void remove(Remove remove, UIService uiService) {
-        // TODO Auto-generated method stub
-
-    }
+    public void remove(Remove remove, UIService uiService) {}
 
     @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
-        // TODO Auto-generated method stub
-
-    }
+    public void addHandler(AddHandler addHandler, UIService uiService) {}
 
     @Override
-    public void gc(GC gc, UIService uiService) {
-        // TODO Auto-generated method stub
-    }
+    public void gc(GC gc, UIService uiService) {}
 
 }
