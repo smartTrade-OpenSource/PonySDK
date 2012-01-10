@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Property implements Serializable {
-    private String key = PropertyKey.ROOT.getKey();
+	private static final long serialVersionUID = -2137273148825763591L;
+
+	private String key = PropertyKey.ROOT.getKey();
     private String value;
     private List<String> values;
 

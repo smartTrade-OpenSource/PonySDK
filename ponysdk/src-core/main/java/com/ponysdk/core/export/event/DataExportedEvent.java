@@ -20,21 +20,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export.event;
 
 import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.core.event.Event;
-import com.ponysdk.core.export.ExportContext.ExportType;
+import com.ponysdk.core.export.Exporter;
 
 public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
 
     public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<DataExportedHandler>();
 
-    private final ExportType exportType;
+    private final Exporter exportModule;
 
-    public DataExportedEvent(Object sourceComponent, ExportType exportType) {
+    public DataExportedEvent(Object sourceComponent, Exporter exportModule) {
         super(sourceComponent);
-        this.exportType = exportType;
+        this.exportModule = exportModule;
     }
 
     @Override
@@ -47,8 +48,8 @@ public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
         return TYPE;
     }
 
-    public ExportType getExportType() {
-        return exportType;
+    public Exporter getExportType() {
+        return exportModule;
     }
 
 }

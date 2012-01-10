@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import java.util.ArrayList;
@@ -70,14 +71,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private final PonyEngineServiceAsync ponyService = GWT.create(PonyEngineService.class);
 
     private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
+
     private final UIFactory uiFactory = new UIFactory();
 
     private final Map<Long, UIObject> objectByID = new HashMap<Long, UIObject>();
 
     private SimplePanel loadingMessageBox;
+
     private PopupPanel communicationErrorMessagePanel;
 
     private Timer timer;
+
     private int numberOfrequestInProgress;
 
     private Frame frame;
@@ -198,7 +202,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof Add) {
 
                     final Add add = (Add) instruction;
-                    // GWT.log("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " + add.getMainProperty());
+                    // GWT.log("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " +
+                    // add.getMainProperty());
 
                     final UIObject uiObject = objectByID.get(add.getParentID());
                     uiObject.add(add, this);
@@ -206,11 +211,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof AddHandler) {
 
                     final AddHandler addHandler = (AddHandler) instruction;
-                    // GWT.log("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", " + addHandler.getMainProperty());
+                    // GWT.log("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
+                    // + addHandler.getMainProperty());
 
                     if (HandlerType.STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
-                        frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.getKey() + "="
-                                + addHandler.getMainProperty().getValue());
+                        frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.getKey() + "=" + addHandler.getMainProperty().getValue());
                     } else {
                         final UIObject uiObject = objectByID.get(addHandler.getObjectID());
                         uiObject.addHandler(addHandler, this);
@@ -220,11 +225,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final Remove remove = (Remove) instruction;
                     UIObject uiObject;
 
-                    if (PropertyKey.COOKIE.equals(instruction.getMainProperty().getKey())) { // TODO nciaravola merge with PTCookie ?
+                    if (PropertyKey.COOKIE.equals(instruction.getMainProperty().getKey())) { // TODO
+                                                                                             // nciaravola
+                                                                                             // merge with
+                                                                                             // PTCookie ?
                         Cookies.removeCookie(instruction.getMainProperty().getValue());
                     } else {
-                        if (remove.getParentID() == -1)
-                            uiObject = objectByID.get(remove.getObjectID());
+                        if (remove.getParentID() == -1) uiObject = objectByID.get(remove.getObjectID());
                         else {
                             uiObject = objectByID.get(remove.getParentID());
                         }
@@ -238,7 +245,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof Update) {
 
                     final Update update = (Update) instruction;
-                    // GWT.log("Update " + update.getMainProperty().getKey().getKey() + " / " + update.getMainProperty().getValue());
+                    // GWT.log("Update " + update.getMainProperty().getKey().getKey() + " / " +
+                    // update.getMainProperty().getValue());
 
                     final UIObject uiObject = objectByID.get(update.getObjectID());
                     uiObject.update(update, this);
@@ -266,15 +274,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     public void stackEvent(Instruction instruction) {
-        if (!updateMode)
-            triggerEvent(instruction);
-        else
-            stackedInstructions.add(instruction);
+        if (!updateMode) triggerEvent(instruction);
+        else stackedInstructions.add(instruction);
     }
 
     public void flushEvent() {
-        if (stackedInstructions.isEmpty())
-            return;
+        if (stackedInstructions.isEmpty()) return;
         fireEvents(stackedInstructions);
     }
 
@@ -287,8 +292,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
             @Override
             public void onFailure(Throwable caught) {
-                if (pendingClose)
-                    return;
+                if (pendingClose) return;
                 GWT.log("fireInstruction failed", caught);
                 numberOfrequestInProgress--;
                 hideLoadingMessageBox();

@@ -48,7 +48,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class Create extends Instruction {
 
-    private int widgetType;
+	private static final long serialVersionUID = 7132818214154253221L;
+	
+	private int widgetType;
 
     public Create() {
     }

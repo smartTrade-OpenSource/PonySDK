@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import java.util.ArrayList;
@@ -27,20 +28,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.export.ExportContext.ExportType;
 import com.ponysdk.core.export.ExportableField;
+import com.ponysdk.core.export.Exporter;
 
 public class ExportConfiguration {
 
-    private final List<ExportType> exportTypes = new ArrayList<ExportType>();
+    private final List<Exporter> exporters = new ArrayList<Exporter>();
+
     private final Map<String, ExportableField> exportFields = new LinkedHashMap<String, ExportableField>();
 
-    public void addExportType(ExportType exportType) {
-        exportTypes.add(exportType);
+    public void addExporter(Exporter exporter) {
+        exporters.add(exporter);
     }
 
-    public List<ExportType> getExportTypes() {
-        return exportTypes;
+    public List<Exporter> getExportTypes() {
+        return exporters;
     }
 
     public void addExportableField(ExportableField exportableField) {

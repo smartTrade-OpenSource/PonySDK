@@ -27,19 +27,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ponysdk.core.activity.Activity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
-public class PlaceController implements PValueChangeHandler<String>, InitializingBean {
+public class PlaceController implements PValueChangeHandler<String> {
 
     private static final Logger log = LoggerFactory.getLogger(PlaceController.class);
 
-    @Autowired
     private PHistory history;
 
     private final Map<String, PlaceContext> placeContextByToken = new ConcurrentHashMap<String, PlaceContext>();
@@ -86,11 +83,11 @@ public class PlaceController implements PValueChangeHandler<String>, Initializin
         placeContext.getActivity().goTo(placeContext.getPlace(), placeContext.getWorld());
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        history.addValueChangeHandler(this);
+    public void setHistory(PHistory history){
+        this.history = history;
+    	this.history.addValueChangeHandler(this);
     }
-
+    
     public PlaceContext getPlaceContext(String token) {
         return placeContextByToken.get(token);
     }

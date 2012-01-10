@@ -24,7 +24,9 @@ package com.ponysdk.ui.terminal.instruction;
 
 public class Remove extends Instruction {
 
-    public Remove() {
+	private static final long serialVersionUID = -7279461230051812100L;
+
+	public Remove() {
     }
 
     public Remove(long objectID, long parentID) {

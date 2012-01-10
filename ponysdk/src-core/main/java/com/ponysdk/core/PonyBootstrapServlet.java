@@ -24,6 +24,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -33,12 +34,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.FileCopyUtils;
 
 public class PonyBootstrapServlet extends HttpServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(PonyBootstrapServlet.class);
+	private static final long serialVersionUID = 6993633431616272739L;
 
+	private static final Logger log = LoggerFactory.getLogger(PonyBootstrapServlet.class);
+    private static final int BUFFER_SIZE = 4096;
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         handlePonyResource(request, response);
@@ -87,7 +90,33 @@ public class PonyBootstrapServlet extends HttpServlet {
         }
         
         response.setContentType(type);
-        FileCopyUtils.copy(inputStream, response.getOutputStream());
+        copy(inputStream, response.getOutputStream());
+    }
+    
+    public static int copy(InputStream in, OutputStream out) throws IOException {
+        try {
+            int byteCount = 0;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead = -1;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                byteCount += bytesRead;
+            }
+            out.flush();
+            return byteCount;
+        }
+        finally {
+            try {
+                in.close();
+            }
+            catch (IOException ex) {
+            }
+            try {
+                out.close();
+            }
+            catch (IOException ex) {
+            }
+        }
     }
 
 }

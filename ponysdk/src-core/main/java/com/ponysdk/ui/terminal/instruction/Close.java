@@ -23,8 +23,9 @@
 package com.ponysdk.ui.terminal.instruction;
 
 public class Close extends Instruction {
+	private static final long serialVersionUID = 5712036611348256066L;
 
-    public Close() {
+	public Close() {
     }
 
 }

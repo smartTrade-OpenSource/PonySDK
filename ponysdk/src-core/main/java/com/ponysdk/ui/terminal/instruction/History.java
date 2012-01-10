@@ -24,7 +24,9 @@ package com.ponysdk.ui.terminal.instruction;
 
 public class History extends Instruction {
 
-    private String token;
+	private static final long serialVersionUID = -881219734311901808L;
+	
+	private String token;
 
     public History() {
     }

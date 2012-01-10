@@ -28,7 +28,9 @@ import java.util.List;
 import com.ponysdk.ui.terminal.instruction.Instruction;
 
 public class PonySessionContext implements Serializable {
-    private long ID;
+	private static final long serialVersionUID = 9221240689602616478L;
+
+	private long ID;
     private List<Instruction> instructions;
 
     public PonySessionContext() {

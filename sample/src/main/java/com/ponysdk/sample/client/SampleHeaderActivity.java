@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client;
 
 import com.ponysdk.core.PonySession;
@@ -43,12 +44,13 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class SampleHeaderActivity extends HeaderActivity {
+
     @Override
     public void start(PAcceptsOneWidget world) {
         super.start(world);
 
         final User user = PonySession.getCurrent().getAttribute(UISampleEntryPoint.USER, User.class);
-        headerView.addActionWidget(createUserAccountMenu(user));
+        getHeaderView().addActionWidget(createUserAccountMenu(user));
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {

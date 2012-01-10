@@ -22,20 +22,16 @@
  */
 package com.ponysdk.impl.webapplication.login;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
-public abstract class AbstractLoginPageActivity extends AbstractActivity implements PClickHandler, InitializingBean {
+public abstract class AbstractLoginPageActivity extends AbstractActivity implements PClickHandler {
 
     public static final int KEY_ENTER = 13;// temp
 
-    @Autowired
     protected LoginPageView loginPageView;
 
     protected PAcceptsOneWidget world;
@@ -55,13 +51,22 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
         world.setWidget(loginPageView);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(KEY_ENTER) {
+
+    public LoginPageView getLoginPageView() {
+        return loginPageView;
+    }
+
+    public PAcceptsOneWidget getWorld() {
+        return world;
+    }
+
+	public void setLoginPageView(final LoginPageView loginPageView) {
+		this.loginPageView = loginPageView;
+		final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(KEY_ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {
-                loginPageView.clearMessages();
+            	loginPageView.clearMessages();
                 if (keyCode == KEY_ENTER) {
                     sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
                 }
@@ -71,14 +76,6 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
         loginPageView.addPasswordShortcutListener(keyPressHandler);
 
         this.loginPageView.addLoginClickHandler(this);
-    }
-
-    public LoginPageView getLoginPageView() {
-        return loginPageView;
-    }
-
-    public PAcceptsOneWidget getWorld() {
-        return world;
-    }
+	}
 
 }

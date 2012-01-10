@@ -26,7 +26,9 @@ import com.ponysdk.ui.terminal.HandlerType;
 
 public class AddHandler extends Instruction {
 
-    private HandlerType type;
+	private static final long serialVersionUID = 1573887166835313254L;
+	
+	private HandlerType type;
 
     public AddHandler() {
     }

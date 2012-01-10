@@ -1,42 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
+	xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+	<context:annotation-config />
 
-    <bean name="entryPoint" class="com.ponysdk.sample.client.UISampleEntryPoint" />
+	<bean name="entryPoint" class="com.ponysdk.sample.client.UISampleEntryPoint" />
 
-    <bean name="loginActivity" class="com.ponysdk.sample.client.LoginActivity" />
+	<bean name="pageProvider" class="com.ponysdk.impl.webapplication.page.DefaultPageProvider">
+		<property name="pageActivities">
+			<bean class="com.ponysdk.spring.ListLoader">
+				<property name="type" value="com.ponysdk.impl.webapplication.page.PageActivity" />
+			</bean>
+		</property>
+	</bean>
 
-    <bean name="applicationView" class="com.ponysdk.impl.webapplication.application.DefaultApplicationView" />
-    <bean name="applicationActivity" class="com.ponysdk.impl.webapplication.application.ApplicationActivity" />
+	<bean name="loginActivity" class="com.ponysdk.sample.client.LoginActivity" />
 
-    <bean name="pageProvider" class="com.ponysdk.impl.webapplication.page.DefaultPageProvider" />
+	<bean name="headerView" class="com.ponysdk.impl.webapplication.header.DefaultHeaderView">
+		<constructor-arg value="UIShowcase" />
+	</bean>
+	<bean name="headerActivity" class="com.ponysdk.sample.client.SampleHeaderActivity">
+		<property name="headerView" ref="headerView" />
+	</bean>
 
-    <bean name="menuView" class="com.ponysdk.impl.webapplication.menu.StackLayoutMenuView" />
-    <!-- <bean name="menuView" class="com.ponysdk.impl.webapplication.menu.DefaultMenuView" /> -->
-    <bean name="menuActivity" class="com.ponysdk.impl.webapplication.menu.MenuActivity" />
+	<bean name="menuView" class="com.ponysdk.impl.webapplication.menu.StackLayoutMenuView" />
+	<!-- <bean name="menuView" class="com.ponysdk.impl.webapplication.menu.DefaultMenuView" /> -->
+	<bean name="menuActivity" class="com.ponysdk.impl.webapplication.menu.MenuActivity">
+		<property name="menuView" ref="menuView" />
+		<property name="pageProvider" ref="pageProvider" />
+		<property name="applicationActivity" ref="applicationActivity"/>
+	</bean>
 
-    <bean name="headerView" class="com.ponysdk.impl.webapplication.header.DefaultHeaderView">
-        <constructor-arg value="UIShowcase" />
-    </bean>
-    <bean name="headerActivity" class="com.ponysdk.sample.client.SampleHeaderActivity" />
+	<bean name="footerView" class="com.ponysdk.impl.webapplication.footer.DefaultFooterView">
+		<constructor-arg value="PonySDK 2011" />
+	</bean>
+	<bean name="footerActivity" class="com.ponysdk.impl.webapplication.footer.FooterActivity">
+		<property name="footerView" ref="footerView" />
+	</bean>
 
-    <bean name="footerView" class="com.ponysdk.impl.webapplication.footer.DefaultFooterView">
-        <constructor-arg value="PonySDK 2011" />
-    </bean>
-    <bean name="footerActivity" class="com.ponysdk.impl.webapplication.footer.FooterActivity" />
+	<bean name="notificationActivity" class="com.ponysdk.impl.webapplication.notification.NotificationActivity">
+		<property name="notificationView">
+			<bean class="com.ponysdk.impl.webapplication.notification.DefaultNotificationView" />
+		</property>
+	</bean>
 
-    <bean class="com.ponysdk.impl.webapplication.notification.NotificationActivity">
-        <property name="notificationView">
-            <bean class="com.ponysdk.impl.webapplication.notification.DefaultNotificationView" />
-        </property>
-    </bean>
 
-    <bean class="com.ponysdk.sample.client.page.CheckBoxPageActivity" />
-    <bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
-    <bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
+	<bean name="applicationView" class="com.ponysdk.impl.webapplication.application.DefaultApplicationView" />
+	<bean name="applicationActivity" class="com.ponysdk.impl.webapplication.application.ApplicationActivity">
+		<property name="applicationView" ref="applicationView" />
+		<property name="headerActivity" ref="headerActivity" />
+		<property name="menuActivity" ref="menuActivity" />
+		<property name="notificationActivity" ref="notificationActivity" />
+		<property name="footerActivity" ref="footerActivity" />
+		<property name="pageProvider" ref="pageProvider" />
+	</bean>
+
+	<bean class="com.ponysdk.sample.client.page.CheckBoxPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" />
@@ -55,4 +78,5 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" />
+
 </beans>

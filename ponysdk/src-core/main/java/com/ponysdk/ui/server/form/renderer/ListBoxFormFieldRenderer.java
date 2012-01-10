@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.jmx.export.annotation.ManagedResource;
-
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PListBox;
@@ -38,7 +36,6 @@ import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.form.FormField;
 
-@ManagedResource
 public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHandlers, PChangeHandler {
 
     private final List<FormFieldComponent<PListBox>> fields = new ArrayList<FormFieldComponent<PListBox>>();

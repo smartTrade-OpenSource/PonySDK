@@ -29,7 +29,9 @@ import com.ponysdk.core.query.CriterionField;
 
 public class ExportableData<T> implements Serializable {
 
-    private T data;
+	private static final long serialVersionUID = -1206357980776899604L;
+	
+	private T data;
     private List<CriterionField> criterian;
     private String dateFormat;
     private String timezone;

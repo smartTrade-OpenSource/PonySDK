@@ -24,7 +24,9 @@ package com.ponysdk.ui.terminal.instruction;
 
 public class Add extends Instruction {
 
-    public Add() {
+	private static final long serialVersionUID = 2471039740559239983L;
+
+	public Add() {
     }
 
     public Add(long objectID, long parentID) {

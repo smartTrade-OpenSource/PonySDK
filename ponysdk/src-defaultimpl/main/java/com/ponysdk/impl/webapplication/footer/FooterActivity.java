@@ -22,18 +22,23 @@
  */
 package com.ponysdk.impl.webapplication.footer;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class FooterActivity extends AbstractActivity {
 
-    @Autowired
     private FooterView footerView;
 
     @Override
     public void start(PAcceptsOneWidget world) {
         world.setWidget(footerView);
     }
+
+	public FooterView getFooterView() {
+		return footerView;
+	}
+
+	public void setFooterView(FooterView footerView) {
+		this.footerView = footerView;
+	}
 }

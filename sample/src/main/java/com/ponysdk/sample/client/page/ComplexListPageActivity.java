@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ponysdk.core.command.AbstractServiceCommand;
 import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
-import com.ponysdk.core.export.ExportContext.ExportType;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.command.ExternalExportCommand;
 import com.ponysdk.core.place.Place;
@@ -86,16 +86,13 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
@@ -219,9 +216,9 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         exportConfiguration.addExportableField(new ExportableField("name", "Name"));
         exportConfiguration.addExportableField(new ExportableField("age", "Age"));
         exportConfiguration.addExportableField(new ExportableField("race", "type"));
-        exportConfiguration.addExportType(ExportType.CSV);
-        exportConfiguration.addExportType(ExportType.PDF);
-        exportConfiguration.addExportType(ExportType.XML);
+        // exportConfiguration.addExportType(ExportType.CSV);
+        // exportConfiguration.addExportType(ExportType.PDF);
+        // exportConfiguration.addExportType(ExportType.XML);
         return exportConfiguration;
     }
 
@@ -263,8 +260,11 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     }
 
     public class Pony {
+
         private final String name;
+
         private final String age;
+
         private final String race;
 
         public Pony(String name, String age, String race) {

@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page;
 
 import java.util.Collection;
 
 public interface PageProvider {
+
     public PageActivity getPageActivity(String pageName);
 
     public Collection<PageActivity> getPageActivities();

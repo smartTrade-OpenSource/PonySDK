@@ -38,7 +38,9 @@ import com.ponysdk.core.event.StreamHandler;
  */
 public class StreamServiceServlet extends HttpServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
+	private static final long serialVersionUID = 5368766616550622126L;
+
+	private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
     private static final String STREAM_REQUEST_ID = "STREAM_REQUEST_ID";
 

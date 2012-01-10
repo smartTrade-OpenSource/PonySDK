@@ -40,7 +40,9 @@ import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
  */
 public class PonyRemoteServiceServlet extends RemoteServiceServlet {
 
-    static SerializationPolicy loadSerializationPolicy(HttpServlet servlet, HttpServletRequest request, String moduleBaseURL, String strongName) {
+	private static final long serialVersionUID = -5935404413538410635L;
+
+	static SerializationPolicy loadSerializationPolicy(HttpServlet servlet, HttpServletRequest request, String moduleBaseURL, String strongName) {
         // The request can tell you the path of the web app relative to the
         // container root.
         final String contextPath = request.getContextPath();

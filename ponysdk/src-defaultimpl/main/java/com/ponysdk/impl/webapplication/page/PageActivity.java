@@ -22,8 +22,6 @@
  */
 package com.ponysdk.impl.webapplication.page;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.security.Permission;
@@ -35,8 +33,7 @@ import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public abstract class PageActivity extends AbstractActivity implements InitializingActivity {
 
-    @Autowired
-    protected ApplicationActivity applicationActivity;
+    private ApplicationActivity applicationActivity;
 
     private static PageActivity currentPage;
 

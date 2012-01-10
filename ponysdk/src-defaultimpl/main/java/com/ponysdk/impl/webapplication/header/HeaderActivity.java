@@ -22,22 +22,23 @@
  */
 package com.ponysdk.impl.webapplication.header;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class HeaderActivity extends AbstractActivity {
-    @Autowired
-    protected HeaderView headerView;
+	private HeaderView headerView;
 
-    @Override
-    public void start(PAcceptsOneWidget world) {
-        world.setWidget(headerView);
-    }
+	@Override
+	public void start(PAcceptsOneWidget world) {
+		world.setWidget(headerView);
+	}
 
-    public HeaderView getHeaderView() {
-        return headerView;
-    }
+	public void setHeaderView(HeaderView headerView) {
+		this.headerView = headerView;
+	}
+
+	public HeaderView getHeaderView() {
+		return headerView;
+	}
 
 }

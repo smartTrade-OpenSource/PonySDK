@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.core;
+ */
+
+package com.ponysdk.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,21 +66,28 @@ public class PonySession {
     private static ThreadLocal<PonySession> currentSession = new ThreadLocal<PonySession>();
 
     private long objectCounter = 1;
+
     private long streamRequestCounter = 0;
 
     private final PWeakHashMap objectByID = new PWeakHashMap();
 
     // to do a weak reference ?
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
+
     private final List<Instruction> pendingInstructions = new ArrayList<Instruction>();
+
     private final PRootLayoutPanel rootPanel = new PRootLayoutPanel();
 
     private Set<Permission> permissions = new HashSet<Permission>();
 
     private EntryPoint entryPoint;
+
     private PHistory history;
+
     private PlaceController placeController;
+
     private EventBus rootEventBus;
+
     private PCookies cookies;
 
     private final PonyApplicationSession applicationSession;
@@ -194,19 +203,19 @@ public class PonySession {
         return cookies;
     }
 
-    void setHistory(PHistory history) {
+    public void setHistory(PHistory history) {
         this.history = history;
     }
 
-    void setPlaceController(PlaceController placeController) {
+    public void setPlaceController(PlaceController placeController) {
         this.placeController = placeController;
     }
 
-    void setRootEventBus(EventBus eventBus) {
+    public void setRootEventBus(EventBus eventBus) {
         this.rootEventBus = eventBus;
     }
 
-    void setCookies(PCookies cookies) {
+    public void setCookies(PCookies cookies) {
         this.cookies = cookies;
     }
 

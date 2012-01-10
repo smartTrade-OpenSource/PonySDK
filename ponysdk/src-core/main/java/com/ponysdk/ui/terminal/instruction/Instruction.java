@@ -51,7 +51,9 @@ import com.ponysdk.ui.terminal.PropertyKey;
  */
 public class Instruction implements Serializable {
 
-    protected long objectID;
+	private static final long serialVersionUID = -8984390049516680155L;
+
+	protected long objectID;
     protected Long parentID;
     protected String addOnSignature;
 

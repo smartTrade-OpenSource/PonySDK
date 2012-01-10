@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.jmx.export.annotation.ManagedResource;
-
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PButton;
@@ -46,7 +44,6 @@ import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
-@ManagedResource
 public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPChangeHandlers, PChangeHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();

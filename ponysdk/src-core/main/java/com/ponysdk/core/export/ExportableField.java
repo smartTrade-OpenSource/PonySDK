@@ -26,7 +26,9 @@ import java.io.Serializable;
 
 public class ExportableField implements Serializable {
 
-    private String key;
+	private static final long serialVersionUID = -6670152593608997663L;
+
+	private String key;
     private String caption;
 
     public ExportableField() {

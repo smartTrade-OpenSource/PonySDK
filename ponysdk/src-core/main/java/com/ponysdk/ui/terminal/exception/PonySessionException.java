@@ -23,7 +23,9 @@
 package com.ponysdk.ui.terminal.exception;
 
 public class PonySessionException extends Exception {
-    public PonySessionException() {
+	private static final long serialVersionUID = -2064816487726122645L;
+
+	public PonySessionException() {
         super();
     }
 

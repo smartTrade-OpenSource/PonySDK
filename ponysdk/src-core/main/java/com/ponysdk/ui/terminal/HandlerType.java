@@ -26,7 +26,9 @@ import java.io.Serializable;
 
 public class HandlerType implements Serializable {
 
-    public HandlerType() {
+	private static final long serialVersionUID = -5429044523491075556L;
+
+	public HandlerType() {
 
     }
 

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page;
 
 import java.util.Collection;
@@ -27,19 +28,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
 import com.ponysdk.core.security.SecurityManager;
 
-public class DefaultPageProvider implements PageProvider, ApplicationContextAware {
-
-    private final static Logger log = LoggerFactory.getLogger(DefaultPageProvider.class);
+public class DefaultPageProvider implements PageProvider {
 
     private final Map<String, PageActivity> allPageActivitiesDeclared = new LinkedHashMap<String, PageActivity>();
+
     private Map<String, PageActivity> allActivePageActivities;
 
     @Override
@@ -67,20 +61,18 @@ public class DefaultPageProvider implements PageProvider, ApplicationContextAwar
         }
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        final Map<String, PageActivity> pageActivities = applicationContext.getBeansOfType(PageActivity.class);
-
-        if (pageActivities.isEmpty()) {
-            // throw new FatalBeanException("The application must contain at least 1 PageActivity");
-            log.warn("The application doesn't have any page activity");
-        }
-        for (final PageActivity pageActivity : pageActivities.values()) {
-            if (pageActivity.getPageName() != null) {
-                allPageActivitiesDeclared.put(pageActivity.getPageName(), pageActivity);
-            } else if (pageActivity.getPageCategory() != null) {
-                allPageActivitiesDeclared.put(pageActivity.getPageCategory(), pageActivity);
-            }
+    public void addPageActivity(PageActivity pageActivity) {
+        if (pageActivity.getPageName() != null) {
+            allPageActivitiesDeclared.put(pageActivity.getPageName(), pageActivity);
+        } else if (pageActivity.getPageCategory() != null) {
+            allPageActivitiesDeclared.put(pageActivity.getPageCategory(), pageActivity);
         }
     }
+
+    public void setPageActivities(Collection<PageActivity> pageActivities) {
+        for (PageActivity pageActivity : pageActivities) {
+            addPageActivity(pageActivity);
+        }
+    }
+
 }

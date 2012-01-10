@@ -89,7 +89,9 @@ public final class FilteringTools {
     public static <U> BeanComparator getPropertyComparator(String propertyName, Comparator<U> comparator) {
         return new BeanComparator((null != propertyName) ? propertyName : "name", comparator) {
 
-            @SuppressWarnings("unchecked")
+			private static final long serialVersionUID = 5957817419869265091L;
+
+			@SuppressWarnings("unchecked")
             @Override
             public int compare(Object o1, Object o2) {
                 final String property = getProperty();

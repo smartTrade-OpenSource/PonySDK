@@ -20,16 +20,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.application;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.activity.AbstractActivity;
@@ -45,26 +40,20 @@ import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
-public class ApplicationActivity extends AbstractActivity implements ApplicationContextAware, PValueChangeHandler<String> {
+public class ApplicationActivity extends AbstractActivity implements PValueChangeHandler<String> {
 
     private final Map<String, PageActivity> pageActivitiesByName = new LinkedHashMap<String, PageActivity>();
 
-    @Autowired
     private ApplicationView applicationView;
 
-    @Autowired
     private MenuActivity menuActivity;
 
-    @Autowired
     private HeaderActivity headerActivity;
 
-    @Autowired
     private FooterActivity footerActivity;
 
-    @Autowired
     private NotificationActivity notificationActivity;
 
-    @Autowired
     private PageProvider pageProvider;
 
     @Override
@@ -83,22 +72,6 @@ public class ApplicationActivity extends AbstractActivity implements Application
         PonySession.getCurrent().getPlaceController().goTo(place.getPageActivity(), place, applicationView.getBody());
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        final Map<String, PageActivity> pageActivities = applicationContext.getBeansOfType(PageActivity.class);
-        if (pageActivities.isEmpty()) {
-            throw new FatalBeanException("The application must contain at least 1 PageActivity");
-        }
-        for (final PageActivity pageActivity : pageActivities.values()) {
-
-            if (pageActivity.getPageName() != null) {
-                pageActivitiesByName.put(pageActivity.getPageName(), pageActivity);
-            } else if (pageActivity.getPageCategory() != null) {
-                pageActivitiesByName.put(pageActivity.getPageCategory(), pageActivity);
-            }
-        }
-    }
-
     public ApplicationView getApplicationView() {
         return applicationView;
     }
@@ -106,7 +79,10 @@ public class ApplicationActivity extends AbstractActivity implements Application
     @Override
     public void onValueChange(final String token) {
         final PlaceController placeController = PonySession.getCurrent().getPlaceController();
-        if (placeController.getPlaceContext(token) == null) { // History on a new PonySesion instance
+        if (placeController.getPlaceContext(token) == null) { // History on a
+                                                              // new
+                                                              // PonySesion
+                                                              // instance
             final PageActivity pageActivity = pageProvider.getPageActivity(token);
             if (pageActivity != null) {
                 final PlaceContext context = new PlaceContext();
@@ -123,5 +99,29 @@ public class ApplicationActivity extends AbstractActivity implements Application
                 placeController.registerPlaceContext(context);
             }
         }
+    }
+
+    public void setApplicationView(ApplicationView applicationView) {
+        this.applicationView = applicationView;
+    }
+
+    public void setMenuActivity(MenuActivity menuActivity) {
+        this.menuActivity = menuActivity;
+    }
+
+    public void setHeaderActivity(HeaderActivity headerActivity) {
+        this.headerActivity = headerActivity;
+    }
+
+    public void setFooterActivity(FooterActivity footerActivity) {
+        this.footerActivity = footerActivity;
+    }
+
+    public void setNotificationActivity(NotificationActivity notificationActivity) {
+        this.notificationActivity = notificationActivity;
+    }
+
+    public void setPageProvider(PageProvider pageProvider) {
+        this.pageProvider = pageProvider;
     }
 }

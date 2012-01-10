@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export;
 
 import java.io.Serializable;
@@ -30,27 +31,17 @@ import com.ponysdk.ui.server.list.SelectionResult;
 
 public class ExportContext<T> implements Serializable {
 
-    public enum ExportType {
-        CSV("csv"), PDF("pdf"), XML("xml");
-        private String extension;
-        private static String DOT = ".";
-
-        private ExportType(String extension) {
-            this.extension = extension;
-        }
-
-        public String getFileName(String name) {
-            return name + DOT + extension;
-        }
-    }
+    private static final long serialVersionUID = -4385175322776780654L;
 
     private Query query;
+
     private List<ExportableField> exportableFields;
-    private ExportType type = ExportType.CSV;
+
+    private Exporter<T> exporter;
+
     private SelectionResult<T> selectionResult;
 
-    public ExportContext() {
-    }
+    public ExportContext() {}
 
     public ExportContext(Query query, List<ExportableField> exportableFields, SelectionResult<T> selectionResult) {
         this.query = query;
@@ -66,10 +57,6 @@ public class ExportContext<T> implements Serializable {
         return exportableFields;
     }
 
-    public ExportType getType() {
-        return type;
-    }
-
     public void setQuery(Query query) {
         this.query = query;
     }
@@ -78,11 +65,19 @@ public class ExportContext<T> implements Serializable {
         this.exportableFields = exportableFields;
     }
 
-    public void setType(ExportType type) {
-        this.type = type;
+    public Exporter<T> getExporter() {
+        return exporter;
+    }
+
+    public void setExporter(Exporter<T> exportModule) {
+        this.exporter = exportModule;
     }
 
     public SelectionResult<T> getSelectionResult() {
         return selectionResult;
+    }
+
+    public void setSelectionResult(SelectionResult<T> selectionResult) {
+        this.selectionResult = selectionResult;
     }
 }

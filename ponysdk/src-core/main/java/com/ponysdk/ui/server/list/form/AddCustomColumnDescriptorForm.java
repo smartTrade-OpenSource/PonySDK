@@ -20,9 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.form;
 
-import com.ponysdk.core.export.ExporterTools;
+import java.beans.PropertyDescriptor;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.form.FormActivity;
 import com.ponysdk.ui.server.form.FormConfiguration;
@@ -32,8 +37,12 @@ import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
 
 public class AddCustomColumnDescriptorForm<T> extends FormActivity {
 
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(AddCustomColumnDescriptorForm.class);
+
     private FormField captionFormField;
+
     private FormField fieldPathFormField;
+
     private final Class<T> clas;
 
     public AddCustomColumnDescriptorForm(FormConfiguration formConfiguration, FormView formView, Class<T> instanceClass) {
@@ -56,9 +65,8 @@ public class AddCustomColumnDescriptorForm<T> extends FormActivity {
     @Override
     public boolean isValid() {
         final String fieldPath = fieldPathFormField.getStringValue();
-        final boolean valid = super.isValid() && ExporterTools.hasProperty(clas, fieldPath);
-        if (!valid)
-            fieldPathFormField.getFormFieldRenderer().addErrorMessage("Error occured when finding property#" + fieldPath);
+        final boolean valid = super.isValid() && hasProperty(clas, fieldPath);
+        if (!valid) fieldPathFormField.getFormFieldRenderer().addErrorMessage("Error occured when finding property#" + fieldPath);
         return valid;
     }
 
@@ -68,6 +76,42 @@ public class AddCustomColumnDescriptorForm<T> extends FormActivity {
 
     public String getFieldPath() {
         return fieldPathFormField.getStringValue();
+    }
+
+    private static boolean hasProperty(Class<?> clas, String property) {
+        final String propertyPath = property;
+        boolean isValid = true;
+        Class<?> propertyClass = null;
+        try {
+            if (propertyPath != null) {
+                final String[] tokens = propertyPath.split("\\.");
+                final PropertyDescriptor[] propertyDescriptors = PropertyUtils.getPropertyDescriptors(clas);
+                for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                    if (propertyDescriptor.getName().equals(tokens[0])) {
+                        propertyClass = propertyDescriptor.getPropertyType();
+                        break;
+                    }
+                }
+
+                if (propertyClass == null) throw new Exception("unknown property#" + tokens[0]);
+                for (int i = 1; i < tokens.length; i++) {
+                    final PropertyDescriptor[] descriptors = PropertyUtils.getPropertyDescriptors(propertyClass);
+                    boolean found = false;
+                    for (final PropertyDescriptor propertyDescriptor : descriptors) {
+                        if (propertyDescriptor.getName().equals(tokens[i])) {
+                            propertyClass = propertyDescriptor.getPropertyType();
+                            found = true;
+                        }
+                    }
+                    if (!found) throw new Exception("unknown property#" + tokens[i] + " for class#" + propertyClass);
+                }
+            }
+        } catch (final Exception e) {
+            final String errorMessage = "Error occured when finding property '" + propertyPath + "'";
+            log.error(errorMessage, e);
+            isValid = false;
+        }
+        return isValid;
     }
 
 }

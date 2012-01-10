@@ -33,19 +33,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.PonyApplicationSession;
-import com.ponysdk.core.spring.ContextLoader;
+import com.ponysdk.spring.SpringContextLoader;
 
 public class ApplicationLoader implements ServletContextListener, HttpSessionListener {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 
-    private final ContextLoader contextLoader;
+    private final SpringContextLoader contextLoader;
 
     private String applicationName;
     private String applicationDescription;
 
     public ApplicationLoader() {
-        contextLoader = new ContextLoader();
+        contextLoader = new SpringContextLoader();
     }
 
     @Override

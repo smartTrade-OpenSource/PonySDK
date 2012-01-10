@@ -19,8 +19,11 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.core;
+ */
+package com.ponysdk.core;
 
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +32,12 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
-import com.ponysdk.impl.webapplication.page.InitializingActivity;
+import com.ponysdk.spring.SpringPonyEngineServiceImpl;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.terminal.PonyEngineService;
@@ -46,113 +49,146 @@ import com.ponysdk.ui.terminal.instruction.Instruction;
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
-public class PonyEngineServiceImpl extends PonyRemoteServiceServlet implements PonyEngineService {
+public class PonyEngineServiceImpl extends PonyRemoteServiceServlet implements
+		PonyEngineService {
 
-    private static final Logger log = LoggerFactory.getLogger(PonyEngineServiceImpl.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(SpringPonyEngineServiceImpl.class);
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-    }
+	@Override
+	public void init() throws ServletException {
+		super.init();
+	}
 
-    @Override
-    public PonySessionContext startApplication(String token, Map<String, String> cookiesByName) throws Exception {
-        try {
-            boolean isNewHttpSession = false;
-            final HttpSession session = getThreadLocalRequest().getSession();
-            PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
-            if (applicationSession == null) {
-                log.info("Creating a new application ... session[" + session.getId() + "]");
-                applicationSession = new PonyApplicationSession(session);
-                session.setAttribute(PonyApplicationSession.class.getCanonicalName(), applicationSession);
-                isNewHttpSession = true;
-            }
+	@Override
+	public PonySessionContext startApplication(String token,
+			Map<String, String> cookiesByName) throws Exception {
+		try {
+			boolean isNewHttpSession = false;
+			final HttpSession session = getThreadLocalRequest().getSession();
+			PonyApplicationSession applicationSession = (PonyApplicationSession) session
+					.getAttribute(PonyApplicationSession.class
+							.getCanonicalName());
+			if (applicationSession == null) {
+				log.info("Creating a new application ... session["
+						+ session.getId() + "]");
+				applicationSession = new PonyApplicationSession(session);
+				session.setAttribute(
+						PonyApplicationSession.class.getCanonicalName(),
+						applicationSession);
+				isNewHttpSession = true;
+			}
 
-            synchronized (applicationSession) {
+			synchronized (applicationSession) {
 
-                final PonySession ponySession = new PonySession(applicationSession);
+				final PonySession ponySession = new PonySession(
+						applicationSession);
 
-                final long ponySessionID = applicationSession.registerPonySession(ponySession);
-                PonySession.setCurrent(ponySession);
+				final long ponySessionID = applicationSession
+						.registerPonySession(ponySession);
+				PonySession.setCurrent(ponySession);
 
-                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { "conf/client_application.inc.xml",
-                        "client_application.xml" });
+				final EventBus rootEventBus = new SimpleEventBus();
 
-                final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
-                final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
-                final PlaceController placeController = applicationContext.getBean(PlaceController.class);
-                final PHistory history = applicationContext.getBean(PHistory.class);
+				EntryPoint entryPoint  = null;
 
-                ponySession.setRootEventBus(rootEventBus);
-                ponySession.setHistory(history);
-                ponySession.setPlaceController(placeController);
-                ponySession.setEntryPoint(entryPoint);
+				
+				ClassLoader classLoader = getClass().getClassLoader();
+				Enumeration<URL> resources = classLoader.getResources("/");
 
-                final PCookies cookies = new PCookies(cookiesByName);
-                ponySession.setCookies(cookies);
+				 while (resources.hasMoreElements()) {
+					  URL resource = resources.nextElement();
+					  Class<?> clazz = Class.forName(resource.getPath());
+					  for (Class<?> c : clazz.getInterfaces()) {
+						  if(c.equals(EntryPoint.class)){
+							  if(entryPoint!= null){
+								  log.warn("EntryPoint already created");
+							  }
+							  entryPoint = (EntryPoint) clazz.newInstance();
+						  }
+					  }
+				 }
 
-                final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-                if (initializingPages != null && !initializingPages.isEmpty()) {
-                    for (final InitializingActivity p : initializingPages.values()) {
-                        p.afterContextInitialized();
-                    }
-                }
+				final PlaceController placeController = new PlaceController();
+				final PHistory history = new PHistory();
+				placeController.setHistory(history);
 
-                if (isNewHttpSession)
-                    entryPoint.start(ponySession);
-                else {
-                    entryPoint.restart(ponySession);
-                }
+				ponySession.setRootEventBus(rootEventBus);
+				ponySession.setHistory(history);
+				ponySession.setPlaceController(placeController);
+				ponySession.setEntryPoint(entryPoint);
 
-                ponySession.getHistory().fireHistoryChanged(token); // update current token
+				final PCookies cookies = new PCookies(cookiesByName);
+				ponySession.setCookies(cookies);
 
-                final PonySessionContext ponySessionContext = new PonySessionContext();
-                ponySessionContext.setID(ponySessionID);
-                ponySessionContext.setInstructions(ponySession.flushInstructions());
+				if (isNewHttpSession)
+					entryPoint.start(ponySession);
+				else {
+					entryPoint.restart(ponySession);
+				}
 
-                return ponySessionContext;
-            }
+				ponySession.getHistory().fireHistoryChanged(token); // update
+																	// current
+																	// token
 
-        } catch (final Throwable e) {
-            log.error("[PonyEngineServiceImpl::startApplication]=>failed ", e);
-            throw new RuntimeException(e);
-        }
-    }
+				final PonySessionContext ponySessionContext = new PonySessionContext();
+				ponySessionContext.setID(ponySessionID);
+				ponySessionContext.setInstructions(ponySession
+						.flushInstructions());
 
-    @Override
-    public List<Instruction> fireInstructions(final long key, final List<Instruction> instructions) throws Exception {
-        final long start = System.currentTimeMillis();
-        try {
+				return ponySessionContext;
+			}
 
-            final HttpSession session = getThreadLocalRequest().getSession();
-            final PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
+		} catch (final Throwable e) {
+			log.error("[PonyEngineServiceImpl::startApplication]=>failed ", e);
+			throw new RuntimeException(e);
+		}
+	}
 
-            if (applicationSession == null) {
-                throw new PonySessionException("Invalid session, please reload your application");
-            }
+	
+	@Override
+	public List<Instruction> fireInstructions(final long key,
+			final List<Instruction> instructions) throws Exception {
+		final long start = System.currentTimeMillis();
+		try {
 
-            final PonySession ponySession = applicationSession.getPonySession(key);
+			final HttpSession session = getThreadLocalRequest().getSession();
+			final PonyApplicationSession applicationSession = (PonyApplicationSession) session
+					.getAttribute(PonyApplicationSession.class
+							.getCanonicalName());
 
-            if (ponySession == null) {
-                throw new PonySessionException("Invalid session, please reload your application");
-            }
+			if (applicationSession == null) {
+				throw new PonySessionException(
+						"Invalid session, please reload your application");
+			}
 
-            synchronized (ponySession) {
-                PonySession.setCurrent(ponySession);
-                ponySession.fireInstructions(instructions);
-                return ponySession.flushInstructions();
-            }
-        } catch (final PonySessionException e) {
-            log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
-            throw e;
-        } catch (final Throwable e) {
-            log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
-            throw new RuntimeException(e);
-        } finally {
-            if (log.isDebugEnabled()) {
-                log.debug("Server call took " + (System.currentTimeMillis() - start) + " millis");
-            }
-        }
-    }
+			final PonySession ponySession = applicationSession
+					.getPonySession(key);
+
+			if (ponySession == null) {
+				throw new PonySessionException(
+						"Invalid session, please reload your application");
+			}
+
+			synchronized (ponySession) {
+				PonySession.setCurrent(ponySession);
+				ponySession.fireInstructions(instructions);
+				return ponySession.flushInstructions();
+			}
+		} catch (final PonySessionException e) {
+			log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : "
+					+ instructions.toString(), e);
+			throw e;
+		} catch (final Throwable e) {
+			log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : "
+					+ instructions.toString(), e);
+			throw new RuntimeException(e);
+		} finally {
+			if (log.isDebugEnabled()) {
+				log.debug("Server call took "
+						+ (System.currentTimeMillis() - start) + " millis");
+			}
+		}
+	}
 
 }

@@ -20,9 +20,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.impl.webapplication.menu;
 
-import org.springframework.beans.factory.annotation.Autowired;
+package com.ponysdk.impl.webapplication.menu;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
@@ -37,19 +36,15 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class MenuActivity extends AbstractActivity implements PageDisplayHandler, InitializingActivity, PSelectionHandler<String> {
 
-    @Autowired
     private MenuView menuView;
 
-    @Autowired
     private ApplicationActivity applicationActivity;
 
-    @Autowired
     private PageProvider pageProvider;
 
     @Override
     public void onPageDisplayed(PageDisplayedEvent event) {
-        if (event.getSource().equals(this))
-            return;
+        if (event.getSource().equals(this)) return;
 
         final PageActivity pageActivity = event.getPageActivity();
         if (pageActivity.getPageName() != null) {
@@ -63,7 +58,6 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
         for (final PageActivity pageActivity : pageProvider.getPageActivities()) {
             menuView.addItem(pageActivity.getPageCategory(), pageActivity.getPageName());
         }
-
     }
 
     @Override
@@ -78,14 +72,34 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
         }
     }
 
-    @Override
-    public void afterContextInitialized() {
-        this.menuView.addSelectionHandler(this);
-        addHandler(PageDisplayedEvent.TYPE, this);
-    }
-
     public void setMenuView(MenuView menuView) {
         this.menuView = menuView;
+    }
+
+    public ApplicationActivity getApplicationActivity() {
+        return applicationActivity;
+    }
+
+    public void setApplicationActivity(ApplicationActivity applicationActivity) {
+        this.applicationActivity = applicationActivity;
+    }
+
+    public PageProvider getPageProvider() {
+        return pageProvider;
+    }
+
+    public void setPageProvider(PageProvider pageProvider) {
+        this.pageProvider = pageProvider;
+    }
+
+    public MenuView getMenuView() {
+        return menuView;
+    }
+
+    @Override
+    public void afterContextInitialized() {
+        menuView.addSelectionHandler(this);
+        addHandler(PageDisplayedEvent.TYPE, this);
     }
 
 }

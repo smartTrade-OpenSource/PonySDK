@@ -23,7 +23,9 @@
 package com.ponysdk.ui.terminal.instruction;
 
 public class Update extends Instruction {
-    public Update() {
+	private static final long serialVersionUID = -664165558060579491L;
+
+	public Update() {
     }
 
     public Update(long objectID) {

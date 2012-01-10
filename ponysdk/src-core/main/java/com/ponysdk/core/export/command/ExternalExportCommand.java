@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export.command;
 
 import java.util.List;
@@ -29,13 +30,14 @@ import com.ponysdk.core.command.AsyncCallback;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.ui.server.list.SelectionMode;
+import com.ponysdk.ui.server.list.SelectionResult;
 
 public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportCommand<T> implements AsyncCallback<U> {
 
     private final AbstractServiceCommand<U> findCommand;
 
     public ExternalExportCommand(String exportName, ExportContext<T> exportContext, AbstractServiceCommand<U> findCommand) {
-        super(exportName, exportContext);
+        super(exportContext);
         this.findCommand = findCommand;
         this.findCommand.addAsyncCallback(this);
     }
@@ -50,7 +52,7 @@ public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportC
      */
     @Override
     public void onSuccess(U result) {
-        setData(result.getData());
+        exportContext.setSelectionResult(new SelectionResult<T>(SelectionMode.FULL, result.getData()));
         super.execute();
     }
 

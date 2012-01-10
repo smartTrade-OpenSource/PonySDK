@@ -24,7 +24,9 @@ package com.ponysdk.ui.terminal.instruction;
 
 public class GC extends Instruction {
 
-    public GC() {
+	private static final long serialVersionUID = 3879458689907358583L;
+
+	public GC() {
     }
 
     public GC(long objectID, long parentID) {
