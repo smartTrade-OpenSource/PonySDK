@@ -31,8 +31,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.ponysdk.generator.BaseGenerator;
@@ -47,20 +47,14 @@ public class ProxyBuilderGenerator extends BaseGenerator {
 
     private String srcGeneratedDirectory = "src-generated-application";
 
-    private static String proxyBuilderPackageName = "com.ponysdk.service";
+    private String packageName = "com.ponysdk.service";
 
     public static void main(String[] args) {
         try {
             final List<Root> definitions = getDefinitions(args[0]);
             final ProxyBuilderGenerator generator = new ProxyBuilderGenerator(definitions);
-
-            if (args.length == 2) {
-                generator.setSrcGeneratedDirectory(args[1]);
-            }
-
-            if (args.length == 3) {
-                proxyBuilderPackageName = args[2];
-            }
+            if (args.length >= 2) generator.setSrcGeneratedDirectory(args[1]);
+            if (args.length >= 3) generator.setPackageName(args[2]);
 
             generator.generate();
         } catch (final Exception e) {
@@ -107,7 +101,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
     }
 
     public void generate() throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), proxyBuilderPackageName, "ProxyBuilder");
+        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), getPackageName(), "ProxyBuilder");
         classWriter.addImplements(ApplicationContextAware.class);
         classWriter.addNewLine();
         classWriter.addLine("private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyBuilder.class);");
@@ -147,5 +141,13 @@ public class ProxyBuilderGenerator extends BaseGenerator {
 
     public String getSrcGeneratedDirectory() {
         return srcGeneratedDirectory;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 }
