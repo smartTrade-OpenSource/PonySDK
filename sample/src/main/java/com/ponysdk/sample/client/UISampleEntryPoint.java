@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.main.AbstractEntryPoint;
+import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
@@ -36,7 +36,7 @@ import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
-public class UISampleEntryPoint extends AbstractEntryPoint implements UserLoggedOutHandler, InitializingActivity {
+public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
 
     public static final String USER = "user";
 
