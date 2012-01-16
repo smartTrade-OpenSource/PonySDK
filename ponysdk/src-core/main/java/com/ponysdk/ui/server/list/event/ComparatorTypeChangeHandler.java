@@ -21,30 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.form.renderer;
+package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.form.FormField;
+import com.ponysdk.core.event.EventHandler;
 
-public class TextBoxFormFieldRenderer extends TextBoxBaseFormFieldRenderer {
+public interface ComparatorTypeChangeHandler extends EventHandler {
 
-    public TextBoxFormFieldRenderer() {
-        this(null);
-    }
-
-    public TextBoxFormFieldRenderer(String caption) {
-        super(caption);
-    }
-
-    @Override
-    public IsPWidget render(FormField formField) {
-        final PTextBox textBox = new PTextBox();
-        if (debugID != null) {
-            textBox.ensureDebugId(debugID);
-        }
-        final FormFieldComponent<PTextBox> textField = buildTextField(textBox);
-        fields.add(textField);
-        return textField;
-    }
+    public void onComparatorTypeChange(ComparatorTypeChangeEvent event);
 }

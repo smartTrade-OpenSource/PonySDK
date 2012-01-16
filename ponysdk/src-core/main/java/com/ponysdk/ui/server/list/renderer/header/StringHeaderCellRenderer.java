@@ -20,18 +20,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class EmptyCellRenderer<D, V> implements CellRenderer<D, V> {
+public class StringHeaderCellRenderer implements HeaderCellRenderer {
 
-    private static final String EMPTY_VALUE = "";
+    private final String caption;
 
-    @Override
-    public IsPWidget render(int row, D data, V value) {
-        return new PLabel(EMPTY_VALUE);
+    public StringHeaderCellRenderer(String caption) {
+        this.caption = caption;
     }
 
+    @Override
+    public IsPWidget render() {
+        return new PLabel(caption);
+    }
+
+    @Override
+    public String getCaption() {
+        return caption;
+    }
 }

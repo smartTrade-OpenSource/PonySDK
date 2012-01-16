@@ -20,17 +20,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PLabel;
 
-public class BooleanCellRenderer<T> extends AbstractCellRenderer<T, Boolean> {
+public class StringCellRenderer<T> extends AbstractCellRenderer<T, String> {
 
     @Override
-    public IsPWidget render0(final int rowCount, final T data, final Boolean value) {
-        final PCheckBox checkBox = new PCheckBox();
-        checkBox.setValue(value);
-        return checkBox;
+    public IsPWidget render0(final int rowCount, final T data, final String value) {
+        return new PLabel(value);
     }
 }

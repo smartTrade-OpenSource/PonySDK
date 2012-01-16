@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import java.util.HashMap;
@@ -41,10 +42,15 @@ public class SimpleListActivity<T> extends AbstractActivity {
     protected SimpleListView listView;
 
     private List<ListColumnDescriptor<T, ?>> listFields;
+
     private final String ID;
+
     private String debugID;
+
     private List<T> data;
+
     private Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
+
     private final EventBus eventBus;
 
     private int colCount;
@@ -91,7 +97,11 @@ public class SimpleListActivity<T> extends AbstractActivity {
         // listView.insertRow(0);
 
         for (final ListColumnDescriptor<T, ?> field : listFields) {
-            listView.addWidget(field.renderHeader(), colCount++, 0);
+            listView.addWidget(field.renderHeader(), colCount, 0);
+            if (field.getWidth() != null) {
+                listView.setColumnWidth(colCount, field.getWidth());
+            }
+            colCount++;
         }
         final PSimplePanel widget = new PSimplePanel();
         listView.addWidget(widget, colCount, 0);
@@ -141,8 +151,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
     }
 
     public void insertSubList(int row, java.util.List<T> datas) {
-        if (datas.isEmpty())
-            return;
+        if (datas.isEmpty()) return;
         int subRow = row + 1;
         for (final T data : datas) {
             listView.insertRow(subRow); // create a new row after

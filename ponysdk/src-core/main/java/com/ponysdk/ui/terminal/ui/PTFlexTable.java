@@ -39,24 +39,23 @@ public class PTFlexTable extends PTHTMLTable {
     @Override
     public void update(Update update, UIService uiService) {
 
-        final com.google.gwt.user.client.ui.FlexTable table = cast();
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
 
         if (PropertyKey.CLEAR.equals(propertyKey)) {
-            table.clear();
+            cast().clear();
         } else if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
-            table.removeRow(property.getIntValue());
+            cast().removeRow(property.getIntValue());
         } else if (PropertyKey.INSERT_ROW.equals(propertyKey)) {
-            table.insertRow(property.getIntValue());
+            cast().insertRow(property.getIntValue());
         } else if (PropertyKey.HTMLTABLE_ROW_STYLE.equals(propertyKey)) {
             final int row = property.getChildProperty(PropertyKey.ROW).getIntValue();
             final Property addProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_ADD_STYLE_NAME);
             final Property removeProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_REMOVE_STYLE_NAME);
             if (addProperty != null) {
-                table.getRowFormatter().addStyleName(row, addProperty.getValue());
+                cast().getRowFormatter().addStyleName(row, addProperty.getValue());
             } else {
-                table.getRowFormatter().removeStyleName(row, removeProperty.getValue());
+                cast().getRowFormatter().removeStyleName(row, removeProperty.getValue());
             }
         } else if (PropertyKey.HTMLTABLE_CELL_STYLE.equals(propertyKey)) {
             final int cellRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
@@ -64,9 +63,9 @@ public class PTFlexTable extends PTHTMLTable {
             final Property addCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_ADD_STYLE_NAME);
             final Property removeCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME);
             if (addCellProperty != null) {
-                table.getCellFormatter().addStyleName(cellRow, cellColumn, addCellProperty.getValue());
+                cast().getCellFormatter().addStyleName(cellRow, cellColumn, addCellProperty.getValue());
             } else {
-                table.getCellFormatter().removeStyleName(cellRow, cellColumn, removeCellProperty.getValue());
+                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, removeCellProperty.getValue());
             }
         } else if (PropertyKey.FLEXTABLE_CELL_FORMATTER.equals(propertyKey)) {
             final int cellFormatterRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
@@ -74,9 +73,9 @@ public class PTFlexTable extends PTHTMLTable {
             final Property colSpanProperty = property.getChildProperty(PropertyKey.SET_COL_SPAN);
             final Property rowSpanProperty = property.getChildProperty(PropertyKey.SET_ROW_SPAN);
             if (colSpanProperty != null) {
-                table.getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, colSpanProperty.getIntValue());
+                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, colSpanProperty.getIntValue());
             } else if (rowSpanProperty != null) {
-                table.getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, rowSpanProperty.getIntValue());
+                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, rowSpanProperty.getIntValue());
             }
         } else {
             super.update(update, uiService);

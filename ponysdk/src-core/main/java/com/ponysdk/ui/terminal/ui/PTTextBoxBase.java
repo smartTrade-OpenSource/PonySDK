@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -46,7 +47,6 @@ public class PTTextBoxBase extends PTValueBoxBase<String> {
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
         }
 
         super.addHandler(addHandler, uiService);

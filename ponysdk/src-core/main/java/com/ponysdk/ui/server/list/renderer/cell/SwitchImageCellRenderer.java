@@ -20,15 +20,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PImage;
 
-public class AnchorCellRenderer<T> extends AbstractCellRenderer<T, String> {
+public class SwitchImageCellRenderer<D> extends AbstractCellRenderer<D, Boolean> {
 
     @Override
-    public IsPWidget render0(int rowCount, T data, String value) {
-        return new PAnchor(value);
+    public IsPWidget render0(int row, D data, Boolean value) {
+        // TODO not a switch ......
+        return new PImage(value ? "icons/16/check.png" : "icons/16/block.png");
     }
 }

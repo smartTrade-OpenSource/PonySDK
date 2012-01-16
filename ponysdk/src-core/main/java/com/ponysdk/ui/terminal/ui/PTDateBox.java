@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import java.util.Date;
@@ -91,23 +92,23 @@ public class PTDateBox extends PTWidget {
             } else if (PropertyKey.DATE_FORMAT.equals(propertyKey)) {
                 DefaultFormat format = null;
                 switch (property.getIntValue()) {
-                case 0:
-                    format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL));
-                    dateBox.setFormat(format);
-                    break;
-                case 1:
-                    format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_LONG));
-                    break;
-                case 2:
-                    format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
-                    break;
-                case 3:
-                    format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-                    break;
+                    case 0:
+                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL));
+                        dateBox.setFormat(format);
+                        break;
+                    case 1:
+                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_LONG));
+                        break;
+                    case 2:
+                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
+                        break;
+                    case 3:
+                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+                        break;
 
-                default:
-                    format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
-                    break;
+                    default:
+                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
+                        break;
                 }
                 dateBox.setFormat(format);
                 break;

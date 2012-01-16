@@ -20,9 +20,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.activity.Activity;
 import com.ponysdk.core.place.AbstractPlace;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 
@@ -34,7 +34,7 @@ public abstract class PagePlace extends AbstractPlace {
         this.pageActivity = activity;
     }
 
-    public Activity getPageActivity() {
+    public PageActivity getPageActivity() {
         return pageActivity;
     }
 

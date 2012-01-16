@@ -20,12 +20,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list;
+
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.list.event.RowDeletedEvent;
@@ -33,7 +36,6 @@ import com.ponysdk.ui.server.list.event.RowDeletedHandler;
 import com.ponysdk.ui.server.list.event.RowInsertedEvent;
 import com.ponysdk.ui.server.list.event.RowInsertedHandler;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
-import com.ponysdk.ui.server.list.renderer.CellRenderer;
 
 public class DetailsCellRenderer<D, V> implements CellRenderer<D, V>, EventBusAware {
 
@@ -46,19 +48,30 @@ public class DetailsCellRenderer<D, V> implements CellRenderer<D, V>, EventBusAw
 
     @Override
     public IsPWidget render(int row, D data, V value) {
-        final PButton button = new PButton("+");
+        PSimplePanel panel = new PSimplePanel();
+
+        final PAnchor button = new PAnchor("");
+
+        button.addStyleName(PonySDKTheme.COMPLEXLIST_DETAILS_PLUS);
+
         button.addClickHandler(new DetailsCellClickHandler(button, data, row));
-        return button;
+
+        panel.setWidget(button);
+
+        return panel;
     }
 
     private final class DetailsCellClickHandler implements PClickHandler, RowInsertedHandler, RowDeletedHandler {
 
-        private final PButton details;
+        private final PAnchor details;
+
         private final D data;
+
         private int row;
+
         private boolean isOpen = false;
 
-        private DetailsCellClickHandler(PButton details, D data, int row) {
+        private DetailsCellClickHandler(PAnchor details, D data, int row) {
             this.details = details;
             this.data = data;
             this.row = row;
@@ -69,10 +82,10 @@ public class DetailsCellRenderer<D, V> implements CellRenderer<D, V>, EventBusAw
         @Override
         public void onClick(PClickEvent clickEvent) {
             if (!isOpen) {
-                details.setText("-");
+                details.setStyleName(PonySDKTheme.COMPLEXLIST_DETAILS_MINUS);
                 eventBus.fireEvent(new ShowSubListEvent<D>(this, data, true, row));
             } else {
-                details.setText("+");
+                details.setStyleName(PonySDKTheme.COMPLEXLIST_DETAILS_PLUS);
                 eventBus.fireEvent(new ShowSubListEvent<D>(this, data, false, row));
             }
             isOpen = !isOpen;

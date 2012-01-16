@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -50,8 +51,7 @@ public class FlexTablePageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
     protected void onShowPage(Place place) {
@@ -94,6 +94,7 @@ public class FlexTablePageActivity extends PageActivity {
 
         final PButton scheduleButton = new PButton("Schedule");
         scheduleButton.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 if (currentTimer != null) {
@@ -119,6 +120,7 @@ public class FlexTablePageActivity extends PageActivity {
                 currentTimer.scheduleRepeating(Integer.valueOf(textBox.getText()));
             }
         });
+
         bodyLayout.add(textBox);
         bodyLayout.add(scheduleButton);
     }

@@ -20,56 +20,107 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.theme;
 
 public interface PonySDKTheme {
 
     String HEADER = "pony-Header";
+
     String HEADER_LOGO = "pony-Header-Logo";
+
     String HEADER_ACCOUNT_MENU = "pony-Header-AccountMenu";
+
     String HEADER_ACCOUNT_MENU_SELECTED = "pony-Header-AccountMenu-Selected";
+
     String HEADER_ACCOUNT_MENU_POPUP = "pony-Header-AccountMenu-Popup";
+
     String HEADER_ACCOUNT_MENU_POPUP_USER_NAME = "pony-Header-AccountMenu-Popup-UserName";
+
     String HEADER_ACCOUNT_MENU_POPUP_USER_LOGIN = "pony-Header-AccountMenu-Popup-UserLogin";
+
     String FOOTER = "pony-Footer";
+
     String LIST = "List";
-    String COMPLEX_LIST_BOTTOM_LIST = "pony-ComplexList-bottomList";
+
+    String COMPLEXLIST_BOTTOM_LIST = "pony-ComplexList-bottomList";
+
+    String COMPLEXLIST_DETAILS_PLUS = "pony-ComplexList-Details-Plus";
+
+    String COMPLEXLIST_DETAILS_MINUS = "pony-ComplexList-Details-Minus";
+
     String SIMPLELIST_ROW = "pony-SimpleList-Row";
+
     String SIMPLELIST_SUBROW = "pony-SimpleList-SubRow";
+
     String SIMPLELIST_SELECTEDROW = "pony-SimpleList-Row-Selected";
+
     String ORACLE_ITEM = "pony-Oracle-Item";
+
     String ORACLE_LIST_BOX_SELECTED = "pony-OracleListBox-Selected";
+
     String ORACLE_POPUP_PANEL = "pony-Oracle-PopupPanel";
+
     String ORACLE_PAGINATION = "pony-Oracle-pagination";
+
     String ORACLE_ARROW = "pony-Oracle-Arrow";
+
     String ORACLE_ARROW_UP = "pony-Oracle-Arrow-Up";
+
     String ORACLE_ARROW_DOWN = "pony-Oracle-Arrow-Down";
+
     String ORACLE_TEXT_BOX = "pony-Oracle-TextBox";
+
     String PAGE = "pony-Page";
+
     String PAGE_BODY = "pony-Page-Body";
+
     String PAGE_HEADER = "pony-Page-Header";
+
     String PAGE_HEADER_CAPTION = "pony-Page-Header-Caption";
+
     String MENUBAR = "pony-MenuBar";
+
     String MENUBAR_LIGHT = "pony-MenuBar-Light";
+
     String TOOLBAR = "pony-Toolbar";
+
     String FLOATING_TOOLBAR = "pony-Toolbar-Floating";
+
     String TOOLBAR_SEPARATOR = "pony-Toolbar-Separator";
+
     String BUTTON = "pony-PButton";
+
     String BUTTON_BLACK = "pony-PButton black";
+
     String BUTTON_GRAY = "pony-PButton gray";
+
     String BUTTON_WHITE = "pony-PButton white";
+
     String BUTTON_ORANGE = "pony-PButton orange";
+
     String BUTTON_RED = "pony-PButton red";
+
     String BUTTON_BLUE = "pony-PButton blue";
+
     String BUTTON_ROSY = "pony-PButton rosy";
+
     String BUTTON_GREEN = "pony-PButton green";
+
     String BUTTON_PINK = "pony-PButton pink";
+
     String FILL_COLUMN = "pony-ComplexList-Fill-column";
+
     String LOGIN_PAGE = "pony-LoginPage";
+
     String LOGIN_PAGE_LOGIN_TEXTBOX = "pony-LoginPage-LoginTextBox";
+
     String LOGIN_PAGE_PASSWORD_TEXTBOX = "pony-LoginPage-PasswordTextBox";
+
     String LOGIN_PAGE_SUBMIT_BUTTON = "pony-LoginPage-SubmitButton";
+
     String LOGIN_PAGE_VERSION_INFORMATION = "pony-LoginPage-VersionInformation";
+
     String LOGIN_PAGE_LOGO = "pony-LoginPage-Logo";
 
 }

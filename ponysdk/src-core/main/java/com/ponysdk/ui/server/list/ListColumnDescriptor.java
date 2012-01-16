@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import org.slf4j.Logger;
@@ -27,10 +28,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.list.renderer.CellRenderer;
-import com.ponysdk.ui.server.list.renderer.HeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.ObjectCellRenderer;
-import com.ponysdk.ui.server.list.renderer.StringHeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.ObjectCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
 
 public class ListColumnDescriptor<D, V> {
@@ -40,14 +41,18 @@ public class ListColumnDescriptor<D, V> {
     private String caption;
 
     private HeaderCellRenderer headerCellRenderer;
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private CellRenderer<D, V> cellRenderer = new ObjectCellRenderer();
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private CellRenderer<D, V> subCellRenderer = new ObjectCellRenderer();
+
     private ValueProvider<D, V> valueProvider;
 
-    public ListColumnDescriptor() {
-    }
+    private String width;
+
+    public ListColumnDescriptor() {}
 
     public ListColumnDescriptor(String caption) {
         this.caption = caption;
@@ -73,8 +78,7 @@ public class ListColumnDescriptor<D, V> {
     }
 
     public IsPWidget renderHeader() {
-        if (headerCellRenderer == null)
-            headerCellRenderer = new StringHeaderCellRenderer(caption);
+        if (headerCellRenderer == null) headerCellRenderer = new StringHeaderCellRenderer(caption);
         return headerCellRenderer.render();
     }
 
@@ -83,8 +87,7 @@ public class ListColumnDescriptor<D, V> {
     }
 
     public void setCellRenderer(CellRenderer<D, V> cellRenderer) {
-        if (cellRenderer == null)
-            throw new RuntimeException("cellRender cannot be null");
+        if (cellRenderer == null) throw new RuntimeException("cellRender cannot be null");
         this.cellRenderer = cellRenderer;
     }
 
@@ -106,6 +109,14 @@ public class ListColumnDescriptor<D, V> {
 
     public void setSubCellRenderer(CellRenderer<D, V> subCellRenderer) {
         this.subCellRenderer = subCellRenderer;
+    }
+
+    public String getWidth() {
+        return width;
+    }
+
+    public void setWidth(String width) {
+        this.width = width;
     }
 
 }

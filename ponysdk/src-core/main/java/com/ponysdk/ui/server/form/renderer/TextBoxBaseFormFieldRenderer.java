@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PTextBoxBase;
 import com.ponysdk.ui.server.basic.event.HasPKeyPressHandlers;
 import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
@@ -46,11 +48,13 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     protected final List<FormFieldComponent<? extends PTextBoxBase>> fields = new ArrayList<FormFieldComponent<? extends PTextBoxBase>>();
 
     private final List<PValueChangeHandler<String>> valueChangeHandlers = new ArrayList<PValueChangeHandler<String>>();
+
     private final List<PKeyPressHandler> keypPressHandlers = new ArrayList<PKeyPressHandler>();
 
     private boolean enabled = true;
 
     private String value;
+
     protected String debugID;
 
     // private final List<ErrorMessage> errorMessages = new ArrayList<ErrorMessage>();
@@ -89,10 +93,8 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
 
     @Override
     public String getValue() {// temp must be removed
-        if (value == null)
-            return null;
-        if (value.toString().isEmpty())
-            return null;
+        if (value == null) return null;
+        if (value.toString().isEmpty()) return null;
         return value.toString();
     }
 
@@ -169,6 +171,12 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
         }
     }
 
+    public void addClickHandler(PClickHandler handler) {
+        for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
+            field.getInput().addClickHandler(handler);
+        }
+    }
+
     @Override
     public void removeValueChangeHandler(PValueChangeHandler<String> handler) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
@@ -223,8 +231,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     @Override
     public void ensureDebugID(String debugID) {
         this.debugID = debugID;
-        if (fields.isEmpty())
-            return;
+        if (fields.isEmpty()) return;
 
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().ensureDebugId(debugID);

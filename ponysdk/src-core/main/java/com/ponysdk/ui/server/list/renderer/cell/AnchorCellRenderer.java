@@ -20,16 +20,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PAnchor;
 
-public class ButtonCellRenderer<T> extends AbstractCellRenderer<T, String> {
+public class AnchorCellRenderer<T> extends AbstractCellRenderer<T, String> {
 
     @Override
     public IsPWidget render0(int rowCount, T data, String value) {
-        return new PButton(value);
+        return new PAnchor(value);
     }
-
 }

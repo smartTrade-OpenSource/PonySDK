@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -80,6 +81,21 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     @Override
     public void removeCellStyle(int row, int column, String styleName) {
         getCellFormatter().removeStyleName(row, column, styleName);
+    }
+
+    @Override
+    public void addColumnStyle(int column, String styleName) {
+        getColumnFormatter().addStyleName(column, styleName);
+    }
+
+    @Override
+    public void removeColumnStyle(int column, String styleName) {
+        getColumnFormatter().removeStyleName(column, styleName);
+    }
+
+    @Override
+    public void setColumnWidth(int column, String width) {
+        getColumnFormatter().setWidth(column, width);
     }
 
 }

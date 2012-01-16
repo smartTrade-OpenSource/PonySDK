@@ -20,13 +20,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.attachedpopuppanel;
 
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.Addon;
+import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PonyAddOn;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
 import com.ponysdk.ui.terminal.ui.PTWidget;
@@ -39,11 +45,19 @@ public class PCAttachedPopupPanelAddon extends PTPopupPanel implements Addon {
     private PCAttachedPopupPanel popup;
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final PTUIObject attached = (PTUIObject) uiService.getUIObject(create.getMainProperty().getLongProperty(PropertyKey.WIDGET));
         final boolean autoHide = create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE);
         popup = new PCAttachedPopupPanel(autoHide, attached.cast());
         popup.show();
+
+        popup.addCloseHandler(new CloseHandler<PopupPanel>() {
+
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
+            }
+        });
 
         init(popup);
     }

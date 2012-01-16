@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -42,14 +43,19 @@ import com.ponysdk.ui.server.form.FormField;
 public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChangeHandler<Date>, HasPValueChangeHandlers<Date>, HasPKeyPressHandlers {
 
     private Date value;
+
     private String caption;
+
     private String dateFormat = "dd/MM/yyyy";
 
     private final List<FormFieldComponent<PDateBox>> fields = new ArrayList<FormFieldComponent<PDateBox>>();
+
     private final List<PKeyPressHandler> keyPressHandlers = new ArrayList<PKeyPressHandler>();
+
     private final List<PValueChangeHandler<Date>> valueChangeHandlers = new ArrayList<PValueChangeHandler<Date>>();
 
     private boolean enabled = true;
+
     private String debugID;
 
     public DateBoxFormFieldRenderer() {
@@ -76,9 +82,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     @Override
     public IsPWidget render(FormField formField) {
         final PDateBox dateBox = new PDateBox();
-        if (debugID != null) {
-            dateBox.ensureDebugId(debugID);
-        }
+        if (debugID != null) dateBox.ensureDebugId(debugID);
         final FormFieldComponent<PDateBox> dateFieldComponent = new FormFieldComponent<PDateBox>(dateBox);
         dateFieldComponent.setCaption(caption);
         dateFieldComponent.getInput().setFormat(dateFormat);
@@ -190,8 +194,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     @Override
     public void ensureDebugID(String debugID) {
         this.debugID = debugID;
-        if (fields.isEmpty())
-            return;
+        if (fields.isEmpty()) return;
 
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().ensureDebugId(debugID);

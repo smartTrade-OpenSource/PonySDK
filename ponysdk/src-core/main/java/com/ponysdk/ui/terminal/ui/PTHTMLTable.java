@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -42,8 +43,33 @@ public class PTHTMLTable extends PTPanel {
 
         final int row = add.getMainProperty().getIntProperty(PropertyKey.ROW);
         final int cell = add.getMainProperty().getIntProperty(PropertyKey.CELL);
-        table.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");// temp nciaravola we don't have this mirro server side
+        table.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");// temp nciaravola we
+        // don't
+        // // have this mirro server
+        // // side
         table.setWidget(row, cell, w);
     }
+
+    // @Override
+    // public void update(Update update, UIService uiService) {
+    // final Property property = update.getMainProperty();
+    // final PropertyKey propertyKey = property.getKey();
+    //
+    // if (PropertyKey.COLUMN_FORMATTER_COLUMN_WIDTH.equals(propertyKey)) {
+    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
+    // final String width = property.getChildProperty(PropertyKey.WIDTH).getValue();
+    // cast().getColumnFormatter().setWidth(column, width);
+    // } else if (PropertyKey.COLUMN_FORMATTER_ADD_STYLE_NAME.equals(propertyKey)) {
+    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
+    // final String styleName = property.getChildProperty(PropertyKey.STYLE_NAME).getValue();
+    // cast().getColumnFormatter().addStyleName(column, styleName);
+    // } else if (PropertyKey.COLUMN_FORMATTER_REMOVE_STYLE_NAME.equals(propertyKey)) {
+    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
+    // final String styleName = property.getChildProperty(PropertyKey.STYLE_NAME).getValue();
+    // cast().getColumnFormatter().removeStyleName(column, styleName);
+    // } else {
+    // super.update(update, uiService);
+    // }
+    // }
 
 }

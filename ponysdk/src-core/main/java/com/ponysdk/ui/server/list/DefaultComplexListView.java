@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -40,12 +41,19 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class DefaultComplexListView extends PVerticalPanel implements ComplexListView {
 
     private final SimpleListView simpleListView = new DefaultSimpleListView();
+
     private final PSimplePanel inputLayout = new PSimplePanel();
+
     private final PToolbar toolbarLayout = new PToolbar();
+
     private final PSimplePanel pagingLayout = new PSimplePanel();
+
     private final PFloatablePanel positionPanel = new PFloatablePanel();
+
     private final PSimplePanel topListLayout = new PSimplePanel();
+
     private final PSimplePanel bottomListLayout = new PSimplePanel();
+
     private final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
 
     private final PLabel searchResultTimeLabel = new PLabel();
@@ -81,7 +89,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         add(simpleListView.asWidget());
         add(bottomListLayout);
         setCellHorizontalAlignment(bottomListLayout, PHorizontalAlignment.ALIGN_CENTER);
-        bottomListLayout.addStyleName(PonySDKTheme.COMPLEX_LIST_BOTTOM_LIST);
+        bottomListLayout.addStyleName(PonySDKTheme.COMPLEXLIST_BOTTOM_LIST);
         add(bottomListCustomInformationLayout);
     }
 
@@ -191,7 +199,21 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     @Override
     public void removeCellStyle(int row, int column, String styleName) {
         simpleListView.removeCellStyle(row, column, styleName);
+    }
 
+    @Override
+    public void addColumnStyle(int column, String styleName) {
+        simpleListView.addColumnStyle(column, styleName);
+    }
+
+    @Override
+    public void removeColumnStyle(int column, String styleName) {
+        simpleListView.removeColumnStyle(column, styleName);
+    }
+
+    @Override
+    public void setColumnWidth(int column, String width) {
+        simpleListView.setColumnWidth(column, width);
     }
 
 }

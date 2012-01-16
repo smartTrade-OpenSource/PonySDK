@@ -1064,15 +1064,65 @@ table .pony-PFlexTable{
 	border-top-width: 1px;
 	color: white;
 	font-family: arial, sans-serif;
-	font-size: 11px;
+	font-size: 14px;
 	font-weight: normal;
 	text-decoration: none;
+	text-align: center;
+	vertical-align:top;
 	/*text-shadow: #555 0px 1px 0px;*/
 }
 
 .pony-ComplexList-ColumnHeader .pony-PFlextable-Cell a{
 	color :#fff;
 }
+
+.pony-ComplexList-ColumnHeader .pony-PFlextable-Cell .gwt-CheckBox{
+
+}
+.pony-ComplexList-ColumnHeader .pony-PFlextable-Cell .gwt-Label{
+	padding-top: 4px;
+	padding-left:2px;
+	padding-right : 2px;
+}
+
+
+.pony-ComplexList-ComplexHeader .gwt-TextBox{
+	height:9px;
+	font-size:9px;
+	margin-right: 1px;
+	margin-top: 0px;
+}
+
+.pony-ComplexList-ComplexHeader .gwt-ListBox{
+	height:20px;
+	font-size:9px;
+}
+
+
+.pony-ComplexList-Details-Plus{
+	background:url('../images/plus_12_light.png') no-repeat;
+	width:12px;
+	height:12px;
+	display:block;
+}
+
+
+.pony-ComplexList-Details-Plus:hover{
+	background:url('../images/plus_12_dark.png')  no-repeat;
+}
+
+.pony-ComplexList-Details-Minus{
+	background:url('../images/minus_12_light.png')  no-repeat;
+	width:12px;
+	height:12px;
+	display:block;
+}
+
+
+.pony-ComplexList-Details-Minus:hover{
+	background:url('../images/minus_12_dark.png') no-repeat;
+}
+
 
 .pony-Oracle-PopupPanel {
     border: 1px solid #eee;

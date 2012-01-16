@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -34,7 +35,7 @@ public class PTDockLayoutPanel extends PTComplexPanel {
 
     @Override
     public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.DockLayoutPanel(Unit.PCT));
+        init(new com.google.gwt.user.client.ui.DockLayoutPanel(Unit.PX));// must be a parametter
     }
 
     @Override
@@ -51,34 +52,34 @@ public class PTDockLayoutPanel extends PTComplexPanel {
         final Direction direction = Direction.values()[add.getMainProperty().getIntProperty(PropertyKey.DIRECTION)];
         final double size = add.getMainProperty().getDoubleProperty(PropertyKey.SIZE);
         switch (direction) {
-        case CENTER: {
-            dockLayoutPanel.add(w);
-            break;
-        }
-        case NORTH: {
-            dockLayoutPanel.addNorth(w, size);
-            break;
-        }
-        case SOUTH: {
-            dockLayoutPanel.addSouth(w, size);
-            break;
-        }
-        case EAST: {
-            dockLayoutPanel.addEast(w, size);
-            break;
-        }
-        case WEST: {
-            dockLayoutPanel.addWest(w, size);
-            break;
-        }
-        case LINE_START: {
-            dockLayoutPanel.addLineStart(w, size);
-            break;
-        }
-        case LINE_END: {
-            dockLayoutPanel.addLineEnd(w, size);
-            break;
-        }
+            case CENTER: {
+                dockLayoutPanel.add(w);
+                break;
+            }
+            case NORTH: {
+                dockLayoutPanel.addNorth(w, size);
+                break;
+            }
+            case SOUTH: {
+                dockLayoutPanel.addSouth(w, size);
+                break;
+            }
+            case EAST: {
+                dockLayoutPanel.addEast(w, size);
+                break;
+            }
+            case WEST: {
+                dockLayoutPanel.addWest(w, size);
+                break;
+            }
+            case LINE_START: {
+                dockLayoutPanel.addLineStart(w, size);
+                break;
+            }
+            case LINE_END: {
+                dockLayoutPanel.addLineEnd(w, size);
+                break;
+            }
         }
 
     }

@@ -20,24 +20,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
-
-import java.text.DateFormat;
-import java.util.Date;
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
-
-    private final DateFormat dateFormat;
-
-    public DateCellRenderer(final DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
+public class ObjectCellRenderer<T> extends AbstractCellRenderer<T, Object> {
 
     @Override
-    public IsPWidget render0(int rowCount, T data, Date value) {
-        return new PLabel(dateFormat.format(value));
+    public IsPWidget render0(final int rowCount, final T data, final Object value) {
+        return new PLabel(String.valueOf(value));
     }
 }

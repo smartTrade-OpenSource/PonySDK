@@ -71,6 +71,8 @@ import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.FormView;
 import com.ponysdk.ui.server.list.event.AddCustomColumnDescriptorEvent;
 import com.ponysdk.ui.server.list.event.AddCustomColumnDescriptorHandler;
+import com.ponysdk.ui.server.list.event.ComparatorTypeChangeEvent;
+import com.ponysdk.ui.server.list.event.ComparatorTypeChangeHandler;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
 import com.ponysdk.ui.server.list.event.RefreshListHandler;
 import com.ponysdk.ui.server.list.event.RemoveColumnDescriptorEvent;
@@ -85,16 +87,18 @@ import com.ponysdk.ui.server.list.paging.PagingActivity;
 import com.ponysdk.ui.server.list.paging.PagingView;
 import com.ponysdk.ui.server.list.paging.event.PagingSelectionChangeEvent;
 import com.ponysdk.ui.server.list.paging.event.PagingSelectionChangeHandler;
-import com.ponysdk.ui.server.list.renderer.CellRenderer;
-import com.ponysdk.ui.server.list.renderer.ComplexHeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.EmptyCellRenderer;
-import com.ponysdk.ui.server.list.renderer.HeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.DetailsCellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.EmptyCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.ComplexHeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.list.valueprovider.BooleanValueProvider;
 import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, RefreshListHandler, ShowSubListHandler<D>, AddCustomColumnDescriptorHandler<D>, RemoveColumnDescriptorHandler {
+public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, AddCustomColumnDescriptorHandler<D>,
+        RemoveColumnDescriptorHandler {
 
     private SimpleListActivity<D> simpleListActivity;
 
@@ -107,6 +111,8 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     private static SimpleDateFormat formater = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 
     private final Map<CriterionField, FormField> formFieldsByCriterionFields = new HashMap<CriterionField, FormField>();
+
+    private final Map<String, CriterionField> criterionByPojoProperty = new HashMap<String, CriterionField>();
 
     private PagingActivity pagingActivity;
 
@@ -140,7 +146,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     private Result<List<D>> findResult;
 
-    SelectionMode selectionMode = SelectionMode.NONE;
+    private SelectionMode selectionMode = SelectionMode.NONE;
 
     private PMenuItem addCustomColumnButton;
 
@@ -165,6 +171,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.localEventBus = new SimpleEventBus();
         this.localEventBus.addHandler(PagingSelectionChangeEvent.TYPE, this);
         this.localEventBus.addHandler(SortColumnEvent.TYPE, this);
+        this.localEventBus.addHandler(ComparatorTypeChangeEvent.TYPE, this);
         this.localEventBus.addHandler(RefreshListEvent.TYPE, this);
         this.localEventBus.addHandler(ShowSubListEvent.TYPE, this);
         this.localEventBus.addHandler(AddCustomColumnDescriptorEvent.TYPE, this);
@@ -639,6 +646,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     public void registerSearchCriteria(final CriterionField criterionField, final FormField formField) {
         formFieldsByCriterionFields.put(criterionField, formField);
+        criterionByPojoProperty.put(criterionField.getPojoProperty(), criterionField);
     }
 
     @Override
@@ -646,6 +654,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         currentSortingType = event.getSortingType();
         currentSortingPojoPropertyKey = event.getPojoPropertyKey();
         refresh();
+    }
+
+    @Override
+    public void onComparatorTypeChange(ComparatorTypeChangeEvent event) {
+        CriterionField criterionField = criterionByPojoProperty.get(event.getPojoPropertyKey());
+        if (criterionField != null) {
+            criterionField.setComparator(event.getComparatorType());
+        }
     }
 
     public SelectionResult<D> getSelectedData() {
@@ -678,6 +694,17 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         }
     }
 
+    public void enableSelectedData(D data, boolean enabled) {
+        // // unselect previously selected data
+        // if (mainCheckBox != null) {
+        // mainCheckBox.setValue(false);
+        // triggerMainCheckBoxValueChange(false);
+        // }
+
+        // enable
+        enableRow(getRow(data), enabled);
+    }
+
     public int getRow(D data) {
         if (findResult == null) return -1;
 
@@ -693,9 +720,22 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         refresh();
     }
 
+    public void enableRow(int row, boolean enabled) {
+        if (complexListConfiguration.isSelectionColumnEnabled()) {
+            enableCheckBoxRow(row, enabled);
+        }
+    }
+
     public void selectRow(int row) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             selectRowCheckBox(row);
+        }
+        this.simpleListActivity.selectRow(row);
+    }
+
+    public void enableCheckBoxRow(int row, boolean enabled) {
+        if (complexListConfiguration.isSelectionColumnEnabled()) {
+            enableRowCheckBox(row, enabled);
         }
         this.simpleListActivity.selectRow(row);
     }
@@ -705,6 +745,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             unselectRowCheckBox(row);
         }
         this.simpleListActivity.unSelectRow(row);
+    }
+
+    private void enableRowCheckBox(int row, boolean enabled) {
+        for (final PRowCheckBox checkBox : rowSelectors) {
+            if (checkBox.getRow() == row) {
+                checkBox.setEnabled(enabled);
+            }
+        }
     }
 
     private void selectRowCheckBox(int row) {

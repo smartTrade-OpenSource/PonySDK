@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.application;
 
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
@@ -30,22 +31,35 @@ import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
 public class DefaultApplicationView extends PDockLayoutPanel implements ApplicationView {
 
     private final PSimplePanel header = new PSimpleLayoutPanel();
+
     private final PSimpleLayoutPanel menu = new PSimpleLayoutPanel();
+
     private final PSimplePanel body = new PSimpleLayoutPanel();
+
     private final PSimplePanel footer = new PSimpleLayoutPanel();
+
     private final PSimplePanel logs = new PSimpleLayoutPanel();
+
     private final PSplitLayoutPanel center;
+
+    private int headerHeight = 30;
+
+    private int footerHeight = 20;
+
+    private int logsHeight = 130;
+
+    private final int menuWidth = 190;
 
     public DefaultApplicationView() {
         setSizeFull();
 
-        addNorth(header, 4);
-        addSouth(footer, 3);
+        addNorth(header, headerHeight);
+        addSouth(footer, footerHeight);
 
         center = new PSplitLayoutPanel();
         center.setSizeFull();
-        center.addSouth(logs, 70);
-        center.addWest(menu, 200);
+        center.addSouth(logs, logsHeight);
+        center.addWest(menu, menuWidth);
         center.add(body);
 
         add(center);
@@ -74,6 +88,18 @@ public class DefaultApplicationView extends PDockLayoutPanel implements Applicat
     @Override
     public PSimplePanel getLogs() {
         return logs;
+    }
+
+    public void setHeaderHeight(int height) {
+        this.headerHeight = height;
+    }
+
+    public void setFooterHeight(int height) {
+        this.footerHeight = height;
+    }
+
+    public void setLogsHeight(int height) {
+        this.logsHeight = height;
     }
 
 }

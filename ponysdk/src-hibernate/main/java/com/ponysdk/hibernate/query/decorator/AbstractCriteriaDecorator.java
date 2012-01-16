@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.Arrays;
@@ -46,9 +47,7 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
         final CriterionField field = context.getCriterion();
         Criteria criteria = context.getSTCriteria();
 
-        if (field.getValue() == null && field.getComparator() != ComparatorType.IS_NULL && field.getComparator() != ComparatorType.IS_NOT_NULL) {
-            return;
-        }
+        if (field.getValue() == null && field.getComparator() != ComparatorType.IS_NULL && field.getComparator() != ComparatorType.IS_NOT_NULL) { return; }
 
         final List<String> propertyNamePath = Arrays.asList(field.getPojoProperty().split(REGEX_SPLIT));
         final Iterator<String> iter = propertyNamePath.iterator();
@@ -56,19 +55,18 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
         String associationPath = null;
         if (propertyNamePath.size() == 1) {
             associationPath = iter.next();
-        } else
-            while (iter.hasNext()) {
-                key = iter.next();
-                if (associationPath == null) {
-                    associationPath = new String(key);
-                } else {
-                    associationPath += "." + key;
-                }
-                if (iter.hasNext()) {
-                    criteria = criteria.createCriteria(associationPath, key, CriteriaSpecification.INNER_JOIN);
-                    associationPath = new String(key);
-                }
+        } else while (iter.hasNext()) {
+            key = iter.next();
+            if (associationPath == null) {
+                associationPath = new String(key);
+            } else {
+                associationPath += "." + key;
             }
+            if (iter.hasNext()) {
+                criteria = criteria.createCriteria(associationPath, key, CriteriaSpecification.INNER_JOIN);
+                associationPath = new String(key);
+            }
+        }
 
         final T value = getObjectValue(field);
         ComparatorType comparator = field.getComparator();
@@ -80,63 +78,48 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
         }
 
         switch (comparator) {
-        case EQ:
-            criteria.add(Restrictions.eq(associationPath, value));
-            break;
-        case GE:
-            criteria.add(Restrictions.ge(associationPath, value));
-            break;
-        case GT:
-            criteria.add(Restrictions.gt(associationPath, value));
-            break;
-        case LE:
-            criteria.add(Restrictions.le(associationPath, value));
-            break;
-        case LT:
-            criteria.add(Restrictions.lt(associationPath, value));
-            break;
-        case NE:
-            criteria.add(Restrictions.ne(associationPath, value));
-            break;
-        case LIKE:
-            criteria.add(Restrictions.ilike(associationPath, value));
-            break;
-        case IS_NULL:
-            criteria.add(Restrictions.isNull(associationPath));
-            break;
-        case IS_NOT_NULL:
-            criteria.add(Restrictions.isNotNull(associationPath));
-            break;
-        case SIZE_EQ:
-            criteria.add(Restrictions.sizeEq(associationPath, (Integer) value));
-            break;
-        case SIZE_GE:
-            criteria.add(Restrictions.sizeGe(associationPath, (Integer) value));
-            break;
-        case SIZE_GT:
-            criteria.add(Restrictions.sizeGt(associationPath, (Integer) value));
-            break;
-        case SIZE_LT:
-            criteria.add(Restrictions.sizeLt(associationPath, (Integer) value));
-            break;
-        // case IN:
-        // criteria.add(Restrictions.in(field.getPojoProperty(), field.getValue()));
-        // break;
+            case EQ:
+                criteria.add(Restrictions.eq(associationPath, value));
+                break;
+            case GE:
+                criteria.add(Restrictions.ge(associationPath, value));
+                break;
+            case GT:
+                criteria.add(Restrictions.gt(associationPath, value));
+                break;
+            case LE:
+                criteria.add(Restrictions.le(associationPath, value));
+                break;
+            case LT:
+                criteria.add(Restrictions.lt(associationPath, value));
+                break;
+            case NE:
+                criteria.add(Restrictions.ne(associationPath, value));
+                break;
+            case LIKE:
+                criteria.add(Restrictions.ilike(associationPath, value));
+                break;
+            case IS_NULL:
+                criteria.add(Restrictions.isNull(associationPath));
+                break;
+            case IS_NOT_NULL:
+                criteria.add(Restrictions.isNotNull(associationPath));
+                break;
 
-        default:
-            log.warn("Restriction not supported: " + comparator);
-            break;
+            default:
+                log.warn("Restriction not supported: " + comparator);
+                break;
         }
 
         switch (field.getSortingType()) {
-        case ASCENDING:
-            criteria.addOrder(Order.asc(field.getPojoProperty()));
-            break;
-        case DESCENDING:
-            criteria.addOrder(Order.desc(field.getPojoProperty()));
-            break;
-        case NONE:
-            break;
+            case ASCENDING:
+                criteria.addOrder(Order.asc(field.getPojoProperty()));
+                break;
+            case DESCENDING:
+                criteria.addOrder(Order.desc(field.getPojoProperty()));
+                break;
+            case NONE:
+                break;
         }
 
     }

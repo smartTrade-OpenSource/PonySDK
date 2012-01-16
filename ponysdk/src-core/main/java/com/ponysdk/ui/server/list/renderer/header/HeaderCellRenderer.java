@@ -20,15 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+
+package com.ponysdk.ui.server.list.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
 
-public class ObjectCellRenderer<T> extends AbstractCellRenderer<T, Object> {
+public interface HeaderCellRenderer {
 
-    @Override
-    public IsPWidget render0(final int rowCount, final T data, final Object value) {
-        return new PLabel(String.valueOf(value));
-    }
+    public IsPWidget render();
+
+    public String getCaption();// TODO nciaravol => must be removed
 }

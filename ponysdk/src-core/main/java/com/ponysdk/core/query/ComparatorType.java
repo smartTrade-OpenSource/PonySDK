@@ -20,8 +20,42 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.query;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public enum ComparatorType {
-    EQ, NE, GT, LT, LE, GE, IN, LIKE, IS_NULL, IS_NOT_NULL, SIZE_EQ, SIZE_GE, SIZE_GT, SIZEçLE, SIZE_LT;
+    EQ("="), NE("!="), GT(">"), LT("<"), LE("<="), GE(">="), IN("IN"), LIKE("LIKE"), IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL");
+
+    private String name;
+
+    private static final Map<ComparatorType, String> names = new HashMap<ComparatorType, String>();
+
+    private static final Map<String, ComparatorType> comparatorTypeByName = new HashMap<String, ComparatorType>();
+
+    private ComparatorType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static Collection<String> getNames() {
+        if (names.isEmpty()) {
+            for (ComparatorType comparatorType : ComparatorType.values()) {
+                names.put(comparatorType, comparatorType.getName());
+            }
+        }
+
+        return names.values();
+    }
+
+    public static ComparatorType fromName(String name) {
+        return comparatorTypeByName.get(name);
+    }
+
 }

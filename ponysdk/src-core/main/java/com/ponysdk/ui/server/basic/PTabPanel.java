@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -43,10 +43,13 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer> {
+
     private boolean animationEnabled = false;
 
     private final List<PWidget> children = new ArrayList<PWidget>();
+
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
+
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
 
     private Integer selectedItemIndex;
@@ -127,7 +130,8 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         return children.indexOf(child);
     }
 
-    public void add(Widget w) {
+    @Override
+    public void add(PWidget w) {
         throw new UnsupportedOperationException("A tabText parameter must be specified with add().");
     }
 

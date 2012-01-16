@@ -20,15 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
 
-public class StringCellRenderer<T> extends AbstractCellRenderer<T, String> {
+public interface CellRenderer<D, V> {
 
-    @Override
-    public IsPWidget render0(final int rowCount, final T data, final String value) {
-        return new PLabel(value);
-    }
+    public IsPWidget render(final int row, D data, V value);
+
 }

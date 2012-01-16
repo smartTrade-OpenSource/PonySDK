@@ -20,16 +20,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.list.renderer;
+package com.ponysdk.ui.server.list.renderer.cell;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PImage;
+import com.ponysdk.ui.server.basic.PLabel;
 
-public class SwitchImageCellRenderer<D> extends AbstractCellRenderer<D, Boolean> {
+public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
+
+    private final DateFormat dateFormat;
+
+    public DateCellRenderer(final DateFormat dateFormat) {
+        this.dateFormat = dateFormat;
+    }
 
     @Override
-    public IsPWidget render0(int row, D data, Boolean value) {
-        // TODO not a switch ......
-        return new PImage(value ? "icons/16/check.png" : "icons/16/block.png");
+    public IsPWidget render0(int rowCount, T data, Date value) {
+        return new PLabel(dateFormat.format(value));
     }
 }

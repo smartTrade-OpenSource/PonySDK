@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -41,6 +42,12 @@ public interface SimpleListView extends IsPWidget {
     void unSelectRow(int row);
 
     void addRowStyle(int row, String styleName);
+
+    void addColumnStyle(int column, String styleName);
+
+    void removeColumnStyle(int column, String styleName);
+
+    void setColumnWidth(int column, String width);
 
     void addHeaderStyle(String styleName);
 
