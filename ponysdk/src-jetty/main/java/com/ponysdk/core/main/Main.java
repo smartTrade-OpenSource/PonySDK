@@ -30,15 +30,12 @@ import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.GenericXmlApplicationContext;
 
 public class Main {
 
     protected static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private Server webServer;
-
-    private String configurationFile;
 
     private Integer port;
 
@@ -54,8 +51,6 @@ public class Main {
 
             if (parameter[0].equals("contextName")) {
                 main.setApplicationContextName(parameter[1]);
-            } else if (parameter[0].equals("configurationFile")) {
-                main.setConfigurationFile(parameter[1]);
             } else if (parameter[0].equals("port")) {
                 main.setPort(Integer.valueOf(parameter[1]));
             } else if (parameter[0].equals("war")) {
@@ -67,12 +62,7 @@ public class Main {
     }
 
     public void start() throws Exception {
-        final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
-        if (configurationFile != null) {
-            ctx.load("classpath:" + configurationFile);
-            ctx.refresh();
-        }
-
+        
         if (port != null) {
             webServer = new Server(port);
         } else {
@@ -103,10 +93,6 @@ public class Main {
 
     public void setPort(Integer port) {
         this.port = port;
-    }
-
-    public void setConfigurationFile(String configurationFile) {
-        this.configurationFile = configurationFile;
     }
 
     public void setApplicationContextName(String applicationContextName) {
