@@ -1047,10 +1047,6 @@ table .pony-PFlexTable{
 .pony-ComplexList-ColumnHeader .pony-PFlextable-Cell {
 	-webkit-border-horizontal-spacing: 0px;
 	-webkit-border-vertical-spacing: 0px;
-	-webkit-transition-delay: 0s, 0s, 0s;
-	-webkit-transition-duration: 0.15s, 0.15s, 0.15s;
-	-webkit-transition-property: background-color, border-color, color;
-	-webkit-transition-timing-function: linear, linear, linear;
 	background-clip: border-box;
 	background-color: #777;
 	background-image: -webkit-gradient(linear, 0% 100%, 0% 0%, from(#666), to(#999) );
@@ -1059,16 +1055,21 @@ table .pony-PFlexTable{
 	border-bottom-style: solid;
 	border-bottom-width: 1px;
 	border-collapse: separate;
-	border-top-color: #666;
+	border-top-color: #959595;
 	border-top-style: solid;
 	border-top-width: 1px;
+	border-right: 1px solid #959595;
 	color: white;
 	font-family: arial, sans-serif;
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: normal;
 	text-decoration: none;
 	text-align: center;
 	vertical-align:top;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 3px;
+	padding-right: 3px;
 	/*text-shadow: #555 0px 1px 0px;*/
 }
 
@@ -1123,6 +1124,22 @@ table .pony-PFlexTable{
 	background:url('../images/minus_12_dark.png') no-repeat;
 }
 
+
+.pony-ComplexList-HeaderCellRenderer-DateRange{
+	background:url('../images/filter_12_white.png') no-repeat;
+	width:12px;
+	height:12px;
+	display:block;
+	padding-bottom: 2px;
+}
+
+.pony-ComplexList-HeaderCellRenderer-DateRange:hover{
+	background:url('../images/filter_12_dark.png') no-repeat;
+}
+
+.pony-ComplexList-HeaderCellRenderer-MainCheckBox{
+	
+}
 
 .pony-Oracle-PopupPanel {
     border: 1px solid #eee;

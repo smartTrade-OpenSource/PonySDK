@@ -4,10 +4,11 @@ package com.ponysdk.ui.server.list.renderer.header;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.addon.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -39,9 +40,8 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
     public DateRangeHeaderCellRenderer(String caption, final FormField from, final FormField to, String pojoProperty) {
         super(caption, pojoProperty);
 
-        final PImage plusAnchor = new PImage("images/plus_20.png"); // must be a parameter ?
-        plusAnchor.setHeight("16px");
-        plusAnchor.setWidth("16px");
+        final PAnchor anchor = new PAnchor("");
+        anchor.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_DATERANGE);
 
         mainformFieldRenderer = (TextBoxFormFieldRenderer) formField.getFormFieldRenderer();
         mainformFieldRenderer.addClickHandler(this);
@@ -86,7 +86,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
             }
         });
 
-        plusAnchor.addClickHandler(new PClickHandler() {
+        anchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(PClickEvent arg0) {
@@ -96,8 +96,8 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         });
 
         fieldContainer.add(container);
-        fieldContainer.add(plusAnchor);
-        fieldContainer.setCellVerticalAlignment(plusAnchor, PVerticalAlignment.ALIGN_BOTTOM);
+        fieldContainer.add(anchor);
+        fieldContainer.setCellVerticalAlignment(anchor, PVerticalAlignment.ALIGN_BOTTOM);
     }
 
     @Override

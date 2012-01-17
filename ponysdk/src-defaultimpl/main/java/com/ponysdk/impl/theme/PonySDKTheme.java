@@ -49,6 +49,10 @@ public interface PonySDKTheme {
 
     String COMPLEXLIST_DETAILS_MINUS = "pony-ComplexList-Details-Minus";
 
+    String COMPLEXLIST_HEADERCELLRENDERER_DATERANGE = "pony-ComplexList-HeaderCellRenderer-DateRange";
+
+    String COMPLEXLIST_HEADERCELLRENDERER_MAINCHECKBOX = "pony-ComplexList-HeaderCellRenderer-MainCheckBox";
+
     String SIMPLELIST_ROW = "pony-SimpleList-Row";
 
     String SIMPLELIST_SUBROW = "pony-SimpleList-SubRow";

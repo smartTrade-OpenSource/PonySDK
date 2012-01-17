@@ -68,7 +68,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
     }
 
     public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey) {
-        this(caption, new FormField(), pojoPropertyKey, true);
+        this(caption, new FormField(), pojoPropertyKey, false);
     }
 
     public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey, boolean enableComparatorType) {
@@ -144,13 +144,13 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
 
     protected SortingType getNextSortingType() {
         if (sortingType == SortingType.NONE) {
-            header.setStyleProperty("background", "#4f4f4f url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
+            header.setStyleProperty("background", "#666666 url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
             return SortingType.ASCENDING;
         } else if (sortingType == SortingType.DESCENDING) {
-            header.setStyleProperty("background", "#4f4f4f url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
+            header.setStyleProperty("background", "#666666 url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
             return SortingType.ASCENDING;
         } else if (sortingType == SortingType.ASCENDING) {
-            header.setStyleProperty("background", "#4f4f4f url(" + ARROW_UP_IMAGE_URL + ") no-repeat 98% 50%");
+            header.setStyleProperty("background", "#666666 url(" + ARROW_UP_IMAGE_URL + ") no-repeat 98% 50%");
             return SortingType.DESCENDING;
         }
         return SortingType.NONE;

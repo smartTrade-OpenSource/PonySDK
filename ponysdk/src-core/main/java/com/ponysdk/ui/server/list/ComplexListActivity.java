@@ -43,6 +43,7 @@ import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.core.query.SortingType;
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
@@ -283,6 +284,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             @Override
             public IsPWidget render() {
                 mainCheckBox = new PCheckBox();
+                mainCheckBox.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_MAINCHECKBOX);
                 mainCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
                     @Override
@@ -392,12 +394,12 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
             @Override
             public IsPWidget render() {
-                return new PLabel("Details");
+                return new PLabel("");
             }
 
             @Override
             public String getCaption() {
-                return "Details";
+                return "";
             }
         });
 
@@ -467,7 +469,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             actionBar.addSeparator();
             final PMenuBar exportListMenuBar = new PMenuBar(true);
 
-            for (final Exporter exporter : complexListConfiguration.getExportConfiguration().getExportTypes()) {
+            for (final Exporter<D> exporter : complexListConfiguration.getExportConfiguration().getExportTypes()) {
                 final PMenuItem item = new PMenuItem(exporter.name(), new PCommand() {
 
                     @Override
