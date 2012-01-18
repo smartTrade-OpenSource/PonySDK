@@ -49,6 +49,8 @@ public class ListColumnDescriptor<D, V> {
     private CellRenderer<D, V> subCellRenderer = new ObjectCellRenderer();
 
     private ValueProvider<D, V> valueProvider;
+	private boolean viewable = true;
+	private boolean isCustom = false;
 
     private String width;
 
@@ -84,6 +86,9 @@ public class ListColumnDescriptor<D, V> {
 
     public void setHeaderCellRenderer(HeaderCellRenderer headerCellRender) {
         this.headerCellRenderer = headerCellRender;
+		if (caption == null) {
+			caption = headerCellRender.getCaption();
+		}
     }
 
     public void setCellRenderer(CellRenderer<D, V> cellRenderer) {
@@ -117,6 +122,26 @@ public class ListColumnDescriptor<D, V> {
 
     public void setWidth(String width) {
         this.width = width;
+    }
+    
+    public String getCaption() {
+        return caption;
+    }
+
+    public void setViewable(boolean viewable) {
+        this.viewable = viewable;
+    }
+
+    public boolean isViewable() {
+        return viewable;
+    }
+
+    public boolean isCustom() {
+        return isCustom;
+    }
+
+    public void setCustom(boolean isCustom) {
+        this.isCustom = isCustom;
     }
 
 }

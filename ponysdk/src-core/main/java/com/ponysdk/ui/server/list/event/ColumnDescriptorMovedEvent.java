@@ -20,36 +20,41 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.ponysdk.ui.server.list.event;
 
-package com.ponysdk.core.export.event;
+import java.util.List;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.export.Exporter;
+import com.ponysdk.core.event.SystemEvent;
 
-public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
+public class ColumnDescriptorMovedEvent extends SystemEvent<ColumnDescriptorMovedHandler> {
 
-    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<DataExportedHandler>();
+	public static final Type<ColumnDescriptorMovedHandler> TYPE = new Type<ColumnDescriptorMovedHandler>();
 
-    private final Exporter<?> exporter;
+    private final List<String> columnOrder;
+    private final String tableName;
 
-    public DataExportedEvent(Object sourceComponent, Exporter<?> exportModule) {
+    public ColumnDescriptorMovedEvent(Object sourceComponent, List<String> columnOrder, String tableName) {
         super(sourceComponent);
-        this.exporter = exportModule;
+        this.columnOrder = columnOrder;
+        this.tableName = tableName;
     }
 
     @Override
-    protected void dispatch(DataExportedHandler handler) {
-        handler.onDataExported(this);
+	protected void dispatch(ColumnDescriptorMovedHandler handler) {
+		handler.onColumnMoved(this);
     }
 
     @Override
-    public Event.Type<DataExportedHandler> getAssociatedType() {
+	public Type<ColumnDescriptorMovedHandler> getAssociatedType() {
         return TYPE;
     }
 
-    public Exporter<?> getExporter() {
-        return exporter;
+    public List<String> getColumnOrder() {
+        return columnOrder;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
 }

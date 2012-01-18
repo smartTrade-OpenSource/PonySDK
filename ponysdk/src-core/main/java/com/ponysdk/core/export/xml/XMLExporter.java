@@ -24,9 +24,9 @@ public class XMLExporter<T> implements Exporter<T> {
 
     private static final String NAME = "XML";
 
-    private final String fileName;
+    protected final String fileName;
 
-    private final String rootName;
+    protected final String rootName;
 
     public XMLExporter(String rootName, String fileName) {
         this.rootName = rootName;

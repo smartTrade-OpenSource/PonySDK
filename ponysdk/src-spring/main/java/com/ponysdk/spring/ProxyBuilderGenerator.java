@@ -114,7 +114,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
             this.domain = root.getDomain();
             classWriter.addLine("try{");
             classWriter.indentBlock();
-            classWriter.addLine(GeneratorHelper.getRemoteServiceImplFullClassName(domain) + ".getInstance().setService(context.getBean(" + GeneratorHelper.getServiceFullClassName(domain) + ".class));");
+            classWriter.addLine("com.ponysdk.core.service.PonyServiceRegistry.registerPonyService(context.getBean(" + GeneratorHelper.getServiceFullClassName(domain) + ".class));");
             classWriter.unindentBlock();
             classWriter.addLine("}catch(org.springframework.beans.factory.NoSuchBeanDefinitionException e){");
             classWriter.indentBlock();

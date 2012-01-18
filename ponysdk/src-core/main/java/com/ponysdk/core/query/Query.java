@@ -20,10 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Query {
 
@@ -32,10 +35,12 @@ public class Query {
     }
 
     private int pageSize = Integer.MAX_VALUE;
+
     private int pageNum = 0;
+
     private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola avoid to breaking existing queries
 
-    private List<CriterionField> criteria = new ArrayList<CriterionField>();
+    private final Map<String, CriterionField> criteria = new HashMap<String, CriterionField>();
 
     public Query() {
         super();
@@ -50,15 +55,21 @@ public class Query {
     }
 
     public void addCriterion(CriterionField criteriField) {
-        criteria.add(criteriField);
+        criteria.put(criteriField.getPojoProperty(), criteriField);
     }
 
     public List<CriterionField> getCriteria() {
-        return criteria;
+        return new ArrayList<CriterionField>(criteria.values());
     }
 
     public void setCriteria(List<CriterionField> criteria) {
-        this.criteria = criteria;
+        for (CriterionField criterionField : criteria) {
+            addCriterion(criterionField);
+        }
+    }
+
+    public CriterionField getCriterion(String pojoProperty) {
+        return this.criteria.get(pojoProperty);
     }
 
     public void setPageSize(int pageSize) {

@@ -31,6 +31,8 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -89,6 +91,15 @@ public class PTWidget extends PTUIObject {
         uiService.triggerEvent(eventInstruction);
     }
 
+	protected void triggerOnMouseOut(final AddHandler addHandler,
+			final int domHandlerType, final UIService uiService) {
+		final EventInstruction eventInstruction = new EventInstruction(
+				addHandler.getObjectID(), addHandler.getType());
+		eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER,
+				domHandlerType);
+		uiService.triggerEvent(eventInstruction);
+	}
+
     protected void triggerOnKeyPress(final AddHandler addHandler, final int domHandlerType, final UIService uiService, KeyPressEvent event) {
         final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
         main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
@@ -128,6 +139,15 @@ public class PTWidget extends PTUIObject {
 
             }, MouseOverEvent.getType());
             break;
+		case MOUSE_OUT:
+			widget.addDomHandler(new MouseOutHandler() {
+				@Override
+				public void onMouseOut(MouseOutEvent event) {
+					triggerOnMouseOut(addHandler, domHandlerType, uiService);
+				}
+
+			}, MouseOutEvent.getType());
+			break;
         case KEY_PRESS:
             widget.addDomHandler(new KeyPressHandler() {
                 @Override

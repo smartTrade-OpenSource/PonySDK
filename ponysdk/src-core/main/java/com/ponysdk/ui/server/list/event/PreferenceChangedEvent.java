@@ -22,10 +22,24 @@
  */
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.SystemEvent;
 
-public interface AddCustomColumnDescriptorHandler extends EventHandler {
+public class PreferenceChangedEvent extends
+		SystemEvent<PreferenceChangedHandler> {
 
-	public void onAddCustomColumnDescriptor(
-AddCustomColumnDescriptorEvent event);
+	public static final Type<PreferenceChangedHandler> TYPE = new Type<PreferenceChangedHandler>();
+
+	public PreferenceChangedEvent(Object sourceComponent) {
+        super(sourceComponent);
+    }
+
+    @Override
+	protected void dispatch(PreferenceChangedHandler handler) {
+		handler.onPreferenceChanged(this);
+    }
+
+    @Override
+	public Type<PreferenceChangedHandler> getAssociatedType() {
+        return TYPE;
+    }
 }

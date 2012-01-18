@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -24,30 +24,42 @@
 package com.ponysdk.ui.server.list.form;
 
 import java.beans.PropertyDescriptor;
+import java.util.Date;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.form.FormActivity;
 import com.ponysdk.ui.server.form.FormConfiguration;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.FormView;
+import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.ui.server.list.ComplexListActivity;
 
-public class AddCustomColumnDescriptorForm<T> extends FormActivity {
+public class AddCustomColumnDescriptorForm extends FormActivity {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(AddCustomColumnDescriptorForm.class);
-
+    
     private FormField captionFormField;
 
     private FormField fieldPathFormField;
 
-    private final Class<T> clas;
+    private final Class<?> clas;
 
-    public AddCustomColumnDescriptorForm(FormConfiguration formConfiguration, FormView formView, Class<T> instanceClass) {
+    private FormField fieldTypeFormField;
+
+    public static final int KEY_ENTER = 13;
+
+    private final ComplexListActivity<?> complexListActivity;
+
+    public AddCustomColumnDescriptorForm(FormConfiguration formConfiguration, FormView formView, Class<?> instanceClass, ComplexListActivity<?> complexListActivity) {
         super(formConfiguration, formView);
         this.clas = instanceClass;
+        this.complexListActivity = complexListActivity;
     }
 
     @Override
@@ -56,18 +68,57 @@ public class AddCustomColumnDescriptorForm<T> extends FormActivity {
         captionFormField = new FormField("Caption");
         captionFormField.addValidator(new NotEmptyFieldValidator());
         addFormField(captionFormField);
+        addHandlerToFormField(captionFormField);
 
         fieldPathFormField = new FormField("Field Path");
         fieldPathFormField.addValidator(new NotEmptyFieldValidator());
         addFormField(fieldPathFormField);
+        addHandlerToFormField(fieldPathFormField);
+
+        ListBoxFormFieldRenderer typeRenderer = new ListBoxFormFieldRenderer("Field Type");
+        typeRenderer.addItem(String.class.getSimpleName(), String.class);
+        typeRenderer.addItem(Integer.class.getSimpleName(), Integer.class);
+        typeRenderer.addItem(Long.class.getSimpleName(), Long.class);
+        typeRenderer.addItem(Double.class.getSimpleName(), Double.class);
+        typeRenderer.addItem(Date.class.getSimpleName(), Date.class);
+        typeRenderer.addItem(Boolean.class.getSimpleName(), Boolean.class);
+        fieldTypeFormField = new FormField(typeRenderer);
+        fieldTypeFormField.addValidator(new NotEmptyFieldValidator());
+        addFormField(fieldTypeFormField);
+        addHandlerToFormField(fieldTypeFormField);
+
+    }
+
+    private void addHandlerToFormField(FormField formField) {
+        formField.addDomHandler(new PKeyUpHandler() {
+
+            @Override
+            public void onKeyUp(int keyCode) {
+                if (keyCode != KEY_ENTER) return;
+            }
+        }, PKeyUpEvent.TYPE);
     }
 
     @Override
     public boolean isValid() {
         final String fieldPath = fieldPathFormField.getStringValue();
-        final boolean valid = super.isValid() && hasProperty(clas, fieldPath);
-        if (!valid) fieldPathFormField.getFormFieldRenderer().addErrorMessage("Error occured when finding property#" + fieldPath);
+
+        boolean valid = super.isValid();
+        if (valid) {
+            if (complexListActivity.getDescriptorsByCaption().containsKey(captionFormField.getStringValue())) {
+                captionFormField.getFormFieldRenderer().addErrorMessage("a column with this caption already exist in the list!");
+                valid = false;
+            }
+            if (!hasProperty(clas, fieldPath)) {
+                fieldPathFormField.getFormFieldRenderer().addErrorMessage("Error occured when finding property#" + fieldPath);
+                valid = false;
+            }
+        }
         return valid;
+    }
+
+    public Class<?> getFieldType() {
+        return ((Class<?>) fieldTypeFormField.getValue());
     }
 
     public String getCaption() {

@@ -24,6 +24,7 @@ package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PToolbar;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
@@ -47,5 +48,8 @@ public interface ComplexListView extends SimpleListView {
 
     public PAcceptsOneWidget getPagingLayout();
 
-    public void updateView();
+	PSimplePanel getPreferencesLayout();
+
+	public void updateView();
+
 }

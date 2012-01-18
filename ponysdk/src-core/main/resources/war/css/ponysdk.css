@@ -877,6 +877,13 @@ table .pony-PFlexTable{
 	background: -webkit-gradient(linear, left top, left bottom, from(#575757), to(#888));
 	background: -moz-linear-gradient(top,  #575757,  #888);
 }
+.pony-PButton .gray[disabled] {
+ 	color:#CCC;
+	background: #e9e9e9;
+	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#3084a3));
+	background: -moz-linear-gradient(top,  #00adee,  #3084a3);
+	cursor:auto;
+}
  
 /* white */
 .white {
@@ -948,10 +955,19 @@ table .pony-PFlexTable{
 	background: -webkit-gradient(linear, left top, left bottom, from(#0095cc), to(#00678e));
 	background: -moz-linear-gradient(top,  #0095cc,  #00678e);
 }
+
 .blue:active {
 	color: #80bed6;
 	background: -webkit-gradient(linear, left top, left bottom, from(#0078a5), to(#00adee));
 	background: -moz-linear-gradient(top,  #0078a5,  #00adee);
+}
+
+.pony-PButton .blue[disabled] {
+ 	color:#CCC;
+	background: #3da5cc;
+	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#3084a3));
+	background: -moz-linear-gradient(top,  #00adee,  #3084a3);
+	cursor:auto;
 }
  
 /* rosy */

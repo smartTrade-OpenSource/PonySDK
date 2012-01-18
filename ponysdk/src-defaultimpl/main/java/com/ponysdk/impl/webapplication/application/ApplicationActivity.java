@@ -23,9 +23,6 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.PlaceContext;
@@ -42,8 +39,6 @@ import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class ApplicationActivity extends AbstractActivity implements PValueChangeHandler<String> {
 
-    private final Map<String, PageActivity> pageActivitiesByName = new LinkedHashMap<String, PageActivity>();
-
     private ApplicationView applicationView;
 
     private MenuActivity menuActivity;
@@ -59,6 +54,10 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
     @Override
     public void start(PAcceptsOneWidget world) {
         PonySession.getCurrent().getHistory().addValueChangeHandler(this);
+
+        for (PageActivity page : pageProvider.getPageActivities()) {
+            page.setApplicationActivity(this);
+        }
 
         world.setWidget(applicationView.asWidget());
 

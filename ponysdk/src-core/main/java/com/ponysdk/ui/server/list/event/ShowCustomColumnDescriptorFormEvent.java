@@ -22,10 +22,26 @@
  */
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.SystemEvent;
 
-public interface AddCustomColumnDescriptorHandler extends EventHandler {
+public class ShowCustomColumnDescriptorFormEvent extends
+		SystemEvent<ShowCustomColumnDescriptorFormHandler> {
 
-	public void onAddCustomColumnDescriptor(
-AddCustomColumnDescriptorEvent event);
+	public static final Type<ShowCustomColumnDescriptorFormHandler> TYPE = new Type<ShowCustomColumnDescriptorFormHandler>();
+
+    public ShowCustomColumnDescriptorFormEvent(Object sourceComponent) {
+        super(sourceComponent);
+    }
+
+    @Override
+	protected void dispatch(ShowCustomColumnDescriptorFormHandler handler) {
+        handler.onShowCustomColumnDescriptorForm(this);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+	public Type<ShowCustomColumnDescriptorFormHandler> getAssociatedType() {
+        return (Type) TYPE;
+    }
+
 }

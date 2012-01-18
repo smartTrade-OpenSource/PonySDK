@@ -23,24 +23,34 @@
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.ui.server.list.ColumnDescriptorFieldHolder;
 
-public class AddCustomColumnDescriptorEvent<T> extends SystemEvent<AddCustomColumnDescriptorHandler<T>> {
+public class AddCustomColumnDescriptorEvent extends
+		SystemEvent<AddCustomColumnDescriptorHandler> {
 
-    public static final Type<AddCustomColumnDescriptorHandler<?>> TYPE = new Type<AddCustomColumnDescriptorHandler<?>>();
 
-    public AddCustomColumnDescriptorEvent(Object sourceComponent) {
+	public static final Type<AddCustomColumnDescriptorHandler> TYPE = new Type<AddCustomColumnDescriptorHandler>();
+	private final ColumnDescriptorFieldHolder descriptorHolder;
+
+	public AddCustomColumnDescriptorEvent(Object sourceComponent,
+			ColumnDescriptorFieldHolder descriptorHolder) {
         super(sourceComponent);
+		this.descriptorHolder = descriptorHolder;
     }
 
     @Override
-    protected void dispatch(AddCustomColumnDescriptorHandler<T> handler) {
+	protected void dispatch(AddCustomColumnDescriptorHandler handler) {
         handler.onAddCustomColumnDescriptor(this);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Type<AddCustomColumnDescriptorHandler<T>> getAssociatedType() {
+	public Type<AddCustomColumnDescriptorHandler> getAssociatedType() {
         return (Type) TYPE;
     }
+
+	public ColumnDescriptorFieldHolder getDescriptorHolder() {
+		return descriptorHolder;
+	}
 
 }

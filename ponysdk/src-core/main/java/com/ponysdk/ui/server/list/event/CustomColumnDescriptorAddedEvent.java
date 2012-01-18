@@ -20,36 +20,36 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.ponysdk.ui.server.list.event;
 
-package com.ponysdk.core.export.event;
+import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.ui.server.list.ColumnDescriptorFieldHolder;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.export.Exporter;
+public class CustomColumnDescriptorAddedEvent extends
+		SystemEvent<CustomColumnDescriptorAddedHandler> {
 
-public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
+	public static final Type<CustomColumnDescriptorAddedHandler> TYPE = new Type<CustomColumnDescriptorAddedHandler>();
+	private final ColumnDescriptorFieldHolder descriptorHolder;
 
-    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<DataExportedHandler>();
 
-    private final Exporter<?> exporter;
-
-    public DataExportedEvent(Object sourceComponent, Exporter<?> exportModule) {
+	public CustomColumnDescriptorAddedEvent(Object sourceComponent,
+			ColumnDescriptorFieldHolder descriptorHolder) {
         super(sourceComponent);
-        this.exporter = exportModule;
+		this.descriptorHolder = descriptorHolder;
     }
 
     @Override
-    protected void dispatch(DataExportedHandler handler) {
-        handler.onDataExported(this);
+	protected void dispatch(CustomColumnDescriptorAddedHandler handler) {
+		handler.onCustomColumnDescriptorAdded(this);
     }
 
+
     @Override
-    public Event.Type<DataExportedHandler> getAssociatedType() {
+	public Type<CustomColumnDescriptorAddedHandler> getAssociatedType() {
         return TYPE;
     }
 
-    public Exporter<?> getExporter() {
-        return exporter;
-    }
-
+	public ColumnDescriptorFieldHolder getDescriptorHolder() {
+		return descriptorHolder;
+	}
 }

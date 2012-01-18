@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.core.activity.AbstractActivity;
@@ -38,7 +39,9 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     private static PageActivity currentPage;
 
     protected final String pageName;
+
     protected final String pageCategory;
+
     protected Permission permission;
 
     protected PageView pageView;
@@ -63,6 +66,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         this.permission = permission;
 
         homePlace = new PagePlace(this) {
+
             @Override
             public String getToken() {
                 return pageName != null ? pageName : pageCategory;
@@ -77,8 +81,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     @Override
     public void goTo(Place place, PAcceptsOneWidget world) {
-        if (currentPage != null)
-            currentPage.onLeavingPage();
+        if (currentPage != null) currentPage.onLeavingPage();
 
         currentPage = this;
 
@@ -125,6 +128,10 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         return permission;
     }
 
+    public void setApplicationActivity(ApplicationActivity applicationActivity) {
+        this.applicationActivity = applicationActivity;
+    }
+
     @Override
     public final void afterContextInitialized() {
         if (this.pageView == null) {
@@ -145,23 +152,16 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final PageActivity other = (PageActivity) obj;
         if (pageCategory == null) {
-            if (other.pageCategory != null)
-                return false;
-        } else if (!pageCategory.equals(other.pageCategory))
-            return false;
+            if (other.pageCategory != null) return false;
+        } else if (!pageCategory.equals(other.pageCategory)) return false;
         if (pageName == null) {
-            if (other.pageName != null)
-                return false;
-        } else if (!pageName.equals(other.pageName))
-            return false;
+            if (other.pageName != null) return false;
+        } else if (!pageName.equals(other.pageName)) return false;
         return true;
     }
 

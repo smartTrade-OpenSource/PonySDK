@@ -56,6 +56,8 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     private final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
 
+    private final PSimplePanel preferencesLayout = new PSimplePanel();
+
     private final PLabel searchResultTimeLabel = new PLabel();
 
     public DefaultComplexListView() {
@@ -66,6 +68,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         toolbarGroupPanel.setWidth("100%");
         toolbarGroupPanel.add(toolbarLayout.asWidget());
         toolbarGroupPanel.add(pagingLayout);
+        toolbarGroupPanel.add(preferencesLayout);
         toolbarGroupPanel.setCellHorizontalAlignment(pagingLayout.asWidget(), PHorizontalAlignment.ALIGN_RIGHT);
         topListLayout.setSizeFull();
 
@@ -214,6 +217,11 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     @Override
     public void setColumnWidth(int column, String width) {
         simpleListView.setColumnWidth(column, width);
+    }
+
+    @Override
+    public PSimplePanel getPreferencesLayout() {
+        return preferencesLayout;
     }
 
 }

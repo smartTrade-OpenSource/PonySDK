@@ -22,10 +22,38 @@
  */
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.SystemEvent;
 
-public interface AddCustomColumnDescriptorHandler extends EventHandler {
+public class ColumnDescriptorRemovedEvent extends SystemEvent<ColumnDescriptorRemovedHandler> {
 
-	public void onAddCustomColumnDescriptor(
-AddCustomColumnDescriptorEvent event);
+	public static final Type<ColumnDescriptorRemovedHandler> TYPE = new Type<ColumnDescriptorRemovedHandler>();
+
+	private final String caption;
+    private final String tableName;
+
+	public ColumnDescriptorRemovedEvent(Object sourceComponent, String caption,
+			String tableName) {
+        super(sourceComponent);
+		this.caption = caption;
+        this.tableName = tableName;
+    }
+
+    @Override
+	protected void dispatch(ColumnDescriptorRemovedHandler handler) {
+		handler.onColumnRemoved(this);
+    }
+
+    @Override
+	public Type<ColumnDescriptorRemovedHandler> getAssociatedType() {
+        return TYPE;
+    }
+
+	public String getCaption() {
+		return caption;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
 }

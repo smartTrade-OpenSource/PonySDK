@@ -135,6 +135,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         complexListConfiguration.setExportConfiguration(initExportConfiguration());
         complexListConfiguration.setColumnDescriptors(initListColumnDescriptors());
         complexListConfiguration.setCustomColumnEnabled(true, Pony.class);
+        complexListConfiguration.setShowPreferences(true);
 
         final ComplexListView complexListView = new DefaultComplexListView();
         complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());

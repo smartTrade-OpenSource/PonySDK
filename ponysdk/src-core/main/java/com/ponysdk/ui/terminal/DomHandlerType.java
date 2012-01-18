@@ -23,5 +23,5 @@
 package com.ponysdk.ui.terminal;
 
 public enum DomHandlerType {
-    CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP;
+	CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP, MOUSE_OUT;
 }

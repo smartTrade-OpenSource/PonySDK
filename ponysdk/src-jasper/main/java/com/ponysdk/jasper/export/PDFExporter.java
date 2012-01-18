@@ -10,10 +10,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperRunManager;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,30 +109,33 @@ public class PDFExporter<T> implements Exporter<T> {
         return "";
     }
 
-    private static <T> void exportPDF(final String fileName, String jasperReport, List<T> records) throws Exception {
-        final JRDataSource dsource = new JRBeanCollectionDataSource(records);
-        final byte[] reportBytes = JasperRunManager.runReportToPdf(dsource.getClass().getClassLoader().getResourceAsStream(jasperReport), null, dsource);
-
-        // Set MIME type to binary data to prevent opening of PDF in browser window
-        final StreamResource streamResource = new StreamResource();
-        streamResource.open(new StreamHandler() {
-
-            @Override
-            public void onStream(HttpServletRequest req, HttpServletResponse response) {
-                response.reset();
-                response.setContentType("application/pdf");
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-                try {
-                    final OutputStream outputStream = response.getOutputStream();
-                    outputStream.write(reportBytes);
-                    outputStream.flush();
-                    outputStream.close();
-                } catch (final IOException e) {
-                    log.error("Error when exporting", e);
-                }
-            }
-        });
-
-    }
+    // private static <T> void exportPDF(final String fileName, String jasperReport, List<T> records) throws
+    // Exception {
+    // final JRDataSource dsource = new JRBeanCollectionDataSource(records);
+    // final byte[] reportBytes =
+    // JasperRunManager.runReportToPdf(dsource.getClass().getClassLoader().getResourceAsStream(jasperReport),
+    // null, dsource);
+    //
+    // // Set MIME type to binary data to prevent opening of PDF in browser window
+    // final StreamResource streamResource = new StreamResource();
+    // streamResource.open(new StreamHandler() {
+    //
+    // @Override
+    // public void onStream(HttpServletRequest req, HttpServletResponse response) {
+    // response.reset();
+    // response.setContentType("application/pdf");
+    // response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+    // try {
+    // final OutputStream outputStream = response.getOutputStream();
+    // outputStream.write(reportBytes);
+    // outputStream.flush();
+    // outputStream.close();
+    // } catch (final IOException e) {
+    // log.error("Error when exporting", e);
+    // }
+    // }
+    // });
+    //
+    // }
 
 }

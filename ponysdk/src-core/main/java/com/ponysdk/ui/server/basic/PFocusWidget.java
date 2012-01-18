@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.List;
@@ -42,7 +43,9 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers {
 
     private boolean enabled = true;
+
     private boolean focused;
+
     private boolean loadingOnRequest;
 
     @Override

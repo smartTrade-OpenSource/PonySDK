@@ -26,7 +26,9 @@ package com.ponysdk.ui.server.list;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,19 +72,33 @@ import com.ponysdk.ui.server.form.FormActivity;
 import com.ponysdk.ui.server.form.FormConfiguration;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.FormView;
+import com.ponysdk.ui.server.form.renderer.DateBoxFormFieldRenderer;
+import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.list.event.AddCustomColumnDescriptorEvent;
 import com.ponysdk.ui.server.list.event.AddCustomColumnDescriptorHandler;
+import com.ponysdk.ui.server.list.event.ColumnDescriptorMovedEvent;
+import com.ponysdk.ui.server.list.event.ColumnDescriptorRemovedEvent;
+import com.ponysdk.ui.server.list.event.ColumnDescriptorShownEvent;
 import com.ponysdk.ui.server.list.event.ComparatorTypeChangeEvent;
 import com.ponysdk.ui.server.list.event.ComparatorTypeChangeHandler;
+import com.ponysdk.ui.server.list.event.CustomColumnDescriptorAddedEvent;
+import com.ponysdk.ui.server.list.event.MoveColumnDescriptorEvent;
+import com.ponysdk.ui.server.list.event.MoveColumnDescriptorHandler;
+import com.ponysdk.ui.server.list.event.PreferenceChangedEvent;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
 import com.ponysdk.ui.server.list.event.RefreshListHandler;
 import com.ponysdk.ui.server.list.event.RemoveColumnDescriptorEvent;
 import com.ponysdk.ui.server.list.event.RemoveColumnDescriptorHandler;
+import com.ponysdk.ui.server.list.event.ShowColumnDescriptorEvent;
+import com.ponysdk.ui.server.list.event.ShowColumnDescriptorHandler;
+import com.ponysdk.ui.server.list.event.ShowCustomColumnDescriptorFormEvent;
+import com.ponysdk.ui.server.list.event.ShowCustomColumnDescriptorFormHandler;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
 import com.ponysdk.ui.server.list.event.SortColumnEvent;
 import com.ponysdk.ui.server.list.event.SortColumnHandler;
 import com.ponysdk.ui.server.list.form.AddCustomColumnDescriptorForm;
+import com.ponysdk.ui.server.list.form.PreferenceForm;
 import com.ponysdk.ui.server.list.paging.MenuBarPagingView;
 import com.ponysdk.ui.server.list.paging.PagingActivity;
 import com.ponysdk.ui.server.list.paging.PagingView;
@@ -98,8 +114,8 @@ import com.ponysdk.ui.server.list.valueprovider.BooleanValueProvider;
 import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, AddCustomColumnDescriptorHandler<D>,
-        RemoveColumnDescriptorHandler {
+public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, ShowCustomColumnDescriptorFormHandler,
+        ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
 
     private SimpleListActivity<D> simpleListActivity;
 
@@ -118,6 +134,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     private PagingActivity pagingActivity;
 
     protected final ComplexListConfiguration<D> complexListConfiguration;
+
+    private final Map<String, ColumnDescriptorFieldHolder> customDescriptorHolderByCaption = new HashMap<String, ColumnDescriptorFieldHolder>();
+
+    protected LinkedHashMap<String, ListColumnDescriptor<?, ?>> descriptorsByCaption = new LinkedHashMap<String, ListColumnDescriptor<?, ?>>();
 
     private FormActivity searchFormActivity;
 
@@ -149,7 +169,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     private SelectionMode selectionMode = SelectionMode.NONE;
 
-    private PMenuItem addCustomColumnButton;
+    private int beforeIndex = -1;
+
+    private ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler = new SHowCustomColumnDescriptorFormHandlerImpl();
 
     public ComplexListActivity(ComplexListConfiguration<D> complexListConfiguration, ComplexListView complexListView) {
         this(complexListConfiguration, complexListView, null);
@@ -159,12 +181,16 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.eventBus = eventBus;
         this.complexListConfiguration = complexListConfiguration;
         this.listColumnDescriptors = complexListConfiguration.getColumnDescriptors();
-
+        for (final ListColumnDescriptor<D, ?> descriptor : listColumnDescriptors) {
+            descriptorsByCaption.put(descriptor.getCaption(), descriptor);
+        }
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             listColumnDescriptors.add(0, getSelectableRow());
+            beforeIndex = 0;
         }
         if (complexListConfiguration.isShowSubListColumnEnabled()) {
-            listColumnDescriptors.add(1, getShowSubListRow());
+            beforeIndex++;
+            listColumnDescriptors.add(beforeIndex, getShowSubListRow());
         }
 
         this.complexListView = complexListView;
@@ -172,11 +198,13 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.localEventBus = new SimpleEventBus();
         this.localEventBus.addHandler(PagingSelectionChangeEvent.TYPE, this);
         this.localEventBus.addHandler(SortColumnEvent.TYPE, this);
-        this.localEventBus.addHandler(ComparatorTypeChangeEvent.TYPE, this);
         this.localEventBus.addHandler(RefreshListEvent.TYPE, this);
         this.localEventBus.addHandler(ShowSubListEvent.TYPE, this);
-        this.localEventBus.addHandler(AddCustomColumnDescriptorEvent.TYPE, this);
+        this.localEventBus.addHandler(ShowCustomColumnDescriptorFormEvent.TYPE, this);
+        this.localEventBus.addHandler(ShowColumnDescriptorEvent.TYPE, this);
+        this.localEventBus.addHandler(MoveColumnDescriptorEvent.TYPE, this);
         this.localEventBus.addHandler(RemoveColumnDescriptorEvent.TYPE, this);
+        this.localEventBus.addHandler(ComparatorTypeChangeEvent.TYPE, this);
 
         for (final ListColumnDescriptor<D, ?> columnDescriptor : listColumnDescriptors) {
             if (columnDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
@@ -453,24 +481,13 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         });
 
         actionBar.addItem(resetButton);
-        if (complexListConfiguration.isCustomColumnEnabled()) {
-            addCustomColumnButton = new PMenuItem("Add Custom", new PCommand() {
-
-                @Override
-                public void execute() {
-                    localEventBus.fireEvent(new AddCustomColumnDescriptorEvent<D>(this));
-                }
-            });
-            actionBar.addSeparator();
-            actionBar.addItem(addCustomColumnButton);
-        }
 
         if (complexListConfiguration.getExportConfiguration() != null) {
             actionBar.addSeparator();
             final PMenuBar exportListMenuBar = new PMenuBar(true);
 
-            for (final Exporter<D> exporter : complexListConfiguration.getExportConfiguration().getExportTypes()) {
-                final PMenuItem item = new PMenuItem(exporter.name(), new PCommand() {
+            for (final Exporter<?> exportType : complexListConfiguration.getExportConfiguration().getExporters()) {
+                final PMenuItem item = new PMenuItem(exportType.name(), new PCommand() {
 
                     @Override
                     public void execute() {
@@ -485,7 +502,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
                         final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
-                        exportContext.setExporter(exporter);
                         final Command command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
                         command.execute();
                     }
@@ -524,8 +540,17 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         return findResult;
     }
 
-    public void addCustomDescriptor(ListColumnDescriptor<D, ?> customDescriptor) {
-        simpleListActivity.addCustomDescriptor(customDescriptor);
+    public void addDescriptor(ListColumnDescriptor<D, ?> customDescriptor) {
+        simpleListActivity.addDescriptor(customDescriptor);
+        listColumnDescriptors.add(customDescriptor);
+        descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
+    }
+
+    public void addDescriptor(int index, ListColumnDescriptor<D, ?> customDescriptor) {
+        if (index > listColumnDescriptors.size() || index < 0) { throw new RuntimeException("Cannot add column#" + customDescriptor.getCaption() + " index out of bound"); }
+        listColumnDescriptors.add(index, customDescriptor);
+        simpleListActivity.addDescriptor(customDescriptor);
+        descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
     }
 
     public void insertSubList(int row, List<D> datas) {
@@ -779,11 +804,58 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         buildSearchForm();
         buildActions();
         buildPaging();
+        buildPreferences();
         world.setWidget(complexListView);
 
         if (debugID != null) {
             ensureDebugId(debugID);
         }
+    }
+
+    private void buildPreferences() {
+        final PMenuBar menuBar = new PMenuBar();
+        final PMenuBar menuBarAction = new PMenuBar(true);
+        menuBar.addItem("Preferences", menuBarAction);
+        menuBar.setStyleName("pony-ActionToolbar");
+        boolean hasPreferenceAction = false;
+        if (complexListConfiguration.isCustomColumnEnabled()) {
+            menuBarAction.addItem("Add Custom Column", new PCommand() {
+
+                @Override
+                public void execute() {
+                    localEventBus.fireEvent(new ShowCustomColumnDescriptorFormEvent(this));
+
+                }
+            });
+            hasPreferenceAction = true;
+        }
+
+        if (complexListConfiguration.isShowPreferences()) {
+            menuBarAction.addItem(new PMenuItem("Order columns", new PCommand() {
+
+                @Override
+                public void execute() {
+
+                    PConfirmDialog.show("Column Ordering", new PreferenceForm(descriptorsByCaption.values(), localEventBus, complexListConfiguration.getTableName()), new PConfirmDialogHandler() {
+
+                        @Override
+                        public boolean onOK(PDialogBox dialogBox) {
+                            return true;
+                        }
+
+                        @Override
+                        public void onCancel() {}
+                    });
+
+                }
+            }));
+            hasPreferenceAction = true;
+        }
+
+        if (hasPreferenceAction) {
+            complexListView.getPreferencesLayout().setWidget(menuBar);
+        }
+
     }
 
     @Override
@@ -810,42 +882,152 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onAddCustomColumnDescriptor(AddCustomColumnDescriptorEvent<D> event) {
-        final FormView formView = new DefaultFormView("AddCustomColumnDescriptorForm");
-        final FormConfiguration formConfiguration = new FormConfiguration();
-        formConfiguration.setName("Form");
-        final AddCustomColumnDescriptorForm<D> form = new AddCustomColumnDescriptorForm<D>(formConfiguration, formView, complexListConfiguration.getClas());
-        final PSimplePanel windowContent = new PSimplePanel();
-        form.start(windowContent);
-        PConfirmDialog.show("Add custom column", windowContent, "Ok", "Cancel", new PConfirmDialogHandler() {
+    public void onShowCustomColumnDescriptorForm(ShowCustomColumnDescriptorFormEvent event) {
+        columnDescriptorFormHandler.onShowCustomColumnDescriptorForm(event);
 
-            @Override
-            public boolean onOK(PDialogBox dialogBox) {
-                if (form.isValid()) {
-                    final ListColumnDescriptor<D, Object> columnDescriptor = new ListColumnDescriptor<D, Object>();
-                    final ComplexHeaderCellRenderer headerCellRenderer = new ComplexHeaderCellRenderer(form.getCaption(), new FormField(), form.getFieldPath());
-                    columnDescriptor.setHeaderCellRenderer(headerCellRenderer);
-                    columnDescriptor.setValueProvider(new BeanValueProvider<D, Object>(form.getFieldPath()) {
+    }
 
-                        @Override
-                        public Object getValue(D data) {
-                            return super.getValue(data);
-                        };
-                    });
-                    addCustomDescriptor(columnDescriptor);
-                    return true;
+    private class SHowCustomColumnDescriptorFormHandlerImpl implements ShowCustomColumnDescriptorFormHandler {
+
+        @Override
+        public void onShowCustomColumnDescriptorForm(ShowCustomColumnDescriptorFormEvent event) {
+            final FormView formView = new DefaultFormView("AddCustomColumnDescriptorForm");
+            final FormConfiguration formConfiguration = new FormConfiguration();
+            formConfiguration.setName("Form");
+            final AddCustomColumnDescriptorForm form = new AddCustomColumnDescriptorForm(formConfiguration, formView, complexListConfiguration.getClas(), ComplexListActivity.this);
+            final PSimplePanel windowContent = new PSimplePanel();
+            form.start(windowContent);
+            PConfirmDialog.show("Add custom column", windowContent, "Ok", "Cancel", new PConfirmDialogHandler() {
+
+                @Override
+                public boolean onOK(PDialogBox dialogBox) {
+                    if (form.isValid()) {
+                        Class<?> fieldType = form.getFieldType();
+                        String fieldPath = form.getFieldPath();
+                        String caption = form.getCaption();
+                        onAddCustomColumnDescriptor(new AddCustomColumnDescriptorEvent(ComplexListActivity.this, new ColumnDescriptorFieldHolder(caption, fieldPath, fieldType, complexListConfiguration.getTableName())));
+                        eventBus.fireEvent(new PreferenceChangedEvent(ComplexListActivity.this));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
 
-            @Override
-            public void onCancel() {}
-        });
-        eventBus.fireEvent(new AddCustomColumnDescriptorEvent<D>(this));
+                @Override
+                public void onCancel() {}
+            });
+        }
+
+    }
+
+    private void rebuildSimpleList() {
+        if (findResult != null) {
+            simpleListActivity.rebuild(listColumnDescriptors, findResult.getData());
+        } else simpleListActivity.rebuild(listColumnDescriptors, null);
     }
 
     @Override
-    public void onRemoveColumnDescriptor(RemoveColumnDescriptorEvent event) {
-
+    public void onShowColumnDescriptor(ShowColumnDescriptorEvent event) {
+        descriptorsByCaption.get(event.getKey()).setViewable(event.isShow());
+        rebuildSimpleList();
+        ColumnDescriptorShownEvent showColumnDescriptorEvent = new ColumnDescriptorShownEvent(this, event.getKey(), event.isShow(), complexListConfiguration.getTableName());
+        eventBus.fireEvent(showColumnDescriptorEvent);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onMoveColumn(MoveColumnDescriptorEvent event) {
+        if (event.getSource() != this && event.getTableName() != null && event.getTableName().equals(complexListConfiguration.getTableName())) {
+            final List<String> caption = event.getColumnOrder();
+            listColumnDescriptors.removeAll(new ArrayList<ListColumnDescriptor<D, ?>>(listColumnDescriptors.subList(beforeIndex + 1, listColumnDescriptors.size())));
+            for (final String c : caption) {
+                final ListColumnDescriptor<?, ?> listColumnDescriptor = descriptorsByCaption.get(c);
+                listColumnDescriptors.add((ListColumnDescriptor<D, ?>) listColumnDescriptor);
+            }
+            descriptorsByCaption.clear();
+            for (int i = (beforeIndex + 1); i < listColumnDescriptors.size(); i++) {
+                final ListColumnDescriptor<D, ?> d = listColumnDescriptors.get(i);
+                descriptorsByCaption.put(d.getCaption(), d);
+            }
+            rebuildSimpleList();
+            eventBus.fireEvent(new ColumnDescriptorMovedEvent(this, event.getColumnOrder(), event.getTableName()));
+        }
+    }
+
+    @Override
+    public void onRemoveColumn(RemoveColumnDescriptorEvent event) {
+        final String caption = event.getCaption();
+        final ListColumnDescriptor<?, ?> columnDescriptorToBeRemoved = descriptorsByCaption.remove(caption);
+        listColumnDescriptors.remove(columnDescriptorToBeRemoved);
+        rebuildSimpleList();
+        ColumnDescriptorRemovedEvent removeColumnEvent = new ColumnDescriptorRemovedEvent(this, caption, event.getTableName());
+        customDescriptorHolderByCaption.remove(caption);
+        eventBus.fireEvent(removeColumnEvent);
+    }
+
+    public Map<String, ListColumnDescriptor<?, ?>> getDescriptorsByCaption() {
+        return descriptorsByCaption;
+    }
+
+    public Map<String, ColumnDescriptorFieldHolder> getCustomDescriptorHolderByCaption() {
+        return customDescriptorHolderByCaption;
+    }
+
+    @Override
+    public void onAddCustomColumnDescriptor(AddCustomColumnDescriptorEvent event) {
+        FormField formField;
+        Class<?> fieldType = event.getDescriptorHolder().getFieldType();
+        String caption = event.getDescriptorHolder().getCaption();
+        String fieldPath = event.getDescriptorHolder().getFieldPath();
+        if (fieldType.equals(Boolean.class)) {
+            ListBoxFormFieldRenderer formFieldRenderer = new ListBoxFormFieldRenderer();
+            formFieldRenderer.addItem(Boolean.TRUE.toString(), Boolean.TRUE);
+            formFieldRenderer.addItem(Boolean.FALSE.toString(), Boolean.FALSE);
+            formField = new FormField(formFieldRenderer);
+        } else if (fieldType.equals(Date.class)) {
+            formField = new FormField(new DateBoxFormFieldRenderer());
+        } else if (fieldType.equals(Integer.class)) {
+            formField = new FormField() {
+
+                @Override
+                public Object getValue() {
+                    if (super.getValue() != null) return getIntegerValue();
+                    return null;
+                }
+            };
+        } else if (fieldType.equals(Long.class)) {
+            formField = new FormField() {
+
+                @Override
+                public Object getValue() {
+                    if (super.getValue() != null) return getLongValue();
+                    return null;
+                }
+            };
+        } else if (fieldType.equals(Double.class)) {
+            formField = new FormField() {
+
+                @Override
+                public Object getValue() {
+                    if (super.getValue() != null) return getDoubleValue();
+                    return null;
+                }
+            };
+        } else formField = new FormField();
+        final ComplexHeaderCellRenderer headerCellRenderer = new ComplexHeaderCellRenderer(caption, formField, fieldPath);
+        final ListColumnDescriptor<D, Object> columnDescriptor = new ListColumnDescriptor<D, Object>();
+        columnDescriptor.setHeaderCellRenderer(headerCellRenderer);
+        columnDescriptor.setCustom(true);
+        columnDescriptor.setValueProvider(new BeanValueProvider<D, Object>(fieldPath));
+        addDescriptor(columnDescriptor);
+        registerSearchCriteria(new CriterionField(fieldPath), formField);
+        ColumnDescriptorFieldHolder descriptorHolder = new ColumnDescriptorFieldHolder(caption, fieldPath, fieldType, complexListConfiguration.getTableName());
+        customDescriptorHolderByCaption.put(caption, descriptorHolder);
+        rebuildSimpleList();
+        eventBus.fireEvent(new CustomColumnDescriptorAddedEvent(ComplexListActivity.this, descriptorHolder));
+    }
+
+    public void setColumnDescriptorFormHandler(ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler) {
+        this.columnDescriptorFormHandler = columnDescriptorFormHandler;
+    }
+
 }

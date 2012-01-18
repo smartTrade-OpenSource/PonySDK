@@ -71,19 +71,18 @@ jar {
 	baseName = 'ponysdk'
 	doLast {
 		tasks.jarSource.execute()
-		tasks.jarStandalone.execute()
 	}
-	into('conf') {
-		from confResources
-	}
-	into('images') {
-		from warResources + '/images'
-	}
-	into('css') {
-		from warResources + '/css'
-	}
-	metaInf {
+    
+    from sourceSets.main.classes
+    from gwtOutputDirName
+    from warResources
+    
+    metaInf {
         from 'src-core/main/resources/META-INF'
+    }
+    
+    into('conf') {
+        from confResources
     }
 }
 
@@ -146,30 +145,6 @@ task jarSource(type: Jar){
 		include '*.xml'
 	}
 }
-
-task jarStandalone(type: Jar){
-	baseName = 'ponysdk-standalone'
-	from sourceSets.main.classes
-	from gwtOutputDirName
-	from warResources
-	
-	metaInf {
-        from 'src-core/main/resources/META-INF'
-    }
-	
-	into('conf') {
-		from confResources
-	}
-}
-
-task zipStarter(type: Zip) {
-	archiveName = 'starter.zip'
-	from jarStandalone.outputs.files
-	into('libs') {
-		from configurations.runtime
-	}
-}
-
 
 clean.dependsOn(cleanGenerate)
 compileJava.dependsOn(generate)

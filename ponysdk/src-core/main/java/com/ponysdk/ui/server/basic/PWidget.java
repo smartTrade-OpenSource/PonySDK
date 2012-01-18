@@ -20,6 +20,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.HandlerType;
@@ -225,6 +226,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
             case MOUSE_OVER:
                 fireEvent(new PMouseOverEvent(this));
                 break;
+			case MOUSE_OUT:
+				fireEvent(new PMouseOutEvent(this));
+				break;
             default:
                 log.error("Dom Handler not implemented: " + domHandler);
                 break;

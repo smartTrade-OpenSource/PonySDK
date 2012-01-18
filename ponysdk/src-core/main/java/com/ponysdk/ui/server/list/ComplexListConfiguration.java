@@ -35,6 +35,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
     private boolean searchFormMustBeValid;
     private boolean customColumnEnabled;
     private Class<T> clas;
+	private boolean showPreferences;
 
     public boolean isSearchFormMustBeValid() {
         return searchFormMustBeValid;
@@ -108,5 +109,13 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
     public Class<T> getClas() {
         return clas;
     }
+
+	public void setShowPreferences(boolean showPreferences) {
+		this.showPreferences = showPreferences;
+	}
+
+	public boolean isShowPreferences() {
+		return showPreferences;
+	}
 
 }

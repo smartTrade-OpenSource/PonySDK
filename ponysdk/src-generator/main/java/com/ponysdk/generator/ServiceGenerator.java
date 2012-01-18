@@ -195,6 +195,7 @@ public class ServiceGenerator extends BaseGenerator {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServicePackage(domain), className);
 
         classWriter.setInterface(true);
+        classWriter.addExtend("com.ponysdk.core.service.PonyService");
 
         if (domain.getService() != null) {
             for (final Method method : domain.getService().getMethod()) {
@@ -235,13 +236,21 @@ public class ServiceGenerator extends BaseGenerator {
 
         classWriter.addLine("public static " + GeneratorHelper.getRemoteServiceImplClassName(domain) + " getInstance() {");
         classWriter.indentBlock();
-        classWriter.addLine("if (INSTANCE == null) INSTANCE = new " + GeneratorHelper.getRemoteServiceImplClassName(domain) + "();");
-        classWriter.addLine("this.service = com.ponysdk.core.service.PonyServiceRegistry.getPonyService(" + GeneratorHelper.getServiceFullClassName(domain) + ".class);");
+        classWriter.addLine("if (INSTANCE == null){");
+        classWriter.addLine("try{");
+        classWriter.addLine("INSTANCE = new " + GeneratorHelper.getRemoteServiceImplClassName(domain) + "();");
+        classWriter.addLine("} catch (final Exception e) {");
+        classWriter.addLine("log.error(\"Cannot instanciate \"+" + GeneratorHelper.getRemoteServiceImplClassName(domain) + ".class, e);");
+        classWriter.addLine("throw new RuntimeException(e);");
+        classWriter.addLine("}");
+        classWriter.addLine("}");
         classWriter.addLine("return INSTANCE;");
         classWriter.unindentBlock();
         classWriter.addLine("}");
 
-        classWriter.addNewLine();
+        classWriter.addLine("private " + GeneratorHelper.getRemoteServiceImplClassName(domain) + "() throws Exception {");
+        classWriter.addLine("this.service = com.ponysdk.core.service.PonyServiceRegistry.getPonyService(" + GeneratorHelper.getServiceFullClassName(domain) + ".class);");
+        classWriter.addLine("}");
 
         // Build methods
         if (domain.getService() != null) {
