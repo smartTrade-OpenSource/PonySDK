@@ -541,7 +541,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     public void addDescriptor(ListColumnDescriptor<D, ?> customDescriptor) {
-        simpleListActivity.addDescriptor(customDescriptor);
         listColumnDescriptors.add(customDescriptor);
         descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
     }
@@ -549,7 +548,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public void addDescriptor(int index, ListColumnDescriptor<D, ?> customDescriptor) {
         if (index > listColumnDescriptors.size() || index < 0) { throw new RuntimeException("Cannot add column#" + customDescriptor.getCaption() + " index out of bound"); }
         listColumnDescriptors.add(index, customDescriptor);
-        simpleListActivity.addDescriptor(customDescriptor);
         descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
     }
 
@@ -700,6 +698,23 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         for (int i = 0; i < rowSelectors.size(); i++) {
             final PCheckBox rowSelector = rowSelectors.get(i);
             if (rowSelector.getValue()) {
+                selectedData.add(data.get(i));
+            }
+        }
+
+        final SelectionResult<D> selectionResult = new SelectionResult<D>(selectionMode, selectedData);
+        return selectionResult;
+    }
+
+    public SelectionResult<D> getSelectedAndEnabledData() {
+        if (!complexListConfiguration.isSelectionColumnEnabled()) { return new SelectionResult<D>(SelectionMode.FULL, new ArrayList<D>()); }
+
+        final List<D> data = simpleListActivity.getData();
+        final List<D> selectedData = new ArrayList<D>();
+
+        for (int i = 0; i < rowSelectors.size(); i++) {
+            final PCheckBox rowSelector = rowSelectors.get(i);
+            if (rowSelector.getValue() && rowSelector.isEnabled()) {
                 selectedData.add(data.get(i));
             }
         }

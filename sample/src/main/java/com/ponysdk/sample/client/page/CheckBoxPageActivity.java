@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PCheckBox;
@@ -35,7 +36,7 @@ public class CheckBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
         final PVerticalPanel verticalPanel = new PVerticalPanel();
-        verticalPanel.setSizeFull();
+        // verticalPanel.setSizeFull();
 
         verticalPanel.add(new PCheckBox("Pony-SDK 1"));
         verticalPanel.add(new PCheckBox("Pony-SDK 2"));

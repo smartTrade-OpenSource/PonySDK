@@ -20,43 +20,45 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
+import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
 
 public class SamplePageActivity extends PageActivity {
 
     private PTabPanel tabPanel;
-    protected PSimplePanel examplePanel;
-    protected PSimplePanel codePanel;
+
+    protected PSimpleLayoutPanel examplePanel;
+
+    protected PSimpleLayoutPanel codePanel;
 
     public SamplePageActivity(String pageName, String pageCategory) {
         super(pageName, pageCategory);
+        setPageView(new DefaultPageView());
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
         tabPanel = new PTabPanel();
-        tabPanel.setSizeFull();
 
-        examplePanel = new PSimplePanel();
-        tabPanel.add(examplePanel, "Example");
-        codePanel = new PSimplePanel();
+        examplePanel = new PSimpleLayoutPanel();
+
+        tabPanel.add(examplePanel, "Zozo");
+        codePanel = new PSimpleLayoutPanel();
         tabPanel.add(codePanel, "Source Code");
 
         pageView.getBody().setWidget(tabPanel);

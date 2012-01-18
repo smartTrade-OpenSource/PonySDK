@@ -104,6 +104,10 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         applicationActivity.goTo(place);
     }
 
+    protected boolean isShown() {
+        return equals(currentPage);
+    }
+
     public String getPageName() {
         return pageName;
     }
