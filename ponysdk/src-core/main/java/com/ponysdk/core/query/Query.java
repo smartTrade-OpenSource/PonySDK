@@ -24,9 +24,7 @@
 package com.ponysdk.core.query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Query {
 
@@ -40,7 +38,9 @@ public class Query {
 
     private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola avoid to breaking existing queries
 
-    private final Map<String, CriterionField> criteria = new HashMap<String, CriterionField>();
+    private final List<CriterionField> criteria = new ArrayList<CriterionField>();
+
+    // private final Map<String, CriterionField> criteria = new HashMap<String, CriterionField>();
 
     public Query() {
         super();
@@ -55,11 +55,11 @@ public class Query {
     }
 
     public void addCriterion(CriterionField criteriField) {
-        criteria.put(criteriField.getPojoProperty(), criteriField);
+        criteria.add(criteriField);
     }
 
     public List<CriterionField> getCriteria() {
-        return new ArrayList<CriterionField>(criteria.values());
+        return criteria;
     }
 
     public void setCriteria(List<CriterionField> criteria) {
@@ -69,7 +69,11 @@ public class Query {
     }
 
     public CriterionField getCriterion(String pojoProperty) {
-        return this.criteria.get(pojoProperty);
+        // temp return a list
+        for (CriterionField criterion : criteria) {
+            if (criterion.getPojoProperty().equals(pojoProperty)) return criterion;
+        }
+        return null;
     }
 
     public void setPageSize(int pageSize) {

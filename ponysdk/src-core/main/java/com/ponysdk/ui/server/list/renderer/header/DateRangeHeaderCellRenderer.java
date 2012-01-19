@@ -18,6 +18,7 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
+import com.ponysdk.ui.server.form.FormField.ResetHandler;
 import com.ponysdk.ui.server.form.renderer.DateBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
@@ -64,6 +65,23 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
                 eventBus.fireEvent(refreshListEvent);
             }
         };
+
+        from.addResetHandler(new ResetHandler() {
+
+            @Override
+            public void onReset() {
+                updateMainFormField();
+            }
+        });
+
+        to.addResetHandler(new ResetHandler() {
+
+            @Override
+            public void onReset() {
+                updateMainFormField();
+            }
+        });
+
         from.addDomHandler(handler, PKeyUpEvent.TYPE);
         to.addDomHandler(handler, PKeyUpEvent.TYPE);
 

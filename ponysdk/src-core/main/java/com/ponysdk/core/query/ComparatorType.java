@@ -36,6 +36,13 @@ public enum ComparatorType {
 
     private static final Map<String, ComparatorType> comparatorTypeByName = new HashMap<String, ComparatorType>();
 
+    static {
+        for (ComparatorType comparatorType : ComparatorType.values()) {
+            names.put(comparatorType, comparatorType.getName());
+            comparatorTypeByName.put(comparatorType.getName(), comparatorType);
+        }
+    }
+
     private ComparatorType(String name) {
         this.name = name;
     }
@@ -45,12 +52,6 @@ public enum ComparatorType {
     }
 
     public static Collection<String> getNames() {
-        if (names.isEmpty()) {
-            for (ComparatorType comparatorType : ComparatorType.values()) {
-                names.put(comparatorType, comparatorType.getName());
-            }
-        }
-
         return names.values();
     }
 

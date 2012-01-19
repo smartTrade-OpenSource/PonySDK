@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form;
 
 import java.util.ArrayList;
@@ -36,7 +37,15 @@ import com.ponysdk.ui.server.form.validator.ValidationResult;
 public class FormField {
 
     private final List<FieldValidator> validators = new ArrayList<FieldValidator>();
+
+    private final List<ResetHandler> resetHandlers = new ArrayList<ResetHandler>();
+
     private final FormFieldRenderer formFieldRenderer;
+
+    public interface ResetHandler {
+
+        void onReset();
+    }
 
     public FormField() {
         this.formFieldRenderer = new TextBoxFormFieldRenderer();
@@ -57,8 +66,7 @@ public class FormField {
     public boolean isValid() {
         clearErrorMessage();
 
-        if (validators.isEmpty())
-            return true;
+        if (validators.isEmpty()) return true;
 
         boolean valid = true;
 
@@ -75,6 +83,9 @@ public class FormField {
 
     public void reset() {
         formFieldRenderer.reset();
+        for (ResetHandler resetHandler : resetHandlers) {
+            resetHandler.onReset();
+        }
     }
 
     public IsPWidget render() {
@@ -139,5 +150,9 @@ public class FormField {
 
     public <H extends EventHandler> void addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         formFieldRenderer.addDomHandler(handler, type);
+    }
+
+    public void addResetHandler(ResetHandler handler) {
+        resetHandlers.add(handler);
     }
 }

@@ -179,7 +179,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
 
     @Override
     public Collection<PValueChangeHandler<Date>> getValueChangeHandlers() {
-        return null;
+        return valueChangeHandlers;
     }
 
     @Override

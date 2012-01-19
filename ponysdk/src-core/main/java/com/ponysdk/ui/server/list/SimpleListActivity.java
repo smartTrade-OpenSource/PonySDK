@@ -76,15 +76,15 @@ public class SimpleListActivity<T> extends AbstractActivity {
         listView.addCellStyle(0, colCount + 1, PonySDKTheme.FILL_COLUMN);
 
         int rowIndex = 1;
-		if (data != null) {
-        for (final T t : data) {
-            final IsPWidget renderCell = customDescriptor.renderCell(rowIndex, t);
-            listView.addWidget(renderCell, colCount, rowIndex);
-            listView.removeCellStyle(rowIndex, colCount - 1, PonySDKTheme.FILL_COLUMN);
-            listView.addCellStyle(rowIndex, colCount, PonySDKTheme.FILL_COLUMN);
-            rowIndex++;
+        if (data != null) {
+            for (final T t : data) {
+                final IsPWidget renderCell = customDescriptor.renderCell(rowIndex, t);
+                listView.addWidget(renderCell, colCount, rowIndex);
+                listView.removeCellStyle(rowIndex, colCount - 1, PonySDKTheme.FILL_COLUMN);
+                listView.addCellStyle(rowIndex, colCount, PonySDKTheme.FILL_COLUMN);
+                rowIndex++;
+            }
         }
-		}
         if (customDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
             ((EventBusAware) customDescriptor.getHeaderCellRenderer()).setEventBus(eventBus);
         }
@@ -99,7 +99,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         // listView.insertRow(0);
 
         for (final ListColumnDescriptor<T, ?> field : listFields) {
-            if (field.isViewable()){
+            if (field.isViewable()) {
                 listView.addWidget(field.renderHeader(), colCount, 0);
                 if (field.getWidth() != null) {
                     listView.setColumnWidth(colCount, field.getWidth());
@@ -110,7 +110,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         final PSimplePanel widget = new PSimplePanel();
         listView.addWidget(widget, colCount, 0);
         listView.addCellStyle(0, colCount, PonySDKTheme.FILL_COLUMN);
-		listView.addHeaderStyle("pony-ComplexList-ColumnHeader");
+        listView.addHeaderStyle("pony-ComplexList-ColumnHeader");
     }
 
     public void rebuild(List<ListColumnDescriptor<T, ?>> listFields, List<T> data) {
@@ -118,8 +118,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         this.listView.removeRow(0);
         this.listFields = listFields;
         buildHeaders();
-		if (data != null)
-			setData(data);
+        if (data != null) setData(data);
     }
 
     private void reset() {
@@ -137,8 +136,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
             int col = 0;
             // listView.insertRow(rowCount);
             for (final ListColumnDescriptor<T, ?> field : listFields) {
-				if (!field.isViewable())
-					continue;
+                if (!field.isViewable()) continue;
                 final IsPWidget renderCell = field.renderCell(rowIndex, t);
 
                 if (debugID != null) {
@@ -166,6 +164,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
             listView.addRowStyle(subRow, PonySDKTheme.SIMPLELIST_SUBROW);
             int col = 0;
             for (final ListColumnDescriptor<T, ?> field : listFields) {
+                if (!field.isViewable()) continue;
                 listView.addWidget(field.renderSubCell(subRow, data), col++, subRow);
             }
             subRow++;

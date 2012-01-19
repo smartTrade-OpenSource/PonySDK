@@ -779,7 +779,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             enableRowCheckBox(row, enabled);
         }
-        this.simpleListActivity.selectRow(row);
     }
 
     public void unSelectRow(int row) {

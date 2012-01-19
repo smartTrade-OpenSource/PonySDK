@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,7 @@ import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
-import com.ponysdk.ui.server.form.renderer.DateBoxFormFieldRenderer;
+import com.ponysdk.ui.server.form.renderer.DateTimeBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.list.ComplexListActivity;
 import com.ponysdk.ui.server.list.ComplexListCommandFactory;
@@ -85,6 +86,10 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     private CriterionField nameCriterion;
 
     private FormField ageField;
+
+    private FormField field1;
+
+    private FormField field2;
 
     public ComplexListPageActivity() {
         super("Complex List", "Rich UI Components");
@@ -176,6 +181,8 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
             };
         });
 
+        complexListActivity.registerSearchCriteria(new CriterionField("AZ"), field1);
+        complexListActivity.registerSearchCriteria(new CriterionField("AD"), field2);
         complexListActivity.registerSearchCriteria(nameCriterion, nameField);
         complexListActivity.registerSearchCriteria(new CriterionField("age"), ageField);
         complexListActivity.start(listPanel);
@@ -237,10 +244,13 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
         final ListColumnDescriptor<ComplexListPageActivity.Pony, String> nameColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>();
 
-        FormField field1 = new FormField(new DateBoxFormFieldRenderer());
-        FormField field2 = new FormField(new DateBoxFormFieldRenderer());
+        field1 = new FormField(new DateTimeBoxFormFieldRenderer());
+        field2 = new FormField(new DateTimeBoxFormFieldRenderer());
 
-        nameColumnDescriptor.setHeaderCellRenderer(new DateRangeHeaderCellRenderer("Caption", field1, field2, ""));
+        DateRangeHeaderCellRenderer headerCellRender = new DateRangeHeaderCellRenderer("Caption", field1, field2, "");
+        headerCellRender.setDateFormat(new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss"));
+
+        nameColumnDescriptor.setHeaderCellRenderer(headerCellRender);
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
         listColumnDescriptors.add(nameColumnDescriptor);
 

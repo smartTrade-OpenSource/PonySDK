@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.FormField;
+import com.ponysdk.ui.server.form.FormField.ResetHandler;
 import com.ponysdk.ui.server.list.event.ComparatorTypeChangeEvent;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
 import com.ponysdk.ui.server.list.event.SortColumnEvent;
@@ -68,7 +69,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
     }
 
     public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey) {
-        this(caption, new FormField(), pojoPropertyKey, false);
+        this(caption, formField, pojoPropertyKey, false);
     }
 
     public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey, boolean enableComparatorType) {
@@ -101,7 +102,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
         subPanel.add(formField.render().asWidget());
 
         if (enableComparatorType) {
-            final PListBox listBox = new PListBox();
+            final PListBox listBox = new PListBox(false, false);
 
             // for (String comparatorTypeName : ComparatorType.getNames()) {
             // listBox.addItem(comparatorTypeName);
@@ -123,6 +124,15 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
             });
 
             subPanel.add(listBox);
+
+            formField.addResetHandler(new ResetHandler() {
+
+                @Override
+                public void onReset() {
+                    listBox.setSelectedIndex(0);
+                }
+            });
+
         }
 
         formField.addDomHandler(new PKeyUpFilterHandler(KEY_ENTER) {
