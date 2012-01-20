@@ -1,7 +1,8 @@
 build
 src-generated
 /.gradle
-/.settings
+.settings
 bin
+classes
 /.classpath
-/.project
+libs

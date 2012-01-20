@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
 
 sourceCompatibility = 1.6
 
@@ -37,6 +36,18 @@ repositories {
 configurations {
 	xjc
 	gwt
+	spring
+	sl4j
+	hibernate
+	jasper
+	
+	compile {
+		extendsFrom gwt, spring, sl4j, hibernate, jasper
+	}
+	
+	runtime {
+		extendsFrom spring, sl4j, hibernate
+	}
 }
 
 dependencies {
@@ -44,23 +55,12 @@ dependencies {
 	gwt 'com.google.gwt:gwt-user:2.4.0'
 	gwt 'com.google.gwt:gwt-dev:2.4.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
-	
-	compile(
-		'com.google.gwt:gwt-user:2.4.0',
-		'org.springframework:spring-context:3.0.6.RELEASE',
-		'org.springframework:spring-web:3.0.6.RELEASE',
-		'org.slf4j:slf4j-api:1.6.2',
-		'org.hibernate:hibernate-core:3.6.7.Final',
-		'ar.com.fdvs:DynamicJasper:3.0.13',
-		'com.google.gwt:gwt-dev:2.4.0'
-    )
-	runtime(
-		'org.springframework:spring-context:3.0.6.RELEASE',
-		'org.springframework:spring-web:3.0.6.RELEASE',
-		'org.slf4j:slf4j-api:1.6.2',
-		'org.hibernate:hibernate-core:3.6.7.Final',
-		'ch.qos.logback:logback-classic:1.0.0'
-	)
+	spring 'org.springframework:spring-context:3.0.6.RELEASE'
+	spring 'org.springframework:spring-web:3.0.6.RELEASE'
+	sl4j 'org.slf4j:slf4j-api:1.6.2'
+	sl4j 'ch.qos.logback:logback-classic:1.0.0'
+	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
+	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 }
 
 manifest {
@@ -146,7 +146,31 @@ task jarSource(type: Jar){
 	}
 }
 
+task copyAllLibs << {
+	println 'Copying all libs'
+	copy {
+		from configurations.gwt
+		into 'libs/gwt'
+	}
+	copy {
+		from configurations.spring
+		into 'libs/spring'
+	}
+	copy {
+		from configurations.sl4j
+		into 'libs/logging'
+	}
+	copy {
+		from configurations.hibernate
+		into 'libs/hibernate'
+	}
+	copy {
+		from configurations.jasper
+		into 'libs/jasper'
+	}
+}
+
 clean.dependsOn(cleanGenerate)
 compileJava.dependsOn(generate)
 jar.dependsOn(gwtc)
-
+assemble.dependsOn(copyAllLibs)

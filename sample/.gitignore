@@ -1,6 +1,6 @@
 build
 .gradle
-/.project
-/.settings
 bin
+classes
 /.classpath
+log

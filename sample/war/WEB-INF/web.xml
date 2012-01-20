@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+	<listener>
+		<listener-class>com.ponysdk.core.service.ApplicationLoader</listener-class>
+	</listener>
+	
+	<context-param>
+		<param-name>applicationName</param-name>
+		<param-value>PonySDK Sample</param-value>
+	</context-param>
+	<context-param>
+		<param-name>applicationDescription</param-name>
+		<param-value>PonySDK Sample</param-value>
+	</context-param>
+	
+	<servlet>
+		<servlet-name>PonyEngineServlet</servlet-name>
+		<servlet-class>com.ponysdk.spring.SpringPonyEngineServiceImpl</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>StreamServiceServlet</servlet-name>
+		<servlet-class>com.ponysdk.core.StreamServiceServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>PonyBootstrapServlet</servlet-name>
+		<servlet-class>com.ponysdk.core.PonyBootstrapServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>PonyEngineServlet</servlet-name>
+		<url-pattern>/ponyterminal/p</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>StreamServiceServlet</servlet-name>
+		<url-pattern>/ponyterminal/stream</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>PonyBootstrapServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+</web-app>
+
