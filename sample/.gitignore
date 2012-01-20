@@ -4,3 +4,4 @@ bin
 classes
 /.classpath
 log
+gwt-unitCache
