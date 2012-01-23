@@ -37,6 +37,7 @@ public class TimerPageActivity extends PageActivity {
     protected long time = 0;
 
     protected PTimer currentTimer;
+    protected PTimer timer;
 
     private PVerticalPanel verticalPanel;
 
@@ -59,14 +60,15 @@ public class TimerPageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
+        
         verticalPanel = new PVerticalPanel();
         final PLabel label = new PLabel("0");
         verticalPanel.add(label);
 
-        final PTextBox textBox = new PTextBox();
+        final PTextBox textBox = new PTextBox("1000");
 
-        final PButton scheduleButton = new PButton("Schedule");
-        scheduleButton.addClickHandler(new PClickHandler() {
+        final PButton scheduleRepeatingButton = new PButton("Schedule repeating");
+        scheduleRepeatingButton.addClickHandler(new PClickHandler() {
             @Override
             public void onClick(PClickEvent clickEvent) {
                 if (currentTimer != null) {
@@ -84,6 +86,26 @@ public class TimerPageActivity extends PageActivity {
             }
         });
         verticalPanel.add(textBox);
+        verticalPanel.add(scheduleRepeatingButton);
+        
+        timer = new PTimer() {
+
+            @Override
+            public void run() {
+                time++;
+                label.setText("Timer executed" + time);
+            }
+        };
+        
+        PButton scheduleButton = new PButton("Schedule");
+        scheduleButton.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(PClickEvent clickEvent) {
+                label.setText("Timer scheduled....");
+                timer.schedule(Integer.valueOf(textBox.getText()));
+            }
+        });
         verticalPanel.add(scheduleButton);
     }
 }

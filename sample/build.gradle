@@ -2,9 +2,6 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-warPath = buildDir.name + '/war'
-runtimeLibPath = buildDir.name + '/runtime-lib'
-
 repositories {
 	mavenCentral()
 }
@@ -13,3 +10,6 @@ dependencies {
 	compile project(':ponysdk')
 }
 
+task cleanDebug(type: Delete) {
+  delete 'war/ponyterminal', 'war/WEB-INF/deploy'
+}

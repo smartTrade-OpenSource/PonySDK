@@ -24,6 +24,8 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.Timer;
 import com.ponysdk.ui.terminal.HandlerType;
+import com.ponysdk.ui.terminal.Property;
+import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
@@ -53,7 +55,9 @@ public class PTTimer extends PTObject {
 
     @Override
     public void update(Update update, UIService uiService) {
-        timer.scheduleRepeating(update.getMainProperty().getIntValue());
+        Property property = update.getMainProperty();
+        if(property.getKey().equals(PropertyKey.REPEATING_DELAY)) timer.scheduleRepeating(update.getMainProperty().getIntValue());
+        else timer.schedule(update.getMainProperty().getIntValue());
     }
 
     @Override

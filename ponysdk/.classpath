@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="src-core/main/java/|src-core/main/java/|src-defaultimpl/main/java/|src-defaultimpl/main/java/|src-generated/main/java/|src-generated/main/java/|src-generator/main/java/|src-generator/main/java/|src-hibernate/main/java/|src-hibernate/main/java/|src-jasper/main/java/|src-jasper/main/java/|src-jetty/main/java/|src-jetty/main/java/|src-spring/main/java/|src-spring/main/java/|build/|libs/" kind="src" path=""/>
 	<classpathentry kind="src" path="src-core/main/java"/>
 	<classpathentry kind="src" path="src-defaultimpl/main/java"/>
 	<classpathentry kind="src" path="src-generated/main/java"/>

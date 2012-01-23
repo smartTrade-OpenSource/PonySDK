@@ -39,6 +39,12 @@ public abstract class PTimer extends PObject {
 
     public void scheduleRepeating(int delayMillis) {
         final Update update = new Update(ID);
+        update.setMainPropertyValue(PropertyKey.REPEATING_DELAY, delayMillis);
+        PonySession.getCurrent().stackInstruction(update);
+    }
+    
+    public void schedule(int delayMillis) {
+        final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.DELAY, delayMillis);
         PonySession.getCurrent().stackInstruction(update);
     }

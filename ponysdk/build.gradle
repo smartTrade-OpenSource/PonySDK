@@ -109,10 +109,6 @@ task generate {
 	}
 }
 
-task cleanGwtc << {
-	new File(gwtOutputDirName).deleteDir();
-}
-
 task gwtc(type: JavaExec) {
 	description = 'GWT compile'
 	main = 'com.google.gwt.dev.Compiler'
@@ -120,7 +116,7 @@ task gwtc(type: JavaExec) {
 	workingDir = buildDir
 	workers = Runtime.getRuntime().availableProcessors()
 	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
-	inputs.dir file('src-core/main/java')
+	inputs.dir file('src-core/main/java/com/ponysdk/ui/terminal')
 	outputs.dir file(gwtOutputDirName)
 	classpath {
 		[
