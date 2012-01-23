@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="src-core/main/java/|src-core/main/java/|src-defaultimpl/main/java/|src-defaultimpl/main/java/|src-generated/main/java/|src-generated/main/java/|src-generator/main/java/|src-generator/main/java/|src-hibernate/main/java/|src-hibernate/main/java/|src-jasper/main/java/|src-jasper/main/java/|src-jetty/main/java/|src-jetty/main/java/|src-spring/main/java/|src-spring/main/java/|build/|libs/" kind="src" path=""/>
+	<classpathentry kind="src" path="src-core/main/java"/>
+	<classpathentry kind="src" path="src-defaultimpl/main/java"/>
+	<classpathentry kind="src" path="src-generated/main/java"/>
+	<classpathentry kind="src" path="src-generator/main/java"/>
+	<classpathentry kind="src" path="src-hibernate/main/java"/>
+	<classpathentry kind="src" path="src-jasper/main/java"/>
+	<classpathentry kind="src" path="src-jetty/main/java"/>
+	<classpathentry kind="src" path="src-spring/main/java"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-dev-2.4.0.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.4.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/spring/spring-context-3.0.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="libs/spring/spring-beans-3.0.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="libs/spring/spring-core-3.0.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="libs/jasper/DynamicJasper-3.0.13.jar"/>
+	<classpathentry kind="lib" path="libs/jasper/jasperreports-3.5.1.jar"/>
+	<classpathentry kind="lib" path="libs/hibernate/hibernate-core-3.6.7.Final.jar"/>
+	<classpathentry kind="lib" path="libs/spring/spring-web-3.0.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="libs/logging/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
