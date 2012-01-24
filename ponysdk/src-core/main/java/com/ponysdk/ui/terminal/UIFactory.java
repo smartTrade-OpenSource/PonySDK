@@ -24,7 +24,6 @@
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
-import com.ponysdk.ui.server.basic.PTRichTextArea;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
@@ -47,6 +46,7 @@ import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
 import com.ponysdk.ui.terminal.ui.PTRadioButton;
+import com.ponysdk.ui.terminal.ui.PTRichTextArea;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 import com.ponysdk.ui.terminal.ui.PTSimpleLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
@@ -128,7 +128,7 @@ public class UIFactory {
                 return new PTTimer();
             case COMPOSITE:
                 return new PTComposite();
-            case RICH_TEXTAREA:
+            case RICH_TEXT_AREA:
                 return new PTRichTextArea();
             case FLOW_PANEL:
                 return new PTFlowPanel();

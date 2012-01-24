@@ -78,5 +78,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.RichTextAreaPageActivity" />
 
 </beans>

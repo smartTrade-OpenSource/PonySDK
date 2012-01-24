@@ -21,19 +21,27 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
-import com.ponysdk.ui.terminal.ui.PTFocusWidget;
 
-public class PTRichTextArea extends PTFocusWidget {
+public class PTRichTextArea extends PTWidget {
 
-    public PTRichTextArea() {
-        init(new RichTextArea());
+    private RichTextArea richTextArea;
+
+    @Override
+    public void create(Create create, UIService uiService) {
+        this.richTextArea = new RichTextArea();
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(new RichTextToolbar(richTextArea));
+        panel.add(richTextArea);
+        init(panel);
     }
 
     @Override
@@ -42,15 +50,11 @@ public class PTRichTextArea extends PTFocusWidget {
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
         if (PropertyKey.HTML.equals(propertyKey)) {
-            cast().setHTML(property.getValue());
+            richTextArea.setHTML(property.getValue());
             return;
         }
 
         super.update(update, uiService);
     }
 
-    @Override
-    public RichTextArea cast() {
-        return (RichTextArea) uiObject;
-    }
 }
