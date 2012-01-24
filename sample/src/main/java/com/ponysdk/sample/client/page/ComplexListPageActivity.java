@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,6 @@ import com.ponysdk.core.export.command.ExternalExportCommand;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -52,10 +50,11 @@ import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
-import com.ponysdk.ui.server.form.renderer.DateTimeBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.list.ComplexListActivity;
 import com.ponysdk.ui.server.list.ComplexListCommandFactory;
@@ -67,7 +66,6 @@ import com.ponysdk.ui.server.list.ListColumnDescriptor;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
 import com.ponysdk.ui.server.list.renderer.header.ComplexHeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.DateRangeHeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 
 public class ComplexListPageActivity extends PageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
@@ -85,11 +83,9 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
     private CriterionField nameCriterion;
 
+    private FormField nameField;
+
     private FormField ageField;
-
-    private FormField field1;
-
-    private FormField field2;
 
     public ComplexListPageActivity() {
         super("Complex List", "Rich UI Components");
@@ -121,7 +117,6 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         layout.add(listPanel);
         pageView.getBody().setWidget(layout);
 
-        final FormField nameField = new FormField("Name");
         final ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
         ageListBoxRenderer.addItem("1 year");
         ageListBoxRenderer.addItem("2 years");
@@ -149,6 +144,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
             @Override
             public Command newFindCommand(final ComplexListActivity<Pony> complexListActivity, final Query query) {
+
                 return new Command() {
 
                     @Override
@@ -181,8 +177,6 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
             };
         });
 
-        complexListActivity.registerSearchCriteria(new CriterionField("AZ"), field1);
-        complexListActivity.registerSearchCriteria(new CriterionField("AD"), field2);
         complexListActivity.registerSearchCriteria(nameCriterion, nameField);
         complexListActivity.registerSearchCriteria(new CriterionField("age"), ageField);
         complexListActivity.start(listPanel);
@@ -192,6 +186,13 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         complexListView.setFloatableToolBar((PScrollPanel) pageView.getBody());
 
         final PButton addPonyButton = new PButton("Create new pony");
+        addPonyButton.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(PClickEvent event) {
+                complexListActivity.getSelectedAndEnabledData();
+            }
+        });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
         complexListView.getToolbarLayout().add(addPonyButton);
 
@@ -218,14 +219,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     }
 
     protected Result<List<Pony>> getResult(Query query) {
-        List<Pony> searchResult = FilteringTools.filter(ponyList, query.getCriteria());
-        final Result<List<Pony>> result = new Result<List<Pony>>();
-        result.setFullSize(searchResult.size());
-        if (!QueryMode.FULL_RESULT.equals(query.getQueryMode())) {
-            searchResult = FilteringTools.getPage(query.getPageSize(), query.getPageNum(), searchResult);
-        }
-        result.setData(searchResult);
-        return result;
+        return FilteringTools.select(query, ponyList);
     }
 
     private ExportConfiguration initExportConfiguration() {
@@ -244,14 +238,11 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
         final ListColumnDescriptor<ComplexListPageActivity.Pony, String> nameColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>();
 
-        field1 = new FormField(new DateTimeBoxFormFieldRenderer());
-        field2 = new FormField(new DateTimeBoxFormFieldRenderer());
+        nameField = new FormField();
 
-        DateRangeHeaderCellRenderer headerCellRender = new DateRangeHeaderCellRenderer("Caption", field1, field2, "");
-        headerCellRender.setDateFormat(new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss"));
-
-        nameColumnDescriptor.setHeaderCellRenderer(headerCellRender);
+        final ComplexHeaderCellRenderer nameHeaderCellRenderer = new ComplexHeaderCellRenderer("Name", nameField, "name");
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
+        nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRenderer);
         listColumnDescriptors.add(nameColumnDescriptor);
 
         final ListColumnDescriptor<ComplexListPageActivity.Pony, String> ageColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>("Age");

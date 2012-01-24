@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form;
 
 import java.util.ArrayList;
@@ -27,19 +28,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.activity.Activity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
-import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 
 public class FormActivity extends AbstractActivity implements Activity {
 
     private final List<FormField> formFields = new ArrayList<FormField>();
+
     private final Map<FormField, IsPWidget> widgetByFormField = new HashMap<FormField, IsPWidget>();
 
     protected final FormView formView;
@@ -50,17 +52,16 @@ public class FormActivity extends AbstractActivity implements Activity {
 
     public FormActivity(FormConfiguration formConfiguration, FormView formView) {
         this.formView = formView;
-        this.formView.asWidget().addDomHandler(new PKeyPressHandler() {
+        this.formView.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
-            public void onKeyPress(final int keyCode) {
-                if (keyCode == KeyCodes.KEY_ENTER) {
-                    if (isValid()) {
-                        fireEvent(new SubmitFormEvent(FormActivity.this));
-                    }
+            public void onKeyUp(int keyCode) {
+                if (isValid()) {
+                    fireEvent(new SubmitFormEvent(FormActivity.this));
                 }
+
             }
-        }, PKeyPressEvent.TYPE);
+        }, PKeyUpEvent.TYPE);
     }
 
     public void addFormField(FormField formField) {

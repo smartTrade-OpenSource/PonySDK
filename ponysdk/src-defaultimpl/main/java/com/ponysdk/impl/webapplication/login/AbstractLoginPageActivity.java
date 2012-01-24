@@ -20,17 +20,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
 public abstract class AbstractLoginPageActivity extends AbstractActivity implements PClickHandler {
-
-    public static final int KEY_ENTER = 13;// temp
 
     protected LoginPageView loginPageView;
 
@@ -51,7 +51,6 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
         world.setWidget(loginPageView);
     }
 
-
     public LoginPageView getLoginPageView() {
         return loginPageView;
     }
@@ -60,22 +59,20 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
         return world;
     }
 
-	public void setLoginPageView(final LoginPageView loginPageView) {
-		this.loginPageView = loginPageView;
-		final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(KEY_ENTER) {
+    public void setLoginPageView(final LoginPageView loginPageView) {
+        this.loginPageView = loginPageView;
+        final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {
-            	loginPageView.clearMessages();
-                if (keyCode == KEY_ENTER) {
-                    sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
-                }
+                loginPageView.clearMessages();
+                sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
             }
         };
         loginPageView.addLoginShortcutListener(keyPressHandler);
         loginPageView.addPasswordShortcutListener(keyPressHandler);
 
         this.loginPageView.addLoginClickHandler(this);
-	}
+    }
 
 }

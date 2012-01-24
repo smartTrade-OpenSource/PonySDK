@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.terminal;
+ */
+
+package com.ponysdk.ui.terminal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,16 +30,18 @@ import java.util.List;
 import java.util.Map;
 
 public class Property implements Serializable {
-	private static final long serialVersionUID = -2137273148825763591L;
 
-	private String key = PropertyKey.ROOT.getKey();
+    private static final long serialVersionUID = -2137273148825763591L;
+
+    private String key = PropertyKey.ROOT.getKey();
+
     private String value;
+
     private List<String> values;
 
     protected Map<String, Property> childProperties = new HashMap<String, Property>();
 
-    public Property() {
-    }
+    public Property() {}
 
     public Property(PropertyKey key, String value) {
         this.key = key.getKey();

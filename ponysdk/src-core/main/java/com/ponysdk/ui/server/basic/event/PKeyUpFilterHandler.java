@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 
@@ -32,8 +34,13 @@ public abstract class PKeyUpFilterHandler implements PKeyUpHandler, HasPProperti
 
     private final List<Property> properties = new ArrayList<Property>();
 
-    public PKeyUpFilterHandler(int... keyCodes) {
-        final Property filter = new Property(PropertyKey.KEY_FILTER, keyCodes);
+    public PKeyUpFilterHandler(PKeyCode... keyCodes) {
+        List<String> codes = new ArrayList<String>();
+        for (PKeyCode code : keyCodes) {
+            codes.add(code.getCodeToString());
+        }
+
+        final Property filter = new Property(PropertyKey.KEY_FILTER, codes);
         properties.add(filter);
     }
 

@@ -30,6 +30,7 @@ import com.ponysdk.core.query.SortingType;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
@@ -57,8 +58,6 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
     protected EventBus eventBus;
 
     protected FormField formField;
-
-    public static final int KEY_ENTER = 13;
 
     private PAnchor header;
 
@@ -135,11 +134,10 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
 
         }
 
-        formField.addDomHandler(new PKeyUpFilterHandler(KEY_ENTER) {
+        formField.addDomHandler(new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {
-                if (keyCode != KEY_ENTER) return;
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(ComplexHeaderCellRenderer.this, formField);
                 eventBus.fireEvent(refreshListEvent);
             }

@@ -597,16 +597,18 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             formField.reset();
         }
 
+        if (currentSortingPojoPropertyKey != null) {
+            this.localEventBus.fireEvent(new SortColumnEvent(this, SortingType.NONE, currentSortingPojoPropertyKey));
+        }
+
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             changeRowSelectorsState(false);
-            rowSelectors.clear();
             mainCheckBox.setValue(false);
             triggerMainCheckBoxValueChange(false);
         }
 
         currentSortingPojoPropertyKey = null;
         currentSortingType = SortingType.NONE;
-        findResult = null;
     }
 
     public void refresh() {

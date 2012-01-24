@@ -9,6 +9,7 @@ import com.ponysdk.ui.server.addon.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -28,13 +29,13 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
 
     final PHorizontalPanel fieldContainer = new PHorizontalPanel();
 
-    private PVerticalPanel popupContent;
+    private final PVerticalPanel popupContent;
 
-    private FormField from;
+    private final FormField from;
 
-    private FormField to;
+    private final FormField to;
 
-    private TextBoxFormFieldRenderer mainformFieldRenderer;
+    private final TextBoxFormFieldRenderer mainformFieldRenderer;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
@@ -56,11 +57,10 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         popupContent.add(from.render().asWidget());
         popupContent.add(new PLabel("to"));
         popupContent.add(to.render().asWidget());
-        PKeyUpFilterHandler handler = new PKeyUpFilterHandler(KEY_ENTER) {
+        PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {
-                if (keyCode != KEY_ENTER) return;
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(this, from);
                 eventBus.fireEvent(refreshListEvent);
             }

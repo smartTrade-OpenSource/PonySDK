@@ -20,9 +20,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
+import com.ponysdk.ui.server.basic.PTRichTextArea;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
@@ -61,73 +63,75 @@ public class UIFactory {
     public UIObject newUIObject(UIService uiService, Create create) {
         final WidgetType widgetType = create.getWidgetType();
         switch (widgetType) {
-        case BUTTON:
-            return new PTButton();
-        case ANCHOR:
-            return new PTAnchor();
-        case LAYOUT_PANEL:
-            return new PTButton();
-        case TABLAYOUTPANEL:
-            return new PTTabLayoutPanel();
-        case VERTICAL_PANEL:
-            return new PTVerticalPanel();
-        case HORIZONTAL_PANEL:
-            return new PTHorizontalPanel();
-        case DOCK_LAYOUT_PANEL:
-            return new PTDockLayoutPanel();
-        case SPLIT_LAYOUT_PANEL:
-            return new PTSplitLayoutPanel();
-        case STACKLAYOUT_PANEL:
-            return new PTStackLayoutPanel();
-        case LABEL:
-            return new PTLabel();
-        case HTML:
-            return new PTHTML();
-        case TEXTBOX:
-            return new PTTextBox();
-        case PASSWORD_TEXTBOX:
-            return new PTPasswordTextBox();
-        case TEXT_AREA:
-            return new PTTextArea();
-        case CHECKBOX:
-            return new PTCheckBox();
-        case RADIO_BUTTON:
-            return new PTRadioButton();
-        case PUSH_BUTTON:
-            return new PTPushButton();
-        case LISTBOX:
-            return new PTListBox();
-        case SIMPLE_LAYOUT_PANEL:
-            return new PTSimpleLayoutPanel();
-        case SIMPLE_PANEL:
-            return new PTSimplePanel();
-        case SCROLL_PANEL:
-            return new PTScrollPanel();
-        case DATEBOX:
-            return new PTDateBox();
-        case FLEX_TABLE:
-            return new PTFlexTable();
-        case IMAGE:
-            return new PTImage();
-        case FILE_UPLOAD:
-            return new PTFileUpload();
-        case TREE:
-            return new PTTree();
-        case MENU_BAR:
-            return new PTMenuBar();
-        case MENU_ITEM:
-            return new PTMenuItem();
-        case MENU_ITEM_SEPARATOR:
-            return new PTMenuItemSeparator();
-        case POPUP_PANEL:
-            return new PTPopupPanel();
-        case TIMER:
-            return new PTTimer();
-        case COMPOSITE:
-            return new PTComposite();
-        default:
-            Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
-            return null;
+            case BUTTON:
+                return new PTButton();
+            case ANCHOR:
+                return new PTAnchor();
+            case LAYOUT_PANEL:
+                return new PTButton();
+            case TABLAYOUTPANEL:
+                return new PTTabLayoutPanel();
+            case VERTICAL_PANEL:
+                return new PTVerticalPanel();
+            case HORIZONTAL_PANEL:
+                return new PTHorizontalPanel();
+            case DOCK_LAYOUT_PANEL:
+                return new PTDockLayoutPanel();
+            case SPLIT_LAYOUT_PANEL:
+                return new PTSplitLayoutPanel();
+            case STACKLAYOUT_PANEL:
+                return new PTStackLayoutPanel();
+            case LABEL:
+                return new PTLabel();
+            case HTML:
+                return new PTHTML();
+            case TEXTBOX:
+                return new PTTextBox();
+            case PASSWORD_TEXTBOX:
+                return new PTPasswordTextBox();
+            case TEXT_AREA:
+                return new PTTextArea();
+            case CHECKBOX:
+                return new PTCheckBox();
+            case RADIO_BUTTON:
+                return new PTRadioButton();
+            case PUSH_BUTTON:
+                return new PTPushButton();
+            case LISTBOX:
+                return new PTListBox();
+            case SIMPLE_LAYOUT_PANEL:
+                return new PTSimpleLayoutPanel();
+            case SIMPLE_PANEL:
+                return new PTSimplePanel();
+            case SCROLL_PANEL:
+                return new PTScrollPanel();
+            case DATEBOX:
+                return new PTDateBox();
+            case FLEX_TABLE:
+                return new PTFlexTable();
+            case IMAGE:
+                return new PTImage();
+            case FILE_UPLOAD:
+                return new PTFileUpload();
+            case TREE:
+                return new PTTree();
+            case MENU_BAR:
+                return new PTMenuBar();
+            case MENU_ITEM:
+                return new PTMenuItem();
+            case MENU_ITEM_SEPARATOR:
+                return new PTMenuItemSeparator();
+            case POPUP_PANEL:
+                return new PTPopupPanel();
+            case TIMER:
+                return new PTTimer();
+            case COMPOSITE:
+                return new PTComposite();
+            case RICH_TEXTAREA:
+                return new PTRichTextArea();
+            default:
+                Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
+                return null;
         }
     }
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import com.ponysdk.ui.server.basic.Focusable;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
@@ -62,26 +64,27 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHandler<String>, PHasText, HasPValueChangeHandlers<String>, HasPKeyPressHandlers, Focusable {
 
     private final Map<String, Object> hiddenValueByItems = new HashMap<String, Object>();
+
     private final Map<Object, String> itemsByHiddenValue = new HashMap<Object, String>();
+
     private final List<String> items = new ArrayList<String>();
+
     private final List<PValueChangeHandler<String>> valueChangeHandlers = new ArrayList<PValueChangeHandler<String>>();
+
     private final List<PKeyPressHandler> keypPressHandlers = new ArrayList<PKeyPressHandler>();
+
     private final List<PTextBoxBase> fields = new ArrayList<PTextBoxBase>();
+
     private final int pageSize;
+
     private String value;
+
     private final boolean enabled = true;
+
     private final String caption;
-    public static final int KEY_LEFT = 37;
-    public static final int KEY_RIGHT = 39;
-    public static final int KEY_SHIFT = 16;
-    public static final int KEY_TAB = 9;
-    public static final int KEY_ALT = 18;
-    public static final int KEY_CTRL = 17;
-    public static final int KEY_ESCAPE = 27;
-    public static final int KEY_DOWN = 40;
-    public static final int KEY_UP = 38;
-    public static final int KEY_ENTER = 13;
+
     public int maxCharacterLength;
+
     private final PTextBox textbox = new PTextBox();
 
     public OracleListBoxRenderer(int pageSize, String caption) {
@@ -90,19 +93,33 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     private final class KeyUpHandler extends PVerticalPanel implements PKeyUpHandler {
+
         private final PLabel down;
+
         protected final PTextBox textBox;
+
         private final PPopupPanel popup;
+
         private final PLabel up;
+
         private final PLabel nextPaginationLabel;
+
         private final PVerticalPanel popupContent;
+
         private List<String> matchingElements;
+
         private final PLabel previousPaginationLabel;
+
         private final PButton deploy;
+
         private boolean initialized = false;
+
         int currentPage = 0;
+
         int currentSelected = -1;
+
         boolean deployed = false;
+
         List<PLabel> currentMatchingElements = new ArrayList<PLabel>();
 
         private KeyUpHandler(PTextBox textBox, PPopupPanel popup, PButton deploy) {
@@ -148,10 +165,8 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
                         refresh(null);
                     } else {
                         deploy.setText("-");
-                        if (textbox.getText() != null)
-                            refresh(textbox.getText());
-                        else
-                            refresh("%");
+                        if (textbox.getText() != null) refresh(textbox.getText());
+                        else refresh("%");
                     }
                     textbox.setFocus(true);
                 }
@@ -161,27 +176,9 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         @Override
         public void onKeyUp(int keyCode) {
-            switch (keyCode) {
-            case KEY_UP:
-                process(-1);
-                break;
-            case KEY_DOWN:
-                process(1);
-                break;
-            case KEY_ENTER:
-                onValueChange(textBox.getText());
-                popup.hide();
-                deploy.setText("+");
-                break;
-            case KEY_LEFT:
-            case KEY_RIGHT:
-            case KEY_TAB:
-            case KEY_SHIFT:
-            case KEY_ALT:
-            case KEY_CTRL:
-                break;
+            PKeyCode code = PKeyCode.fromInt(keyCode);
 
-            default:
+            if (code == null) {
                 currentSelected = -1;
                 deploy.setText("+");
                 popupContent.clear();
@@ -191,7 +188,22 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
                 }
                 value = textBox.getText();
                 refresh(textBox.getText());
-                break;
+            } else {
+                switch (code) {
+                    case UP:
+                        process(-1);
+                        break;
+                    case DOWN:
+                        process(1);
+                        break;
+                    case ENTER:
+                        onValueChange(textBox.getText());
+                        popup.hide();
+                        deploy.setText("+");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -199,37 +211,39 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             if (currentMatchingElements.size() != 0) {
                 currentSelected += i;
                 switch (i) {
-                case -1:
-                    if (currentSelected >= 0) {
-                        // case we are selecting an element between first and last of current page
-                        refreshLabels();
-                    } else if (currentPage > 0) {
-                        // case last selected element is the first, there are remaining previous page and we want to move backward ==> go to previous page
-                        goToPreviousPage();
-                        refreshLabels();
-                    } else {
-                        // case we reached the first element of the first page ==> do nothing and stay on the first element
-                        currentSelected = 0;
-                    }
-                    break;
-                case 1:
-                    if (currentSelected != currentMatchingElements.size()) {
-                        // case we are selecting an element between first and last of current page
-                        refreshLabels();
-                    } else {
-                        // case we reached the last element of current page and we want to move forward
-                        final boolean hasRemainingPage = currentPage < totalPage();
-                        if (hasRemainingPage) {
-                            // case there are remaining next page => go to next page
-                            goToNextPage();
+                    case -1:
+                        if (currentSelected >= 0) {
+                            // case we are selecting an element between first and last of current page
+                            refreshLabels();
+                        } else if (currentPage > 0) {
+                            // case last selected element is the first, there are remaining previous page and
+                            // we want to move backward ==> go to previous page
+                            goToPreviousPage();
                             refreshLabels();
                         } else {
-                            // we stay at the last element of current page
-                            currentSelected = currentSelected - 1;
-                            return;
+                            // case we reached the first element of the first page ==> do nothing and stay on
+                            // the first element
+                            currentSelected = 0;
                         }
-                    }
-                    break;
+                        break;
+                    case 1:
+                        if (currentSelected != currentMatchingElements.size()) {
+                            // case we are selecting an element between first and last of current page
+                            refreshLabels();
+                        } else {
+                            // case we reached the last element of current page and we want to move forward
+                            final boolean hasRemainingPage = currentPage < totalPage();
+                            if (hasRemainingPage) {
+                                // case there are remaining next page => go to next page
+                                goToNextPage();
+                                refreshLabels();
+                            } else {
+                                // we stay at the last element of current page
+                                currentSelected = currentSelected - 1;
+                                return;
+                            }
+                        }
+                        break;
                 }
 
             }
@@ -239,12 +253,9 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         int totalPage() {
 
-            if ((matchingElements.size() < pageSize))
-                return 0;
-            else if ((matchingElements.size() % pageSize) == 0)
-                return ((matchingElements.size() / pageSize) - 1);
-            else
-                return (matchingElements.size() / pageSize);
+            if ((matchingElements.size() < pageSize)) return 0;
+            else if ((matchingElements.size() % pageSize) == 0) return ((matchingElements.size() / pageSize) - 1);
+            else return (matchingElements.size() / pageSize);
         }
 
         void refreshLabels() {
@@ -258,10 +269,9 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         protected void refresh(String pattern) {
             if (pattern != null)
-                // get String list corresponding to filter patter
-                matchingElements = filter(pattern);
-            else
-                matchingElements = Collections.emptyList();
+            // get String list corresponding to filter patter
+            matchingElements = filter(pattern);
+            else matchingElements = Collections.emptyList();
 
             if (!matchingElements.isEmpty()) {
                 // there are matching pattern ==> show popup
