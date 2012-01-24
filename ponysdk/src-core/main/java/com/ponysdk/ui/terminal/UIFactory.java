@@ -32,6 +32,7 @@ import com.ponysdk.ui.terminal.ui.PTDateBox;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
+import com.ponysdk.ui.terminal.ui.PTFlowPanel;
 import com.ponysdk.ui.terminal.ui.PTHTML;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
 import com.ponysdk.ui.terminal.ui.PTImage;
@@ -73,6 +74,8 @@ public class UIFactory {
             return new PTVerticalPanel();
         case HORIZONTAL_PANEL:
             return new PTHorizontalPanel();
+        case FLOW_PANEL:
+            return new PTFlowPanel();
         case DOCK_LAYOUT_PANEL:
             return new PTDockLayoutPanel();
         case SPLIT_LAYOUT_PANEL:
