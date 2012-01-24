@@ -34,6 +34,11 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     public void add(PWidget child) {
         throw new UnsupportedOperationException("This panel does not support no-arg add()");
     }
+    
+    @Override
+    public void add(IsPWidget w) {
+        add(w.asWidget());
+    }
 
     protected final void adopt(PWidget child) {
         assert (child.getParent() == null);
