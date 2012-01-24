@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -34,7 +35,7 @@ public class PTScrollPanel extends PTSimplePanel {
 
     @Override
     public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.ScrollPanel());
+        init(new PCScrollPanel());
     }
 
     @Override
@@ -60,7 +61,7 @@ public class PTScrollPanel extends PTSimplePanel {
     }
 
     @Override
-    public com.google.gwt.user.client.ui.ScrollPanel cast() {
-        return (com.google.gwt.user.client.ui.ScrollPanel) uiObject;
+    public PCScrollPanel cast() {
+        return (PCScrollPanel) uiObject;
     }
 }

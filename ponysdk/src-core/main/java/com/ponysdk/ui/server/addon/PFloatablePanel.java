@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.addon;
 
 import com.ponysdk.ui.server.basic.PAddOn;
@@ -34,12 +35,7 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
 
     private PScrollPanel linkedScrollPanel;
 
-    public PFloatablePanel() {
-    }
-
-    public PFloatablePanel(PScrollPanel linkedScrollPanel) {
-        setLinkedScrollPanel(linkedScrollPanel);
-    }
+    public PFloatablePanel() {}
 
     @Override
     protected WidgetType getType() {
@@ -54,8 +50,7 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
     }
 
     public void correct() {
-        if (linkedScrollPanel == null)
-            return;
+        if (linkedScrollPanel == null) return;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.CORRECT_DIMENSION, linkedScrollPanel.getID());
         getPonySession().stackInstruction(update);

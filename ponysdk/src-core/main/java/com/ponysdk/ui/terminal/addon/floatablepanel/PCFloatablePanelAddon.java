@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.floatablepanel;
 
 import com.ponysdk.ui.terminal.Addon;
@@ -53,13 +54,9 @@ public class PCFloatablePanelAddon extends PTSimplePanel implements Addon {
             final PropertyKey propertyKey = property.getKey();
             if (PropertyKey.REFERENCE_SCROLL_PANEL.equals(propertyKey)) {
                 final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getUIObject(property.getLongValue());
-                floatablePanel.setLinkedScrollPanel(scrollPanel.cast());
-            } else if (PropertyKey.CORRECT_DIMENSION.equals(propertyKey)) {
-                floatablePanel.update();
-                break;
+                floatablePanel.setScrollPanel(scrollPanel.cast());
             }
         }
-
     }
 
     @Override

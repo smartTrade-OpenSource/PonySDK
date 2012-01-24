@@ -20,66 +20,50 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.floatablepanel;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.ponysdk.ui.terminal.ui.PCScrollPanel;
 
-public class PCFloatablePanel extends SimplePanel implements ScrollHandler, ResizeHandler {
+public class PCFloatablePanel extends SimplePanel implements RequiresResize {
 
-    private ScrollPanel linkedScrollPanel;
     private int startHorizontalPosition;
+
     private int startVerticalPosition;
+
     private int lastHorizontalScrollPosition = 0;
+
     private int lastVerticalScrollPosition = 0;
+
     private boolean topFloating;
+
     private boolean leftFloating;
 
-    final SimplePanel panel = new SimplePanel();
+    final SimplePanel panel = new SimpleLayoutPanel();
 
-    public PCFloatablePanel() {
-    }
+    private ScrollPanel scrollPanel;
 
-    public PCFloatablePanel(ScrollPanel linkedScrollPanel) {
-        setLinkedScrollPanel(linkedScrollPanel);
-    }
-
-    @Override
-    public void onScroll(ScrollEvent event) {
-        if (!isAttached())
-            return;
-        correctPosition();
-    }
-
-    public void update() {
-        if (linkedScrollPanel != null)
-            correctPosition();
-    }
+    public PCFloatablePanel() {}
 
     private void correctPosition() {
-        if (linkedScrollPanel == null) {
-            return;
-        }
-        setWidth(linkedScrollPanel.getElement().getClientWidth() + "px");
 
-        final int scrollTop = linkedScrollPanel.getAbsoluteTop();
-        final int scrollLeft = linkedScrollPanel.getAbsoluteLeft();
-        final int verticalScrollPosition = linkedScrollPanel.getVerticalScrollPosition();
-        final int horizontalScrollPosition = linkedScrollPanel.getHorizontalScrollPosition();
+        setWidth(scrollPanel.getElement().getClientWidth() + "px");
+
+        final int scrollTop = scrollPanel.getAbsoluteTop();
+        final int scrollLeft = scrollPanel.getAbsoluteLeft();
+        final int verticalScrollPosition = scrollPanel.getVerticalScrollPosition();
+        final int horizontalScrollPosition = scrollPanel.getHorizontalScrollPosition();
 
         int X = leftFloating ? scrollLeft : getAbsoluteLeft();
         int Y = topFloating ? scrollTop : getAbsoluteTop();
 
-        GWT.log("init-scrollWidth" + linkedScrollPanel.getOffsetWidth());
-        GWT.log("init-getClientWidth" + linkedScrollPanel.getElement().getClientWidth());
-
-        if (setAndGetVerticalScrollChanged()) {
+        if (setAndGetVerticalScrollChanged(scrollPanel)) {
             if (startVerticalPosition < verticalScrollPosition) {
                 topFloating = true;
                 Y = scrollTop;
@@ -89,7 +73,7 @@ public class PCFloatablePanel extends SimplePanel implements ScrollHandler, Resi
             }
         }
 
-        if (setAndGetHorizontalScrollChanged()) {
+        if (setAndGetHorizontalScrollChanged(scrollPanel)) {
             if (horizontalScrollPosition > startHorizontalPosition) {
                 leftFloating = true;
                 X = scrollLeft;
@@ -102,10 +86,17 @@ public class PCFloatablePanel extends SimplePanel implements ScrollHandler, Resi
             getElement().getStyle().setProperty("top", Y + "px");
             getElement().getStyle().setProperty("left", X + "px");
             if (!isFloating()) {
-                addStyleName("pony-PCPositionPanel-Floating");
-                getElement().getStyle().setProperty("position", "fixed");
-                panel.getElement().getStyle().setProperty("height", getOffsetHeight() + "px");
-                getElement().getParentElement().insertBefore(panel.getElement(), getElement());
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                    @Override
+                    public void execute() {
+                        addStyleName("pony-PCPositionPanel-Floating");
+                        getElement().getStyle().setProperty("position", "fixed");
+                        panel.getElement().getStyle().setProperty("height", getOffsetHeight() + "px");
+                        getElement().getParentElement().insertBefore(panel.getElement(), getElement());
+                        setWidth(scrollPanel.getElement().getClientWidth() + "px");
+                    }
+                });
             }
         } else if (!topFloating && !leftFloating && isFloating()) {
             topFloating = false;
@@ -122,50 +113,39 @@ public class PCFloatablePanel extends SimplePanel implements ScrollHandler, Resi
         return "fixed".equals(getElement().getStyle().getProperty("position"));
     }
 
-    @Override
-    protected void onAttach() {
-        super.onAttach();
-        if (linkedScrollPanel != null) {
-            linkedScrollPanel.setHorizontalScrollPosition(lastHorizontalScrollPosition);
-            linkedScrollPanel.setVerticalScrollPosition(lastVerticalScrollPosition);
-        }
-        initPositions();
-        correctPosition();
-    }
-
     private void initPositions() {
-        if (linkedScrollPanel != null) {
-            startVerticalPosition = getAbsoluteTop() - linkedScrollPanel.getAbsoluteTop();
-            startHorizontalPosition = getAbsoluteLeft() - linkedScrollPanel.getAbsoluteLeft();
-            panel.getElement().getStyle().setProperty("height", getOffsetHeight() + "px");
-            setWidth(linkedScrollPanel.getElement().getClientWidth() + "px");
+        startVerticalPosition = getAbsoluteTop() - scrollPanel.getAbsoluteTop();
+        startHorizontalPosition = getAbsoluteLeft() - scrollPanel.getAbsoluteLeft();
+        panel.getElement().getStyle().setProperty("height", getOffsetHeight() + "px");
+        setWidth(scrollPanel.getElement().getClientWidth() + "px");
+    }
+
+    public void setScrollPanel(PCScrollPanel scrollPanel) {
+        this.scrollPanel = scrollPanel;
+        scrollPanel.addFloatablePanel(this);
+        initPositions();
+    }
+
+    private boolean setAndGetHorizontalScrollChanged(ScrollPanel scrollPanel) {
+        final boolean changed = scrollPanel.getHorizontalScrollPosition() != lastHorizontalScrollPosition;
+        lastHorizontalScrollPosition = scrollPanel.getHorizontalScrollPosition();
+
+        if (!changed) {
+            if (scrollPanel.getAbsoluteLeft() != getAbsoluteLeft()) { return true; }
         }
+
+        return changed;
+    }
+
+    private boolean setAndGetVerticalScrollChanged(ScrollPanel scrollPanel) {
+        final boolean changed = scrollPanel.getVerticalScrollPosition() != lastVerticalScrollPosition;
+        lastVerticalScrollPosition = scrollPanel.getVerticalScrollPosition();
+        return changed;
     }
 
     @Override
-    public void onResize(ResizeEvent event) {
-        initPositions();
+    public void onResize() {
         correctPosition();
-    }
-
-    public void setLinkedScrollPanel(ScrollPanel linkedScrollPanel) {
-        this.linkedScrollPanel = linkedScrollPanel;
-        initPositions();
-        this.linkedScrollPanel.addScrollHandler(this);
-        Window.addResizeHandler(this);
-        linkedScrollPanel.addHandler(this, ResizeEvent.getType());
-    }
-
-    private boolean setAndGetHorizontalScrollChanged() {
-        final boolean changed = linkedScrollPanel.getHorizontalScrollPosition() != lastHorizontalScrollPosition;
-        lastHorizontalScrollPosition = linkedScrollPanel.getHorizontalScrollPosition();
-        return changed;
-    }
-
-    private boolean setAndGetVerticalScrollChanged() {
-        final boolean changed = linkedScrollPanel.getVerticalScrollPosition() != lastVerticalScrollPosition;
-        lastVerticalScrollPosition = linkedScrollPanel.getVerticalScrollPosition();
-        return changed;
     }
 
 }
