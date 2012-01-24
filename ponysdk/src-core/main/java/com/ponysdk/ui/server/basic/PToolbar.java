@@ -52,6 +52,11 @@ public class PToolbar implements IsPWidget, HasPWidgets {
         panel.add(w);
         panel.setCellHeight(w, "100%");
     }
+    
+    @Override
+    public void add(IsPWidget w) {
+        add(w.asWidget());
+    }
 
     public void addSepararator() {
         final PSimplePanel separator = new PSimplePanel();

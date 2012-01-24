@@ -34,6 +34,7 @@ import com.ponysdk.ui.terminal.ui.PTDateBox;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
+import com.ponysdk.ui.terminal.ui.PTFlowPanel;
 import com.ponysdk.ui.terminal.ui.PTHTML;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
 import com.ponysdk.ui.terminal.ui.PTImage;
@@ -129,6 +130,8 @@ public class UIFactory {
                 return new PTComposite();
             case RICH_TEXTAREA:
                 return new PTRichTextArea();
+            case FLOW_PANEL:
+                return new PTFlowPanel();
             default:
                 Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
                 return null;

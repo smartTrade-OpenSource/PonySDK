@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic.event;
 
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PWidget;
 
 public interface HasPWidgets extends Iterable<PWidget> {
@@ -36,6 +37,13 @@ public interface HasPWidgets extends Iterable<PWidget> {
      *             if this method is not supported (most often this means that a specific overload must be called)
      */
     void add(PWidget w);
+
+    /**
+     * Adds a child widget
+     * 
+     * @param w the widget to be added
+     */
+    void add(IsPWidget w);
 
     /**
      * Removes all child widgets.

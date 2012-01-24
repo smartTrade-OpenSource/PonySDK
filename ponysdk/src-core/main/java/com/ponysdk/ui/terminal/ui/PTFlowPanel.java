@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -20,9 +20,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.ponysdk.ui.terminal.ui;
 
-package com.ponysdk.ui.terminal;
+import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
 
-public enum WidgetType {
-    DOCK_LAYOUT_PANEL, SPLIT_LAYOUT_PANEL, SIMPLE_PANEL, SCROLL_PANEL, FLOW_PANEL, VERTICAL_PANEL, HORIZONTAL_PANEL, BUTTON, LABEL, FLEX_TABLE, TREE, COMPOSITE, DATEBOX, TEXTBOX, PASSWORD_TEXTBOX, LISTBOX, IMAGE, ANCHOR, CHECKBOX, MENU_BAR, MENU_ITEM, MENU_ITEM_SEPARATOR, TABLAYOUTPANEL, LAYOUT_PANEL, SIMPLE_LAYOUT_PANEL, TIMER, STACKLAYOUT_PANEL, HTML, RADIO_BUTTON, TEXT_AREA, POPUP_PANEL, CELLLIST, COOKIE, FILE_UPLOAD, PUSH_BUTTON, ADDON, RICH_TEXTAREA;
+public class PTFlowPanel extends PTComplexPanel {
+
+    @Override
+    public void create(Create create, UIService uiService) {
+        init(new com.google.gwt.user.client.ui.FlowPanel());
+    }
+
 }

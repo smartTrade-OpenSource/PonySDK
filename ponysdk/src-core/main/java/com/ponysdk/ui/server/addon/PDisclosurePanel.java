@@ -24,6 +24,7 @@ package com.ponysdk.ui.server.addon;
 
 import java.util.Iterator;
 
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PComposite;
 import com.ponysdk.ui.server.basic.PImage;
@@ -85,6 +86,11 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
         } else {
             throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
         }
+    }
+    
+    @Override
+    public void add(IsPWidget w) {
+        add(w.asWidget());
     }
 
     @Override

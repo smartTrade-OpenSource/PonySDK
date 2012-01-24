@@ -80,6 +80,11 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
     public void add(PWidget w) {
         assert false : "Single-argument add() is not supported for this widget";
     }
+    
+    @Override
+    public void add(IsPWidget w) {
+        add(w.asWidget());
+    }
 
     @Override
     public void clear() {
