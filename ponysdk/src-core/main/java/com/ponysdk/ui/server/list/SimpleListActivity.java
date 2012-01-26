@@ -127,6 +127,29 @@ public class SimpleListActivity<T> extends AbstractActivity {
         data = null;
     }
 
+    public void insertData(int row, T data) {
+        int col = 0;
+
+        // listView.insertRow(rowCount);
+        for (final ListColumnDescriptor<T, ?> field : listFields) {
+            if (!field.isViewable()) continue;
+            final IsPWidget renderCell = field.renderCell(row, data);
+
+            if (debugID != null) {
+                String headerCaption;
+                if (field.getHeaderCellRenderer().getCaption() != null) {
+                    headerCaption = field.getHeaderCellRenderer().getCaption();
+                } else {
+                    headerCaption = String.valueOf(col);
+                }
+                renderCell.asWidget().ensureDebugId(debugID + "[" + row + "][" + headerCaption + "]");
+            }
+            listView.addWidget(renderCell, col++, row);
+        }
+        listView.addWidget(new PSimplePanel(), col, row);
+        listView.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
+    }
+
     public void setData(List<T> data) {
         assert listView != null : "Cannot remove field before binding listView";
         reset();

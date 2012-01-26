@@ -207,6 +207,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
                 for (final int index : listBox.getSelectedItems()) {
                     list.add((Pony) listBox.getValue(index));
                     complexListActivity.enableSelectedData((Pony) listBox.getValue(index), false);
+                    complexListActivity.updateData((Pony) listBox.getValue(index));
                 }
 
                 complexListActivity.setSelectedData(list);
@@ -305,6 +306,8 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         }
     }
 
+    List<Pony> luci = new ArrayList<ComplexListPageActivity.Pony>();
+
     @Override
     public void onShowSubList(ShowSubListEvent<Pony> event) {
         if (event.isShow()) {
@@ -312,6 +315,11 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
             subPonyList.add(new Pony("SubPony 1", "7 years", "Equus ferus caballus"));
             subPonyList.add(new Pony("SubPony 2", "8 years", "Equus ferus caballus"));
             subPonyList.add(new Pony("SubPony 3", "9 years", "Equus ferus caballus"));
+
+            luci.add(new Pony("Luci l'homo", "2 ans aage", "Luci le pd"));
+
+            subPonyList.addAll(luci);
+
             complexListActivity.insertSubList(event.getRow(), subPonyList);
         } else {
             complexListActivity.removeSubList(event.getRow());

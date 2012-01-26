@@ -874,6 +874,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     }
 
+    public void updateData(D d) {
+        int row = getRow(d);
+        eventBus.fireEvent(new ShowSubListEvent<D>(this, d, true, row));
+    }
+
     @Override
     public void onShowSubList(ShowSubListEvent<D> event) {
         eventBus.fireEvent(new ShowSubListEvent<D>(this, event.getData(), event.isShow(), event.getRow()));
