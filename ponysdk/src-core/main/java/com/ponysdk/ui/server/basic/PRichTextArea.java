@@ -27,12 +27,15 @@ import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
     private String text;
 
     private String html;
+
+    private final Formatter formatter = new Formatter();
 
     public PRichTextArea() {
         super();
@@ -67,6 +70,139 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.HTML, html);
         getPonySession().stackInstruction(update);
+    }
+
+    public Formatter getFormatter() {
+        return this.formatter;
+    }
+
+    public class Formatter {
+
+        void createLink(String url) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.CREATE_LINK, html);
+            getPonySession().stackInstruction(update);
+        }
+
+        void insertHorizontalRule() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.INSERT_HORIZONTAL_RULE);
+            getPonySession().stackInstruction(update);
+        }
+
+        void insertHTML(String html) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.INSERT_HTML, html);
+            getPonySession().stackInstruction(update);
+        }
+
+        void insertImage(String url) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.IMAGE, url);
+            getPonySession().stackInstruction(update);
+        }
+
+        void insertOrderedList() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.ORDERED);
+            getPonySession().stackInstruction(update);
+        }
+
+        void insertUnorderedList() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.UNORDERED);
+            getPonySession().stackInstruction(update);
+        }
+
+        void setBackColor(String color) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.BACK_COLOR, color);
+            getPonySession().stackInstruction(update);
+        }
+
+        void setFontName(String name) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.FONT_NAME, name);
+            getPonySession().stackInstruction(update);
+        }
+
+        void setFontSize(String fontSize) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.FONT_SIZE, fontSize);
+            getPonySession().stackInstruction(update);
+        }
+
+        void setForeColor(String color) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.FONT_COLOR, color);
+            getPonySession().stackInstruction(update);
+        }
+
+        void setJustification(Justification justification) {
+            final Update update = new Update(getID());
+            update.setMainPropertyValue(PropertyKey.JUSTIFICATION, justification.name());
+            getPonySession().stackInstruction(update);
+        }
+
+        void toggleBold() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.TOGGLE_BOLD);
+            getPonySession().stackInstruction(update);
+        }
+
+        void toggleItalic() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.TOGGLE_ITALIC);
+            getPonySession().stackInstruction(update);
+        }
+
+        void toggleSubscript() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.TOGGLE_SUBSCRIPT);
+            getPonySession().stackInstruction(update);
+        }
+
+        void toggleUnderline() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.TOGGLE_UNDERLINE);
+            getPonySession().stackInstruction(update);
+        }
+
+        void leftIndent() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.LEFT_INDENT);
+            getPonySession().stackInstruction(update);
+        }
+
+        void redo() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.REDO);
+            getPonySession().stackInstruction(update);
+        }
+
+        void removeFormat() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.REMOVE_FORMAT);
+            getPonySession().stackInstruction(update);
+        }
+
+        void removeLink() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.REMOVE_LINK);
+            getPonySession().stackInstruction(update);
+        }
+
+        void rightIndent() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.TOGGLE_RIGHT_INDENT);
+            getPonySession().stackInstruction(update);
+        }
+
+        void selectAll() {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.SELECT_ALL);
+            getPonySession().stackInstruction(update);
+        }
     }
 
 }

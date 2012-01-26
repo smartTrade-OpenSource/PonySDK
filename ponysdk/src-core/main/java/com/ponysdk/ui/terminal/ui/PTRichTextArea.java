@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -33,15 +32,9 @@ import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTRichTextArea extends PTWidget {
 
-    private RichTextArea richTextArea;
-
     @Override
     public void create(Create create, UIService uiService) {
-        this.richTextArea = new RichTextArea();
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.add(new RichTextToolbar(richTextArea));
-        panel.add(richTextArea);
-        init(panel);
+        init(new RichTextArea());
     }
 
     @Override
@@ -49,12 +42,119 @@ public class PTRichTextArea extends PTWidget {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
-        if (PropertyKey.HTML.equals(propertyKey)) {
-            richTextArea.setHTML(property.getValue());
-            return;
+
+        switch (propertyKey) {
+            case HTML:
+                cast().setHTML(property.getValue());
+                break;
+            case CREATE_LINK:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case INSERT_HORIZONTAL_RULE:
+                cast().getFormatter().insertHorizontalRule();
+                break;
+            case INSERT_HTML:
+                cast().getFormatter().insertHTML(property.getValue());
+                break;
+            case IMAGE:
+                cast().getFormatter().insertImage(property.getValue());
+                break;
+            case ORDERED:
+                cast().getFormatter().insertOrderedList();
+                break;
+            case UNORDERED:
+                cast().getFormatter().insertUnorderedList();
+                break;
+            case BACK_COLOR:
+                cast().getFormatter().setBackColor(property.getValue());
+                break;
+            case FONT_NAME:
+                cast().getFormatter().setFontName(property.getValue());
+                break;
+            case FONT_SIZE:
+                FontSize fontSize = FontSize.valueOf(property.getValue());
+                switch (fontSize) {
+                    case LARGE:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
+                        break;
+                    case SMALL:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
+                        break;
+                    case MEDIUM:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
+                        break;
+                    case X_LARGE:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
+                        break;
+                    case X_SMALL:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
+                        break;
+                    case XX_LARGE:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
+                        break;
+                    case XX_SMALL:
+                        cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+            case FONT_COLOR:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case JUSTIFICATION:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case TOGGLE_BOLD:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case TOGGLE_ITALIC:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case TOGGLE_SUBSCRIPT:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case TOGGLE_UNDERLINE:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case LEFT_INDENT:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case REDO:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case REMOVE_FORMAT:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case REMOVE_LINK:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case TOGGLE_RIGHT_INDENT:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            case SELECT_ALL:
+                cast().getFormatter().createLink(property.getValue());
+                break;
+            default:
+                break;
         }
 
         super.update(update, uiService);
     }
 
+    @Override
+    public RichTextArea cast() {
+        return (RichTextArea) uiObject;
+    }
+
+    public enum FontSize {
+        LARGE, MEDIUM, SMALL, X_LARGE, X_SMALL, XX_LARGE, XX_SMALL;
+    }
+
+    public enum Justification {
+
+        CENTER, FULL, LEFT, RIGHT;
+
+    }
 }
