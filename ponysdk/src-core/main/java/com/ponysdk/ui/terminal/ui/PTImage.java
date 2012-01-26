@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
@@ -42,8 +43,7 @@ public class PTImage extends PTWidget {
     @Override
     public void addHandler(AddHandler addHandler, UIService uiService) {
         if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
-            cast()
-                    .setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.getKey() + "=" + addHandler.getMainProperty().getValue());
+            cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
             return;
         }
 

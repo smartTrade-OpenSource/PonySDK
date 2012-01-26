@@ -215,7 +215,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     // + addHandler.getMainProperty());
 
                     if (HandlerType.STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
-                        frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.getKey() + "=" + addHandler.getMainProperty().getValue());
+                        frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
                     } else {
                         final UIObject uiObject = objectByID.get(addHandler.getObjectID());
                         uiObject.addHandler(addHandler, this);

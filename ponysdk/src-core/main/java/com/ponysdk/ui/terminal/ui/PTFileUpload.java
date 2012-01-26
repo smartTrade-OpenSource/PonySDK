@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
@@ -43,6 +44,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTFileUpload extends PTWidget {
 
     private FormPanel wrappedFormPanel;
+
     final FileUpload fileUpload = new FileUpload();
 
     @Override
@@ -84,8 +86,7 @@ public class PTFileUpload extends PTWidget {
         }
 
         if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
-            final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.getKey() + "="
-                    + addHandler.getMainProperty().getValue();
+            final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue();
             wrappedFormPanel.setAction(action);
             wrappedFormPanel.submit();
         }

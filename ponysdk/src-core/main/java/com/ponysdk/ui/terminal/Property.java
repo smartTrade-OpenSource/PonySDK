@@ -33,7 +33,9 @@ public class Property implements Serializable {
 
     private static final long serialVersionUID = -2137273148825763591L;
 
-    private String key = PropertyKey.ROOT.getKey();
+    private PropertyKey key = PropertyKey.ROOT;
+
+    private String customKey;
 
     private String value;
 
@@ -44,12 +46,12 @@ public class Property implements Serializable {
     public Property() {}
 
     public Property(PropertyKey key, String value) {
-        this.key = key.getKey();
+        this.key = key;
         this.value = value;
     }
 
     public Property(PropertyKey key, List<String> values) {
-        this.key = key.getKey();
+        this.key = key;
         this.values = values;
     }
 
@@ -74,11 +76,11 @@ public class Property implements Serializable {
     }
 
     public void setKey(PropertyKey key) {
-        this.key = key.getKey();
+        this.key = key;
     }
 
     public PropertyKey getKey() {
-        return new PropertyKey(key);
+        return key;
     }
 
     public String getValue() {
@@ -99,64 +101,64 @@ public class Property implements Serializable {
 
     public void setProperty(PropertyKey propertyKey, String value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.getKey(), property);
+        childProperties.put(propertyKey.name(), property);
     }
 
     public void setProperty(PropertyKey propertyKey, int value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.getKey(), property);
+        childProperties.put(propertyKey.name(), property);
     }
 
     public void setProperty(PropertyKey propertyKey, long value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.getKey(), property);
+        childProperties.put(propertyKey.name(), property);
     }
 
     public void setProperty(PropertyKey propertyKey, double value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.getKey(), property);
+        childProperties.put(propertyKey.name(), property);
     }
 
     public void setProperty(PropertyKey propertyKey, boolean value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.getKey(), property);
+        childProperties.put(propertyKey.name(), property);
     }
 
     public Property getChildProperty(PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.getKey());
+        return childProperties.get(propertyKey.name());
     }
 
     public String getStringProperty(PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.getKey()).getValue();
+        return childProperties.get(propertyKey.name()).getValue();
     }
 
     public int getIntProperty(PropertyKey propertyKey) {
-        return Integer.parseInt(childProperties.get(propertyKey.getKey()).getValue());
+        return Integer.parseInt(childProperties.get(propertyKey.name()).getValue());
     }
 
     public long getLongProperty(PropertyKey propertyKey) {
-        return Long.parseLong(childProperties.get(propertyKey.getKey()).getValue());
+        return Long.parseLong(childProperties.get(propertyKey.name()).getValue());
     }
 
     public double getDoubleProperty(PropertyKey propertyKey) {
-        return Double.parseDouble(childProperties.get(propertyKey.getKey()).getValue());
+        return Double.parseDouble(childProperties.get(propertyKey.name()).getValue());
     }
 
     public boolean getBooleanProperty(PropertyKey propertyKey) {
-        return Boolean.parseBoolean(childProperties.get(propertyKey.getKey()).getValue());
+        return Boolean.parseBoolean(childProperties.get(propertyKey.name()).getValue());
     }
 
     public List<String> getListStringProperty(PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.getKey()).getValues();
+        return childProperties.get(propertyKey.name()).getValues();
     }
 
     public List<Integer> getListIntegerProperty(PropertyKey propertyKey) {
-        final List<String> values = childProperties.get(propertyKey.getKey()).getValues();
+        final List<String> values = childProperties.get(propertyKey.name()).getValues();
         return asIntegerList(values);
     }
 
     public boolean hasChildProperty(PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.getKey()) != null;
+        return childProperties.get(propertyKey.name()) != null;
     }
 
     public int getIntValue() {
@@ -181,13 +183,21 @@ public class Property implements Serializable {
 
     public void setProperties(List<Property> properties) {
         for (final Property property : properties) {
-            this.childProperties.put(property.getKey().getKey(), property);
+            this.childProperties.put(property.getKey().name(), property);
         }
+    }
+
+    public String getCustomKey() {
+        return customKey;
+    }
+
+    public void setCustomKey(String customKey) {
+        this.customKey = customKey;
     }
 
     @Override
     public String toString() {
-        return "Property [key=" + key + ", value=" + value + ", childProperties=" + childProperties + "]";
+        return "Property [key=" + key + ", value=" + value + ", custom key=" + customKey + ", childProperties=" + childProperties + "]";
     }
 
     private static List<String> asStringList(int... values) {
