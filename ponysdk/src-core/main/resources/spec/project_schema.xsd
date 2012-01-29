@@ -110,8 +110,7 @@
 			<xs:sequence>
             </xs:sequence>
             <xs:attribute name="class" use="required" type="xs:string" />
-            <xs:attribute name="class" use="required" type="xs:string" />
-            <xs:attribute name="daoLayer" use="required" type="daoLayer" default="hibernate" />
+            <xs:attribute name="daoLayer" use="optional" type="daoLayer" default="hibernate" />
         </xs:complexType>
     </xs:element>
     
@@ -164,5 +163,3 @@
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>
-
-
