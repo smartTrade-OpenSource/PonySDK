@@ -110,6 +110,8 @@
 			<xs:sequence>
             </xs:sequence>
             <xs:attribute name="class" use="required" type="xs:string" />
+            <xs:attribute name="class" use="required" type="xs:string" />
+            <xs:attribute name="daoLayer" use="required" type="daoLayer" default="hibernate" />
         </xs:complexType>
     </xs:element>
     
@@ -153,8 +155,14 @@
             <xs:enumeration value="set" />
         </xs:restriction>
     </xs:simpleType>
-
-
+    
+    <xs:simpleType name="daoLayer">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="memory" />
+            <xs:enumeration value="hibernate" />
+            <xs:enumeration value="mybatis" />
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>
 
 
