@@ -292,7 +292,7 @@ public class ServiceGenerator extends BaseGenerator {
     private void generateDAO(Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
-        classWriter.addExtend("com.ponysdk.core.database.DAO");
+        classWriter.addExtend("com.ponysdk.hibernate.dao");
 
         // Add static logger
         classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");
