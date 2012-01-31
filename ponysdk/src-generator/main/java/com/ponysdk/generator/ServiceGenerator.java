@@ -27,9 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ServiceGenerator extends BaseGenerator {
 
     private String srcGeneratedDirectory = "src-generated-application";
+
+    private final Logger logger = LoggerFactory.getLogger(ServiceGenerator.class);
 
     public ServiceGenerator(Domain domain) {
         super(domain);
@@ -204,8 +209,13 @@ public class ServiceGenerator extends BaseGenerator {
                 classWriter.addLine("public " + returnClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method) + ") throws Exception;");
             }
 
-            if (domain.getService().getDao() != null) {
-                generateDAO(domain.getService().getDao());
+            Dao dao = domain.getService().getDao();
+            if (dao != null) {
+                if (dao.getDaoLayer() == DaoLayer.HIBERNATE) {
+                    generateDAO(dao);
+                } else {
+                    logger.warn(dao.getDaoLayer() + " DAO generation ignored for class" + domain.getService().getDao().getClazz() + ". Only " + DaoLayer.HIBERNATE + " is supported");
+                }
             }
         }
 
@@ -292,7 +302,7 @@ public class ServiceGenerator extends BaseGenerator {
     private void generateDAO(Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
-        classWriter.addExtend("com.ponysdk.core.database.DAO");
+        classWriter.addExtend("com.ponysdk.hibernate.dao.DAO");
 
         // Add static logger
         classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");
