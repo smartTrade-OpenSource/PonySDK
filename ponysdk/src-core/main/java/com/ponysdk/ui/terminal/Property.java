@@ -25,6 +25,7 @@ package com.ponysdk.ui.terminal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,7 +182,7 @@ public class Property implements Serializable {
         return childProperties;
     }
 
-    public void setProperties(List<Property> properties) {
+    public void setProperties(Collection<Property> properties) {
         for (final Property property : properties) {
             this.childProperties.put(property.getKey().name(), property);
         }

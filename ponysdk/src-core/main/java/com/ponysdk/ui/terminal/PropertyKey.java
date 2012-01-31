@@ -43,6 +43,8 @@ public enum PropertyKey {
 
     ITEM_INSERTED,
 
+    ITEM_REMOVED,
+
     ITEM_TEXT,
 
     VALUE,
@@ -293,6 +295,6 @@ public enum PropertyKey {
 
     SELECT_ALL,
 
-    INSERT_HTML;
+    INSERT_HTML, ENABLED_ON_REQUEST, LOADING_ON_REQUEST;
 
 }

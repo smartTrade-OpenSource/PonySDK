@@ -58,9 +58,10 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	</bean>
 
 	<bean class="com.ponysdk.sample.client.page.CheckBoxPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.BasicButtonPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.FlexTablePageActivity" />
@@ -79,5 +80,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.RichTextAreaPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.MultiSelectionPageActivity" />
 
 </beans>

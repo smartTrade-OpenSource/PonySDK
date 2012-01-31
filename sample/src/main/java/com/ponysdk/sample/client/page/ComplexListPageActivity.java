@@ -190,6 +190,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
             @Override
             public void onClick(PClickEvent event) {
+                complexListActivity.resetAllSelectedData();
                 complexListActivity.getSelectedAndEnabledData();
             }
         });

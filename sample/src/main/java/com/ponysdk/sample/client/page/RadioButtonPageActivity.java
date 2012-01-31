@@ -20,87 +20,49 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.addon.PNotificationManager;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRadioButton;
-import com.ponysdk.ui.server.basic.PRadioButtonGroup;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class RadioButtonPageActivity extends PageActivity {
+public class RadioButtonPageActivity extends SamplePageActivity {
 
     public RadioButtonPageActivity() {
-        super("RadioButton", "Basics UI Components");
-    }
-
-    @Override
-    protected void onInitialization() {
-    }
-
-    @Override
-    protected void onLeavingPage() {
-    }
-
-    @Override
-    protected void onShowPage(Place place) {
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        verticalPanel.add(new PLabel("Group1"));
-        final PHorizontalPanel group1Layout = new PHorizontalPanel();
-        group1Layout.add(new PRadioButton("group1", "poney"));
-        group1Layout.add(new PRadioButton("group1", "horse"));
-        group1Layout.add(new PRadioButton("group1", "unicorn"));
-        verticalPanel.add(group1Layout);
-
-        verticalPanel.add(new PLabel("Group2"));
-        final PHorizontalPanel group2Layout = new PHorizontalPanel();
-        group2Layout.add(new PRadioButton("group2", "ford"));
-        group2Layout.add(new PRadioButton("group2", "ferrari"));
-        group2Layout.add(new PRadioButton("group2", "porche"));
-        verticalPanel.add(group2Layout);
-
-        verticalPanel.add(new PLabel("Colors"));
-        final PHorizontalPanel group3Layout = new PHorizontalPanel();
-        final PRadioButton red = new PRadioButton("red");
-        group3Layout.add(red);
-        final PRadioButton blue = new PRadioButton("blue");
-        group3Layout.add(blue);
-        final PRadioButton white = new PRadioButton("white");
-        group3Layout.add(white);
-        verticalPanel.add(group3Layout);
-
-        final PRadioButtonGroup radioButtonGroup = new PRadioButtonGroup("group3");
-        radioButtonGroup.registerRadioButton(red);
-        radioButtonGroup.registerRadioButton(blue);
-        radioButtonGroup.registerRadioButton(white);
-
-        final PButton group3Button = new PButton("PClick!");
-        verticalPanel.add(group3Button);
-        group3Button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                final PRadioButton radioButton = radioButtonGroup.getValue();
-                if (radioButton != null) {
-                    PNotificationManager.notify("Color selected", radioButton.getText());
-                } else {
-                    PNotificationManager.notify("No Color selected ", "");
-                }
-
-            }
-        });
-
-        pageView.getBody().setWidget(verticalPanel);
+        super("Radio Button", "Widgets");
     }
 
     @Override
     protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
+        final PVerticalPanel panelTop = new PVerticalPanel();
+
+        panelTop.add(new PLabel("Select your favorite color:"));
+        panelTop.add(new PRadioButton("color", "blue"));
+        panelTop.add(new PRadioButton("color", "red"));
+
+        PRadioButton yellow = new PRadioButton("color", "yellow");
+        yellow.setEnabled(false);
+        panelTop.add(yellow);
+        panelTop.add(new PRadioButton("color", "green"));
+
+        final PVerticalPanel panelBottom = new PVerticalPanel();
+        panelBottom.add(new PLabel("Select your favorite sport:"));
+        panelBottom.add(new PRadioButton("sport", "Baseball"));
+        panelBottom.add(new PRadioButton("sport", "Basketball"));
+        panelBottom.add(new PRadioButton("sport", "Football"));
+        panelBottom.add(new PRadioButton("sport", "Hockey"));
+        panelBottom.add(new PRadioButton("sport", "Soccer"));
+        panelBottom.add(new PRadioButton("sport", "Water Polo"));
+
+        panelTop.add(panelBottom);
+
+        final PVerticalPanel panel = new PVerticalPanel();
+        panel.add(panelTop);
+        panel.add(panelBottom);
+
+        pageView.getBody().setWidget(panel);
     }
 }

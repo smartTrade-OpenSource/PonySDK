@@ -24,6 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 
 public class CheckBoxPageActivity extends SamplePageActivity {
@@ -35,12 +36,22 @@ public class CheckBoxPageActivity extends SamplePageActivity {
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        // verticalPanel.setSizeFull();
 
-        verticalPanel.add(new PCheckBox("Pony-SDK 1"));
-        verticalPanel.add(new PCheckBox("Pony-SDK 2"));
-        verticalPanel.add(new PCheckBox("Pony-SDK 3"));
+        final PVerticalPanel verticalPanel = new PVerticalPanel();
+
+        verticalPanel.add(new PLabel("Check all days that you are available:"));
+
+        verticalPanel.add(new PCheckBox("Monday"));
+        verticalPanel.add(new PCheckBox("Tuesday"));
+        verticalPanel.add(new PCheckBox("Wednesday"));
+        verticalPanel.add(new PCheckBox("Thursday"));
+        verticalPanel.add(new PCheckBox("Friday"));
+        PCheckBox saturday = new PCheckBox("Saturday");
+        saturday.setEnabled(false);
+        verticalPanel.add(saturday);
+        PCheckBox sunday = new PCheckBox("Sunday");
+        sunday.setEnabled(false);
+        verticalPanel.add(sunday);
 
         examplePanel.setWidget(verticalPanel);
     }

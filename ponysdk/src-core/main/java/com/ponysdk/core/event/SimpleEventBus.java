@@ -20,14 +20,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.event;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.ponysdk.core.event.Event.Type;
 
@@ -36,42 +39,30 @@ public class SimpleEventBus implements EventBus {
     /**
      * Map of event type to map of event source to list of their handlers.
      */
-    private final Map<Type<?>, Map<Object, List<?>>> map = new HashMap<Type<?>, Map<Object, List<?>>>();
+    private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<Type<?>, Map<Object, Set<?>>>();
 
     private final List<BroadcastEventHandler> broadcastHandlerManager = new ArrayList<BroadcastEventHandler>();
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler) {
-        if (type == null) {
-            throw new NullPointerException("Cannot add a handler with a null type");
-        }
-        if (handler == null) {
-            throw new NullPointerException("Cannot add a null handler");
-        }
+        if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
+        if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
 
         return doAdd(type, null, handler);
     }
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
-        if (type == null) {
-            throw new NullPointerException("Cannot add a handler with a null type");
-        }
-        if (source == null) {
-            throw new NullPointerException("Cannot add a handler with a null source");
-        }
-        if (handler == null) {
-            throw new NullPointerException("Cannot add a null handler");
-        }
+        if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
+        if (source == null) { throw new NullPointerException("Cannot add a handler with a null source"); }
+        if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
 
         return doAdd(type, source, handler);
     }
 
     @Override
     public void fireEvent(Event<?> event) {
-        if (event == null) {
-            throw new NullPointerException("Cannot fire null event");
-        }
+        if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         doFire(event, null);
         fireBroadcastEvent(event);
     }
@@ -89,12 +80,8 @@ public class SimpleEventBus implements EventBus {
 
     @Override
     public void fireEventFromSource(Event<?> event, Object source) {
-        if (event == null) {
-            throw new NullPointerException("Cannot fire null event");
-        }
-        if (source == null) {
-            throw new NullPointerException("Cannot fire from a null source");
-        }
+        if (event == null) { throw new NullPointerException("Cannot fire null event"); }
+        if (source == null) { throw new NullPointerException("Cannot fire from a null source"); }
         doFire(event, source);
     }
 
@@ -107,7 +94,7 @@ public class SimpleEventBus implements EventBus {
     }
 
     private <H extends EventHandler> HandlerRegistration doAddNow(final Event.Type<H> type, final Object source, final H handler) {
-        final List<H> l = ensureHandlerList(type, source);
+        final Set<H> l = ensureHandlerSet(type, source);
         l.add(handler);
 
         return new HandlerRegistration() {
@@ -124,9 +111,9 @@ public class SimpleEventBus implements EventBus {
             event.setSource(source);
         }
 
-        final List<H> handlers = getDispatchList(event.getAssociatedType(), source);
+        final Set<H> handlers = getDispatchSet(event.getAssociatedType(), source);
 
-        final ListIterator<H> it = handlers.listIterator();
+        final Iterator<H> it = handlers.iterator();
         while (it.hasNext()) {
             final H handler = it.next();
 
@@ -139,7 +126,7 @@ public class SimpleEventBus implements EventBus {
     }
 
     private <H> void doRemoveNow(Event.Type<H> type, Object source, H handler) {
-        final List<H> l = getHandlerList(type, source);
+        final Set<H> l = getHandlerSet(type, source);
 
         final boolean removed = l.remove(handler);
         assert removed : "redundant remove call";
@@ -148,57 +135,51 @@ public class SimpleEventBus implements EventBus {
         }
     }
 
-    private <H> List<H> ensureHandlerList(Event.Type<H> type, Object source) {
-        Map<Object, List<?>> sourceMap = map.get(type);
+    private <H> Set<H> ensureHandlerSet(Event.Type<H> type, Object source) {
+        Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) {
-            sourceMap = new HashMap<Object, List<?>>();
+            sourceMap = new HashMap<Object, Set<?>>();
             map.put(type, sourceMap);
         }
 
         // safe, we control the puts.
         @SuppressWarnings("unchecked")
-        List<H> handlers = (List<H>) sourceMap.get(source);
+        Set<H> handlers = (Set<H>) sourceMap.get(source);
         if (handlers == null) {
-            handlers = new ArrayList<H>();
+            handlers = new LinkedHashSet<H>();
             sourceMap.put(source, handlers);
         }
 
         return handlers;
     }
 
-    private <H> List<H> getDispatchList(Event.Type<H> type, Object source) {
-        final List<H> directHandlers = getHandlerList(type, source);
-        if (source == null) {
-            return directHandlers;
-        }
+    private <H> Set<H> getDispatchSet(Event.Type<H> type, Object source) {
+        final Set<H> directHandlers = getHandlerSet(type, source);
+        if (source == null) { return directHandlers; }
 
-        final List<H> globalHandlers = getHandlerList(type, null);
+        final Set<H> globalHandlers = getHandlerSet(type, null);
 
-        final List<H> rtn = new ArrayList<H>(directHandlers);
+        final Set<H> rtn = new LinkedHashSet<H>(directHandlers);
         rtn.addAll(globalHandlers);
         return rtn;
     }
 
-    public <H> List<H> getHandlerList(Event.Type<H> type, Object source) {
-        final Map<Object, List<?>> sourceMap = map.get(type);
-        if (sourceMap == null) {
-            return Collections.emptyList();
-        }
+    public <H> Set<H> getHandlerSet(Event.Type<H> type, Object source) {
+        final Map<Object, Set<?>> sourceMap = map.get(type);
+        if (sourceMap == null) { return Collections.emptySet(); }
 
         // safe, we control the puts.
         @SuppressWarnings("unchecked")
-        final List<H> handlers = (List<H>) sourceMap.get(source);
-        if (handlers == null) {
-            return Collections.emptyList();
-        }
+        final Set<H> handlers = (Set<H>) sourceMap.get(source);
+        if (handlers == null) { return Collections.emptySet(); }
 
         return handlers;
     }
 
     private void prune(Event.Type<?> type, Object source) {
-        final Map<Object, List<?>> sourceMap = map.get(type);
+        final Map<Object, Set<?>> sourceMap = map.get(type);
 
-        final List<?> pruned = sourceMap.remove(source);
+        final Set<?> pruned = sourceMap.remove(source);
 
         assert pruned != null : "Can't prune what wasn't there";
         assert pruned.isEmpty() : "Pruned unempty list!";

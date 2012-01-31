@@ -19,9 +19,11 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
 
-import java.util.List;
+package com.ponysdk.ui.server.basic;
+
+import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -36,8 +38,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
 
     private String text;
 
-    public PLabel() {
-    }
+    public PLabel() {}
 
     public PLabel(String text) {
         setText(text);
@@ -67,8 +68,8 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     }
 
     @Override
-    public List<PClickHandler> getClickHandlers() {
-        return getHandlerList(PClickEvent.TYPE, this);
+    public Collection<PClickHandler> getClickHandlers() {
+        return getHandlerSet(PClickEvent.TYPE, this);
     }
 
 }

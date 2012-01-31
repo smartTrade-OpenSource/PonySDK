@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -84,23 +85,34 @@ public class PTListBox extends PTFocusWidget {
         final PropertyKey propertyKey = property.getKey();
         final com.google.gwt.user.client.ui.ListBox listBox = cast();
 
-        if (PropertyKey.CLEAR.equals(propertyKey)) {
-            listBox.clear();
-        } else if (PropertyKey.ITEM_INSERTED.equals(propertyKey)) {
-            final int index = property.getIntProperty(PropertyKey.INDEX);
-            final String item = property.getStringProperty(PropertyKey.ITEM_TEXT);
-            final String value = property.getStringProperty(PropertyKey.VALUE);
-            listBox.insertItem(item, value, index);
-        } else if (PropertyKey.SELECTED.equals(propertyKey)) {
-            final boolean selected = property.getBooleanValue();
-            final int index = property.getIntProperty(PropertyKey.SELECTED_INDEX);
-            if (index == -1)
-                listBox.setSelectedIndex(index);
-            else
-                listBox.setItemSelected(index, selected);
-        } else {
-            super.update(update, uiService);
+        switch (propertyKey) {
+            case CLEAR:
+                listBox.clear();
+                break;
+            case ITEM_INSERTED: {
+                final int index = property.getIntProperty(PropertyKey.INDEX);
+                final String item = property.getStringProperty(PropertyKey.ITEM_TEXT);
+                final String value = property.getStringProperty(PropertyKey.VALUE);
+                listBox.insertItem(item, value, index);
+                break;
+            }
+            case ITEM_REMOVED: {
+                final int index = property.getIntProperty(PropertyKey.INDEX);
+                listBox.removeItem(index);
+                break;
+            }
+            case SELECTED:
+                final boolean selected = property.getBooleanValue();
+                final int index = property.getIntProperty(PropertyKey.SELECTED_INDEX);
+                if (index == -1) listBox.setSelectedIndex(index);
+                else listBox.setItemSelected(index, selected);
+                break;
+
+            default:
+                break;
         }
+
+        super.update(update, uiService);
 
     }
 

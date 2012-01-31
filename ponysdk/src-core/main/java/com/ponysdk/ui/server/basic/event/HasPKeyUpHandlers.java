@@ -20,14 +20,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
 
 public interface HasPKeyUpHandlers {
+
     HandlerRegistration addKeyUpHandler(PKeyUpHandler handler);
 
-    List<PKeyUpHandler> getKeyUpHandlers();
+    Collection<PKeyUpHandler> getKeyUpHandlers();
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
@@ -44,18 +44,20 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
 
     private boolean enabled = true;
 
+    private boolean enabledOnRequest = false;
+
     private boolean focused;
 
-    private boolean loadingOnRequest;
+    private boolean showLoadingOnRequest;
 
     @Override
-    public List<PClickHandler> getClickHandlers() {
-        return getHandlerList(PClickEvent.TYPE, this);
+    public Collection<PClickHandler> getClickHandlers() {
+        return getHandlerSet(PClickEvent.TYPE, this);
     }
 
     @Override
-    public List<PMouseOverHandler> getMouseOverHandlers() {
-        return getHandlerList(PMouseOverEvent.TYPE, this);
+    public Collection<PMouseOverHandler> getMouseOverHandlers() {
+        return getHandlerSet(PMouseOverEvent.TYPE, this);
     }
 
     @Override
@@ -74,19 +76,33 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public List<PKeyPressHandler> getKeyPressHandlers() {
-        return getHandlerList(PKeyPressEvent.TYPE, this);
+    public Collection<PKeyPressHandler> getKeyPressHandlers() {
+        return getHandlerSet(PKeyPressEvent.TYPE, this);
     }
 
     @Override
-    public List<PKeyUpHandler> getKeyUpHandlers() {
-        return getHandlerList(PKeyUpEvent.TYPE, this);
+    public Collection<PKeyUpHandler> getKeyUpHandlers() {
+        return getHandlerSet(PKeyUpEvent.TYPE, this);
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.ENABLED, enabled);
+        getPonySession().stackInstruction(update);
+    }
+
+    public void setEnabledOnRequest(boolean enabledOnRequest) {
+        this.enabledOnRequest = enabledOnRequest;
+        final Update update = new Update(ID);
+        update.setMainPropertyValue(PropertyKey.ENABLED_ON_REQUEST, enabledOnRequest);
+        getPonySession().stackInstruction(update);
+    }
+
+    public void showLoadingOnRequest(boolean showLoadingOnRequest) {
+        this.showLoadingOnRequest = showLoadingOnRequest;
+        final Update update = new Update(ID);
+        update.setMainPropertyValue(PropertyKey.LOADING_ON_REQUEST, showLoadingOnRequest);
         getPonySession().stackInstruction(update);
     }
 
@@ -106,16 +122,9 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         getPonySession().stackInstruction(update);
     }
 
-    public void showLoadingOnRequest(boolean loadingOnRequest) {
-        this.loadingOnRequest = loadingOnRequest;
-        final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.LOADING, loadingOnRequest);
-        getPonySession().stackInstruction(update);
-    }
-
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
-        if (loadingOnRequest) {
+        if (showLoadingOnRequest || !enabledOnRequest) {
             final PClickHandler clickHandler = new PClickHandler() {
 
                 @Override

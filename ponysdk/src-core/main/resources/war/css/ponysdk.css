@@ -904,6 +904,14 @@ table .pony-PFlexTable{
 	background: -moz-linear-gradient(top,  #ededed,  #fff);
 }
  
+.white[disabled] {
+ 	color:#CCC;
+	background: red;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
+	background: -moz-linear-gradient(top,  #ededed,  #fff);
+	cursor:auto;
+}
+ 
 /* orange */
 .orange {
 	color: #fef4e9;
