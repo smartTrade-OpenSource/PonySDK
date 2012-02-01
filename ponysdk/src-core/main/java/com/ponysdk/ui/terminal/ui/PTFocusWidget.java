@@ -93,10 +93,11 @@ public class PTFocusWidget extends PTWidget {
 
     @Override
     protected void triggerOnClick(AddHandler addHandler, Widget widget, int domHandlerType, UIService uiService, ClickEvent event) {
-        if (showLoadingOnRequest) {
+        if (!enabledOnRequest) {
             cast().setEnabled(false);
+        }
+        if (showLoadingOnRequest) {
             cast().addStyleName("pony-Loading");
-
         }
         super.triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
     }
