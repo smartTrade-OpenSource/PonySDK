@@ -20,9 +20,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.ponysdk.ui.terminal.Property;
 
@@ -30,5 +31,5 @@ public interface HasPProperties {
 
     public void addProperty(Property property);
 
-    public List<Property> getProperties();
+    public Collection<Property> getProperties();
 }

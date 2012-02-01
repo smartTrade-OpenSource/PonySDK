@@ -40,10 +40,8 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.application.ApplicationView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonyChildsCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -177,18 +175,22 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
 
+            // @Override
+            // public void onClick(final PClickEvent event) {
+            // Pony pony = new Pony(null, "A dynamic pony", 1, "Equus ferus caballus");
+            // new CreatePonyCommand(pony) {
+            //
+            // @Override
+            // protected void doAfterSuccess(final Pony result) {
+            // PonyCreatedEvent event = new PonyCreatedEvent(this, result);
+            // event.setBusinessMessage("Pony '" + result.getName() + "' has been added");
+            // fireEvent(event);
+            // }
+            // }.execute();
             @Override
             public void onClick(final PClickEvent event) {
-                Pony pony = new Pony(null, "A dynamic pony", 1, "Equus ferus caballus");
-                new CreatePonyCommand(pony) {
-
-                    @Override
-                    protected void doAfterSuccess(final Pony result) {
-                        PonyCreatedEvent event = new PonyCreatedEvent(this, result);
-                        event.setBusinessMessage("Pony '" + result.getName() + "' has been added");
-                        fireEvent(event);
-                    }
-                }.execute();
+                complexListActivity.resetAllSelectedData();
+                complexListActivity.getSelectedAndEnabledData();
             }
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);

@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
+
+package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +45,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
 
     private final Map<String, Object> valueByItems = new HashMap<String, Object>();
+
     private final List<String> items = new ArrayList<String>();
 
     private List<Integer> selectedItems = new ArrayList<Integer>();
@@ -50,6 +53,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private int selectedIndex = -1;
 
     private final boolean containsEmptyItem;
+
     private final boolean isMultipleSelect;
 
     public PListBox() {
@@ -83,8 +87,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
                 if (selectedItemIndex == null) {
                     selectedItemIndex = Integer.valueOf(index);
                     selectedItems.add(selectedItemIndex);
-                } else
-                    selectedItems.add(Integer.valueOf(index));
+                } else selectedItems.add(Integer.valueOf(index));
             }
             syncSelectedItems(selectedItems);
             onChange(this, selectedItemIndex);
@@ -162,6 +165,29 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void removeItem(int index) {
         checkIndex(index);
         valueByItems.remove(items.remove(index));
+        sendRemoveItemInstruction(index);
+    }
+
+    // TODO nciaravola add a map
+    public void removeItem(String item) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).equals(item)) {
+                valueByItems.remove(items.remove(i));
+                sendRemoveItemInstruction(i);
+                return;
+            }
+        }
+    }
+
+    private void sendRemoveItemInstruction(int index) {
+        final Update update = new Update(getID());
+
+        final Property property = new Property(PropertyKey.ITEM_REMOVED);
+        property.setProperty(PropertyKey.INDEX, index);
+
+        update.setMainProperty(property);
+
+        getPonySession().stackInstruction(update);
     }
 
     public Object getValue(int index) {
@@ -206,18 +232,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public String getSelectedItem() {
-        if (selectedIndex < 0)
-            return null;
+        if (selectedIndex < 0) return null;
         return items.get(selectedIndex);
     }
 
     public Object getSelectedValue() {
-        if (selectedIndex < 0)
-            return null;
+        if (selectedIndex < 0) return null;
         final String item = items.get(selectedIndex);
-        if (item != null) {
-            return valueByItems.get(item);
-        }
+        if (item != null) { return valueByItems.get(item); }
         return null;
     }
 
@@ -278,8 +300,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void checkIndex(int index) {
-        if (index >= getItemCount())
-            throw new IndexOutOfBoundsException();
+        if (index >= getItemCount()) throw new IndexOutOfBoundsException();
     }
 
     public List<Integer> getSelectedItems() {

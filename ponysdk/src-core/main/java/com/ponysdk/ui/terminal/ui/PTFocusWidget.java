@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
@@ -34,7 +35,11 @@ import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTFocusWidget extends PTWidget {
 
-    private boolean loadingOnRequest = false;
+    private boolean showLoadingOnRequest = false;
+
+    private boolean enabledOnRequest = false;
+
+    private boolean enabled = true;
 
     @Override
     public void update(Update update, UIService uiService) {
@@ -42,22 +47,31 @@ public class PTFocusWidget extends PTWidget {
         final Property mainProperty = update.getMainProperty();
         final PropertyKey mainPropertyKey = mainProperty.getKey();
 
-        if (PropertyKey.LOADING.equals(mainPropertyKey)) {
-            loadingOnRequest = mainProperty.getBooleanValue();
-            return;
-        }
-        if (PropertyKey.END_OF_PROCESSING.equals(mainPropertyKey)) {
-            if (loadingOnRequest) {
-                cast().setEnabled(true);
-                cast().removeStyleName("pony-Loading");
-            }
-            return;
+        switch (mainPropertyKey) {
+            case LOADING_ON_REQUEST:
+                showLoadingOnRequest = mainProperty.getBooleanValue();
+                break;
+            case ENABLED_ON_REQUEST:
+                enabledOnRequest = mainProperty.getBooleanValue();
+                break;
+            case END_OF_PROCESSING:
+                if (showLoadingOnRequest) {
+                    cast().removeStyleName("pony-Loading");
+                }
+                if (!enabledOnRequest) {
+                    cast().setEnabled(enabled);
+                }
+                break;
+
+            default:
+                break;
         }
 
         for (final Property property : mainProperty.getChildProperties().values()) {
             final PropertyKey propertyKey = property.getKey();
             if (PropertyKey.ENABLED.equals(propertyKey)) {
-                cast().setEnabled(property.getBooleanValue());
+                this.enabled = property.getBooleanValue();
+                cast().setEnabled(enabled);
             } else if (PropertyKey.FOCUSED.equals(propertyKey)) {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -79,10 +93,11 @@ public class PTFocusWidget extends PTWidget {
 
     @Override
     protected void triggerOnClick(AddHandler addHandler, Widget widget, int domHandlerType, UIService uiService, ClickEvent event) {
-        if (loadingOnRequest) {
+        if (!enabledOnRequest) {
             cast().setEnabled(false);
+        }
+        if (showLoadingOnRequest) {
             cast().addStyleName("pony-Loading");
-
         }
         super.triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
     }

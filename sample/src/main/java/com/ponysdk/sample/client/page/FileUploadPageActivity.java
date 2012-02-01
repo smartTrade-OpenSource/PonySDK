@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import java.io.IOException;
@@ -28,8 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFileUpload;
@@ -38,30 +37,18 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
 
-public class FileUploadPageActivity extends PageActivity {
-
-    private PVerticalPanel verticalPanel;
+public class FileUploadPageActivity extends SamplePageActivity {
 
     public FileUploadPageActivity() {
-        super("File Upload", "Basics UI Components");
-    }
-
-    @Override
-    protected void onInitialization() {
-    }
-
-    @Override
-    protected void onShowPage(Place place) {
-        pageView.getBody().setWidget(verticalPanel);
-    }
-
-    @Override
-    protected void onLeavingPage() {
+        super("File Upload", "Widgets");
     }
 
     @Override
     protected void onFirstShowPage() {
-        verticalPanel = new PVerticalPanel();
+        super.onFirstShowPage();
+
+        PVerticalPanel panel = new PVerticalPanel();
+        panel.setSpacing(10);
 
         final PFileUpload fileUpload = new PFileUpload();
         fileUpload.setName("my_file");
@@ -87,23 +74,21 @@ public class FileUploadPageActivity extends PageActivity {
             }
         });
 
-        final PButton submitButton = new PButton("Submit");
+        final PButton submitButton = new PButton("Upload File");
         submitButton.showLoadingOnRequest(true);
+        submitButton.setEnabledOnRequest(false);
 
         submitButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(PClickEvent event) {
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {
-                    e.printStackTrace();
-                }
                 fileUpload.submit();
             }
         });
 
-        verticalPanel.add(fileUpload);
-        verticalPanel.add(submitButton);
+        panel.add(fileUpload);
+        panel.add(submitButton);
+
+        examplePanel.setWidget(panel);
     }
 }

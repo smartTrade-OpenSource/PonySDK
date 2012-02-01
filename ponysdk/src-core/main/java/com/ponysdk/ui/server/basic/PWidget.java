@@ -1,8 +1,8 @@
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,19 +58,25 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private static Logger log = LoggerFactory.getLogger(PWidget.class);
 
     protected PWidget parent;
+
     private boolean visible = true;
+
     private String title;
 
     protected Object data;
 
     private final Set<String> styleNames = new HashSet<String>();
+
     private final Map<String, String> styleProperties = new HashMap<String, String>();
 
     private final SimpleEventBus domHandler = new SimpleEventBus();
 
     private String width;
+
     private String height;
+
     private String styleName;
+
     private String debugID;
 
     protected void setMainProperty(Property mainProperty) {
@@ -188,8 +194,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final AddHandler addHandler = createAddHandlerInstruction(type);
-        if (handler instanceof HasPProperties)
-            addHandler.getMainProperty().setProperties(((HasPProperties) handler).getProperties());
+        if (handler instanceof HasPProperties) addHandler.getMainProperty().setProperties(((HasPProperties) handler).getProperties());
         getPonySession().stackInstruction(addHandler);
         return handlerRegistration;
     }
@@ -207,37 +212,37 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (HandlerType.DOM_HANDLER.equals(instruction.getHandlerType())) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntProperty(PropertyKey.DOM_HANDLER)];
             switch (domHandler) {
-            case KEY_PRESS:
-                fireEvent(new PKeyPressEvent(this, instruction.getMainProperty().getIntValue()));
-                break;
-            case KEY_UP:
-                fireEvent(new PKeyUpEvent(this, instruction.getMainProperty().getIntValue()));
-                break;
-            case CLICK:
-                final PClickEvent event = new PClickEvent(this);
-                event.setClientX(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_X));
-                event.setClientY(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_Y));
-                event.setSourceAbsoluteLeft((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_LEFT));
-                event.setSourceAbsoluteTop((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_TOP));
-                event.setSourceOffsetHeight((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_HEIGHT));
-                event.setSourceOffsetWidth((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_WIDTH));
-                fireEvent(event);
-                break;
-            case MOUSE_OVER:
-                fireEvent(new PMouseOverEvent(this));
-                break;
-			case MOUSE_OUT:
-				fireEvent(new PMouseOutEvent(this));
-				break;
-            default:
-                log.error("Dom Handler not implemented: " + domHandler);
-                break;
+                case KEY_PRESS:
+                    fireEvent(new PKeyPressEvent(this, instruction.getMainProperty().getIntValue()));
+                    break;
+                case KEY_UP:
+                    fireEvent(new PKeyUpEvent(this, instruction.getMainProperty().getIntValue()));
+                    break;
+                case CLICK:
+                    final PClickEvent event = new PClickEvent(this);
+                    event.setClientX(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_X));
+                    event.setClientY(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_Y));
+                    event.setSourceAbsoluteLeft((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_LEFT));
+                    event.setSourceAbsoluteTop((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_TOP));
+                    event.setSourceOffsetHeight((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_HEIGHT));
+                    event.setSourceOffsetWidth((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_WIDTH));
+                    fireEvent(event);
+                    break;
+                case MOUSE_OVER:
+                    fireEvent(new PMouseOverEvent(this));
+                    break;
+                case MOUSE_OUT:
+                    fireEvent(new PMouseOutEvent(this));
+                    break;
+                default:
+                    log.error("Dom Handler not implemented: " + domHandler);
+                    break;
             }
         }
     }
 
-    protected <H extends EventHandler> List<H> getHandlerList(final PDomEvent.Type<H> type, Object source) {
-        return domHandler.getHandlerList(type, null);
+    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, Object source) {
+        return domHandler.getHandlerSet(type, null);
     }
 
     public void fireEvent(Event<?> event) {
@@ -247,9 +252,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void removeFromParent() {
         if (parent instanceof HasPWidgets) {
             ((HasPWidgets) parent).remove(this);
-        } else if (parent != null) {
-            throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
-        }
+        } else if (parent != null) { throw new IllegalStateException("This widget's parent does not implement HasPWidgets"); }
     }
 
     public boolean isVisible() {
