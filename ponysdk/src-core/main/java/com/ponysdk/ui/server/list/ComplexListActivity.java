@@ -180,11 +180,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     private ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler = new SHowCustomColumnDescriptorFormHandlerImpl();
 
-    public ComplexListActivity(ComplexListConfiguration<D> complexListConfiguration, ComplexListView complexListView) {
+    public ComplexListActivity(final ComplexListConfiguration<D> complexListConfiguration, final ComplexListView complexListView) {
         this(complexListConfiguration, complexListView, null);
     }
 
-    public ComplexListActivity(ComplexListConfiguration<D> complexListConfiguration, ComplexListView complexListView, EventBus eventBus) {
+    public ComplexListActivity(final ComplexListConfiguration<D> complexListConfiguration, final ComplexListView complexListView, final EventBus eventBus) {
         this.eventBus = eventBus;
         this.complexListConfiguration = complexListConfiguration;
         this.listColumnDescriptors = complexListConfiguration.getColumnDescriptors();
@@ -230,7 +230,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
         private int datasize;
 
-        public void setRow(int row) {
+        public void setRow(final int row) {
             this.row = row;
         }
 
@@ -238,7 +238,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             return row;
         }
 
-        public void setDatasize(int datasize) {
+        public void setDatasize(final int datasize) {
             this.datasize = datasize;
         }
 
@@ -269,7 +269,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                 checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
                     @Override
-                    public void onValueChange(Boolean value) {
+                    public void onValueChange(final Boolean value) {
                         if (value) {
                             if (checkBox.getRow() != 0) {
                                 simpleListActivity.selectRow(checkBox.getRow());
@@ -337,7 +337,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                 mainCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
                     @Override
-                    public void onValueChange(Boolean value) {
+                    public void onValueChange(final Boolean value) {
                         triggerMainCheckBoxValueChange(value);
                     }
 
@@ -372,7 +372,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         return listColumnDescriptor;
     }
 
-    private void triggerMainCheckBoxValueChange(Boolean value) {
+    private void triggerMainCheckBoxValueChange(final Boolean value) {
         if (!rowSelectorAction) {
             mainSelectorAction = true;
             mainCheckboxChanged(value);
@@ -380,7 +380,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         }
     }
 
-    private void mainCheckboxChanged(Boolean value) {
+    private void mainCheckboxChanged(final Boolean value) {
         changeRowSelectorsState(value);
         if (value) {
             showSelectAllOption();
@@ -408,7 +408,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             anchor.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent event) {
+                public void onClick(final PClickEvent event) {
                     selectionMode = SelectionMode.FULL;
                     showClearSelectAllOption();
                 }
@@ -429,7 +429,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         anchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 mainCheckboxChanged(false);
             }
         });
@@ -450,7 +450,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         listColumnDescriptor.setValueProvider(new ValueProvider<D, String>() {
 
             @Override
-            public String getValue(D data) {
+            public String getValue(final D data) {
                 return null;
             }
         });
@@ -540,7 +540,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
                         final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
-                        final Command command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
+                        final Command<String> command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
                         command.execute();
                     }
                 });
@@ -554,7 +554,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         complexListView.getToolbarLayout().addSepararator();
     }
 
-    public void setData(Result<List<D>> result) {
+    public void setData(final Result<List<D>> result) {
         findResult = result;
         simpleListActivity.setData(result.getData());
 
@@ -584,18 +584,18 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         return findResult;
     }
 
-    public void addDescriptor(ListColumnDescriptor<D, ?> customDescriptor) {
+    public void addDescriptor(final ListColumnDescriptor<D, ?> customDescriptor) {
         listColumnDescriptors.add(customDescriptor);
         descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
     }
 
-    public void addDescriptor(int index, ListColumnDescriptor<D, ?> customDescriptor) {
+    public void addDescriptor(final int index, final ListColumnDescriptor<D, ?> customDescriptor) {
         if (index > listColumnDescriptors.size() || index < 0) { throw new RuntimeException("Cannot add column#" + customDescriptor.getCaption() + " index out of bound"); }
         listColumnDescriptors.add(index, customDescriptor);
         descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
     }
 
-    public void insertSubList(int row, List<D> datas) {
+    public void insertSubList(final int row, final List<D> datas) {
         simpleListActivity.insertSubList(row, datas);
 
         Map<Integer, PRowCheckBox> map = new HashMap<Integer, PRowCheckBox>();
@@ -611,7 +611,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         rowSelectors = map;
     }
 
-    public void removeSubList(int fatherRow) {
+    public void removeSubList(final int fatherRow) {
         simpleListActivity.removeSubList(fatherRow);
         int dataSize = 0;
 
@@ -632,7 +632,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         rowSelectors = map;
     }
 
-    public void setCommandFactory(ComplexListCommandFactory<D> commandFactory) {
+    public void setCommandFactory(final ComplexListCommandFactory<D> commandFactory) {
         this.commandFactory = commandFactory;
     }
 
@@ -682,7 +682,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         refresh(0);
     }
 
-    public void refresh(int page) {
+    public void refresh(final int page) {
         if (complexListConfiguration.isSearchFormMustBeValid()) {
             if (!searchFormActivity.isValid()) { return; }
         }
@@ -693,14 +693,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         // }
 
         final Query query = createQuery(page);
-        final Command command = commandFactory.newFindCommand(ComplexListActivity.this, query);
+        final Command<Result<List<D>>> command = commandFactory.newFindCommand(ComplexListActivity.this, query);
         if (command == null) { throw new IllegalStateException("FindCommand of the complex list can't be null"); }
         command.execute();
         complexListView.updateView();
 
     }
 
-    protected Query createQuery(int page) {
+    protected Query createQuery(final int page) {
         final List<CriterionField> criteria = new ArrayList<CriterionField>();
         for (final Entry<CriterionField, FormField> entry : formFieldsByCriterionFields.entrySet()) {
             final FormField formField = entry.getValue();
@@ -730,7 +730,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onPageChange(PagingSelectionChangeEvent event) {
+    public void onPageChange(final PagingSelectionChangeEvent event) {
         if (event.getSource().equals(pagingActivity)) {
             currentPage = event.getPage();
             refresh(currentPage);
@@ -743,14 +743,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onColumnSort(SortColumnEvent event) {
+    public void onColumnSort(final SortColumnEvent event) {
         currentSortingType = event.getSortingType();
         currentSortingPojoPropertyKey = event.getPojoPropertyKey();
         refresh();
     }
 
     @Override
-    public void onComparatorTypeChange(ComparatorTypeChangeEvent event) {
+    public void onComparatorTypeChange(final ComparatorTypeChangeEvent event) {
         CriterionField criterionField = criterionByPojoProperty.get(event.getPojoPropertyKey());
         if (criterionField != null) {
             criterionField.setComparator(event.getComparatorType());
@@ -778,7 +778,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         return selectionResult;
     }
 
-    public void setSelectedData(List<D> data) {
+    public void setSelectedData(final List<D> data) {
         // unselect previously selected data
         if (mainCheckBox != null) {
             mainCheckBox.setValue(false);
@@ -791,7 +791,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         }
     }
 
-    public void enableSelectedData(D data, boolean enabled) {
+    public void enableSelectedData(final D data, final boolean enabled) {
         // // unselect previously selected data
         // if (mainCheckBox != null) {
         // mainCheckBox.setValue(false);
@@ -802,7 +802,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         enableRow(getRow(data), enabled);
     }
 
-    public int getRow(D data) {
+    public int getRow(final D data) {
         if (findResult == null) return -1;
 
         for (final PRowCheckBox checkBox : rowSelectors.values()) {
@@ -817,13 +817,13 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         refresh();
     }
 
-    public void enableRow(int row, boolean enabled) {
+    public void enableRow(final int row, final boolean enabled) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             enableCheckBoxRow(row, enabled);
         }
     }
 
-    public void selectRow(int row) {
+    public void selectRow(final int row) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             selectRowCheckBox(row);
         }
@@ -840,14 +840,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.simpleListActivity.selectRow(row);
     }
 
-    public void enableCheckBoxRow(int row, boolean enabled) {
+    public void enableCheckBoxRow(final int row, final boolean enabled) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             enableRowCheckBox(row, enabled);
         }
 
     }
 
-    public void unSelectRow(int row) {
+    public void unSelectRow(final int row) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             unselectRowCheckBox(row);
         }
@@ -860,26 +860,26 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.simpleListActivity.unSelectRow(row);
     }
 
-    private void enableRowCheckBox(int row, boolean enabled) {
+    private void enableRowCheckBox(final int row, final boolean enabled) {
         PRowCheckBox checkBox = rowSelectors.get(row);
         if (checkBox == null) return;
         checkBox.setEnabled(enabled);
     }
 
-    private void selectRowCheckBox(int row) {
+    private void selectRowCheckBox(final int row) {
         PRowCheckBox checkBox = rowSelectors.get(row);
         if (checkBox == null) return;
         checkBox.setValue(true);
     }
 
-    private void unselectRowCheckBox(int row) {
+    private void unselectRowCheckBox(final int row) {
         PRowCheckBox checkBox = rowSelectors.get(row);
         if (checkBox == null) return;
         checkBox.setValue(false);
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         this.simpleListActivity = new SimpleListActivity<D>(complexListConfiguration.getTableName(), complexListView, listColumnDescriptors, localEventBus);
         buildSearchForm();
         buildActions();
@@ -919,7 +919,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                     PConfirmDialog.show("Column Ordering", new PreferenceForm(descriptorsByCaption.values(), localEventBus, complexListConfiguration.getTableName()), new PConfirmDialogHandler() {
 
                         @Override
-                        public boolean onOK(PDialogBox dialogBox) {
+                        public boolean onOK(final PDialogBox dialogBox) {
                             return true;
                         }
 
@@ -938,13 +938,13 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     }
 
-    public void updateData(D d) {
+    public void updateData(final D d) {
         int row = getRow(d);
         eventBus.fireEvent(new ShowSubListEvent<D>(this, d, true, row));
     }
 
     @Override
-    public void onShowSubList(ShowSubListEvent<D> event) {
+    public void onShowSubList(final ShowSubListEvent<D> event) {
         eventBus.fireEvent(new ShowSubListEvent<D>(this, event.getData(), event.isShow(), event.getRow()));
     }
 
@@ -952,7 +952,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         return complexListView;
     }
 
-    public void ensureDebugId(String debugID) {
+    public void ensureDebugId(final String debugID) {
         this.debugID = debugID;
         if (refreshButton != null) {
             refreshButton.ensureDebugId(debugID + "[refresh]");
@@ -967,7 +967,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onShowCustomColumnDescriptorForm(ShowCustomColumnDescriptorFormEvent event) {
+    public void onShowCustomColumnDescriptorForm(final ShowCustomColumnDescriptorFormEvent event) {
         columnDescriptorFormHandler.onShowCustomColumnDescriptorForm(event);
 
     }
@@ -975,7 +975,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     private class SHowCustomColumnDescriptorFormHandlerImpl implements ShowCustomColumnDescriptorFormHandler {
 
         @Override
-        public void onShowCustomColumnDescriptorForm(ShowCustomColumnDescriptorFormEvent event) {
+        public void onShowCustomColumnDescriptorForm(final ShowCustomColumnDescriptorFormEvent event) {
             final FormView formView = new DefaultFormView("AddCustomColumnDescriptorForm");
             final FormConfiguration formConfiguration = new FormConfiguration();
             formConfiguration.setName("Form");
@@ -985,7 +985,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             PConfirmDialog.show("Add custom column", windowContent, "Ok", "Cancel", new PConfirmDialogHandler() {
 
                 @Override
-                public boolean onOK(PDialogBox dialogBox) {
+                public boolean onOK(final PDialogBox dialogBox) {
                     if (form.isValid()) {
                         Class<?> fieldType = form.getFieldType();
                         String fieldPath = form.getFieldPath();
@@ -1011,7 +1011,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onShowColumnDescriptor(ShowColumnDescriptorEvent event) {
+    public void onShowColumnDescriptor(final ShowColumnDescriptorEvent event) {
         descriptorsByCaption.get(event.getKey()).setViewable(event.isShow());
         rebuildSimpleList();
         ColumnDescriptorShownEvent showColumnDescriptorEvent = new ColumnDescriptorShownEvent(this, event.getKey(), event.isShow(), complexListConfiguration.getTableName());
@@ -1020,7 +1020,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onMoveColumn(MoveColumnDescriptorEvent event) {
+    public void onMoveColumn(final MoveColumnDescriptorEvent event) {
         if (event.getSource() != this && event.getTableName() != null && event.getTableName().equals(complexListConfiguration.getTableName())) {
             final List<String> caption = event.getColumnOrder();
             listColumnDescriptors.removeAll(new ArrayList<ListColumnDescriptor<D, ?>>(listColumnDescriptors.subList(beforeIndex + 1, listColumnDescriptors.size())));
@@ -1039,7 +1039,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onRemoveColumn(RemoveColumnDescriptorEvent event) {
+    public void onRemoveColumn(final RemoveColumnDescriptorEvent event) {
         final String caption = event.getCaption();
         final ListColumnDescriptor<?, ?> columnDescriptorToBeRemoved = descriptorsByCaption.remove(caption);
         listColumnDescriptors.remove(columnDescriptorToBeRemoved);
@@ -1058,7 +1058,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     @Override
-    public void onAddCustomColumnDescriptor(AddCustomColumnDescriptorEvent event) {
+    public void onAddCustomColumnDescriptor(final AddCustomColumnDescriptorEvent event) {
         FormField formField;
         Class<?> fieldType = event.getDescriptorHolder().getFieldType();
         String caption = event.getDescriptorHolder().getCaption();
@@ -1111,7 +1111,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         eventBus.fireEvent(new CustomColumnDescriptorAddedEvent(ComplexListActivity.this, descriptorHolder));
     }
 
-    public void setColumnDescriptorFormHandler(ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler) {
+    public void setColumnDescriptorFormHandler(final ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler) {
         this.columnDescriptorFormHandler = columnDescriptorFormHandler;
     }
 

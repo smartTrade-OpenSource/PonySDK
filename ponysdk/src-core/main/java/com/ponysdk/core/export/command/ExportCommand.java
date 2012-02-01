@@ -31,9 +31,10 @@ import com.ponysdk.core.command.Command;
 import com.ponysdk.core.event.BusinessEvent.Level;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.export.ExportContext;
+import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.event.DataExportedEvent;
 
-public class ExportCommand<T> implements Command {
+public class ExportCommand<T> implements Command<String> {
 
     protected final ExportContext<T> exportContext;
 
@@ -45,29 +46,33 @@ public class ExportCommand<T> implements Command {
         this(exportContext, PonySession.getRootEventBus());
     }
 
-    public ExportCommand(final ExportContext<T> exportContext, EventBus eventBus) {
+    public ExportCommand(final ExportContext<T> exportContext, final EventBus eventBus) {
         this.exportContext = exportContext;
         this.eventBus = eventBus;
     }
 
     @Override
-    public void execute() {
-        if (exportContext.getSelectionResult().getSelectedData() == null || exportContext.getSelectionResult().getSelectedData().isEmpty()) return;
+    public String execute() {
+        if (exportContext.getSelectionResult().getSelectedData() == null || exportContext.getSelectionResult().getSelectedData().isEmpty()) return null;
         try {
-            onSuccess(exportContext.getExporter().export(exportContext.getExportableFields(), exportContext.getSelectionResult().getSelectedData()));
+            Exporter<T> exporter = exportContext.getExporter();
+            String message = exporter.export(exportContext.getExportableFields(), exportContext.getSelectionResult().getSelectedData());
+            onSuccess(message);
+            return message;
         } catch (final Exception e) {
             onFailure(e);
+            return null;
         }
     }
 
-    protected void onSuccess(String message) {
+    protected void onSuccess(final String message) {
         final DataExportedEvent event = new DataExportedEvent(this, exportContext.getExporter());
         event.setLevel(Level.INFO);
         event.setBusinessMessage(message);
         eventBus.fireEvent(event);
     }
 
-    protected void onFailure(Throwable caught) {
+    protected void onFailure(final Throwable caught) {
         final DataExportedEvent event = new DataExportedEvent(this, exportContext.getExporter());
         event.setLevel(Level.INFO);
         log.error("Failure occured when exporting", caught);
