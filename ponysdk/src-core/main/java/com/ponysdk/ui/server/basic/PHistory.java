@@ -20,12 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.PonySession;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.instruction.History;
 
@@ -35,11 +37,11 @@ public class PHistory {
 
     private String token;
 
-    public void addValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);
     }
 
-    public void newItem(String token) {
+    public void newItem(final String token) {
         this.token = token;
         final History history = new History(token);
         PonySession.getCurrent().stackInstruction(history);
@@ -51,8 +53,9 @@ public class PHistory {
 
     public void fireHistoryChanged(final String token) {
         this.token = token;
+        PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, token);
         for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(token);
+            handler.onValueChange(event);
         }
 
     }

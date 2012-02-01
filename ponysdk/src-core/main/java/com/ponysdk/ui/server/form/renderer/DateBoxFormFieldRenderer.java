@@ -37,6 +37,7 @@ import com.ponysdk.ui.server.basic.event.HasPKeyPressHandlers;
 import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 
@@ -62,12 +63,12 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
         this(null);
     }
 
-    public DateBoxFormFieldRenderer(String caption) {
+    public DateBoxFormFieldRenderer(final String caption) {
         this.caption = caption;
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         this.value = (Date) value;
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().setValue(this.value);
@@ -80,7 +81,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         final PDateBox dateBox = new PDateBox();
         if (debugID != null) dateBox.ensureDebugId(debugID);
         final FormFieldComponent<PDateBox> dateFieldComponent = new FormFieldComponent<PDateBox>(dateBox);
@@ -102,7 +103,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.addErrorMessage(errorMessage);
         }
@@ -124,7 +125,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().setEnabled(enabled);
@@ -136,11 +137,11 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
         return enabled;
     }
 
-    public void setCaption(String caption) {
+    public void setCaption(final String caption) {
         this.caption = caption;
     }
 
-    public void setDateFormat(String dateFormat) {
+    public void setDateFormat(final String dateFormat) {
         this.dateFormat = dateFormat;
     }
 
@@ -162,7 +163,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
         valueChangeHandlers.add(handler);
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().addValueChangeHandler(handler);
@@ -170,7 +171,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
         valueChangeHandlers.remove(handler);
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().removeValueChangeHandler(handler);
@@ -183,8 +184,8 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void onValueChange(Date value) {
-        this.value = value;
+    public void onValueChange(final PValueChangeEvent<Date> event) {
+        this.value = event.getValue();
 
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().setValue(value);
@@ -192,7 +193,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public void ensureDebugID(String debugID) {
+    public void ensureDebugID(final String debugID) {
         this.debugID = debugID;
         if (fields.isEmpty()) return;
 
@@ -202,13 +203,13 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }
     }
 
-    public void setTimeZone(TimeZone timeZone) {
+    public void setTimeZone(final TimeZone timeZone) {
         for (final FormFieldComponent<PDateBox> p : fields) {
             p.getInput().setTimeZone(timeZone);
         }

@@ -23,9 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.PonySession;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRadioButton;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class RadioButtonPageActivity extends SamplePageActivity {
 
@@ -53,12 +57,35 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panelBottom.setSpacing(10);
 
         panelBottom.add(new PLabel("Select your favorite sport:"));
-        panelBottom.add(new PRadioButton("sport", "Baseball"));
-        panelBottom.add(new PRadioButton("sport", "Basketball"));
-        panelBottom.add(new PRadioButton("sport", "Football"));
-        panelBottom.add(new PRadioButton("sport", "Hockey"));
-        panelBottom.add(new PRadioButton("sport", "Soccer"));
-        panelBottom.add(new PRadioButton("sport", "Water Polo"));
+        final PRadioButton baseBall = new PRadioButton("sport", "Baseball");
+        panelBottom.add(baseBall);
+        final PRadioButton basketBall = new PRadioButton("sport", "Basketball");
+        panelBottom.add(basketBall);
+        final PRadioButton footBall = new PRadioButton("sport", "Football");
+        panelBottom.add(footBall);
+        final PRadioButton hockey = new PRadioButton("sport", "Hockey");
+        panelBottom.add(hockey);
+        final PRadioButton soccer = new PRadioButton("sport", "Soccer");
+        panelBottom.add(soccer);
+        final PRadioButton waterPolo = new PRadioButton("sport", "Water Polo");
+        panelBottom.add(waterPolo);
+
+        PValueChangeHandler<Boolean> valueChangeHandler = new PValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(final PValueChangeEvent<Boolean> event) {
+                PRadioButton radioButton = (PRadioButton) event.getSource();
+                String msg = "Value changed : name = " + radioButton.getName() + " caption = " + radioButton.getText() + " value = " + radioButton.getValue();
+                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            }
+        };
+
+        baseBall.addValueChangeHandler(valueChangeHandler);
+        basketBall.addValueChangeHandler(valueChangeHandler);
+        footBall.addValueChangeHandler(valueChangeHandler);
+        hockey.addValueChangeHandler(valueChangeHandler);
+        soccer.addValueChangeHandler(valueChangeHandler);
+        waterPolo.addValueChangeHandler(valueChangeHandler);
 
         panelTop.add(panelBottom);
 

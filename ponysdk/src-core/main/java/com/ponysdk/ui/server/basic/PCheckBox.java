@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.ui.server.basic.event.PHasValue;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -48,7 +50,7 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
         this(null);
     }
 
-    public PCheckBox(String text) {
+    public PCheckBox(final String text) {
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
@@ -60,12 +62,12 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<Boolean> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
         handlers.add(handler);
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<Boolean> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
         handlers.remove(handler);
     }
 
@@ -80,7 +82,7 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     }
 
     @Override
-    public void setHTML(String html) {
+    public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.HTML, html);
@@ -93,7 +95,7 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.TEXT, text);
@@ -106,7 +108,7 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     }
 
     @Override
-    public void setValue(Boolean value) {
+    public void setValue(final Boolean value) {
         this.value = value;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.VALUE, value);
@@ -114,20 +116,19 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     }
 
     @Override
-    public void onValueChange(Boolean value) {
-        this.value = value;
+    public void onValueChange(final PValueChangeEvent<Boolean> event) {
+        this.value = event.getValue();
         for (final PValueChangeHandler<Boolean> handler : handlers) {
-            handler.onValueChange(value);
+            handler.onValueChange(event);
         }
     }
 
     @Override
-    public void onEventInstruction(EventInstruction e) {
+    public void onEventInstruction(final EventInstruction e) {
         if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            onValueChange(e.getMainProperty().getBooleanValue());
+            onValueChange(new PValueChangeEvent<Boolean>(this, e.getMainProperty().getBooleanValue()));
         } else {
             super.onEventInstruction(e);
         }
     }
-
 }

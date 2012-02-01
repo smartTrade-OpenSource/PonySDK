@@ -17,6 +17,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.FormField.ResetHandler;
@@ -39,7 +40,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
-    public DateRangeHeaderCellRenderer(String caption, final FormField from, final FormField to, String pojoProperty) {
+    public DateRangeHeaderCellRenderer(final String caption, final FormField from, final FormField to, final String pojoProperty) {
         super(caption, pojoProperty);
 
         final PAnchor anchor = new PAnchor("");
@@ -60,7 +61,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
-            public void onKeyUp(int keyCode) {
+            public void onKeyUp(final int keyCode) {
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(this, from);
                 eventBus.fireEvent(refreshListEvent);
             }
@@ -89,7 +90,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         fromRenderer.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
             @Override
-            public void onValueChange(Date value) {
+            public void onValueChange(final PValueChangeEvent<Date> event) {
                 updateMainFormField();
             }
 
@@ -99,7 +100,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         toRenderer.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
             @Override
-            public void onValueChange(Date value) {
+            public void onValueChange(final PValueChangeEvent<Date> event) {
                 updateMainFormField();
             }
         });
@@ -107,7 +108,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         anchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent arg0) {
+            public void onClick(final PClickEvent arg0) {
                 showPopup();
             }
 
@@ -149,11 +150,11 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
     }
 
     @Override
-    public void onClick(PClickEvent event) {
+    public void onClick(final PClickEvent event) {
         showPopup();
     }
 
-    public void setDateFormat(SimpleDateFormat dateFormat) {
+    public void setDateFormat(final SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
     }
 }

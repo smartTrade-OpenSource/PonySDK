@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.place;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.activity.Activity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PHistory;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class PlaceController implements PValueChangeHandler<String> {
@@ -46,7 +48,7 @@ public class PlaceController implements PValueChangeHandler<String> {
      * 
      * @param placeContext
      */
-    public void registerPlaceContext(PlaceContext placeContext) {
+    public void registerPlaceContext(final PlaceContext placeContext) {
         placeContextByToken.put(placeContext.getPlace().getToken(), placeContext);
         placeContext.getActivity().goTo(placeContext.getPlace(), placeContext.getWorld());
     }
@@ -58,7 +60,7 @@ public class PlaceController implements PValueChangeHandler<String> {
      * @param place
      * @param world
      */
-    public void goTo(Activity activity, Place place, PAcceptsOneWidget world) {
+    public void goTo(final Activity activity, final Place place, final PAcceptsOneWidget world) {
         final PlaceContext context = new PlaceContext();
         context.setPlace(place);
         context.setActivity(activity);
@@ -72,23 +74,23 @@ public class PlaceController implements PValueChangeHandler<String> {
     }
 
     @Override
-    public void onValueChange(String value) {
-        final PlaceContext placeContext = placeContextByToken.get(value);
+    public void onValueChange(final PValueChangeEvent<String> event) {
+        final PlaceContext placeContext = placeContextByToken.get(event.getValue());
 
         if (placeContext == null) {
-            log.warn("No context found for this token #" + value);
+            log.warn("No context found for this token #" + event.getValue());
             return;
         }
 
         placeContext.getActivity().goTo(placeContext.getPlace(), placeContext.getWorld());
     }
 
-    public void setHistory(PHistory history){
+    public void setHistory(final PHistory history) {
         this.history = history;
-    	this.history.addValueChangeHandler(this);
+        this.history.addValueChangeHandler(this);
     }
-    
-    public PlaceContext getPlaceContext(String token) {
+
+    public PlaceContext getPlaceContext(final String token) {
         return placeContextByToken.get(token);
     }
 

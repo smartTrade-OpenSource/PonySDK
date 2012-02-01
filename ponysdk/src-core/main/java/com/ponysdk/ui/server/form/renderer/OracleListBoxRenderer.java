@@ -56,6 +56,7 @@ import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
@@ -87,7 +88,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
     private final PTextBox textbox = new PTextBox();
 
-    public OracleListBoxRenderer(int pageSize, String caption) {
+    public OracleListBoxRenderer(final int pageSize, final String caption) {
         this.pageSize = pageSize;
         this.caption = caption;
     }
@@ -122,7 +123,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         List<PLabel> currentMatchingElements = new ArrayList<PLabel>();
 
-        private KeyUpHandler(PTextBox textBox, PPopupPanel popup, PButton deploy) {
+        private KeyUpHandler(final PTextBox textBox, final PPopupPanel popup, final PButton deploy) {
             // this.addStyleName(PonySDKTheme.ORACLE_LIST_BOX);
             this.previousPaginationLabel = new PLabel();
             this.deploy = deploy;
@@ -175,7 +176,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         }
 
         @Override
-        public void onKeyUp(int keyCode) {
+        public void onKeyUp(final int keyCode) {
             PKeyCode code = PKeyCode.fromInt(keyCode);
 
             if (code == null) {
@@ -197,7 +198,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
                         process(1);
                         break;
                     case ENTER:
-                        onValueChange(textBox.getText());
+                        onValueChange(new PValueChangeEvent<String>(this, textBox.getText()));
                         popup.hide();
                         deploy.setText("+");
                         break;
@@ -207,7 +208,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             }
         }
 
-        private void process(int i) {
+        private void process(final int i) {
             if (currentMatchingElements.size() != 0) {
                 currentSelected += i;
                 switch (i) {
@@ -267,7 +268,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             textBox.setText(selectedLabel.getText());
         }
 
-        protected void refresh(String pattern) {
+        protected void refresh(final String pattern) {
             if (pattern != null)
             // get String list corresponding to filter patter
             matchingElements = filter(pattern);
@@ -304,7 +305,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             down.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     goToNextPage();
                     refreshLabels();
                 }
@@ -313,7 +314,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             this.up.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     goToPreviousPage();
                     currentSelected = 0;
                     refreshLabels();
@@ -363,8 +364,8 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
                 label.addClickHandler(new PClickHandler() {
 
                     @Override
-                    public void onClick(PClickEvent event) {
-                        OracleListBoxRenderer.this.onValueChange(s);
+                    public void onClick(final PClickEvent event) {
+                        OracleListBoxRenderer.this.onValueChange(new PValueChangeEvent<String>(this, s));
                         popup.hide();
                         deployed = false;
                         deploy.setText("+");
@@ -396,14 +397,14 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
             }
         }
 
-        protected void fillContentWithMatchingElements(List<String> filt) {
+        protected void fillContentWithMatchingElements(final List<String> filt) {
             currentPage = 0;
             this.matchingElements = filt;
             init();
         }
     }
 
-    protected <T extends PTextBox> FormFieldComponent<T> buildTextField(T t) {
+    protected <T extends PTextBox> FormFieldComponent<T> buildTextField(final T t) {
         final FormFieldComponent<T> formFieldComponent = new FormFieldComponent<T>(t);
         formFieldComponent.getInput().setText(value);
         formFieldComponent.getInput().setEnabled(enabled);
@@ -412,7 +413,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         final PLabel captionLabel = new PLabel(caption);
 
         fields.add(textbox);
@@ -426,7 +427,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         textbox.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 keyUphandler.refresh(textbox.getText());
             }
         });
@@ -443,7 +444,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         return mainPanel;
     }
 
-    public void addItem(final String item, Object hiddenValue) {
+    public void addItem(final String item, final Object hiddenValue) {
         if (item.length() > maxCharacterLength) {
             maxCharacterLength = item.length();
             textbox.setSize(maxCharacterLength);
@@ -453,7 +454,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         itemsByHiddenValue.put(hiddenValue, item);
     }
 
-    protected List<String> filter(String filter) {
+    protected List<String> filter(final String filter) {
         final CriterionField criterionField = new CriterionField("");
         criterionField.setValue("%" + filter + "%");
         criterionField.setSortingType(SortingType.ASCENDING);
@@ -468,7 +469,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
 
     }
 
@@ -478,7 +479,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
 
     }
 
@@ -488,7 +489,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
 
     }
 
@@ -498,7 +499,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void ensureDebugID(String id) {
+    public void ensureDebugID(final String id) {
         textbox.ensureDebugId(id);
     }
 
@@ -524,12 +525,12 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         valueChangeHandlers.add(handler);
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
         valueChangeHandlers.remove(handler);
     }
 
@@ -544,7 +545,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.value = text;
         for (final PTextBoxBase field : fields) {
             field.setText(text);
@@ -552,22 +553,22 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public void onValueChange(String value) {
-        setText(value);
+    public void onValueChange(final PValueChangeEvent<String> event) {
+        setText(event.getValue());
         for (final PValueChangeHandler<String> handler : valueChangeHandlers) {
-            handler.onValueChange(value);
+            handler.onValueChange(event);
         }
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final PTextBoxBase field : fields) {
             field.addDomHandler(handler, type);
         }
     }
 
     @Override
-    public void setFocus(boolean focused) {
+    public void setFocus(final boolean focused) {
         textbox.setFocus(true);
     }
 

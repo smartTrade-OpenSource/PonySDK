@@ -30,6 +30,7 @@ import java.util.List;
 
 import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PHasText;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -48,7 +49,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
         this(null);
     }
 
-    public PTextBoxBase(String text) {
+    public PTextBoxBase(final String text) {
         super();
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
@@ -56,9 +57,9 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
     }
 
     @Override
-    public void onEventInstruction(EventInstruction e) {
+    public void onEventInstruction(final EventInstruction e) {
         if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            onValueChange(e.getMainProperty().getValue());
+            onValueChange(new PValueChangeEvent<String>(this, e.getMainProperty().getValue()));
         } else {
             super.onEventInstruction(e);
         }
@@ -75,7 +76,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.TEXT, text);
@@ -83,12 +84,12 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.remove(handler);
     }
 
@@ -98,14 +99,14 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
     }
 
     @Override
-    public void onValueChange(String value) {
-        this.text = value;
+    public void onValueChange(final PValueChangeEvent<String> event) {
+        this.text = event.getValue();
         for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(value);
+            handler.onValueChange(event);
         }
     }
 
-    public void setSize(int maxCharacterLength) {
+    public void setSize(final int maxCharacterLength) {
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.SIZE, maxCharacterLength + "");
         getPonySession().stackInstruction(update);

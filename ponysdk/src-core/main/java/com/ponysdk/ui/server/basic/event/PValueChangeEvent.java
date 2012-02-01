@@ -21,39 +21,34 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.core.event.Event;
 
-public class PRadioButton extends PCheckBox {
+public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
 
-    private String name;
+    public static final Type<PValueChangeHandler<?>> TYPE = new Type<PValueChangeHandler<?>>();
 
-    public PRadioButton(final String label) {
-        super(label);
+    private final T value;
+
+    public PValueChangeEvent(final Object sourceComponent, final T value) {
+        super(sourceComponent);
+        this.value = value;
     }
 
-    public PRadioButton(final String name, final String label) {
-        super(label);
-        setName(name);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Type<PValueChangeHandler<T>> getAssociatedType() {
+        return (Type) TYPE;
     }
 
     @Override
-    protected WidgetType getType() {
-        return WidgetType.RADIO_BUTTON;
+    protected void dispatch(final PValueChangeHandler<T> handler) {
+        handler.onValueChange(this);
     }
 
-    public void setName(final String name) {
-        this.name = name;
-        final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.NAME, name);
-        getPonySession().stackInstruction(update);
-    }
-
-    public String getName() {
-        return name;
+    public T getValue() {
+        return value;
     }
 
 }

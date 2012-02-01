@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
+
+package com.ponysdk.ui.server.basic;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.event.PHasValue;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -60,7 +63,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
         this(null);
     }
 
-    public PDateBox(String text) {
+    public PDateBox(final String text) {
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.DATE_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
@@ -71,7 +74,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
     }
 
     @Override
-    public void onEventInstruction(EventInstruction e) {
+    public void onEventInstruction(final EventInstruction e) {
         if (HandlerType.DATE_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
             final String data = e.getMainProperty().getValue();
             Date date = null;
@@ -82,19 +85,19 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
                     log.error("Cannot parse the date", ex);
                 }
             }
-            onValueChange(date);
+            onValueChange(new PValueChangeEvent<Date>(this, date));
         } else {
             super.onEventInstruction(e);
         }
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
         handlers.add(handler);
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
         handlers.remove(handler);
     }
 
@@ -104,15 +107,15 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
     }
 
     @Override
-    public void onValueChange(Date value) {
-        this.date = value;
+    public void onValueChange(final PValueChangeEvent<Date> event) {
+        this.date = event.getValue();
         for (final PValueChangeHandler<Date> handler : handlers) {
-            handler.onValueChange(value);
+            handler.onValueChange(event);
         }
 
     }
 
-    public void setFormat(int style) {
+    public void setFormat(final int style) {
         this.dateFormat = DateFormat.getDateInstance(style);
 
         final Update update = new Update(getID());
@@ -120,7 +123,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
         getPonySession().stackInstruction(update);
     }
 
-    public void setFormat(String pattern) {
+    public void setFormat(final String pattern) {
         this.pattern = pattern;
         this.dateFormat = new SimpleDateFormat(pattern);
         final Update update = new Update(getID());
@@ -132,7 +135,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
         return dateFormat;
     }
 
-    public void setTimeZone(TimeZone timeZone) {
+    public void setTimeZone(final TimeZone timeZone) {
         dateFormat.setTimeZone(timeZone);
     }
 
@@ -142,7 +145,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
     }
 
     @Override
-    public void setValue(Date date) {
+    public void setValue(final Date date) {
         this.date = date;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.VALUE, date != null ? dateFormat.format(date) : null);
@@ -150,8 +153,7 @@ public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueCha
     }
 
     @Override
-    public void onKeyPress(int keyCode) {
-    }
+    public void onKeyPress(final int keyCode) {}
 
     public String getPattern() {
         return pattern;

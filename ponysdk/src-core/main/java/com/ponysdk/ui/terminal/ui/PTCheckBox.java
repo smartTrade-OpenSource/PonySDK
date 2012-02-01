@@ -44,19 +44,23 @@ public class PTCheckBox extends PTButtonBase {
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
         if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getType())) {
-            cast().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-                @Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
-                    uiService.triggerEvent(eventInstruction);
-                }
-            });
+            addValueChangeHandler(addHandler, uiService);
             return;
         }
 
         super.addHandler(addHandler, uiService);
+    }
+
+    protected void addValueChangeHandler(final AddHandler addHandler, final UIService uiService) {
+        cast().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
+                eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
+                uiService.triggerEvent(eventInstruction);
+            }
+        });
     }
 
     @Override

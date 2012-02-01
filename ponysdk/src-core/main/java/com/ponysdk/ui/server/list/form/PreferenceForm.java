@@ -42,6 +42,7 @@ import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutHandler;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.list.ListColumnDescriptor;
 import com.ponysdk.ui.server.list.event.MoveColumnDescriptorEvent;
@@ -71,13 +72,13 @@ public class PreferenceForm extends PScrollPanel {
 
         boolean custom = false;
 
-        public SelectableLabel(String caption) {
+        public SelectableLabel(final String caption) {
             super(caption);
         }
 
     }
 
-    public PreferenceForm(Collection<ListColumnDescriptor<?, ?>> captions, EventBus eventBus, String tableName) {
+    public PreferenceForm(final Collection<ListColumnDescriptor<?, ?>> captions, final EventBus eventBus, final String tableName) {
         this.eventBus = eventBus;
         this.tableName = tableName;
         init(captions);
@@ -86,7 +87,7 @@ public class PreferenceForm extends PScrollPanel {
         setHeight("500px");
     }
 
-    private void init(Collection<ListColumnDescriptor<?, ?>> captions) {
+    private void init(final Collection<ListColumnDescriptor<?, ?>> captions) {
         labelPanel.getRowFormatter().addStyleName(0, "pony-ComplexList-ColumnHeader");
         for (final ListColumnDescriptor<?, ?> caption : captions) {
             if (caption == null) continue;
@@ -98,10 +99,10 @@ public class PreferenceForm extends PScrollPanel {
             checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
                 @Override
-                public void onValueChange(Boolean value) {
-                    final ShowColumnDescriptorEvent refreshListEvent = new ShowColumnDescriptorEvent(PreferenceForm.this, caption.getCaption(), value, tableName);
+                public void onValueChange(final PValueChangeEvent<Boolean> event) {
+                    final ShowColumnDescriptorEvent refreshListEvent = new ShowColumnDescriptorEvent(PreferenceForm.this, caption.getCaption(), event.getValue(), tableName);
                     eventBus.fireEvent(refreshListEvent);
-                    label.viewable = value;
+                    label.viewable = event.getValue();
                     refreshLabels();
                 }
             });
@@ -166,7 +167,7 @@ public class PreferenceForm extends PScrollPanel {
                 upImage.addClickHandler(new PClickHandler() {
 
                     @Override
-                    public void onClick(PClickEvent event) {
+                    public void onClick(final PClickEvent event) {
                         int index = labels.indexOf(label) - 1;
                         labels.remove(label);
                         labels.add(index, label);
@@ -187,7 +188,7 @@ public class PreferenceForm extends PScrollPanel {
                 downImage.addClickHandler(new PClickHandler() {
 
                     @Override
-                    public void onClick(PClickEvent event) {
+                    public void onClick(final PClickEvent event) {
                         int index = labels.indexOf(label) + 1;
                         labels.remove(label);
                         labels.add(index, label);
@@ -205,7 +206,7 @@ public class PreferenceForm extends PScrollPanel {
                 eraseButton.addClickHandler(new PClickHandler() {
 
                     @Override
-                    public void onClick(PClickEvent event) {
+                    public void onClick(final PClickEvent event) {
                         eventBus.fireEvent(new RemoveColumnDescriptorEvent(PreferenceForm.this, label.getText(), tableName));
                         labels.remove(label);
                         refreshLabels();

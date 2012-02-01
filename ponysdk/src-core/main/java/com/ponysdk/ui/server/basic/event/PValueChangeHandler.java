@@ -20,8 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
-public interface PValueChangeHandler<T> {
-    void onValueChange(T value); // TODO nciaravola implement all GWT events ?
+import com.ponysdk.core.event.EventHandler;
+
+public interface PValueChangeHandler<T> extends EventHandler {
+
+    void onValueChange(PValueChangeEvent<T> event);
 }

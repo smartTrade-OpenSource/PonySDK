@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 
@@ -63,7 +64,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
         this(null);
     }
 
-    public TextBoxBaseFormFieldRenderer(String caption) {
+    public TextBoxBaseFormFieldRenderer(final String caption) {
         this.caption = caption;
     }
 
@@ -71,7 +72,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
         return caption;
     }
 
-    public void setCaption(String caption) {
+    public void setCaption(final String caption) {
         this.caption = caption;
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.setCaption(caption);
@@ -79,7 +80,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         if (value != null) {
             this.value = value.toString();
         } else {
@@ -99,7 +100,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         final PTextBoxBase textBox = new PTextBoxBase();
         if (debugID != null) {
             textBox.ensureDebugId(debugID);
@@ -109,7 +110,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
         return textField;
     }
 
-    protected <T extends PTextBoxBase> FormFieldComponent<T> buildTextField(T t) {
+    protected <T extends PTextBoxBase> FormFieldComponent<T> buildTextField(final T t) {
         final FormFieldComponent<T> formFieldComponent = new FormFieldComponent<T>(t);
         formFieldComponent.getInput().addValueChangeHandler(this);
         formFieldComponent.getInput().setText(value);
@@ -129,7 +130,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.addErrorMessage(errorMessage);
         }
@@ -152,7 +153,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().setEnabled(enabled);
@@ -165,20 +166,20 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().addValueChangeHandler(handler);
         }
     }
 
-    public void addClickHandler(PClickHandler handler) {
+    public void addClickHandler(final PClickHandler handler) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().addClickHandler(handler);
         }
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<String> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().removeValueChangeHandler(handler);
         }
@@ -216,7 +217,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.value = text;
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().setText(text);
@@ -224,12 +225,12 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public void onValueChange(String value) {
-        setText(value);
+    public void onValueChange(final PValueChangeEvent<String> event) {
+        setText(event.getValue());
     }
 
     @Override
-    public void ensureDebugID(String debugID) {
+    public void ensureDebugID(final String debugID) {
         this.debugID = debugID;
         if (fields.isEmpty()) return;
 
@@ -243,7 +244,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

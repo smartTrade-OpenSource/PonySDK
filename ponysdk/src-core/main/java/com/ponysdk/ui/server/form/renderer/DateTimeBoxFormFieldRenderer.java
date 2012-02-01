@@ -40,6 +40,7 @@ import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form.FormField;
 
@@ -73,12 +74,12 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         this(null);
     }
 
-    public DateTimeBoxFormFieldRenderer(String caption) {
+    public DateTimeBoxFormFieldRenderer(final String caption) {
         this.caption = caption;
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         Date date = (Date) value;
         calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -95,7 +96,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         dateBox = new PDateBox();
         if (debugID != null) dateBox.ensureDebugId(debugID);
         final FormFieldComponent<PDateBox> dateFieldComponent = new FormFieldComponent<PDateBox>(dateBox);
@@ -128,7 +129,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         hours.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
+            public void onChange(final Object source, final int selectedIndex) {
                 if (calendar != null) {
                     calendar.set(Calendar.HOUR_OF_DAY, (Integer) hours.getSelectedValue());
                 }
@@ -137,7 +138,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         minutes.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
+            public void onChange(final Object source, final int selectedIndex) {
                 if (calendar != null) {
                     calendar.set(Calendar.MINUTE, (Integer) minutes.getSelectedValue());
                 }
@@ -146,7 +147,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         seconds.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
+            public void onChange(final Object source, final int selectedIndex) {
                 if (calendar != null) {
                     calendar.set(Calendar.SECOND, (Integer) seconds.getSelectedValue());
                 }
@@ -173,7 +174,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.addErrorMessage(errorMessage);
         }
@@ -196,7 +197,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().setEnabled(enabled);
@@ -209,12 +210,12 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void setCaption(String caption) {
+    public void setCaption(final String caption) {
         this.caption = caption;
     }
 
     @Override
-    public void setDateFormat(String dateFormat) {
+    public void setDateFormat(final String dateFormat) {
         this.dateFormat = dateFormat;
     }
 
@@ -236,7 +237,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void addValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
         valueChangeHandlers.add(handler);
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().addValueChangeHandler(handler);
@@ -244,7 +245,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void removeValueChangeHandler(PValueChangeHandler<Date> handler) {
+    public void removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
         valueChangeHandlers.remove(handler);
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().removeValueChangeHandler(handler);
@@ -257,17 +258,17 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public void onValueChange(Date value) {
+    public void onValueChange(final PValueChangeEvent<Date> event) {
         calendar = Calendar.getInstance();
-        calendar.setTime(value);
+        calendar.setTime(event.getValue());
 
         for (final FormFieldComponent<PDateBox> field : fields) {
-            field.getInput().setValue(value);
+            field.getInput().setValue(event.getValue());
         }
     }
 
     @Override
-    public void ensureDebugID(String debugID) {
+    public void ensureDebugID(final String debugID) {
         this.debugID = debugID;
         if (fields.isEmpty()) return;
 
@@ -277,14 +278,14 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }
     }
 
     @Override
-    public void setTimeZone(TimeZone timeZone) {
+    public void setTimeZone(final TimeZone timeZone) {
         for (final FormFieldComponent<PDateBox> p : fields) {
             p.getInput().setTimeZone(timeZone);
         }

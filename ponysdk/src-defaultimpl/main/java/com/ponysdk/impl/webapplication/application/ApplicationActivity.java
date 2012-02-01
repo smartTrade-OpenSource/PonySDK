@@ -35,6 +35,7 @@ import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class ApplicationActivity extends AbstractActivity implements PValueChangeHandler<String> {
@@ -52,7 +53,7 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
     private PageProvider pageProvider;
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         PonySession.getCurrent().getHistory().addValueChangeHandler(this);
 
         for (PageActivity page : pageProvider.getPageActivities()) {
@@ -67,7 +68,7 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
         notificationActivity.start(applicationView.getLogs());
     }
 
-    public void goTo(PagePlace place) {
+    public void goTo(final PagePlace place) {
         PonySession.getCurrent().getPlaceController().goTo(place.getPageActivity(), place, applicationView.getBody());
     }
 
@@ -76,12 +77,14 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
     }
 
     @Override
-    public void onValueChange(final String token) {
+    public void onValueChange(final PValueChangeEvent<String> event) {
         final PlaceController placeController = PonySession.getCurrent().getPlaceController();
+        final String token = event.getValue();
+
         if (placeController.getPlaceContext(token) == null) { // History on a
-                                                              // new
-                                                              // PonySesion
-                                                              // instance
+            // new
+            // PonySesion
+            // instance
             final PageActivity pageActivity = pageProvider.getPageActivity(token);
             if (pageActivity != null) {
                 final PlaceContext context = new PlaceContext();
@@ -100,27 +103,27 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
         }
     }
 
-    public void setApplicationView(ApplicationView applicationView) {
+    public void setApplicationView(final ApplicationView applicationView) {
         this.applicationView = applicationView;
     }
 
-    public void setMenuActivity(MenuActivity menuActivity) {
+    public void setMenuActivity(final MenuActivity menuActivity) {
         this.menuActivity = menuActivity;
     }
 
-    public void setHeaderActivity(HeaderActivity headerActivity) {
+    public void setHeaderActivity(final HeaderActivity headerActivity) {
         this.headerActivity = headerActivity;
     }
 
-    public void setFooterActivity(FooterActivity footerActivity) {
+    public void setFooterActivity(final FooterActivity footerActivity) {
         this.footerActivity = footerActivity;
     }
 
-    public void setNotificationActivity(NotificationActivity notificationActivity) {
+    public void setNotificationActivity(final NotificationActivity notificationActivity) {
         this.notificationActivity = notificationActivity;
     }
 
-    public void setPageProvider(PageProvider pageProvider) {
+    public void setPageProvider(final PageProvider pageProvider) {
         this.pageProvider = pageProvider;
     }
 }
