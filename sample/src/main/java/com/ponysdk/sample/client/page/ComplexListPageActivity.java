@@ -28,20 +28,22 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ponysdk.core.command.AbstractServiceCommand;
 import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.ExportableField;
-import com.ponysdk.core.export.command.ExternalExportCommand;
+import com.ponysdk.core.export.command.ExportCommand;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
-import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.application.ApplicationView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.sample.client.page.ComplexListPageActivity.Pony;
+import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.sample.command.pony.CreatePonyCommand;
+import com.ponysdk.sample.command.pony.FindPonyChildsCommand;
+import com.ponysdk.sample.command.pony.FindPonysCommand;
+import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -72,31 +74,22 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
     @Autowired
     protected ApplicationView applicationView;
-
-    private final List<Pony> ponyList = new ArrayList<ComplexListPageActivity.Pony>();
-
     private ComplexListActivity<Pony> complexListActivity;
 
-    private Result<List<Pony>> result;
-
     private final PListBox listBox = new PListBox(false, true);
-
     private CriterionField nameCriterion;
-
     private FormField nameField;
-
     private FormField ageField;
 
     public ComplexListPageActivity() {
         super("Complex List", "Rich UI Components");
-        loadData();
     }
 
     @Override
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
@@ -118,8 +111,9 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         pageView.getBody().setWidget(layout);
 
         final ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
-        ageListBoxRenderer.addItem("1 year");
-        ageListBoxRenderer.addItem("2 years");
+        for (int i = 0; i < 15; i++) {
+            ageListBoxRenderer.addItem(i + " year", i);
+        }
         ageField = new FormField(ageListBoxRenderer);
 
         nameCriterion = new CriterionField("name");
@@ -140,7 +134,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         final ComplexListView complexListView = new DefaultComplexListView();
         complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());
 
-        complexListActivity.setCommandFactory(new ComplexListCommandFactory<ComplexListPageActivity.Pony>() {
+        complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
 
             @Override
             public Command newFindCommand(final ComplexListActivity<Pony> complexListActivity, final Query query) {
@@ -149,31 +143,26 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
                     @Override
                     public void execute() {
-                        result = getResult(query);
-                        for (final Pony pony : result.getData()) {
-                            listBox.addItem(pony.getName(), pony);
-                        }
-                        complexListActivity.setData(result);
+
+                        new FindPonysCommand(query) {
+
+                            @Override
+                            protected void doAfterSuccess(final Result<List<Pony>> result) {
+                                complexListActivity.setData(result);
+
+                                listBox.clear();
+                                for (Pony p : result.getData()) {
+                                    listBox.addItem(p.getName(), p);
+                                }
+                            }
+                        }.execute();
                     }
                 };
             }
 
             @Override
-            public Command newExportCommand(ComplexListActivity<Pony> complexListActivity, final ExportContext<Pony> exportContext) {
-                final AbstractServiceCommand<Result<List<Pony>>> findCommand = new AbstractServiceCommand<Result<List<Pony>>>() {
-
-                    @Override
-                    protected Result<List<Pony>> execute0() throws Exception {
-                        return getResult(exportContext.getQuery());
-                    }
-
-                    @Override
-                    protected void doAfterSuccess(Result<List<Pony>> result) {
-
-                    }
-                };
-
-                return new ExternalExportCommand<Pony, Result<List<Pony>>>("pony", exportContext, findCommand);
+            public Command newExportCommand(final ComplexListActivity<Pony> complexListActivity, final ExportContext<Pony> exportContext) {
+                return new ExportCommand<Pony>(exportContext);
             };
         });
 
@@ -189,8 +178,17 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         addPonyButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
-                complexListActivity.getSelectedAndEnabledData();
+            public void onClick(final PClickEvent event) {
+                Pony pony = new Pony(null, "A dynamic pony", 1, "Equus ferus caballus");
+                new CreatePonyCommand(pony) {
+
+                    @Override
+                    protected void doAfterSuccess(final Pony result) {
+                        PonyCreatedEvent event = new PonyCreatedEvent(this, result);
+                        event.setBusinessMessage("Pony '" + result.getName() + "' has been added");
+                        fireEvent(event);
+                    }
+                }.execute();
             }
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
@@ -202,7 +200,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         listBox.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
+            public void onChange(final Object source, final int selectedIndex) {
                 final List<Pony> list = new ArrayList<Pony>();
                 for (final int index : listBox.getSelectedItems()) {
                     list.add((Pony) listBox.getValue(index));
@@ -219,25 +217,18 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
     }
 
-    protected Result<List<Pony>> getResult(Query query) {
-        return FilteringTools.select(query, ponyList);
-    }
-
     private ExportConfiguration initExportConfiguration() {
         final ExportConfiguration exportConfiguration = new ExportConfiguration();
         exportConfiguration.addExportableField(new ExportableField("name", "Name"));
         exportConfiguration.addExportableField(new ExportableField("age", "Age"));
         exportConfiguration.addExportableField(new ExportableField("race", "type"));
-        // exportConfiguration.addExportType(ExportType.CSV);
-        // exportConfiguration.addExportType(ExportType.PDF);
-        // exportConfiguration.addExportType(ExportType.XML);
         return exportConfiguration;
     }
 
     private List<ListColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
         final List<ListColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<ListColumnDescriptor<Pony, ?>>();
 
-        final ListColumnDescriptor<ComplexListPageActivity.Pony, String> nameColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>();
+        final ListColumnDescriptor<Pony, String> nameColumnDescriptor = new ListColumnDescriptor<Pony, String>();
 
         nameField = new FormField();
 
@@ -246,7 +237,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRenderer);
         listColumnDescriptors.add(nameColumnDescriptor);
 
-        final ListColumnDescriptor<ComplexListPageActivity.Pony, String> ageColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>("Age");
+        final ListColumnDescriptor<Pony, String> ageColumnDescriptor = new ListColumnDescriptor<Pony, String>("Age");
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
 
         final ComplexHeaderCellRenderer headerCellRenderer = new ComplexHeaderCellRenderer("Age", ageField, "age");
@@ -254,7 +245,7 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
         listColumnDescriptors.add(ageColumnDescriptor);
 
-        final ListColumnDescriptor<ComplexListPageActivity.Pony, String> raceColumnDescriptor = new ListColumnDescriptor<ComplexListPageActivity.Pony, String>("Race");
+        final ListColumnDescriptor<Pony, String> raceColumnDescriptor = new ListColumnDescriptor<Pony, String>("Race");
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
         listColumnDescriptors.add(raceColumnDescriptor);
 
@@ -262,65 +253,20 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     }
 
     @Override
-    public void onSubmitForm(SubmitFormEvent event) {
+    public void onSubmitForm(final SubmitFormEvent event) {
         complexListActivity.refresh();
     }
 
-    private void loadData() {
-
-        for (int i = 0; i < 10; i++) {
-
-            ponyList.add(new Pony("Altai horseBengin", "2 years", "ferus caballus"));
-            ponyList.add(new Pony("American Warmblood", "3 years", "Equus ferus caballus"));
-            ponyList.add(new Pony("Falabella", "1 year", "Equus ferus caballus"));
-            ponyList.add(new Pony("Friesian horse", "4 years", "Equus ferus caballus"));
-            ponyList.add(new Pony("Mustang", "1 year", "Equus ferus caballus"));
-            ponyList.add(new Pony("Altai horse", "2 years", "Equus ferus caballus"));
-        }
-    }
-
-    public class Pony {
-
-        private final String name;
-
-        private final String age;
-
-        private final String race;
-
-        public Pony(String name, String age, String race) {
-            this.name = name;
-            this.age = age;
-            this.race = race;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getAge() {
-            return age;
-        }
-
-        public String getRace() {
-            return race;
-        }
-    }
-
-    List<Pony> luci = new ArrayList<ComplexListPageActivity.Pony>();
-
     @Override
-    public void onShowSubList(ShowSubListEvent<Pony> event) {
+    public void onShowSubList(final ShowSubListEvent<Pony> event) {
         if (event.isShow()) {
-            final List<Pony> subPonyList = new ArrayList<ComplexListPageActivity.Pony>();
-            subPonyList.add(new Pony("SubPony 1", "7 years", "Equus ferus caballus"));
-            subPonyList.add(new Pony("SubPony 2", "8 years", "Equus ferus caballus"));
-            subPonyList.add(new Pony("SubPony 3", "9 years", "Equus ferus caballus"));
+            new FindPonyChildsCommand(event.getData().getId()) {
 
-            luci.add(new Pony("Luci l'homo", "2 ans aage", "Luci le pd"));
-
-            subPonyList.addAll(luci);
-
-            complexListActivity.insertSubList(event.getRow(), subPonyList);
+                @Override
+                protected void doAfterSuccess(final Result<List<Pony>> result) {
+                    complexListActivity.insertSubList(event.getRow(), result.getData());
+                }
+            };
         } else {
             complexListActivity.removeSubList(event.getRow());
         }

@@ -16,6 +16,10 @@
 		<param-name>applicationDescription</param-name>
 		<param-value>PonySDK Sample</param-value>
 	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:server_application.xml</param-value>
+	</context-param>
 	
 	<servlet>
 		<servlet-name>PonyEngineServlet</servlet-name>

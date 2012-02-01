@@ -2,6 +2,9 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
+srcSample = 'src'
+srcGenerated = 'src-generated/main/java'
+
 repositories {
 	mavenCentral()
 }
@@ -10,6 +13,56 @@ dependencies {
 	compile project(':ponysdk')
 }
 
+sourceSets {
+	main {
+		java {
+			srcDir srcSample
+			srcDir srcGenerated
+		}
+	}
+}
+
 task cleanDebug(type: Delete) {
   delete 'war/ponyterminal', 'war/WEB-INF/deploy'
 }
+
+task generateSkeleton(type: JavaExec) {
+	description = 'Generate skeletons'
+	main = 'com.ponysdk.generator.Generator'
+	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
+	inputs.dir file('spec')
+	outputs.dir file(srcGenerated)
+	classpath {
+		[
+			project(':ponysdk').sourceSets.main.classes,
+			project(':ponysdk').configurations.sl4j
+		]
+	}
+	args = [
+		'spec',
+		srcGenerated
+		]
+}
+
+task generateProxyBuilder(type: JavaExec) {
+	description = 'Generate spring proxybuilder'
+	main = 'com.ponysdk.spring.ProxyBuilderGenerator'
+	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
+	inputs.dir file('spec')
+	outputs.dir file(srcGenerated)
+	classpath {
+		[
+			project(':ponysdk').sourceSets.main.classes,
+			project(':ponysdk').configurations.sl4j,
+			project(':ponysdk').configurations.spring
+		]
+	}
+	args = [
+		'spec',
+		srcGenerated
+		]
+}
+
+compileJava.dependsOn(generateSkeleton)
+compileJava.dependsOn(generateProxyBuilder)
+

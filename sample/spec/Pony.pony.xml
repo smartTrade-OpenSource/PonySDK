@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://pony-sdk.googlecode.com/files/project_schema-1.2.xsd">
+	<domain name="Pony" package="com.ponysdk.sample">
+		<service>
+			<method name="findPonys">
+				<parameter name="query" class="com.ponysdk.core.query.Query" />
+				<return
+					value="com.ponysdk.core.query.Result&lt;java.util.List&lt;com.ponysdk.sample.client.datamodel.Pony&gt;&gt;" />
+			</method>
+			<method name="findPonyChilds">
+				<parameter name="id" class="java.lang.Long" />
+				<return
+					value="com.ponysdk.core.query.Result&lt;java.util.List&lt;com.ponysdk.sample.client.datamodel.Pony&gt;&gt;" />
+			</method>
+			<method name="createPony">
+				<parameter name="Pony" class="com.ponysdk.sample.client.datamodel.Pony" />
+				<return class="com.ponysdk.sample.client.datamodel.Pony" />
+			</method>
+			<method name="deletePony">
+				<parameter name="id" class="java.lang.Long" />
+				<return class="java.lang.Void" />
+			</method>
+		</service>
+		<crudevent>
+			<parameter name="pony" class="com.ponysdk.sample.client.datamodel.Pony" />
+		</crudevent>
+		
+	</domain>
+</root>
