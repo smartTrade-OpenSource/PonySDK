@@ -20,15 +20,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
+
+import java.util.List;
 
 import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.query.Query;
+import com.ponysdk.core.query.Result;
 
 public interface ComplexListCommandFactory<T> {
 
-    public Command newFindCommand(final ComplexListActivity<T> complexListActivity, final Query query);
+    public Command<Result<List<T>>> newFindCommand(final ComplexListActivity<T> complexListActivity, final Query query);
 
-    public Command newExportCommand(final ComplexListActivity<T> complexListActivity, final ExportContext<T> exportContext);
+    public Command<String> newExportCommand(final ComplexListActivity<T> complexListActivity, final ExportContext<T> exportContext);
 }

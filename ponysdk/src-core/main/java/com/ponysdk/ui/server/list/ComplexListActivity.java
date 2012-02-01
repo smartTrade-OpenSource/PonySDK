@@ -541,7 +541,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
                         final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
-                        final Command command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
+                        final Command<String> command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
                         command.execute();
                     }
                 });
@@ -694,7 +694,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         // }
 
         final Query query = createQuery(page);
-        final Command command = commandFactory.newFindCommand(ComplexListActivity.this, query);
+        final Command<Result<List<D>>> command = commandFactory.newFindCommand(ComplexListActivity.this, query);
         if (command == null) { throw new IllegalStateException("FindCommand of the complex list can't be null"); }
         command.execute();
         complexListView.updateView();

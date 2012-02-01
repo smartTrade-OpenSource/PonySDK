@@ -26,44 +26,34 @@ package com.ponysdk.core.export.command;
 import java.util.List;
 
 import com.ponysdk.core.command.AbstractServiceCommand;
-import com.ponysdk.core.command.AsyncCallback;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.ui.server.list.SelectionMode;
 import com.ponysdk.ui.server.list.SelectionResult;
 
-public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportCommand<T> implements AsyncCallback<U> {
+public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportCommand<T> {
 
     private final AbstractServiceCommand<U> findCommand;
 
-    public ExternalExportCommand(String exportName, ExportContext<T> exportContext, AbstractServiceCommand<U> findCommand) {
+    public ExternalExportCommand(final String exportName, final ExportContext<T> exportContext, final AbstractServiceCommand<U> findCommand) {
         super(exportContext);
         this.findCommand = findCommand;
-        this.findCommand.addAsyncCallback(this);
     }
 
     @Override
-    public void onFailure(Throwable caught) {
-        super.onFailure(caught);
-    }
-
-    /**
-     * When the find command is succeeded
-     */
-    @Override
-    public void onSuccess(U result) {
-        exportContext.setSelectionResult(new SelectionResult<T>(SelectionMode.FULL, result.getData()));
-        super.execute();
-    }
-
-    @Override
-    public void execute() {
+    public String execute() {
         if (exportContext.getSelectionResult().getSelectionMode() == SelectionMode.FULL) {
-            findCommand.execute();
+            U findResult = findCommand.execute();
+            if (findCommand.isSuccessful()) {
+                exportContext.setSelectionResult(new SelectionResult<T>(SelectionMode.FULL, findResult.getData()));
+                return super.execute();
+            } else {
+                super.onFailure(findCommand.getCaught());
+                return null;
+            }
         } else {
-            super.execute();
+            return super.execute();
         }
-
     }
 
 }

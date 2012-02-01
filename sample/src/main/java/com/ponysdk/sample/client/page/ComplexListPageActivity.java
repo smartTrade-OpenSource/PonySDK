@@ -137,33 +137,26 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
 
             @Override
-            public Command newFindCommand(final ComplexListActivity<Pony> complexListActivity, final Query query) {
-
-                return new Command() {
+            public Command<Result<List<Pony>>> newFindCommand(final ComplexListActivity<Pony> complexListActivity, final Query query) {
+                return new FindPonysCommand(query) {
 
                     @Override
-                    public void execute() {
+                    protected void doAfterSuccess(final Result<List<Pony>> result) {
+                        complexListActivity.setData(result);
 
-                        new FindPonysCommand(query) {
-
-                            @Override
-                            protected void doAfterSuccess(final Result<List<Pony>> result) {
-                                complexListActivity.setData(result);
-
-                                listBox.clear();
-                                for (Pony p : result.getData()) {
-                                    listBox.addItem(p.getName(), p);
-                                }
-                            }
-                        }.execute();
+                        listBox.clear();
+                        for (Pony p : result.getData()) {
+                            listBox.addItem(p.getName(), p);
+                        }
                     }
                 };
             }
 
             @Override
-            public Command newExportCommand(final ComplexListActivity<Pony> complexListActivity, final ExportContext<Pony> exportContext) {
+            public Command<String> newExportCommand(final ComplexListActivity<Pony> complexListActivity, final ExportContext<Pony> exportContext) {
                 return new ExportCommand<Pony>(exportContext);
-            };
+            }
+
         });
 
         complexListActivity.registerSearchCriteria(nameCriterion, nameField);
@@ -178,17 +171,15 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         addPonyButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(final PClickEvent event) {
+            public void onClick(final PClickEvent clickEvent) {
                 Pony pony = new Pony(null, "A dynamic pony", 1, "Equus ferus caballus");
-                new CreatePonyCommand(pony) {
-
-                    @Override
-                    protected void doAfterSuccess(final Pony result) {
-                        PonyCreatedEvent event = new PonyCreatedEvent(this, result);
-                        event.setBusinessMessage("Pony '" + result.getName() + "' has been added");
-                        fireEvent(event);
-                    }
-                }.execute();
+                CreatePonyCommand command = new CreatePonyCommand(pony);
+                Pony newPony = command.execute();
+                if (command.isSuccessful()) {
+                    PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
+                    event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
+                    fireEvent(event);
+                }
             }
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
@@ -260,13 +251,11 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     @Override
     public void onShowSubList(final ShowSubListEvent<Pony> event) {
         if (event.isShow()) {
-            new FindPonyChildsCommand(event.getData().getId()) {
-
-                @Override
-                protected void doAfterSuccess(final Result<List<Pony>> result) {
-                    complexListActivity.insertSubList(event.getRow(), result.getData());
-                }
-            };
+            FindPonyChildsCommand command = new FindPonyChildsCommand(event.getData().getId());
+            Result<List<Pony>> result = command.execute();
+            if (command.isSuccessful()) {
+                complexListActivity.insertSubList(event.getRow(), result.getData());
+            }
         } else {
             complexListActivity.removeSubList(event.getRow());
         }

@@ -20,9 +20,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.command;
 
-public interface Command {
+public interface Command<T> {
 
-    void execute();
+    T execute();
 }

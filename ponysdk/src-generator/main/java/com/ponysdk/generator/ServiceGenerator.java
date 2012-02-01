@@ -31,7 +31,7 @@ public class ServiceGenerator extends BaseGenerator {
 
     private String srcGeneratedDirectory = "src-generated-application";
 
-    public ServiceGenerator(Domain domain) {
+    public ServiceGenerator(final Domain domain) {
         super(domain);
     }
 
@@ -39,7 +39,6 @@ public class ServiceGenerator extends BaseGenerator {
         generateCRUDMethos();
         generateCommands();
         generateService();
-        generateRemoteServiceImpl();
         generateCRUDEvents();
         generateEvents();
         generateEventsHandler();
@@ -177,7 +176,7 @@ public class ServiceGenerator extends BaseGenerator {
         }
     }
 
-    private Method createCRUDMethod(String name, Parameter crudParameter, Return crudReturn) {
+    private Method createCRUDMethod(final String name, final Parameter crudParameter, final Return crudReturn) {
         final Method method = new Method();
         method.setName(name);
         method.setReturn(crudReturn);
@@ -217,84 +216,11 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.generateContentAndStore();
     }
 
-    private void generateRemoteServiceImpl() throws Exception {
-
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServerServicePackage(domain), GeneratorHelper.getRemoteServiceImplClassName(domain));
-
-        classWriter.addImplements(GeneratorHelper.getServiceClassName(domain));
-
-        classWriter.addClassAnnotation("@SuppressWarnings(\"serial\")");
-        final Parameter parameter = new Parameter();
-        parameter.setClazz(GeneratorHelper.getServiceFullClassName(domain));
-        parameter.setName("service");
-        classWriter.addClassMembers(parameter);
-
-        classWriter.addImport(GeneratorHelper.getServiceFullClassName(domain));
-
-        // add logger
-        classWriter.addNewLine();
-        classWriter.addLine("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getRemoteServiceImplClassName(domain) + ".class);");
-
-        classWriter.addLine("private static " + GeneratorHelper.getRemoteServiceImplClassName(domain) + " INSTANCE;");
-
-        classWriter.addNewLine();
-
-        classWriter.addLine("public static " + GeneratorHelper.getRemoteServiceImplClassName(domain) + " getInstance() {");
-        classWriter.indentBlock();
-        classWriter.addLine("if (INSTANCE == null){");
-        classWriter.addLine("try{");
-        classWriter.addLine("INSTANCE = new " + GeneratorHelper.getRemoteServiceImplClassName(domain) + "();");
-        classWriter.addLine("} catch (final Exception e) {");
-        classWriter.addLine("log.error(\"Cannot instanciate \"+" + GeneratorHelper.getRemoteServiceImplClassName(domain) + ".class, e);");
-        classWriter.addLine("throw new RuntimeException(e);");
-        classWriter.addLine("}");
-        classWriter.addLine("}");
-        classWriter.addLine("return INSTANCE;");
-        classWriter.unindentBlock();
-        classWriter.addLine("}");
-
-        classWriter.addLine("private " + GeneratorHelper.getRemoteServiceImplClassName(domain) + "() throws Exception {");
-        classWriter.addLine("this.service = com.ponysdk.core.service.PonyServiceRegistry.getPonyService(" + GeneratorHelper.getServiceFullClassName(domain) + ".class);");
-        classWriter.addLine("}");
-
-        // Build methods
-        if (domain.getService() != null) {
-
-            for (final Method method : domain.getService().getMethod()) {
-                final String returnClass = GeneratorHelper.getClassName(method.getReturn());
-                classWriter.addLine("@Override");
-                classWriter.addLine("public " + returnClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method) + ") throws Exception {");
-                classWriter.addLine("try{");
-                classWriter.addLine("final long start = System.nanoTime();");
-
-                if (method.getReturn().getClazz().equals("void") && method.getReturn().getValue() == null) {
-                    classWriter.addLine("service." + method.getName() + "(" + GeneratorHelper.parameterToString(method.getParameter(), " ,") + ");");
-                } else {
-                    classWriter.addLine(GeneratorHelper.getClassName(method.getReturn()) + " result = service." + method.getName() + "(" + GeneratorHelper.parameterToString(method.getParameter(), " ,") + ");");
-                }
-
-                classWriter.addLine("final long end = System.nanoTime();");
-                classWriter.addLine("log.debug(\"execution time = \" + ((end - start)* 0.000000001f) + \" ms \");");
-                if (method.getReturn().getValue() != null || !method.getReturn().getClazz().equals("void")) {
-                    classWriter.addLine("return result;");
-                }
-                classWriter.addLine("} catch (final Throwable throwable) {");
-                classWriter.addLine("    log.error(\"\", throwable);");
-                classWriter.addLine("    throw new Exception(throwable.getMessage(), throwable);");
-                classWriter.addLine("}");
-                classWriter.addLine("}");
-            }
-
-        }
-
-        classWriter.generateContentAndStore();
-    }
-
     /*
      * Services : DAO
      */
 
-    private void generateDAO(Dao dao) throws Exception {
+    private void generateDAO(final Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
         classWriter.addExtend("com.ponysdk.hibernate.dao.DAO");
@@ -368,11 +294,10 @@ public class ServiceGenerator extends BaseGenerator {
         }
     }
 
-    private ClassWriter generateCommandX(Method method, String resultClass) throws Exception {
+    private ClassWriter generateCommandX(final Method method, final String resultClass) throws Exception {
         final String className = method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1) + "Command";
 
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
-        classWriter.setAbstract(true);
 
         final Constructor constructor = new Constructor();
         final Parameter eventBusParameter = new Parameter();
@@ -402,7 +327,7 @@ public class ServiceGenerator extends BaseGenerator {
         for (final Parameter param : parameters) {
             classWriter.addClassMembers(param);
         }
-        classWriter.addConstants("public static " + GeneratorHelper.getServiceFullClassName(domain) + " service;");
+        classWriter.addConstants("private static " + GeneratorHelper.getServiceFullClassName(domain) + " service;");
 
         final StringBuilder template = new StringBuilder();
         template.append("@Override\n");
@@ -412,7 +337,7 @@ public class ServiceGenerator extends BaseGenerator {
             template.append("protected " + resultClass + " execute0() throws Exception {\n");
         }
         template.append("   if (service == null) {\n");
-        template.append("       service = " + GeneratorHelper.getRemoteServiceImplFullClassName(domain) + ".getInstance();\n");
+        template.append("       service = com.ponysdk.core.service.PonyServiceRegistry.getPonyService(" + GeneratorHelper.getServiceFullClassName(domain) + ".class);");
         template.append("   }\n");
         if (resultClass.equals("void") && method.getReturn().getValue() == null) {
             template.append("	service.%1$s(%2$s);\n");
@@ -460,7 +385,7 @@ public class ServiceGenerator extends BaseGenerator {
         }
     }
 
-    private void generateEvent(Event event) throws Exception {
+    private void generateEvent(final Event event) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getEventClassName(event));
 
         if (event.getParameter() != null) {
@@ -505,7 +430,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.generateContentAndStore();
     }
 
-    private void generateHandler(Event event) throws Exception {
+    private void generateHandler(final Event event) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getHandlerClassName(event));
 
         classWriter.setInterface(true);
@@ -546,7 +471,7 @@ public class ServiceGenerator extends BaseGenerator {
         return srcGeneratedDirectory;
     }
 
-    public void setSrcGeneratedDirectory(String srcGeneratedDirectory) {
+    public void setSrcGeneratedDirectory(final String srcGeneratedDirectory) {
         this.srcGeneratedDirectory = srcGeneratedDirectory;
     }
 }

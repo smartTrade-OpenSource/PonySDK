@@ -20,10 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.command;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,75 +34,94 @@ import com.ponysdk.core.PonySession;
 import com.ponysdk.core.command.event.ServiceFailedEvent;
 import com.ponysdk.core.event.EventBus;
 
-public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Command {
+public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Command<T> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractServiceCommand.class.getName());
 
     private final Set<AsyncCallback<T>> callbacks = new HashSet<AsyncCallback<T>>();
 
     private final EventBus eventBus;
+    private Throwable caught;
+    private long executionTime = 0;
 
     public AbstractServiceCommand() {
         this(PonySession.getRootEventBus());
     }
 
-    public AbstractServiceCommand(EventBus eventBus) {
+    public AbstractServiceCommand(final EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
     @Override
-    public void onSuccess(T result) {
+    public void onSuccess(final T result) {
         doAfterSuccess(result);
         fireSuccess(result);
-        doFinally();
     }
 
     @Override
-    public void onFailure(Throwable caught) {
+    public void onFailure(final Throwable caught) {
         log.error("Command " + this.getClass() + " failed.", caught);
+        this.caught = caught;
+
         fireFailure(caught);
         doAfterFailure(caught);
-        doFinally();
     }
 
     @Override
-    public void execute() {
+    public T execute() {
+
+        final long start = System.nanoTime();
         try {
             final T result = execute0();
             onSuccess(result);
+            return result;
         } catch (final Exception e) {
             log.error("service command execution failed", e);
             onFailure(e);
+            return null;
+        } finally {
+            executionTime = (System.nanoTime() - start);
+            if (log.isDebugEnabled()) log.debug("execution time = " + (executionTime * 0.000000001f) + " ms ");
         }
     }
 
     protected abstract T execute0() throws Exception;
 
-    protected abstract void doAfterSuccess(T result);
+    protected void doAfterSuccess(final T result) {
+        // Do nothing
+    }
 
     protected void doAfterFailure(final Throwable caught) {
         final ServiceFailedEvent event = new ServiceFailedEvent(AbstractServiceCommand.this, caught);
         eventBus.fireEvent(event);
     }
 
-    protected void doFinally() {
-        // Do nothing
-    }
-
-    public void addAsyncCallback(AsyncCallback<T> callback) {
+    public void addAsyncCallback(final AsyncCallback<T> callback) {
         callbacks.add(callback);
     }
 
-    private void fireSuccess(T result) {
+    private void fireSuccess(final T result) {
         for (final AsyncCallback<T> callback : callbacks) {
             callback.onSuccess(result);
         }
     }
 
-    private void fireFailure(Throwable caught) {
+    private void fireFailure(final Throwable caught) {
         for (final AsyncCallback<T> callback : callbacks) {
             callback.onFailure(caught);
         }
+    }
+
+    public Throwable getCaught() {
+        return caught;
+    }
+
+    public boolean isSuccessful() {
+        return caught != null;
+    }
+
+    public long getExecutionTime(final TimeUnit timeUnit) {
+        return timeUnit.convert(executionTime, TimeUnit.NANOSECONDS);
     }
 
 }
