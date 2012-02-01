@@ -38,6 +38,7 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         super.onFirstShowPage();
 
         final PVerticalPanel panelTop = new PVerticalPanel();
+        panelTop.setSpacing(10);
 
         panelTop.add(new PLabel("Select your favorite color:"));
         panelTop.add(new PRadioButton("color", "blue"));
@@ -49,6 +50,8 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panelTop.add(new PRadioButton("color", "green"));
 
         final PVerticalPanel panelBottom = new PVerticalPanel();
+        panelBottom.setSpacing(10);
+
         panelBottom.add(new PLabel("Select your favorite sport:"));
         panelBottom.add(new PRadioButton("sport", "Baseball"));
         panelBottom.add(new PRadioButton("sport", "Basketball"));
@@ -63,6 +66,6 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panel.add(panelTop);
         panel.add(panelBottom);
 
-        pageView.getBody().setWidget(panel);
+        examplePanel.setWidget(panel);
     }
 }

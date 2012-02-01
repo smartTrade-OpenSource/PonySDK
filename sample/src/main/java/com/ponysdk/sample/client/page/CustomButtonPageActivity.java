@@ -23,14 +23,25 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PPushButton;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 
-public class CheckBoxPageActivity extends SamplePageActivity {
+public class CustomButtonPageActivity extends SamplePageActivity {
 
-    public CheckBoxPageActivity() {
-        super("CheckBox", "Widgets");
+    protected PButton enabledPushButton;
+
+    protected PButton disabledPushButton;
+
+    protected PButton enabledToggleButton;
+
+    protected PButton disabledToggleButton;
+
+    public CustomButtonPageActivity() {
+        super("Custom Button", "Widgets");
     }
 
     @Override
@@ -40,20 +51,23 @@ public class CheckBoxPageActivity extends SamplePageActivity {
         final PVerticalPanel panel = new PVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Check all days that you are available:"));
-
-        panel.add(new PCheckBox("Monday"));
-        panel.add(new PCheckBox("Tuesday"));
-        panel.add(new PCheckBox("Wednesday"));
-        panel.add(new PCheckBox("Thursday"));
-        panel.add(new PCheckBox("Friday"));
-        PCheckBox saturday = new PCheckBox("Saturday");
-        saturday.setEnabled(false);
-        panel.add(saturday);
-        PCheckBox sunday = new PCheckBox("Sunday");
-        sunday.setEnabled(false);
-        panel.add(sunday);
+        panel.add(new PLabel("Push button :"));
+        panel.add(buildPushButtonPanel());
 
         examplePanel.setWidget(panel);
+    }
+
+    private PHorizontalPanel buildPushButtonPanel() {
+        final PHorizontalPanel panel = new PHorizontalPanel();
+        panel.setSpacing(10);
+
+        enabledPushButton = new PPushButton(new PImage("pony.png"));
+        panel.add(enabledPushButton);
+
+        disabledPushButton = new PPushButton(new PImage("pony.png"));
+        disabledPushButton.setEnabled(false);
+        panel.add(disabledPushButton);
+
+        return panel;
     }
 }

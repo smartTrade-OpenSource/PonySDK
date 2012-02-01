@@ -57,7 +57,7 @@ public class SamplePageActivity extends PageActivity {
 
         examplePanel = new PSimpleLayoutPanel();
 
-        tabPanel.add(examplePanel, "Zozo");
+        tabPanel.add(examplePanel, "Example");
         codePanel = new PSimpleLayoutPanel();
         tabPanel.add(codePanel, "Source Code");
 
