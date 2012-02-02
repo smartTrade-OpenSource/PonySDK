@@ -50,7 +50,7 @@ public class DialogBoxPageActivity extends PageActivity {
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
@@ -62,7 +62,7 @@ public class DialogBoxPageActivity extends PageActivity {
         anchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final PDialogBox dialogBox = new PDialogBox(true);
                 dialogBox.setText("Dialog");
                 final PSimplePanel content = new PSimplePanel();
@@ -80,7 +80,7 @@ public class DialogBoxPageActivity extends PageActivity {
         anchor2.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
 
                 final PPopupPanel popupPanel = new PPopupPanel();
                 final PVerticalPanel content = new PVerticalPanel();
@@ -88,7 +88,7 @@ public class DialogBoxPageActivity extends PageActivity {
                 closeButton.addClickHandler(new PClickHandler() {
 
                     @Override
-                    public void onClick(PClickEvent clickEvent) {
+                    public void onClick(final PClickEvent clickEvent) {
                         popupPanel.hide();
                     }
                 });
@@ -107,7 +107,7 @@ public class DialogBoxPageActivity extends PageActivity {
         anchor3.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final PDialogBox dialogBox = new PDialogBox(true);
                 dialogBox.setText("Custom close");
                 dialogBox.setCloseWidget(new PImage("image/cross.png"));
@@ -128,11 +128,11 @@ public class DialogBoxPageActivity extends PageActivity {
         anchor4.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 POptionPane.showConfirmDialog(new PActionHandler() {
 
                     @Override
-                    public void onAction(PDialogBox dialogBox, String option) {
+                    public void onAction(final PDialogBox dialogBox, final String option) {
                         dialogBox.hide();
                     }
                 }, "showConfirmDialog");
@@ -145,11 +145,11 @@ public class DialogBoxPageActivity extends PageActivity {
         anchor5.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 POptionPane dialodBox = POptionPane.showConfirmDialog(new PActionHandler() {
 
                     @Override
-                    public void onAction(PDialogBox dialogBox, String option) {
+                    public void onAction(final PDialogBox dialogBox, final String option) {
                         dialogBox.hide();
                     }
                 }, "showConfirmDialog");

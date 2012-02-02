@@ -23,21 +23,37 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.ui.server.basic.PHTML;
+import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
 
+import de.java2html.converter.JavaSource2HTMLConverter;
+import de.java2html.javasource.JavaSource;
+import de.java2html.javasource.JavaSourceParser;
+import de.java2html.options.JavaSourceConversionOptions;
+
 public class SamplePageActivity extends PageActivity {
 
+    private static Logger log = LoggerFactory.getLogger(SamplePageActivity.class);
+
     private PTabPanel tabPanel;
-
     protected PSimpleLayoutPanel examplePanel;
-
     protected PSimpleLayoutPanel codePanel;
 
-    public SamplePageActivity(String pageName, String pageCategory) {
+    private PScrollPanel codeScrollpanel;
+
+    public SamplePageActivity(final String pageName, final String pageCategory) {
         super(pageName, pageCategory);
         setPageView(new DefaultPageView());
     }
@@ -46,22 +62,52 @@ public class SamplePageActivity extends PageActivity {
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
+        codeScrollpanel = new PScrollPanel();
+
         tabPanel = new PTabPanel();
 
         examplePanel = new PSimpleLayoutPanel();
 
         tabPanel.add(examplePanel, "Example");
+
         codePanel = new PSimpleLayoutPanel();
+        codePanel.setWidget(codeScrollpanel);
+        codeScrollpanel.setWidget(new PHTML(getSource()));
+
         tabPanel.add(codePanel, "Source Code");
 
         pageView.getBody().setWidget(tabPanel);
 
+    }
+
+    protected String getSource() {
+
+        String fileName = getClass().getName().replaceAll("\\.", "/") + ".java";
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = null;
+        try {
+
+            inputStream = classLoader.getResourceAsStream(fileName);
+            if (inputStream == null) return "Unable to load file: " + fileName;
+
+            StringWriter writer = new StringWriter();
+            JavaSource javaSource = new JavaSourceParser().parse(inputStream);
+            JavaSource2HTMLConverter converter = new JavaSource2HTMLConverter();
+            converter.convert(javaSource, JavaSourceConversionOptions.getDefault(), writer);
+
+            return writer.toString();
+
+        } catch (IOException e) {
+            log.error("", e);
+        }
+
+        return "";
     }
 }

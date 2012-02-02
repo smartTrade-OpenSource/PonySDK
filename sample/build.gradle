@@ -6,7 +6,24 @@ srcSample = 'src'
 srcGenerated = 'src-generated/main/java'
 
 repositories {
-	mavenCentral()
+        mavenCentral()
+        maven {
+        	url "https://github.com/mbarbier/ponysdk-mvn-repo/raw/master/ext"
+    	}
+}
+
+configurations {
+	java2html
+	compile {
+		extendsFrom java2html
+	}
+	runtime {
+		extendsFrom java2html
+	}
+}
+
+dependencies {
+	java2html 'de.java2html:java2html:1.0'
 }
 
 dependencies {
@@ -21,6 +38,8 @@ sourceSets {
 		}
 	}
 }
+
+
 
 task cleanDebug(type: Delete) {
   delete 'war/ponyterminal', 'war/WEB-INF/deploy'
@@ -63,6 +82,15 @@ task generateProxyBuilder(type: JavaExec) {
 		]
 }
 
+task copyAllLibs << {
+	println 'Copying all libs'
+	copy {
+		from configurations.java2html
+		into 'libs/java2html'
+	}
+}
+
 compileJava.dependsOn(generateSkeleton)
 compileJava.dependsOn(generateProxyBuilder)
+assemble.dependsOn(copyAllLibs)
 
