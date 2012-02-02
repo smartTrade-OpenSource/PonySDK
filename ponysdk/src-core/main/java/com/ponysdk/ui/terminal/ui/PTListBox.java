@@ -37,7 +37,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTListBox extends PTFocusWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final boolean multiselect = create.getMainProperty().getBooleanValue();
         final com.google.gwt.user.client.ui.ListBox listBox = new com.google.gwt.user.client.ui.ListBox(multiselect);
         init(listBox);
@@ -51,7 +51,7 @@ public class PTListBox extends PTFocusWidget {
             listBox.addChangeHandler(new ChangeHandler() {
 
                 @Override
-                public void onChange(ChangeEvent event) {
+                public void onChange(final ChangeEvent event) {
                     final int selectedIndex = listBox.getSelectedIndex();
                     if (selectedIndex == -1) {
                         final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.CHANGE_HANDLER);
@@ -79,7 +79,7 @@ public class PTListBox extends PTFocusWidget {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
@@ -106,6 +106,9 @@ public class PTListBox extends PTFocusWidget {
                 final int index = property.getIntProperty(PropertyKey.SELECTED_INDEX);
                 if (index == -1) listBox.setSelectedIndex(index);
                 else listBox.setItemSelected(index, selected);
+                break;
+            case VISIBLE_ITEM_COUNT:
+                listBox.setVisibleItemCount(property.getIntValue());
                 break;
 
             default:

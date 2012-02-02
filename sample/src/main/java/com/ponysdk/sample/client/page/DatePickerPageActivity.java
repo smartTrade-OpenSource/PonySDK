@@ -20,36 +20,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.server.basic;
 
-import java.util.ArrayList;
-import java.util.List;
+package com.ponysdk.sample.client.page;
 
-public class PRadioButtonGroup {
+import com.ponysdk.ui.server.basic.PDateBox;
+import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PVerticalPanel;
 
-    private final List<PRadioButton> radioButtons = new ArrayList<PRadioButton>();
+public class DatePickerPageActivity extends SamplePageActivity {
 
-    private final String group;
-
-    public PRadioButtonGroup(String group) {
-        this.group = group;
+    public DatePickerPageActivity() {
+        super("Date Picker", "Widgets");
     }
 
-    public void registerRadioButton(PRadioButton radioButton) {
-        radioButtons.add(radioButton);
-        radioButton.setName(group);
-    }
+    @Override
+    protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-    public void unregisterRadioButton(PRadioButton radioButton) {
-        radioButtons.remove(radioButton);
-    }
+        final PVerticalPanel panel = new PVerticalPanel();
+        panel.setSpacing(10);
 
-    public PRadioButton getValue() {
-        for (final PRadioButton radioButton : radioButtons) {
-            if (radioButton.getValue()) {
-                return radioButton;
-            }
-        }
-        return null;
+        panel.add(new PLabel("Permanent DatePicker:"));
+        panel.add(new PLabel("DateBox with popup DatePicker:"));
+        panel.add(new PDateBox("date:"));
+
+        examplePanel.setWidget(panel);
     }
 }

@@ -47,9 +47,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private int selectedIndex = -1;
     private final boolean containsEmptyItem;
     private final boolean isMultipleSelect;
+    private int visibleItemCount;
 
     public PListBox() {
-        this(true, false);
+        this(false, false);
+    }
+
+    public PListBox(final boolean containsEmptyItem) {
+        this(containsEmptyItem, false);
     }
 
     public PListBox(final boolean containsEmptyItem, final boolean isMultipleSelect) {
@@ -59,13 +64,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (containsEmptyItem) {
             addItem("", null);
         }
-        // comment....
+
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.CHANGE_HANDLER);
 
         getPonySession().stackInstruction(addHandler);
 
-        final Property mainProperty = new Property(PropertyKey.MULTISELECT, isMultipleSelect);
-        setMainProperty(mainProperty);
+        setMainProperty(new Property(PropertyKey.MULTISELECT, isMultipleSelect));
     }
 
     @Override
@@ -311,6 +315,17 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         return selectedItems;
     }
 
+    public void setVisibleItemCount(final int visibleItemCount) {
+        this.visibleItemCount = visibleItemCount;
+        final Update update = new Update(getID());
+        update.setMainPropertyValue(PropertyKey.VISIBLE_ITEM_COUNT, visibleItemCount);
+        getPonySession().stackInstruction(update);
+    }
+
+    public int getVisibleItemCount() {
+        return visibleItemCount;
+    }
+
     private class ListItem {
 
         protected String label;
@@ -323,4 +338,5 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         }
 
     }
+
 }

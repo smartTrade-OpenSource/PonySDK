@@ -177,6 +177,8 @@ public enum PropertyKey {
 
     VISIBLE_LINES,
 
+    VISIBLE_ITEM_COUNT,
+
     CHARACTER_WIDTH,
 
     HORIZONTAL_SCROLL_POSITION,

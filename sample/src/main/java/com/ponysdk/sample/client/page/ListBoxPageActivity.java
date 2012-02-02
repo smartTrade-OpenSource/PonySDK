@@ -20,93 +20,81 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.addon.PDialogBox;
-import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.addon.PNotificationManager;
+import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class ListBoxPageActivity extends PageActivity {
+public class ListBoxPageActivity extends SamplePageActivity {
 
     public ListBoxPageActivity() {
-        super("ListBox", "Basics UI Components");
-    }
-
-    @Override
-    protected void onInitialization() {
-    }
-
-    @Override
-    protected void onShowPage(Place place) {
-    }
-
-    @Override
-    protected void onLeavingPage() {
+        super("List Box", "Lists and Menus");
     }
 
     @Override
     protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-        final PVerticalPanel layout = new PVerticalPanel();
-        pageView.getBody().setWidget(layout);
+        final PFlexTable table = new PFlexTable();
 
-        final PListBox listBox = new PListBox(true, true);
+        final PListBox listBoxCategory = new PListBox();
+        listBoxCategory.addItem("Sports");
+        listBoxCategory.addItem("Pony");
 
-        listBox.addItem("AAAAAAAA");
-        listBox.addItem("BBBBBBBBB");
-        listBox.addItem("CCCCCCCCC");
-        listBox.addItem("DDDDDDDDD");
-        listBox.addItem("EEEEEEEEE");
-        listBox.addItem("FFFFFFFFF");
+        final PListBox listBoxApplied = new PListBox();
+        listBoxApplied.setVisibleItemCount(10);
 
-        listBox.addChangeHandler(new PChangeHandler() {
+        listBoxApplied.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
-                final PDialogBox dialogBox = new PDialogBox(true);
+            public void onChange(final Object source, final int selectedIndex) {
+                PNotificationManager.notify("Item selected", "Item selected : " + listBoxApplied.getSelectedItem());
+            }
+        });
 
-                String msg = "Current selected index : " + selectedIndex + "\n";
-                msg += "Selected indexes :  ";
+        fillSports(listBoxApplied);
 
-                for (int i = 0; i < listBox.getItemCount(); i++) {
-                    if (listBox.isItemSelected(i))
-                        msg += ", " + i;
+        listBoxCategory.addChangeHandler(new PChangeHandler() {
+
+            @Override
+            public void onChange(final Object source, final int selectedIndex) {
+                listBoxApplied.clear();
+
+                if (listBoxCategory.getItem(selectedIndex).equals("Sports")) {
+                    fillSports(listBoxApplied);
+                } else {
+                    fillPony(listBoxApplied);
                 }
-
-                dialogBox.setWidget(new PLabel(msg));
-                dialogBox.center();
-                dialogBox.show();
             }
+
         });
 
-        layout.add(listBox);
+        table.setWidget(0, 0, new PLabel("Select a category:"));
+        table.setWidget(1, 0, listBoxCategory);
+        table.setWidget(0, 1, new PLabel("Select all that apply:"));
+        table.setWidget(1, 1, listBoxApplied);
 
-        final PButton clear = new PButton("clear");
-        clear.addClickHandler(new PClickHandler() {
+        examplePanel.setWidget(table);
+    }
 
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                listBox.clear();
-            }
-        });
+    protected void fillSports(final PListBox listBoxApplied) {
+        listBoxApplied.addItem("Baseball");
+        listBoxApplied.addItem("Basketball");
+        listBoxApplied.addItem("Football");
+        listBoxApplied.addItem("Hockey");
+        listBoxApplied.addItem("Water Polo");
+    }
 
-        final PButton add = new PButton("Add item");
-        add.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                listBox.addItem("Item_" + System.currentTimeMillis());
-            }
-        });
-
-        layout.add(clear);
-        layout.add(add);
+    protected void fillPony(final PListBox listBoxApplied) {
+        listBoxApplied.addItem("Altai horseBengin");
+        listBoxApplied.addItem("American Warmblood");
+        listBoxApplied.addItem("Falabella");
+        listBoxApplied.addItem("Friesian horse");
+        listBoxApplied.addItem("Mustang");
+        listBoxApplied.addItem("Altai horse");
     }
 }

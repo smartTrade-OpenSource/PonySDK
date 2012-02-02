@@ -61,6 +61,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.BasicButtonPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.CustomButtonPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.DatePickerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
@@ -78,7 +81,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.OraclePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.CookiePageActivity" />
-	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.RichTextAreaPageActivity" />
