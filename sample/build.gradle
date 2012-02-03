@@ -102,6 +102,8 @@ task createPackage << {
 	println 'ponysdk path: ' + ponysdkPath
 	println 'ponysdk war path: ' + ponysdkWarResourcesPath
 	
+	
+	
 	copy {
 		from configurations.java2html
 		from project(':ponysdk').configurations.sl4j
@@ -124,6 +126,9 @@ task createPackage << {
 		into packageOutputDirName + '/war'
 	}
 
+	delete packageOutputDirName + '/start.bat'
+	delete packageOutputDirName + '/start.sh'
+
 	f = new File(packageOutputDirName + '/start.bat')
 	writer = f.newWriter("UTF-8", true)
 	writer.write("java -server -cp .;etc/;lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
@@ -136,8 +141,13 @@ task createPackage << {
 	writer.close()
 }
 
+jar {
+	doLast {
+		tasks.createPackage.execute()
+	}
+}
+
 compileJava.dependsOn(generateSkeleton)
 compileJava.dependsOn(generateProxyBuilder)
 assemble.dependsOn(copyAllLibs)
-assemble.dependsOn(createPackage)
 
