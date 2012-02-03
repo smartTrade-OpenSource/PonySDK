@@ -23,6 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.io.File;
+
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PImage;
@@ -61,10 +63,13 @@ public class CustomButtonPageActivity extends SamplePageActivity {
         final PHorizontalPanel panel = new PHorizontalPanel();
         panel.setSpacing(10);
 
-        enabledPushButton = new PPushButton(new PImage("pony.png"));
+        File f = new File("");
+        f.newW
+
+        enabledPushButton = new PPushButton(new PImage("images/pony.png"));
         panel.add(enabledPushButton);
 
-        disabledPushButton = new PPushButton(new PImage("pony.png"));
+        disabledPushButton = new PPushButton(new PImage("images/pony.png"));
         disabledPushButton.setEnabled(false);
         panel.add(disabledPushButton);
 
