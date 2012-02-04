@@ -10,6 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
  * implied. See the License for the specific language governing permissions and limitations under the License.
  */
+
 package com.ponysdk.impl.webapplication.menu;
 
 import java.util.LinkedHashMap;
@@ -37,20 +38,19 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
         tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
 
             @Override
-            public void onSelection(PSelectionEvent<PTreeItem> event) {
-                final PSelectionEvent<String> e = new PSelectionEvent<String>();
-                e.setSelectedItem(event.getSelectedItem().getText());
+            public void onSelection(final PSelectionEvent<PTreeItem> event) {
+                final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getText());
                 handler.onSelection(e);
             }
         });
     }
 
     @Override
-    public void addCategory(String category) {
+    public void addCategory(final String category) {
         createCategoryItemIfNeeded(category);
     }
 
-    private PTreeItem createCategoryItemIfNeeded(String category) {
+    private PTreeItem createCategoryItemIfNeeded(final String category) {
         PTreeItem categoryItem = itemsByName.get(category);
         if (categoryItem == null) {
             categoryItem = tree.addItem(category);
@@ -60,7 +60,7 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void addItem(String category, String caption) {
+    public void addItem(final String category, final String caption) {
         final PTreeItem categoryItem = createCategoryItemIfNeeded(category);
         if (caption != null) {
             final PTreeItem captionItem = new PTreeItem(caption);
@@ -70,7 +70,7 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void selectItem(String category, String caption) {
+    public void selectItem(final String category, final String caption) {
         if (caption != null) {
             tree.setSelectedItem(itemsByName.get(caption));
         } else {
@@ -79,7 +79,7 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void addSelectionHandler(PSelectionHandler<String> handler) {
+    public void addSelectionHandler(final PSelectionHandler<String> handler) {
         this.handler = handler;
     }
 

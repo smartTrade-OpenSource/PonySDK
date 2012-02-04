@@ -41,19 +41,20 @@ public class PTTextBoxBase extends PTValueBoxBase<String> {
             cast().addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
-                public void onValueChange(ValueChangeEvent<String> event) {
+                public void onValueChange(final ValueChangeEvent<String> event) {
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
+            return;
         }
 
         super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

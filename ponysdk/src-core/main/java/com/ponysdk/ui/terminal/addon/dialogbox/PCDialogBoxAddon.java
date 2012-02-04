@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.dialogbox;
 
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -50,7 +51,7 @@ public class PCDialogBoxAddon extends PTDialogBox implements Addon {
         dialogBox.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
+            public void onClose(final CloseEvent<PopupPanel> event) {
                 uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
             }
         });
@@ -59,8 +60,9 @@ public class PCDialogBoxAddon extends PTDialogBox implements Addon {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
         final Property mainProperty = update.getMainProperty();
+
         for (final Property property : mainProperty.getChildProperties().values()) {
             final PropertyKey propertyKey = property.getKey();
             if (PropertyKey.POPUP_TEXT.equals(propertyKey)) {

@@ -1,3 +1,4 @@
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
@@ -40,10 +41,8 @@ public abstract class PObject {
 
     protected abstract WidgetType getType();
 
-    protected void init(WidgetType widgetType) {
-        if (widgetType == null) {
-            return;
-        }
+    protected void init(final WidgetType widgetType) {
+        if (widgetType == null) { return; }
         ID = PonySession.getCurrent().nextID();
         create = new Create(ID, widgetType);
         if (this instanceof PAddOn) {
@@ -57,8 +56,12 @@ public abstract class PObject {
         return ID;
     }
 
-    public void onEventInstruction(EventInstruction event) {
+    public void onEventInstruction(final EventInstruction event) {
         // override
+    }
+
+    public PonySession getPonySession() {
+        return PonySession.getCurrent();
     }
 
     @Override
@@ -70,16 +73,12 @@ public abstract class PObject {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final PObject other = (PObject) obj;
-        if (ID != other.ID)
-            return false;
+        if (ID != other.ID) return false;
         return true;
     }
 

@@ -64,6 +64,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DatePickerPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
@@ -76,7 +78,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.MenuPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.OraclePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" />

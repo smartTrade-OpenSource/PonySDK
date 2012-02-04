@@ -63,15 +63,15 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         return WidgetType.TABLAYOUTPANEL;
     }
 
-    public void insert(IsPWidget widget, String tabText, int beforeIndex) {
+    public void insert(final IsPWidget widget, final String tabText, final int beforeIndex) {
         insert(asWidgetOrNull(widget), tabText, beforeIndex);
     }
 
-    public void insert(IsPWidget widget, IsPWidget tabWidget, int beforeIndex) {
+    public void insert(final IsPWidget widget, final IsPWidget tabWidget, final int beforeIndex) {
         insert(asWidgetOrNull(widget), asWidgetOrNull(tabWidget), beforeIndex);
     }
 
-    public void insert(PWidget widget, PWidget tabWidget, int beforeIndex) {
+    public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
         // Detach new child.
         widget.removeFromParent();
 
@@ -88,7 +88,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         getPonySession().stackInstruction(addWidget);
     }
 
-    public void insert(PWidget widget, String tabText, int beforeIndex) {
+    public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
         // Detach new child.
         widget.removeFromParent();
 
@@ -102,23 +102,23 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         getPonySession().stackInstruction(addWidget);
     }
 
-    public void add(IsPWidget w, IsPWidget tabWidget) {
+    public void add(final IsPWidget w, final IsPWidget tabWidget) {
         add(asWidgetOrNull(w), asWidgetOrNull(tabWidget));
     }
 
-    public void add(IsPWidget w, String tabText) {
+    public void add(final IsPWidget w, final String tabText) {
         add(asWidgetOrNull(w), tabText);
     }
 
-    public void add(PWidget w, String tabText) {
+    public void add(final PWidget w, final String tabText) {
         insert(w, tabText, getWidgetCount());
     }
 
-    public void add(PWidget w, PWidget tabWidget) {
+    public void add(final PWidget w, final PWidget tabWidget) {
         insert(w, tabWidget, getWidgetCount());
     }
 
-    public PWidget getWidget(int index) {
+    public PWidget getWidget(final int index) {
         return children.get(index);
     }
 
@@ -126,12 +126,12 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         return children.size();
     }
 
-    public int getWidgetIndex(PWidget child) {
+    public int getWidgetIndex(final PWidget child) {
         return children.indexOf(child);
     }
 
     @Override
-    public void add(PWidget w) {
+    public void add(final PWidget w) {
         throw new UnsupportedOperationException("A tabText parameter must be specified with add().");
     }
 
@@ -141,7 +141,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void setAnimationEnabled(boolean animationEnabled) {
+    public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.ANIMATION, animationEnabled);
@@ -149,14 +149,14 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void addBeforeSelectionHandler(PBeforeSelectionHandler<Integer> handler) {
+    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.BEFORE_SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
-    public void removeBeforeSelectionHandler(PBeforeSelectionHandler<Integer> handler) {
+    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.remove(handler);
     }
 
@@ -166,7 +166,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void addSelectionHandler(PSelectionHandler<Integer> handler) {
+    public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
@@ -174,12 +174,11 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void onEventInstruction(EventInstruction eventInstruction) {
+    public void onEventInstruction(final EventInstruction eventInstruction) {
         final HandlerType handlerType = eventInstruction.getHandlerType();
         if (HandlerType.SELECTION_HANDLER.equals(handlerType)) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
-                final PSelectionEvent<Integer> selection = new PSelectionEvent<Integer>();
-                selection.setSelectedItem(eventInstruction.getMainProperty().getIntValue());
+                final PSelectionEvent<Integer> selection = new PSelectionEvent<Integer>(this, eventInstruction.getMainProperty().getIntValue());
                 handler.onSelection(selection);
             }
         } else if (HandlerType.BEFORE_SELECTION_HANDLER.equals(handlerType)) {
@@ -192,7 +191,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void removeSelectionHandler(PSelectionHandler<Integer> handler) {
+    public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.remove(handler);
     }
 
@@ -202,7 +201,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     }
 
     @Override
-    public void onSelection(PSelectionEvent<Integer> event) {
+    public void onSelection(final PSelectionEvent<Integer> event) {
         selectedItemIndex = event.getSelectedItem();
     }
 

@@ -78,6 +78,7 @@ public class PTListBox extends PTFocusWidget {
         super.addHandler(addHandler, uiService);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void update(final Update update, final UIService uiService) {
 
@@ -109,6 +110,9 @@ public class PTListBox extends PTFocusWidget {
                 break;
             case VISIBLE_ITEM_COUNT:
                 listBox.setVisibleItemCount(property.getIntValue());
+                break;
+            case MULTISELECT:
+                listBox.setMultipleSelect(property.getBooleanValue());
                 break;
 
             default:

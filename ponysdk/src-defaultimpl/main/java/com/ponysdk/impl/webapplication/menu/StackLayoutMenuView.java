@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.menu;
 
 import java.util.Arrays;
@@ -54,11 +55,11 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
     }
 
     @Override
-    public void addCategory(String category) {
+    public void addCategory(final String category) {
         createCategoryItemIfNeeded(category);
     }
 
-    private String getCategory(String[] split, int index) {
+    private String getCategory(final String[] split, final int index) {
         String category = split[0];
         for (int i = 0; i <= index; i++) {
             category = category + "," + split[i];
@@ -66,7 +67,7 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
         return category;
     }
 
-    private PVerticalPanel createCategoryItemIfNeeded(String category) {
+    private PVerticalPanel createCategoryItemIfNeeded(final String category) {
         final String[] split = category.split(",");
         final List<String> list = Arrays.asList(split);
         int i = 0;
@@ -101,7 +102,7 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
     }
 
     @Override
-    public void addItem(String category, final String caption) {
+    public void addItem(final String category, final String caption) {
         final PVerticalPanel categoryPanel = createCategoryItemIfNeeded(category);
         if (caption != null) {
             final PAnchor item = new PAnchor(caption);
@@ -109,14 +110,9 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
             item.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
-                    final PSelectionEvent<String> event = new PSelectionEvent<String>();
-                    event.setSelectedItem(caption);
+                public void onClick(final PClickEvent clickEvent) {
+                    final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
                     handler.onSelection(event);
-                    // item.addStyleName("selectedItem");
-                    // if (selectedItem != null)
-                    // selectedItem.removeStyleName("selectedItem");
-                    // selectedItem = item;
                 }
             });
             categoryPanel.add(item);
@@ -125,15 +121,14 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
     }
 
     @Override
-    public void addSelectionHandler(PSelectionHandler<String> handler) {
+    public void addSelectionHandler(final PSelectionHandler<String> handler) {
         this.handler = handler;
     }
 
     @Override
-    public void selectItem(String category, String caption) {
+    public void selectItem(final String category, final String caption) {
         if (caption != null) {
-            if (selectedItem != null)
-                selectedItem.removeStyleName("selectedItem");
+            if (selectedItem != null) selectedItem.removeStyleName("selectedItem");
             final PAnchor item = anchorByName.get(caption);
             item.addStyleName("selectedItem");
             selectedItem = item;

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
@@ -56,15 +57,15 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
         return WidgetType.TREE;
     }
 
-    public PTreeItem addItem(String item) {
+    public PTreeItem addItem(final String item) {
         return root.addItem(item);
     }
 
-    public PTreeItem addItem(PTreeItem item) {
+    public PTreeItem addItem(final PTreeItem item) {
         return root.addItem(item);
     }
 
-    public void removeItem(PTreeItem item) {
+    public void removeItem(final PTreeItem item) {
         root.removeItem(item);
     }
 
@@ -72,7 +73,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
         return curSelection;
     }
 
-    public void setSelectedItem(PTreeItem item) {
+    public void setSelectedItem(final PTreeItem item) {
         if (curSelection != null) {
             curSelection.setSelected(false);
         }
@@ -80,7 +81,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
         curSelection.setSelected(true);
     }
 
-    public PTreeItem getItem(int index) {
+    public PTreeItem getItem(final int index) {
         return root.getChild(index);
     }
 
@@ -93,27 +94,27 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
         return root.getChildCount();
     }
 
-    void orphan(PWidget widget) {
+    void orphan(final PWidget widget) {
         assert (widget.getParent() == this);
         widget.setParent(null);
         childWidgets.remove(widget);
     }
 
-    void adopt(PWidget widget, PTreeItem item) {
+    void adopt(final PWidget widget, final PTreeItem item) {
         assert (!childWidgets.containsKey(widget));
         childWidgets.put(widget, item);
         widget.setParent(this);
     }
 
     @Override
-    public void addSelectionHandler(PSelectionHandler<PTreeItem> handler) {
+    public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
-    public void removeSelectionHandler(PSelectionHandler<PTreeItem> handler) {
+    public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
     }
 
@@ -123,11 +124,10 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     }
 
     @Override
-    public void onEventInstruction(EventInstruction event) {
+    public void onEventInstruction(final EventInstruction event) {
         if (HandlerType.SELECTION_HANDLER.equals(event.getHandlerType())) {
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
-                final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>();
-                selectionEvent.setSelectedItem(getItemByPath(event.getMainProperty().getValue()));
+                final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, getItemByPath(event.getMainProperty().getValue()));
                 handler.onSelection(selectionEvent);
             }
         } else {
@@ -135,14 +135,12 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
         }
     }
 
-    public PTreeItem getItemByPath(String data) {
-        if (ROOT_PATH.equals(data)) {
-            return root;
-        }
+    public PTreeItem getItemByPath(final String data) {
+        if (ROOT_PATH.equals(data)) { return root; }
         return childByPath.get(data);
     }
 
-    public void updateTreeItemPosition(String path, PTreeItem item) {
+    public void updateTreeItemPosition(final String path, final PTreeItem item) {
         childByPath.put(path, item);
     }
 
