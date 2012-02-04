@@ -73,7 +73,7 @@ jar {
 		tasks.jarSource.execute()
 	}
     
-    from sourceSets.main.classes
+    from sourceSets.main.output
     from gwtOutputDirName
     from warResources
     
@@ -121,7 +121,7 @@ task gwtc(type: JavaExec) {
 	classpath {
 		[
 			sourceSets.main.java.srcDirs,
-			sourceSets.main.classes,
+			sourceSets.main.output,
 			configurations.gwt
 		]
 	}

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import java.io.IOException;
@@ -47,15 +48,13 @@ public class StreamResourcePageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
-    protected void onShowPage(Place place) {
+    protected void onShowPage(final Place place) {
         pageView.getBody().setWidget(verticalPanel);
     }
 
@@ -68,19 +67,19 @@ public class StreamResourcePageActivity extends PageActivity {
         downloadImageButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 final StreamResource streamResource = new StreamResource();
                 streamResource.open(new StreamHandler() {
 
                     @Override
-                    public void onStream(HttpServletRequest request, HttpServletResponse response) {
+                    public void onStream(final HttpServletRequest request, final HttpServletResponse response) {
                         response.reset();
                         response.setContentType("image/png");
                         response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
 
                         try {
                             final OutputStream output = response.getOutputStream();
-                            final InputStream input = getClass().getClassLoader().getResourceAsStream("pony.png");
+                            final InputStream input = getClass().getClassLoader().getResourceAsStream("images/pony.png");
 
                             final byte[] buff = new byte[1024];
                             while (input.read(buff) != -1) {

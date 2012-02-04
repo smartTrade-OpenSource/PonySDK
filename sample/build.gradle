@@ -2,14 +2,19 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-srcSample = 'src'
+srcSample = 'src/main/java'
 srcGenerated = 'src-generated/main/java'
 
+ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
+
+//warOutputDirName = buildDir.name + '/war';
+packageOutputDirName = buildDir.name + '/package';
+
 repositories {
-        mavenCentral()
-        maven {
-        	url "https://github.com/mbarbier/ponysdk-mvn-repo/raw/master/ext"
-    	}
+    mavenCentral()
+    maven {
+    	url "https://github.com/mbarbier/ponysdk-mvn-repo/raw/master/ext"
+	}
 }
 
 configurations {
@@ -24,10 +29,8 @@ configurations {
 
 dependencies {
 	java2html 'de.java2html:java2html:1.0'
-}
-
-dependencies {
 	compile project(':ponysdk')
+	runtime project(':ponysdk')
 }
 
 sourceSets {
@@ -53,7 +56,7 @@ task generateSkeleton(type: JavaExec) {
 	outputs.dir file(srcGenerated)
 	classpath {
 		[
-			project(':ponysdk').sourceSets.main.classes,
+			project(':ponysdk').sourceSets.main.output,
 			project(':ponysdk').configurations.sl4j
 		]
 	}
@@ -71,7 +74,7 @@ task generateProxyBuilder(type: JavaExec) {
 	outputs.dir file(srcGenerated)
 	classpath {
 		[
-			project(':ponysdk').sourceSets.main.classes,
+			project(':ponysdk').sourceSets.main.output,
 			project(':ponysdk').configurations.sl4j,
 			project(':ponysdk').configurations.spring
 		]
@@ -87,6 +90,60 @@ task copyAllLibs << {
 	copy {
 		from configurations.java2html
 		into 'libs/java2html'
+	}
+}
+
+
+task createPackage << {
+
+	ponysdkWarResourcesPath = ponysdkPath + '/' + project(':ponysdk').warResources
+
+	println 'Building war'
+	println 'ponysdk path: ' + ponysdkPath
+	println 'ponysdk war path: ' + ponysdkWarResourcesPath
+	
+	
+	
+	copy {
+		from configurations.java2html
+		from project(':ponysdk').configurations.sl4j
+		from project(':ponysdk').configurations.spring
+		from project(':ponysdk').configurations.gwt
+		from project(':ponysdk').buildDir.path + '/libs'
+		into packageOutputDirName + '/lib'
+	}
+	copy {
+		from sourceSets.main.java
+		from sourceSets.main.output
+		into packageOutputDirName + '/war/WEB-INF/classes'
+	}
+	copy {
+		from 'etc'
+		into packageOutputDirName + '/etc'
+	}
+	copy {
+		from ponysdkWarResourcesPath
+		into packageOutputDirName + '/war'
+	}
+
+	delete packageOutputDirName + '/start.bat'
+	delete packageOutputDirName + '/start.sh'
+
+	f = new File(packageOutputDirName + '/start.bat')
+	writer = f.newWriter("UTF-8", true)
+	writer.write("java -server -cp .;etc/;lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
+	writer.write("pause\n")
+	writer.close()
+
+	f = new File(packageOutputDirName + '/start.sh')
+	writer = f.newWriter("UTF-8", true)
+	writer.write("java -server -cp .:etc/:lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
+	writer.close()
+}
+
+jar {
+	doLast {
+		tasks.createPackage.execute()
 	}
 }
 
