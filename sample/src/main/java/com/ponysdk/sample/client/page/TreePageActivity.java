@@ -25,19 +25,18 @@ package com.ponysdk.sample.client.page;
 
 import java.util.List;
 
-import com.ponysdk.core.PonySession;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
+import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PSuggestBox;
-import com.ponysdk.ui.server.basic.PSuggestBox.PSuggestOracle;
-import com.ponysdk.ui.server.basic.PSuggestion;
+import com.ponysdk.ui.server.basic.PTree;
+import com.ponysdk.ui.server.basic.PTreeItem;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class TreePageActivity extends SamplePageActivity {
 
@@ -51,29 +50,39 @@ public class TreePageActivity extends SamplePageActivity {
 
         final PVerticalPanel panel = new PVerticalPanel();
 
-        panel.add(new PLabel("Choose a word:"));
+        panel.add(new PLabel("Static Tree:"));
 
-        final PSuggestBox suggestBox = new PSuggestBox();
-        PSuggestOracle suggestOracle = suggestBox.getSuggestOracle();
+        final PTree tree = new PTree();
 
-        suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
+        PTreeItem firstItem = new PTreeItem("First item");
+
+        PAnchor anchor = new PAnchor("Second item");
+        final PTreeItem secondItem = new PTreeItem(anchor);
+        anchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onSelection(final PSelectionEvent<PSuggestion> event) {
-                String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
-                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            public void onClick(final PClickEvent event) {
+                tree.setSelectedItem(secondItem);
             }
         });
+
+        PTreeItem thirdItem = new PTreeItem(new PImage("images/pony.png"));
+
+        tree.addItem(firstItem);
+        tree.addItem(secondItem);
+        tree.addItem(thirdItem);
 
         Query query = new Query();
         FindPonysCommand command = new FindPonysCommand(query);
         Result<List<Pony>> ponys = command.execute();
 
         for (Pony pony : ponys.getData()) {
-            suggestOracle.add(pony.getName());
+            firstItem.addItem(pony.getName());
+            secondItem.addItem(pony.getName());
+            thirdItem.addItem(pony.getName());
         }
 
-        panel.add(suggestBox);
+        panel.add(tree);
 
         examplePanel.setWidget(panel);
     }
