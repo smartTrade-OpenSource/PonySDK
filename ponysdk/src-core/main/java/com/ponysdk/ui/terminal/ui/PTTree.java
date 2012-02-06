@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -28,7 +29,6 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
@@ -37,37 +37,10 @@ import com.ponysdk.ui.terminal.instruction.Remove;
 public class PTTree extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final com.google.gwt.user.client.ui.Tree tree = new com.google.gwt.user.client.ui.Tree();
         tree.setAnimationEnabled(true);
         init(tree);
-    }
-
-    @Override
-    public void add(Add add, UIService uiService) {
-
-        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.Tree tree = cast();
-        final String positionPath = add.getMainProperty().getStringProperty(PropertyKey.TREE_ITEM_POSITION_PATH);
-        final String[] positions = positionPath.split("\\.");
-        TreeItem item = null;
-        for (int i = 1; i <= positions.length - 2; i++) {
-            if (item == null)
-                item = tree.getItem(Integer.parseInt(positions[i]));
-            else
-                item = item.getChild(Integer.parseInt(positions[i]));
-        }
-
-        if (positionPath.equals("0"))
-            return; // root
-
-        if (item == null) {
-            item = new TreeItem(w);
-            tree.addItem(item);
-        } else {
-            item.addItem(new TreeItem(w));
-        }
-
     }
 
     @Override
@@ -76,8 +49,9 @@ public class PTTree extends PTWidget {
         if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
             final com.google.gwt.user.client.ui.Tree tree = cast();
             tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
+
                 @Override
-                public void onSelection(SelectionEvent<TreeItem> event) {
+                public void onSelection(final SelectionEvent<TreeItem> event) {
 
                     String path = "0";
                     String childPath = "";
@@ -96,10 +70,8 @@ public class PTTree extends PTWidget {
                             // temp not optimal?
                             for (int i = 0; i < tree.getItemCount(); i++) {
                                 if (tree.getItem(i).equals(item)) {
-                                    if (childPath.isEmpty())
-                                        childPath = i + "";
-                                    else
-                                        childPath = i + "." + childPath;
+                                    if (childPath.isEmpty()) childPath = i + "";
+                                    else childPath = i + "." + childPath;
                                     break;
                                 }
                             }
@@ -122,7 +94,7 @@ public class PTTree extends PTWidget {
     }
 
     @Override
-    public void remove(Remove remove, UIService uiService) {
+    public void remove(final Remove remove, final UIService uiService) {
         final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }

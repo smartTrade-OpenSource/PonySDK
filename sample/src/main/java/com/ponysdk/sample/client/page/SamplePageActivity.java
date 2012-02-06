@@ -48,7 +48,9 @@ public class SamplePageActivity extends PageActivity {
     private static Logger log = LoggerFactory.getLogger(SamplePageActivity.class);
 
     private PTabPanel tabPanel;
+
     protected PSimpleLayoutPanel examplePanel;
+
     protected PSimpleLayoutPanel codePanel;
 
     private PScrollPanel codeScrollpanel;

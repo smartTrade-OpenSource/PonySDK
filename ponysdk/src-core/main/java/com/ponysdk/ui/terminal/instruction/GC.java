@@ -20,14 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 public class GC extends Instruction {
 
-	private static final long serialVersionUID = 3879458689907358583L;
+    private static final long serialVersionUID = 3879458689907358583L;
 
-	public GC() {
-    }
+    public GC() {}
 
     public GC(long objectID, long parentID) {
         super(objectID);

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -61,32 +62,32 @@ public class PTVerticalPanel extends PTCellPanel {
         } else if (PropertyKey.HORIZONTAL_ALIGNMENT.equals(propertyKey)) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[property.getIntValue()];
             switch (horizontalAlignment) {
-            case ALIGN_LEFT:
-                verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-                break;
-            case ALIGN_CENTER:
-                verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-                break;
-            case ALIGN_RIGHT:
-                verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-                break;
-            default:
-                break;
+                case ALIGN_LEFT:
+                    verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+                    break;
+                case ALIGN_CENTER:
+                    verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+                    break;
+                case ALIGN_RIGHT:
+                    verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+                    break;
+                default:
+                    break;
             }
         } else if (PropertyKey.VERTICAL_ALIGNMENT.equals(propertyKey)) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[property.getIntValue()];
             switch (verticalAlignment) {
-            case ALIGN_TOP:
-                verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-                break;
-            case ALIGN_MIDDLE:
-                verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-                break;
-            case ALIGN_BOTTOM:
-                verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-                break;
-            default:
-                break;
+                case ALIGN_TOP:
+                    verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+                    break;
+                case ALIGN_MIDDLE:
+                    verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+                    break;
+                case ALIGN_BOTTOM:
+                    verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+                    break;
+                default:
+                    break;
             }
         } else {
             super.update(update, uiService);

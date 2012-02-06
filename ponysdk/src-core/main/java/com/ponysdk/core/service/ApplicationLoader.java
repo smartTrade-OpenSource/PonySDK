@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.service;
 
 import java.util.Calendar;
@@ -42,6 +43,7 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     private final SpringContextLoader contextLoader;
 
     private String applicationName;
+
     private String applicationDescription;
 
     public ApplicationLoader() {

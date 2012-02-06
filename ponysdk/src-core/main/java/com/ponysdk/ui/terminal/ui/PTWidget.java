@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import java.util.List;
@@ -36,6 +37,7 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.Property;
@@ -48,7 +50,7 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 public class PTWidget extends PTUIObject {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         init(new com.google.gwt.user.client.ui.Widget());
     }
 
@@ -58,7 +60,7 @@ public class PTWidget extends PTUIObject {
     }
 
     @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
         if (HandlerType.DOM_HANDLER.equals(addHandler.getType())) {
             final int domHandlerType = addHandler.getMainProperty().getIntValue();
@@ -71,7 +73,13 @@ public class PTWidget extends PTUIObject {
 
     }
 
-    protected void triggerOnClick(final AddHandler addHandler, final com.google.gwt.user.client.ui.Widget widget, final int domHandlerType, final UIService uiService, ClickEvent event) {
+    @Override
+    public Widget asWidget(final Long objectID, final UIService uiService) {
+        final com.ponysdk.ui.terminal.ui.PTWidget child = (com.ponysdk.ui.terminal.ui.PTWidget) uiService.getUIObject(objectID);
+        return child.cast();
+    }
+
+    protected void triggerOnClick(final AddHandler addHandler, final com.google.gwt.user.client.ui.Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
         final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
         final Property main = new Property();
         main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
@@ -91,16 +99,13 @@ public class PTWidget extends PTUIObject {
         uiService.triggerEvent(eventInstruction);
     }
 
-	protected void triggerOnMouseOut(final AddHandler addHandler,
-			final int domHandlerType, final UIService uiService) {
-		final EventInstruction eventInstruction = new EventInstruction(
-				addHandler.getObjectID(), addHandler.getType());
-		eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER,
-				domHandlerType);
-		uiService.triggerEvent(eventInstruction);
-	}
+    protected void triggerOnMouseOut(final AddHandler addHandler, final int domHandlerType, final UIService uiService) {
+        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+        eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
+        uiService.triggerEvent(eventInstruction);
+    }
 
-    protected void triggerOnKeyPress(final AddHandler addHandler, final int domHandlerType, final UIService uiService, KeyPressEvent event) {
+    protected void triggerOnKeyPress(final AddHandler addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
         final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
         main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
         if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
@@ -121,91 +126,96 @@ public class PTWidget extends PTUIObject {
 
         final DomHandlerType h = DomHandlerType.values()[domHandlerType];
         switch (h) {
-        case CLICK:
-            widget.addDomHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
-                }
-
-            }, ClickEvent.getType());
-            break;
-        case MOUSE_OVER:
-            widget.addDomHandler(new MouseOverHandler() {
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    triggerOnMouseOver(addHandler, domHandlerType, uiService);
-                }
-
-            }, MouseOverEvent.getType());
-            break;
-		case MOUSE_OUT:
-			widget.addDomHandler(new MouseOutHandler() {
-				@Override
-				public void onMouseOut(MouseOutEvent event) {
-					triggerOnMouseOut(addHandler, domHandlerType, uiService);
-				}
-
-			}, MouseOutEvent.getType());
-			break;
-        case KEY_PRESS:
-            widget.addDomHandler(new KeyPressHandler() {
-                @Override
-                public void onKeyPress(KeyPressEvent event) {
-                    triggerOnKeyPress(addHandler, domHandlerType, uiService, event);
-                }
-
-            }, KeyPressEvent.getType());
-            break;
-        case KEY_UP:
-
-            if (widget instanceof TextBoxBase) {
-                final TextBoxBase textBox = (TextBoxBase) widget;
-                textBox.addKeyUpHandler(new KeyUpHandler() {
+            case CLICK:
+                widget.addDomHandler(new ClickHandler() {
 
                     @Override
-                    public void onKeyUp(KeyUpEvent event) {
-                        final EventInstruction changeHandlerInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
-                        changeHandlerInstruction.setMainPropertyValue(PropertyKey.VALUE, textBox.getText());
-                        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
-                        final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
-                        main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-                        eventInstruction.setMainProperty(main);
-                        if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
-                            final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
-                            if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
+                    public void onClick(final ClickEvent event) {
+                        triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
+                    }
+
+                }, ClickEvent.getType());
+                break;
+            case MOUSE_OVER:
+                widget.addDomHandler(new MouseOverHandler() {
+
+                    @Override
+                    public void onMouseOver(final MouseOverEvent event) {
+                        triggerOnMouseOver(addHandler, domHandlerType, uiService);
+                    }
+
+                }, MouseOverEvent.getType());
+                break;
+            case MOUSE_OUT:
+                widget.addDomHandler(new MouseOutHandler() {
+
+                    @Override
+                    public void onMouseOut(final MouseOutEvent event) {
+                        triggerOnMouseOut(addHandler, domHandlerType, uiService);
+                    }
+
+                }, MouseOutEvent.getType());
+                break;
+            case KEY_PRESS:
+                widget.addDomHandler(new KeyPressHandler() {
+
+                    @Override
+                    public void onKeyPress(final KeyPressEvent event) {
+                        triggerOnKeyPress(addHandler, domHandlerType, uiService, event);
+                    }
+
+                }, KeyPressEvent.getType());
+                break;
+            case KEY_UP:
+
+                if (widget instanceof TextBoxBase) {
+                    final TextBoxBase textBox = (TextBoxBase) widget;
+                    textBox.addKeyUpHandler(new KeyUpHandler() {
+
+                        @Override
+                        public void onKeyUp(final KeyUpEvent event) {
+                            final EventInstruction changeHandlerInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.setMainPropertyValue(PropertyKey.VALUE, textBox.getText());
+                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                            final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
+                            main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
+                            eventInstruction.setMainProperty(main);
+                            if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
+                                final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
+                                if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
+                                    uiService.triggerEvent(changeHandlerInstruction);
+                                    uiService.triggerEvent(eventInstruction);
+                                }
+                            } else {
                                 uiService.triggerEvent(changeHandlerInstruction);
                                 uiService.triggerEvent(eventInstruction);
                             }
-                        } else {
-                            uiService.triggerEvent(changeHandlerInstruction);
-                            uiService.triggerEvent(eventInstruction);
                         }
-                    }
-                });
-            } else {
-                widget.addDomHandler(new KeyUpHandler() {
-                    @Override
-                    public void onKeyUp(KeyUpEvent event) {
-                        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
-                        final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
-                        main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-                        eventInstruction.setMainProperty(main);
-                        if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
-                            final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
-                            if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
+                    });
+                } else {
+                    widget.addDomHandler(new KeyUpHandler() {
+
+                        @Override
+                        public void onKeyUp(final KeyUpEvent event) {
+                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                            final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
+                            main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
+                            eventInstruction.setMainProperty(main);
+                            if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
+                                final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
+                                if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
+                                    uiService.triggerEvent(eventInstruction);
+                                }
+                            } else {
                                 uiService.triggerEvent(eventInstruction);
                             }
-                        } else {
-                            uiService.triggerEvent(eventInstruction);
                         }
-                    }
-                }, KeyUpEvent.getType());
-            }
-            break;
-        default:
-            GWT.log("Handler not supported #" + h);
-            break;
+                    }, KeyUpEvent.getType());
+                }
+                break;
+            default:
+                GWT.log("Handler not supported #" + h);
+                break;
         }
     }
 

@@ -58,6 +58,7 @@ import com.ponysdk.ui.terminal.ui.PTTextArea;
 import com.ponysdk.ui.terminal.ui.PTTextBox;
 import com.ponysdk.ui.terminal.ui.PTTimer;
 import com.ponysdk.ui.terminal.ui.PTTree;
+import com.ponysdk.ui.terminal.ui.PTTreeItem;
 import com.ponysdk.ui.terminal.ui.PTVerticalPanel;
 
 public class UIFactory {
@@ -117,6 +118,8 @@ public class UIFactory {
                 return new PTFileUpload();
             case TREE:
                 return new PTTree();
+            case TREE_ITEM:
+                return new PTTreeItem();
             case MENU_BAR:
                 return new PTMenuBar();
             case MENU_ITEM:

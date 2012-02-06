@@ -18,6 +18,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import com.ponysdk.hibernate.query.CriteriaContext;

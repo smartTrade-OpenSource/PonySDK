@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core;
 
 import java.io.IOException;
@@ -40,9 +41,9 @@ import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
  */
 public class PonyRemoteServiceServlet extends RemoteServiceServlet {
 
-	private static final long serialVersionUID = -5935404413538410635L;
+    private static final long serialVersionUID = -5935404413538410635L;
 
-	static SerializationPolicy loadSerializationPolicy(HttpServlet servlet, HttpServletRequest request, String moduleBaseURL, String strongName) {
+    static SerializationPolicy loadSerializationPolicy(HttpServlet servlet, HttpServletRequest request, String moduleBaseURL, String strongName) {
         // The request can tell you the path of the web app relative to the
         // container root.
         final String contextPath = request.getContextPath();
@@ -60,11 +61,12 @@ public class PonyRemoteServiceServlet extends RemoteServiceServlet {
         SerializationPolicy serializationPolicy = null;
 
         /*
-         * Check that the module path must be in the same web app as the servlet itself. If you need to implement a scheme different than this, override this method.
+         * Check that the module path must be in the same web app as the servlet itself. If you need to
+         * implement a scheme different than this, override this method.
          */
         if (modulePath == null || !modulePath.startsWith(contextPath)) {
             final String message = "ERROR: The module path requested, " + modulePath + ", is not in the same web application as this servlet, " + contextPath
-                    + ".  Your module may not be properly configured or your client and server code maybe out of date.";
+                + ".  Your module may not be properly configured or your client and server code maybe out of date.";
             servlet.log(message);
         } else {
             // Strip off the context path from the module base URL. It should be a

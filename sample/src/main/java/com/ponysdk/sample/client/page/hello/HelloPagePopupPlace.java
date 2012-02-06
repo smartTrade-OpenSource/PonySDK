@@ -20,12 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page.hello;
 
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
 public class HelloPagePopupPlace extends PagePlace {
+
     private final String content;
 
     public HelloPagePopupPlace(PageActivity activity, String content) {

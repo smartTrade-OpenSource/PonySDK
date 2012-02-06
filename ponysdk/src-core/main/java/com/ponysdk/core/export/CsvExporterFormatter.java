@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export;
 
 public class CsvExporterFormatter {
@@ -107,7 +108,8 @@ public class CsvExporterFormatter {
     // write(out, propertyValues);
     // }
     //
-    // private Object getPropertyValue(Object bean, final String propertyName) throws IllegalAccessException, InvocationTargetException,
+    // private Object getPropertyValue(Object bean, final String propertyName) throws IllegalAccessException,
+    // InvocationTargetException,
     // NoSuchMethodException {
     // Object propertyValue;
     // if (PropertyUtils.isReadable(bean, propertyName)) {

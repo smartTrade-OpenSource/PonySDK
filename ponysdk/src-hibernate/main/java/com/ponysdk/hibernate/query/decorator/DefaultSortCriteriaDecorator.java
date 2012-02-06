@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.Arrays;
@@ -40,8 +41,7 @@ public class DefaultSortCriteriaDecorator implements CriteriaDecorator {
     public void render(CriteriaContext context) {
         final CriterionField field = context.getCriterion();
 
-        if (field.getSortingType() == SortingType.NONE)
-            return;
+        if (field.getSortingType() == SortingType.NONE) return;
 
         Criteria criteria = context.getSTCriteria();
 
@@ -51,19 +51,18 @@ public class DefaultSortCriteriaDecorator implements CriteriaDecorator {
         String associationPath = null;
         if (propertyNamePath.size() == 1) {
             associationPath = iter.next();
-        } else
-            while (iter.hasNext()) {
-                key = iter.next();
-                if (associationPath == null) {
-                    associationPath = new String(key);
-                } else {
-                    associationPath += "." + key;
-                }
-                if (iter.hasNext()) {
-                    criteria = criteria.createCriteria(associationPath, key, CriteriaSpecification.LEFT_JOIN);
-                    associationPath = new String(key);
-                }
+        } else while (iter.hasNext()) {
+            key = iter.next();
+            if (associationPath == null) {
+                associationPath = new String(key);
+            } else {
+                associationPath += "." + key;
             }
+            if (iter.hasNext()) {
+                criteria = criteria.createCriteria(associationPath, key, CriteriaSpecification.LEFT_JOIN);
+                associationPath = new String(key);
+            }
+        }
         criteria = context.getSTCriteria();
         if (field.getSortingType() == SortingType.ASCENDING) {
             criteria.addOrder(Order.asc(associationPath));

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -42,7 +43,9 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 public class StackLayoutPanelPageActivity extends PageActivity {
 
     private PVerticalPanel verticalPanel;
+
     private final PVerticalPanel header1Child = new PVerticalPanel();;
+
     private final PVerticalPanel header2Child = new PVerticalPanel();;
 
     public StackLayoutPanelPageActivity() {
@@ -50,8 +53,7 @@ public class StackLayoutPanelPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
     protected void onShowPage(Place place) {
@@ -59,8 +61,7 @@ public class StackLayoutPanelPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {

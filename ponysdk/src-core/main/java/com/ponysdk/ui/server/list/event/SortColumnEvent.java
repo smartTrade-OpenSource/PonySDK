@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
@@ -30,6 +31,7 @@ public class SortColumnEvent extends SystemEvent<SortColumnHandler> {
     public static final Type<SortColumnHandler> TYPE = new Type<SortColumnHandler>();
 
     private final SortingType sortingType;
+
     private final String pojoPropertyKey;
 
     public SortColumnEvent(Object sourceComponent, SortingType sortingType, String pojoPropertyKey) {

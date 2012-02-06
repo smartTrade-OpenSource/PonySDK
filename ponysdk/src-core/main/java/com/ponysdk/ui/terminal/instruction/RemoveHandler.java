@@ -21,16 +21,30 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.terminal.instruction;
 
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.HandlerType;
 
-public class PTPasswordTextBox extends PTTextBox {
+public class RemoveHandler extends Instruction {
+
+    private static final long serialVersionUID = -6724549463244696256L;
+
+    private HandlerType type;
+
+    public RemoveHandler() {}
+
+    public RemoveHandler(final long objectID, final HandlerType type) {
+        super(objectID);
+        this.type = type;
+    }
+
+    public HandlerType getType() {
+        return type;
+    }
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.PasswordTextBox());
+    public String toString() {
+        return "RemoveHandler [type=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
     }
 
 }

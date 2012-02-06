@@ -39,8 +39,9 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
 
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getText());
-                handler.onSelection(e);
+                // final PSelectionEvent<String> e = new PSelectionEvent<String>(this,
+                // event.getSelectedItem().getText());
+                // handler.onSelection(e);
             }
         });
     }

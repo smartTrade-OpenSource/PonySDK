@@ -22,14 +22,17 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandler<String>, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private final List<PValueChangeHandler<String>> valueChangeHandler = new ArrayList<PValueChangeHandler<String>>();
+
     private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<PSelectionHandler<PSuggestion>>();
 
     private PSuggestOracle suggestOracle;
 
     private int limit;
+
     private String text;
 
     private String replacementString;
+
     private String displayString;
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
@@ -147,6 +150,7 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     public static class MultiWordSuggestion implements PSuggestion {
 
         private final String displayString;
+
         private final String replacementString;
 
         public MultiWordSuggestion(final String replacementString, final String displayString) {

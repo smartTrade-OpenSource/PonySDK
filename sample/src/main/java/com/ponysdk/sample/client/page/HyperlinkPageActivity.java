@@ -37,12 +37,16 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
     @Autowired
     private CheckBoxPageActivity checkBoxPageActivity;
+
     @Autowired
     private RadioButtonPageActivity radioButtonPageActivity;
+
     @Autowired
     private BasicButtonPageActivity basicButtonPageActivity;
+
     @Autowired
     private CustomButtonPageActivity customButtonPageActivity;
+
     @Autowired
     private FileUploadPageActivity fileUploadPageActivity;
 

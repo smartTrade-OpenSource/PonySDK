@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.terminal;
+ */
+
+package com.ponysdk.ui.terminal;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -56,8 +58,7 @@ public class CommunicationEntryPoint implements EntryPoint {
                     GWT.log("Error", caught);
                     if (caught instanceof StatusCodeException) {
                         final StatusCodeException codeException = (StatusCodeException) caught;
-                        if (codeException.getStatusCode() == 0)
-                            return;
+                        if (codeException.getStatusCode() == 0) return;
 
                     }
                     Window.alert("Cannot inititialize the application : " + caught.getMessage() + "\n" + caught + "\nPlease reload your application");

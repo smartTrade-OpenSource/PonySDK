@@ -20,12 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.EventHandler;
 
 public interface CustomColumnDescriptorAddedHandler extends EventHandler {
 
-	public void onCustomColumnDescriptorAdded(
-			CustomColumnDescriptorAddedEvent event);
+    public void onCustomColumnDescriptorAdded(CustomColumnDescriptorAddedEvent event);
 }

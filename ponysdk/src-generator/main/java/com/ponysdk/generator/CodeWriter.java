@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.generator;
 
 import java.io.FileWriter;
@@ -28,6 +29,7 @@ import java.io.StringWriter;
 public class CodeWriter {
 
     private StringWriter stringwriter = null;
+
     private int tabposition = 0;
 
     public CodeWriter() {
@@ -84,8 +86,7 @@ public class CodeWriter {
     }
 
     public void append(String line) {
-        if (line == null)
-            return;
+        if (line == null) return;
         stringwriter.write(line);
     }
 

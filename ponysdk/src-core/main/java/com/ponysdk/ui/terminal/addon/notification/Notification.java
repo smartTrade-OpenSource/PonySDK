@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.notification;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -40,12 +41,15 @@ public class Notification extends DecoratedPopupPanel implements ResizeHandler {
     private static final String DEFAULT_STYLENAME = "pony-Notification";
 
     public static final int DEFAULT_DELAY = 2500;
+
     public static final int WIDTH = 200;
+
     public static final int HEIGHT = 70;
 
     private final Label caption, description;
 
     private final Timer hideTimer = new Timer() {
+
         @Override
         public void run() {
             hide();

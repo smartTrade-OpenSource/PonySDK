@@ -29,26 +29,25 @@ import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
 
     private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<PSelectionHandler<PTreeItem>>();
 
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<PWidget, PTreeItem>();
-    private final Map<String, PTreeItem> childByPath = new HashMap<String, PTreeItem>();
 
-    private final String ROOT_PATH = "0";
+    private final PTreeItem root;
 
-    private final PTreeItem root = new PTreeItem(new PLabel("root"));
     private PTreeItem curSelection;
 
     public PTree() {
+        root = new PTreeItem(true);
         root.setTree(this);
     }
 
@@ -116,6 +115,8 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HandlerType.SELECTION_HANDLER);
+        getPonySession().stackInstruction(removeHandler);
     }
 
     @Override
@@ -126,22 +127,14 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     @Override
     public void onEventInstruction(final EventInstruction event) {
         if (HandlerType.SELECTION_HANDLER.equals(event.getHandlerType())) {
-            for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
-                final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, getItemByPath(event.getMainProperty().getValue()));
-                handler.onSelection(selectionEvent);
-            }
+            // final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this,
+            // getItemByPath(event.getMainProperty().getValue()));
+            // for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
+            // handler.onSelection(selectionEvent);
+            // }
         } else {
             super.onEventInstruction(event);
         }
-    }
-
-    public PTreeItem getItemByPath(final String data) {
-        if (ROOT_PATH.equals(data)) { return root; }
-        return childByPath.get(data);
-    }
-
-    public void updateTreeItemPosition(final String path, final PTreeItem item) {
-        childByPath.put(path, item);
     }
 
     public PTreeItem getRoot() {

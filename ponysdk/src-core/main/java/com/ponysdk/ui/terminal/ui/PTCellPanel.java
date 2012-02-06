@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -45,33 +46,33 @@ public class PTCellPanel extends PTComplexPanel {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[property.getIntValue()];
             final Widget w = asWidget(property.getLongProperty(PropertyKey.CELL), uiService);
             switch (horizontalAlignment) {
-            case ALIGN_LEFT:
-                cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
-                break;
-            case ALIGN_CENTER:
-                cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_CENTER);
-                break;
-            case ALIGN_RIGHT:
-                cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_RIGHT);
-                break;
-            default:
-                break;
+                case ALIGN_LEFT:
+                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
+                    break;
+                case ALIGN_CENTER:
+                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_CENTER);
+                    break;
+                case ALIGN_RIGHT:
+                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_RIGHT);
+                    break;
+                default:
+                    break;
             }
         } else if (PropertyKey.CELL_VERTICAL_ALIGNMENT.equals(propertyKey)) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[property.getIntValue()];
             final Widget w = asWidget(property.getLongProperty(PropertyKey.CELL), uiService);
             switch (verticalAlignment) {
-            case ALIGN_TOP:
-                cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
-                break;
-            case ALIGN_MIDDLE:
-                cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_MIDDLE);
-                break;
-            case ALIGN_BOTTOM:
-                cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_BOTTOM);
-                break;
-            default:
-                break;
+                case ALIGN_TOP:
+                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
+                    break;
+                case ALIGN_MIDDLE:
+                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_MIDDLE);
+                    break;
+                case ALIGN_BOTTOM:
+                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_BOTTOM);
+                    break;
+                default:
+                    break;
             }
         } else if (PropertyKey.CELL_WIDTH.equals(propertyKey)) {
             cellPanel.setCellWidth(asWidget(property.getLongProperty(PropertyKey.CELL), uiService), property.getValue());

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.disclosurepanel;
 
 import java.util.Iterator;
@@ -44,9 +45,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A widget that consists of a header and a content panel that discloses the content when a user clicks on the header.
- * 
- * <h3>CSS Style Rules</h3>
+ * A widget that consists of a header and a content panel that discloses the content when a user clicks on the
+ * header. <h3>CSS Style Rules</h3>
  * <dl class="css">
  * <dt>.gwt-DisclosurePanel
  * <dd>the panel's primary style
@@ -58,16 +58,17 @@ import com.google.gwt.user.client.ui.Widget;
  * <p>
  * <img class='gallery' src='doc-files/DisclosurePanel.png'/>
  * </p>
- * 
  * <p>
  * The header and content sections can be easily selected using css with a child selector:<br/>
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  * <h3>Use in UiBinder Templates</h3>
  * <p>
- * DisclosurePanel elements in {@link com.google.gwt.uibinder.client.UiBinder UiBinder} templates can have one widget child and one of two types of header elements. A &lt;g:header> element can hold
- * text (not html), or a &lt;g:customHeader> element can hold a widget. (Note that the tags of the header elements are not capitalized. This is meant to signal that the header is not a runtime object,
- * and so cannot have a <code>ui:field</code> attribute.)
+ * DisclosurePanel elements in {@link com.google.gwt.uibinder.client.UiBinder UiBinder} templates can have one
+ * widget child and one of two types of header elements. A &lt;g:header> element can hold text (not html), or
+ * a &lt;g:customHeader> element can hold a widget. (Note that the tags of the header elements are not
+ * capitalized. This is meant to signal that the header is not a runtime object, and so cannot have a
+ * <code>ui:field</code> attribute.)
  * <p>
  * For example:
  * 
@@ -86,7 +87,9 @@ import com.google.gwt.user.client.ui.Widget;
  * </pre>
  */
 public final class PCDisclosurePanel extends Composite implements HasWidgets.ForIsWidget, HasAnimation, HasOpenHandlers<PCDisclosurePanel>, HasCloseHandlers<PCDisclosurePanel> {
+
     interface DefaultImages extends ClientBundle {
+
         @ImageOptions(flipRtl = true)
         ImageResource disclosurePanelClosed();
 
@@ -94,7 +97,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     }
 
     /**
-     * Used to wrap widgets in the header to provide click support. Effectively wraps the widget in an <code>anchor</code> to get automatic keyboard access.
+     * Used to wrap widgets in the header to provide click support. Effectively wraps the widget in an
+     * <code>anchor</code> to get automatic keyboard access.
      */
     private final class ClickableHeader extends SimplePanel {
 
@@ -113,10 +117,10 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
         public void onBrowserEvent(Event event) {
             // no need to call super.
             switch (DOM.eventGetType(event)) {
-            case Event.ONCLICK:
-                // Prevent link default action.
-                DOM.eventPreventDefault(event);
-                setOpen(!isOpen);
+                case Event.ONCLICK:
+                    // Prevent link default action.
+                    DOM.eventPreventDefault(event);
+                    setOpen(!isOpen);
             }
         }
     }
@@ -125,6 +129,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
      * An {@link Animation} used to open the content.
      */
     private static class ContentAnimation extends Animation {
+
         /**
          * Whether the item is being opened or closed.
          */
@@ -209,6 +214,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
         private final Element labelTD;
 
         private final SimplePanel iconImagePanel;
+
         private final Imager imager;
 
         private DefaultHeader(Imager imager, String text) {
@@ -286,6 +292,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     }
 
     private interface Imager {
+
         void updateImage(boolean open, SimplePanel imagePanel);
     }
 
@@ -311,7 +318,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     private static ContentAnimation contentAnimation;
 
     /**
-     * top level widget. The first child will be a reference to {@link #header}. The second child will be a reference to {@link #contentWrapper}.
+     * top level widget. The first child will be a reference to {@link #header}. The second child will be a
+     * reference to {@link #contentWrapper}.
      */
     private final VerticalPanel mainPanel = new VerticalPanel();
 
@@ -343,7 +351,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     }
 
     /**
-     * Creates a DisclosurePanel with the specified header text, an initial open/close state and a bundle of images to be used in the default header widget.
+     * Creates a DisclosurePanel with the specified header text, an initial open/close state and a bundle of
+     * images to be used in the default header widget.
      * 
      * @param openImage
      *            the open state image resource
@@ -405,7 +414,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     }
 
     /**
-     * Gets a {@link HasText} instance to provide access to the headers's text, if the header widget does provide such access.
+     * Gets a {@link HasText} instance to provide access to the headers's text, if the header widget does
+     * provide such access.
      * 
      * @return a reference to the header widget if it implements {@link HasText}, <code>null</code> otherwise
      */
@@ -458,7 +468,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
     }
 
     /**
-     * Sets the content widget which can be opened and closed by this panel. If there is a preexisting content widget, it will be detached.
+     * Sets the content widget which can be opened and closed by this panel. If there is a preexisting content
+     * widget, it will be detached.
      * 
      * @param content
      *            the widget to be used as the content panel
@@ -554,7 +565,8 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
         }
 
         /**
-         * Wraps an array of widgets to be returned during iteration. <code>null</code> is allowed in the array and will be skipped during iteration.
+         * Wraps an array of widgets to be returned during iteration. <code>null</code> is allowed in the
+         * array and will be skipped during iteration.
          * 
          * @param container
          *            the container of the widgets in <code>contained</code>
@@ -564,8 +576,11 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
          */
         static final Iterator<Widget> createWidgetIterator(final HasWidgets container, final Widget[] contained) {
             return new Iterator<Widget>() {
+
                 int index = -1, last = -1;
+
                 boolean widgetsWasCopied = false;
+
                 Widget[] widgets = contained;
 
                 {
@@ -575,9 +590,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
                 private void gotoNextIndex() {
                     ++index;
                     while (index < contained.length) {
-                        if (contained[index] != null) {
-                            return;
-                        }
+                        if (contained[index] != null) { return; }
                         ++index;
                     }
                 }
@@ -589,9 +602,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
 
                 @Override
                 public Widget next() {
-                    if (!hasNext()) {
-                        throw new NoSuchElementException();
-                    }
+                    if (!hasNext()) { throw new NoSuchElementException(); }
                     last = index;
                     final Widget w = contained[index];
                     gotoNextIndex();
@@ -600,9 +611,7 @@ public final class PCDisclosurePanel extends Composite implements HasWidgets.For
 
                 @Override
                 public void remove() {
-                    if (last < 0) {
-                        throw new IllegalStateException();
-                    }
+                    if (last < 0) { throw new IllegalStateException(); }
 
                     if (!widgetsWasCopied) {
                         widgets = copyWidgetArray(widgets);

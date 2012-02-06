@@ -20,14 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 public class Add extends Instruction {
 
-	private static final long serialVersionUID = 2471039740559239983L;
+    private static final long serialVersionUID = 2471039740559239983L;
 
-	public Add() {
-    }
+    public Add() {}
 
     public Add(long objectID, long parentID) {
         super(objectID);

@@ -20,13 +20,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.datamodel;
 
 public class User {
 
     private long ID;
+
     private String name;
+
     private String login;
+
     private String password;
 
     public long getID() {

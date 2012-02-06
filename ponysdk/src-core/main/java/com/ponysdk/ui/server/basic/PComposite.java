@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
+
+package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -27,6 +29,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Create;
 
 public abstract class PComposite extends PWidget {
+
     private PWidget widget;
 
     @Override
@@ -35,13 +38,10 @@ public abstract class PComposite extends PWidget {
     }
 
     @Override
-    protected void init(WidgetType widgetType) {
-    }
+    protected void init(WidgetType widgetType) {}
 
     protected void initWidget(final PWidget child) {
-        if (this.widget != null) {
-            throw new IllegalStateException("PComposite.initWidget() may only be " + "called once.");
-        }
+        if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
         ID = PonySession.getCurrent().nextID();
         create = new Create(ID, getType());
         if (this instanceof PAddOn) {

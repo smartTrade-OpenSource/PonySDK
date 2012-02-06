@@ -20,27 +20,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
 
-public class ShowCustomColumnDescriptorFormEvent extends
-		SystemEvent<ShowCustomColumnDescriptorFormHandler> {
+public class ShowCustomColumnDescriptorFormEvent extends SystemEvent<ShowCustomColumnDescriptorFormHandler> {
 
-	public static final Type<ShowCustomColumnDescriptorFormHandler> TYPE = new Type<ShowCustomColumnDescriptorFormHandler>();
+    public static final Type<ShowCustomColumnDescriptorFormHandler> TYPE = new Type<ShowCustomColumnDescriptorFormHandler>();
 
     public ShowCustomColumnDescriptorFormEvent(Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-	protected void dispatch(ShowCustomColumnDescriptorFormHandler handler) {
+    protected void dispatch(ShowCustomColumnDescriptorFormHandler handler) {
         handler.onShowCustomColumnDescriptorForm(this);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-	public Type<ShowCustomColumnDescriptorFormHandler> getAssociatedType() {
+    public Type<ShowCustomColumnDescriptorFormHandler> getAssociatedType() {
         return (Type) TYPE;
     }
 

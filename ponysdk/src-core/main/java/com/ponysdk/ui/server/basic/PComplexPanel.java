@@ -50,8 +50,7 @@ public abstract class PComplexPanel extends PPanel {
 
     @Override
     public boolean remove(PWidget w) {
-        if (w.getParent() != this)
-            return false;
+        if (w.getParent() != this) return false;
         orphan(w);
         getChildren().remove(w);
 

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page.hello;
 
 import java.io.IOException;
@@ -47,17 +48,14 @@ public class HelloPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onShowPage(Place place) {
-        if (place instanceof HelloPlace) {
-        } else if (place instanceof HelloPagePopupPlace) {
+        if (place instanceof HelloPlace) {} else if (place instanceof HelloPagePopupPlace) {
             final HelloPagePopupPlace popupPanel = (HelloPagePopupPlace) place;
             PNotificationManager.notify(popupPanel.getContent());
         }
@@ -71,10 +69,12 @@ public class HelloPageActivity extends PageActivity {
         }
         final PButton openStreamButon = new PButton("open Stream");
         openStreamButon.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 final StreamResource streamResource = new StreamResource();
                 streamResource.open(new StreamHandler() {
+
                     @Override
                     public void onStream(HttpServletRequest req, HttpServletResponse response) {
                         response.setContentType("text/text");

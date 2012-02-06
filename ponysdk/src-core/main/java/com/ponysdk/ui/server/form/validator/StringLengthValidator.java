@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.validator;
 
 import com.ponysdk.ui.server.form.FormField;
@@ -27,6 +28,7 @@ import com.ponysdk.ui.server.form.FormField;
 public class StringLengthValidator implements FieldValidator {
 
     private int minLength = 0;
+
     private int maxLength = 0;
 
     public StringLengthValidator(int minLength, int maxLength) {
@@ -37,12 +39,9 @@ public class StringLengthValidator implements FieldValidator {
     @Override
     public ValidationResult isValid(FormField field) {
         String text = (String) field.getValue();
-        if (text == null)
-            text = "";
-        if (text.length() < minLength)
-            return ValidationResult.newFailedValidationResult(minLength + " chars at minimum.");
-        if (text.length() > maxLength)
-            return ValidationResult.newFailedValidationResult(maxLength + " chars at maximum.");
+        if (text == null) text = "";
+        if (text.length() < minLength) return ValidationResult.newFailedValidationResult(minLength + " chars at minimum.");
+        if (text.length() > maxLength) return ValidationResult.newFailedValidationResult(maxLength + " chars at maximum.");
         return ValidationResult.newOKValidationResult();
     }
 }

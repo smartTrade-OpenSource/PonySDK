@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.generator;
 
 import java.io.File;
@@ -34,20 +35,33 @@ import java.util.Set;
 public class ClassWriter {
 
     private final String destinationFolder;
+
     private final String packageName;
+
     private final String className;
+
     private boolean isAbstract = false;
+
     private boolean isInterface = false;
+
     private boolean generateGetter = false;
+
     private boolean generateSetter = false;
 
     private final CodeWriter codeWriter = new CodeWriter();
+
     private final Set<String> classImport = new HashSet<String>();
+
     private final Set<String> classExtensions = new HashSet<String>();
+
     private final Set<String> classImplements = new HashSet<String>();
+
     private final List<Parameter> classMembers = new ArrayList<Parameter>();
+
     private final List<Constructor> constructors = new ArrayList<Constructor>();
+
     private final List<String> constantes = new ArrayList<String>();
+
     private final List<MethodHolder> methodTemplates = new ArrayList<MethodHolder>();
 
     private final CodeWriter methodWriter;
@@ -169,8 +183,7 @@ public class ClassWriter {
                 while (it.hasNext()) {
                     final Parameter parameter = it.next();
                     constructorParameters += GeneratorHelper.getClassName(parameter) + " " + parameter.getName();
-                    if (it.hasNext())
-                        constructorParameters += ", ";
+                    if (it.hasNext()) constructorParameters += ", ";
                 }
 
                 codeWriter.addLine("public " + className + "(" + constructorParameters + ") {");
@@ -199,8 +212,7 @@ public class ClassWriter {
                 String nameUp = parameter.getName();
                 nameUp = nameUp.substring(0, 1).toUpperCase() + nameUp.substring(1);
                 String prefixe = "get";
-                if (clazz.equals(boolean.class.getCanonicalName()))
-                    prefixe = "is";
+                if (clazz.equals(boolean.class.getCanonicalName())) prefixe = "is";
                 codeWriter.addLine("public " + clazz + " " + prefixe + nameUp + "() {");
                 codeWriter.indentBlock();
                 codeWriter.addLine("return " + parameter.getName() + ";");
@@ -252,8 +264,7 @@ public class ClassWriter {
             final String pathToClass = destinationFolder + "/" + packageName.replaceAll("\\.", "/") + "/";
 
             final File file = new File(pathToClass);
-            if (!file.exists())
-                file.mkdirs();
+            if (!file.exists()) file.mkdirs();
             final FileWriter writer = new FileWriter(pathToClass + className + ".java");
             writer.write(codeWriter.getContent());
             writer.close();
@@ -265,6 +276,7 @@ public class ClassWriter {
     private class MethodHolder {
 
         final String template;
+
         private final Object[] params;
 
         public MethodHolder(String template, Object[] params) {

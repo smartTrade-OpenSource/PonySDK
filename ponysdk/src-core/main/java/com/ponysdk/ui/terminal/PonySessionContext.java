@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import java.io.Serializable;
@@ -28,13 +29,14 @@ import java.util.List;
 import com.ponysdk.ui.terminal.instruction.Instruction;
 
 public class PonySessionContext implements Serializable {
-	private static final long serialVersionUID = 9221240689602616478L;
 
-	private long ID;
+    private static final long serialVersionUID = 9221240689602616478L;
+
+    private long ID;
+
     private List<Instruction> instructions;
 
-    public PonySessionContext() {
-    }
+    public PonySessionContext() {}
 
     public long getID() {
         return ID;

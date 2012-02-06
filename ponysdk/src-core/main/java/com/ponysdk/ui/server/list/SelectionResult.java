@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 public class SelectionResult<T> {
 
     private final SelectionMode selectionMode;
+
     private final List<T> selectedData;
 
     public SelectionResult(SelectionMode selectionMode, List<T> selectedData) {

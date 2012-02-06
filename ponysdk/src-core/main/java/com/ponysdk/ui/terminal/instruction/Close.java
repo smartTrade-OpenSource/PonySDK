@@ -20,12 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 public class Close extends Instruction {
-	private static final long serialVersionUID = 5712036611348256066L;
 
-	public Close() {
-    }
+    private static final long serialVersionUID = 5712036611348256066L;
+
+    public Close() {}
 
 }

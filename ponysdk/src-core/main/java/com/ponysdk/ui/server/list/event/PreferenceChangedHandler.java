@@ -20,11 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.EventHandler;
 
 public interface PreferenceChangedHandler extends EventHandler {
 
-	public void onPreferenceChanged(PreferenceChangedEvent event);
+    public void onPreferenceChanged(PreferenceChangedEvent event);
 }

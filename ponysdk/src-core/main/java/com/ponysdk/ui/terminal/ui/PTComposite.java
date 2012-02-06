@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Composite;
@@ -29,6 +30,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 
 public class PTComposite extends PTWidget {
+
     @Override
     public void create(Create create, UIService uiService) {
         final PTWidget uiObject = (PTWidget) uiService.getUIObject(create.getMainProperty().getChildProperty(PropertyKey.WIDGET).getLongValue());
@@ -36,6 +38,7 @@ public class PTComposite extends PTWidget {
     }
 
     class MyComposite extends Composite {
+
         public MyComposite(Widget widget) {
             initWidget(widget);
         }

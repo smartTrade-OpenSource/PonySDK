@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -42,16 +43,23 @@ import com.ponysdk.ui.server.form.FormField;
 public class RadioButtonGroupFormFieldRenderer implements FormFieldRenderer, HasPChangeHandlers {
 
     private final List<FormFieldComponent<PVerticalPanel>> fields = new ArrayList<FormFieldComponent<PVerticalPanel>>();
+
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
 
     private final List<String> items = new ArrayList<String>();
+
     private final List<PRadioButton> radioButtons = new ArrayList<PRadioButton>();
+
     private final Map<String, Object> hiddenValueByItems = new HashMap<String, Object>();
+
     private final Map<Object, String> itemsByHiddenValue = new HashMap<Object, String>();
 
     private final String caption;
+
     private String debugID;
+
     private boolean enabled;
+
     private Object value;
 
     public RadioButtonGroupFormFieldRenderer(String caption) {
@@ -88,8 +96,7 @@ public class RadioButtonGroupFormFieldRenderer implements FormFieldRenderer, Has
     }
 
     @Override
-    public void reset() {
-    }
+    public void reset() {}
 
     @Override
     public void addErrorMessage(String errorMessage) {
@@ -106,8 +113,7 @@ public class RadioButtonGroupFormFieldRenderer implements FormFieldRenderer, Has
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-    }
+    public void setEnabled(boolean enabled) {}
 
     @Override
     public boolean isEnabled() {
@@ -171,6 +177,5 @@ public class RadioButtonGroupFormFieldRenderer implements FormFieldRenderer, Has
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
-    }
+    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {}
 }

@@ -1,3 +1,4 @@
+
 package com.ponysdk.impl.webapplication.menu;
 
 import com.ponysdk.ui.server.basic.IsPWidget;

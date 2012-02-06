@@ -1,3 +1,4 @@
+
 package com.ponysdk.core;
 
 import java.lang.ref.Reference;
@@ -17,7 +18,9 @@ public class PWeakHashMap implements Map<Long, PObject> {
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<PObject>();
 
     private final Map<Long, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<Long, WeakReference<PObject>>();
+
     private final Map<WeakReference<PObject>, Long> objectIDByReferences = new ConcurrentHashMap<WeakReference<PObject>, Long>();
+
     private final Map<WeakReference<PObject>, Long> parentObjectIDByReferences = new ConcurrentHashMap<WeakReference<PObject>, Long>();
 
     @Override
@@ -48,8 +51,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
     public PObject get(Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> value = referenceByObjectID.get(key);
-        if (value == null)
-            return null;
+        if (value == null) return null;
         return value.get();
     }
 
@@ -74,8 +76,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
     public PObject remove(Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> reference = referenceByObjectID.remove(key);
-        if (reference == null)
-            return null;
+        if (reference == null) return null;
 
         objectIDByReferences.remove(reference);
         parentObjectIDByReferences.remove(reference);

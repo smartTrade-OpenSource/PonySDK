@@ -20,10 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public interface HasPHorizontalAlignment {
+
     void setHorizontalAlignment(PHorizontalAlignment horizontalAlignment);
 }

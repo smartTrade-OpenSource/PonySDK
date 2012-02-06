@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
@@ -59,9 +60,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
 
     @Override
     public boolean remove(PWidget child) {
-        if (child.getParent() != this) {
-            return false;
-        }
+        if (child.getParent() != this) { return false; }
         orphan(child);
 
         children.remove(child);
@@ -80,7 +79,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
     public void add(PWidget w) {
         assert false : "Single-argument add() is not supported for this widget";
     }
-    
+
     @Override
     public void add(IsPWidget w) {
         add(w.asWidget());

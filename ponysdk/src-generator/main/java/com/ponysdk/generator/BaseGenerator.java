@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.generator;
 
 import java.util.HashMap;
@@ -31,13 +32,16 @@ public class BaseGenerator {
     protected Domain domain;
 
     protected final Map<String, FormFieldProperties> editFormFieldByID = new HashMap<String, FormFieldProperties>();
+
     protected final Map<String, FormFieldProperties> searchFormFieldByID = new HashMap<String, FormFieldProperties>();
+
     protected final Map<String, CriteriaFieldProperties> criteriaFieldByID = new HashMap<String, CriteriaFieldProperties>();
+
     protected final Map<String, ExportFieldProperties> exportFieldByID = new HashMap<String, ExportFieldProperties>();
+
     protected final Map<String, ListFieldProperties> listFieldByID = new HashMap<String, ListFieldProperties>();
 
-    public BaseGenerator() {
-    }
+    public BaseGenerator() {}
 
     public BaseGenerator(Domain domain) {
         this.domain = domain;
@@ -45,8 +49,7 @@ public class BaseGenerator {
     }
 
     private void loadDescription() {
-        if (domain.getUi() == null)
-            return;
+        if (domain.getUi() == null) return;
         final List<Field> fields = domain.getUi().getField();
         for (final Field field : fields) {
             if (field.getListFieldProperties() != null) {

@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
+
+package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -28,6 +30,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTextArea extends PTextBoxBase {
 
     private int visibleLines = 5;
+
     private int characterWidth = 25;
 
     public PTextArea() {

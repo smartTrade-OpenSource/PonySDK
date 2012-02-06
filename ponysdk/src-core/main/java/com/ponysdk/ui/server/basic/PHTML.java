@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.server.basic.event.PHasHTML;
@@ -30,10 +31,10 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PHTML extends PLabel implements PHasHTML {
 
     private String html;
+
     private boolean wordWrap;
 
-    public PHTML() {
-    }
+    public PHTML() {}
 
     public PHTML(String text) {
         this(text, false);

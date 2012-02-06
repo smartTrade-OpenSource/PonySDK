@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
@@ -27,16 +28,18 @@ import com.ponysdk.core.event.SystemEvent;
 public class ShowColumnDescriptorEvent extends SystemEvent<ShowColumnDescriptorHandler> {
 
     public static final Type<ShowColumnDescriptorHandler> TYPE = new Type<ShowColumnDescriptorHandler>();
-    private final String key;
-    private final boolean show;
-	private final String tableName;
 
-	public ShowColumnDescriptorEvent(Object sourceComponent, String key,
-			boolean show, String tableName) {
+    private final String key;
+
+    private final boolean show;
+
+    private final String tableName;
+
+    public ShowColumnDescriptorEvent(Object sourceComponent, String key, boolean show, String tableName) {
         super(sourceComponent);
         this.key = key;
         this.show = show;
-		this.tableName = tableName;
+        this.tableName = tableName;
     }
 
     @Override
@@ -57,8 +60,8 @@ public class ShowColumnDescriptorEvent extends SystemEvent<ShowColumnDescriptorH
         return show;
     }
 
-	public String getTableName() {
-		return tableName;
-	}
+    public String getTableName() {
+        return tableName;
+    }
 
 }

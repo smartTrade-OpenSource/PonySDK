@@ -43,7 +43,7 @@ import com.ponysdk.ui.server.list.ComplexListActivity;
 public class AddCustomColumnDescriptorForm extends FormActivity {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(AddCustomColumnDescriptorForm.class);
-    
+
     private FormField captionFormField;
 
     private FormField fieldPathFormField;

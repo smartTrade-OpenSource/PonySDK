@@ -20,19 +20,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export;
 
 import java.io.Serializable;
 
 public class ExportableField implements Serializable {
 
-	private static final long serialVersionUID = -6670152593608997663L;
+    private static final long serialVersionUID = -6670152593608997663L;
 
-	private String key;
+    private String key;
+
     private String caption;
 
-    public ExportableField() {
-    }
+    public ExportableField() {}
 
     public ExportableField(String key, String caption) {
         this.key = key;

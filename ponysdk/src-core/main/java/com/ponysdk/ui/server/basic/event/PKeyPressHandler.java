@@ -20,10 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.EventHandler;
 
 public interface PKeyPressHandler extends EventHandler {
+
     void onKeyPress(int keyCode);
 }

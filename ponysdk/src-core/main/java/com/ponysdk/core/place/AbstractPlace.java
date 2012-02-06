@@ -20,9 +20,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.place;
 
 public abstract class AbstractPlace implements Place {
+
     @Override
     public String getToken() {
         return getClass().getSimpleName();

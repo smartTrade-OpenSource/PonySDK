@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.event.BusinessEvent.Level;
@@ -40,16 +41,13 @@ public class EventPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
@@ -94,6 +92,7 @@ public class EventPageActivity extends PageActivity {
         final PButton ok3 = new PButton("send [ERROR]");
 
         ok3.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);

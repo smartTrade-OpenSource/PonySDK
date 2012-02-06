@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -49,7 +50,9 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
 
     private final List<String> items = new ArrayList<String>();
+
     private final Map<String, Object> hiddenValueByItems = new HashMap<String, Object>();
+
     private final Map<Object, String> itemsByHiddenValue = new HashMap<Object, String>();
 
     private boolean enabled = true;
@@ -57,11 +60,13 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     private final String caption;
 
     private final Set<String> selectValues = new HashSet<String>();
+
     private PListBox selected;
 
     private PListBox unselected;
 
     private PButton switchButton;
+
     private String debugID;
 
     private FormFieldComponent<PHorizontalPanel> formFieldComponent;
@@ -213,8 +218,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
                     throw new IllegalArgumentException("Item '" + text + "' already unselected for listbox '" + caption + "'");
                 }
             }
-        } else
-            throw new IllegalArgumentException("unknow Item '" + text + "' for listbox '" + caption + "'");
+        } else throw new IllegalArgumentException("unknow Item '" + text + "' for listbox '" + caption + "'");
     }
 
     public void setSelectedItem(final String text) {
@@ -266,8 +270,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     @Override
     public void ensureDebugID(String id) {
         this.debugID = id;
-        if (selected == null)
-            return;
+        if (selected == null) return;
         onEnsureDebugID();
     }
 

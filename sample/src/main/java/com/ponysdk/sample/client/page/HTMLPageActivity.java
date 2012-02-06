@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -38,12 +39,10 @@ public class HTMLPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onShowPage(Place place) {
@@ -54,6 +53,7 @@ public class HTMLPageActivity extends PageActivity {
         final PHTML htmlClickable = new PHTML("<span style='border: 3px solid black;color:white;background-color:gray;margin:5px;padding:10px;display:block'>click me!</span>");
 
         htmlClickable.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 PNotificationManager.notify("HTML", "clicked!");

@@ -74,11 +74,15 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
     @Autowired
     protected ApplicationView applicationView;
+
     private ComplexListActivity<Pony> complexListActivity;
 
     private final PListBox listBox = new PListBox(false, true);
+
     private CriterionField nameCriterion;
+
     private FormField nameField;
+
     private FormField ageField;
 
     public ComplexListPageActivity() {

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -39,6 +40,7 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 public class TabPanelPageActivity extends PageActivity {
 
     private final PTabPanel tabPanel = new PTabPanel();
+
     private int tabCount = 0;
 
     public TabPanelPageActivity() {
@@ -47,12 +49,14 @@ public class TabPanelPageActivity extends PageActivity {
         tabPanel.setHeight("400px");
         tabPanel.setAnimationEnabled(true);
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
+
             @Override
             public void onBeforeSelection(Integer index) {
                 PNotificationManager.notify("onBeforeSelection", "Tab index : " + index);
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
+
             @Override
             public void onSelection(PSelectionEvent<Integer> event) {
                 PNotificationManager.notify("onSelection", "Tab index : " + event.getSelectedItem());
@@ -61,16 +65,13 @@ public class TabPanelPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {

@@ -20,14 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 public class Remove extends Instruction {
 
-	private static final long serialVersionUID = -7279461230051812100L;
+    private static final long serialVersionUID = -7279461230051812100L;
 
-	public Remove() {
-    }
+    public Remove() {}
 
     public Remove(long objectID, long parentID) {
         super(objectID);

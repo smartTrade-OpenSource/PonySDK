@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
 public class PFlowPanel extends PComplexPanel {
+
     @Override
     protected WidgetType getType() {
         return WidgetType.FLOW_PANEL;

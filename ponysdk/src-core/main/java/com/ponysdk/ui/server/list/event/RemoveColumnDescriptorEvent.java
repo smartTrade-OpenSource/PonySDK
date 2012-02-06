@@ -20,36 +20,37 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
 
 public class RemoveColumnDescriptorEvent extends SystemEvent<RemoveColumnDescriptorHandler> {
 
-	public static final Type<RemoveColumnDescriptorHandler> TYPE = new Type<RemoveColumnDescriptorHandler>();
+    public static final Type<RemoveColumnDescriptorHandler> TYPE = new Type<RemoveColumnDescriptorHandler>();
 
-	private final String caption;
+    private final String caption;
+
     private final String tableName;
 
-	public RemoveColumnDescriptorEvent(Object sourceComponent, String caption,
-			String tableName) {
+    public RemoveColumnDescriptorEvent(Object sourceComponent, String caption, String tableName) {
         super(sourceComponent);
-		this.caption = caption;
+        this.caption = caption;
         this.tableName = tableName;
     }
 
     @Override
-	protected void dispatch(RemoveColumnDescriptorHandler handler) {
-		handler.onRemoveColumn(this);
+    protected void dispatch(RemoveColumnDescriptorHandler handler) {
+        handler.onRemoveColumn(this);
     }
 
     @Override
-	public Type<RemoveColumnDescriptorHandler> getAssociatedType() {
+    public Type<RemoveColumnDescriptorHandler> getAssociatedType() {
         return TYPE;
     }
 
-	public String getCaption() {
-		return caption;
+    public String getCaption() {
+        return caption;
     }
 
     public String getTableName() {

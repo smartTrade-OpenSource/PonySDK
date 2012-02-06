@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.footer;
 
 import com.ponysdk.core.activity.AbstractActivity;
@@ -34,11 +35,11 @@ public class FooterActivity extends AbstractActivity {
         world.setWidget(footerView);
     }
 
-	public FooterView getFooterView() {
-		return footerView;
-	}
+    public FooterView getFooterView() {
+        return footerView;
+    }
 
-	public void setFooterView(FooterView footerView) {
-		this.footerView = footerView;
-	}
+    public void setFooterView(FooterView footerView) {
+        this.footerView = footerView;
+    }
 }

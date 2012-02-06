@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.addon;
 
 import com.ponysdk.core.PonySession;
@@ -39,20 +40,20 @@ public class PNotificationManager implements PAddOn {
     public static void notify(String title, String message, Notification notification) {
 
         switch (notification) {
-        case TRAY:
-            notify(title, message);
-            break;
-        case HUMANIZED:
-            notify(title, message, "HUMANIZED");
-            break;
-        case WARNING_MESSAGE:
-            notify(title, message, "WARNING_MESSAGE");
-            break;
-        case ERROR_MESSAGE:
-            notify(title, message, "ERROR_MESSAGE");
-            break;
-        default:
-            break;
+            case TRAY:
+                notify(title, message);
+                break;
+            case HUMANIZED:
+                notify(title, message, "HUMANIZED");
+                break;
+            case WARNING_MESSAGE:
+                notify(title, message, "WARNING_MESSAGE");
+                break;
+            case ERROR_MESSAGE:
+                notify(title, message, "ERROR_MESSAGE");
+                break;
+            default:
+                break;
         }
 
     }

@@ -20,8 +20,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.event;
 
 public interface BroadcastEventHandler {
+
     public void onEvent(Event<?> event);
 }

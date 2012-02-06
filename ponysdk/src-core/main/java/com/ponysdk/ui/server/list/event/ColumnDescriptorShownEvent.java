@@ -20,33 +20,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
 
-public class ColumnDescriptorShownEvent extends
-		SystemEvent<ColumnDescriptorShownHandler> {
+public class ColumnDescriptorShownEvent extends SystemEvent<ColumnDescriptorShownHandler> {
 
-	public static final Type<ColumnDescriptorShownHandler> TYPE = new Type<ColumnDescriptorShownHandler>();
+    public static final Type<ColumnDescriptorShownHandler> TYPE = new Type<ColumnDescriptorShownHandler>();
+
     private final String key;
-    private final boolean show;
-	private final String tableName;
 
-	public ColumnDescriptorShownEvent(Object sourceComponent, String key,
-			boolean show, String tableName) {
+    private final boolean show;
+
+    private final String tableName;
+
+    public ColumnDescriptorShownEvent(Object sourceComponent, String key, boolean show, String tableName) {
         super(sourceComponent);
         this.key = key;
         this.show = show;
-		this.tableName = tableName;
+        this.tableName = tableName;
     }
 
     @Override
-	protected void dispatch(ColumnDescriptorShownHandler handler) {
-		handler.onColumnDescriptorShown(this);
+    protected void dispatch(ColumnDescriptorShownHandler handler) {
+        handler.onColumnDescriptorShown(this);
     }
 
     @Override
-	public Type<ColumnDescriptorShownHandler> getAssociatedType() {
+    public Type<ColumnDescriptorShownHandler> getAssociatedType() {
         return TYPE;
     }
 
@@ -58,8 +60,8 @@ public class ColumnDescriptorShownEvent extends
         return show;
     }
 
-	public String getTableName() {
-		return tableName;
-	}
+    public String getTableName() {
+        return tableName;
+    }
 
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.main;
 
 import com.ponysdk.core.PonySession;
@@ -34,10 +35,7 @@ public interface EntryPoint {
     public void start(PonySession session);
 
     /**
-     * 
-     * The HTTP session already exists, and a new PonySession has been created.
-     * 
-     * <h4>Cases :</h4>
+     * The HTTP session already exists, and a new PonySession has been created. <h4>Cases :</h4>
      * <ul>
      * <li>Reload</li>
      * <li>New browser tabulation</li>

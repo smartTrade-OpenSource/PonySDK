@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.event;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface StreamHandler {
+
     void onStream(HttpServletRequest request, HttpServletResponse response);
 }

@@ -20,18 +20,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 import com.ponysdk.ui.terminal.HandlerType;
 
 public class AddHandler extends Instruction {
 
-	private static final long serialVersionUID = 1573887166835313254L;
-	
-	private HandlerType type;
+    private static final long serialVersionUID = 1573887166835313254L;
 
-    public AddHandler() {
-    }
+    private HandlerType type;
+
+    public AddHandler() {}
 
     public AddHandler(long objectID, HandlerType type) {
         super(objectID);

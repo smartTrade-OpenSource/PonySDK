@@ -10,6 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
  * implied. See the License for the specific language governing permissions and limitations under the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
@@ -30,17 +31,13 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
         @Override
         public PWidget next() {
-            if (index >= size) {
-                throw new NoSuchElementException();
-            }
+            if (index >= size) { throw new NoSuchElementException(); }
             return array[++index];
         }
 
         @Override
         public void remove() {
-            if ((index < 0) || (index >= size)) {
-                throw new IllegalStateException();
-            }
+            if ((index < 0) || (index >= size)) { throw new IllegalStateException(); }
             parent.remove(array[index--]);
         }
     }
@@ -48,7 +45,9 @@ public class PWidgetCollection implements Iterable<PWidget> {
     private static final int INITIAL_SIZE = 4;
 
     private PWidget[] array;
+
     private final HasPWidgets parent;
+
     private int size;
 
     public PWidgetCollection(HasPWidgets parent) {
@@ -65,27 +64,21 @@ public class PWidgetCollection implements Iterable<PWidget> {
     }
 
     public PWidget get(int index) {
-        if ((index < 0) || (index >= size)) {
-            throw new IndexOutOfBoundsException();
-        }
+        if ((index < 0) || (index >= size)) { throw new IndexOutOfBoundsException(); }
 
         return array[index];
     }
 
     public int indexOf(PWidget w) {
         for (int i = 0; i < size; ++i) {
-            if (array[i] == w) {
-                return i;
-            }
+            if (array[i] == w) { return i; }
         }
 
         return -1;
     }
 
     public void insert(PWidget w, int beforeIndex) {
-        if ((beforeIndex < 0) || (beforeIndex > size)) {
-            throw new IndexOutOfBoundsException();
-        }
+        if ((beforeIndex < 0) || (beforeIndex > size)) { throw new IndexOutOfBoundsException(); }
 
         // Realloc array if necessary (doubling).
         if (size == array.length) {
@@ -112,9 +105,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
     }
 
     public void remove(int index) {
-        if ((index < 0) || (index >= size)) {
-            throw new IndexOutOfBoundsException();
-        }
+        if ((index < 0) || (index >= size)) { throw new IndexOutOfBoundsException(); }
 
         --size;
         for (int i = index; i < size; ++i) {
@@ -126,9 +117,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
     public void remove(PWidget w) {
         final int index = indexOf(w);
-        if (index == -1) {
-            throw new NoSuchElementException();
-        }
+        if (index == -1) { throw new NoSuchElementException(); }
 
         remove(index);
     }

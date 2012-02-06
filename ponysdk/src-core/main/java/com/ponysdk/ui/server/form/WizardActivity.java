@@ -21,7 +21,6 @@ import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.form.FormActivity;
 
 /**
  * @author mjbenjamin
@@ -29,15 +28,25 @@ import com.ponysdk.ui.server.form.FormActivity;
 public class WizardActivity extends AbstractActivity {
 
     protected List<FormActivity> formActivities = new ArrayList<FormActivity>();
+
     protected PSimplePanel currentFormActivityPanel;
+
     protected boolean lastActivity = false;
+
     private final PButton previous = new PButton("Previous");
+
     private final PButton finish = new PButton("Finish");
+
     private final PButton cancel = new PButton("Cancel");
+
     private final PButton next = new PButton("Next");
+
     protected FormActivity currentFormActivity;
+
     int index;
+
     protected final List<WizardActivityHandler> wizardActivityHandlers = new ArrayList<WizardActivityHandler>();
+
     private final PDialogBox container;
 
     public interface WizardActivityHandler {

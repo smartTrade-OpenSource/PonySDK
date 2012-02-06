@@ -20,13 +20,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.query;
 
 public class CriterionField {
 
     private final String pojoProperty;
+
     private Object value;
+
     private ComparatorType comparator = ComparatorType.EQ;
+
     private SortingType sortingType = SortingType.NONE;
 
     public CriterionField(String key) {

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client;
 
 import org.springframework.beans.factory.annotation.Autowired;

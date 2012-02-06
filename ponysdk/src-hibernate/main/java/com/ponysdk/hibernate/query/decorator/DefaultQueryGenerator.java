@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.HashMap;
@@ -38,9 +39,13 @@ import com.ponysdk.hibernate.query.QueryGenerator;
 public class DefaultQueryGenerator implements QueryGenerator {
 
     private final Map<String, CriteriaDecorator> criteriaDecoratorByPojoPropertyKey = new HashMap<String, CriteriaDecorator>();
+
     private CriteriaDecorator sortCriteriaDecorator;
+
     private final String defaultSortingProperty;
+
     private final OrderingCriteria criteria;
+
     private SortingType sortingType = SortingType.NONE;
 
     public DefaultQueryGenerator(OrderingCriteria criteria) {

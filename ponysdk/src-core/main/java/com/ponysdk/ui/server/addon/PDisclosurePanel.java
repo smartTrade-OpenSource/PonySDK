@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.addon;
 
 import java.util.Iterator;
@@ -87,7 +88,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
             throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
         }
     }
-    
+
     @Override
     public void add(IsPWidget w) {
         add(w.asWidget());
@@ -109,9 +110,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
 
     public void setWidget(PWidget w) {
         // Validate
-        if (w == content) {
-            return;
-        }
+        if (w == content) { return; }
 
         // Detach new child.
         if (w != null) {

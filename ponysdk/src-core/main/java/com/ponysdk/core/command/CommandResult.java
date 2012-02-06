@@ -4,6 +4,7 @@ package com.ponysdk.core.command;
 public class CommandResult<T> {
 
     private T result;
+
     private Throwable throwable;
 
     public CommandResult(final T result) {

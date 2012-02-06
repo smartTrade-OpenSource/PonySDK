@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.dialogbox;
 
 import com.google.gwt.core.client.GWT;
@@ -41,6 +42,7 @@ public class PCDialogBox extends DialogBox {
     private final HorizontalPanel captionPanel = new HorizontalPanel();
 
     private Widget closeWidget = new Anchor("close");
+
     private boolean closable = true;
 
     private final HTML text = new HTML("&nbsp;");
@@ -94,14 +96,14 @@ public class PCDialogBox extends DialogBox {
         if (isCaptionControlEvent(event)) {
 
             switch (event.getTypeInt()) {
-            case Event.ONMOUSEUP:
-            case Event.ONCLICK:
-                hide();
-                break;
-            case Event.ONMOUSEOVER:
-                break;
-            case Event.ONMOUSEOUT:
-                break;
+                case Event.ONMOUSEUP:
+                case Event.ONCLICK:
+                    hide();
+                    break;
+                case Event.ONMOUSEOVER:
+                    break;
+                case Event.ONMOUSEOUT:
+                    break;
             }
 
             return;

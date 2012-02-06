@@ -20,8 +20,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.terminal.ui;
 
+package com.ponysdk.ui.terminal.ui;
 
 public class PTComplexPanel extends PTPanel {
 

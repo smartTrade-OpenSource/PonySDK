@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.validator;
 
 import com.ponysdk.ui.server.form.FormField;
@@ -27,22 +28,20 @@ import com.ponysdk.ui.server.form.FormField;
 public class EmailFieldValidator implements FieldValidator {
 
     private static final String EMAILS_SEPARATOR = ";";
+
     private static final String VALID_MAIL_REGEX = "^[a-z0-9._-]+@[a-z0-9.-]{1,}[.][a-z]{2,3}";
+
     private static final String INVALID_CHARACTERS_MSG = "Contains invalid characters.\n Allowed characters " + VALID_MAIL_REGEX;
 
     @Override
     public ValidationResult isValid(FormField field) {
 
         final String text = (String) field.getValue();
-        if (text == null || text.isEmpty()) {
-            return ValidationResult.newOKValidationResult();
-        }
+        if (text == null || text.isEmpty()) { return ValidationResult.newOKValidationResult(); }
 
         final String[] emails = text.split(EMAILS_SEPARATOR);
         for (int i = 0; i < emails.length; i++) {
-            if (!emails[i].matches(VALID_MAIL_REGEX)) {
-                return ValidationResult.newFailedValidationResult(INVALID_CHARACTERS_MSG);
-            }
+            if (!emails[i].matches(VALID_MAIL_REGEX)) { return ValidationResult.newFailedValidationResult(INVALID_CHARACTERS_MSG); }
         }
 
         return ValidationResult.newOKValidationResult();

@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.datamodel;
 
 public class MBean {
 
     private final String beanName;
+
     private String name;
 
     public MBean(String beanName) {

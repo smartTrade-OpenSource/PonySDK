@@ -42,11 +42,17 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
 
     private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
+
     private final List<ListItem> items = new ArrayList<ListItem>();
+
     private List<Integer> selectedItems = new ArrayList<Integer>();
+
     private int selectedIndex = -1;
+
     private boolean isMultipleSelect;
+
     private final boolean containsEmptyItem;
+
     private int visibleItemCount;
 
     public PListBox() {
@@ -336,6 +342,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private class ListItem {
 
         protected String label;
+
         protected Object value;
 
         public ListItem(final String label, final Object value) {

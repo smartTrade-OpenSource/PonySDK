@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
@@ -56,9 +57,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     public boolean remove(PWidget w) {
         // Validate.
-        if (widget != w) {
-            return false;
-        }
+        if (widget != w) { return false; }
 
         // Orphan.
         try {
@@ -76,9 +75,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     public void setWidget(PWidget w) {
         // Validate
-        if (w == widget) {
-            return;
-        }
+        if (w == widget) { return; }
 
         // Detach new child.
         if (w != null) {
@@ -110,7 +107,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     public Iterator<PWidget> iterator() {
         return new Iterator<PWidget>() {
+
             boolean hasElement = widget != null;
+
             PWidget returned = null;
 
             @Override
@@ -120,9 +119,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
             @Override
             public PWidget next() {
-                if (!hasElement || (widget == null)) {
-                    throw new NoSuchElementException();
-                }
+                if (!hasElement || (widget == null)) { throw new NoSuchElementException(); }
                 hasElement = false;
                 return (returned = widget);
             }

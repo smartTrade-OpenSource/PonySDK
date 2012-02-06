@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.basic.PPanel;
@@ -27,15 +28,24 @@ import com.ponysdk.ui.server.basic.PPanel;
 public class ComplexListConfiguration<T> extends ListConfiguration<T> {
 
     private int pageSize = 30;
+
     private boolean formEnabled;// FormConfiguration with Layout ?
+
     private PPanel formLayout;
+
     private ExportConfiguration exportConfiguration;
+
     private boolean selectionColumnEnabled;
+
     private boolean showSubListColumnEnabled;
+
     private boolean searchFormMustBeValid;
+
     private boolean customColumnEnabled;
+
     private Class<T> clas;
-	private boolean showPreferences;
+
+    private boolean showPreferences;
 
     public boolean isSearchFormMustBeValid() {
         return searchFormMustBeValid;
@@ -110,12 +120,12 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return clas;
     }
 
-	public void setShowPreferences(boolean showPreferences) {
-		this.showPreferences = showPreferences;
-	}
+    public void setShowPreferences(boolean showPreferences) {
+        this.showPreferences = showPreferences;
+    }
 
-	public boolean isShowPreferences() {
-		return showPreferences;
-	}
+    public boolean isShowPreferences() {
+        return showPreferences;
+    }
 
 }
