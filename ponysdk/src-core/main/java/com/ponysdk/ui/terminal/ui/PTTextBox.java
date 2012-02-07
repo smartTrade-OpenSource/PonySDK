@@ -32,12 +32,12 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTTextBox extends PTTextBoxBase {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.TextBox());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.TextBox());
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         final com.google.gwt.user.client.ui.TextBox textBox = cast();

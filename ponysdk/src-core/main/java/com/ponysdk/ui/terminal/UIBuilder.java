@@ -52,6 +52,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
@@ -76,6 +77,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private final UIFactory uiFactory = new UIFactory();
 
     private final Map<Long, PTObject> objectByID = new HashMap<Long, PTObject>();
+
+    private final Map<UIObject, Long> objectIDByWidget = new HashMap<UIObject, Long>();
+
+    private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<Long, UIObject>();
 
     private SimplePanel loadingMessageBox;
 
@@ -242,6 +247,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final GC remove = (GC) instruction;
                     GWT.log("GC: " + remove.getObjectID());
                     final PTObject ptObject = objectByID.remove(remove.getObjectID());
+                    final UIObject uiObject = widgetIDByObjectID.remove(remove.getObjectID());
+                    if (uiObject != null) {
+                        objectIDByWidget.remove(uiObject);
+                    }
+
                     ptObject.gc(remove, this);
                 } else if (instruction instanceof Update) {
 
@@ -406,6 +416,18 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         return objectByID.get(ID);
     }
 
-    private native void reload() /*-{$wnd.location.reload();}-*/;
+    @Override
+    public PTObject getPTObject(final UIObject uiObject) {
+        Long objectID = objectIDByWidget.get(uiObject);
+        if (objectID != null) return objectByID.get(objectID);
+        return null;
+    }
 
+    @Override
+    public void registerUIObject(final Long ID, final UIObject uiObject) {
+        objectIDByWidget.put(uiObject, ID);
+        widgetIDByObjectID.put(ID, uiObject);
+    }
+
+    private native void reload() /*-{$wnd.location.reload();}-*/;
 }

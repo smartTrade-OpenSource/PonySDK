@@ -92,12 +92,12 @@ public class PonySession {
 
     private final PonyApplicationSession applicationSession;
 
-    public PonySession(PonyApplicationSession applicationSession) {
+    public PonySession(final PonyApplicationSession applicationSession) {
         this.applicationSession = applicationSession;
         objectByID.put(0l, rootPanel);
     }
 
-    public void stackInstruction(Instruction instruction) {
+    public void stackInstruction(final Instruction instruction) {
         if (instruction instanceof Add) {
             final Add add = (Add) instruction;
             objectByID.assignParentID(add.getObjectID(), add.getParentID());
@@ -105,13 +105,13 @@ public class PonySession {
         pendingInstructions.add(instruction);
     }
 
-    public void fireInstructions(List<Instruction> instructions) throws PonySessionException {
+    public void fireInstructions(final List<Instruction> instructions) throws PonySessionException {
         for (final Instruction instruction : instructions) {
             fireInstruction(instruction);
         }
     }
 
-    private void fireInstruction(Instruction instruction) throws PonySessionException {
+    private void fireInstruction(final Instruction instruction) throws PonySessionException {
         if (instruction instanceof Close) {
             PonySession.getCurrent().invalidate();
             return;
@@ -155,8 +155,13 @@ public class PonySession {
         return streamRequestCounter++;
     }
 
-    public void registerObject(long objectID, PObject object) {
+    public void registerObject(final long objectID, final PObject object) {
         objectByID.put(objectID, object);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getObject(final long objectID) {
+        return (T) objectByID.get(objectID);
     }
 
     public HttpSession getHttpSession() {
@@ -167,11 +172,11 @@ public class PonySession {
         return rootPanel;
     }
 
-    public StreamHandler removeStreamListener(Long streamID) {
+    public StreamHandler removeStreamListener(final Long streamID) {
         return streamListenerByID.remove(streamID);
     }
 
-    public void stackStreamRequest(StreamHandler streamListener) {
+    public void stackStreamRequest(final StreamHandler streamListener) {
         final AddHandler addHandler = new AddHandler(0, HandlerType.STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.setMainPropertyValue(PropertyKey.STREAM_REQUEST_ID, streamRequestID);
@@ -179,7 +184,7 @@ public class PonySession {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
-    public void stackEmbededStreamRequest(StreamHandler streamListener, long objectID) {
+    public void stackEmbededStreamRequest(final StreamHandler streamListener, final long objectID) {
         final AddHandler addHandler = new AddHandler(objectID, HandlerType.EMBEDED_STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.setMainPropertyValue(PropertyKey.STREAM_REQUEST_ID, streamRequestID);
@@ -203,19 +208,19 @@ public class PonySession {
         return cookies;
     }
 
-    public void setHistory(PHistory history) {
+    public void setHistory(final PHistory history) {
         this.history = history;
     }
 
-    public void setPlaceController(PlaceController placeController) {
+    public void setPlaceController(final PlaceController placeController) {
         this.placeController = placeController;
     }
 
-    public void setRootEventBus(EventBus eventBus) {
+    public void setRootEventBus(final EventBus eventBus) {
         this.rootEventBus = eventBus;
     }
 
-    public void setCookies(PCookies cookies) {
+    public void setCookies(final PCookies cookies) {
         this.cookies = cookies;
     }
 
@@ -223,27 +228,27 @@ public class PonySession {
         return currentSession.get();
     }
 
-    public static void setCurrent(PonySession ponySession) {
+    public static void setCurrent(final PonySession ponySession) {
         currentSession.set(ponySession);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
         return getCurrent().getEventBus().addHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(Type<H> type, Object source, H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
         return getCurrent().getEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static void fireEvent(Event<?> event) {
+    public static void fireEvent(final Event<?> event) {
         getCurrent().getEventBus().fireEvent(event);
     }
 
-    public static void fireEventFromSource(Event<?> event, Object source) {
+    public static void fireEventFromSource(final Event<?> event, final Object source) {
         getCurrent().getEventBus().fireEventFromSource(event, source);
     }
 
-    public static void addHandler(BroadcastEventHandler handler) {
+    public static void addHandler(final BroadcastEventHandler handler) {
         getCurrent().getEventBus().addHandler(handler);
     }
 
@@ -264,7 +269,7 @@ public class PonySession {
         return entryPoint;
     }
 
-    public void setEntryPoint(EntryPoint entryPoint) {
+    public void setEntryPoint(final EntryPoint entryPoint) {
         this.entryPoint = entryPoint;
     }
 
@@ -272,24 +277,24 @@ public class PonySession {
         return permissions;
     }
 
-    public void setPermissions(Set<Permission> permissions) {
+    public void setPermissions(final Set<Permission> permissions) {
         this.permissions = permissions;
     }
 
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         this.applicationSession.setAttribute(name, value);
     }
 
-    public void addSessionListener(HttpSessionListener sessionListener) {
+    public void addSessionListener(final HttpSessionListener sessionListener) {
         this.applicationSession.addSessionListener(sessionListener);
     }
 
-    public boolean removeSessionListener(HttpSessionListener sessionListener) {
+    public boolean removeSessionListener(final HttpSessionListener sessionListener) {
         return this.applicationSession.removeSessionListener(sessionListener);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getAttribute(String name, Class<T> clazz) {
+    public <T> T getAttribute(final String name, final Class<T> clazz) {
         return (T) this.applicationSession.getAttribute(name);
     }
 

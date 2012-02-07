@@ -29,7 +29,7 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTRootLayoutPanel extends PTLayoutPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(com.google.gwt.user.client.ui.RootLayoutPanel.get());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, com.google.gwt.user.client.ui.RootLayoutPanel.get());
     }
 }

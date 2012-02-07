@@ -29,8 +29,8 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTFlowPanel extends PTComplexPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.FlowPanel());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.FlowPanel());
     }
 
 }

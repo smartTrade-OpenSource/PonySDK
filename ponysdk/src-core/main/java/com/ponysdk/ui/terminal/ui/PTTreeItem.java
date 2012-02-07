@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
@@ -49,7 +50,7 @@ public class PTTreeItem extends PTUIObject {
         } else {
             treeItem = new TreeItem(textProperty.getValue());
         }
-        init(treeItem);
+        init(create, uiService, treeItem);
     }
 
     @Override
@@ -59,12 +60,16 @@ public class PTTreeItem extends PTUIObject {
         if (widget instanceof Tree) {
             this.tree = (Tree) widget;
         } else {
-            final TreeItem w = (TreeItem) widget;
-            int index = add.getMainProperty().getIntValue();
-            if (isRoot) {
-                tree.insertItem(index, w);
+            if (add.getMainProperty().containsChildProperty(PropertyKey.WIDGET)) {
+                cast().setWidget((Widget) widget);
             } else {
-                cast().insertItem(index, w);
+                final TreeItem w = (TreeItem) widget;
+                int index = add.getMainProperty().getIntValue();
+                if (isRoot) {
+                    tree.insertItem(index, w);
+                } else {
+                    cast().insertItem(index, w);
+                }
             }
         }
     }

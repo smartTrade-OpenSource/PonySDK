@@ -33,12 +33,12 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTRichTextArea extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new RichTextArea());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new RichTextArea());
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

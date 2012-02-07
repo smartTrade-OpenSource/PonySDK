@@ -29,10 +29,10 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTPushButton extends PTCustomButton {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final PTImage image = (PTImage) uiService.getPTObject(create.getMainProperty().getLongValue());
         final com.google.gwt.user.client.ui.PushButton pushButton = new com.google.gwt.user.client.ui.PushButton(image.cast());
-        init(pushButton);
+        init(create, uiService, pushButton);
     }
 
 }

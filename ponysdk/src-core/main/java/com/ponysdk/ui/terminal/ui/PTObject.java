@@ -33,6 +33,8 @@ import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTObject {
 
+    protected Long objectID;
+
     public void create(final Create create, final UIService uiService) {}
 
     public void update(final Update update, final UIService uiService) {}
@@ -44,5 +46,9 @@ public class PTObject {
     public void addHandler(final AddHandler addHandler, final UIService uiService) {}
 
     public void gc(final GC gc, final UIService uiService) {}
+
+    public Long getObjectID() {
+        return objectID;
+    }
 
 }

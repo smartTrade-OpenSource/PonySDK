@@ -23,7 +23,7 @@ public class PTSuggestBox extends PTWidget {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.SuggestBox(oracle));
+        init(create, uiService, new com.google.gwt.user.client.ui.SuggestBox(oracle));
     }
 
     @Override

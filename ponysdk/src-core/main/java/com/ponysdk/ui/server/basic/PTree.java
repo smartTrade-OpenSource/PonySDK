@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
+import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -127,11 +129,11 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     @Override
     public void onEventInstruction(final EventInstruction event) {
         if (HandlerType.SELECTION_HANDLER.equals(event.getHandlerType())) {
-            // final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this,
-            // getItemByPath(event.getMainProperty().getValue()));
-            // for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
-            // handler.onSelection(selectionEvent);
-            // }
+            PTreeItem treeItem = PonySession.getCurrent().getObject(event.getMainProperty().getLongValue());
+            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, treeItem);
+            for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
+                handler.onSelection(selectionEvent);
+            }
         } else {
             super.onEventInstruction(event);
         }

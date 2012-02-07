@@ -46,6 +46,27 @@ public class PTreeItem extends PObject {
         this.widget = widget;
     }
 
+    private void setWidget() {
+        if (widget == null) return;
+
+        if (widget.getParent() != null) {
+            widget.removeFromParent();
+        }
+
+        if (tree != null) {
+            tree.orphan(widget);
+            final Remove remove = new Remove(widget.getID(), tree.getID());
+            widget.getPonySession().stackInstruction(remove);
+        }
+
+        if (tree != null) {
+            tree.adopt(widget, this);
+            final Add add = new Add(widget.getID(), getID());
+            add.getMainProperty().setProperty(PropertyKey.WIDGET, true);
+            widget.getPonySession().stackInstruction(add);
+        }
+    }
+
     @Override
     protected WidgetType getType() {
         return WidgetType.TREE_ITEM;
@@ -73,6 +94,7 @@ public class PTreeItem extends PObject {
             add.setMainPropertyValue(PropertyKey.ROOT, true);
             getPonySession().stackInstruction(add);
         }
+        setWidget();
     }
 
     public PTree getTree() {
@@ -130,6 +152,10 @@ public class PTreeItem extends PObject {
 
     public PTreeItem getChild(final int index) {
         return children.get(index);
+    }
+
+    public PWidget getWidget() {
+        return widget;
     }
 
 }

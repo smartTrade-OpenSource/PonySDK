@@ -32,14 +32,14 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTComposite extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final PTWidget uiObject = (PTWidget) uiService.getPTObject(create.getMainProperty().getChildProperty(PropertyKey.WIDGET).getLongValue());
-        init(new MyComposite(uiObject.cast()));
+        init(create, uiService, new MyComposite(uiObject.cast()));
     }
 
     class MyComposite extends Composite {
 
-        public MyComposite(Widget widget) {
+        public MyComposite(final Widget widget) {
             initWidget(widget);
         }
     }

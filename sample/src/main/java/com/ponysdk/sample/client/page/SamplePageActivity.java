@@ -35,7 +35,6 @@ import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
 
 import de.java2html.converter.JavaSource2HTMLConverter;
@@ -49,15 +48,13 @@ public class SamplePageActivity extends PageActivity {
 
     private PTabPanel tabPanel;
 
-    protected PSimpleLayoutPanel examplePanel;
+    protected PScrollPanel examplePanel;
 
-    protected PSimpleLayoutPanel codePanel;
-
-    private PScrollPanel codeScrollpanel;
+    private PScrollPanel codePanel;
 
     public SamplePageActivity(final String pageName, final String pageCategory) {
         super(pageName, pageCategory);
-        setPageView(new DefaultPageView());
+        setPageView(new DefaultPageView(pageName));
     }
 
     @Override
@@ -71,17 +68,14 @@ public class SamplePageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
-        codeScrollpanel = new PScrollPanel();
+        codePanel = new PScrollPanel();
+        examplePanel = new PScrollPanel();
 
         tabPanel = new PTabPanel();
 
-        examplePanel = new PSimpleLayoutPanel();
-
         tabPanel.add(examplePanel, "Example");
 
-        codePanel = new PSimpleLayoutPanel();
-        codePanel.setWidget(codeScrollpanel);
-        codeScrollpanel.setWidget(new PHTML(getSource()));
+        codePanel.setWidget(new PHTML(getSource()));
 
         tabPanel.add(codePanel, "Source Code");
 

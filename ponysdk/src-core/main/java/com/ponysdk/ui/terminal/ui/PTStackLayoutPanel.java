@@ -34,14 +34,14 @@ import com.ponysdk.ui.terminal.instruction.Remove;
 public class PTStackLayoutPanel extends PTResizeComposite {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final Unit unit = Unit.valueOf(create.getMainProperty().getStringProperty(PropertyKey.UNIT));
         final com.google.gwt.user.client.ui.StackLayoutPanel stackLayoutPanel = new com.google.gwt.user.client.ui.StackLayoutPanel(unit);
-        init(stackLayoutPanel);
+        init(create, uiService, stackLayoutPanel);
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
         super.add(add, uiService);
 
         final Widget w = asWidget(add.getObjectID(), uiService);
@@ -53,7 +53,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
     }
 
     @Override
-    public void remove(Remove remove, UIService uiService) {
+    public void remove(final Remove remove, final UIService uiService) {
         final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }

@@ -25,9 +25,11 @@ package com.ponysdk.sample.client.page;
 
 import java.util.List;
 
+import com.ponysdk.core.PonySession;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PImage;
@@ -37,6 +39,8 @@ import com.ponysdk.ui.server.basic.PTreeItem;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PSelectionEvent;
+import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class TreePageActivity extends SamplePageActivity {
 
@@ -55,6 +59,15 @@ public class TreePageActivity extends SamplePageActivity {
         final PTree tree = new PTree();
         tree.setWidth("300px");
 
+        tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
+
+            @Override
+            public void onSelection(final PSelectionEvent<PTreeItem> event) {
+                String msg = "Selected item : name = " + event.getSelectedItem();
+                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            }
+        });
+
         PTreeItem firstItem = new PTreeItem("First item");
 
         PAnchor anchor = new PAnchor("Second item");
@@ -63,7 +76,7 @@ public class TreePageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                tree.setSelectedItem(secondItem);
+                secondItem.setState(secondItem.getState() ? false : true);
             }
         });
 

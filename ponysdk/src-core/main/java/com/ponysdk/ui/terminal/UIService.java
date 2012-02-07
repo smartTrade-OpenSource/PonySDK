@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal;
 
+import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.instruction.Instruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
 
@@ -31,4 +32,8 @@ public interface UIService {
     public void triggerEvent(Instruction instruction);
 
     public PTObject getPTObject(Long ID);
+
+    public PTObject getPTObject(UIObject uiObject);
+
+    public void registerUIObject(Long ID, UIObject uiObject);
 }

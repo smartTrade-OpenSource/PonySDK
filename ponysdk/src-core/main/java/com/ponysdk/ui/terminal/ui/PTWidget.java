@@ -51,7 +51,7 @@ public class PTWidget extends PTUIObject {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.Widget());
+        init(create, uiService, new com.google.gwt.user.client.ui.Widget());
     }
 
     @Override

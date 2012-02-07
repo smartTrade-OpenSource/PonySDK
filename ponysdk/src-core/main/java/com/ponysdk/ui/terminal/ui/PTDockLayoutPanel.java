@@ -34,8 +34,9 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTDockLayoutPanel extends PTComplexPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.DockLayoutPanel(Unit.PX));// must be a parametter
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.DockLayoutPanel(Unit.PX));// must be a
+                                                                                            // parametter
     }
 
     @Override
@@ -44,7 +45,7 @@ public class PTDockLayoutPanel extends PTComplexPanel {
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
         final com.google.gwt.user.client.ui.DockLayoutPanel dockLayoutPanel = cast();

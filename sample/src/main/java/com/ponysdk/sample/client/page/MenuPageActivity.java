@@ -23,9 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -33,41 +31,33 @@ import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 
-public class MenuPageActivity extends PageActivity {
+public class MenuPageActivity extends SamplePageActivity {
 
     public MenuPageActivity() {
-        super("Menu", "UI Components");
+        super("MenuBar", "UI Components");
     }
 
     @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
     protected void onFirstShowPage() {
-
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        pageView.getBody().setWidget(verticalPanel);
+        super.onFirstShowPage();
+        final PVerticalPanel panel = new PVerticalPanel();
 
         final PMenuBar menuBar1 = createMenuBar(false);
         final PMenuBar menuBar2 = createMenuBar(true);
         final PMenuBar menuBar3 = createMenuBar(true);
         final PMenuBar menuBar4 = createStyledMenuBar();
 
-        verticalPanel.add(new PLabel("Horizontal Menu Bar [Default Style]"));
-        verticalPanel.add(menuBar1);
-        verticalPanel.add(new PLabel("Vertical Menu Bar [Default Style]"));
-        verticalPanel.add(menuBar2);
-        verticalPanel.add(new PLabel("Vertical Menu Bar [Light Style]"));
+        panel.add(new PLabel("Horizontal Menu Bar [Default Style]"));
+        panel.add(menuBar1);
+        panel.add(new PLabel("Vertical Menu Bar [Default Style]"));
+        panel.add(menuBar2);
+        panel.add(new PLabel("Vertical Menu Bar [Light Style]"));
         menuBar3.addStyleName(PonySDKTheme.MENUBAR_LIGHT);
-        verticalPanel.add(menuBar3);
-        verticalPanel.add(new PLabel("Vertical Menu Bar [Toolbar Style]"));
-        verticalPanel.add(menuBar4);
+        panel.add(menuBar3);
+        panel.add(new PLabel("Vertical Menu Bar [Toolbar Style]"));
+        panel.add(menuBar4);
+
+        examplePanel.setWidget(panel);
     }
 
     private PMenuBar createStyledMenuBar() {
@@ -87,7 +77,7 @@ public class MenuPageActivity extends PageActivity {
         return menuBar;
     }
 
-    private PMenuBar createMenuBar(boolean vertical) {
+    private PMenuBar createMenuBar(final boolean vertical) {
         final PMenuBar menuBar = new PMenuBar();
         final PMenuBar fileBar = new PMenuBar(vertical);
 
@@ -110,8 +100,24 @@ public class MenuPageActivity extends PageActivity {
             }
         });
 
+        final PMenuItem closeItem = new PMenuItem("Close");
+        openItem.setCommand(new PCommand() {
+
+            @Override
+            public void execute() {
+                PNotificationManager.notify("Menu Selection", closeItem.getText());
+            }
+        });
+
         fileBar.addItem(newItem);
         fileBar.addItem(openItem);
+        fileBar.addItem(closeItem);
+        fileBar.addSeparator();
+
+        final PMenuBar recentItem = new PMenuBar();
+
+        fileBar.addItem("Recent", recentItem);
+
         return menuBar;
     }
 }

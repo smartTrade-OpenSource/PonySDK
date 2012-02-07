@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 public abstract class PTUIObject extends PTObject {
@@ -35,9 +36,13 @@ public abstract class PTUIObject extends PTObject {
 
     protected UIObject uiObject;
 
-    protected void init(final UIObject uiObject) {
+    protected void init(final Create create, final UIService uiService, final UIObject uiObject) {
         if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
         this.uiObject = uiObject;
+        if (create != null) {
+            this.objectID = create.getObjectID();
+            uiService.registerUIObject(this.objectID, uiObject);
+        }
     }
 
     public UIObject cast() {
@@ -91,5 +96,4 @@ public abstract class PTUIObject extends PTObject {
         if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject) uiService.getPTObject(objectID)).cast(); }
         throw new IllegalStateException("This object is not an UIObject");
     }
-
 }

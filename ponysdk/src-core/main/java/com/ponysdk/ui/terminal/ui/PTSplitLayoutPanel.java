@@ -29,7 +29,7 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.SplitLayoutPanel());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.SplitLayoutPanel());
     }
 }

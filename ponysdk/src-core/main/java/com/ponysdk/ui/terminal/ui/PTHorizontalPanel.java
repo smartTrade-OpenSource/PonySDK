@@ -38,19 +38,19 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTHorizontalPanel extends PTCellPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.HorizontalPanel());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.HorizontalPanel());
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final int beforeIndex = add.getMainProperty().getIntValue();
         cast().insert(w, beforeIndex);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final com.google.gwt.user.client.ui.HorizontalPanel horizontalPanel = cast();
         final Property property = update.getMainProperty();

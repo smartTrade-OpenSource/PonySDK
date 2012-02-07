@@ -50,7 +50,7 @@ public class PTFileUpload extends PTWidget {
     @Override
     public void create(final Create create, final UIService uiService) {
         wrappedFormPanel = new FormPanel();
-        init(wrappedFormPanel);
+        init(create, uiService, wrappedFormPanel);
 
         wrappedFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         wrappedFormPanel.setMethod(FormPanel.METHOD_POST);
@@ -62,7 +62,7 @@ public class PTFileUpload extends PTWidget {
         wrappedFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
             @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
+            public void onSubmitComplete(final SubmitCompleteEvent event) {
                 final EventInstruction eventInstruction = new EventInstruction(create.getObjectID(), HandlerType.SUBMIT_COMPLETE_HANDLER);
                 uiService.triggerEvent(eventInstruction);
             }
@@ -76,7 +76,7 @@ public class PTFileUpload extends PTWidget {
             fileUpload.addChangeHandler(new ChangeHandler() {
 
                 @Override
-                public void onChange(ChangeEvent event) {
+                public void onChange(final ChangeEvent event) {
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.CHANGE_HANDLER);
                     eventInstruction.setMainPropertyValue(PropertyKey.FILE_NAME, fileUpload.getFilename());
                     uiService.triggerEvent(eventInstruction);
@@ -95,7 +95,7 @@ public class PTFileUpload extends PTWidget {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
         if (PropertyKey.NAME.equals(propertyKey)) {

@@ -40,7 +40,7 @@ public class PTTree extends PTWidget {
     public void create(final Create create, final UIService uiService) {
         final com.google.gwt.user.client.ui.Tree tree = new com.google.gwt.user.client.ui.Tree();
         tree.setAnimationEnabled(true);
-        init(tree);
+        init(create, uiService, tree);
     }
 
     @Override
@@ -52,38 +52,9 @@ public class PTTree extends PTWidget {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
-
-                    String path = "0";
-                    String childPath = "";
-                    final TreeItem selectedTreeItem = event.getSelectedItem();
-                    TreeItem item = selectedTreeItem;
-                    while (item != null) {
-                        final TreeItem parentItem = item.getParentItem();
-                        if (parentItem != null) {
-                            final int childIndex = parentItem.getChildIndex(item);
-                            if (childPath.isEmpty()) {
-                                childPath = String.valueOf(childIndex);
-                            } else {
-                                childPath = childIndex + "." + childPath;
-                            }
-                        } else {
-                            // temp not optimal?
-                            for (int i = 0; i < tree.getItemCount(); i++) {
-                                if (tree.getItem(i).equals(item)) {
-                                    if (childPath.isEmpty()) childPath = i + "";
-                                    else childPath = i + "." + childPath;
-                                    break;
-                                }
-                            }
-                        }
-                        item = parentItem;
-                    }
-                    final int ROOT = 0;
-                    if (!childPath.isEmpty()) {
-                        path = ROOT + "." + childPath;
-                    }
+                    PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, path);
+                    eventInstruction.setMainPropertyValue(PropertyKey.WIDGET, ptObject.getObjectID());
                     uiService.triggerEvent(eventInstruction);
                 }
             });

@@ -31,8 +31,8 @@ public class PTMenuItemSeparator extends PTUIObject {
     private com.google.gwt.user.client.ui.MenuItemSeparator separator;
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(separator = new com.google.gwt.user.client.ui.MenuItemSeparator());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, separator = new com.google.gwt.user.client.ui.MenuItemSeparator());
     }
 
     @Override

@@ -40,7 +40,7 @@ public class PTListBox extends PTFocusWidget {
     public void create(final Create create, final UIService uiService) {
         final boolean multiselect = create.getMainProperty().getBooleanValue();
         final com.google.gwt.user.client.ui.ListBox listBox = new com.google.gwt.user.client.ui.ListBox(multiselect);
-        init(listBox);
+        init(create, uiService, listBox);
     }
 
     @Override

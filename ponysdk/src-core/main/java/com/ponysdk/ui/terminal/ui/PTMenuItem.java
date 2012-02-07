@@ -37,19 +37,19 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTMenuItem extends PTUIObject {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final com.google.gwt.user.client.ui.MenuItem menuItem = new com.google.gwt.user.client.ui.MenuItem("?", (Command) null);
-        init(menuItem);
+        init(create, uiService, menuItem);
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
         final PTMenuBar child = (PTMenuBar) uiService.getPTObject(add.getObjectID());
         cast().setSubMenu(child.cast());
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         final com.google.gwt.user.client.ui.MenuItem menuItem = cast();

@@ -40,19 +40,19 @@ public class PTPopupPanel extends PTSimplePanel {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        init(create, uiService, new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
         final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
         popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
+            public void onClose(final CloseEvent<PopupPanel> event) {
                 uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
             }
         });
     }
 
     @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {
         if (HandlerType.POPUP_POSITION_CALLBACK.equals(addHandler.getType())) {
             final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
 
@@ -73,7 +73,7 @@ public class PTPopupPanel extends PTSimplePanel {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

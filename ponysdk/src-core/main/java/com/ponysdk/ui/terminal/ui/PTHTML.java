@@ -32,12 +32,12 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTHTML extends PTLabel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.HTML());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.HTML());
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
         if (PropertyKey.HTML.equals(propertyKey)) {

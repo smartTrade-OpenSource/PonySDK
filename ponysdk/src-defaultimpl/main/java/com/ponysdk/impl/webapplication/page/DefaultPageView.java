@@ -38,7 +38,7 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
     private final PLabel title = new PLabel();
 
-    public DefaultPageView() {
+    public DefaultPageView(final String pageTitle) {
         setSizeFull();
         addStyleName(PonySDKTheme.PAGE);
         header.addStyleName(PonySDKTheme.PAGE_HEADER);
@@ -47,14 +47,19 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
         header.add(title);
 
+        title.setText(pageTitle);
         title.addStyleName(PonySDKTheme.PAGE_HEADER_CAPTION);
 
         final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
         dockLayoutPanel.setSizeFull();
-        dockLayoutPanel.addNorth(header, 5);
+        dockLayoutPanel.addNorth(header, 40);
         dockLayoutPanel.add(body);
 
         setWidget(dockLayoutPanel);
+    }
+
+    public DefaultPageView() {
+        this("");
     }
 
     @Override
@@ -63,7 +68,7 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
     }
 
     @Override
-    public void setPageTitle(String caption) {
+    public void setPageTitle(final String caption) {
         title.setText(caption);
     }
 
