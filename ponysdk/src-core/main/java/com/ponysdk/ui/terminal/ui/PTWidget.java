@@ -75,7 +75,7 @@ public class PTWidget extends PTUIObject {
 
     @Override
     public Widget asWidget(final Long objectID, final UIService uiService) {
-        final com.ponysdk.ui.terminal.ui.PTWidget child = (com.ponysdk.ui.terminal.ui.PTWidget) uiService.getUIObject(objectID);
+        final com.ponysdk.ui.terminal.ui.PTWidget child = (com.ponysdk.ui.terminal.ui.PTWidget) uiService.getPTObject(objectID);
         return child.cast();
     }
 

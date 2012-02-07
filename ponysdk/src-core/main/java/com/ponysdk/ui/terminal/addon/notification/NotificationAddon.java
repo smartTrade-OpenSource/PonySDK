@@ -27,56 +27,24 @@ import com.ponysdk.ui.terminal.Addon;
 import com.ponysdk.ui.terminal.PonyAddOn;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
-import com.ponysdk.ui.terminal.ui.PTWidget;
 
 @PonyAddOn
-public class NotificationAddon extends PTWidget implements Addon {
+public class NotificationAddon extends Addon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.notification.NotificationAddon";
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         final String caption = create.getMainProperty().getStringProperty(PropertyKey.NOTIFICATION_CAPTION);
         final String message = create.getMainProperty().getStringProperty(PropertyKey.NOTIFICATION_MESSAGE);
         final Notification notification = new Notification(caption, message);
         notification.show();
-
-        init(notification);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public void add(Add add, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public void remove(Remove remove, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public String getSignature() {
+    protected String getSignature() {
         return SIGNATURE;
-    }
-
-    @Override
-    public PTWidget asPTWidget() {
-        return this;
     }
 
 }

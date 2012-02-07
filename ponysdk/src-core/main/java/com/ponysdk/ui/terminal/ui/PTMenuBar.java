@@ -25,7 +25,6 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.UIObject;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
@@ -33,14 +32,14 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTMenuBar extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
         init(new com.google.gwt.user.client.ui.MenuBar(create.getMainProperty().getBooleanProperty(PropertyKey.MENU_BAR_IS_VERTICAL)));
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
 
-        final UIObject child = uiService.getUIObject(add.getObjectID());
+        final PTObject child = uiService.getPTObject(add.getObjectID());
         final com.google.gwt.user.client.ui.MenuBar menuBar = cast();
 
         final Property beforeIndexProperty = add.getMainProperty().getChildProperty(PropertyKey.BEFORE_INDEX);

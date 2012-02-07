@@ -24,10 +24,11 @@
 package com.ponysdk.ui.terminal;
 
 import com.ponysdk.ui.terminal.instruction.Instruction;
+import com.ponysdk.ui.terminal.ui.PTObject;
 
 public interface UIService {
 
     public void triggerEvent(Instruction instruction);
 
-    public UIObject getUIObject(Long ID);
+    public PTObject getPTObject(Long ID);
 }

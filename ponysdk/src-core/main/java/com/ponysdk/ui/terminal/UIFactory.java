@@ -42,6 +42,7 @@ import com.ponysdk.ui.terminal.ui.PTListBox;
 import com.ponysdk.ui.terminal.ui.PTMenuBar;
 import com.ponysdk.ui.terminal.ui.PTMenuItem;
 import com.ponysdk.ui.terminal.ui.PTMenuItemSeparator;
+import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
@@ -63,7 +64,7 @@ import com.ponysdk.ui.terminal.ui.PTVerticalPanel;
 
 public class UIFactory {
 
-    public UIObject newUIObject(final UIService uiService, final Create create) {
+    public PTObject newUIObject(final UIService uiService, final Create create) {
         final WidgetType widgetType = create.getWidgetType();
         switch (widgetType) {
             case BUTTON:

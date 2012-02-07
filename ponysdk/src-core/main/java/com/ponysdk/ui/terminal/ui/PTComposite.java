@@ -33,7 +33,7 @@ public class PTComposite extends PTWidget {
 
     @Override
     public void create(Create create, UIService uiService) {
-        final PTWidget uiObject = (PTWidget) uiService.getUIObject(create.getMainProperty().getChildProperty(PropertyKey.WIDGET).getLongValue());
+        final PTWidget uiObject = (PTWidget) uiService.getPTObject(create.getMainProperty().getChildProperty(PropertyKey.WIDGET).getLongValue());
         init(new MyComposite(uiObject.cast()));
     }
 

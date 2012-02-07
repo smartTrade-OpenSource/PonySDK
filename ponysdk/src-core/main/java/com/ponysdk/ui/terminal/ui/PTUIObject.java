@@ -88,7 +88,8 @@ public abstract class PTUIObject extends PTObject {
     }
 
     public UIObject asWidget(final Long objectID, final UIService uiService) {
-        return (UIObject) uiService.getUIObject(objectID);
+        if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject) uiService.getPTObject(objectID)).cast(); }
+        throw new IllegalStateException("This object is not an UIObject");
     }
 
 }

@@ -30,7 +30,7 @@ public class PTPushButton extends PTCustomButton {
 
     @Override
     public void create(Create create, UIService uiService) {
-        final PTImage image = (PTImage) uiService.getUIObject(create.getMainProperty().getLongValue());
+        final PTImage image = (PTImage) uiService.getPTObject(create.getMainProperty().getLongValue());
         final com.google.gwt.user.client.ui.PushButton pushButton = new com.google.gwt.user.client.ui.PushButton(image.cast());
         init(pushButton);
     }

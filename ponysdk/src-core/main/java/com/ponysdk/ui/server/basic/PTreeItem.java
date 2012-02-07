@@ -14,7 +14,7 @@ public class PTreeItem extends PObject {
 
     private PTree tree;
 
-    private final boolean isRoot;
+    private boolean isRoot = false;
 
     private String html;
 
@@ -69,7 +69,7 @@ public class PTreeItem extends PObject {
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot) {
-            final Add add = new Add(getID(), tree.getID());
+            final Add add = new Add(tree.getID(), getID());
             add.setMainPropertyValue(PropertyKey.ROOT, true);
             getPonySession().stackInstruction(add);
         }

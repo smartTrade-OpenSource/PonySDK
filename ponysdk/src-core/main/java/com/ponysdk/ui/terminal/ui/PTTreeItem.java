@@ -35,7 +35,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTTreeItem extends PTUIObject {
 
-    private boolean isRoot;
+    private boolean isRoot = false;
 
     private Tree tree;
 
@@ -54,12 +54,12 @@ public class PTTreeItem extends PTUIObject {
 
     @Override
     public void add(final Add add, final UIService uiService) {
-        UIObject asWidget = asWidget(add.getParentID(), uiService);
+        UIObject widget = asWidget(add.getObjectID(), uiService);
 
-        if (asWidget instanceof Tree) {
-            this.tree = (Tree) asWidget;
+        if (widget instanceof Tree) {
+            this.tree = (Tree) widget;
         } else {
-            final TreeItem w = (TreeItem) asWidget(add.getObjectID(), uiService);
+            final TreeItem w = (TreeItem) widget;
             int index = add.getMainProperty().getIntValue();
             if (isRoot) {
                 tree.insertItem(index, w);

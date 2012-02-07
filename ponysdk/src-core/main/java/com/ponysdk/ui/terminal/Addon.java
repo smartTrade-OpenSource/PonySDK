@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.terminal;
 
-import com.ponysdk.ui.terminal.ui.IsPTWidget;
+import com.ponysdk.ui.terminal.ui.PTObject;
 
-public interface Addon extends UIObject, IsPTWidget {
+public abstract class Addon extends PTObject {
 
-    String getSignature();
+    protected abstract String getSignature();
 
 }

@@ -44,7 +44,7 @@ public class PTMenuItem extends PTUIObject {
 
     @Override
     public void add(Add add, UIService uiService) {
-        final PTMenuBar child = (PTMenuBar) uiService.getUIObject(add.getObjectID());
+        final PTMenuBar child = (PTMenuBar) uiService.getPTObject(add.getObjectID());
         cast().setSubMenu(child.cast());
     }
 

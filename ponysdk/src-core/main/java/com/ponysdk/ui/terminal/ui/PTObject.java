@@ -31,24 +31,18 @@ import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTObject implements com.ponysdk.ui.terminal.UIObject {
+public class PTObject {
 
-    @Override
-    public void create(Create create, UIService uiService) {}
+    public void create(final Create create, final UIService uiService) {}
 
-    @Override
-    public void update(Update update, UIService uiService) {}
+    public void update(final Update update, final UIService uiService) {}
 
-    @Override
-    public void add(Add add, UIService uiService) {}
+    public void add(final Add add, final UIService uiService) {}
 
-    @Override
-    public void remove(Remove remove, UIService uiService) {}
+    public void remove(final Remove remove, final UIService uiService) {}
 
-    @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {}
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {}
 
-    @Override
-    public void gc(GC gc, UIService uiService) {}
+    public void gc(final GC gc, final UIService uiService) {}
 
 }

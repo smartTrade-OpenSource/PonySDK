@@ -53,6 +53,7 @@ public class TreePageActivity extends SamplePageActivity {
         panel.add(new PLabel("Static Tree:"));
 
         final PTree tree = new PTree();
+        tree.setWidth("300px");
 
         PTreeItem firstItem = new PTreeItem("First item");
 

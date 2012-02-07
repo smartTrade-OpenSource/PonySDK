@@ -31,42 +31,35 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
-import com.ponysdk.ui.terminal.ui.PTSimplePanel;
-import com.ponysdk.ui.terminal.ui.PTWidget;
 
 @PonyAddOn
-public class PCFloatablePanelAddon extends PTSimplePanel implements Addon {
+public class PCFloatablePanelAddon extends Addon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon";
 
     private PCFloatablePanel floatablePanel;
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(floatablePanel = new PCFloatablePanel());
+    public void create(final Create create, final UIService uiService) {
+        this.floatablePanel = new PCFloatablePanel();
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         for (final Property property : mainProperty.getChildProperties().values()) {
             final PropertyKey propertyKey = property.getKey();
             if (PropertyKey.REFERENCE_SCROLL_PANEL.equals(propertyKey)) {
-                final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getUIObject(property.getLongValue());
+                final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getPTObject(property.getLongValue());
                 floatablePanel.setScrollPanel(scrollPanel.cast());
             }
         }
     }
 
     @Override
-    public String getSignature() {
+    protected String getSignature() {
         return SIGNATURE;
-    }
-
-    @Override
-    public PTWidget asPTWidget() {
-        return this;
     }
 
 }
