@@ -23,20 +23,33 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
+import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
+import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Remove;
 
-public class PStackLayoutPanel extends PComposite implements HasPWidgets {
+public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer> {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
-    public PStackLayoutPanel(Unit unit) {
+    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
+
+    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
+
+    public PStackLayoutPanel(final Unit unit) {
         super();
         initWidget(new PLayoutPanel());
         create.getMainProperty().setProperty(PropertyKey.UNIT, unit.toString());
@@ -47,7 +60,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
         return WidgetType.STACKLAYOUT_PANEL;
     }
 
-    public void add(final PWidget child, String header, boolean asHtml, double headerSize) {
+    public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
         child.removeFromParent();
         children.add(child);
         adopt(child);
@@ -59,7 +72,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
     }
 
     @Override
-    public boolean remove(PWidget child) {
+    public boolean remove(final PWidget child) {
         if (child.getParent() != this) { return false; }
         orphan(child);
 
@@ -76,12 +89,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
     }
 
     @Override
-    public void add(PWidget w) {
+    public void add(final PWidget w) {
         assert false : "Single-argument add() is not supported for this widget";
     }
 
     @Override
-    public void add(IsPWidget w) {
+    public void add(final IsPWidget w) {
         add(w.asWidget());
     }
 
@@ -94,14 +107,48 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets {
         }
     }
 
-    private void adopt(PWidget child) {
+    private void adopt(final PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
     }
 
-    private void orphan(PWidget child) {
+    private void orphan(final PWidget child) {
         assert (child.getParent() == this);
         child.setParent(null);
+    }
+
+    @Override
+    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+        beforeSelectionHandlers.add(handler);
+        final AddHandler addHandler = new AddHandler(getID(), HandlerType.BEFORE_SELECTION_HANDLER);
+        getPonySession().stackInstruction(addHandler);
+    }
+
+    @Override
+    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+        beforeSelectionHandlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PBeforeSelectionHandler<Integer>> getBeforeSelectionHandlers() {
+        return Collections.unmodifiableCollection(beforeSelectionHandlers);
+    }
+
+    @Override
+    public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
+        selectionHandlers.add(handler);
+        final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
+        getPonySession().stackInstruction(addHandler);
+    }
+
+    @Override
+    public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
+        selectionHandlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PSelectionHandler<Integer>> getSelectionHandlers() {
+        return Collections.unmodifiableCollection(selectionHandlers);
     }
 
 }

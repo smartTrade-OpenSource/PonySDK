@@ -23,7 +23,9 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.addon.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PImage;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -39,7 +42,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
-public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
+public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
     private final Map<String, PAnchor> anchorByName = new LinkedHashMap<String, PAnchor>();
 
@@ -47,13 +50,29 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
 
     private final double headerWidth = 2;// em
 
-    private PSelectionHandler<String> handler;
-
     private PAnchor selectedItem;
 
+    private final PStackLayoutPanel layoutPanel;
+
+    private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
+
     public StackLayoutMenuView() {
-        super(Unit.EM);
+        layoutPanel = new PStackLayoutPanel(Unit.EM);
+        setWidget(layoutPanel);
         setSizeFull();
+        layoutPanel.setSizeFull();
+
+        layoutPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
+
+            @Override
+            public void onSelection(final PSelectionEvent<Integer> event) {
+                // PSelectionEvent<String> e = new PSelectionEvent<String>(StackLayoutMenuView.this, );
+                // for (PSelectionHandler<String> handler : selectionHandlers) {
+                // handler.onSelection(e);
+                // }
+            }
+        });
+
     }
 
     @Override
@@ -84,7 +103,7 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
                 categoryPanel.setWidth("100%");
                 categoriesByName.put(currentCategory, categoryPanel);
                 if (i == 0) {
-                    add(categoryPanel, currentCategoryHeader, true, headerWidth);
+                    layoutPanel.add(categoryPanel, currentCategoryHeader, true, headerWidth);
                 } else {
                     final String containingCategory = getCategory(split, i - 1);
                     final PVerticalPanel containingPanel = categoriesByName.get(containingCategory);
@@ -114,17 +133,14 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
                 @Override
                 public void onClick(final PClickEvent clickEvent) {
                     final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
-                    handler.onSelection(event);
+                    for (PSelectionHandler<String> handler : selectionHandlers) {
+                        handler.onSelection(event);
+                    }
                 }
             });
             categoryPanel.add(item);
             anchorByName.put(caption, item);
         }
-    }
-
-    @Override
-    public void addSelectionHandler(final PSelectionHandler<String> handler) {
-        this.handler = handler;
     }
 
     @Override
@@ -138,4 +154,20 @@ public class StackLayoutMenuView extends PStackLayoutPanel implements MenuView {
             // tree.setSelectedItem(anchorByName.get(category));
         }
     }
+
+    @Override
+    public void addSelectionHandler(final PSelectionHandler<String> handler) {
+        selectionHandlers.add(handler);
+    }
+
+    @Override
+    public void removeSelectionHandler(final PSelectionHandler<String> handler) {
+        selectionHandlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PSelectionHandler<String>> getSelectionHandlers() {
+        return selectionHandlers;
+    }
+
 }

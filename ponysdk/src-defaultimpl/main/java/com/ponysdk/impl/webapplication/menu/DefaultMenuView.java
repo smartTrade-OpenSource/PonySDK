@@ -13,22 +13,25 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTree;
 import com.ponysdk.ui.server.basic.PTreeItem;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
-public class DefaultMenuView extends PSimplePanel implements MenuView {
+public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
     private final Map<String, PTreeItem> itemsByName = new LinkedHashMap<String, PTreeItem>();
 
     private final PTree tree;
 
-    private PSelectionHandler<String> handler;
+    private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
 
     public DefaultMenuView() {
         tree = new PTree();
@@ -39,9 +42,10 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
 
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                // final PSelectionEvent<String> e = new PSelectionEvent<String>(this,
-                // event.getSelectedItem().getText());
-                // handler.onSelection(e);
+                final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getHtml());
+                for (PSelectionHandler<String> handler : selectionHandlers) {
+                    handler.onSelection(e);
+                }
             }
         });
     }
@@ -81,7 +85,17 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
 
     @Override
     public void addSelectionHandler(final PSelectionHandler<String> handler) {
-        this.handler = handler;
+        selectionHandlers.add(handler);
+    }
+
+    @Override
+    public void removeSelectionHandler(final PSelectionHandler<String> handler) {
+        selectionHandlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PSelectionHandler<String>> getSelectionHandlers() {
+        return selectionHandlers;
     }
 
 }

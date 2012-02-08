@@ -24,11 +24,19 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
+import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Remove;
 
 public class PTStackLayoutPanel extends PTResizeComposite {
@@ -36,7 +44,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
     @Override
     public void create(final Create create, final UIService uiService) {
         final Unit unit = Unit.valueOf(create.getMainProperty().getStringProperty(PropertyKey.UNIT));
-        final com.google.gwt.user.client.ui.StackLayoutPanel stackLayoutPanel = new com.google.gwt.user.client.ui.StackLayoutPanel(unit);
+        final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(unit);
         init(create, uiService, stackLayoutPanel);
     }
 
@@ -45,7 +53,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         super.add(add, uiService);
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.StackLayoutPanel stackLayoutPanel = cast();
+        final StackLayoutPanel stackLayoutPanel = cast();
 
         final String header = add.getMainProperty().getStringProperty(PropertyKey.HTML);
         final double headerSize = add.getMainProperty().getDoubleProperty(PropertyKey.SIZE);
@@ -53,13 +61,46 @@ public class PTStackLayoutPanel extends PTResizeComposite {
     }
 
     @Override
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {
+
+        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
+            final StackLayoutPanel stackLayoutPanel = cast();
+            stackLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+
+                @Override
+                public void onSelection(final SelectionEvent<Integer> event) {
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getSelectedItem());
+                    uiService.triggerEvent(eventInstruction);
+                }
+            });
+            return;
+        }
+
+        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getType())) {
+            cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+
+                @Override
+                public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BEFORE_SELECTION_HANDLER);
+                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getItem());
+                    uiService.triggerEvent(eventInstruction);
+                }
+            });
+            return;
+        }
+
+        super.addHandler(addHandler, uiService);
+    }
+
+    @Override
     public void remove(final Remove remove, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
+        final Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.StackLayoutPanel cast() {
-        return (com.google.gwt.user.client.ui.StackLayoutPanel) uiObject;
+    public StackLayoutPanel cast() {
+        return (StackLayoutPanel) uiObject;
     }
 }

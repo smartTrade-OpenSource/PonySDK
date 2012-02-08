@@ -26,7 +26,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	</bean>
 
 	<bean name="menuView" class="com.ponysdk.impl.webapplication.menu.StackLayoutMenuView" />
-	<!-- <bean name="menuView" class="com.ponysdk.impl.webapplication.menu.DefaultMenuView" /> -->
+<!-- 	<bean name="menuView" class="com.ponysdk.impl.webapplication.menu.DefaultMenuView" /> -->
 	<bean name="menuActivity" class="com.ponysdk.impl.webapplication.menu.MenuActivity">
 		<property name="menuView" ref="menuView" />
 		<property name="pageProvider" ref="pageProvider" />
@@ -67,6 +67,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TreePageActivity" />
+	<bean class="com.ponysdk.sample.client.page.MenuBarPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
@@ -75,10 +77,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.EventPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.MenuPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.OraclePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.CookiePageActivity" />

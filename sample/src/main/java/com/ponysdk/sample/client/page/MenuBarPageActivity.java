@@ -31,21 +31,22 @@ import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 
-public class MenuPageActivity extends SamplePageActivity {
+public class MenuBarPageActivity extends SamplePageActivity {
 
-    public MenuPageActivity() {
-        super("MenuBar", "UI Components");
+    public MenuBarPageActivity() {
+        super("MenuBar", "Lists and Menus");
     }
 
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
+
         final PVerticalPanel panel = new PVerticalPanel();
 
         final PMenuBar menuBar1 = createMenuBar(false);
         final PMenuBar menuBar2 = createMenuBar(true);
         final PMenuBar menuBar3 = createMenuBar(true);
-        final PMenuBar menuBar4 = createStyledMenuBar();
+        final PMenuBar menuBar4 = createMenuBar(true);
 
         panel.add(new PLabel("Horizontal Menu Bar [Default Style]"));
         panel.add(menuBar1);
@@ -57,24 +58,9 @@ public class MenuPageActivity extends SamplePageActivity {
         panel.add(new PLabel("Vertical Menu Bar [Toolbar Style]"));
         panel.add(menuBar4);
 
+        menuBar4.setStyleName("pony-ActionToolbar");
+
         examplePanel.setWidget(panel);
-    }
-
-    private PMenuBar createStyledMenuBar() {
-        final PMenuBar menuBar = new PMenuBar();
-        menuBar.setStyleName("pony-ActionToolbar");
-
-        menuBar.addItem("Refresh");
-
-        final PMenuBar exportMenuBar = new PMenuBar(true);
-        exportMenuBar.addItem(new PMenuItem("CSV"));
-        exportMenuBar.addItem(new PMenuItem("PDF"));
-        exportMenuBar.addItem(new PMenuItem("XML"));
-        menuBar.addItem("Export", exportMenuBar);
-
-        menuBar.addItem("Reload");
-
-        return menuBar;
     }
 
     private PMenuBar createMenuBar(final boolean vertical) {
@@ -114,9 +100,30 @@ public class MenuPageActivity extends SamplePageActivity {
         fileBar.addItem(closeItem);
         fileBar.addSeparator();
 
-        final PMenuBar recentItem = new PMenuBar();
+        final PMenuBar recentItem = new PMenuBar(vertical);
 
         fileBar.addItem("Recent", recentItem);
+
+        final PMenuItem recent1 = new PMenuItem("recent1");
+        recent1.setCommand(new PCommand() {
+
+            @Override
+            public void execute() {
+                PNotificationManager.notify("Menu Selection", recent1.getText());
+            }
+        });
+        final PMenuItem recent2 = new PMenuItem("recent2");
+        recent2.setCommand(new PCommand() {
+
+            @Override
+            public void execute() {
+                PNotificationManager.notify("Menu Selection", recent2.getText());
+            }
+        });
+
+        recentItem.addItem(recent1);
+        recentItem.addSeparator();
+        recentItem.addItem(recent2);
 
         return menuBar;
     }

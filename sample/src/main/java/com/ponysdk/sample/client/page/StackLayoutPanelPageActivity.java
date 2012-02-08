@@ -24,77 +24,63 @@
 package com.ponysdk.sample.client.page;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.addon.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class StackLayoutPanelPageActivity extends PageActivity {
-
-    private PVerticalPanel verticalPanel;
+public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
     private final PVerticalPanel header1Child = new PVerticalPanel();;
 
     private final PVerticalPanel header2Child = new PVerticalPanel();;
 
     public StackLayoutPanelPageActivity() {
-        super("Stack Layout Panel", "Basics UI Components");
+        super("Stack Layout Panel", "Lists and Menus");
     }
-
-    @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(Place place) {
-        pageView.getBody().setWidget(verticalPanel);
-    }
-
-    @Override
-    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-        verticalPanel = new PVerticalPanel();
+        PVerticalPanel panel = new PVerticalPanel();
 
-        // stack layout
-        verticalPanel.add(new PLabel("StackLayout: "));
+        panel.add(new PLabel("StackLayout: "));
+
         final PStackLayoutPanel stackLayoutPanel = new PStackLayoutPanel(Unit.PX);
+
+        stackLayoutPanel.setStyleProperty("border", "1px solid #CCC");
+
         stackLayoutPanel.setWidth("200px");
         stackLayoutPanel.setHeight("400px");
         stackLayoutPanel.add(getHeader1Child(), "Header 1", true, 30);
         stackLayoutPanel.add(getHeader2Child(), "Header 2", true, 30);
-        verticalPanel.add(stackLayoutPanel);
 
-        // disclosure panel
-        verticalPanel.add(new PLabel("Disclosure: "));
-        final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details", new PImage("images/treeRightTriangleBlack.png"), new PImage("images/treeDownTriangleBlack.png"));
-        disclosurePanel.setContent(getDisclosurePanelContent());
-        verticalPanel.add(disclosurePanel);
+        panel.add(stackLayoutPanel);
+        //
+        // // disclosure panel
+        // panel.add(new PLabel("Disclosure: "));
+        // final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details", new
+        // PImage("images/treeRightTriangleBlack.png"), new PImage("images/treeDownTriangleBlack.png"));
+        // disclosurePanel.setContent(getDisclosurePanelContent());
+        // panel.add(disclosurePanel);
+        //
+        // final PButton button = new PButton("add item");
+        // button.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent clickEvent) {
+        // header1Child.add(new PAnchor("Element at " + System.currentTimeMillis()));
+        // }
+        // });
+        //
+        // panel.add(button);
 
-        final PButton button = new PButton("add item");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                header1Child.add(new PAnchor("Element at " + System.currentTimeMillis()));
-            }
-        });
-
-        verticalPanel.add(button);
-
-        pageView.getBody().setWidget(verticalPanel);
+        examplePanel.setWidget(panel);
     }
 
     private PWidget getHeader1Child() {
