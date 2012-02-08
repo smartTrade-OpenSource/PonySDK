@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import com.ponysdk.ui.terminal.instruction.Instruction;
  */
 @RemoteServiceRelativePath("p")
 public interface PonyEngineService extends RemoteService {
+
     PonySessionContext startApplication(String historyToken, Map<String, String> cookies) throws Exception;
 
     List<Instruction> fireInstructions(long key, List<Instruction> instructions) throws Exception;

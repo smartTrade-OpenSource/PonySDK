@@ -43,6 +43,7 @@ import com.ponysdk.ui.terminal.ui.PTListBox;
 import com.ponysdk.ui.terminal.ui.PTMenuBar;
 import com.ponysdk.ui.terminal.ui.PTMenuItem;
 import com.ponysdk.ui.terminal.ui.PTMenuItemSeparator;
+import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
@@ -53,16 +54,18 @@ import com.ponysdk.ui.terminal.ui.PTSimpleLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
 import com.ponysdk.ui.terminal.ui.PTSplitLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTStackLayoutPanel;
+import com.ponysdk.ui.terminal.ui.PTSuggestBox;
 import com.ponysdk.ui.terminal.ui.PTTabLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTTextArea;
 import com.ponysdk.ui.terminal.ui.PTTextBox;
 import com.ponysdk.ui.terminal.ui.PTTimer;
 import com.ponysdk.ui.terminal.ui.PTTree;
+import com.ponysdk.ui.terminal.ui.PTTreeItem;
 import com.ponysdk.ui.terminal.ui.PTVerticalPanel;
 
 public class UIFactory {
 
-    public UIObject newUIObject(final UIService uiService, final Create create) {
+    public PTObject newUIObject(final UIService uiService, final Create create) {
         final WidgetType widgetType = create.getWidgetType();
         switch (widgetType) {
             case BUTTON:
@@ -117,6 +120,8 @@ public class UIFactory {
                 return new PTFileUpload();
             case TREE:
                 return new PTTree();
+            case TREE_ITEM:
+                return new PTTreeItem();
             case MENU_BAR:
                 return new PTMenuBar();
             case MENU_ITEM:
@@ -135,6 +140,8 @@ public class UIFactory {
                 return new PTRichTextArea();
             case FLOW_PANEL:
                 return new PTFlowPanel();
+            case SUGGESTBOX:
+                return new PTSuggestBox();
             default:
                 Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
                 return null;

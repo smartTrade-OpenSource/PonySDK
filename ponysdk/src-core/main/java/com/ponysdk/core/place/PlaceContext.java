@@ -1,11 +1,15 @@
+
 package com.ponysdk.core.place;
 
 import com.ponysdk.core.activity.Activity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class PlaceContext {
+
     private Place place = Place.NOWHERE;
+
     private Activity activity;
+
     private PAcceptsOneWidget world;
 
     public Place getPlace() {

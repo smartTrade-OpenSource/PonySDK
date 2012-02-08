@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -30,12 +31,17 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
 public class FormFieldComponent<W extends PWidget> implements IsPWidget {
+
     private final PVerticalPanel mainLayout;
+
     private final PHorizontalPanel headerLayout;
+
     private final W input;
 
     private final PLabel requiredLabel = new PLabel("*");
+
     private final PLabel captionLabel = new PLabel();
+
     private final PImage errorImage = new PImage("images/error.jpg");
 
     public FormFieldComponent(final W w) {

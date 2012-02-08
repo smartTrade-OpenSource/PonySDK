@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
@@ -29,12 +30,12 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTSimplePanel extends PTPanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.SimplePanel());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.SimplePanel());
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
         final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
         cast().setWidget(w);
     }

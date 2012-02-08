@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.datamodel;
 
 import java.io.Serializable;
@@ -29,15 +30,17 @@ import com.ponysdk.core.query.CriterionField;
 
 public class ExportableData<T> implements Serializable {
 
-	private static final long serialVersionUID = -1206357980776899604L;
-	
-	private T data;
+    private static final long serialVersionUID = -1206357980776899604L;
+
+    private T data;
+
     private List<CriterionField> criterian;
+
     private String dateFormat;
+
     private String timezone;
 
-    public ExportableData() {
-    }
+    public ExportableData() {}
 
     public T getData() {
         return data;

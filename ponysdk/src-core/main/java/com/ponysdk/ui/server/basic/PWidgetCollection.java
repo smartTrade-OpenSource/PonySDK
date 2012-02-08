@@ -45,7 +45,9 @@ public class PWidgetCollection implements Iterable<PWidget> {
     private static final int INITIAL_SIZE = 4;
 
     private PWidget[] array;
+
     private final HasPWidgets parent;
+
     private int size;
 
     public PWidgetCollection(final HasPWidgets parent) {

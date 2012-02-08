@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class MoveColumnDescriptorEvent extends SystemEvent<MoveColumnDescriptorH
     public static final Type<MoveColumnDescriptorHandler> TYPE = new Type<MoveColumnDescriptorHandler>();
 
     private final List<String> columnOrder;
+
     private final String tableName;
 
     public MoveColumnDescriptorEvent(Object sourceComponent, List<String> columnOrder, String tableName) {

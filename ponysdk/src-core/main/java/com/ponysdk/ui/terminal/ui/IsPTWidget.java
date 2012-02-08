@@ -1,5 +1,5 @@
-package com.ponysdk.ui.terminal.ui;
 
+package com.ponysdk.ui.terminal.ui;
 
 public interface IsPTWidget {
 

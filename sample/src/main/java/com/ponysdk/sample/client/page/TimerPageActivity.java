@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -37,6 +38,7 @@ public class TimerPageActivity extends PageActivity {
     protected long time = 0;
 
     protected PTimer currentTimer;
+
     protected PTimer timer;
 
     private PVerticalPanel verticalPanel;
@@ -46,12 +48,10 @@ public class TimerPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onShowPage(Place place) {
@@ -60,7 +60,7 @@ public class TimerPageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
-        
+
         verticalPanel = new PVerticalPanel();
         final PLabel label = new PLabel("0");
         verticalPanel.add(label);
@@ -69,6 +69,7 @@ public class TimerPageActivity extends PageActivity {
 
         final PButton scheduleRepeatingButton = new PButton("Schedule repeating");
         scheduleRepeatingButton.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 if (currentTimer != null) {
@@ -87,7 +88,7 @@ public class TimerPageActivity extends PageActivity {
         });
         verticalPanel.add(textBox);
         verticalPanel.add(scheduleRepeatingButton);
-        
+
         timer = new PTimer() {
 
             @Override
@@ -96,7 +97,7 @@ public class TimerPageActivity extends PageActivity {
                 label.setText("Timer executed" + time);
             }
         };
-        
+
         PButton scheduleButton = new PButton("Schedule");
         scheduleButton.addClickHandler(new PClickHandler() {
 

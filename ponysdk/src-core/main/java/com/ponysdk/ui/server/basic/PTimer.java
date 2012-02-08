@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
@@ -42,7 +43,7 @@ public abstract class PTimer extends PObject {
         update.setMainPropertyValue(PropertyKey.REPEATING_DELAY, delayMillis);
         PonySession.getCurrent().stackInstruction(update);
     }
-    
+
     public void schedule(int delayMillis) {
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.DELAY, delayMillis);

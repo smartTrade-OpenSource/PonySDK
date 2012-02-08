@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.notification;
 
 import java.text.DateFormat;
@@ -40,7 +41,9 @@ public class LogsListPanel extends PScrollPanel {
     private static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     protected PVerticalPanel content = new PVerticalPanel();;
+
     protected PVerticalPanel logsPanel = new PVerticalPanel();
+
     protected PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     public LogsListPanel(String caption) {
@@ -64,6 +67,7 @@ public class LogsListPanel extends PScrollPanel {
         final PAnchor clearLogs = new PAnchor("Clear logs");
 
         clearLogs.addClickHandler(new PClickHandler() {
+
             @Override
             public void onClick(PClickEvent clickEvent) {
                 logsPanel.clear();

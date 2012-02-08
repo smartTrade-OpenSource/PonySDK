@@ -48,12 +48,12 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     private Widget tabWidget = null;
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.TabLayoutPanel(2, Unit.EM));
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.TabLayoutPanel(2, Unit.EM));
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
         final com.google.gwt.user.client.ui.TabLayoutPanel tabLayoutPanel = cast();
@@ -80,7 +80,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
             tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
-                public void onSelection(SelectionEvent<Integer> event) {
+                public void onSelection(final SelectionEvent<Integer> event) {
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, tabLayoutPanel.getSelectedIndex());
                     uiService.triggerEvent(eventInstruction);
@@ -93,7 +93,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
             cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
-                public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+                public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BEFORE_SELECTION_HANDLER);
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getItem());
                     uiService.triggerEvent(eventInstruction);
@@ -106,13 +106,13 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     }
 
     @Override
-    public void remove(Remove remove, UIService uiService) {
+    public void remove(final Remove remove, final UIService uiService) {
         final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

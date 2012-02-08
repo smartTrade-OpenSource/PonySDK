@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
@@ -48,8 +49,8 @@ public interface ComplexListView extends SimpleListView {
 
     public PAcceptsOneWidget getPagingLayout();
 
-	PSimplePanel getPreferencesLayout();
+    PSimplePanel getPreferencesLayout();
 
-	public void updateView();
+    public void updateView();
 
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
@@ -29,6 +30,7 @@ public class RowInsertedEvent extends SystemEvent<RowInsertedHandler> {
     public static final Type<RowInsertedHandler> TYPE = new Type<RowInsertedHandler>();
 
     public int insertedRowCount;
+
     public int row;
 
     public RowInsertedEvent(Object sourceComponent) {

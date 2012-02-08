@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import java.util.List;
@@ -28,9 +29,10 @@ import com.ponysdk.core.event.SystemEvent;
 
 public class ColumnDescriptorMovedEvent extends SystemEvent<ColumnDescriptorMovedHandler> {
 
-	public static final Type<ColumnDescriptorMovedHandler> TYPE = new Type<ColumnDescriptorMovedHandler>();
+    public static final Type<ColumnDescriptorMovedHandler> TYPE = new Type<ColumnDescriptorMovedHandler>();
 
     private final List<String> columnOrder;
+
     private final String tableName;
 
     public ColumnDescriptorMovedEvent(Object sourceComponent, List<String> columnOrder, String tableName) {
@@ -40,12 +42,12 @@ public class ColumnDescriptorMovedEvent extends SystemEvent<ColumnDescriptorMove
     }
 
     @Override
-	protected void dispatch(ColumnDescriptorMovedHandler handler) {
-		handler.onColumnMoved(this);
+    protected void dispatch(ColumnDescriptorMovedHandler handler) {
+        handler.onColumnMoved(this);
     }
 
     @Override
-	public Type<ColumnDescriptorMovedHandler> getAssociatedType() {
+    public Type<ColumnDescriptorMovedHandler> getAssociatedType() {
         return TYPE;
     }
 

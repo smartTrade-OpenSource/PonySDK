@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.header;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -33,6 +34,7 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class DefaultHeaderView extends PSimplePanel implements HeaderView {
 
     private final PHorizontalPanel gridLayout = new PHorizontalPanel();
+
     private final PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     public DefaultHeaderView(String title) {

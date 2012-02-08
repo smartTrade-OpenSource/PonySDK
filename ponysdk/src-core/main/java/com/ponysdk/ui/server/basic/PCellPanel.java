@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.Property;
@@ -31,6 +32,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public abstract class PCellPanel extends PComplexPanel {
 
     private int borderWidth;
+
     private int spacing;
 
     public void setBorderWidth(int width) {

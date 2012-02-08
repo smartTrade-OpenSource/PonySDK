@@ -10,24 +10,28 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
  * implied. See the License for the specific language governing permissions and limitations under the License.
  */
+
 package com.ponysdk.impl.webapplication.menu;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTree;
 import com.ponysdk.ui.server.basic.PTreeItem;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
-public class DefaultMenuView extends PSimplePanel implements MenuView {
+public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
     private final Map<String, PTreeItem> itemsByName = new LinkedHashMap<String, PTreeItem>();
 
     private final PTree tree;
 
-    private PSelectionHandler<String> handler;
+    private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
 
     public DefaultMenuView() {
         tree = new PTree();
@@ -37,20 +41,21 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
         tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
 
             @Override
-            public void onSelection(PSelectionEvent<PTreeItem> event) {
-                final PSelectionEvent<String> e = new PSelectionEvent<String>();
-                e.setSelectedItem(event.getSelectedItem().getText());
-                handler.onSelection(e);
+            public void onSelection(final PSelectionEvent<PTreeItem> event) {
+                final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getHtml());
+                for (PSelectionHandler<String> handler : selectionHandlers) {
+                    handler.onSelection(e);
+                }
             }
         });
     }
 
     @Override
-    public void addCategory(String category) {
+    public void addCategory(final String category) {
         createCategoryItemIfNeeded(category);
     }
 
-    private PTreeItem createCategoryItemIfNeeded(String category) {
+    private PTreeItem createCategoryItemIfNeeded(final String category) {
         PTreeItem categoryItem = itemsByName.get(category);
         if (categoryItem == null) {
             categoryItem = tree.addItem(category);
@@ -60,7 +65,7 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void addItem(String category, String caption) {
+    public void addItem(final String category, final String caption) {
         final PTreeItem categoryItem = createCategoryItemIfNeeded(category);
         if (caption != null) {
             final PTreeItem captionItem = new PTreeItem(caption);
@@ -70,7 +75,7 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void selectItem(String category, String caption) {
+    public void selectItem(final String category, final String caption) {
         if (caption != null) {
             tree.setSelectedItem(itemsByName.get(caption));
         } else {
@@ -79,8 +84,18 @@ public class DefaultMenuView extends PSimplePanel implements MenuView {
     }
 
     @Override
-    public void addSelectionHandler(PSelectionHandler<String> handler) {
-        this.handler = handler;
+    public void addSelectionHandler(final PSelectionHandler<String> handler) {
+        selectionHandlers.add(handler);
+    }
+
+    @Override
+    public void removeSelectionHandler(final PSelectionHandler<String> handler) {
+        selectionHandlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PSelectionHandler<String>> getSelectionHandlers() {
+        return selectionHandlers;
     }
 
 }

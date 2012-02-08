@@ -20,36 +20,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
 import com.ponysdk.ui.server.list.ColumnDescriptorFieldHolder;
 
-public class CustomColumnDescriptorAddedEvent extends
-		SystemEvent<CustomColumnDescriptorAddedHandler> {
+public class CustomColumnDescriptorAddedEvent extends SystemEvent<CustomColumnDescriptorAddedHandler> {
 
-	public static final Type<CustomColumnDescriptorAddedHandler> TYPE = new Type<CustomColumnDescriptorAddedHandler>();
-	private final ColumnDescriptorFieldHolder descriptorHolder;
+    public static final Type<CustomColumnDescriptorAddedHandler> TYPE = new Type<CustomColumnDescriptorAddedHandler>();
 
+    private final ColumnDescriptorFieldHolder descriptorHolder;
 
-	public CustomColumnDescriptorAddedEvent(Object sourceComponent,
-			ColumnDescriptorFieldHolder descriptorHolder) {
+    public CustomColumnDescriptorAddedEvent(Object sourceComponent, ColumnDescriptorFieldHolder descriptorHolder) {
         super(sourceComponent);
-		this.descriptorHolder = descriptorHolder;
+        this.descriptorHolder = descriptorHolder;
     }
 
     @Override
-	protected void dispatch(CustomColumnDescriptorAddedHandler handler) {
-		handler.onCustomColumnDescriptorAdded(this);
+    protected void dispatch(CustomColumnDescriptorAddedHandler handler) {
+        handler.onCustomColumnDescriptorAdded(this);
     }
 
-
     @Override
-	public Type<CustomColumnDescriptorAddedHandler> getAssociatedType() {
+    public Type<CustomColumnDescriptorAddedHandler> getAssociatedType() {
         return TYPE;
     }
 
-	public ColumnDescriptorFieldHolder getDescriptorHolder() {
-		return descriptorHolder;
-	}
+    public ColumnDescriptorFieldHolder getDescriptorHolder() {
+        return descriptorHolder;
+    }
 }

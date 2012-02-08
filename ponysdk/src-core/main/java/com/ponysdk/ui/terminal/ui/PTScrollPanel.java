@@ -34,18 +34,18 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTScrollPanel extends PTSimplePanel {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new PCScrollPanel());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new PCScrollPanel());
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
         final Widget w = asWidget(add.getObjectID(), uiService);
         cast().setWidget(w);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         final com.google.gwt.user.client.ui.ScrollPanel scrollPanel = cast();

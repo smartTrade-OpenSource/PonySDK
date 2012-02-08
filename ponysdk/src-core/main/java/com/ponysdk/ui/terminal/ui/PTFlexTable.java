@@ -33,7 +33,7 @@ public class PTFlexTable extends PTHTMLTable {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.FlexTable());
+        init(create, uiService, new com.google.gwt.user.client.ui.FlexTable());
     }
 
     @Override

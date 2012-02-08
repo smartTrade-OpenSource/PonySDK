@@ -47,15 +47,20 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
     private boolean dragging;
+
     private int dragStartX;
+
     private int dragStartY;
+
     private int clientLeft;
+
     private int windowWidth;
+
     private int clientTop;
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        init(create, uiService, new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
         addCloseHandler(create, uiService);
 
         windowWidth = Window.getClientWidth();

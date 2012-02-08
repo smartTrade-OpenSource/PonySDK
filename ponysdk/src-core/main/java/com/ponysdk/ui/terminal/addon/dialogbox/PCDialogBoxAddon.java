@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.dialogbox;
 
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -34,11 +35,10 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Update;
-import com.ponysdk.ui.terminal.ui.PTDialogBox;
 import com.ponysdk.ui.terminal.ui.PTWidget;
 
 @PonyAddOn
-public class PCDialogBoxAddon extends PTDialogBox implements Addon {
+public class PCDialogBoxAddon extends Addon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.dialogbox.PCDialogBoxAddon";
 
@@ -50,23 +50,22 @@ public class PCDialogBoxAddon extends PTDialogBox implements Addon {
         dialogBox.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
+            public void onClose(final CloseEvent<PopupPanel> event) {
                 uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
             }
         });
-
-        init(dialogBox);
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
         final Property mainProperty = update.getMainProperty();
+
         for (final Property property : mainProperty.getChildProperties().values()) {
             final PropertyKey propertyKey = property.getKey();
             if (PropertyKey.POPUP_TEXT.equals(propertyKey)) {
                 dialogBox.setText(property.getValue());
             } else if (PropertyKey.DIALOG_BOX_CLOSE_WIDGET.equals(propertyKey)) {
-                final PTWidget widget = (PTWidget) uiService.getUIObject(property.getLongValue());
+                final PTWidget widget = (PTWidget) uiService.getPTObject(property.getLongValue());
                 dialogBox.setCloseWidget(widget.cast());
             } else if (PropertyKey.DIALOG_BOX_CLOSABLE.equals(propertyKey)) {
                 dialogBox.setClosable(property.getBooleanValue());
@@ -77,12 +76,7 @@ public class PCDialogBoxAddon extends PTDialogBox implements Addon {
     }
 
     @Override
-    public String getSignature() {
+    protected String getSignature() {
         return SIGNATURE;
-    }
-
-    @Override
-    public PTWidget asPTWidget() {
-        return this;
     }
 }

@@ -36,12 +36,12 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTImage extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.Image());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.Image());
     }
 
     @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {
         if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
             cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
             return;
@@ -51,7 +51,7 @@ public class PTImage extends PTWidget {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

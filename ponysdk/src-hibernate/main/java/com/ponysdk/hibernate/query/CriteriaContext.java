@@ -1,3 +1,4 @@
+
 package com.ponysdk.hibernate.query;
 
 import com.ponysdk.core.query.CriterionField;
@@ -5,6 +6,7 @@ import com.ponysdk.core.query.CriterionField;
 public class CriteriaContext {
 
     private CriterionField criterion;
+
     private OrderingCriteria STCriteria;
 
     public OrderingCriteria getSTCriteria() {

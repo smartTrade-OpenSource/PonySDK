@@ -20,25 +20,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.header;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class HeaderActivity extends AbstractActivity {
-	private HeaderView headerView;
 
-	@Override
-	public void start(PAcceptsOneWidget world) {
-		world.setWidget(headerView);
-	}
+    private HeaderView headerView;
 
-	public void setHeaderView(HeaderView headerView) {
-		this.headerView = headerView;
-	}
+    @Override
+    public void start(PAcceptsOneWidget world) {
+        world.setWidget(headerView);
+    }
 
-	public HeaderView getHeaderView() {
-		return headerView;
-	}
+    public void setHeaderView(HeaderView headerView) {
+        this.headerView = headerView;
+    }
+
+    public HeaderView getHeaderView() {
+        return headerView;
+    }
 
 }

@@ -9,7 +9,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.Event;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
@@ -79,43 +78,39 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private String debugID;
 
-    protected void setMainProperty(Property mainProperty) {
+    protected void setMainProperty(final Property mainProperty) {
         create.setMainProperty(mainProperty);
     }
 
-    public static PWidget asWidgetOrNull(IsPWidget w) {
+    public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
 
-    protected void stackUpdate(PropertyKey key, String value) {
+    protected void stackUpdate(final PropertyKey key, final String value) {
         final Update update = new Update(getID());
         update.setMainPropertyValue(key, value);
         getPonySession().stackInstruction(update);
     }
 
-    public void setWidth(String width) {
+    public void setWidth(final String width) {
         this.width = width;
         stackUpdate(PropertyKey.WIDGET_WIDTH, width);
     }
 
-    public void setHeight(String height) {
+    public void setHeight(final String height) {
         this.height = height;
         stackUpdate(PropertyKey.WIDGET_HEIGHT, height);
-    }
-
-    public PonySession getPonySession() {
-        return PonySession.getCurrent();
     }
 
     public PWidget getParent() {
         return parent;
     }
 
-    public void setParent(PWidget parent) {
+    public void setParent(final PWidget parent) {
         this.parent = parent;
     }
 
-    public void setStyleProperty(String name, String value) {
+    public void setStyleProperty(final String name, final String value) {
         styleProperties.put(name, value);
         final Update update = new Update(ID);
         update.setMainPropertyKey(PropertyKey.STYLE_PROPERTY);
@@ -124,7 +119,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         getPonySession().stackInstruction(update);
     }
 
-    public void setStyleName(String styleName) {
+    public void setStyleName(final String styleName) {
         this.styleName = styleName;
 
         final Update update = new Update(ID);
@@ -132,7 +127,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         getPonySession().stackInstruction(update);
     }
 
-    public void addStyleName(String styleName) {
+    public void addStyleName(final String styleName) {
         if (styleNames.add(styleName)) {
             final Update update = new Update(ID);
             update.setMainPropertyValue(PropertyKey.ADD_STYLE_NAME, styleName);
@@ -140,7 +135,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    public void removeStyleName(String styleName) {
+    public void removeStyleName(final String styleName) {
         if (styleNames.remove(styleName)) {
             final Update update = new Update(ID);
             update.setMainPropertyValue(PropertyKey.REMOVE_STYLE_NAME, styleName);
@@ -148,7 +143,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    public void ensureDebugId(String debugID) {
+    public void ensureDebugId(final String debugID) {
         this.debugID = debugID;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.ENSURE_DEBUG_ID, debugID);
@@ -165,14 +160,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
         setHeight("100%");
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(final boolean visible) {
         this.visible = visible;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.WIDGET_VISIBLE, visible);
         getPonySession().stackInstruction(update);
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.WIDGET_TITLE, title);
@@ -187,7 +182,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(final Object data) {
         this.data = data;
     }
 
@@ -207,7 +202,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     @Override
-    public void onEventInstruction(EventInstruction instruction) {
+    public void onEventInstruction(final EventInstruction instruction) {
 
         if (HandlerType.DOM_HANDLER.equals(instruction.getHandlerType())) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntProperty(PropertyKey.DOM_HANDLER)];
@@ -241,11 +236,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, Object source) {
+    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
         return domHandler.getHandlerSet(type, null);
     }
 
-    public void fireEvent(Event<?> event) {
+    public void fireEvent(final Event<?> event) {
         domHandler.fireEvent(event);
     }
 

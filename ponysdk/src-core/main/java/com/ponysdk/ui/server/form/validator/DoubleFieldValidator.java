@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.validator;
 
 import com.ponysdk.ui.server.form.FormField;
@@ -31,9 +32,7 @@ public class DoubleFieldValidator implements FieldValidator {
     @Override
     public ValidationResult isValid(FormField field) {
         final String value = (String) field.getValue();
-        if (value == null || value.isEmpty()) {
-            return ValidationResult.newOKValidationResult();
-        }
+        if (value == null || value.isEmpty()) { return ValidationResult.newOKValidationResult(); }
         return isADouble(value);
     }
 

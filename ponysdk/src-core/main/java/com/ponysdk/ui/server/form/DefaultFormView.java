@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form;
 
 import java.util.ArrayList;
@@ -38,7 +39,9 @@ public class DefaultFormView extends PSimplePanel implements FormView {
     private static final String CSS_SMARTFORM = "Form";
 
     private final List<FormField> fields = new ArrayList<FormField>();
+
     private final HasPWidgets layout;
+
     private final PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     private boolean isFirstInsertInActionPanel = true;
@@ -73,8 +76,7 @@ public class DefaultFormView extends PSimplePanel implements FormView {
 
     public boolean isValid() {
         for (final FormField field : fields) {
-            if (!field.isValid())
-                return false;
+            if (!field.isValid()) return false;
         }
         return true;
     }

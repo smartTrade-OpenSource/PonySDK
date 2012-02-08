@@ -31,7 +31,7 @@ public class PTDecoratedPopupPanel extends PTPopupPanel {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.DecoratedPopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        init(create, uiService, new com.google.gwt.user.client.ui.DecoratedPopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
         addCloseHandler(create, uiService);
     }
 

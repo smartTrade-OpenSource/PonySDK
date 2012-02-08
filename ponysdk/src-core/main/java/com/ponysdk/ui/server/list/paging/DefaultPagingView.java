@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.paging;
 
 import java.util.HashMap;
@@ -37,11 +38,17 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 public class DefaultPagingView extends PHorizontalPanel implements PagingView {
 
     private final Map<Integer, IsPWidget> items = new HashMap<Integer, IsPWidget>();
+
     private IsPWidget selectedItem;
+
     private PButton startButton;
+
     private PButton previousButton;
+
     private PHorizontalPanel pagesPanel;
+
     private PButton nextButton;
+
     private PButton endButton;
 
     public DefaultPagingView() {
@@ -85,8 +92,7 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     public void setSelectedPage(int pageIndex) {
         final PWidget item = items.get(pageIndex).asWidget();
         item.setStyleName("selected");
-        if (selectedItem != null)
-            selectedItem.asWidget().setStyleName("unselected");
+        if (selectedItem != null) selectedItem.asWidget().setStyleName("unselected");
         selectedItem = item;
     }
 

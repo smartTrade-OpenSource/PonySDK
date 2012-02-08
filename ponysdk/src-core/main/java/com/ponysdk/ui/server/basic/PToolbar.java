@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
@@ -52,7 +53,7 @@ public class PToolbar implements IsPWidget, HasPWidgets {
         panel.add(w);
         panel.setCellHeight(w, "100%");
     }
-    
+
     @Override
     public void add(IsPWidget w) {
         add(w.asWidget());

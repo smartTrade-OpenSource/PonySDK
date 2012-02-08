@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.Property;
@@ -31,12 +32,12 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTLabel extends PTLabelBase<String> {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.Label());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.Label());
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

@@ -20,12 +20,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.exception;
 
 public class PonySessionException extends Exception {
-	private static final long serialVersionUID = -2064816487726122645L;
 
-	public PonySessionException() {
+    private static final long serialVersionUID = -2064816487726122645L;
+
+    public PonySessionException() {
         super();
     }
 

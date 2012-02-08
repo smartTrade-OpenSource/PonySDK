@@ -41,7 +41,9 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
     private final Set<AsyncCallback<T>> callbacks = new HashSet<AsyncCallback<T>>();
 
     private final EventBus eventBus;
+
     private Throwable caught;
+
     private long executionTime = 0;
 
     public AbstractServiceCommand() {

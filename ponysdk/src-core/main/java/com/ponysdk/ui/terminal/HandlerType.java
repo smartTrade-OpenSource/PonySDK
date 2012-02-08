@@ -35,6 +35,8 @@ public class HandlerType implements Serializable {
 
     public static HandlerType SELECTION_HANDLER = new HandlerType("SELECTION_HANDLER");
 
+    public static HandlerType STRING_SELECTION_HANDLER = new HandlerType("STRING_SELECTION_HANDLER");
+
     public static HandlerType STRING_VALUE_CHANGE_HANDLER = new HandlerType("STRING_VALUE_CHANGE_HANDLER");
 
     public static HandlerType BOOLEAN_VALUE_CHANGE_HANDLER = new HandlerType("BOOLEAN_VALUE_CHANGE_HANDLER");
@@ -65,7 +67,7 @@ public class HandlerType implements Serializable {
 
     private String key;
 
-    public HandlerType(String key) {
+    public HandlerType(final String key) {
         this.key = key;
     }
 
@@ -74,7 +76,7 @@ public class HandlerType implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return key.equalsIgnoreCase(((HandlerType) obj).getKey());
     }
 }

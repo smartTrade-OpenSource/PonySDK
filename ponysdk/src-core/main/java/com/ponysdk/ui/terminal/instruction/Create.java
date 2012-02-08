@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 import com.ponysdk.ui.terminal.WidgetType;
@@ -48,12 +49,11 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class Create extends Instruction {
 
-	private static final long serialVersionUID = 7132818214154253221L;
-	
-	private int widgetType;
+    private static final long serialVersionUID = 7132818214154253221L;
 
-    public Create() {
-    }
+    private int widgetType;
+
+    public Create() {}
 
     public Create(long objectID, WidgetType widgetType) {
         super(objectID);
@@ -66,15 +66,11 @@ public class Create extends Instruction {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final Instruction other = (Instruction) obj;
-        if (objectID != other.objectID)
-            return false;
+        if (objectID != other.objectID) return false;
         return true;
     }
 

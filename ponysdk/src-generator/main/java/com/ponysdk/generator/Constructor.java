@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.generator;
 
 import java.util.ArrayList;
@@ -31,8 +32,7 @@ public class Constructor {
 
     private List<Parameter> superConstructorParameters = new ArrayList<Parameter>();
 
-    public Constructor() {
-    }
+    public Constructor() {}
 
     public Constructor(List<Parameter> constructorParameters, List<Parameter> superConstructorParameters) {
         this.constructorParameters = constructorParameters;

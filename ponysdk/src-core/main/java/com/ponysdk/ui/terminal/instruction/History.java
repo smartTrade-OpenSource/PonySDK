@@ -20,16 +20,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 public class History extends Instruction {
 
-	private static final long serialVersionUID = -881219734311901808L;
-	
-	private String token;
+    private static final long serialVersionUID = -881219734311901808L;
 
-    public History() {
-    }
+    private String token;
+
+    public History() {}
 
     public History(String token) {
         this.token = token;

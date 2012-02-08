@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
@@ -24,7 +25,6 @@ public interface PAcceptsOneWidget {
      * 
      * @param w
      *            the widget, or <code>null</code> to remove the widget
-     * 
      * @see PTSimplePanel
      */
     void setWidget(IsPWidget w);

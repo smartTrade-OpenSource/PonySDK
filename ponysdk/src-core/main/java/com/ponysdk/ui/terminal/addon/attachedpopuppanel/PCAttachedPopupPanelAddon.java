@@ -33,12 +33,10 @@ import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
-import com.ponysdk.ui.terminal.ui.PTWidget;
 
 @PonyAddOn
-public class PCAttachedPopupPanelAddon extends PTPopupPanel implements Addon {
+public class PCAttachedPopupPanelAddon extends Addon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon";
 
@@ -46,7 +44,7 @@ public class PCAttachedPopupPanelAddon extends PTPopupPanel implements Addon {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        final PTUIObject attached = (PTUIObject) uiService.getUIObject(create.getMainProperty().getLongProperty(PropertyKey.WIDGET));
+        final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getMainProperty().getLongProperty(PropertyKey.WIDGET));
         final boolean autoHide = create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE);
         popup = new PCAttachedPopupPanel(autoHide, attached.cast());
         popup.show();
@@ -54,22 +52,16 @@ public class PCAttachedPopupPanelAddon extends PTPopupPanel implements Addon {
         popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
-            public void onClose(CloseEvent<PopupPanel> event) {
+            public void onClose(final CloseEvent<PopupPanel> event) {
                 uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
             }
         });
 
-        init(popup);
     }
 
     @Override
-    public String getSignature() {
+    protected String getSignature() {
         return SIGNATURE;
-    }
-
-    @Override
-    public PTWidget asPTWidget() {
-        return this;
     }
 
 }

@@ -43,7 +43,9 @@ public class PCheckBox extends PButtonBase implements PHasValue<Boolean>, PValue
     private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<PValueChangeHandler<Boolean>>();
 
     private boolean value;
+
     private String text;
+
     private String html;
 
     public PCheckBox() {

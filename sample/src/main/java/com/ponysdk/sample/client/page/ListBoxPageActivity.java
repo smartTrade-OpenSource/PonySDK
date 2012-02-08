@@ -24,10 +24,13 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.addon.PNotificationManager;
+import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class ListBoxPageActivity extends SamplePageActivity {
 
@@ -58,6 +61,15 @@ public class ListBoxPageActivity extends SamplePageActivity {
 
         fillSports(listBoxApplied);
 
+        PCheckBox checkBox = new PCheckBox("Enable multi-selection");
+        checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(final PValueChangeEvent<Boolean> event) {
+                listBoxApplied.setMultiSelect(event.getValue());
+            }
+        });
+
         listBoxCategory.addChangeHandler(new PChangeHandler() {
 
             @Override
@@ -77,6 +89,7 @@ public class ListBoxPageActivity extends SamplePageActivity {
         table.setWidget(1, 0, listBoxCategory);
         table.setWidget(0, 1, new PLabel("Select all that apply:"));
         table.setWidget(1, 1, listBoxApplied);
+        table.setWidget(0, 2, checkBox);
 
         examplePanel.setWidget(table);
     }

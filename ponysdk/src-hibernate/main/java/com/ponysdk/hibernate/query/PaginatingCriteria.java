@@ -18,6 +18,7 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query;
 
 import java.util.HashMap;
@@ -43,10 +44,13 @@ import org.hibernate.transform.ResultTransformer;
 public class PaginatingCriteria implements OrderingCriteria {
 
     private final Criteria mainCriteria;
+
     private final Criteria cloneCriteria;
+
     boolean isOrderedByIDProperty = false;
 
     private final String IDProperty;
+
     private Map<String, OrderingCriteria> subCriteriaByAlias = new HashMap<String, OrderingCriteria>();
 
     public PaginatingCriteria(Class<?> clazz, Session session, String IDProperty) {
@@ -117,8 +121,7 @@ public class PaginatingCriteria implements OrderingCriteria {
     @Override
     public OrderingCriteria createAlias(String associationPath, String alias) throws HibernateException {
         final OrderingCriteria orderingCriteria = subCriteriaByAlias.get(alias);
-        if (orderingCriteria != null)
-            return orderingCriteria;
+        if (orderingCriteria != null) return orderingCriteria;
         mainCriteria.createAlias(associationPath, alias);
         cloneCriteria.createAlias(associationPath, alias);
         subCriteriaByAlias.put(alias, this);
@@ -128,8 +131,7 @@ public class PaginatingCriteria implements OrderingCriteria {
     @Override
     public OrderingCriteria createAlias(String arg0, String arg1, int arg2) throws HibernateException {
         final OrderingCriteria orderingCriteria = subCriteriaByAlias.get(arg1);
-        if (orderingCriteria != null)
-            return orderingCriteria;
+        if (orderingCriteria != null) return orderingCriteria;
         mainCriteria.createAlias(arg0, arg1, arg2);
         cloneCriteria.createAlias(arg0, arg1, arg2);
         subCriteriaByAlias.put(arg1, this);
@@ -227,8 +229,7 @@ public class PaginatingCriteria implements OrderingCriteria {
 
     @Override
     public List<?> list() throws HibernateException {
-        if (!isOrderedByIDProperty)
-            mainCriteria.addOrder(Order.asc(IDProperty));
+        if (!isOrderedByIDProperty) mainCriteria.addOrder(Order.asc(IDProperty));
         mainCriteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
         return mainCriteria.list();
     }

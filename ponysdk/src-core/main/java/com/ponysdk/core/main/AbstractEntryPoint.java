@@ -20,8 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.main;
 
-
-public abstract class AbstractEntryPoint implements EntryPoint {
-}
+public abstract class AbstractEntryPoint implements EntryPoint {}

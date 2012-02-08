@@ -43,8 +43,8 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTDateBox extends PTWidget {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.datepicker.client.DateBox());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.datepicker.client.DateBox());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class PTDateBox extends PTWidget {
             dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                 @Override
-                public void onValueChange(ValueChangeEvent<Date> event) {
+                public void onValueChange(final ValueChangeEvent<Date> event) {
                     final String date = dateBox.getTextBox().getText();
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.DATE_VALUE_CHANGE_HANDLER);
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, date);
@@ -66,7 +66,7 @@ public class PTDateBox extends PTWidget {
             textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
-                public void onValueChange(ValueChangeEvent<String> event) {
+                public void onValueChange(final ValueChangeEvent<String> event) {
                     final String date = dateBox.getTextBox().getText();
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.DATE_VALUE_CHANGE_HANDLER);
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, date);
@@ -80,7 +80,7 @@ public class PTDateBox extends PTWidget {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         final com.google.gwt.user.datepicker.client.DateBox dateBox = cast();

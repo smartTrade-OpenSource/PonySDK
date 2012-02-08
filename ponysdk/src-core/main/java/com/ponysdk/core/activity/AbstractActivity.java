@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.activity;
 
 import com.ponysdk.core.PonySession;

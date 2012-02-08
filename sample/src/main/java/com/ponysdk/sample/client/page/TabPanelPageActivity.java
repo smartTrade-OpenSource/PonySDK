@@ -40,6 +40,7 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 public class TabPanelPageActivity extends PageActivity {
 
     private final PTabPanel tabPanel = new PTabPanel();
+
     private int tabCount = 0;
 
     public TabPanelPageActivity() {

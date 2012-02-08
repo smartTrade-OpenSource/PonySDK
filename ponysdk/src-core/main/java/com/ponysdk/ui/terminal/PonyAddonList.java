@@ -20,11 +20,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 import java.util.List;
 
 public class PonyAddonList implements AddonList {
+
     @Override
     public List<AddonFactory> getAddonFactoryList() {
         return null;

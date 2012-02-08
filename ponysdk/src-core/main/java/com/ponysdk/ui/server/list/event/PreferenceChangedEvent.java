@@ -20,26 +20,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
 
-public class PreferenceChangedEvent extends
-		SystemEvent<PreferenceChangedHandler> {
+public class PreferenceChangedEvent extends SystemEvent<PreferenceChangedHandler> {
 
-	public static final Type<PreferenceChangedHandler> TYPE = new Type<PreferenceChangedHandler>();
+    public static final Type<PreferenceChangedHandler> TYPE = new Type<PreferenceChangedHandler>();
 
-	public PreferenceChangedEvent(Object sourceComponent) {
+    public PreferenceChangedEvent(Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-	protected void dispatch(PreferenceChangedHandler handler) {
-		handler.onPreferenceChanged(this);
+    protected void dispatch(PreferenceChangedHandler handler) {
+        handler.onPreferenceChanged(this);
     }
 
     @Override
-	public Type<PreferenceChangedHandler> getAssociatedType() {
+    public Type<PreferenceChangedHandler> getAssociatedType() {
         return TYPE;
     }
 }

@@ -1,3 +1,4 @@
+
 package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.EventHandler;
@@ -5,11 +6,15 @@ import com.ponysdk.core.event.EventHandler;
 public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEvent<H> {
 
     private int clientX;
+
     private int clientY;
 
     private int sourceAbsoluteLeft;
+
     private int sourceAbsoluteTop;
+
     private int sourceOffsetHeight;
+
     private int sourceOffsetWidth;
 
     public PMouseEvent(Object sourceComponent) {

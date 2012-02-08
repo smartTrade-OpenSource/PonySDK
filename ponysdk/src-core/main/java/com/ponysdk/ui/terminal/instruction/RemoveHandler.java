@@ -20,26 +20,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.ponysdk.ui.terminal;
 
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+package com.ponysdk.ui.terminal.instruction;
 
-public interface UIObject {
+import com.ponysdk.ui.terminal.HandlerType;
 
-    void create(Create create, UIService uiService);
+public class RemoveHandler extends Instruction {
 
-    void update(Update update, UIService uiService);
+    private static final long serialVersionUID = -6724549463244696256L;
 
-    void add(Add add, UIService uiService);
+    private HandlerType type;
 
-    void remove(Remove remove, UIService uiService);
+    public RemoveHandler() {}
 
-    void addHandler(AddHandler addHandler, UIService uiService);
+    public RemoveHandler(final long objectID, final HandlerType type) {
+        super(objectID);
+        this.type = type;
+    }
 
-    void gc(GC gc, UIService uiService);
+    public HandlerType getType() {
+        return type;
+    }
+
+    @Override
+    public String toString() {
+        return "RemoveHandler [type=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+    }
+
 }

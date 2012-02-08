@@ -20,9 +20,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic.event;
 
-public class PSelectionEvent<T> {
+import com.ponysdk.core.event.Event;
+
+public class PSelectionEvent<T> extends Event<PSelectionHandler<T>> {
+
+    public static final Type<PSelectionHandler<?>> TYPE = new Type<PSelectionHandler<?>>();
+
+    public PSelectionEvent(final Object source, final T selectedItem) {
+        super(source);
+        this.selectedItem = selectedItem;
+    }
 
     private T selectedItem;
 
@@ -30,7 +40,18 @@ public class PSelectionEvent<T> {
         return selectedItem;
     }
 
-    public void setSelectedItem(T item) {
+    public void setSelectedItem(final T item) {
         this.selectedItem = item;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Type<PSelectionHandler<T>> getAssociatedType() {
+        return (Type) TYPE;
+    }
+
+    @Override
+    protected void dispatch(final PSelectionHandler<T> handler) {
+        handler.onSelection(this);
     }
 }

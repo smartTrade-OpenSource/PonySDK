@@ -20,12 +20,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
+import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.instruction.Instruction;
+import com.ponysdk.ui.terminal.ui.PTObject;
 
 public interface UIService {
+
     public void triggerEvent(Instruction instruction);
 
-    public UIObject getUIObject(Long ID);
+    public PTObject getPTObject(Long ID);
+
+    public PTObject getPTObject(UIObject uiObject);
+
+    public void registerUIObject(Long ID, UIObject uiObject);
 }

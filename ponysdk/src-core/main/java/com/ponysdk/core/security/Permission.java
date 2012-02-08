@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.security;
 
 public class Permission {
@@ -42,18 +43,13 @@ public class Permission {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final Permission other = (Permission) obj;
         if (getKey() == null) {
-            if (other.getKey() != null)
-                return false;
-        } else if (!getKey().equals(other.getKey()))
-            return false;
+            if (other.getKey() != null) return false;
+        } else if (!getKey().equals(other.getKey())) return false;
         return true;
     }
 

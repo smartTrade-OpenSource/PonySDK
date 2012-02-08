@@ -20,11 +20,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.EventHandler;
 
 public interface ColumnDescriptorRemovedHandler extends EventHandler {
 
-	public void onColumnRemoved(ColumnDescriptorRemovedEvent event);
+    public void onColumnRemoved(ColumnDescriptorRemovedEvent event);
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.server.addon.PDialogBox;
@@ -30,11 +31,15 @@ import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 public class PConfirmDialog extends PDialogBox {
 
     public static final String DEFAULT_CAPTION = "Confirm";
+
     public static final String DEFAULT_MESSAGE = "Are You sure?";
+
     public static final String DEFAULT_OK_CAPTION = "Ok";
+
     public static final String DEFAULT_CANCEL_CAPTION = "Cancel";
 
     private PButton okButton;
+
     private PButton cancelButton;
 
     protected PConfirmDialog(boolean closable) {
@@ -79,6 +84,7 @@ public class PConfirmDialog extends PDialogBox {
             final PButton cancelButton = new PButton();
             cancelButton.setText(cancelCaption != null ? cancelCaption : DEFAULT_CANCEL_CAPTION);
             cancelButton.addClickHandler(new PClickHandler() {
+
                 @Override
                 public void onClick(PClickEvent clickEvent) {
                     if (confirmDialogHandler != null) {
@@ -94,13 +100,12 @@ public class PConfirmDialog extends PDialogBox {
             final PButton okButton = new PButton();
             okButton.setText(okCaption != null ? okCaption : DEFAULT_OK_CAPTION);
             okButton.addClickHandler(new PClickHandler() {
+
                 @Override
                 public void onClick(PClickEvent clickEvent) {
                     if (confirmDialogHandler != null) {
-                        if (confirmDialogHandler.onOK(confirmDialog))
-                            confirmDialog.hide();
-                    } else
-                        confirmDialog.hide();
+                        if (confirmDialogHandler.onOK(confirmDialog)) confirmDialog.hide();
+                    } else confirmDialog.hide();
                 }
             });
 

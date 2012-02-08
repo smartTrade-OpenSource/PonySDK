@@ -40,7 +40,7 @@ public class PTListBox extends PTFocusWidget {
     public void create(final Create create, final UIService uiService) {
         final boolean multiselect = create.getMainProperty().getBooleanValue();
         final com.google.gwt.user.client.ui.ListBox listBox = new com.google.gwt.user.client.ui.ListBox(multiselect);
-        init(listBox);
+        init(create, uiService, listBox);
     }
 
     @Override
@@ -78,6 +78,7 @@ public class PTListBox extends PTFocusWidget {
         super.addHandler(addHandler, uiService);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void update(final Update update, final UIService uiService) {
 
@@ -109,6 +110,9 @@ public class PTListBox extends PTFocusWidget {
                 break;
             case VISIBLE_ITEM_COUNT:
                 listBox.setVisibleItemCount(property.getIntValue());
+                break;
+            case MULTISELECT:
+                listBox.setMultipleSelect(property.getBooleanValue());
                 break;
 
             default:

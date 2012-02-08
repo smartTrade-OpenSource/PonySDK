@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 import java.io.Serializable;
@@ -51,16 +52,17 @@ import com.ponysdk.ui.terminal.PropertyKey;
  */
 public class Instruction implements Serializable {
 
-	private static final long serialVersionUID = -8984390049516680155L;
+    private static final long serialVersionUID = -8984390049516680155L;
 
-	protected long objectID;
+    protected long objectID;
+
     protected Long parentID;
+
     protected String addOnSignature;
 
     protected Property property = new Property();
 
-    public Instruction() {
-    }
+    public Instruction() {}
 
     public Instruction(long objectID) {
         this.objectID = objectID;
@@ -126,20 +128,14 @@ public class Instruction implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final Instruction other = (Instruction) obj;
-        if (objectID != other.objectID)
-            return false;
+        if (objectID != other.objectID) return false;
         if (property == null) {
-            if (other.property != null)
-                return false;
-        } else if (!property.equals(other.property))
-            return false;
+            if (other.property != null) return false;
+        } else if (!property.equals(other.property)) return false;
         return true;
     }
 

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.query.memory;
 
 import java.util.ArrayList;
@@ -51,17 +52,22 @@ public final class FilteringTools {
     private static final Logger log = LoggerFactory.getLogger(FilteringTools.class);
 
     private static final String REGEX_END = "$";
+
     private static final String REGEX_MEMORY_SYNTAXE = ".*";
+
     private static final String REGEX_DATABASE_SYNTAXE = "%";
+
     private static final String REGEX_BEGIN = "^";
+
     private static final String EMPTY = "";
+
     private static final String KEYWORD_KEYS = "keys";
+
     private static final String KEYWORD_VALUES = "values";
 
     @SuppressWarnings("unchecked")
     public static <T> List<T> sortByPropertyName(List<T> data, String propertyName) {
-        if (data == null)
-            return null;
+        if (data == null) return null;
         try {
             Collections.sort(data, getPropertyComparator(propertyName));
         } catch (final ClassCastException e) {
@@ -72,8 +78,7 @@ public final class FilteringTools {
 
     @SuppressWarnings("unchecked")
     public static <T> List<T> sortByPropertyName(List<T> data, String propertyName, Comparator<T> comparator) {
-        if (data == null)
-            return null;
+        if (data == null) return null;
         try {
             Collections.sort(data, getPropertyComparator(propertyName, comparator));
         } catch (final ClassCastException e) {
@@ -89,15 +94,13 @@ public final class FilteringTools {
     public static <U> BeanComparator getPropertyComparator(String propertyName, Comparator<U> comparator) {
         return new BeanComparator((null != propertyName) ? propertyName : "name", comparator) {
 
-			private static final long serialVersionUID = 5957817419869265091L;
+            private static final long serialVersionUID = 5957817419869265091L;
 
-			@SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked")
             @Override
             public int compare(Object o1, Object o2) {
                 final String property = getProperty();
-                if (property == null) {
-                    return getComparator().compare(o1, o2);
-                }
+                if (property == null) { return getComparator().compare(o1, o2); }
 
                 try {
                     final Object value1 = getValue(o1, property.split(DOT_REGEX));
@@ -115,14 +118,11 @@ public final class FilteringTools {
     }
 
     public static List<String> filter(List<String> datas, String patternMatching) {
-        if (patternMatching == null || datas == null) {
-            return datas;
-        }
+        if (patternMatching == null || datas == null) { return datas; }
         final List<String> validData = new ArrayList<String>();
         try {
             for (final String data : datas) {
-                if (data == null)
-                    continue;
+                if (data == null) continue;
                 if (data.equalsIgnoreCase(patternMatching)) {
                     validData.add(data);
                     continue;
@@ -152,16 +152,13 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> filter(List<T> datas, String fieldKey, Object value) {
-        if (value == null || datas == null || fieldKey.equals(EMPTY)) {
-            return datas;
-        }
+        if (value == null || datas == null || fieldKey.equals(EMPTY)) { return datas; }
         final List<T> validData = new ArrayList<T>();
         try {
             final String[] pathDetails = fieldKey.split(DOT_REGEX);
             for (final T data : datas) {
                 final Object val = getValue(data, pathDetails);
-                if (val == null)
-                    continue;
+                if (val == null) continue;
                 if (value.equals(val)) {
                     validData.add(data);
                     continue;
@@ -208,11 +205,13 @@ public final class FilteringTools {
     }
 
     /**
-     * Used to Filter a list of data, scoped by a <code>propertyPath</code>, according to a <code>patternName</code>. The property path is used to go as deep as one wants into each object of the
-     * <code>datas</code>. It takes form as a string representing attributes separated by dots, e.g. <code>attribute1.attribute2.attribute3</code><br/>
+     * Used to Filter a list of data, scoped by a <code>propertyPath</code>, according to a
+     * <code>patternName</code>. The property path is used to go as deep as one wants into each object of the
+     * <code>datas</code>. It takes form as a string representing attributes separated by dots, e.g.
+     * <code>attribute1.attribute2.attribute3</code><br/>
      * <br/>
-     * If an attribute is a map, the tokens <code>keys</code> or <code>values</code> can be used to retrieve the corresponding data as a Collection. E.g.
-     * <code>attribute1.mapAttribute.keys.attribute2</code>
+     * If an attribute is a map, the tokens <code>keys</code> or <code>values</code> can be used to retrieve
+     * the corresponding data as a Collection. E.g. <code>attribute1.mapAttribute.keys.attribute2</code>
      * 
      * @param <T>
      *            the type of the data obtained with the propertyPath that is tested against the patternName
@@ -225,16 +224,13 @@ public final class FilteringTools {
      * @return the list of filtered data
      */
     public static <T> List<T> filter(List<T> datas, String propertyPath, String patternName) {
-        if (datas == null || patternName.equals(EMPTY) || propertyPath.equals(EMPTY)) {
-            return datas;
-        }
+        if (datas == null || patternName.equals(EMPTY) || propertyPath.equals(EMPTY)) { return datas; }
         final List<T> validData = new ArrayList<T>();
         try {
             final String[] pathDetails = propertyPath.split(DOT_REGEX);
             for (final T data : datas) {
                 final Object val = getValue(data, pathDetails);
-                if (val == null)
-                    continue;
+                if (val == null) continue;
                 // Now we can filter our data against the pattern
                 final String value = normalisePattern(patternName.trim());
                 final Pattern pattern = Pattern.compile(REGEX_BEGIN + value + REGEX_END, Pattern.CASE_INSENSITIVE);
@@ -282,8 +278,7 @@ public final class FilteringTools {
         int curIndex = 0;
         Object val = null;
         Object tmpVal = PropertyUtils.getProperty(currentData, pathDetails[curIndex]);
-        if (tmpVal == null)
-            return null;
+        if (tmpVal == null) return null;
         curIndex++;
         // We parse the pathDetails array to extract the target object
         while (curIndex <= lastIndex) {
@@ -300,8 +295,7 @@ public final class FilteringTools {
                             value = entry.getValue();
                         }
                     } else {
-                        if (value == null)
-                            value = new ArrayList<Object>();
+                        if (value == null) value = new ArrayList<Object>();
                         ((ArrayList<Object>) value).add(PropertyUtils.getProperty(o, pathDetails[curIndex]));
                     }
                 }
@@ -324,8 +318,7 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> filter(List<T> datas, List<CriterionField> criteria) {
-        if (criteria == null)
-            return datas;
+        if (criteria == null) return datas;
 
         for (final CriterionField criterion : criteria) {
             datas = filter(datas, criterion.getPojoProperty(), criterion.getValue());
@@ -334,8 +327,7 @@ public final class FilteringTools {
     }
 
     public static List<String> filterStringCollection(List<String> datas, List<CriterionField> criteria) {
-        if (criteria == null)
-            return datas;
+        if (criteria == null) return datas;
 
         for (final CriterionField criterion : criteria) {
             datas = filter(datas, (String) criterion.getValue());
@@ -345,8 +337,7 @@ public final class FilteringTools {
 
     // TODO nciaravola must be a criterion into SmartCC Criteria
     public static <T> List<T> filterByDisjunction(List<T> datas, List<CriterionField> criteria) {
-        if (criteria == null || criteria.isEmpty())
-            return datas;
+        if (criteria == null || criteria.isEmpty()) return datas;
 
         final List<T> result = new ArrayList<T>();
         for (final CriterionField criterion : criteria) {
@@ -356,8 +347,7 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> sort(List<T> datas, List<CriterionField> criteria) {
-        if (criteria == null)
-            return datas;
+        if (criteria == null) return datas;
 
         for (final CriterionField criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
@@ -366,23 +356,17 @@ public final class FilteringTools {
 
                     @Override
                     public int compare(T o1, T o2) {
-                        if (o1 == null && o2 == null)
-                            return 0;
+                        if (o1 == null && o2 == null) return 0;
                         if (o1 == null) {
-                            if (sortingType == SortingType.ASCENDING)
-                                return -1;
+                            if (sortingType == SortingType.ASCENDING) return -1;
                             return 1;
                         }
                         if (o2 == null) {
-                            if (sortingType == SortingType.ASCENDING)
-                                return 1;
+                            if (sortingType == SortingType.ASCENDING) return 1;
                             return -1;
                         }
-                        if (o1.equals(o2))
-                            return 0;
-                        if (sortingType == SortingType.ASCENDING) {
-                            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
-                        }
+                        if (o1.equals(o2)) return 0;
+                        if (sortingType == SortingType.ASCENDING) { return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase()); }
                         return o2.toString().toLowerCase().compareTo(o1.toString().toLowerCase());
                     }
 
@@ -394,8 +378,7 @@ public final class FilteringTools {
     }
 
     public static List<String> sortStringCollection(List<String> datas, List<CriterionField> criteria) {
-        if (criteria == null)
-            return datas;
+        if (criteria == null) return datas;
 
         for (final CriterionField criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
@@ -404,23 +387,17 @@ public final class FilteringTools {
 
                     @Override
                     public int compare(String o1, String o2) {
-                        if (o1 == null && o2 == null)
-                            return 0;
+                        if (o1 == null && o2 == null) return 0;
                         if (o1 == null) {
-                            if (sortingType == SortingType.ASCENDING)
-                                return -1;
+                            if (sortingType == SortingType.ASCENDING) return -1;
                             return 1;
                         }
                         if (o2 == null) {
-                            if (sortingType == SortingType.ASCENDING)
-                                return 1;
+                            if (sortingType == SortingType.ASCENDING) return 1;
                             return -1;
                         }
-                        if (o1.equals(o2))
-                            return 0;
-                        if (sortingType == SortingType.ASCENDING) {
-                            return o1.toLowerCase().compareTo(o2.toLowerCase());
-                        }
+                        if (o1.equals(o2)) return 0;
+                        if (sortingType == SortingType.ASCENDING) { return o1.toLowerCase().compareTo(o2.toLowerCase()); }
                         return o2.toLowerCase().compareTo(o1.toLowerCase());
                     }
 
@@ -432,11 +409,8 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> getPage(int pageSize, int page, List<T> result) {
-        if ((result == null) || (result.size() == 0)) {
-            return result;
-        }
-        if (result.size() < pageSize)
-            return result;
+        if ((result == null) || (result.size() == 0)) { return result; }
+        if (result.size() < pageSize) return result;
         if ((page * pageSize) > result.size()) {
             // return last page
             final int lastPage = result.size() / pageSize;

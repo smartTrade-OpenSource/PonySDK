@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.ArrayList;
@@ -37,12 +38,17 @@ import com.ponysdk.hibernate.query.OrderingCriteria;
 import com.ponysdk.hibernate.query.PaginatingCriteria;
 
 public class PonyCriteria<T> {
+
     private static final Logger log = LoggerFactory.getLogger(PonyCriteria.class);
 
     private final Class<?> clazz;
+
     private final Session session;
+
     private String propertyKey;
+
     private final Query query;
+
     private final List<Criterion> criterions = new ArrayList<Criterion>();
 
     private SortingType sortingType;

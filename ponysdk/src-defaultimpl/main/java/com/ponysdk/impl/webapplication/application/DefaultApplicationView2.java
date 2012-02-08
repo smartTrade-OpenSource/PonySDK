@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.application;
 
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
@@ -30,9 +31,13 @@ import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
 public class DefaultApplicationView2 extends PDockLayoutPanel implements ApplicationView {
 
     private final PSimpleLayoutPanel header = new PSimpleLayoutPanel();
+
     private final PSimpleLayoutPanel menu = new PSimpleLayoutPanel();
+
     private final PSimpleLayoutPanel body = new PSimpleLayoutPanel();
+
     private final PSimpleLayoutPanel footer = new PSimpleLayoutPanel();
+
     private final PSimpleLayoutPanel logs = new PSimpleLayoutPanel();
 
     public DefaultApplicationView2() {

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.server.basic.event.PHasHTML;
@@ -34,10 +35,13 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PMenuItem extends PWidget implements PHasHTML {
 
     private String text;
+
     private String html;
 
     private PMenuBar subMenu;
+
     private PCommand cmd;
+
     private boolean enabled;
 
     public PMenuItem(String text, boolean asHTML, PCommand cmd) {
@@ -65,10 +69,8 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     public PMenuItem(String text, boolean asHTML) {
-        if (asHTML)
-            setHTML(text);
-        else
-            setText(text);
+        if (asHTML) setHTML(text);
+        else setText(text);
     }
 
     @Override

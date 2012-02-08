@@ -20,18 +20,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.instruction;
 
 import com.ponysdk.ui.terminal.HandlerType;
 
 public class EventInstruction extends Instruction {
 
-	private static final long serialVersionUID = -3194913240376942319L;
-	
-	private HandlerType handlerType;
+    private static final long serialVersionUID = -3194913240376942319L;
 
-    public EventInstruction() {
-    }
+    private HandlerType handlerType;
+
+    public EventInstruction() {}
 
     public EventInstruction(long objectID, HandlerType handlerType) {
         super(objectID);

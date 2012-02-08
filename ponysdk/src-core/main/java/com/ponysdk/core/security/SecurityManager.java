@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.security;
 
 import com.ponysdk.core.PonySession;
@@ -27,8 +28,7 @@ import com.ponysdk.core.PonySession;
 public class SecurityManager {
 
     public static boolean checkPermission(Permission permission) {
-        if (Permission.ALLOWED.equals(permission))
-            return true;
+        if (Permission.ALLOWED.equals(permission)) return true;
         return PonySession.getCurrent().getPermissions().contains(permission);
     }
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.validator;
 
 import com.ponysdk.ui.server.form.FormField;
@@ -27,6 +28,7 @@ import com.ponysdk.ui.server.form.FormField;
 public class TwinFieldValidator implements FieldValidator {
 
     private final FormField twinFormField;
+
     private final String errorMessage;
 
     public TwinFieldValidator(String errorMessage, FormField twinFormField) {
@@ -39,17 +41,11 @@ public class TwinFieldValidator implements FieldValidator {
         final Object twinFormFieldText = twinFormField.getValue();
         final Object formFieldText = field.getValue();
 
-        if (twinFormFieldText == null && formFieldText == null) {
-            return ValidationResult.newOKValidationResult();
-        }
+        if (twinFormFieldText == null && formFieldText == null) { return ValidationResult.newOKValidationResult(); }
 
-        if (twinFormFieldText == null || formFieldText == null) {
-            return ValidationResult.newFailedValidationResult(errorMessage);
-        }
+        if (twinFormFieldText == null || formFieldText == null) { return ValidationResult.newFailedValidationResult(errorMessage); }
 
-        if (!twinFormFieldText.equals(formFieldText)) {
-            return ValidationResult.newFailedValidationResult(errorMessage);
-        }
+        if (!twinFormFieldText.equals(formFieldText)) { return ValidationResult.newFailedValidationResult(errorMessage); }
         return ValidationResult.newOKValidationResult();
     }
 }

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.export;
 
 import java.util.List;
@@ -29,9 +30,13 @@ import com.ponysdk.core.datamodel.ExportableData;
 public class ExporterContext<T> {
 
     private ExportableData<List<T>> exportableDTO;
+
     private String requestKey;
+
     private String timezone;
+
     private String dateFormat;
+
     private Object object;
 
     public ExporterContext(ExportableData<List<T>> exportableDTO) {

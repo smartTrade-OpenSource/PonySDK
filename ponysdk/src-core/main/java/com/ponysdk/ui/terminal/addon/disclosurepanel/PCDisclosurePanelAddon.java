@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.disclosurepanel;
 
 import com.google.gwt.user.client.ui.Image;
@@ -29,63 +30,41 @@ import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
 import com.ponysdk.ui.terminal.ui.PTImage;
 import com.ponysdk.ui.terminal.ui.PTWidget;
 
 @PonyAddOn
-public final class PCDisclosurePanelAddon extends PTWidget implements Addon {
+public final class PCDisclosurePanelAddon extends Addon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.disclosurepanel.PCDisclosurePanelAddon";
 
     private PCDisclosurePanel disclosurePanel;
 
     @Override
-    public String getSignature() {
+    protected String getSignature() {
         return SIGNATURE;
     }
 
     @Override
-    public void create(Create create, UIService uiService) {
+    public void create(final Create create, final UIService uiService) {
 
         final Property mainProperty = create.getMainProperty();
 
-        final PTImage openImg = (PTImage) uiService.getUIObject(mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG));
-        final PTImage closeImg = (PTImage) uiService.getUIObject(mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG));
+        final PTImage openImg = (PTImage) uiService.getPTObject(mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG));
+        final PTImage closeImg = (PTImage) uiService.getPTObject(mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG));
 
         final String headerText = mainProperty.getValue();
         final Image openImage = openImg.cast();
         final Image closeImage = closeImg.cast();
 
-        init(disclosurePanel = new PCDisclosurePanel(openImage, closeImage, headerText));
+        disclosurePanel = new PCDisclosurePanel(openImage, closeImage, headerText);
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
-        final PTWidget w = (PTWidget) uiService.getUIObject(add.getObjectID());
+    public void add(final Add add, final UIService uiService) {
+        final PTWidget w = (PTWidget) uiService.getPTObject(add.getObjectID());
         disclosurePanel.setContent(w.cast());
     }
 
-    @Override
-    public void update(Update update, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public void remove(Remove remove, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public void addHandler(AddHandler addHandler, UIService uiService) {
-        // nothing
-    }
-
-    @Override
-    public PTWidget asPTWidget() {
-        return this;
-    }
 }

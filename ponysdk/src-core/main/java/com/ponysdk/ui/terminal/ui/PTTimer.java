@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.Timer;
@@ -56,7 +57,7 @@ public class PTTimer extends PTObject {
     @Override
     public void update(Update update, UIService uiService) {
         Property property = update.getMainProperty();
-        if(property.getKey().equals(PropertyKey.REPEATING_DELAY)) timer.scheduleRepeating(update.getMainProperty().getIntValue());
+        if (property.getKey().equals(PropertyKey.REPEATING_DELAY)) timer.scheduleRepeating(update.getMainProperty().getIntValue());
         else timer.schedule(update.getMainProperty().getIntValue());
     }
 

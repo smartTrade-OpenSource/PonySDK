@@ -42,12 +42,9 @@ public class PTRadioButton extends PTCheckBox {
 
     private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<String, PTRadioButton>();
 
-    private long objectID;
-
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(new com.google.gwt.user.client.ui.RadioButton(null));
-        objectID = create.getObjectID();
+        init(create, uiService, new com.google.gwt.user.client.ui.RadioButton(null));
     }
 
     @Override
@@ -96,10 +93,6 @@ public class PTRadioButton extends PTCheckBox {
     @Override
     public com.google.gwt.user.client.ui.RadioButton cast() {
         return (com.google.gwt.user.client.ui.RadioButton) uiObject;
-    }
-
-    public long getObjectID() {
-        return objectID;
     }
 
 }

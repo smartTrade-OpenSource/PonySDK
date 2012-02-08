@@ -41,9 +41,11 @@ public class CheckBoxFormFieldRenderer implements FormFieldRenderer, PValueChang
     private final String caption;
 
     protected final List<FormFieldComponent<PCheckBox>> fields = new ArrayList<FormFieldComponent<PCheckBox>>();
+
     private final List<PValueChangeHandler<Boolean>> valuesHandlers = new ArrayList<PValueChangeHandler<Boolean>>();
 
     private boolean enabled = true;
+
     private boolean value = false;
 
     protected String debugID;

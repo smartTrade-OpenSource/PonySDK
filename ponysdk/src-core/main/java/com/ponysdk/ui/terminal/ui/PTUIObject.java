@@ -20,25 +20,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 public abstract class PTUIObject extends PTObject {
 
+    private static final String FONT_SIZE = "fontSize";
+
     protected UIObject uiObject;
 
-    protected void init(UIObject uiObject) {
-        if (this.uiObject != null) {
-            throw new IllegalStateException("init may only be called once.");
-        }
+    protected void init(final Create create, final UIService uiService, final UIObject uiObject) {
+        if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
         this.uiObject = uiObject;
+        if (create != null) {
+            this.objectID = create.getObjectID();
+            uiService.registerUIObject(this.objectID, uiObject);
+        }
     }
 
     public UIObject cast() {
@@ -46,54 +50,50 @@ public abstract class PTUIObject extends PTObject {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
 
-        if (PropertyKey.WIDGET_WIDTH.equals(propertyKey)) {
-            uiObject.setWidth(property.getValue());
-        } else if (PropertyKey.WIDGET_HEIGHT.equals(propertyKey)) {
-            uiObject.setHeight(property.getValue());
-        } else if (PropertyKey.WIDGET_FONT_SIZE.equals(propertyKey)) {
-            uiObject.getElement().getStyle().setProperty("fontSize", property.getValue());
-        } else if (PropertyKey.STYLE_PROPERTY.equals(propertyKey)) {
-            uiObject.getElement().getStyle().setProperty(property.getStringProperty(PropertyKey.STYLE_KEY), property.getStringProperty(PropertyKey.STYLE_VALUE));
-        } else if (PropertyKey.STYLE_NAME.equals(propertyKey)) {
-            uiObject.setStyleName(property.getValue());
-        } else if (PropertyKey.ADD_STYLE_NAME.equals(propertyKey)) {
-            uiObject.addStyleName(property.getValue());
-        } else if (PropertyKey.REMOVE_STYLE_NAME.equals(propertyKey)) {
-            uiObject.removeStyleName(property.getValue());
-        } else if (PropertyKey.ENSURE_DEBUG_ID.equals(propertyKey)) {
-            uiObject.ensureDebugId(property.getValue());
-        } else if (PropertyKey.WIDGET_TITLE.equals(propertyKey)) {
-            uiObject.setTitle(property.getValue());
-        } else if (PropertyKey.WIDGET_VISIBLE.equals(propertyKey)) {
-            // TODO remove check on instance
-            final com.ponysdk.ui.terminal.UIObject parentWidget = uiService.getUIObject(update.getParentID());
-            if (parentWidget instanceof com.google.gwt.user.client.ui.Tree) {
-                final com.google.gwt.user.client.ui.Tree tree = (com.google.gwt.user.client.ui.Tree) parentWidget;
-                final String positionPath = property.getStringProperty(PropertyKey.TREE_ITEM_POSITION_PATH);
-                final String[] positions = positionPath.split("\\.");
-                TreeItem item = null;
-                for (int i = 0; i <= positions.length - 1; i++) {
-                    if (item == null)
-                        item = tree.getItem(Integer.parseInt(positions[i]));
-                    else
-                        item = item.getChild(Integer.parseInt(positions[i]));
-                }
-                item.setVisible(property.getBooleanValue());
-            } else {
+        switch (propertyKey) {
+            case WIDGET_WIDTH:
+                uiObject.setWidth(property.getValue());
+                break;
+            case WIDGET_HEIGHT:
+                uiObject.setHeight(property.getValue());
+                break;
+            case WIDGET_FONT_SIZE:
+                uiObject.getElement().getStyle().setProperty(FONT_SIZE, property.getValue());
+                break;
+            case STYLE_PROPERTY:
+                uiObject.getElement().getStyle().setProperty(property.getStringProperty(PropertyKey.STYLE_KEY), property.getStringProperty(PropertyKey.STYLE_VALUE));
+                break;
+            case STYLE_NAME:
+                uiObject.setStyleName(property.getValue());
+                break;
+            case ADD_STYLE_NAME:
+                uiObject.addStyleName(property.getValue());
+                break;
+            case REMOVE_STYLE_NAME:
+                uiObject.removeStyleName(property.getValue());
+                break;
+            case ENSURE_DEBUG_ID:
+                uiObject.ensureDebugId(property.getValue());
+                break;
+            case WIDGET_TITLE:
+                uiObject.setTitle(property.getValue());
+                break;
+            case WIDGET_VISIBLE:
                 uiObject.setVisible(property.getBooleanValue());
-            }
+                break;
+
+            default:
+                break;
         }
-
     }
 
-    public Widget asWidget(Long objectID, UIService uiService) {
-        final com.ponysdk.ui.terminal.ui.PTWidget child = (com.ponysdk.ui.terminal.ui.PTWidget) uiService.getUIObject(objectID);
-        return child.cast();
+    public UIObject asWidget(final Long objectID, final UIService uiService) {
+        if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject) uiService.getPTObject(objectID)).cast(); }
+        throw new IllegalStateException("This object is not an UIObject");
     }
-
 }

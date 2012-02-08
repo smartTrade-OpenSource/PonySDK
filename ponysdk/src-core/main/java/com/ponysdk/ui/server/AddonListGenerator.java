@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server;
 
 import java.io.PrintWriter;
@@ -56,9 +57,7 @@ public class AddonListGenerator extends Generator {
         }
 
         final SourceWriter src = getSourceWriter(classType, context, logger);
-        if (src == null) {
-            return typeName + "Generated";
-        }
+        if (src == null) { return typeName + "Generated"; }
 
         final JClassType[] types = typeOracle.getTypes();
 

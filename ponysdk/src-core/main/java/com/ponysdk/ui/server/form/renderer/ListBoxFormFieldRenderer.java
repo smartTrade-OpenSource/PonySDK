@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
@@ -39,10 +40,13 @@ import com.ponysdk.ui.server.form.FormField;
 public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHandlers, PChangeHandler {
 
     private final List<FormFieldComponent<PListBox>> fields = new ArrayList<FormFieldComponent<PListBox>>();
+
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
 
     private final List<String> items = new ArrayList<String>();
+
     private final Map<String, Object> hiddenValueByItems = new HashMap<String, Object>();
+
     private final Map<Object, String> itemsByHiddenValue = new HashMap<Object, String>();
 
     private boolean enabled = true;
@@ -50,8 +54,11 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     private final String caption;
 
     private Object value;
+
     private final boolean emptySelection;
+
     private final boolean multipleSelect;
+
     private String debugID;
 
     public ListBoxFormFieldRenderer() {
@@ -240,8 +247,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     @Override
     public void ensureDebugID(String debugID) {
         this.debugID = debugID;
-        if (fields.isEmpty())
-            return;
+        if (fields.isEmpty()) return;
 
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().ensureDebugId(debugID);

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.valueprovider;
 
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class BeanValueProvider<D, V> implements ValueProvider<D, V> {
     private final Logger log = LoggerFactory.getLogger(BeanValueProvider.class);
 
     private final String[] path;
+
     private final String pojoPropertyKey;
 
     public BeanValueProvider(String pojoPropertyKey) {

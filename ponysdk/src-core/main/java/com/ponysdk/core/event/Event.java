@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.event;
 
 import java.util.UUID;
@@ -29,6 +30,7 @@ public abstract class Event<H extends EventHandler> {
     public static class Type<H> {
 
         private static int nextHashCode;
+
         private final int index;
 
         public Type() {
@@ -49,8 +51,11 @@ public abstract class Event<H extends EventHandler> {
     private static long count = 0;
 
     private final long eventID;
+
     private UUID uuid;
+
     private Object source;
+
     private Object data;
 
     public Object getData() {

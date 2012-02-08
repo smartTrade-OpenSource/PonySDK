@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.query;
 
 import java.io.Serializable;
@@ -29,11 +30,12 @@ public class Result<T> implements Serializable {
     private static final long serialVersionUID = -8598967363564331854L;
 
     private T data;
+
     private int fullSize;
+
     private long executionTime;
 
-    public Result() {
-    }
+    public Result() {}
 
     public Result(T data) {
         this.data = data;

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
@@ -42,11 +43,15 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
+
     private final List<PSubmitCompleteHandler> submitCompleteHandlers = new ArrayList<PSubmitCompleteHandler>();
 
     private StreamHandler streamHandler;
+
     private String name;
+
     private String fileName;
+
     private boolean enabled = true;
 
     public PFileUpload() {

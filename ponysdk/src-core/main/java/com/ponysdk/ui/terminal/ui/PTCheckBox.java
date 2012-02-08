@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -36,8 +37,8 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTCheckBox extends PTButtonBase {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        init(new com.google.gwt.user.client.ui.CheckBox());
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.CheckBox());
     }
 
     @Override
@@ -55,7 +56,7 @@ public class PTCheckBox extends PTButtonBase {
         cast().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
                 final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
                 eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
                 uiService.triggerEvent(eventInstruction);
@@ -64,7 +65,7 @@ public class PTCheckBox extends PTButtonBase {
     }
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
         final com.google.gwt.user.client.ui.CheckBox checkBox = cast();

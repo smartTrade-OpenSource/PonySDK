@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
@@ -28,10 +29,10 @@ import com.ponysdk.ui.terminal.instruction.Create;
 public class PTPushButton extends PTCustomButton {
 
     @Override
-    public void create(Create create, UIService uiService) {
-        final PTImage image = (PTImage) uiService.getUIObject(create.getMainProperty().getLongValue());
+    public void create(final Create create, final UIService uiService) {
+        final PTImage image = (PTImage) uiService.getPTObject(create.getMainProperty().getLongValue());
         final com.google.gwt.user.client.ui.PushButton pushButton = new com.google.gwt.user.client.ui.PushButton(image.cast());
-        init(pushButton);
+        init(create, uiService, pushButton);
     }
 
 }

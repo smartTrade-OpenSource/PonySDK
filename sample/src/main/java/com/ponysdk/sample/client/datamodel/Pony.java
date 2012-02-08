@@ -4,8 +4,11 @@ package com.ponysdk.sample.client.datamodel;
 public class Pony {
 
     private Long id;
+
     private String name;
+
     private Integer age;
+
     private String race;
 
     public Pony(final Long id, final String name, final Integer age, final String race) {

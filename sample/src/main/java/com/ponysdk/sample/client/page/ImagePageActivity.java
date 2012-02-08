@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -35,8 +36,7 @@ public class ImagePageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
     protected void onFirstShowPage() {
@@ -47,8 +47,7 @@ public class ImagePageActivity extends PageActivity {
     }
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onShowPage(Place place) {

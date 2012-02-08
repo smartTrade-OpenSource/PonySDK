@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.event;
 
 import com.ponysdk.core.event.SystemEvent;
@@ -29,6 +30,7 @@ public class RowDeletedEvent extends SystemEvent<RowDeletedHandler> {
     public static final Type<RowDeletedHandler> TYPE = new Type<RowDeletedHandler>();
 
     public int deletedRowCount;
+
     public int row;
 
     public RowDeletedEvent(Object sourceComponent) {

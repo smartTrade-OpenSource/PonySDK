@@ -38,7 +38,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         boolean autoHide = mainProperty.hasChildProperty(PropertyKey.POPUP_AUTO_HIDE) ? mainProperty.getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE) : false;
         boolean modal = mainProperty.hasChildProperty(PropertyKey.POPUP_MODAL) ? mainProperty.getBooleanProperty(PropertyKey.POPUP_MODAL) : false;
 
-        init(new com.google.gwt.user.client.ui.DialogBox(autoHide, modal));
+        init(create, uiService, new com.google.gwt.user.client.ui.DialogBox(autoHide, modal));
         addCloseHandler(create, uiService);
     }
 

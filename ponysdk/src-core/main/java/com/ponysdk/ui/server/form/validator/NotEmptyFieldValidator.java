@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.form.validator;
 
 import com.ponysdk.ui.server.form.FormField;
@@ -30,8 +31,7 @@ public class NotEmptyFieldValidator implements FieldValidator {
 
     @Override
     public ValidationResult isValid(FormField field) {
-        if (field.getValue() == null)
-            return ValidationResult.newFailedValidationResult(FIELD_MSG_EMPTY);
+        if (field.getValue() == null) return ValidationResult.newFailedValidationResult(FIELD_MSG_EMPTY);
         return ValidationResult.newOKValidationResult();
     }
 

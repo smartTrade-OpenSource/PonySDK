@@ -1,3 +1,4 @@
+
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -18,11 +19,17 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 
     private final PButton loginButton = new PButton("Sign in");
+
     private final PTextBox loginTextBox = new PTextBox();
+
     private final PPasswordTextBox passwordTextBox = new PPasswordTextBox();
+
     private final PCheckBox rememberMe = new PCheckBox("Stay signed in");
+
     private final PVerticalPanel messagePanel = new PVerticalPanel();
+
     private final PLabel versionInformation = new PLabel("");
+
     private int messageIndex = 1;
 
     public DefaultLoginPageView(String title) {

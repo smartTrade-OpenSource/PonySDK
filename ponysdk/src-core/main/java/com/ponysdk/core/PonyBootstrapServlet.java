@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.core;
+ */
+
+package com.ponysdk.core;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +39,12 @@ import org.slf4j.LoggerFactory;
 
 public class PonyBootstrapServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 6993633431616272739L;
+    private static final long serialVersionUID = 6993633431616272739L;
 
-	private static final Logger log = LoggerFactory.getLogger(PonyBootstrapServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PonyBootstrapServlet.class);
+
     private static final int BUFFER_SIZE = 4096;
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         handlePonyResource(request, response);
@@ -83,16 +86,16 @@ public class PonyBootstrapServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            
+
             type = new MimetypesFileTypeMap().getContentType(new File(jarPath));
         } else {
-        	type = new MimetypesFileTypeMap().getContentType(new File(path));
+            type = new MimetypesFileTypeMap().getContentType(new File(path));
         }
-        
+
         response.setContentType(type);
         copy(inputStream, response.getOutputStream());
     }
-    
+
     public static int copy(InputStream in, OutputStream out) throws IOException {
         try {
             int byteCount = 0;
@@ -104,18 +107,13 @@ public class PonyBootstrapServlet extends HttpServlet {
             }
             out.flush();
             return byteCount;
-        }
-        finally {
+        } finally {
             try {
                 in.close();
-            }
-            catch (IOException ex) {
-            }
+            } catch (IOException ex) {}
             try {
                 out.close();
-            }
-            catch (IOException ex) {
-            }
+            } catch (IOException ex) {}
         }
     }
 

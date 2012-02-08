@@ -20,8 +20,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal;
 
 public enum DomHandlerType {
-	CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP, MOUSE_OUT;
+    CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP, MOUSE_OUT;
 }

@@ -62,7 +62,7 @@ public class Main {
     }
 
     public void start() throws Exception {
-        
+
         if (port != null) {
             webServer = new Server(port);
         } else {

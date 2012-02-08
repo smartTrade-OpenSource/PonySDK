@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -27,6 +28,7 @@ import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 
 public class DefaultScrollablePageView extends DefaultPageView implements PageView {
+
     @Override
     protected PSimplePanel buildBody() {
         final PScrollPanel panel = new PScrollPanel();

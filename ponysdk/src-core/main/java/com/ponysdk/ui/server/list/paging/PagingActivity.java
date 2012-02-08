@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.list.paging;
 
 import com.ponysdk.core.activity.AbstractActivity;
@@ -32,9 +33,13 @@ import com.ponysdk.ui.server.list.paging.event.PagingSelectionChangeEvent;
 public class PagingActivity extends AbstractActivity implements EventBusAware {
 
     private int pageSize = 20;
+
     private static final int PAGING_WINDOW = 5;
+
     protected final PagingView pagingView;
+
     protected int activePageIndex;
+
     private EventBus eventBus;
 
     public PagingActivity(PagingView pagingView) {
@@ -53,8 +58,7 @@ public class PagingActivity extends AbstractActivity implements EventBusAware {
         final int rest = fullSize % pageSize;
         if (rest != 0) {
             pageCount = (fullSize - rest) / pageSize + 1;
-        } else
-            pageCount = (fullSize - rest) / pageSize;
+        } else pageCount = (fullSize - rest) / pageSize;
         if (fullSize == 0 || pageCount == 1) {
             pagingView.showPagingBar(false);
             return;

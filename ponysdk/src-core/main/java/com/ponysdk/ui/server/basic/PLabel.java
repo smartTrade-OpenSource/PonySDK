@@ -40,7 +40,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
 
     public PLabel() {}
 
-    public PLabel(String text) {
+    public PLabel(final String text) {
         setText(text);
     }
 
@@ -55,7 +55,8 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
+        if (text == null) return;
         this.text = text;
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.TEXT, text);
@@ -63,7 +64,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     }
 
     @Override
-    public HandlerRegistration addClickHandler(PClickHandler handler) {
+    public HandlerRegistration addClickHandler(final PClickHandler handler) {
         return addDomHandler(handler, PClickEvent.TYPE);
     }
 

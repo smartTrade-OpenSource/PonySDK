@@ -43,7 +43,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
     private PageProvider pageProvider;
 
     @Override
-    public void onPageDisplayed(PageDisplayedEvent event) {
+    public void onPageDisplayed(final PageDisplayedEvent event) {
         if (event.getSource().equals(this)) return;
 
         final PageActivity pageActivity = event.getPageActivity();
@@ -53,7 +53,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         world.setWidget(menuView);
         for (final PageActivity pageActivity : pageProvider.getPageActivities()) {
             menuView.addItem(pageActivity.getPageCategory(), pageActivity.getPageName());
@@ -61,7 +61,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
     }
 
     @Override
-    public void onSelection(PSelectionEvent<String> event) {
+    public void onSelection(final PSelectionEvent<String> event) {
         selectItem(event.getSelectedItem());
     }
 
@@ -72,7 +72,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
         }
     }
 
-    public void setMenuView(MenuView menuView) {
+    public void setMenuView(final MenuView menuView) {
         this.menuView = menuView;
     }
 
@@ -80,7 +80,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
         return applicationActivity;
     }
 
-    public void setApplicationActivity(ApplicationActivity applicationActivity) {
+    public void setApplicationActivity(final ApplicationActivity applicationActivity) {
         this.applicationActivity = applicationActivity;
     }
 
@@ -88,7 +88,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
         return pageProvider;
     }
 
-    public void setPageProvider(PageProvider pageProvider) {
+    public void setPageProvider(final PageProvider pageProvider) {
         this.pageProvider = pageProvider;
     }
 

@@ -398,7 +398,7 @@ public class ServiceGenerator extends BaseGenerator {
 
         // Constant
         classWriter.addConstants("public static final com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event) + "> TYPE = new com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event)
-                + ">();");
+            + ">();");
 
         // Build constructor
         final Parameter sourceComponentParameter = new Parameter();

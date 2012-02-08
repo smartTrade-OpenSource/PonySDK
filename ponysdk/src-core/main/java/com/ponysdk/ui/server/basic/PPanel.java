@@ -19,7 +19,9 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */package com.ponysdk.ui.server.basic;
+ */
+
+package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
@@ -34,7 +36,7 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     public void add(PWidget child) {
         throw new UnsupportedOperationException("This panel does not support no-arg add()");
     }
-    
+
     @Override
     public void add(IsPWidget w) {
         add(w.asWidget());
