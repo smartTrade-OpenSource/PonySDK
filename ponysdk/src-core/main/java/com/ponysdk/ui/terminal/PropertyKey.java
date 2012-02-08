@@ -253,6 +253,8 @@ public class PropertyKey {
 
     public static final PropertyKey END_OF_PROCESSING = new PropertyKey("END_OF_PROCESSING");
 
+	public static final PropertyKey OPEN = new PropertyKey("OPEN");
+
     private final String key;
 
     public PropertyKey(String key) {

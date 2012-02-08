@@ -35,10 +35,12 @@ import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.disclosurepanel.PCDisclosurePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn {
 
     private PWidget content;
+	private boolean isOpened;
 
     public PDisclosurePanel(String headerText, PImage openImage, PImage closeImage) {
         super();
@@ -49,6 +51,9 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
         setMainProperty(mainProperty);
     }
 
+    
+    
+    
     @Override
     protected WidgetType getType() {
         return WidgetType.ADDON;
@@ -137,6 +142,13 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
     @Override
     public String getSignature() {
         return PCDisclosurePanelAddon.SIGNATURE;
+    }
+    
+    public void setOpen(boolean isOpened){
+        this.isOpened = isOpened;
+        final Update update = new Update(getID());
+        update.getMainProperty().setProperty(PropertyKey.OPEN,isOpened);
+        getPonySession().stackInstruction(update);
     }
 
 }

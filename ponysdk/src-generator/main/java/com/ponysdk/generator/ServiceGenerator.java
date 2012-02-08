@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ponysdk.hibernate.dao.DAO;
+
 public class ServiceGenerator extends BaseGenerator {
 
     private String srcGeneratedDirectory = "src-generated-application";
@@ -292,7 +294,7 @@ public class ServiceGenerator extends BaseGenerator {
     private void generateDAO(Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
-        classWriter.addExtend("com.ponysdk.core.database.DAO");
+        classWriter.addExtend("com.ponysdk.hibernate.dao.DAO");
 
         // Add static logger
         classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");

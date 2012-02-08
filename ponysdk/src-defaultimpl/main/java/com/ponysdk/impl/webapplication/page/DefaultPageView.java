@@ -48,7 +48,7 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
         final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
         dockLayoutPanel.setSizeFull();
-        dockLayoutPanel.addNorth(header, 5);
+        dockLayoutPanel.addNorth(header, 30);
         dockLayoutPanel.add(body);
 
         setWidget(dockLayoutPanel);

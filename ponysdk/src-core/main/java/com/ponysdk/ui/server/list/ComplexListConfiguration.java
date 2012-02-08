@@ -36,6 +36,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
     private boolean customColumnEnabled;
     private Class<T> clas;
 	private boolean showPreferences;
+	private ComplexListActivity<T> complexListActivity;
 
     public boolean isSearchFormMustBeValid() {
         return searchFormMustBeValid;
@@ -116,6 +117,20 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
 
 	public boolean isShowPreferences() {
 		return showPreferences;
+	}
+
+	public ComplexListActivity<T> getComplexListActivity() {
+		return complexListActivity;
+	}
+
+	public void setComplexListActivity(ComplexListActivity<T> complexListActivity) {
+		this.complexListActivity = complexListActivity;
+	}
+	
+	@Override
+	public void addColumnDescriptor(ListColumnDescriptor<T, ?> listColumnDescriptor) {
+		if(this.complexListActivity != null) complexListActivity.addDescriptor(listColumnDescriptor);
+		else super.addColumnDescriptor(listColumnDescriptor);
 	}
 
 }

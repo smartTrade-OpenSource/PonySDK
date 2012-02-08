@@ -71,7 +71,16 @@ public final class PCDisclosurePanelAddon extends PTWidget implements Addon {
 
     @Override
     public void update(Update update, UIService uiService) {
-        // nothing
+    	final Property mainProperty = update.getMainProperty();
+
+        for (final Property property : mainProperty.getChildProperties().values()) {
+            final PropertyKey propertyKey = property.getKey();
+            if (PropertyKey.OPEN.equals(propertyKey)) {
+            	disclosurePanel.setOpen(property.getBooleanValue());
+            	return;
+            }
+        }
+        super.update(update, uiService);
     }
 
     @Override
