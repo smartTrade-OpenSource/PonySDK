@@ -110,6 +110,12 @@ public enum PropertyKey {
     POPUP_HIDE,
 
     POPUP_TEXT,
+    
+    POPUP_CAPTION,
+
+    POPUP_DRAGGABLE,
+    
+    POPUP_MODAL,
 
     POPUP_GLASS_STYLE_NAME,
 
@@ -297,6 +303,10 @@ public enum PropertyKey {
 
     SELECT_ALL,
 
-    INSERT_HTML, ENABLED_ON_REQUEST, LOADING_ON_REQUEST;
+    INSERT_HTML,
+
+    ENABLED_ON_REQUEST,
+
+    LOADING_ON_REQUEST;
 
 }

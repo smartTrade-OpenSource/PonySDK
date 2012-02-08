@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.notification;
 
 import com.ponysdk.core.event.BusinessEvent;
@@ -28,19 +29,19 @@ import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
 
 public class LogsPopupPanel {
 
-    public void addEvent(BusinessEvent<?> event) {
+    public void addEvent(final BusinessEvent<?> event) {
         switch (event.getLevel()) {
-        case INFO:
-            PNotificationManager.notify("Notification", event.getBusinessMessage());
-            break;
-        case WARNING:
-            PNotificationManager.notify("Notification", event.getBusinessMessage(), Notification.WARNING_MESSAGE);
-            break;
-        case ERROR:
-            PNotificationManager.notify("Notification", "Error occured " + event.getBusinessMessage(), Notification.ERROR_MESSAGE);
-            break;
-        default:
-            break;
+            case INFO:
+                PNotificationManager.notify(event.getBusinessMessage(), Notification.HUMANIZED);
+                break;
+            case WARNING:
+                PNotificationManager.notify(event.getBusinessMessage(), Notification.WARNING_MESSAGE);
+                break;
+            case ERROR:
+                PNotificationManager.notify(event.getBusinessMessage(), Notification.ERROR_MESSAGE);
+                break;
+            default:
+                break;
         }
     }
 }

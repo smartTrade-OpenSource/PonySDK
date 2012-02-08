@@ -94,7 +94,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
     public static long sessionID;
 
-    public UIBuilder(long ID) {
+    public UIBuilder(final long ID) {
         UIBuilder.sessionID = ID;
         History.addValueChangeHandler(this);
 
@@ -146,7 +146,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         RootPanel.get().add(frame);
     }
 
-    public void update(List<Instruction> instructions) {
+    public void update(final List<Instruction> instructions) {
         updateMode = true;
         try {
 
@@ -254,7 +254,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof com.ponysdk.ui.terminal.instruction.History) {
                     final com.ponysdk.ui.terminal.instruction.History history = (com.ponysdk.ui.terminal.instruction.History) instruction;
                     final String oldToken = History.getToken();
-                    if (oldToken != null && history.getToken().equals(oldToken)) {
+                    if (oldToken != null && oldToken.equals(history.getToken())) {
                         History.fireCurrentHistoryState();
                     } else {
                         History.newItem(history.getToken(), true);
@@ -269,11 +269,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         }
     }
 
-    private void updateTimer(Timer object, Property mainProperty) {
+    private void updateTimer(final Timer object, final Property mainProperty) {
         object.scheduleRepeating(mainProperty.getIntValue());
     }
 
-    public void stackEvent(Instruction instruction) {
+    public void stackEvent(final Instruction instruction) {
         if (!updateMode) triggerEvent(instruction);
         else stackedInstructions.add(instruction);
     }
@@ -291,7 +291,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         ponyService.fireInstructions(sessionID, instructions, new AsyncCallback<List<Instruction>>() {
 
             @Override
-            public void onFailure(Throwable caught) {
+            public void onFailure(final Throwable caught) {
                 if (pendingClose) return;
                 GWT.log("fireInstruction failed", caught);
                 numberOfrequestInProgress--;
@@ -306,7 +306,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             }
 
             @Override
-            public void onSuccess(List<Instruction> result) {
+            public void onSuccess(final List<Instruction> result) {
                 numberOfrequestInProgress--;
                 hideLoadingMessageBox();
                 instructions.clear();
@@ -316,7 +316,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public void triggerEvent(Instruction instruction) {
+    public void triggerEvent(final Instruction instruction) {
         final List<Instruction> instructions = new ArrayList<Instruction>();
         instructions.add(instruction);
         fireEvents(instructions);
@@ -334,7 +334,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         return timer;
     }
 
-    private void showCommunicationErrorMessage(Throwable caught) {
+    private void showCommunicationErrorMessage(final Throwable caught) {
         final VerticalPanel content = new VerticalPanel();
         if (caught instanceof StatusCodeException) {
             final StatusCodeException exception = (StatusCodeException) caught;
@@ -352,7 +352,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         reloadAnchor.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
+            public void onClick(final ClickEvent event) {
                 History.newItem("");
                 reload();
             }
@@ -362,7 +362,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         closeAnchor.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
+            public void onClick(final ClickEvent event) {
                 communicationErrorMessagePanel.hide();
             }
         });
@@ -376,7 +376,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         communicationErrorMessagePanel.setPopupPositionAndShow(new PositionCallback() {
 
             @Override
-            public void setPosition(int offsetWidth, int offsetHeight) {
+            public void setPosition(final int offsetWidth, final int offsetHeight) {
                 final int left = (Window.getClientWidth() - offsetWidth) >> 1;
                 communicationErrorMessagePanel.setPopupPosition(left, 0);
             }
@@ -392,7 +392,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public void onValueChange(ValueChangeEvent<String> event) {
+    public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final EventInstruction eventInstruction = new EventInstruction(-1, HandlerType.HISTORY);
             eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
@@ -401,7 +401,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public UIObject getUIObject(Long ID) {
+    public UIObject getUIObject(final Long ID) {
         return objectByID.get(ID);
     }
 

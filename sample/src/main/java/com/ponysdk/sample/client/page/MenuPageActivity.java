@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
@@ -39,16 +40,13 @@ public class MenuPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {
-    }
+    protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {
-    }
+    protected void onShowPage(final Place place) {}
 
     @Override
-    protected void onLeavingPage() {
-    }
+    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
@@ -89,7 +87,7 @@ public class MenuPageActivity extends PageActivity {
         return menuBar;
     }
 
-    private PMenuBar createMenuBar(boolean vertical) {
+    private PMenuBar createMenuBar(final boolean vertical) {
         final PMenuBar menuBar = new PMenuBar();
         final PMenuBar fileBar = new PMenuBar(vertical);
 
@@ -97,16 +95,18 @@ public class MenuPageActivity extends PageActivity {
 
         final PMenuItem newItem = new PMenuItem("New");
         newItem.setCommand(new PCommand() {
+
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", newItem.getText());
+                PNotificationManager.showTrayNotification("Menu Selection: " + newItem.getText());
             }
         });
         final PMenuItem openItem = new PMenuItem("Open");
         openItem.setCommand(new PCommand() {
+
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", openItem.getText());
+                PNotificationManager.showTrayNotification("Menu Selection: " + openItem.getText());
             }
         });
 

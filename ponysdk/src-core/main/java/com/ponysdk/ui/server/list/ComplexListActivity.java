@@ -533,7 +533,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
                         final SelectionResult<D> selectionResult = getSelectedData();
                         if (selectionResult.getSelectedData() != null && selectionResult.getSelectedData().isEmpty()) {
-                            PNotificationManager.notify("Export failed", "Please select data to export", Notification.WARNING_MESSAGE);
+                            PNotificationManager.notify("Export failed, please select data to export", Notification.WARNING_MESSAGE);
                             return;
                         }
                         final Query query = createQuery(currentPage);

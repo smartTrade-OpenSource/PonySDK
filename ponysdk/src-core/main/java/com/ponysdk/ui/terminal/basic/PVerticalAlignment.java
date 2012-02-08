@@ -20,8 +20,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.basic;
+
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
 public enum PVerticalAlignment {
     ALIGN_TOP, ALIGN_MIDDLE, ALIGN_BOTTOM;
+
+    public VerticalAlignmentConstant asVerticalAlignmentConstant() {
+        switch (this) {
+            case ALIGN_TOP:
+                return HasVerticalAlignment.ALIGN_TOP;
+            case ALIGN_MIDDLE:
+                return HasVerticalAlignment.ALIGN_MIDDLE;
+            case ALIGN_BOTTOM:
+                return HasVerticalAlignment.ALIGN_BOTTOM;
+            default:
+                throw new IllegalArgumentException("Undefined alignement");
+        }
+    }
 }

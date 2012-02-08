@@ -20,8 +20,46 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.ui;
+
+import com.google.gwt.user.client.ui.DialogBox;
+import com.ponysdk.ui.terminal.Property;
+import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
+    @Override
+    public void create(final Create create, final UIService uiService) {
+        Property mainProperty = create.getMainProperty();
+        boolean autoHide = mainProperty.hasChildProperty(PropertyKey.POPUP_AUTO_HIDE) ? mainProperty.getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE) : false;
+        boolean modal = mainProperty.hasChildProperty(PropertyKey.POPUP_MODAL) ? mainProperty.getBooleanProperty(PropertyKey.POPUP_MODAL) : false;
+
+        init(new com.google.gwt.user.client.ui.DialogBox(autoHide, modal));
+        addCloseHandler(create, uiService);
+    }
+
+    @Override
+    public void update(final Update update, final UIService uiService) {
+
+        DialogBox dialogBox = cast();
+
+        final Property mainProperty = update.getMainProperty();
+        for (final Property property : mainProperty.getChildProperties().values()) {
+            final PropertyKey propertyKey = property.getKey();
+            if (PropertyKey.POPUP_CAPTION.equals(propertyKey)) {
+                dialogBox.setHTML(property.getValue());
+            }
+        }
+
+        super.update(update, uiService);
+    }
+
+    @Override
+    public com.google.gwt.user.client.ui.DialogBox cast() {
+        return (com.google.gwt.user.client.ui.DialogBox) uiObject;
+    }
 }

@@ -24,9 +24,13 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
+import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTHTMLTable extends PTPanel {
 
@@ -36,7 +40,7 @@ public class PTHTMLTable extends PTPanel {
     }
 
     @Override
-    public void add(Add add, UIService uiService) {
+    public void add(final Add add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
         final com.google.gwt.user.client.ui.HTMLTable table = cast();
@@ -50,26 +54,49 @@ public class PTHTMLTable extends PTPanel {
         table.setWidget(row, cell, w);
     }
 
-    // @Override
-    // public void update(Update update, UIService uiService) {
-    // final Property property = update.getMainProperty();
-    // final PropertyKey propertyKey = property.getKey();
-    //
-    // if (PropertyKey.COLUMN_FORMATTER_COLUMN_WIDTH.equals(propertyKey)) {
-    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-    // final String width = property.getChildProperty(PropertyKey.WIDTH).getValue();
-    // cast().getColumnFormatter().setWidth(column, width);
-    // } else if (PropertyKey.COLUMN_FORMATTER_ADD_STYLE_NAME.equals(propertyKey)) {
-    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-    // final String styleName = property.getChildProperty(PropertyKey.STYLE_NAME).getValue();
-    // cast().getColumnFormatter().addStyleName(column, styleName);
-    // } else if (PropertyKey.COLUMN_FORMATTER_REMOVE_STYLE_NAME.equals(propertyKey)) {
-    // final int column = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-    // final String styleName = property.getChildProperty(PropertyKey.STYLE_NAME).getValue();
-    // cast().getColumnFormatter().removeStyleName(column, styleName);
-    // } else {
-    // super.update(update, uiService);
-    // }
-    // }
+    @Override
+    public void update(final Update update, final UIService uiService) {
+        final Property property = update.getMainProperty();
+        final PropertyKey propertyKey = property.getKey();
+
+        if (PropertyKey.CLEAR.equals(propertyKey)) {
+            cast().clear();
+        } else if (PropertyKey.CELL_SPACING.equals(propertyKey)) {
+            cast().setCellSpacing(property.getIntValue());
+        } else if (PropertyKey.CELL_PADDING.equals(propertyKey)) {
+            cast().setCellPadding(property.getIntValue());
+        } else if (PropertyKey.HTMLTABLE_ROW_STYLE.equals(propertyKey)) {
+            final int row = property.getChildProperty(PropertyKey.ROW).getIntValue();
+            final Property addProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_ADD_STYLE_NAME);
+            final Property removeProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_REMOVE_STYLE_NAME);
+            if (addProperty != null) {
+                cast().getRowFormatter().addStyleName(row, addProperty.getValue());
+            } else {
+                cast().getRowFormatter().removeStyleName(row, removeProperty.getValue());
+            }
+        } else if (PropertyKey.HTMLTABLE_CELL_STYLE.equals(propertyKey)) {
+            final int cellRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
+            final int cellColumn = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
+            final Property addCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_ADD_STYLE_NAME);
+            if (addCellProperty != null) {
+                cast().getCellFormatter().addStyleName(cellRow, cellColumn, addCellProperty.getValue());
+            }
+            final Property removeCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME);
+            if (removeCellProperty != null) {
+                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, removeCellProperty.getValue());
+            }
+            final Property verticalAlignmentProperty = property.getChildProperty(PropertyKey.CELL_VERTICAL_ALIGNMENT);
+            if (verticalAlignmentProperty != null) {
+                cast().getCellFormatter().setVerticalAlignment(cellRow, cellColumn, PVerticalAlignment.values()[verticalAlignmentProperty.getIntValue()].asVerticalAlignmentConstant());
+            }
+            final Property horizontalAlignmentProperty = property.getChildProperty(PropertyKey.CELL_HORIZONTAL_ALIGNMENT);
+            if (horizontalAlignmentProperty != null) {
+                cast().getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, PHorizontalAlignment.values()[horizontalAlignmentProperty.getIntValue()].asHorizontalAlignmentConstant());
+            }
+
+        } else {
+            super.update(update, uiService);
+        }
+    }
 
 }

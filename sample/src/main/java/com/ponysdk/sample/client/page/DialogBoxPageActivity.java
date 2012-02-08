@@ -39,6 +39,7 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.rich.PClosableDialogBox;
 
 public class DialogBoxPageActivity extends PageActivity {
 
@@ -108,17 +109,13 @@ public class DialogBoxPageActivity extends PageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PDialogBox dialogBox = new PDialogBox(true);
-                dialogBox.setText("Custom close");
-                dialogBox.setCloseWidget(new PImage("image/cross.png"));
-                final PSimplePanel content = new PSimplePanel();
-                content.setWidget(new PLabel("Dialog Box with custom close widget"));
-                dialogBox.setWidget(content);
-                content.setWidth("200px");
-                content.setHeight("200px");
+                final PClosableDialogBox dialogBox = new PClosableDialogBox(true);
+                dialogBox.setDraggable(true);
+                dialogBox.setCaption(new PLabel("Custom caption"));
+                dialogBox.setClose(new PImage("images/close_16.png"));
+                dialogBox.setContent(new PLabel("Content of a popup"));
                 dialogBox.center();
                 dialogBox.show();
-
             }
         });
 
@@ -158,7 +155,9 @@ public class DialogBoxPageActivity extends PageActivity {
 
                     @Override
                     public void onClose() {
-                        fireEvent(new DemoBusinessEvent(this));
+                        DemoBusinessEvent event = new DemoBusinessEvent(this);
+                        event.setBusinessMessage("PoptionPane closed");
+                        fireEvent(event);
                     }
                 });
             }

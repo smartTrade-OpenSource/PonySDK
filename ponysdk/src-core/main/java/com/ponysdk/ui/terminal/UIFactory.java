@@ -30,6 +30,7 @@ import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
+import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
@@ -61,7 +62,7 @@ import com.ponysdk.ui.terminal.ui.PTVerticalPanel;
 
 public class UIFactory {
 
-    public UIObject newUIObject(UIService uiService, Create create) {
+    public UIObject newUIObject(final UIService uiService, final Create create) {
         final WidgetType widgetType = create.getWidgetType();
         switch (widgetType) {
             case BUTTON:
@@ -124,6 +125,8 @@ public class UIFactory {
                 return new PTMenuItemSeparator();
             case POPUP_PANEL:
                 return new PTPopupPanel();
+            case DECORATED_POPUP_PANEL:
+                return new PTDecoratedPopupPanel();
             case TIMER:
                 return new PTTimer();
             case COMPOSITE:
