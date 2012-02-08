@@ -26,20 +26,20 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.POptionPane;
-import com.ponysdk.ui.server.basic.POptionPane.PActionHandler;
 import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.rich.PClosableDialogBox;
+import com.ponysdk.ui.server.rich.PConfirmDialog;
+import com.ponysdk.ui.server.rich.POptionPane;
+import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
 
 public class DialogBoxPageActivity extends PageActivity {
 
@@ -59,23 +59,6 @@ public class DialogBoxPageActivity extends PageActivity {
     @Override
     protected void onFirstShowPage() {
         final PVerticalPanel verticalPanel = new PVerticalPanel();
-        final PAnchor anchor = new PAnchor("Closable Dialog");
-        anchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final PDialogBox dialogBox = new PDialogBox(true);
-                dialogBox.setText("Dialog");
-                final PSimplePanel content = new PSimplePanel();
-                content.setWidget(new PLabel("Dialog Box"));
-                dialogBox.setWidget(content);
-                content.setWidth("500px");
-                content.setHeight("300px");
-                dialogBox.center();
-                dialogBox.show();
-            }
-        });
-        verticalPanel.add(anchor);
 
         final PAnchor anchor2 = new PAnchor("Popup top left");
         anchor2.addClickHandler(new PClickHandler() {
@@ -163,6 +146,16 @@ public class DialogBoxPageActivity extends PageActivity {
             }
         });
         verticalPanel.add(anchor5);
+
+        final PAnchor anchor6 = new PAnchor("PConfirmDialogBox");
+        anchor6.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                PConfirmDialog.show("Question ?", new PLabel("This is a confirm dialog box"));
+            }
+        });
+        verticalPanel.add(anchor6);
 
         pageView.getBody().setWidget(verticalPanel);
     }

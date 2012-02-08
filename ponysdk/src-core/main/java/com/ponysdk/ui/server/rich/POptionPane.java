@@ -21,10 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.server.rich;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.server.addon.PDialogBox;
+import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PComposite;
+import com.ponysdk.ui.server.basic.PDialogBox;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PPanel;
+import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
@@ -34,30 +39,34 @@ public class POptionPane extends PComposite {
     final PDialogBox dialogBox;
 
     public POptionPane() {
-        dialogBox = new PDialogBox(false);
-
-        final PWidgetCollection children = PonySession.getCurrent().getRootLayoutPanel().getChildren();
-        children.insert(this, children.size());
-        PonySession.getCurrent().getRootLayoutPanel().adopt(this);
+        this(new PDialogBox());
     }
 
-    public static POptionPane showConfirmDialog(PActionHandler handler, String message) {
+    public POptionPane(final PDialogBox dialogBox) {
+        this.dialogBox = dialogBox;
+
+        // final PWidgetCollection children = PonySession.getCurrent().getRootLayoutPanel().getChildren();
+        // children.insert(this, children.size());
+        // PonySession.getCurrent().getRootLayoutPanel().adopt(this);
+    }
+
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message) {
         return showConfirmDialog(handler, message, null, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(PActionHandler handler, String message, PPanel parentPanel) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel) {
         return showConfirmDialog(handler, message, parentPanel, "Message", POptionType.YES_NO_CANCEL_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(PActionHandler handler, String message, PPanel parentPanel, String title, POptionType optionType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType) {
         return showConfirmDialog(handler, message, parentPanel, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(PActionHandler handler, String message, PPanel parentPanel, String title, POptionType optionType, PMessageType messageType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType, final PMessageType messageType) {
         return showOptionDialog(handler, message, parentPanel, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final PActionHandler handler, String message, PPanel parentPanel, String title, POptionType optionType, PMessageType messageType, String... options) {
+    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
@@ -65,9 +74,8 @@ public class POptionPane extends PComposite {
         dialogBox.addStyleName("pony-ConfirmDialogBox");
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
-        dialogBox.setClosable(true);
         dialogBox.setTitle(title);
-        dialogBox.setText(messageType.getName());
+        dialogBox.setCaption(messageType.getName());
 
         // Build content
         final PVerticalPanel panel = new PVerticalPanel();
@@ -84,7 +92,7 @@ public class POptionPane extends PComposite {
             button.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     handler.onAction(dialogBox, option);
                 }
             });
@@ -102,7 +110,7 @@ public class POptionPane extends PComposite {
         return optionPane;
     }
 
-    private static String[] getOptions(POptionType optionType) {
+    private static String[] getOptions(final POptionType optionType) {
         switch (optionType) {
             case DEFAULT_OPTION:
                 return new String[] { POption.OK_OPTION.getName() };
@@ -128,7 +136,7 @@ public class POptionPane extends PComposite {
 
         private final String name;
 
-        private POption(String name) {
+        private POption(final String name) {
             this.name = name;
         }
 
@@ -136,7 +144,7 @@ public class POptionPane extends PComposite {
             return name;
         }
 
-        public boolean equals(String option) {
+        public boolean equals(final String option) {
             return name.equals(option);
         }
     }
@@ -150,7 +158,7 @@ public class POptionPane extends PComposite {
 
         private final String name;
 
-        private PMessageType(String name) {
+        private PMessageType(final String name) {
             this.name = name;
         }
 

@@ -23,10 +23,32 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Update;
 
-public interface PConfirmDialogHandler {
+public class PDialogBox extends PDecoratedPopupPanel {
 
-    boolean onOK(PDialogBox dialogBox);
+    private String caption;
 
-    void onCancel();
+    public PDialogBox() {
+        super(false);
+    }
+
+    @Override
+    protected WidgetType getType() {
+        return WidgetType.DIALOG_BOX;
+    }
+
+    public void setCaption(final String caption) {
+        this.caption = caption;
+        final Update update = new Update(ID);
+        update.getMainProperty().setProperty(PropertyKey.POPUP_CAPTION, caption);
+        getPonySession().stackInstruction(update);
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
 }

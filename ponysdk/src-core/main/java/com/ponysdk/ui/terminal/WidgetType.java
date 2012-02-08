@@ -63,5 +63,6 @@ public enum WidgetType {
     ADDON,
     RICH_TEXT_AREA,
     DECORATED_POPUP_PANEL,
+    DIALOG_BOX,
     SUGGESTBOX;
 }

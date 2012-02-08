@@ -34,11 +34,11 @@ public abstract class PComplexPanel extends PPanel {
     private final PWidgetCollection children = new PWidgetCollection(this);
 
     @Override
-    public void add(PWidget child) {
+    public void add(final PWidget child) {
         insert(child, getChildren().size());
     }
 
-    public void insert(PWidget child, int beforeIndex) {
+    public void insert(final PWidget child, final int beforeIndex) {
         child.removeFromParent();
         getChildren().insert(child, beforeIndex);
         adopt(child);
@@ -49,7 +49,7 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
-    public boolean remove(PWidget w) {
+    public boolean remove(final PWidget w) {
         if (w.getParent() != this) return false;
         orphan(w);
         getChildren().remove(w);
