@@ -132,6 +132,7 @@ public interface PonySDKTheme {
     String NOTIFICATION_WARNING = "warning";
     String NOTIFICATION_ERROR = "error";
     String NOTIFICATION_TRAY = "tray";
+    String NOTIFICATION_CLOSING_ANIMATION = "closing";
 
     String CLOSABLE_DIALOGBOX = "pony-closable-dialog-box";
     String CLOSABLE_DIALOGBOX_HEADER = "header";

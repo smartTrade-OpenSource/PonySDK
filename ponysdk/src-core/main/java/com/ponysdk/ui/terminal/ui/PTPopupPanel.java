@@ -24,7 +24,6 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -34,7 +33,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -186,11 +184,11 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     }
 
     protected void onPreviewNativeEvent(final NativePreviewEvent event) {
-        NativeEvent nativeEvent = event.getNativeEvent();
-
-        if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN) /* && isCaptionEvent(nativeEvent) */) {
-            nativeEvent.preventDefault();
-        }
+        // NativeEvent nativeEvent = event.getNativeEvent();
+        // if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN) /* &&
+        // isCaptionEvent(nativeEvent) */) {
+        // nativeEvent.preventDefault();
+        // }
     }
 
 }

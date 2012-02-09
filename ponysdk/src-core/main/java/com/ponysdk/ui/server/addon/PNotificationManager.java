@@ -29,7 +29,6 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PPositionCallback;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
@@ -85,20 +84,20 @@ public class PNotificationManager {
         final PPopupPanel popupPanel = new PPopupPanel(true);
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_HUMANIZED);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_CLOSING_ANIMATION);
         popupPanel.setWidget(content);
 
         displayAtCenter(popupPanel);
-        addAutoCloseTimer(popupPanel, 1000);
     }
 
     private static void showWarningNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_WARNING);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_CLOSING_ANIMATION);
         popupPanel.setWidget(content);
 
         displayAtCenter(popupPanel);
-        addAutoCloseTimer(popupPanel, 2500);
     }
 
     private static void showErrorNotification(final IsPWidget content) {
@@ -128,10 +127,10 @@ public class PNotificationManager {
         popupPanel.setAnimationEnabled(true);
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_TRAY);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_CLOSING_ANIMATION);
         popupPanel.setWidget(div2);
 
         displayAtBottomRight(popupPanel);
-        addAutoCloseTimer(popupPanel, 2500);
     }
 
     private static void displayAtBottomRight(final PPopupPanel popupPanel) {
@@ -152,17 +151,6 @@ public class PNotificationManager {
                 popupPanel.setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2);
             }
         });
-    }
-
-    private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PTimer timer = new PTimer() {
-
-            @Override
-            public void run() {
-                popupPanel.addStyleName("closing");
-            }
-        };
-        timer.schedule(delayBeforeClosing);
     }
 
 }
