@@ -30,6 +30,7 @@ import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
+import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
@@ -139,6 +140,8 @@ public class UIFactory {
                 return new PTFlowPanel();
             case SUGGESTBOX:
                 return new PTSuggestBox();
+            case DISCLOSURE_PANEL:
+                return new PTDisclosurePanel();
             default:
                 Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
                 return null;

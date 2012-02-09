@@ -24,14 +24,17 @@
 package com.ponysdk.sample.client.page;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.ponysdk.core.PonySession;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;
-import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PSelectionEvent;
+import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
@@ -60,25 +63,16 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
         stackLayoutPanel.add(getHeader1Child(), "Header 1", true, 30);
         stackLayoutPanel.add(getHeader2Child(), "Header 2", true, 30);
 
+        stackLayoutPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
+
+            @Override
+            public void onSelection(final PSelectionEvent<Integer> event) {
+                String msg = "On selection : " + event.getSelectedItem();
+                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            }
+        });
+
         panel.add(stackLayoutPanel);
-        //
-        // // disclosure panel
-        // panel.add(new PLabel("Disclosure: "));
-        // final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details", new
-        // PImage("images/treeRightTriangleBlack.png"), new PImage("images/treeDownTriangleBlack.png"));
-        // disclosurePanel.setContent(getDisclosurePanelContent());
-        // panel.add(disclosurePanel);
-        //
-        // final PButton button = new PButton("add item");
-        // button.addClickHandler(new PClickHandler() {
-        //
-        // @Override
-        // public void onClick(final PClickEvent clickEvent) {
-        // header1Child.add(new PAnchor("Element at " + System.currentTimeMillis()));
-        // }
-        // });
-        //
-        // panel.add(button);
 
         examplePanel.setWidget(panel);
     }
@@ -102,15 +96,6 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
         final PSimplePanel container = new PSimplePanel();
         container.setWidget(header2Child);
         return container;
-    }
-
-    private PWidget getDisclosurePanelContent() {
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        verticalPanel.add(new PLabel("First Name: "));
-        verticalPanel.add(new PTextBox());
-        verticalPanel.add(new PLabel("Last Name: "));
-        verticalPanel.add(new PTextBox());
-        return verticalPanel;
     }
 
 }

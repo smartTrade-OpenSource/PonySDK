@@ -62,5 +62,6 @@ public enum WidgetType {
     PUSH_BUTTON,
     ADDON,
     RICH_TEXT_AREA,
-    SUGGESTBOX;
+    SUGGESTBOX,
+    DISCLOSURE_PANEL;
 }

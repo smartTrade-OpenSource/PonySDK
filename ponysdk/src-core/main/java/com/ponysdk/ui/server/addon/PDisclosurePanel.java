@@ -26,25 +26,20 @@ package com.ponysdk.ui.server.addon;
 import java.util.Iterator;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAddOn;
-import com.ponysdk.ui.server.basic.PComposite;
 import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.addon.disclosurepanel.PCDisclosurePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Add;
 
-public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn {
+public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
     private PWidget content;
 
-    public PDisclosurePanel(String headerText, PImage openImage, PImage closeImage) {
+    public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
         super();
-        initWidget(new PVerticalPanel());
         final Property mainProperty = new Property(PropertyKey.TEXT, headerText);
         mainProperty.setProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
         mainProperty.setProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
@@ -53,10 +48,10 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
 
     @Override
     protected WidgetType getType() {
-        return WidgetType.ADDON;
+        return WidgetType.DISCLOSURE_PANEL;
     }
 
-    public void setContent(PWidget content) {
+    public void setContent(final PWidget content) {
 
         final PWidget currentContent = getContent();
 
@@ -81,7 +76,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
     }
 
     @Override
-    public void add(PWidget w) {
+    public void add(final PWidget w) {
         if (this.getContent() == null) {
             setContent(w);
         } else {
@@ -90,7 +85,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
     }
 
     @Override
-    public void add(IsPWidget w) {
+    public void add(final IsPWidget w) {
         add(w.asWidget());
     }
 
@@ -100,7 +95,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
     }
 
     @Override
-    public boolean remove(PWidget w) {
+    public boolean remove(final PWidget w) {
         if (w == getContent()) {
             setContent(null);
             return true;
@@ -108,7 +103,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
         return false;
     }
 
-    public void setWidget(PWidget w) {
+    public void setWidget(final PWidget w) {
         // Validate
         if (w == content) { return; }
 
@@ -134,14 +129,9 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
         }
     }
 
-    private final void adopt(PWidget child) {
+    private final void adopt(final PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
-    }
-
-    @Override
-    public String getSignature() {
-        return PCDisclosurePanelAddon.SIGNATURE;
     }
 
 }

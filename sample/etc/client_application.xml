@@ -69,7 +69,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.TreePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.MenuBarPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.BasicTextBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.DecoratorPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" />
