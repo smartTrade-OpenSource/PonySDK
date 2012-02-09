@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.ponysdk.ui.server.addon.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;

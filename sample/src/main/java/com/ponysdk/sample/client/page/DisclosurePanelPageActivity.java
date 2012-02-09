@@ -23,16 +23,16 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.addon.PDisclosurePanel;
+import com.ponysdk.ui.server.basic.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
-public class DecoratorPanelPageActivity extends SamplePageActivity {
+public class DisclosurePanelPageActivity extends SamplePageActivity {
 
-    public DecoratorPanelPageActivity() {
+    public DisclosurePanelPageActivity() {
         super("Decorator Panel", "Panels");
     }
 
@@ -43,7 +43,7 @@ public class DecoratorPanelPageActivity extends SamplePageActivity {
         PVerticalPanel panel = new PVerticalPanel();
 
         final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details", new PImage("images/treeRightTriangleBlack.png"), new PImage("images/treeDownTriangleBlack.png"));
-        disclosurePanel.setContent(new PLabel("sdfjkslmfklkdsflksdlm"));
+        disclosurePanel.setContent(getDisclosurePanelContent());
         disclosurePanel.setWidth("200px");
         disclosurePanel.setHeight("200px");
 

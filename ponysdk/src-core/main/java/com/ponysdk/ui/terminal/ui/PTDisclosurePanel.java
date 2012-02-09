@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
 
 public class PTDisclosurePanel extends PTWidget {
@@ -35,14 +36,27 @@ public class PTDisclosurePanel extends PTWidget {
     public void create(final Create create, final UIService uiService) {
         final Property mainProperty = create.getMainProperty();
 
-        final String openImg = mainProperty.getStringProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG);
-        final String closeImg = mainProperty.getStringProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG);
+        final Long openImg = mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG);
+        final Long closeImg = mainProperty.getLongProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG);
         final String headerText = mainProperty.getValue();
 
-        PImageResource openImageResource = new PImageResource(openImg, 16, 16);
-        PImageResource closeImageResource = new PImageResource(closeImg, 16, 16);
+        PTImage open = (PTImage) uiService.getPTObject(openImg);
+        PTImage close = (PTImage) uiService.getPTObject(closeImg);
+
+        PImageResource openImageResource = new PImageResource(open.cast().getUrl(), 16, 16);
+        PImageResource closeImageResource = new PImageResource(close.cast().getUrl(), 16, 16);
 
         init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
     }
 
+    @Override
+    public void add(final Add add, final UIService uiService) {
+        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
+        cast().setContent(w);
+    }
+
+    @Override
+    public DisclosurePanel cast() {
+        return (DisclosurePanel) uiObject;
+    }
 }

@@ -21,13 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.addon;
+package com.ponysdk.ui.server.basic;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -51,18 +49,29 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         return WidgetType.DISCLOSURE_PANEL;
     }
 
-    public void setContent(final PWidget content) {
+    public void setContent(final PWidget w) {
+        // Validate
+        if (w == content) { return; }
 
-        final PWidget currentContent = getContent();
-
-        // Remove existing content widget.
-        if (currentContent != null) {
-            setWidget(null);
+        // Detach new child.
+        if (w != null) {
+            w.removeFromParent();
         }
 
-        // Add new content widget if != null.
+        // Remove old child.
         if (content != null) {
-            setWidget(content);
+            remove(content);
+        }
+
+        // Logical attach.
+        content = w;
+
+        if (w != null) {
+            // Physical attach.
+            final Add add = new Add(w.getID(), getID());
+            getPonySession().stackInstruction(add);
+
+            adopt(w);
         }
     }
 
@@ -72,7 +81,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
     @Override
     public Iterator<PWidget> iterator() {
-        return null;
+        return Arrays.asList(content).iterator();
     }
 
     @Override
@@ -101,32 +110,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
             return true;
         }
         return false;
-    }
-
-    public void setWidget(final PWidget w) {
-        // Validate
-        if (w == content) { return; }
-
-        // Detach new child.
-        if (w != null) {
-            w.removeFromParent();
-        }
-
-        // Remove old child.
-        if (content != null) {
-            remove(content);
-        }
-
-        // Logical attach.
-        content = w;
-
-        if (w != null) {
-            // Physical attach.
-            final Add add = new Add(w.getID(), getID());
-            getPonySession().stackInstruction(add);
-
-            adopt(w);
-        }
     }
 
     private final void adopt(final PWidget child) {
