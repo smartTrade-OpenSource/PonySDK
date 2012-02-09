@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-
 public interface PConfirmDialogHandler {
 
     boolean onOK(PDialogBox dialogBox);

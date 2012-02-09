@@ -40,13 +40,21 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositionCallback {
 
     private final boolean autoHide;
+
     private boolean glassEnabled;
+
     private boolean animationEnabled;
+
     private boolean center;
+
     private boolean showing;
+
     private int leftPosition;
+
     private int topPosition;
+
     private String glassStyleName;
+
     private PPositionCallback positionCallback;
 
     private final List<PCloseHandler> listeners = new ArrayList<PCloseHandler>();

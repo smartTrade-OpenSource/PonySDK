@@ -14,7 +14,9 @@ import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 public class PClosableDialogBox extends PPopupPanel {
 
     private final PSimplePanel captionContainer;
+
     private final PSimplePanel closeContainer;
+
     private final PSimplePanel contentContainer;
 
     public PClosableDialogBox() {
