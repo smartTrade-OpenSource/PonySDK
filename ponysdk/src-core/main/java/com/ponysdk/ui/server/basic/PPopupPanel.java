@@ -40,22 +40,14 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositionCallback {
 
     private final boolean autoHide;
-
     private boolean glassEnabled;
-
     private boolean animationEnabled;
-
-    private String glassStyleName;
-
     private boolean center;
-
-    private PPositionCallback positionCallback;
-
-    private int leftPosition;
-
-    private int topPosition;
-
     private boolean showing;
+    private int leftPosition;
+    private int topPosition;
+    private String glassStyleName;
+    private PPositionCallback positionCallback;
 
     private final List<PCloseHandler> listeners = new ArrayList<PCloseHandler>();
 
@@ -82,15 +74,29 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         return WidgetType.POPUP_PANEL;
     }
 
-    public void setGlassEnabled(boolean glassEnabled) {
+    public void setModal(final boolean modal) {
+        final Update update = new Update(ID);
+        update.setMainPropertyValue(PropertyKey.POPUP_MODAL, modal);
+        getPonySession().stackInstruction(update);
+    }
+
+    public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.POPUP_GLASS_ENABLED, glassEnabled);
         getPonySession().stackInstruction(update);
     }
 
+    public void setDraggable(final boolean draggable) {
+        if (draggable) {
+            final Update update = new Update(ID);
+            update.setMainPropertyValue(PropertyKey.POPUP_DRAGGABLE, true);
+            getPonySession().stackInstruction(update);
+        }
+    }
+
     @Override
-    public void setAnimationEnabled(boolean animationEnabled) {
+    public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.ANIMATION, animationEnabled);
@@ -122,7 +128,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         }
     }
 
-    public void setGlassStyleName(String glassStyleName) {
+    public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.POPUP_GLASS_STYLE_NAME, glassStyleName);
@@ -142,7 +148,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         return showing;
     }
 
-    public void setPopupPosition(int left, int top) {
+    public void setPopupPosition(final int left, final int top) {
         leftPosition = left;
         topPosition = top;
 
@@ -155,7 +161,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         getPonySession().stackInstruction(updateLeft);
     }
 
-    public void setPopupPositionAndShow(PPositionCallback callback) {
+    public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
         final AddHandler handler = new AddHandler(ID, HandlerType.POPUP_POSITION_CALLBACK); // remove ordinal
@@ -163,12 +169,12 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         getPonySession().stackInstruction(handler);
     }
 
-    public void addCloseHandler(PCloseHandler handler) {
+    public void addCloseHandler(final PCloseHandler handler) {
         listeners.add(handler);
     }
 
     @Override
-    public void onEventInstruction(EventInstruction instruction) {
+    public void onEventInstruction(final EventInstruction instruction) {
         if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getHandlerType())) {
             final Integer windowWidth = instruction.getMainProperty().getIntProperty(PropertyKey.OFFSETWIDTH);
             final Integer windowHeight = instruction.getMainProperty().getIntProperty(PropertyKey.OFFSETHEIGHT);
@@ -190,7 +196,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     }
 
     @Override
-    public void setPosition(int offsetWidth, int offsetHeight, int windowWidth, int windowHeight) {
+    public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
         this.positionCallback.setPosition(offsetWidth, offsetHeight, windowWidth, windowHeight);
         setVisible(true);
     }

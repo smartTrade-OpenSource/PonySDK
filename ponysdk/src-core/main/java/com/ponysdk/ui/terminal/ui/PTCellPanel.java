@@ -36,7 +36,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PTCellPanel extends PTComplexPanel {
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();

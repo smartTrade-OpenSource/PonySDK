@@ -45,7 +45,7 @@ public class HTMLPageActivity extends PageActivity {
     protected void onLeavingPage() {}
 
     @Override
-    protected void onShowPage(Place place) {
+    protected void onShowPage(final Place place) {
         final PVerticalPanel verticalPanel = new PVerticalPanel();
 
         final PHTML htmlBold = new PHTML("<b>Pony Bold</b>");
@@ -55,8 +55,8 @@ public class HTMLPageActivity extends PageActivity {
         htmlClickable.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
-                PNotificationManager.notify("HTML", "clicked!");
+            public void onClick(final PClickEvent clickEvent) {
+                PNotificationManager.showTrayNotification("HTML clicked!");
             }
         });
 

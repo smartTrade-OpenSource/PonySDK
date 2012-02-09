@@ -27,6 +27,8 @@ import com.ponysdk.core.event.BusinessEvent.Level;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
+import com.ponysdk.ui.server.addon.PNotificationManager;
+import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
@@ -44,7 +46,7 @@ public class EventPageActivity extends PageActivity {
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
@@ -53,13 +55,14 @@ public class EventPageActivity extends PageActivity {
     protected void onFirstShowPage() {
         final PVerticalPanel panel = new PVerticalPanel();
 
+        // Send 'info' business event
         final PHorizontalPanel infoPanel = new PHorizontalPanel();
-        final PTextBox textField = new PTextBox();
+        final PTextBox textField = new PTextBox("This is an info event");
         final PButton ok = new PButton("send [INFO]");
         ok.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
                 businessEvent.setBusinessMessage(textField.getText());
                 fireEvent(businessEvent);
@@ -69,14 +72,15 @@ public class EventPageActivity extends PageActivity {
         infoPanel.add(textField);
         infoPanel.add(ok);
 
+        // Send 'warn' business event
         final PHorizontalPanel warningPanel = new PHorizontalPanel();
-        final PTextBox textField2 = new PTextBox();
+        final PTextBox textField2 = new PTextBox("This is a warning event");
         final PButton ok2 = new PButton("send [WARN]");
 
         ok2.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
                 businessEvent.setLevel(Level.WARNING);
                 businessEvent.setBusinessMessage(textField2.getText());
@@ -87,14 +91,15 @@ public class EventPageActivity extends PageActivity {
         warningPanel.add(textField2);
         warningPanel.add(ok2);
 
+        // Send 'error' business level
         final PHorizontalPanel errorPanel = new PHorizontalPanel();
-        final PTextBox textField3 = new PTextBox();
+        final PTextBox textField3 = new PTextBox("This is an error event");
         final PButton ok3 = new PButton("send [ERROR]");
 
         ok3.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
                 businessEvent.setLevel(Level.ERROR);
                 businessEvent.setBusinessMessage(textField3.getText());
@@ -105,9 +110,28 @@ public class EventPageActivity extends PageActivity {
         errorPanel.add(textField3);
         errorPanel.add(ok3);
 
+        // Show 'tray' notification
+        final PHorizontalPanel trayPanel = new PHorizontalPanel();
+        final PTextBox textField4 = new PTextBox("This is a tray notification");
+        final PButton ok4 = new PButton("show [TRAY]");
+
+        ok4.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                PNotificationManager.notify(textField4.getText(), Notification.TRAY);
+            }
+        });
+
+        trayPanel.add(textField4);
+        trayPanel.add(ok4);
+
+        // Build page
+
         panel.add(infoPanel);
         panel.add(warningPanel);
         panel.add(errorPanel);
+        panel.add(trayPanel);
 
         pageView.getBody().setWidget(panel);
     }

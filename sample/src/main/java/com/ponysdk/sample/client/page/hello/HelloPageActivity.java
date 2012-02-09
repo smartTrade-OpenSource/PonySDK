@@ -54,10 +54,10 @@ public class HelloPageActivity extends PageActivity {
     protected void onLeavingPage() {}
 
     @Override
-    protected void onShowPage(Place place) {
+    protected void onShowPage(final Place place) {
         if (place instanceof HelloPlace) {} else if (place instanceof HelloPagePopupPlace) {
             final HelloPagePopupPlace popupPanel = (HelloPagePopupPlace) place;
-            PNotificationManager.notify(popupPanel.getContent());
+            PNotificationManager.showTrayNotification("Going to HelloPagePopupPlace " + popupPanel.getContent());
         }
     }
 
@@ -71,12 +71,12 @@ public class HelloPageActivity extends PageActivity {
         openStreamButon.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final StreamResource streamResource = new StreamResource();
                 streamResource.open(new StreamHandler() {
 
                     @Override
-                    public void onStream(HttpServletRequest req, HttpServletResponse response) {
+                    public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
                         response.setContentType("text/text");
                         response.setHeader("Content-Disposition", "attachment; filename=" + "toto.txt");
                         PrintWriter printer;
@@ -96,7 +96,7 @@ public class HelloPageActivity extends PageActivity {
         pageView.getBody().setWidget(verticalPanel);
     }
 
-    public HelloPagePopupPlace newPopupPlace(String content) {
+    public HelloPagePopupPlace newPopupPlace(final String content) {
         final HelloPagePopupPlace pagePlace = new HelloPagePopupPlace(this, content);
         return pagePlace;
     }

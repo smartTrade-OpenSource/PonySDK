@@ -25,6 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.addon.PNotificationManager;
+import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
 import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PMenuBar;
@@ -74,7 +75,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
 
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", newItem.getText());
+                PNotificationManager.notify("Menu Selection, " + newItem.getText(), Notification.HUMANIZED);
             }
         });
         final PMenuItem openItem = new PMenuItem("Open");
@@ -82,7 +83,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
 
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", openItem.getText());
+                PNotificationManager.notify("Menu Selection, " + openItem.getText(), Notification.HUMANIZED);
             }
         });
 
@@ -91,7 +92,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
 
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", closeItem.getText());
+                PNotificationManager.notify("Menu Selection, " + closeItem.getText(), Notification.HUMANIZED);
             }
         });
 
@@ -109,7 +110,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
 
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", recent1.getText());
+                PNotificationManager.notify("Menu Selection, " + recent1.getText(), Notification.HUMANIZED);
             }
         });
         final PMenuItem recent2 = new PMenuItem("recent2");
@@ -117,7 +118,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
 
             @Override
             public void execute() {
-                PNotificationManager.notify("Menu Selection", recent2.getText());
+                PNotificationManager.notify("Menu Selection, " + recent2.getText(), Notification.HUMANIZED);
             }
         });
 

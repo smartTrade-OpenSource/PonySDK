@@ -23,85 +23,146 @@
 
 package com.ponysdk.ui.server.addon;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.server.basic.PAddOn;
+import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.server.basic.PPopupPanel;
+import com.ponysdk.ui.server.basic.PPositionCallback;
+import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PTimer;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class PNotificationManager implements PAddOn {
+public class PNotificationManager {
 
     public enum Notification {
         TRAY, HUMANIZED, WARNING_MESSAGE, ERROR_MESSAGE;
     }
 
-    public static void notify(String title, String message, Notification notification) {
-
+    public static void notify(final String message, final Notification notification) {
         switch (notification) {
             case TRAY:
-                notify(title, message);
+                showTrayNotification(new PLabel(message), 2500);
                 break;
             case HUMANIZED:
-                notify(title, message, "HUMANIZED");
+                showHumanizedNotification(new PLabel(message));
                 break;
             case WARNING_MESSAGE:
-                notify(title, message, "WARNING_MESSAGE");
+                showWarningNotification(new PLabel(message));
                 break;
             case ERROR_MESSAGE:
-                notify(title, message, "ERROR_MESSAGE");
+                showErrorNotification(new PLabel(message));
                 break;
             default:
                 break;
         }
-
     }
 
-    private static void notify(String title, String message, String styleName) {
-        final PDialogBox confirmDialog = new PDialogBox();
-        confirmDialog.setAnimationEnabled(true);
-        confirmDialog.setGlassEnabled(true);
-        confirmDialog.setClosable(true);
-        confirmDialog.addStyleName(styleName);
-
-        final PVerticalPanel dialogContent = new PVerticalPanel();
-        dialogContent.add(new PLabel(message));
-
-        confirmDialog.setText(title);
-        confirmDialog.setWidget(dialogContent);
-        confirmDialog.show();
-        confirmDialog.center();
+    public static void notify(final IsPWidget content, final Notification notification) {
+        switch (notification) {
+            case TRAY:
+                showTrayNotification(content, 2500);
+                break;
+            case HUMANIZED:
+                showHumanizedNotification(content);
+                break;
+            case WARNING_MESSAGE:
+                showWarningNotification(content);
+                break;
+            case ERROR_MESSAGE:
+                showErrorNotification(content);
+                break;
+            default:
+                break;
+        }
     }
 
-    // must be implemented server side
-    public static void notify(String caption, String content) {
-        final PonySession ponySession = PonySession.getCurrent();
-        final long ID = ponySession.nextID();
-        final Create create = new Create(ID, WidgetType.ADDON);
-        create.setAddOnSignature(com.ponysdk.ui.terminal.addon.notification.NotificationAddon.SIGNATURE);
-        ponySession.stackInstruction(create);
-
-        // ponySession.addWidget(ID, this);
-        create.getMainProperty().setProperty(PropertyKey.NOTIFICATION_CAPTION, caption != null ? caption : "");
-        create.getMainProperty().setProperty(PropertyKey.NOTIFICATION_MESSAGE, content != null ? content : "");
+    public static void showTrayNotification(final String message) {
+        showTrayNotification(new PLabel(message), 2500);
     }
 
-    public static void notify(String caption) {
-        final PonySession ponySession = PonySession.getCurrent();
-        final long ID = ponySession.nextID();
-        final Create create = new Create(ID, WidgetType.ADDON);
-        create.setAddOnSignature(com.ponysdk.ui.terminal.addon.notification.NotificationAddon.SIGNATURE);
-        ponySession.stackInstruction(create);
+    private static void showHumanizedNotification(final IsPWidget content) {
+        final PPopupPanel popupPanel = new PPopupPanel(true);
+        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_HUMANIZED);
+        popupPanel.setWidget(content);
 
-        // ponySession.addWidget(ID, this);
-        create.getMainProperty().setProperty(PropertyKey.NOTIFICATION_CAPTION, caption != null ? caption : "");
-        create.getMainProperty().setProperty(PropertyKey.NOTIFICATION_MESSAGE, "");
+        displayAtCenter(popupPanel);
+        addAutoCloseTimer(popupPanel, 1000);
     }
 
-    @Override
-    public String getSignature() {
-        return com.ponysdk.ui.terminal.addon.notification.NotificationAddon.SIGNATURE;
+    private static void showWarningNotification(final IsPWidget content) {
+        final PPopupPanel popupPanel = new PPopupPanel(true);
+        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_WARNING);
+        popupPanel.setWidget(content);
+
+        displayAtCenter(popupPanel);
+        addAutoCloseTimer(popupPanel, 2500);
+    }
+
+    private static void showErrorNotification(final IsPWidget content) {
+        final PPopupPanel popupPanel = new PPopupPanel(false);
+        popupPanel.setGlassEnabled(true);
+        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_ERROR);
+        popupPanel.setWidget(content);
+        popupPanel.addDomHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                popupPanel.hide();
+            }
+        }, PClickEvent.TYPE);
+
+        displayAtCenter(popupPanel);
+    }
+
+    private static void showTrayNotification(final IsPWidget content, final int delayBeforeClosing) {
+        final PSimplePanel div2 = new PSimplePanel();
+        div2.setWidget(content);
+        div2.setWidth("200px");
+        div2.setHeight("70px");
+
+        final PPopupPanel popupPanel = new PPopupPanel(true);
+        popupPanel.setAnimationEnabled(true);
+        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_TRAY);
+        popupPanel.setWidget(div2);
+
+        displayAtBottomRight(popupPanel);
+        addAutoCloseTimer(popupPanel, 2500);
+    }
+
+    private static void displayAtBottomRight(final PPopupPanel popupPanel) {
+        popupPanel.setPopupPositionAndShow(new PPositionCallback() {
+
+            @Override
+            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
+                popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
+            }
+        });
+    }
+
+    private static void displayAtCenter(final PPopupPanel popupPanel) {
+        popupPanel.setPopupPositionAndShow(new PPositionCallback() {
+
+            @Override
+            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
+                popupPanel.setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2);
+            }
+        });
+    }
+
+    private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
+        PTimer timer = new PTimer() {
+
+            @Override
+            public void run() {
+                popupPanel.addStyleName("closing");
+            }
+        };
+        timer.schedule(delayBeforeClosing);
     }
 
 }

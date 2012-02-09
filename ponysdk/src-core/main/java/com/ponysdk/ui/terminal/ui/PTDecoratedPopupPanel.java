@@ -23,6 +23,21 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Create;
+
 public class PTDecoratedPopupPanel extends PTPopupPanel {
+
+    @Override
+    public void create(final Create create, final UIService uiService) {
+        init(create, uiService, new com.google.gwt.user.client.ui.DecoratedPopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        addCloseHandler(create, uiService);
+    }
+
+    @Override
+    public com.google.gwt.user.client.ui.DecoratedPopupPanel cast() {
+        return (com.google.gwt.user.client.ui.DecoratedPopupPanel) uiObject;
+    }
 
 }

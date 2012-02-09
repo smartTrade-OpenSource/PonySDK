@@ -30,6 +30,8 @@ import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
+import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
+import com.ponysdk.ui.terminal.ui.PTDialogBox;
 import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
@@ -130,12 +132,16 @@ public class UIFactory {
                 return new PTMenuItemSeparator();
             case POPUP_PANEL:
                 return new PTPopupPanel();
+            case DECORATED_POPUP_PANEL:
+                return new PTDecoratedPopupPanel();
             case TIMER:
                 return new PTTimer();
             case COMPOSITE:
                 return new PTComposite();
             case RICH_TEXT_AREA:
                 return new PTRichTextArea();
+            case DIALOG_BOX:
+                return new PTDialogBox();
             case FLOW_PANEL:
                 return new PTFlowPanel();
             case SUGGESTBOX:

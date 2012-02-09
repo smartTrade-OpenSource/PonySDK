@@ -23,6 +23,20 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.terminal.WidgetType;
+
 public class PDecoratedPopupPanel extends PPopupPanel {
 
+    public PDecoratedPopupPanel() {
+        super();
+    }
+
+    public PDecoratedPopupPanel(final boolean autoHide) {
+        super(autoHide);
+    }
+
+    @Override
+    protected WidgetType getType() {
+        return WidgetType.DECORATED_POPUP_PANEL;
+    }
 }

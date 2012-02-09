@@ -51,15 +51,15 @@ public class TabPanelPageActivity extends PageActivity {
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
 
             @Override
-            public void onBeforeSelection(Integer index) {
-                PNotificationManager.notify("onBeforeSelection", "Tab index : " + index);
+            public void onBeforeSelection(final Integer index) {
+                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + index);
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
 
             @Override
-            public void onSelection(PSelectionEvent<Integer> event) {
-                PNotificationManager.notify("onSelection", "Tab index : " + event.getSelectedItem());
+            public void onSelection(final PSelectionEvent<Integer> event) {
+                PNotificationManager.showTrayNotification("onSelection, tab index : " + event.getSelectedItem());
             }
         });
     }
@@ -68,7 +68,7 @@ public class TabPanelPageActivity extends PageActivity {
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
@@ -86,7 +86,7 @@ public class TabPanelPageActivity extends PageActivity {
         button.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 final PVerticalPanel tabContent = new PVerticalPanel();
                 tabContent.setSizeFull();
 

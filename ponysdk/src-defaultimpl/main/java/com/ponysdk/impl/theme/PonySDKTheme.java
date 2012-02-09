@@ -127,4 +127,18 @@ public interface PonySDKTheme {
 
     String LOGIN_PAGE_LOGO = "pony-LoginPage-Logo";
 
+    String NOTIFICATION = "pony-notification";
+    String NOTIFICATION_HUMANIZED = "humanized";
+    String NOTIFICATION_WARNING = "warning";
+    String NOTIFICATION_ERROR = "error";
+    String NOTIFICATION_TRAY = "tray";
+
+    String CLOSABLE_DIALOGBOX = "pony-closable-dialog-box";
+    String CLOSABLE_DIALOGBOX_HEADER = "header";
+    String CLOSABLE_DIALOGBOX_CAPTION = "caption";
+    String CLOSABLE_DIALOGBOX_CLOSE = "close";
+    String CLOSABLE_DIALOGBOX_CONTENT = "content";
+
+    String DIALOGBOX = "pony-DialogBox";
+    String DIALOGBOX_CONTROLS = "dialogControls";
 }

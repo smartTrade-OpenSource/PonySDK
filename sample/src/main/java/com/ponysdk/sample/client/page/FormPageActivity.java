@@ -54,7 +54,7 @@ public class FormPageActivity extends PageActivity {
     protected void onInitialization() {}
 
     @Override
-    protected void onShowPage(Place place) {}
+    protected void onShowPage(final Place place) {}
 
     @Override
     protected void onLeavingPage() {}
@@ -103,10 +103,9 @@ public class FormPageActivity extends PageActivity {
         validateButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
-
+            public void onClick(final PClickEvent clickEvent) {
                 final boolean isValid = formActivity.isValid();
-                PNotificationManager.notify("The form is valid?", isValid ? "YES" : "NO");
+                PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
             }
         });
         layout.add(validateButton);

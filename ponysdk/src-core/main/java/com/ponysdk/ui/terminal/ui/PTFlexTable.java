@@ -42,31 +42,10 @@ public class PTFlexTable extends PTHTMLTable {
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
 
-        if (PropertyKey.CLEAR.equals(propertyKey)) {
-            cast().clear();
-        } else if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
+        if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
             cast().removeRow(property.getIntValue());
         } else if (PropertyKey.INSERT_ROW.equals(propertyKey)) {
             cast().insertRow(property.getIntValue());
-        } else if (PropertyKey.HTMLTABLE_ROW_STYLE.equals(propertyKey)) {
-            final int row = property.getChildProperty(PropertyKey.ROW).getIntValue();
-            final Property addProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_ADD_STYLE_NAME);
-            final Property removeProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_REMOVE_STYLE_NAME);
-            if (addProperty != null) {
-                cast().getRowFormatter().addStyleName(row, addProperty.getValue());
-            } else {
-                cast().getRowFormatter().removeStyleName(row, removeProperty.getValue());
-            }
-        } else if (PropertyKey.HTMLTABLE_CELL_STYLE.equals(propertyKey)) {
-            final int cellRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
-            final int cellColumn = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-            final Property addCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_ADD_STYLE_NAME);
-            final Property removeCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME);
-            if (addCellProperty != null) {
-                cast().getCellFormatter().addStyleName(cellRow, cellColumn, addCellProperty.getValue());
-            } else {
-                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, removeCellProperty.getValue());
-            }
         } else if (PropertyKey.FLEXTABLE_CELL_FORMATTER.equals(propertyKey)) {
             final int cellFormatterRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
             final int cellFormatterColumn = property.getChildProperty(PropertyKey.COLUMN).getIntValue();

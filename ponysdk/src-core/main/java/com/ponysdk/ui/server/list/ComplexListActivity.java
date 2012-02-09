@@ -49,7 +49,6 @@ import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -57,8 +56,8 @@ import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PCommand;
-import com.ponysdk.ui.server.basic.PConfirmDialog;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -116,10 +115,11 @@ import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.list.valueprovider.BooleanValueProvider;
 import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
+import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, ShowCustomColumnDescriptorFormHandler,
-    ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
+        ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
 
     private SimpleListActivity<D> simpleListActivity;
 
@@ -533,7 +533,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
                         final SelectionResult<D> selectionResult = getSelectedData();
                         if (selectionResult.getSelectedData() != null && selectionResult.getSelectedData().isEmpty()) {
-                            PNotificationManager.notify("Export failed", "Please select data to export", Notification.WARNING_MESSAGE);
+                            PNotificationManager.notify("Export failed, please select data to export", Notification.WARNING_MESSAGE);
                             return;
                         }
                         final Query query = createQuery(currentPage);

@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
+import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.Update;
@@ -44,16 +46,16 @@ public abstract class PHTMLTable extends PPanel {
 
         private int value;
 
-        protected Row(int value) {
+        protected Row(final int value) {
             this.value = value;
         }
 
-        public void setValue(int value) {
+        public void setValue(final int value) {
             this.value = value;
         }
 
         @Override
-        public int compareTo(Row row) {
+        public int compareTo(final Row row) {
             return value >= row.value ? (value != row.value ? 1 : 0) : -1;
         }
     }
@@ -64,16 +66,16 @@ public abstract class PHTMLTable extends PPanel {
 
         private int column;
 
-        protected Cell(int rowIndex, int cellIndex) {
+        protected Cell(final int rowIndex, final int cellIndex) {
             this.column = cellIndex;
             this.row = rowIndex;
         }
 
-        public void setRow(int row) {
+        public void setRow(final int row) {
             this.row = row;
         }
 
-        public void setColumn(int column) {
+        public void setColumn(final int column) {
             this.column = column;
         }
 
@@ -113,7 +115,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        public void insertRowStyle(int row) {
+        public void insertRowStyle(final int row) {
             final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() >= row) {
@@ -124,7 +126,7 @@ public abstract class PHTMLTable extends PPanel {
             styleNames = temp;
         }
 
-        public void removeRowStyle(int row) {
+        public void removeRowStyle(final int row) {
             styleNames.remove(row);
             final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
@@ -138,7 +140,7 @@ public abstract class PHTMLTable extends PPanel {
 
     public class PCellFormatter {
 
-        public void addStyleName(int row, int column, String styleName) {
+        public void addStyleName(final int row, final int column, final String styleName) {
             final Update update = new Update(ID);
             update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
             update.getMainProperty().setProperty(PropertyKey.ROW, row);
@@ -147,7 +149,7 @@ public abstract class PHTMLTable extends PPanel {
             getPonySession().stackInstruction(update);
         }
 
-        public void removeStyleName(int row, int column, String styleName) {
+        public void removeStyleName(final int row, final int column, final String styleName) {
             final Update update = new Update(ID);
             update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
             update.getMainProperty().setProperty(PropertyKey.ROW, row);
@@ -155,19 +157,38 @@ public abstract class PHTMLTable extends PPanel {
             update.getMainProperty().setProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
+
+        public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
+            update.getMainProperty().setProperty(PropertyKey.ROW, row);
+            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
+            update.getMainProperty().setProperty(PropertyKey.CELL_VERTICAL_ALIGNMENT, align.ordinal());
+            getPonySession().stackInstruction(update);
+        }
+
+        public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
+            final Update update = new Update(getID());
+            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
+            update.getMainProperty().setProperty(PropertyKey.ROW, row);
+            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
+            update.getMainProperty().setProperty(PropertyKey.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
+            getPonySession().stackInstruction(update);
+        }
     }
 
     public class PColumnFormatter {
 
-        public void setWidth(int column, String width) {
+        public void setWidth(final int column, final String width) {
             final Update update = new Update(ID);
+            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
             update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_COLUMN_WIDTH);
             update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
             update.getMainProperty().setProperty(PropertyKey.WIDTH, width);
             getPonySession().stackInstruction(update);
         }
 
-        public void addStyleName(int column, String styleName) {
+        public void addStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
             update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_ADD_STYLE_NAME);
             update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
@@ -175,7 +196,7 @@ public abstract class PHTMLTable extends PPanel {
             getPonySession().stackInstruction(update);
         }
 
-        public void removeStyleName(int column, String styleName) {
+        public void removeStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
             update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_REMOVE_STYLE_NAME);
             update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
@@ -205,13 +226,13 @@ public abstract class PHTMLTable extends PPanel {
         return columnByRow.lastKey().value;
     }
 
-    public int getCellCount(int row) {
+    public int getCellCount(final int row) {
         final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
         if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
         return cellByColumn.lastKey();
     }
 
-    public void clearCell(int row, int col) {
+    public void clearCell(final int row, final int col) {
         final PWidget widget = getWidgetFromMap(row, col);
         if (widget != null) {
             remove(widget);
@@ -238,7 +259,7 @@ public abstract class PHTMLTable extends PPanel {
         return borderWidth;
     }
 
-    public PWidget getWidget(int row, int column) {
+    public PWidget getWidget(final int row, final int column) {
         return getWidgetFromMap(row, column);
     }
 
@@ -256,7 +277,7 @@ public abstract class PHTMLTable extends PPanel {
         stackUpdate(PropertyKey.CLEAR, "");
     }
 
-    public void removeRow(int row) {
+    public void removeRow(final int row) {
         final TreeMap<Integer, PWidget> widgetByColumn = columnByRow.remove(new Row(row));
         if (widgetByColumn == null) return;
         getRowFormatter().removeRowStyle(row);
@@ -281,7 +302,7 @@ public abstract class PHTMLTable extends PPanel {
 
     }
 
-    public void insertRow(int row) {
+    public void insertRow(final int row) {
         for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
             final Row irow = entry.getKey();
             if (irow.value >= row) {
@@ -297,11 +318,11 @@ public abstract class PHTMLTable extends PPanel {
     }
 
     @Override
-    public boolean remove(PWidget widget) {
+    public boolean remove(final PWidget widget) {
         return remove(widget, true);
     }
 
-    private boolean remove(PWidget widget, boolean physicalDetach) {
+    private boolean remove(final PWidget widget, final boolean physicalDetach) {
         // Validate.
         if (widget.getParent() != this) { return false; }
 
@@ -321,26 +342,26 @@ public abstract class PHTMLTable extends PPanel {
         return true;
     }
 
-    public void setBorderWidth(int width) {
+    public void setBorderWidth(final int width) {
         this.borderWidth = width;
         stackUpdate(PropertyKey.BORDER_WIDTH, Integer.toString(width));
     }
 
-    public void setCellPadding(int padding) {
+    public void setCellPadding(final int padding) {
         cellPadding = padding;
         stackUpdate(PropertyKey.CELL_PADDING, Integer.toString(padding));
     }
 
-    public void setCellSpacing(int spacing) {
+    public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
         stackUpdate(PropertyKey.CELL_SPACING, Integer.toString(spacing));
     }
 
-    protected void setCellFormatter(PCellFormatter cellFormatter) {
+    protected void setCellFormatter(final PCellFormatter cellFormatter) {
         this.cellFormatter = cellFormatter;
     }
 
-    public void setWidget(int row, int column, PWidget widget) {
+    public void setWidget(final int row, final int column, final PWidget widget) {
         if (widget != null) {
             widget.removeFromParent();
 
@@ -359,13 +380,13 @@ public abstract class PHTMLTable extends PPanel {
         }
     }
 
-    private PWidget getWidgetFromMap(int row, int column) {
+    private PWidget getWidgetFromMap(final int row, final int column) {
         final Map<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
         if (cellByColumn != null) { return cellByColumn.get(column); }
         return null;
     }
 
-    private PWidget removeWidgetFromMap(PWidget widget) {
+    private PWidget removeWidgetFromMap(final PWidget widget) {
         final Cell cell = cellByWidget.remove(widget);
         final Row row = new Row(cell.row);
         final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
@@ -379,7 +400,7 @@ public abstract class PHTMLTable extends PPanel {
         return null;
     }
 
-    private void addWidgetToMap(int row, int column, PWidget widget) {
+    private void addWidgetToMap(final int row, final int column, final PWidget widget) {
         final Row irow = new Row(row);
         final Cell cell = new Cell(row, column);
         cellByWidget.put(widget, cell);

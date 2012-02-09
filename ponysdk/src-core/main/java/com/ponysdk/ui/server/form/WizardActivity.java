@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;

@@ -56,14 +56,14 @@ public class FileUploadPageActivity extends SamplePageActivity {
 
             @Override
             public void onSubmitComplete() {
-                PNotificationManager.notify("Submit file '" + fileUpload.getFileName() + "'");
+                PNotificationManager.showTrayNotification("File uploaded, submit file '" + fileUpload.getFileName() + "'");
             }
         });
 
         fileUpload.addStreamHandler(new StreamHandler() {
 
             @Override
-            public void onStream(HttpServletRequest request, HttpServletResponse response) {
+            public void onStream(final HttpServletRequest request, final HttpServletResponse response) {
                 try {
                     response.setStatus(HttpServletResponse.SC_CREATED);
                     response.getWriter().print("The file was created successfully.");
@@ -81,7 +81,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
         submitButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 fileUpload.submit();
             }
         });

@@ -28,20 +28,20 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.ui.server.addon.PDialogBox;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.POptionPane;
-import com.ponysdk.ui.server.basic.POptionPane.PActionHandler;
-import com.ponysdk.ui.server.basic.POptionPane.POption;
-import com.ponysdk.ui.server.basic.POptionPane.POptionType;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PPositionCallback;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.rich.POptionPane;
+import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
+import com.ponysdk.ui.server.rich.POptionPane.POption;
+import com.ponysdk.ui.server.rich.POptionPane.POptionType;
 
 public class SampleHeaderActivity extends HeaderActivity {
 

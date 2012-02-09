@@ -55,7 +55,7 @@ public class ListBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final Object source, final int selectedIndex) {
-                PNotificationManager.notify("Item selected", "Item selected : " + listBoxApplied.getSelectedItem());
+                PNotificationManager.showTrayNotification("Item selected : " + listBoxApplied.getSelectedItem());
             }
         });
 
