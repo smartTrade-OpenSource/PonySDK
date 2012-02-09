@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -33,6 +34,8 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.HandlerType;
@@ -60,7 +63,19 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.PopupPanel(create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE)));
+        boolean autoHide = create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE);
+
+        com.google.gwt.user.client.ui.PopupPanel popup = new com.google.gwt.user.client.ui.PopupPanel(autoHide) {
+
+            @Override
+            protected void onPreviewNativeEvent(final NativePreviewEvent event) {
+                PTPopupPanel.this.onPreviewNativeEvent(event);
+
+                super.onPreviewNativeEvent(event);
+            }
+        };
+
+        init(create, uiService, popup);
         addCloseHandler(create, uiService);
 
         windowWidth = Window.getClientWidth();
@@ -129,6 +144,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 popup.addDomHandler(this, MouseDownEvent.getType());
                 popup.addDomHandler(this, MouseUpEvent.getType());
                 popup.addDomHandler(this, MouseMoveEvent.getType());
+
             }
         } else {
             super.update(update, uiService);
@@ -167,6 +183,14 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     public void onMouseUp(final MouseUpEvent event) {
         dragging = false;
         DOM.releaseCapture(uiObject.getElement());
+    }
+
+    protected void onPreviewNativeEvent(final NativePreviewEvent event) {
+        NativeEvent nativeEvent = event.getNativeEvent();
+
+        if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN) /* && isCaptionEvent(nativeEvent) */) {
+            nativeEvent.preventDefault();
+        }
     }
 
 }

@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.rich;
 
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PComposite;
 import com.ponysdk.ui.server.basic.PDialogBox;
@@ -70,8 +71,7 @@ public class POptionPane extends PComposite {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
-
-        dialogBox.addStyleName("pony-ConfirmDialogBox");
+        dialogBox.setStyleName(PonySDKTheme.DIALOGBOX);
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
         dialogBox.setTitle(title);
@@ -82,7 +82,7 @@ public class POptionPane extends PComposite {
         final PLabel content = new PLabel(message);
         panel.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName("confirmDialogControls");
+        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {

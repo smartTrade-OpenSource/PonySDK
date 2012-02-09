@@ -139,6 +139,6 @@ public interface PonySDKTheme {
     String CLOSABLE_DIALOGBOX_CLOSE = "close";
     String CLOSABLE_DIALOGBOX_CONTENT = "content";
 
-    String CONFIRM_DIALOGBOX = "pony-ConfirmDialogBox";
-    String CONFIRM_DIALOGBOX_CONTROLS = "confirmDialogControls";
+    String DIALOGBOX = "pony-DialogBox";
+    String DIALOGBOX_CONTROLS = "dialogControls";
 }

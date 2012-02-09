@@ -71,14 +71,14 @@ public class PConfirmDialog extends PDialogBox {
 
     public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = new PConfirmDialog();
-        confirmDialog.setStyleName(PonySDKTheme.CONFIRM_DIALOGBOX);
+        confirmDialog.setStyleName(PonySDKTheme.DIALOGBOX);
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
         final PVerticalPanel dialogContent = new PVerticalPanel();
         dialogContent.setWidth("100%");
         dialogContent.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName(PonySDKTheme.CONFIRM_DIALOGBOX_CONTROLS);
+        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
         controlsPanel.setWidth("100%");
 
