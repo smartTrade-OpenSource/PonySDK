@@ -119,7 +119,7 @@ import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, ShowCustomColumnDescriptorFormHandler,
-    ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
+        ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
 
     private SimpleListActivity<D> simpleListActivity;
 

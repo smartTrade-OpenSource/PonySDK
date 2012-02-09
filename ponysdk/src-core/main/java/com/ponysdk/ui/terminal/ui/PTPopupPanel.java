@@ -192,5 +192,4 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             nativeEvent.preventDefault();
         }
     }
-
 }
