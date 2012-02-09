@@ -1271,10 +1271,14 @@ a.header{
 .pony-Loading:hover {}
 
 
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent{
+.gwt-TabLayoutPanel{
 	padding:0;
+	border:1px solid #e7e7e7;
 }
 
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab{
+	padding-top: 1px;
+}
 
 .pony-closable-dialog-box {
 	cursor: default;

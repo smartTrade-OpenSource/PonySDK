@@ -74,6 +74,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.FlowPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.VerticalPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HorizontalPanelPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.DockPanelPageActivity" />
 <!-- 	<bean class="com.ponysdk.sample.client.page.hello.HelloPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.AlignmentPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" /> -->
@@ -82,7 +84,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 <!-- 	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.EventPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" /> -->
-<!-- 	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" /> -->
