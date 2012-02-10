@@ -24,8 +24,11 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
+import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class DockPanelPageActivity extends SamplePageActivity {
 
@@ -38,20 +41,48 @@ public class DockPanelPageActivity extends SamplePageActivity {
         super.onFirstShowPage();
 
         PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
-        dockLayoutPanel.setSizeFull();
 
-        dockLayoutPanel.addNorth(new PLabel("North"), 30);
+        dockLayoutPanel.addNorth(buildNorthPanel(), 50);
         dockLayoutPanel.addEast(new PLabel("east"), 30);
         dockLayoutPanel.addLineEnd(new PLabel("Line end"), 30);
-        dockLayoutPanel.addSouth(new PLabel("South"), 30);
+        dockLayoutPanel.addSouth(buildSouthPanel(), 50);
         dockLayoutPanel.addLineStart(new PLabel("Line start"), 30);
 
-        PScrollPanel scrollPanel = new PScrollPanel();
-        scrollPanel.setWidget(scrollPanel);
+        PScrollPanel scrollPanel = buildCenterPanel();
 
         dockLayoutPanel.add(scrollPanel);
 
         examplePanel.setWidget(dockLayoutPanel);
+    }
+
+    private PScrollPanel buildCenterPanel() {
+        PScrollPanel panel = new PScrollPanel();
+        panel.setSizeFull();
+        panel.setStyleProperty("backgroundColor", "#e8b6ea");
+        panel.setWidget(new PLabel("center"));
+        return panel;
+    }
+
+    private PHorizontalPanel buildNorthPanel() {
+        PHorizontalPanel panel = new PHorizontalPanel();
+        panel.setSizeFull();
+        panel.setStyleProperty("backgroundColor", "#edede8");
+        PLabel label = new PLabel("The north component");
+        panel.add(label);
+        panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
+        panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);
+        return panel;
+    }
+
+    private PHorizontalPanel buildSouthPanel() {
+        PHorizontalPanel panel = new PHorizontalPanel();
+        panel.setSizeFull();
+        panel.setStyleProperty("backgroundColor", "#336293");
+        PLabel label = new PLabel("The south component");
+        panel.add(label);
+        panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
+        panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);
+        return panel;
     }
 
 }

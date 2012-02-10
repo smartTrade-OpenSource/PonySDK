@@ -273,7 +273,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 }
             }
         } catch (final Throwable e) {
-            GWT.log("Failed to process instruction", e);
+            Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+            GWT.log("PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvent();
             updateMode = false;

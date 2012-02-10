@@ -45,7 +45,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
-    public void add(PWidget w) {
+    public void add(final PWidget w) {
         log.error("Use setWidget(IsWidget w)");
         throw new UnsupportedOperationException("Use setWidget(IsWidget w)");
     }
@@ -55,7 +55,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
-    public boolean remove(PWidget w) {
+    public boolean remove(final PWidget w) {
         // Validate.
         if (widget != w) { return false; }
 
@@ -73,7 +73,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         return true;
     }
 
-    public void setWidget(PWidget w) {
+    public void setWidget(final PWidget w) {
+        if (w == this) throw new UnsupportedOperationException("You cannot call setWidget with 'this' in parameter");
+
         // Validate
         if (w == widget) { return; }
 
@@ -100,7 +102,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
-    public void setWidget(IsPWidget w) {
+    public void setWidget(final IsPWidget w) {
         setWidget(w.asWidget());
     }
 

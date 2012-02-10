@@ -30,8 +30,11 @@ import com.ponysdk.core.PonySession;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
+import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
+import com.ponysdk.sample.client.page.CheckBoxPageActivity;
 import com.ponysdk.sample.client.place.ApplicationPlace;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -43,6 +46,8 @@ public class LoginActivity extends AbstractActivity {
 
     @Autowired
     private ApplicationActivity applicationActivity;
+    @Autowired
+    private CheckBoxPageActivity checkBoxPageActivity;
 
     private DefaultLoginPageView loginPageView;
 
@@ -52,21 +57,24 @@ public class LoginActivity extends AbstractActivity {
     public void start(final PAcceptsOneWidget world) {
         this.world = world;
 
-        loginPageView = new DefaultLoginPageView("PonySDK Sample");
+        loginPageView = new DefaultLoginPageView("PonySDK Showcase");
+
+        loginPageView.getLoginTextBox().setText("Guest");
+        loginPageView.getPasswordTextBox().setText("Guest");
 
         loginPageView.getLoginTextBox().showLoadingOnRequest(true);
         loginPageView.getLoginTextBox().addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
-
+            public void onClick(final PClickEvent event) {
+                doLogin();
             }
         });
 
         loginPageView.addLoginClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 doLogin();
             }
 
@@ -76,7 +84,7 @@ public class LoginActivity extends AbstractActivity {
         loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(KeyCodes.KEY_ENTER) {
 
             @Override
-            public void onKeyPress(int keyCode) {
+            public void onKeyPress(final int keyCode) {
                 doLogin();
             }
         }, PKeyPressEvent.TYPE);
@@ -86,17 +94,29 @@ public class LoginActivity extends AbstractActivity {
     private void doLogin() {
         final User user = new User();
         user.setID(0);
-        user.setLogin("guest");
-        user.setName("guest");
-        user.setPassword("guest");
+        user.setLogin(loginPageView.getLogin());
+        user.setName(loginPageView.getLogin());
+        user.setPassword(loginPageView.getPassword());
 
         PonySession.getCurrent().setAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
-        loggedInEvent.setBusinessMessage("guest is now connected");
+        loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
         fireEvent(loggedInEvent);
 
         applicationActivity.goTo(new ApplicationPlace(), world);
+
+        applicationActivity.goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
+    }
+
+    private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
+        return new PagePlace(pageActivity) {
+
+            @Override
+            public String getToken() {
+                return token;
+            }
+        };
     }
 
 }
