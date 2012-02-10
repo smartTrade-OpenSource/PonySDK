@@ -23,24 +23,24 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
-public class DockPanelPageActivity extends SamplePageActivity {
+public class SplitPanelPageActivity extends SamplePageActivity {
 
-    public DockPanelPageActivity() {
-        super("Dock Panel", "Panels");
+    public SplitPanelPageActivity() {
+        super("Split Panel", "Panels");
     }
 
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        PSplitLayoutPanel dockLayoutPanel = new PSplitLayoutPanel();
 
         dockLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         dockLayoutPanel.addSouth(buildComponent("south", "#75ffdc"), 50);

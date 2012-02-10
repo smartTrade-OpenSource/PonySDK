@@ -23,26 +23,26 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PFlexTable;
+import com.ponysdk.ui.server.basic.PGrid;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 
-public class FlexTablePageActivity extends SamplePageActivity {
+public class GridPageActivity extends SamplePageActivity {
 
-    public FlexTablePageActivity() {
-        super("Flex Table", "Table");
+    public GridPageActivity() {
+        super("Grid Table", "Table");
     }
 
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable table = new PFlexTable();
+        final PGrid table = new PGrid(10, 10);
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setSizeFull();
 
-        for (int r = 0; r < 100; r++) {
+        for (int r = 0; r < 10; r++) {
             for (int c = 0; c < 10; c++) {
                 table.setWidget(r, c, new PLabel(r + "_" + c));
             }

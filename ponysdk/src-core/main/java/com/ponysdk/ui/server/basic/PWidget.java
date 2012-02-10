@@ -205,7 +205,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void onEventInstruction(final EventInstruction instruction) {
 
         if (HandlerType.DOM_HANDLER.equals(instruction.getHandlerType())) {
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntProperty(PropertyKey.DOM_HANDLER)];
+            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntPropertyValue(PropertyKey.DOM_HANDLER)];
             switch (domHandler) {
                 case KEY_PRESS:
                     fireEvent(new PKeyPressEvent(this, instruction.getMainProperty().getIntValue()));
@@ -215,12 +215,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
                 case CLICK:
                     final PClickEvent event = new PClickEvent(this);
-                    event.setClientX(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_X));
-                    event.setClientY(instruction.getMainProperty().getIntProperty(PropertyKey.CLIENT_Y));
-                    event.setSourceAbsoluteLeft((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_LEFT));
-                    event.setSourceAbsoluteTop((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_ABSOLUTE_TOP));
-                    event.setSourceOffsetHeight((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_HEIGHT));
-                    event.setSourceOffsetWidth((int) instruction.getMainProperty().getDoubleProperty(PropertyKey.SOURCE_OFFSET_WIDTH));
+                    event.setClientX(instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_X));
+                    event.setClientY(instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_Y));
+                    event.setSourceAbsoluteLeft((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_ABSOLUTE_LEFT));
+                    event.setSourceAbsoluteTop((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_ABSOLUTE_TOP));
+                    event.setSourceOffsetHeight((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_OFFSET_HEIGHT));
+                    event.setSourceOffsetWidth((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_OFFSET_WIDTH));
                     fireEvent(event);
                     break;
                 case MOUSE_OVER:

@@ -66,7 +66,7 @@ public abstract class PTUIObject extends PTObject {
                 uiObject.getElement().getStyle().setProperty(FONT_SIZE, property.getValue());
                 break;
             case STYLE_PROPERTY:
-                uiObject.getElement().getStyle().setProperty(property.getStringProperty(PropertyKey.STYLE_KEY), property.getStringProperty(PropertyKey.STYLE_VALUE));
+                uiObject.getElement().getStyle().setProperty(property.getStringPropertyValue(PropertyKey.STYLE_KEY), property.getStringPropertyValue(PropertyKey.STYLE_VALUE));
                 break;
             case STYLE_NAME:
                 uiObject.setStyleName(property.getValue());

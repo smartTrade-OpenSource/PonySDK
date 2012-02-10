@@ -33,7 +33,7 @@ public class PTMenuBar extends PTWidget {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.MenuBar(create.getMainProperty().getBooleanProperty(PropertyKey.MENU_BAR_IS_VERTICAL)));
+        init(create, uiService, new com.google.gwt.user.client.ui.MenuBar(create.getMainProperty().getBooleanPropertyValue(PropertyKey.MENU_BAR_IS_VERTICAL)));
     }
 
     @Override

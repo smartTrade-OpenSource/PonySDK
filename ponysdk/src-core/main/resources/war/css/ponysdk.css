@@ -120,6 +120,7 @@
 .pony-Header-Logout {
 	color: #FFFFFF;
 }
+
 .pony-Header-AccountMenu {
 	color: #FFF;
 	font-weight:bold;
@@ -633,6 +634,7 @@
 table .pony-PFlexTable{
 	border-spacing: 0px;
 	border-collapse: collapse;
+	overflow:hidden;
 }
 
 .pony-SimpleList-Row .pony-PFlextable-Cell{
@@ -1383,6 +1385,11 @@ a.header{
   	animation-delay: 2000ms;
   	-moz-animation-delay: 2000ms;
   	-webkit-animation-delay: 2000ms;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+  overflow: hidden;
+  padding: 0px;
 }
 
 @keyframes notificationFadeOut {

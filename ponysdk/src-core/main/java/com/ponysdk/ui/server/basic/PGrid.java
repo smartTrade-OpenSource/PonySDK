@@ -21,23 +21,40 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.WidgetType;
 
-public class PTDecoratedPopupPanel extends PTPopupPanel {
+public class PGrid extends PHTMLTable {
 
-    @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.DecoratedPopupPanel(create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE)));
-        addCloseHandler(create, uiService);
+    private int columns;
+    private int rows;
+
+    public PGrid(final int rows, final int columns) {
+        this();
+        this.rows = rows;
+        this.columns = columns;
+
+        create.getMainProperty().setProperty(PropertyKey.ROW, rows);
+        create.getMainProperty().setProperty(PropertyKey.COLUMN, columns);
+    }
+
+    public PGrid() {
+        addStyleName("pony-PGrid");
     }
 
     @Override
-    public com.google.gwt.user.client.ui.DecoratedPopupPanel cast() {
-        return (com.google.gwt.user.client.ui.DecoratedPopupPanel) uiObject;
+    protected WidgetType getType() {
+        return WidgetType.GRID;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
+    public int getRows() {
+        return rows;
     }
 
 }

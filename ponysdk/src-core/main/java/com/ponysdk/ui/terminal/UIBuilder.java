@@ -176,8 +176,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final Create create = (Create) instruction;
 
                     if (WidgetType.COOKIE.equals(create.getWidgetType())) {
-                        final String name = create.getMainProperty().getStringProperty(PropertyKey.NAME);
-                        final String value = create.getMainProperty().getStringProperty(PropertyKey.VALUE);
+                        final String name = create.getMainProperty().getStringPropertyValue(PropertyKey.NAME);
+                        final String value = create.getMainProperty().getStringPropertyValue(PropertyKey.VALUE);
                         final Property expires = create.getMainProperty().getChildProperty(PropertyKey.COOKIE_EXPIRE);
                         if (expires != null) {
                             final Long time = expires.getLongValue();
