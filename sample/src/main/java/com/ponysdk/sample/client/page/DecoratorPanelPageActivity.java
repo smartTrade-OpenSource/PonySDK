@@ -23,35 +23,35 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.ui.server.basic.PDecoratorPanel;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PTextBox;
 
-public class FlexTablePageActivity extends SamplePageActivity {
+public class DecoratorPanelPageActivity extends SamplePageActivity {
 
-    public FlexTablePageActivity() {
-        super("Flex Table", "Table");
+    public DecoratorPanelPageActivity() {
+        super("Decorator Panel", "Panels");
     }
 
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable table = new PFlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setSizeFull();
+        PDecoratorPanel decoratorPanel = new PDecoratorPanel();
 
-        for (int r = 0; r < 100; r++) {
-            for (int c = 0; c < 10; c++) {
-                table.setWidget(r, c, new PLabel(r + "_" + c));
-            }
-        }
+        PFlexTable panel = new PFlexTable();
 
-        PScrollPanel scrollPanel = new PScrollPanel();
-        scrollPanel.setWidget(table);
-        scrollPanel.setSizeFull();
+        panel.setStyleProperty("padding", "10px");
 
-        examplePanel.setWidget(scrollPanel);
+        panel.setWidget(0, 0, new PLabel("Name :"));
+        panel.setWidget(0, 1, new PTextBox("name"));
+        panel.setWidget(1, 0, new PLabel("Description :"));
+        panel.setWidget(1, 1, new PTextBox("description"));
+
+        decoratorPanel.setWidget(panel);
+
+        examplePanel.setWidget(decoratorPanel);
     }
+
 }

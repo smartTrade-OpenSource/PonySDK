@@ -178,8 +178,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final Create create = (Create) instruction;
 
                     if (WidgetType.COOKIE.equals(create.getWidgetType())) {
-                        final String name = create.getMainProperty().getStringProperty(PropertyKey.NAME);
-                        final String value = create.getMainProperty().getStringProperty(PropertyKey.VALUE);
+                        final String name = create.getMainProperty().getStringPropertyValue(PropertyKey.NAME);
+                        final String value = create.getMainProperty().getStringPropertyValue(PropertyKey.VALUE);
                         final Property expires = create.getMainProperty().getChildProperty(PropertyKey.COOKIE_EXPIRE);
                         if (expires != null) {
                             final Long time = expires.getLongValue();
@@ -275,7 +275,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 }
             }
         } catch (final Throwable e) {
-            GWT.log("Failed to process instruction", e);
+            Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+            GWT.log("PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvent();
             updateMode = false;

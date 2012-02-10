@@ -44,8 +44,8 @@ public class PCAttachedPopupPanelAddon extends PTAddon {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getMainProperty().getLongProperty(PropertyKey.WIDGET));
-        final boolean autoHide = create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE);
+        final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getMainProperty().getLongPropertyValue(PropertyKey.WIDGET));
+        final boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
         popup = new PCAttachedPopupPanel(autoHide, attached.cast());
         popup.show();
 

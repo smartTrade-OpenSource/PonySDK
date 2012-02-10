@@ -24,8 +24,6 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.event.BusinessEvent.Level;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
@@ -36,23 +34,17 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class EventPageActivity extends PageActivity {
+public class EventPageActivity extends SamplePageActivity {
 
     public EventPageActivity() {
-        super("PNotificationManager by event", "PNotificationManager");
+        super("Notifications", "Rich UI Components");
     }
 
     @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(final Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
     protected void onFirstShowPage() {
+
+        super.onFirstShowPage();
+
         final PVerticalPanel panel = new PVerticalPanel();
 
         // Send 'info' business event
@@ -133,6 +125,6 @@ public class EventPageActivity extends PageActivity {
         panel.add(errorPanel);
         panel.add(trayPanel);
 
-        pageView.getBody().setWidget(panel);
+        examplePanel.setWidget(panel);
     }
 }

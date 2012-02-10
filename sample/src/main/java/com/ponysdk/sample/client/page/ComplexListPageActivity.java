@@ -47,6 +47,7 @@ import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -106,6 +107,9 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
         super.onFirstShowPage();
 
+        PScrollPanel scrolPanel = new PScrollPanel();
+        examplePanel.setWidget(scrolPanel);
+
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
         addHandler(ShowSubListEvent.TYPE, this);
@@ -123,7 +127,7 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         complexListConfiguration.setShowPreferences(true);
 
         final ComplexListView complexListView = new DefaultComplexListView();
-        complexListView.setFloatableToolBar(examplePanel);
+        complexListView.setFloatableToolBar(scrolPanel);
 
         complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());
 

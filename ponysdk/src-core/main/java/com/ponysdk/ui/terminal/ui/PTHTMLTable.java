@@ -45,8 +45,8 @@ public class PTHTMLTable extends PTPanel {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final com.google.gwt.user.client.ui.HTMLTable table = cast();
 
-        final int row = add.getMainProperty().getIntProperty(PropertyKey.ROW);
-        final int cell = add.getMainProperty().getIntProperty(PropertyKey.CELL);
+        final int row = add.getMainProperty().getIntPropertyValue(PropertyKey.ROW);
+        final int cell = add.getMainProperty().getIntPropertyValue(PropertyKey.CELL);
         table.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");// temp nciaravola we
         // don't
         // // have this mirro server

@@ -23,12 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDialogBox;
+import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
@@ -40,27 +38,27 @@ import com.ponysdk.ui.server.rich.PClosableDialogBox;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.server.rich.POptionPane;
 import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
+import com.ponysdk.ui.server.rich.POptionPane.POptionType;
 
-public class DialogBoxPageActivity extends PageActivity {
+public class DialogBoxPageActivity extends SamplePageActivity {
+
+    private int row;
+    private PFlexTable layout;
 
     public DialogBoxPageActivity() {
         super("Dialog Box", "Popup");
     }
 
     @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(final Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
     protected void onFirstShowPage() {
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
 
-        final PAnchor anchor2 = new PAnchor("Popup top left");
+        super.onFirstShowPage();
+
+        row = 0;
+        layout = new PFlexTable();
+
+        addLabel("Show a basic popup");
+        PButton anchor2 = addButton("Open");
         anchor2.addClickHandler(new PClickHandler() {
 
             @Override
@@ -76,18 +74,18 @@ public class DialogBoxPageActivity extends PageActivity {
                         popupPanel.hide();
                     }
                 });
-                content.add(new PLabel("A popup displayed on the top left"));
+                content.add(new PLabel("A popup displayed relatively to the mouse click"));
                 content.add(closeButton);
                 content.setWidth("200px");
                 content.setHeight("200px");
                 popupPanel.setWidget(content);
-                popupPanel.setPopupPosition(50, 50);
+                popupPanel.setPopupPosition(clickEvent.getClientX(), clickEvent.getClientY());
                 popupPanel.show();
             }
         });
-        verticalPanel.add(anchor2);
 
-        final PAnchor anchor3 = new PAnchor("Custom close dialog widget");
+        addLabel("A draggable popup");
+        PButton anchor3 = addButton("Open");
         anchor3.addClickHandler(new PClickHandler() {
 
             @Override
@@ -102,27 +100,9 @@ public class DialogBoxPageActivity extends PageActivity {
             }
         });
 
-        verticalPanel.add(anchor3);
-
-        final PAnchor anchor4 = new PAnchor("POptionPane showConfirmDialog");
+        addLabel("A confirm dialog listenening on the close event");
+        PButton anchor4 = addButton("Open");
         anchor4.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                POptionPane.showConfirmDialog(new PActionHandler() {
-
-                    @Override
-                    public void onAction(final PDialogBox dialogBox, final String option) {
-                        dialogBox.hide();
-                    }
-                }, "showConfirmDialog");
-
-            }
-        });
-        verticalPanel.add(anchor4);
-
-        final PAnchor anchor5 = new PAnchor("POptionPane with close handler");
-        anchor5.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
@@ -132,22 +112,41 @@ public class DialogBoxPageActivity extends PageActivity {
                     public void onAction(final PDialogBox dialogBox, final String option) {
                         dialogBox.hide();
                     }
-                }, "showConfirmDialog");
+                }, "Your custom text");
 
                 dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
 
                     @Override
                     public void onClose() {
                         DemoBusinessEvent event = new DemoBusinessEvent(this);
-                        event.setBusinessMessage("PoptionPane closed");
+                        event.setBusinessMessage("Dialog box closed");
                         fireEvent(event);
                     }
                 });
             }
         });
-        verticalPanel.add(anchor5);
 
-        final PAnchor anchor6 = new PAnchor("PConfirmDialogBox");
+        addLabel("A confirm dialog listenening on the close event");
+        PButton anchor5 = addButton("Open");
+        anchor5.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                POptionPane.showConfirmDialog(new PActionHandler() {
+
+                    @Override
+                    public void onAction(final PDialogBox dialogBox, final String option) {
+                        dialogBox.hide();
+                        DemoBusinessEvent event = new DemoBusinessEvent(this);
+                        event.setBusinessMessage("Option selected #" + option);
+                        fireEvent(event);
+                    }
+                }, "Your custom text", null, "Your title", POptionType.YES_NO_CANCEL_OPTION);
+            }
+        });
+
+        addLabel("PConfirmDialogBox");
+        PButton anchor6 = addButton("Open");
         anchor6.addClickHandler(new PClickHandler() {
 
             @Override
@@ -155,8 +154,20 @@ public class DialogBoxPageActivity extends PageActivity {
                 PConfirmDialog.show("Question ?", new PLabel("This is a confirm dialog box"));
             }
         });
-        verticalPanel.add(anchor6);
 
-        pageView.getBody().setWidget(verticalPanel);
+        examplePanel.setWidget(layout);
     }
+
+    private PLabel addLabel(final String text) {
+        PLabel label = new PLabel(text);
+        layout.setWidget(row, 0, label);
+        return label;
+    }
+
+    private PButton addButton(final String text) {
+        PButton button = new PButton(text);
+        layout.setWidget(row++, 1, button);
+        return button;
+    }
+
 }

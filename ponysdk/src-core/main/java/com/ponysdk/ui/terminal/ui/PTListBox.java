@@ -91,20 +91,20 @@ public class PTListBox extends PTFocusWidget {
                 listBox.clear();
                 break;
             case ITEM_INSERTED: {
-                final int index = property.getIntProperty(PropertyKey.INDEX);
-                final String item = property.getStringProperty(PropertyKey.ITEM_TEXT);
-                final String value = property.getStringProperty(PropertyKey.VALUE);
+                final int index = property.getIntPropertyValue(PropertyKey.INDEX);
+                final String item = property.getStringPropertyValue(PropertyKey.ITEM_TEXT);
+                final String value = property.getStringPropertyValue(PropertyKey.VALUE);
                 listBox.insertItem(item, value, index);
                 break;
             }
             case ITEM_REMOVED: {
-                final int index = property.getIntProperty(PropertyKey.INDEX);
+                final int index = property.getIntPropertyValue(PropertyKey.INDEX);
                 listBox.removeItem(index);
                 break;
             }
             case SELECTED:
                 final boolean selected = property.getBooleanValue();
-                final int index = property.getIntProperty(PropertyKey.SELECTED_INDEX);
+                final int index = property.getIntPropertyValue(PropertyKey.SELECTED_INDEX);
                 if (index == -1) listBox.setSelectedIndex(index);
                 else listBox.setItemSelected(index, selected);
                 break;

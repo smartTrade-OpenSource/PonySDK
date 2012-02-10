@@ -50,8 +50,8 @@ public class PTDockLayoutPanel extends PTComplexPanel {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final com.google.gwt.user.client.ui.DockLayoutPanel dockLayoutPanel = cast();
 
-        final Direction direction = Direction.values()[add.getMainProperty().getIntProperty(PropertyKey.DIRECTION)];
-        final double size = add.getMainProperty().getDoubleProperty(PropertyKey.SIZE);
+        final Direction direction = Direction.values()[add.getMainProperty().getIntPropertyValue(PropertyKey.DIRECTION)];
+        final double size = add.getMainProperty().getDoublePropertyValue(PropertyKey.SIZE);
         switch (direction) {
             case CENTER: {
                 dockLayoutPanel.add(w);

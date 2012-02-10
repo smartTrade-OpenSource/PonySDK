@@ -125,7 +125,6 @@ public class PNotificationManager {
         div2.setHeight("70px");
 
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.setAnimationEnabled(true);
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_TRAY);
         popupPanel.setWidget(div2);

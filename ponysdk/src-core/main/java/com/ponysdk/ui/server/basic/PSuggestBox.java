@@ -55,8 +55,8 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
             this.text = e.getMainProperty().getValue();
             onValueChange(new PValueChangeEvent<String>(this, text));
         } else if (HandlerType.STRING_SELECTION_HANDLER.equals(e.getHandlerType())) {
-            this.replacementString = e.getMainProperty().getStringProperty(PropertyKey.REPLACEMENT_STRING);
-            this.displayString = e.getMainProperty().getStringProperty(PropertyKey.DISPLAY_STRING);
+            this.replacementString = e.getMainProperty().getStringPropertyValue(PropertyKey.REPLACEMENT_STRING);
+            this.displayString = e.getMainProperty().getStringPropertyValue(PropertyKey.DISPLAY_STRING);
 
             MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));

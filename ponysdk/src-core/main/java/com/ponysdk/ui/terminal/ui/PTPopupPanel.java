@@ -61,7 +61,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        boolean autoHide = create.getMainProperty().getBooleanProperty(PropertyKey.POPUP_AUTO_HIDE);
+        boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
 
         com.google.gwt.user.client.ui.PopupPanel popup = new com.google.gwt.user.client.ui.PopupPanel(autoHide) {
 
@@ -133,8 +133,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         } else if (PropertyKey.POPUP_MODAL.equals(propertyKey)) {
             popup.setModal(property.getBooleanValue());
         } else if (PropertyKey.POPUP_POSITION.equals(propertyKey)) {
-            final int left = property.getIntProperty(PropertyKey.POPUP_POSITION_LEFT);
-            final int top = property.getIntProperty(PropertyKey.POPUP_POSITION_TOP);
+            final int left = property.getIntPropertyValue(PropertyKey.POPUP_POSITION_LEFT);
+            final int top = property.getIntPropertyValue(PropertyKey.POPUP_POSITION_TOP);
             popup.setPopupPosition(left, top);
         } else if (PropertyKey.POPUP_DRAGGABLE.equals(propertyKey)) {
             boolean draggable = property.getBooleanValue();

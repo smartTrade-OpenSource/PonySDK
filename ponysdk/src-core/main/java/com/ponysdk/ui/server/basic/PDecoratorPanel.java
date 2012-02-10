@@ -21,23 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.WidgetType;
 
-public class PTDecoratedPopupPanel extends PTPopupPanel {
+public class PDecoratorPanel extends PSimplePanel {
 
-    @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.DecoratedPopupPanel(create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE)));
-        addCloseHandler(create, uiService);
+    public PDecoratorPanel() {
+        super();
     }
 
     @Override
-    public com.google.gwt.user.client.ui.DecoratedPopupPanel cast() {
-        return (com.google.gwt.user.client.ui.DecoratedPopupPanel) uiObject;
+    protected WidgetType getType() {
+        return WidgetType.DECORATOR_PANEL;
     }
-
 }

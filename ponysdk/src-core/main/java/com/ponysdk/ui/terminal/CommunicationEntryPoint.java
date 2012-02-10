@@ -29,6 +29,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -41,6 +42,15 @@ public class CommunicationEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+
+            @Override
+            public void onUncaughtException(final Throwable e) {
+                Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+                GWT.log("PonySDK has encountered an internal error : ", e);
+            }
+        });
+
         try {
             // load all cookies at startup
             final Map<String, String> cookies = new HashMap<String, String>();
@@ -54,7 +64,7 @@ public class CommunicationEntryPoint implements EntryPoint {
             communicationService.startApplication(History.getToken(), cookies, new AsyncCallback<PonySessionContext>() {
 
                 @Override
-                public void onFailure(Throwable caught) {
+                public void onFailure(final Throwable caught) {
                     GWT.log("Error", caught);
                     if (caught instanceof StatusCodeException) {
                         final StatusCodeException codeException = (StatusCodeException) caught;
@@ -65,7 +75,7 @@ public class CommunicationEntryPoint implements EntryPoint {
                 }
 
                 @Override
-                public void onSuccess(PonySessionContext ponySessionContext) {
+                public void onSuccess(final PonySessionContext ponySessionContext) {
                     final UIBuilder uiBuilder = new UIBuilder(ponySessionContext.getID());
                     uiBuilder.init();
                     uiBuilder.update(ponySessionContext.getInstructions());

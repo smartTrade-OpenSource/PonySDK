@@ -30,6 +30,7 @@ import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
+import com.ponysdk.ui.terminal.ui.PTDecoratedPanel;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDialogBox;
 import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
@@ -37,6 +38,7 @@ import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
 import com.ponysdk.ui.terminal.ui.PTFlowPanel;
+import com.ponysdk.ui.terminal.ui.PTGrid;
 import com.ponysdk.ui.terminal.ui.PTHTML;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
 import com.ponysdk.ui.terminal.ui.PTImage;
@@ -116,6 +118,8 @@ public class UIFactory {
                 return new PTDateBox();
             case FLEX_TABLE:
                 return new PTFlexTable();
+            case GRID:
+                return new PTGrid();
             case IMAGE:
                 return new PTImage();
             case FILE_UPLOAD:
@@ -148,6 +152,8 @@ public class UIFactory {
                 return new PTSuggestBox();
             case DISCLOSURE_PANEL:
                 return new PTDisclosurePanel();
+            case DECORATOR_PANEL:
+                return new PTDecoratedPanel();
             default:
                 Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
                 return null;

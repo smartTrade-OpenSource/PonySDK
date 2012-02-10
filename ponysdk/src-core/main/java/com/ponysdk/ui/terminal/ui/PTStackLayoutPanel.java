@@ -43,7 +43,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        final Unit unit = Unit.valueOf(create.getMainProperty().getStringProperty(PropertyKey.UNIT));
+        final Unit unit = Unit.valueOf(create.getMainProperty().getStringPropertyValue(PropertyKey.UNIT));
         final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(unit);
         init(create, uiService, stackLayoutPanel);
     }
@@ -55,8 +55,8 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final StackLayoutPanel stackLayoutPanel = cast();
 
-        final String header = add.getMainProperty().getStringProperty(PropertyKey.HTML);
-        final double headerSize = add.getMainProperty().getDoubleProperty(PropertyKey.SIZE);
+        final String header = add.getMainProperty().getStringPropertyValue(PropertyKey.HTML);
+        final double headerSize = add.getMainProperty().getDoublePropertyValue(PropertyKey.SIZE);
         stackLayoutPanel.add(w, header, true, headerSize);
     }
 

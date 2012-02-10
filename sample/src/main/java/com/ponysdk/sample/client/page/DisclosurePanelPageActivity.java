@@ -33,7 +33,7 @@ import com.ponysdk.ui.server.basic.PWidget;
 public class DisclosurePanelPageActivity extends SamplePageActivity {
 
     public DisclosurePanelPageActivity() {
-        super("Decorator Panel", "Panels");
+        super("Disclosure Panel", "Panels");
     }
 
     @Override
@@ -47,6 +47,7 @@ public class DisclosurePanelPageActivity extends SamplePageActivity {
         disclosurePanel.setWidth("200px");
         disclosurePanel.setHeight("200px");
 
+        panel.setSpacing(10);
         panel.add(disclosurePanel);
 
         examplePanel.setWidget(panel);

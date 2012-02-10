@@ -59,7 +59,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
         final com.google.gwt.user.client.ui.TabLayoutPanel tabLayoutPanel = cast();
 
         if (add.getMainProperty().getKey().equals(PropertyKey.TAB_WIDGET)) {
-            tabIndex = add.getMainProperty().getIntProperty(PropertyKey.TAB_WIDGET);
+            tabIndex = add.getMainProperty().getIntPropertyValue(PropertyKey.TAB_WIDGET);
             tabWidget = w;
         } else {
             final Property childProperty = add.getMainProperty().getChildProperty(PropertyKey.TAB_TEXT);

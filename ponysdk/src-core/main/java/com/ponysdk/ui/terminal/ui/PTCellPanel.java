@@ -44,7 +44,7 @@ public class PTCellPanel extends PTComplexPanel {
 
         if (PropertyKey.CELL_HORIZONTAL_ALIGNMENT.equals(propertyKey)) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[property.getIntValue()];
-            final Widget w = asWidget(property.getLongProperty(PropertyKey.CELL), uiService);
+            final Widget w = asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
@@ -60,7 +60,7 @@ public class PTCellPanel extends PTComplexPanel {
             }
         } else if (PropertyKey.CELL_VERTICAL_ALIGNMENT.equals(propertyKey)) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[property.getIntValue()];
-            final Widget w = asWidget(property.getLongProperty(PropertyKey.CELL), uiService);
+            final Widget w = asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
@@ -75,9 +75,9 @@ public class PTCellPanel extends PTComplexPanel {
                     break;
             }
         } else if (PropertyKey.CELL_WIDTH.equals(propertyKey)) {
-            cellPanel.setCellWidth(asWidget(property.getLongProperty(PropertyKey.CELL), uiService), property.getValue());
+            cellPanel.setCellWidth(asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService), property.getValue());
         } else if (PropertyKey.CELL_HEIGHT.equals(propertyKey)) {
-            cellPanel.setCellHeight(asWidget(property.getLongProperty(PropertyKey.CELL), uiService), property.getValue());
+            cellPanel.setCellHeight(asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService), property.getValue());
         } else {
             super.update(update, uiService);
         }

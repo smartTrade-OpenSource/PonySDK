@@ -35,6 +35,7 @@ import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
 
 import de.java2html.converter.JavaSource2HTMLConverter;
@@ -48,7 +49,7 @@ public class SamplePageActivity extends PageActivity {
 
     private PTabPanel tabPanel;
 
-    protected PScrollPanel examplePanel;
+    protected PSimpleLayoutPanel examplePanel;
 
     private PScrollPanel codePanel;
 
@@ -69,7 +70,8 @@ public class SamplePageActivity extends PageActivity {
     @Override
     protected void onFirstShowPage() {
         codePanel = new PScrollPanel();
-        examplePanel = new PScrollPanel();
+        examplePanel = new PSimpleLayoutPanel();
+        examplePanel.setSizeFull();
 
         tabPanel = new PTabPanel();
 

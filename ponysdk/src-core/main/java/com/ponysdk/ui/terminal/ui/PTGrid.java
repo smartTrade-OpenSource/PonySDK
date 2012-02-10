@@ -23,40 +23,43 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTDisclosurePanel extends PTWidget {
+public class PTGrid extends PTHTMLTable {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        final Property mainProperty = create.getMainProperty();
-
-        final Long openImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG);
-        final Long closeImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG);
-        final String headerText = mainProperty.getValue();
-
-        PTImage open = (PTImage) uiService.getPTObject(openImg);
-        PTImage close = (PTImage) uiService.getPTObject(closeImg);
-
-        PImageResource openImageResource = new PImageResource(open.cast().getUrl(), 16, 16);
-        PImageResource closeImageResource = new PImageResource(close.cast().getUrl(), 16, 16);
-
-        init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
+        if (create.getMainProperty().containsChildProperty(PropertyKey.ROW)) {
+            int rows = create.getMainProperty().getIntPropertyValue(PropertyKey.ROW);
+            int columns = create.getMainProperty().getIntPropertyValue(PropertyKey.COLUMN);
+            init(create, uiService, new Grid(rows, columns));
+        } else {
+            init(create, uiService, new Grid());
+        }
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
-        cast().setContent(w);
+    public void update(final Update update, final UIService uiService) {
+
+        final Property property = update.getMainProperty();
+        final PropertyKey propertyKey = property.getKey();
+
+        if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
+            cast().removeRow(property.getIntValue());
+        } else if (PropertyKey.INSERT_ROW.equals(propertyKey)) {
+            cast().insertRow(property.getIntValue());
+        } else {
+            super.update(update, uiService);
+        }
     }
 
     @Override
-    public DisclosurePanel cast() {
-        return (DisclosurePanel) uiObject;
+    public Grid cast() {
+        return (Grid) uiObject;
     }
 }

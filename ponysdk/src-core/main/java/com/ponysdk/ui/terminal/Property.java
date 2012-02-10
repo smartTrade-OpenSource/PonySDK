@@ -133,23 +133,23 @@ public class Property implements Serializable {
         return childProperties.get(propertyKey.name());
     }
 
-    public String getStringProperty(final PropertyKey propertyKey) {
+    public String getStringPropertyValue(final PropertyKey propertyKey) {
         return childProperties.get(propertyKey.name()).getValue();
     }
 
-    public int getIntProperty(final PropertyKey propertyKey) {
+    public int getIntPropertyValue(final PropertyKey propertyKey) {
         return Integer.parseInt(childProperties.get(propertyKey.name()).getValue());
     }
 
-    public long getLongProperty(final PropertyKey propertyKey) {
+    public long getLongPropertyValue(final PropertyKey propertyKey) {
         return Long.parseLong(childProperties.get(propertyKey.name()).getValue());
     }
 
-    public double getDoubleProperty(final PropertyKey propertyKey) {
+    public double getDoublePropertyValue(final PropertyKey propertyKey) {
         return Double.parseDouble(childProperties.get(propertyKey.name()).getValue());
     }
 
-    public boolean getBooleanProperty(final PropertyKey propertyKey) {
+    public boolean getBooleanPropertyValue(final PropertyKey propertyKey) {
         return Boolean.parseBoolean(childProperties.get(propertyKey.name()).getValue());
     }
 
