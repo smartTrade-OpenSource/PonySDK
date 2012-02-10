@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal;
 
 public interface AddonFactory {
 
-    public Addon newAddon();
+    public PTAddon newAddon();
 
     public String getSignature();
 }

@@ -23,28 +23,6 @@
 	border-bottom-right-radius: 5px 5px;
 	z-index: 10000;
 }
-.pony-CommunicationErrorMessage {
-	background: #DB0D0D
-	-webkit-gradient(linear, left top, left bottom, from(#DB0D0D),
-	to(#EA3838) );
-	background-color: #DB0D0D;
-	color: white;
-	padding: 3px 6px;
-	font-weight: bold;
-	border-radius: 0 0 5px 5px;
-	-moz-border-radius: 0 0 5px 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px, rgba(0, 0, 0, 0.246094)
-	0 3px 5px;
-	-moz-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	-webkit-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	border-bottom-left-radius: 5px 5px;
-	border-bottom-right-radius: 5px 5px;
-	z-index: 10000;
-}
 .pony-LoginPage {
 	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma,
 	Helvetica, sans-serif;
@@ -580,6 +558,17 @@
 	text-decoration: none;
 	text-shadow: #555 0px 1px 0px;
 }
+
+.gwt-ListBox {
+  padding: 4px 4px;
+  border: 1px solid #ccc;
+  border-top: 1px solid #999;
+}
+
+.Form input, .Form select, .Form .gwt-Label {
+	margin: 0px 2px;
+}
+
 .pony-LogsListPanel {
 }
 .pony-LogsListPanel .gwt-Anchor {
@@ -1042,9 +1031,6 @@ table .pony-PFlexTable{
 	border-bottom-style: solid;
 	border-bottom-width: 1px;
 	border-collapse: separate;
-	border-top-color: #959595;
-	border-top-style: solid;
-	border-top-width: 1px;
 	border-right: 1px solid #959595;
 	color: white;
 	font-family: arial, sans-serif;
@@ -1053,11 +1039,6 @@ table .pony-PFlexTable{
 	text-decoration: none;
 	text-align: center;
 	vertical-align:top;
-	padding-top: 0;
-	padding-bottom: 0;
-	padding-left: 3px;
-	padding-right: 3px;
-	/*text-shadow: #555 0px 1px 0px;*/
 }
 
 .pony-ComplexList-ColumnHeader .pony-PFlextable-Cell a{
@@ -1073,7 +1054,6 @@ table .pony-PFlexTable{
 	padding-right : 2px;
 }
 
-
 .pony-ComplexList-ComplexHeader .gwt-TextBox{
 	height:9px;
 	font-size:9px;
@@ -1085,6 +1065,34 @@ table .pony-PFlexTable{
 	height:20px;
 	font-size:9px;
 }
+
+.pony-ComplexList-ColumnHeader .sortable{
+	width: 100%;
+	height: 100%;
+	height: 20px;
+	cursor: pointer;
+	text-align: center;
+	display: block;
+	padding-left: 18px;
+	padding-right: 18px;
+}
+
+.pony-ComplexList-ColumnHeader .sortable.ascending {
+	background: #666666 url('../images/down_16.png') no-repeat 98% 65%;
+}
+
+.pony-ComplexList-ColumnHeader .sortable.descending {
+	background: #666666 url('../images/up_16.png') no-repeat 98% 65%;
+}
+
+.pony-ComplexList-ColumnHeader .pony-PFlextable-Cell .sortable {
+	padding-right: 20px;
+	padding-left: 20px;
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
 
 
 .pony-ComplexList-Details-Plus{
@@ -1336,13 +1344,16 @@ a.header{
 }
 
 .pony-notification.error {
-	color: white;
 	background: #B40000;
 	border: 3px solid #700A0A;
 	background-image: url("../images/close_16.png");
 	background-position: top right;
 	background-repeat: no-repeat;
 	cursor: pointer;
+}
+
+.pony-notification.error, .pony-notification.error a, .pony-notification.error a:visited, .pony-notification.error a:hover {
+	color: white;
 }
 
 .pony-notification.tray {

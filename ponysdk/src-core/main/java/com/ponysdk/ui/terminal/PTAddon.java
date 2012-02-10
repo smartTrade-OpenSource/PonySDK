@@ -21,26 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page.hello;
+package com.ponysdk.ui.terminal;
 
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.ui.terminal.ui.PTObject;
 
-public class HelloPagePopupPlace extends PagePlace {
+public abstract class PTAddon extends PTObject {
 
-    private final String content;
+    protected abstract String getSignature();
 
-    public HelloPagePopupPlace(PageActivity activity, String content) {
-        super(activity);
-        this.content = content;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    @Override
-    public String getToken() {
-        return getClass().getSimpleName();
-    }
 }

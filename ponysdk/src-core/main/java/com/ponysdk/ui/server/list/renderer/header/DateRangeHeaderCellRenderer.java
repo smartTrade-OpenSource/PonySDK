@@ -11,6 +11,7 @@ import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -136,10 +137,11 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
 
     protected void showPopup() {
         final PAttachedPopupPanel levelPopupPanel = new PAttachedPopupPanel(true, fieldContainer);
-        levelPopupPanel.setWidget(popupContent);
-        levelPopupPanel.show();
+        PPopupPanel popupWidget = levelPopupPanel.asWidget();
+        popupWidget.setWidget(popupContent);
+        popupWidget.show();
 
-        levelPopupPanel.addCloseHandler(new PCloseHandler() {
+        popupWidget.addCloseHandler(new PCloseHandler() {
 
             @Override
             public void onClose() {

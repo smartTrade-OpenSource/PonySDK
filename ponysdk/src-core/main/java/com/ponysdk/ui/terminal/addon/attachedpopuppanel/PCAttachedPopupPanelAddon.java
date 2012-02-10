@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.addon.attachedpopuppanel;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.ponysdk.ui.terminal.Addon;
+import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PonyAddOn;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -36,7 +36,7 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
 
 @PonyAddOn
-public class PCAttachedPopupPanelAddon extends Addon {
+public class PCAttachedPopupPanelAddon extends PTAddon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon";
 

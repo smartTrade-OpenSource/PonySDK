@@ -82,7 +82,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         headerPanel.add(topListLayout);
         headerPanel.setWidth("100%");
 
-        positionPanel.setWidget(headerPanel);
+        positionPanel.asWidget().setWidget(headerPanel);
 
         bottomListLayout.setWidget(searchResultTimeLabel);
 
@@ -97,7 +97,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addAction(String caption, PClickHandler clickHandler) {
+    public void addAction(final String caption, final PClickHandler clickHandler) {
         final PButton button = new PButton(caption);
         button.addClickHandler(clickHandler);
         toolbarLayout.add(button);
@@ -109,22 +109,22 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void insertRow(int row) {
+    public void insertRow(final int row) {
         simpleListView.insertRow(row);
     }
 
     @Override
-    public void removeRow(int row) {
+    public void removeRow(final int row) {
         simpleListView.removeRow(row);
     }
 
     @Override
-    public void setColumns(int size) {
+    public void setColumns(final int size) {
         simpleListView.setColumns(size);
     }
 
     @Override
-    public void setSearchResultInformation(String text) {
+    public void setSearchResultInformation(final String text) {
         searchResultTimeLabel.setText(text);
     }
 
@@ -139,7 +139,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addWidget(IsPWidget component, int column, int row) {
+    public void addWidget(final IsPWidget component, final int column, final int row) {
         simpleListView.addWidget(component, column, row);
     }
 
@@ -154,22 +154,22 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void selectRow(int row) {
+    public void selectRow(final int row) {
         simpleListView.selectRow(row);
     }
 
     @Override
-    public void unSelectRow(int row) {
+    public void unSelectRow(final int row) {
         simpleListView.unSelectRow(row);
     }
 
     @Override
-    public void addRowStyle(int row, String styleName) {
+    public void addRowStyle(final int row, final String styleName) {
         simpleListView.addRowStyle(row, styleName);
     }
 
     @Override
-    public void setFloatableToolBar(PScrollPanel ancestorScrollPanel) {
+    public void setFloatableToolBar(final PScrollPanel ancestorScrollPanel) {
         positionPanel.setLinkedScrollPanel(ancestorScrollPanel);
     }
 
@@ -179,7 +179,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addHeaderStyle(String styleName) {
+    public void addHeaderStyle(final String styleName) {
         simpleListView.addHeaderStyle(styleName);
 
     }
@@ -190,32 +190,32 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addCustomInformation(String text) {
+    public void addCustomInformation(final String text) {
         bottomListCustomInformationLayout.add(new PLabel(text));
     }
 
     @Override
-    public void addCellStyle(int row, int col, String styleName) {
+    public void addCellStyle(final int row, final int col, final String styleName) {
         simpleListView.addCellStyle(row, col, styleName);
     }
 
     @Override
-    public void removeCellStyle(int row, int column, String styleName) {
+    public void removeCellStyle(final int row, final int column, final String styleName) {
         simpleListView.removeCellStyle(row, column, styleName);
     }
 
     @Override
-    public void addColumnStyle(int column, String styleName) {
+    public void addColumnStyle(final int column, final String styleName) {
         simpleListView.addColumnStyle(column, styleName);
     }
 
     @Override
-    public void removeColumnStyle(int column, String styleName) {
+    public void removeColumnStyle(final int column, final String styleName) {
         simpleListView.removeColumnStyle(column, styleName);
     }
 
     @Override
-    public void setColumnWidth(int column, String width) {
+    public void setColumnWidth(final int column, final String width) {
         simpleListView.setColumnWidth(column, width);
     }
 

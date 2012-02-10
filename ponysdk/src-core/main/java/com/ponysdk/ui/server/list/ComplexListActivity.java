@@ -223,6 +223,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             }
         }
 
+        buildSearchForm();
+        buildActions();
+        buildPaging();
+        buildPreferences();
+
+        if (debugID != null) {
+            ensureDebugId(debugID);
+        }
     }
 
     private class PRowCheckBox extends PCheckBox {
@@ -882,15 +890,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     @Override
     public void start(final PAcceptsOneWidget world) {
         this.simpleListActivity = new SimpleListActivity<D>(complexListConfiguration.getTableName(), complexListView, listColumnDescriptors, localEventBus);
-        buildSearchForm();
-        buildActions();
-        buildPaging();
-        buildPreferences();
         world.setWidget(complexListView);
-
-        if (debugID != null) {
-            ensureDebugId(debugID);
-        }
     }
 
     private void buildPreferences() {

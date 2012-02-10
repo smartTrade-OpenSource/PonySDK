@@ -7,18 +7,23 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.sample.client.datamodel.Pony;
 
-public class RemotePonyService implements com.ponysdk.sample.service.pony.PonyService {
+public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyService {
+
+    private static Logger log = LoggerFactory.getLogger(PonyServiceImpl.class);
 
     private static AtomicLong id = new AtomicLong();
 
     private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<Long, Pony>();
 
-    public RemotePonyService() {
+    public PonyServiceImpl() {
         Random rdm = new Random();
         for (int i = 0; i < 10; i++) {
             addPony(new Pony(id.incrementAndGet(), "Altai horseBengin", rdm.nextInt(10), "Equus ferus caballus"));
@@ -32,6 +37,7 @@ public class RemotePonyService implements com.ponysdk.sample.service.pony.PonySe
 
     @Override
     public Result<List<Pony>> findPonys(final Query query) throws Exception {
+        log.info("Looking for pony with criterion #" + query.getCriteria());
         List<Pony> datas = new ArrayList<Pony>(ponyByID.values());
         return FilteringTools.select(query, datas);
     }
@@ -51,10 +57,11 @@ public class RemotePonyService implements com.ponysdk.sample.service.pony.PonySe
 
     @Override
     public Result<List<Pony>> findPonyChilds(final Long fatherID) throws Exception {
+        final Pony father = ponyByID.get(fatherID);
         final List<Pony> subPonyList = new ArrayList<Pony>();
-        subPonyList.add(new Pony(id.incrementAndGet(), "SubPony 1", 7, "Equus ferus caballus"));
-        subPonyList.add(new Pony(id.incrementAndGet(), "SubPony 2", 8, "Equus ferus caballus"));
-        subPonyList.add(new Pony(id.incrementAndGet(), "SubPony 3", 9, "Equus ferus caballus"));
+        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 1", 1, father.getRace()));
+        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 2", 2, father.getRace()));
+        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 3", 3, father.getRace()));
         return new Result<List<Pony>>(subPonyList);
     }
 

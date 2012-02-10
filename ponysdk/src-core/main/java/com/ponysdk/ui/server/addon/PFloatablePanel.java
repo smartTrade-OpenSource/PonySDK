@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.addon;
 
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -31,7 +32,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PFloatablePanel extends PSimplePanel implements PAddOn {
+public class PFloatablePanel extends PAddOn implements IsPWidget {
+
+    private final PSimplePanel simplePanel = new PSimplePanel();
 
     private PScrollPanel linkedScrollPanel;
 
@@ -42,7 +45,7 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
         return WidgetType.ADDON;
     }
 
-    public void setLinkedScrollPanel(PScrollPanel linkedScrollPanel) {
+    public void setLinkedScrollPanel(final PScrollPanel linkedScrollPanel) {
         this.linkedScrollPanel = linkedScrollPanel;
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.REFERENCE_SCROLL_PANEL, linkedScrollPanel.getID());
@@ -61,4 +64,8 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
         return PCFloatablePanelAddon.SIGNATURE;
     }
 
+    @Override
+    public PSimplePanel asWidget() {
+        return simplePanel;
+    }
 }

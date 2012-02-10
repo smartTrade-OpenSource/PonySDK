@@ -418,10 +418,10 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         fields.add(textbox);
         final PAttachedPopupPanel popup = new PAttachedPopupPanel(true, textbox);
-        popup.setStyleName(PonySDKTheme.ORACLE_POPUP_PANEL);
+        popup.asWidget().setStyleName(PonySDKTheme.ORACLE_POPUP_PANEL);
 
         final PButton deploy = new PButton("+");
-        final KeyUpHandler keyUphandler = new KeyUpHandler(textbox, popup, deploy);
+        final KeyUpHandler keyUphandler = new KeyUpHandler(textbox, popup.asWidget(), deploy);
         textbox.setStyleName(PonySDKTheme.ORACLE_TEXT_BOX);
         textbox.addKeyUpHandler(keyUphandler);
         textbox.addClickHandler(new PClickHandler() {

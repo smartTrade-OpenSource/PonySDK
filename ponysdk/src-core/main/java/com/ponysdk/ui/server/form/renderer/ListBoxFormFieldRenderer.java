@@ -65,26 +65,26 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         this(null, true, false);
     }
 
-    public ListBoxFormFieldRenderer(boolean emptySelection) {
+    public ListBoxFormFieldRenderer(final boolean emptySelection) {
         this(null, emptySelection, false);
     }
 
-    public ListBoxFormFieldRenderer(String caption) {
+    public ListBoxFormFieldRenderer(final String caption) {
         this(caption, true, false);
     }
 
-    public ListBoxFormFieldRenderer(String caption, boolean emptySelection, boolean multipleSelect) {
+    public ListBoxFormFieldRenderer(final String caption, final boolean emptySelection, final boolean multipleSelect) {
         this.caption = caption;
         this.emptySelection = emptySelection;
         this.multipleSelect = multipleSelect;
     }
 
-    public ListBoxFormFieldRenderer(String caption, boolean emptySelection) {
+    public ListBoxFormFieldRenderer(final String caption, final boolean emptySelection) {
         this(caption, emptySelection, false);
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         final PListBox listBox = new PListBox(emptySelection, multipleSelect);
         if (debugID != null) {
             listBox.ensureDebugId(debugID);
@@ -110,7 +110,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
         for (final FormFieldComponent<PListBox> field : fields) {
             field.addErrorMessage(errorMessage);
         }
@@ -147,7 +147,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         items.add(item);
     }
 
-    public void addItem(final String item, Object hiddenValue) {
+    public void addItem(final String item, final Object hiddenValue) {
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().addItem(item);
         }
@@ -157,7 +157,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().setEnabled(enabled);
@@ -169,7 +169,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         return enabled;
     }
 
-    public void setSelectedItem(final String text, boolean selected) {
+    public void setSelectedItem(final String text, final boolean selected) {
         this.value = hiddenValueByItems.get(text);
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().setSelectedItem(text, selected);
@@ -180,7 +180,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         setSelectedItem(text, true);
     }
 
-    public void setSelectedValue(final Object value, boolean selected) {
+    public void setSelectedValue(final Object value, final boolean selected) {
         this.value = value;
         final String item = itemsByHiddenValue.get(value);
         for (final FormFieldComponent<PListBox> field : fields) {
@@ -192,14 +192,14 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         setSelectedValue(value, true);
     }
 
-    public static ListBoxFormFieldRenderer newTrueFalseListBoxFormFieldRenderer(String caption, String trueCaption, String falseCaption) {
+    public static ListBoxFormFieldRenderer newTrueFalseListBoxFormFieldRenderer(final String caption, final String trueCaption, final String falseCaption) {
         final ListBoxFormFieldRenderer listBoxFormFieldRenderer = new ListBoxFormFieldRenderer(caption, false, false);
         listBoxFormFieldRenderer.addItem(trueCaption, true);
         listBoxFormFieldRenderer.addItem(falseCaption, false);
         return listBoxFormFieldRenderer;
     }
 
-    public static ListBoxFormFieldRenderer newTrueFalseListBoxFormFieldRenderer(String caption) {
+    public static ListBoxFormFieldRenderer newTrueFalseListBoxFormFieldRenderer(final String caption) {
         return newTrueFalseListBoxFormFieldRenderer(caption, "true", "false");
     }
 
@@ -208,7 +208,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public void addChangeHandler(PChangeHandler handler) {
+    public void addChangeHandler(final PChangeHandler handler) {
         changeHandlers.add(handler);
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().addChangeHandler(handler);
@@ -226,26 +226,29 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public void onChange(Object source, int selectedIndex) {
-        if (!fields.isEmpty()) {
-            value = hiddenValueByItems.get(fields.get(0).getInput().getSelectedItem());
-        }
+    public void onChange(final Object source, final int selectedIndex) {
 
+        // Propagate to all listbox first
         for (final FormFieldComponent<PListBox> field : fields) {
             final PListBox listBox = field.getInput();
             if (!listBox.equals(source)) { // avoid call again the selected value update
                 listBox.setSelectedIndex(selectedIndex);
             }
         }
+
+        // Then pick up the value
+        if (!fields.isEmpty()) {
+            value = hiddenValueByItems.get(fields.get(0).getInput().getSelectedItem());
+        }
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         setSelectedValue(value);
     }
 
     @Override
-    public void ensureDebugID(String debugID) {
+    public void ensureDebugID(final String debugID) {
         this.debugID = debugID;
         if (fields.isEmpty()) return;
 
@@ -255,7 +258,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

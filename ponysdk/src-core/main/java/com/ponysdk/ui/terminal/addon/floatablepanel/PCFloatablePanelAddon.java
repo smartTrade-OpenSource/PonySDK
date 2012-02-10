@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.terminal.addon.floatablepanel;
 
-import com.ponysdk.ui.terminal.Addon;
+import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.PonyAddOn;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -33,7 +33,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 
 @PonyAddOn
-public class PCFloatablePanelAddon extends Addon {
+public class PCFloatablePanelAddon extends PTAddon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon";
 
@@ -46,7 +46,6 @@ public class PCFloatablePanelAddon extends Addon {
 
     @Override
     public void update(final Update update, final UIService uiService) {
-
         final Property mainProperty = update.getMainProperty();
         for (final Property property : mainProperty.getChildProperties().values()) {
             final PropertyKey propertyKey = property.getKey();

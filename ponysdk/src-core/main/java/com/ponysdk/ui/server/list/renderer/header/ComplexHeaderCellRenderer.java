@@ -26,79 +26,57 @@ package com.ponysdk.ui.server.list.renderer.header;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventBusAware;
 import com.ponysdk.core.query.ComparatorType;
-import com.ponysdk.core.query.SortingType;
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.FormField.ResetHandler;
 import com.ponysdk.ui.server.list.event.ComparatorTypeChangeEvent;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
-import com.ponysdk.ui.server.list.event.SortColumnEvent;
-import com.ponysdk.ui.server.list.event.SortColumnHandler;
 
-public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumnHandler, EventBusAware {
+public class ComplexHeaderCellRenderer implements HeaderCellRenderer, EventBusAware {
 
-    private static final String ARROW_DOWN_IMAGE_URL = "images/down_16.png";
-
-    private static final String ARROW_UP_IMAGE_URL = "images/up_16.png";
-
-    protected SortingType sortingType = SortingType.ASCENDING;
-
-    protected final PVerticalPanel container;
+    protected final PFlexTable container;
 
     protected EventBus eventBus;
 
     protected FormField formField;
 
-    private PAnchor header;
-
     private String caption;
 
-    public ComplexHeaderCellRenderer(String caption, final String pojoPropertyKey) {
+    private SortableHeader sortableHeader;
+
+    private PWidget header;
+
+    public ComplexHeaderCellRenderer(final String caption, final String pojoPropertyKey) {
         this(caption, new FormField(), pojoPropertyKey);
     }
 
-    public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField formField, final String pojoPropertyKey) {
         this(caption, formField, pojoPropertyKey, false);
     }
 
-    public ComplexHeaderCellRenderer(String caption, final FormField formField, final String pojoPropertyKey, boolean enableComparatorType) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField formField, final String pojoPropertyKey, final boolean enableComparatorType) {
 
         this.caption = caption;
-
-        this.container = new PVerticalPanel();
+        this.container = new PFlexTable();
         this.formField = formField;
+        this.header = new PLabel(caption);
+        this.sortableHeader = new SortableHeader(header, pojoPropertyKey);
 
-        header = new PAnchor(caption);
-        header.setWidth("100%");
-        header.setHeight("20px");
+        container.setSizeFull();
+        container.setCellPadding(0);
+        container.setCellSpacing(0);
 
-        PHorizontalPanel subPanel = new PHorizontalPanel();
-        subPanel.setSizeFull();
-
-        header.setStyleProperty("cursor", "hand");
-        header.setStyleProperty("cursor", "pointer");
-        header.setStyleProperty("textAlign", "center");
-        header.setStyleProperty("display", "block");
-
-        header.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                askSort(pojoPropertyKey);
-            }
-        });
-
-        subPanel.add(formField.render().asWidget());
+        container.setWidget(0, 0, header);
+        container.setWidget(1, 0, formField.render().asWidget());
 
         if (enableComparatorType) {
             final PListBox listBox = new PListBox(false, false);
@@ -116,13 +94,11 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
             listBox.addChangeHandler(new PChangeHandler() {
 
                 @Override
-                public void onChange(Object source, int selectedIndex) {
+                public void onChange(final Object source, final int selectedIndex) {
                     if (listBox.getItem(selectedIndex).isEmpty()) return;
                     fireComparatorTypeChange(pojoPropertyKey, ComparatorType.fromName(listBox.getItem(selectedIndex)));
                 }
             });
-
-            subPanel.add(listBox);
 
             formField.addResetHandler(new ResetHandler() {
 
@@ -132,36 +108,20 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
                 }
             });
 
+            container.setWidget(1, 1, listBox);
+            container.getFlexCellFormatter().setColSpan(0, 0, 2);
         }
 
         formField.addDomHandler(new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
-            public void onKeyUp(int keyCode) {
+            public void onKeyUp(final int keyCode) {
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(ComplexHeaderCellRenderer.this, formField);
                 eventBus.fireEvent(refreshListEvent);
             }
         }, PKeyUpEvent.TYPE);
 
-        container.add(header);
-        container.add(subPanel);
-
-        container.addStyleName("pony-ComplexList-ComplexHeader");
-
-    }
-
-    protected SortingType getNextSortingType() {
-        if (sortingType == SortingType.NONE) {
-            header.setStyleProperty("background", "#666666 url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
-            return SortingType.ASCENDING;
-        } else if (sortingType == SortingType.DESCENDING) {
-            header.setStyleProperty("background", "#666666 url(" + ARROW_DOWN_IMAGE_URL + ") no-repeat 98% 50%");
-            return SortingType.ASCENDING;
-        } else if (sortingType == SortingType.ASCENDING) {
-            header.setStyleProperty("background", "#666666 url(" + ARROW_UP_IMAGE_URL + ") no-repeat 98% 50%");
-            return SortingType.DESCENDING;
-        }
-        return SortingType.NONE;
+        container.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX);
     }
 
     @Override
@@ -169,34 +129,20 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, SortColumn
         return container;
     }
 
-    @Override
-    public void onColumnSort(SortColumnEvent event) {
-        if (!event.getSource().equals(this)) {
-            sortingType = SortingType.NONE;
-            header.setStyleProperty("background", "none");
-        } else {
-            sortingType = event.getSortingType();
-        }
-    }
-
-    @Override
-    public void setEventBus(EventBus eventBus) {
-        this.eventBus = eventBus;
-        this.eventBus.addHandler(SortColumnEvent.TYPE, this);
-    }
-
-    private void fireComparatorTypeChange(final String pojoPropertyKey, ComparatorType comparatorType) {
+    private void fireComparatorTypeChange(final String pojoPropertyKey, final ComparatorType comparatorType) {
         final ComparatorTypeChangeEvent comparatorTypeEvent = new ComparatorTypeChangeEvent(ComplexHeaderCellRenderer.this, comparatorType, pojoPropertyKey);
         eventBus.fireEvent(comparatorTypeEvent);
-    }
-
-    private void askSort(final String pojoPropertyKey) {
-        final SortColumnEvent sortColumnEvent = new SortColumnEvent(ComplexHeaderCellRenderer.this, getNextSortingType(), pojoPropertyKey);
-        eventBus.fireEvent(sortColumnEvent);
     }
 
     @Override
     public String getCaption() {
         return caption;
     }
+
+    @Override
+    public void setEventBus(final EventBus eventBus) {
+        this.eventBus = eventBus;
+        this.sortableHeader.setEventBus(eventBus);
+    }
+
 }

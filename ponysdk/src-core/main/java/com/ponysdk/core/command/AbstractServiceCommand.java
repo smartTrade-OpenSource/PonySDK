@@ -119,7 +119,7 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
     }
 
     public boolean isSuccessful() {
-        return caught != null;
+        return (caught == null);
     }
 
     public long getExecutionTime(final TimeUnit timeUnit) {

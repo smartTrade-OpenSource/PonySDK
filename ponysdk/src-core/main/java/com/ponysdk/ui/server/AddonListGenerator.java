@@ -41,7 +41,7 @@ import com.ponysdk.ui.terminal.PonyAddOn;
 public class AddonListGenerator extends Generator {
 
     @Override
-    public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+    public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
 
         final List<JClassType> ponyAddons = new ArrayList<JClassType>();
 
@@ -78,9 +78,9 @@ public class AddonListGenerator extends Generator {
         for (final JClassType addon : ponyAddons) {
             src.println("addonList.add(new AddonFactory(){");
             src.indent();
-            src.println("public Addon newAddon(){");
+            src.println("public PTAddon newAddon(){");
             src.indent();
-            src.println("Addon addon =  new " + addon.getParameterizedQualifiedSourceName() + "();");
+            src.println("PTAddon addon =  new " + addon.getParameterizedQualifiedSourceName() + "();");
             src.println("return addon;");
             src.outdent();
             src.println("}");
@@ -104,7 +104,7 @@ public class AddonListGenerator extends Generator {
         return typeName + "Generated";
     }
 
-    public SourceWriter getSourceWriter(JClassType classType, GeneratorContext context, TreeLogger logger) {
+    public SourceWriter getSourceWriter(final JClassType classType, final GeneratorContext context, final TreeLogger logger) {
         final String packageName = classType.getPackage().getName();
         final String simpleName = classType.getSimpleSourceName() + "Generated";
         final ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName, simpleName);

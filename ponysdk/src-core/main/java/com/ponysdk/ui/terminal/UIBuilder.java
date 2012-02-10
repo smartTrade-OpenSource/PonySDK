@@ -47,6 +47,8 @@ import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
@@ -122,9 +124,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         loadingMessageBox = new SimplePanel();
 
         communicationErrorMessagePanel = new PopupPanel(false, true);
-        communicationErrorMessagePanel.setStyleName("pony-CommunicationErrorMessage");
         communicationErrorMessagePanel.setGlassEnabled(true);
-        communicationErrorMessagePanel.setAnimationEnabled(true);
+        communicationErrorMessagePanel.setStyleName("pony-notification");
+        communicationErrorMessagePanel.addStyleName("error");
 
         RootPanel.get().add(loadingMessageBox);
 
@@ -381,6 +383,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         actionPanel.add(reloadAnchor);
         actionPanel.add(closeAnchor);
 
+        actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
+        actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
+        actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
+        actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
+
         content.add(actionPanel);
 
         communicationErrorMessagePanel.setWidget(content);
@@ -388,8 +395,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight) {
-                final int left = (Window.getClientWidth() - offsetWidth) >> 1;
-                communicationErrorMessagePanel.setPopupPosition(left, 0);
+                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2);
             }
         });
     }

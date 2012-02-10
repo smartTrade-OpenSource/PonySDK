@@ -45,7 +45,7 @@ public class PositionContainerPageActivity extends PageActivity {
     protected void onLeavingPage() {}
 
     @Override
-    protected void onShowPage(Place place) {
+    protected void onShowPage(final Place place) {
         final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setHeight("500px");
         scrollPanel.setWidth("500px");
@@ -57,7 +57,7 @@ public class PositionContainerPageActivity extends PageActivity {
         controlBar.add(new PButton("Button 1"));
         controlBar.add(new PButton("Button 2"));
         final PFloatablePanel positionContainer = new PFloatablePanel();
-        positionContainer.setWidget(controlBar);
+        positionContainer.asWidget().setWidget(controlBar);
 
         content.add(positionContainer);
         for (int i = 0; i < 50; i++) {

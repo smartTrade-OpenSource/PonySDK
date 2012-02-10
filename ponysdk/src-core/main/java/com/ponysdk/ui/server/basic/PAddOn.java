@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-public interface PAddOn {
+public abstract class PAddOn extends PObject {
 
-    String getSignature();
+    public abstract String getSignature();
 
 }

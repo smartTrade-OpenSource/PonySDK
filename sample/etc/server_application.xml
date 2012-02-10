@@ -10,6 +10,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 	<bean name="proxyBuilder" class="com.ponysdk.service.ProxyBuilder" />
 
-	<bean name="ponyService" class="com.ponysdk.sample.server.RemotePonyService" />
+	<bean name="ponyService" class="com.ponysdk.sample.server.PonyServiceImpl" />
 
 </beans>

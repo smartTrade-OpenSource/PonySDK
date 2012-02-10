@@ -38,15 +38,13 @@ public abstract class PComposite extends PWidget {
     }
 
     @Override
-    protected void init(WidgetType widgetType) {}
+    protected void init(final WidgetType widgetType) {}
 
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
         ID = PonySession.getCurrent().nextID();
         create = new Create(ID, getType());
-        if (this instanceof PAddOn) {
-            create.setAddOnSignature(((PAddOn) this).getSignature());
-        }
+
         PonySession.getCurrent().stackInstruction(create);
         PonySession.getCurrent().registerObject(ID, this);
 

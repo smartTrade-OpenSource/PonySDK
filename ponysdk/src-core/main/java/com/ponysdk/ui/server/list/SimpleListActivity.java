@@ -55,7 +55,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
 
     private int colCount;
 
-    public SimpleListActivity(String ID, SimpleListView listView, List<ListColumnDescriptor<T, ?>> listFields, EventBus eventBus) {
+    public SimpleListActivity(final String ID, final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
         this.ID = ID;
         this.listFields = listFields;
         this.listView = listView;
@@ -67,7 +67,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         return ID;
     }
 
-    public void addDescriptor(ListColumnDescriptor<T, ?> customDescriptor) {
+    public void addDescriptor(final ListColumnDescriptor<T, ?> customDescriptor) {
         listFields.add(customDescriptor);
         listView.removeCellStyle(0, colCount, PonySDKTheme.FILL_COLUMN);
         listView.setColumns(colCount);
@@ -113,7 +113,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         listView.addHeaderStyle("pony-ComplexList-ColumnHeader");
     }
 
-    public void rebuild(List<ListColumnDescriptor<T, ?>> listFields, List<T> data) {
+    public void rebuild(final List<ListColumnDescriptor<T, ?>> listFields, final List<T> data) {
         reset();
         this.listView.removeRow(0);
         this.listFields = listFields;
@@ -127,7 +127,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         data = null;
     }
 
-    public void insertData(int row, T data) {
+    public void insertData(final int row, final T data) {
         int col = 0;
 
         // listView.insertRow(rowCount);
@@ -150,7 +150,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         listView.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
     }
 
-    public void setData(List<T> data) {
+    public void setData(final List<T> data) {
         assert listView != null : "Cannot remove field before binding listView";
         reset();
         this.data = data;
@@ -179,7 +179,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         }
     }
 
-    public void insertSubList(int row, java.util.List<T> datas) {
+    public void insertSubList(final int row, final java.util.List<T> datas) {
         if (datas.isEmpty()) return;
         int subRow = row + 1;
         for (final T data : datas) {
@@ -190,13 +190,13 @@ public class SimpleListActivity<T> extends AbstractActivity {
                 if (!field.isViewable()) continue;
                 listView.addWidget(field.renderSubCell(subRow, data), col++, subRow);
             }
-            subRow++;
+            listView.addWidget(new PSimplePanel(), col, subRow++);
         }
         updateSubListOnRowInserted(row, datas.size());
         eventBus.fireEvent(new RowInsertedEvent(this, row, datas.size()));
     }
 
-    public void removeSubList(int fatherRow) {
+    public void removeSubList(final int fatherRow) {
         final Integer subListSize = subListSizeByFather.remove(fatherRow);
         if (subListSize != null) {
             for (int i = 1; i <= subListSize; i++) {
@@ -207,7 +207,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         }
     }
 
-    private void updateSubListOnRowInserted(int row, int insertedRowCount) {
+    private void updateSubListOnRowInserted(final int row, final int insertedRowCount) {
         final Map<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (final Map.Entry<Integer, Integer> entry : subListSizeByFather.entrySet()) {
             final int size = entry.getValue();
@@ -221,7 +221,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         subListSizeByFather.put(row, insertedRowCount);
     }
 
-    private void updateSubListOnRowDeleted(int row, int deletedRowCount) {
+    private void updateSubListOnRowDeleted(final int row, final int deletedRowCount) {
         final Map<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (final Map.Entry<Integer, Integer> entry : subListSizeByFather.entrySet()) {
             final int size = entry.getValue();
@@ -234,11 +234,11 @@ public class SimpleListActivity<T> extends AbstractActivity {
         subListSizeByFather = temp;
     }
 
-    public void selectRow(int row) {
+    public void selectRow(final int row) {
         listView.selectRow(row);
     }
 
-    public void unSelectRow(int row) {
+    public void unSelectRow(final int row) {
         listView.unSelectRow(row);
     }
 
@@ -247,11 +247,11 @@ public class SimpleListActivity<T> extends AbstractActivity {
     }
 
     @Override
-    public void start(PAcceptsOneWidget container) {
+    public void start(final PAcceptsOneWidget container) {
         container.setWidget(listView);
     }
 
-    public void ensureDebugId(String debugID) {
+    public void ensureDebugId(final String debugID) {
         this.debugID = debugID;
     }
 }

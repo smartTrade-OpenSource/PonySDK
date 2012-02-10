@@ -38,26 +38,28 @@ import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.application.ApplicationView;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonyChildsCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.form.DefaultFormView;
+import com.ponysdk.ui.server.form.FormActivity;
 import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
 import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
+import com.ponysdk.ui.server.form.renderer.TextBoxBaseFormFieldRenderer;
+import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
+import com.ponysdk.ui.server.form.validator.IntegerFieldValidator;
+import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.list.ComplexListActivity;
 import com.ponysdk.ui.server.list.ComplexListCommandFactory;
 import com.ponysdk.ui.server.list.ComplexListConfiguration;
@@ -67,23 +69,24 @@ import com.ponysdk.ui.server.list.ExportConfiguration;
 import com.ponysdk.ui.server.list.ListColumnDescriptor;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
-import com.ponysdk.ui.server.list.renderer.header.ComplexHeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
+import com.ponysdk.ui.server.rich.PConfirmDialog;
 
-public class ComplexListPageActivity extends PageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
+public class ComplexListPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
 
     @Autowired
     protected ApplicationView applicationView;
 
     private ComplexListActivity<Pony> complexListActivity;
+    private FormField nameSearchField;
+    private FormField ageSearchField;
 
-    private final PListBox listBox = new PListBox(false, true);
-
-    private CriterionField nameCriterion;
-
-    private FormField nameField;
-
-    private FormField ageField;
+    private PSimplePanel createPonyActivityPanel;
+    private FormActivity createPonyActivity;
+    private FormField raceFormField;
+    private FormField nameFormField;
+    private FormField ageFormField;
 
     public ComplexListPageActivity() {
         super("Complex List", "Rich UI Components");
@@ -101,42 +104,34 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     @Override
     protected void onFirstShowPage() {
 
+        super.onFirstShowPage();
+
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
         addHandler(ShowSubListEvent.TYPE, this);
 
-        // Layout the page with a search panel and a list panel
-        final PSimplePanel searchPanel = new PSimplePanel();
-        final PSimplePanel listPanel = new PSimplePanel();
-        final PVerticalPanel layout = new PVerticalPanel();
-        layout.setSizeFull();
-        layout.add(searchPanel);
-        layout.add(listPanel);
-        pageView.getBody().setWidget(layout);
-
-        final ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
-        for (int i = 0; i < 15; i++) {
-            ageListBoxRenderer.addItem(i + " year", i);
-        }
-        ageField = new FormField(ageListBoxRenderer);
-
-        nameCriterion = new CriterionField("name");
-
         final ComplexListConfiguration<Pony> complexListConfiguration = new ComplexListConfiguration<Pony>();
         complexListConfiguration.setEnableForm(true);
-        final PHorizontalPanel formPanel = new PHorizontalPanel();
-        complexListConfiguration.setFormLayout(formPanel);
+        complexListConfiguration.setFormLayout(new PHorizontalPanel());
         complexListConfiguration.setShowSubListColumnEnabled(true);
         complexListConfiguration.setSelectionColumnEnabled(true);
-        complexListConfiguration.setPageSize(40);
-        complexListConfiguration.setTableName("ComplexList");
+        complexListConfiguration.setPageSize(20);
+        complexListConfiguration.setTableName("Pony List");
         complexListConfiguration.setExportConfiguration(initExportConfiguration());
         complexListConfiguration.setColumnDescriptors(initListColumnDescriptors());
         complexListConfiguration.setCustomColumnEnabled(true, Pony.class);
         complexListConfiguration.setShowPreferences(true);
 
         final ComplexListView complexListView = new DefaultComplexListView();
+        complexListView.setFloatableToolBar(examplePanel);
+
         complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());
+
+        complexListActivity.registerSearchCriteria(new CriterionField("name"), nameSearchField);
+        complexListActivity.registerSearchCriteria(new CriterionField("age"), ageSearchField);
+
+        complexListActivity.getForm().addFormField(nameSearchField);
+        complexListActivity.getForm().addFormField(ageSearchField);
 
         complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
 
@@ -147,11 +142,6 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
                     @Override
                     protected void doAfterSuccess(final Result<List<Pony>> result) {
                         complexListActivity.setData(result);
-
-                        listBox.clear();
-                        for (Pony p : result.getData()) {
-                            listBox.addItem(p.getName(), p);
-                        }
                     }
                 };
             }
@@ -163,28 +153,16 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
 
         });
 
-        complexListActivity.registerSearchCriteria(nameCriterion, nameField);
-        complexListActivity.registerSearchCriteria(new CriterionField("age"), ageField);
-        complexListActivity.start(listPanel);
-        complexListActivity.getForm().addFormField(nameField);
-        complexListActivity.getForm().addFormField(ageField);
-
-        complexListView.setFloatableToolBar((PScrollPanel) pageView.getBody());
+        complexListActivity.start(examplePanel);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                Pony pony = new Pony(null, "A dynamic pony", 1, "Equus ferus caballus");
-                CreatePonyCommand command = new CreatePonyCommand(pony);
-                Pony newPony = command.execute();
-                if (command.isSuccessful()) {
-                    PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
-                    event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
-                    fireEvent(event);
-                }
+                showCreatePonyPopup();
             }
+
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
         complexListView.getToolbarLayout().add(addPonyButton);
@@ -192,24 +170,8 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         // Load initial datas
         complexListActivity.refresh();
 
-        listBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final Object source, final int selectedIndex) {
-                final List<Pony> list = new ArrayList<Pony>();
-                for (final int index : listBox.getSelectedItems()) {
-                    list.add((Pony) listBox.getValue(index));
-                    complexListActivity.enableSelectedData((Pony) listBox.getValue(index), false);
-                    complexListActivity.updateData((Pony) listBox.getValue(index));
-                }
-
-                complexListActivity.setSelectedData(list);
-            }
-        });
-
-        complexListActivity.getComplexListView().getToolbarLayout().add(new PLabel("SelectData : "));
-        complexListActivity.getComplexListView().getToolbarLayout().add(listBox);
-
+        // Build create pony form
+        buildCreatePonyActivity();
     }
 
     private ExportConfiguration initExportConfiguration() {
@@ -221,27 +183,29 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
     }
 
     private List<ListColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
+
+        ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
+        for (int i = 0; i < 30; i++)
+            ageListBoxRenderer.addItem(i + " year", i);
+
+        ageSearchField = new FormField(ageListBoxRenderer);
+        nameSearchField = new FormField(new TextBoxBaseFormFieldRenderer("Name"));
+
         final List<ListColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<ListColumnDescriptor<Pony, ?>>();
 
         final ListColumnDescriptor<Pony, String> nameColumnDescriptor = new ListColumnDescriptor<Pony, String>();
-
-        nameField = new FormField();
-
-        final ComplexHeaderCellRenderer nameHeaderCellRenderer = new ComplexHeaderCellRenderer("Name", nameField, "name");
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRenderer);
+        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name", "name"));
         listColumnDescriptors.add(nameColumnDescriptor);
 
         final ListColumnDescriptor<Pony, String> ageColumnDescriptor = new ListColumnDescriptor<Pony, String>("Age");
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
-
-        final ComplexHeaderCellRenderer headerCellRenderer = new ComplexHeaderCellRenderer("Age", ageField, "age");
-        ageColumnDescriptor.setHeaderCellRenderer(headerCellRenderer);
-
+        ageColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Age", "age"));
         listColumnDescriptors.add(ageColumnDescriptor);
 
         final ListColumnDescriptor<Pony, String> raceColumnDescriptor = new ListColumnDescriptor<Pony, String>("Race");
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
+        raceColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
         listColumnDescriptors.add(raceColumnDescriptor);
 
         return listColumnDescriptors;
@@ -265,4 +229,49 @@ public class ComplexListPageActivity extends PageActivity implements SubmitFormH
         }
     }
 
+    protected void showCreatePonyPopup() {
+        final PDialogBox dialogBox = PConfirmDialog.show("Create pony", createPonyActivityPanel, "Create", "Cancel", new PConfirmDialogHandler() {
+
+            @Override
+            public void onCancel() {}
+
+            @Override
+            public boolean onOK(final PDialogBox p) {
+                if (createPonyActivity.isValid()) {
+                    Pony pony = new Pony(null, nameFormField.getStringValue(), ageFormField.getIntegerValue(), raceFormField.getStringValue());
+                    CreatePonyCommand command = new CreatePonyCommand(pony);
+                    Pony newPony = command.execute();
+                    if (command.isSuccessful()) {
+                        PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
+                        event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
+                        fireEvent(event);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        dialogBox.center();
+    }
+
+    private void buildCreatePonyActivity() {
+
+        createPonyActivityPanel = new PSimplePanel();
+        createPonyActivity = new FormActivity(new DefaultFormView("Create a Pony"));
+        nameFormField = new FormField(new TextBoxFormFieldRenderer("Name"));
+        ageFormField = new FormField(new TextBoxFormFieldRenderer("Age"));
+        raceFormField = new FormField(new TextBoxFormFieldRenderer("Race"));
+
+        nameFormField.addValidator(new NotEmptyFieldValidator());
+        raceFormField.addValidator(new NotEmptyFieldValidator());
+        ageFormField.addValidator(new NotEmptyFieldValidator());
+        ageFormField.addValidator(new IntegerFieldValidator());
+
+        createPonyActivity.addFormField(nameFormField);
+        createPonyActivity.addFormField(ageFormField);
+        createPonyActivity.addFormField(raceFormField);
+
+        createPonyActivity.start(createPonyActivityPanel);
+    }
 }
