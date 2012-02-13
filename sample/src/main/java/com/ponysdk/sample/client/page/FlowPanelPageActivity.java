@@ -30,7 +30,6 @@ import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 
 public class FlowPanelPageActivity extends SamplePageActivity {
 
@@ -42,8 +41,6 @@ public class FlowPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PVerticalPanel panel = new PVerticalPanel();
-
         final PFlowPanel flowPanel = new PFlowPanel();
 
         FindPonysCommand command = new FindPonysCommand(new Query());
@@ -53,9 +50,7 @@ public class FlowPanelPageActivity extends SamplePageActivity {
             flowPanel.add(new PCheckBox(pony.getName()));
         }
 
-        panel.add(flowPanel);
-
-        examplePanel.setWidget(panel);
+        examplePanel.setWidget(flowPanel);
     }
 
 }

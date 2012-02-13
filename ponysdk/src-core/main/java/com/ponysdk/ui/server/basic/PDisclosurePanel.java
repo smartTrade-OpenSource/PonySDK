@@ -34,7 +34,14 @@ import com.ponysdk.ui.terminal.instruction.Add;
 
 public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
+    private static final String CLOSED = "images/disclosure_closed.png";
+    private static final String OPENNED = "images/disclosure_openned.png";
+
     private PWidget content;
+
+    public PDisclosurePanel(final String headerText) {
+        this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
+    }
 
     public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
         super();

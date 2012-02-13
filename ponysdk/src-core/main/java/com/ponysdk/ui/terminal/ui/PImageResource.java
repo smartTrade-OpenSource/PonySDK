@@ -3,6 +3,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.ui.Image;
 
 public class PImageResource implements ImageResource {
 
@@ -12,8 +13,22 @@ public class PImageResource implements ImageResource {
 
     private final int height;
 
-    public PImageResource(final String uri, final int width, final int height) {
+    private final int left;
+
+    private final int top;
+
+    public PImageResource(final Image image) {
+        this.uri = image.getUrl();
+        this.left = image.getOriginLeft();
+        this.top = image.getOriginTop();
+        this.width = image.getWidth();
+        this.height = image.getHeight();
+    }
+
+    public PImageResource(final String uri, final int left, final int top, final int width, final int height) {
         this.uri = uri;
+        this.left = left;
+        this.top = top;
         this.width = width;
         this.height = height;
     }
@@ -30,7 +45,7 @@ public class PImageResource implements ImageResource {
 
     @Override
     public int getLeft() {
-        return 0;
+        return left;
     }
 
     @Override
@@ -46,7 +61,7 @@ public class PImageResource implements ImageResource {
 
     @Override
     public int getTop() {
-        return 0;
+        return top;
     }
 
     @Override

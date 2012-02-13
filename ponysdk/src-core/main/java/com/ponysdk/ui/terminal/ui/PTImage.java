@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -37,7 +38,17 @@ public class PTImage extends PTWidget {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.Image());
+        if (create.getMainProperty().hasChildProperty(PropertyKey.IMAGE_URL)) {
+            String url = create.getMainProperty().getStringPropertyValue(PropertyKey.IMAGE_URL);
+            int left = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_LEFT);
+            int top = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_TOP);
+            int width = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_WIDTH);
+            int height = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_HEIGHT);
+
+            init(create, uiService, new Image(url, left, top, width, height));
+        } else {
+            init(create, uiService, new Image());
+        }
     }
 
     @Override
@@ -55,12 +66,15 @@ public class PTImage extends PTWidget {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
-        if (PropertyKey.IMAGE_URL.equals(propertyKey)) {
-            cast().setUrl(property.getValue());
-            return;
-        }
+        switch (propertyKey) {
+            case IMAGE_URL:
+                cast().setUrl(property.getValue());
+                break;
 
-        super.update(update, uiService);
+            default:
+                super.update(update, uiService);
+                break;
+        }
     }
 
     @Override

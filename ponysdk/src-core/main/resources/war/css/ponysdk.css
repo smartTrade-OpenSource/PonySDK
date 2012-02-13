@@ -300,33 +300,23 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.gwt-DisclosurePanel {
-	border-bottom-color: #333;
-	border-bottom-style: none;
-	border-collapse: separate;
-	border-left-color: white;
-	border-left-style: solid;
-	border-left-width: 1px;
-	border-right-color: transparent;
-	border-right-style: solid;
-	border-right-width: 1px;
-	border-top-color: white;
-	border-top-style: solid;
-	border-top-width: 1px;
-	color: #333;
-	cursor: pointer;
-	font-family: arial, sans-serif;
-	font-size: 12px;
-	font-weight: bold;
-	height: 15px;
-	margin: 0px;
-	outline-style: none;
+
+
+.gwt-DisclosurePanel .content {
 }
-.header {
-	background-color: #EEE;
+
+.gwt-DisclosurePanel .gwt-DisclosurePanel-open .header{
 }
-.gwt-DisclosurePanel .header a:hover {
+
+.gwt-DisclosurePanel .gwt-DisclosurePanel-closed{
 }
+
+.gwt-DisclosurePanel .header,
+.gwt-DisclosurePanel .header a,
+.gwt-DisclosurePanel .header td {
+	font-size : 13px;
+}
+
 .gwt-Tree table {
 	border-collapse: collapse;
 }
@@ -1227,18 +1217,6 @@ a.header{
 	background: white;
 }
 
-.gwt-DisclosurePanel .content {
-	border-left: none;
-}
-
-.gwt-DisclosurePanel .gwt-DisclosurePanel-open{
-	font-family: arial, sans-serif;
-	font-size:11px;
-}
-
-.gwt-DisclosurePanel{
-	padding-top: 0px;
-}
 
 .header td{
 	font-family: arial, sans-serif;

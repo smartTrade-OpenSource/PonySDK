@@ -38,13 +38,14 @@ public class PTDisclosurePanel extends PTWidget {
 
         final Long openImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG);
         final Long closeImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG);
+
         final String headerText = mainProperty.getValue();
 
         PTImage open = (PTImage) uiService.getPTObject(openImg);
         PTImage close = (PTImage) uiService.getPTObject(closeImg);
 
-        PImageResource openImageResource = new PImageResource(open.cast().getUrl(), 16, 16);
-        PImageResource closeImageResource = new PImageResource(close.cast().getUrl(), 16, 16);
+        PImageResource openImageResource = new PImageResource(open.cast());
+        PImageResource closeImageResource = new PImageResource(close.cast());
 
         init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
     }
