@@ -36,7 +36,6 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.ui.server.basic.event.PHasValue;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -47,7 +46,7 @@ import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PDateBox extends PFocusWidget implements PHasValue<Date>, PValueChangeHandler<Date>, PKeyPressHandler {
+public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date>, PKeyPressHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 

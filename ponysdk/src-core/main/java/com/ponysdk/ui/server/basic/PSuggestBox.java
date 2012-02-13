@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
-import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;

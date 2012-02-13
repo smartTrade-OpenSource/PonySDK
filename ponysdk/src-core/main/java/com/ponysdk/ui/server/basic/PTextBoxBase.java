@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -39,7 +38,7 @@ import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueChangeHandlers<String>, PValueChangeHandler<String> {
+public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String>, PValueChangeHandler<String> {
 
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
@@ -110,6 +109,16 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValueCha
         final Update update = new Update(getID());
         update.getMainProperty().setProperty(PropertyKey.SIZE, maxCharacterLength + "");
         getPonySession().stackInstruction(update);
+    }
+
+    @Override
+    public String getValue() {
+        return getText();
+    }
+
+    @Override
+    public void setValue(final String value) {
+        setText(value);
     }
 
 }

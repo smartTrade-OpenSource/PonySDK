@@ -21,11 +21,29 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic.event;
+package com.ponysdk.ui.server.form2.event;
 
-public interface PHasValue<T> extends HasPValueChangeHandlers<T> {
+import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.ui.server.form.FormActivity;
 
-    T getValue();
+public class SubmitFormEvent extends SystemEvent<SubmitFormHandler> {
 
-    void setValue(T value);
+    public static final Type<SubmitFormHandler> TYPE = new Type<SubmitFormHandler>();
+
+    public FormActivity formField;
+
+    public SubmitFormEvent(Object sourceComponent) {
+        super(sourceComponent);
+    }
+
+    @Override
+    protected void dispatch(SubmitFormHandler handler) {
+        handler.onSubmitForm(this);
+    }
+
+    @Override
+    public Type<SubmitFormHandler> getAssociatedType() {
+        return TYPE;
+    }
+
 }

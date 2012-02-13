@@ -31,10 +31,10 @@ import java.util.TimeZone;
 
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.ui.server.basic.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.ui.server.basic.event.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;

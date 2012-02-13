@@ -94,6 +94,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         formFieldComponent.setCaption(caption);
 
         fields.add(formFieldComponent);
+
         addListener(formFieldComponent.getInput());
 
         for (final String item : items) {

@@ -21,15 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic.event;
+package com.ponysdk.ui.server.basic;
 
-import java.util.Collection;
 
-public interface HasPValueChangeHandlers<T> {
+public interface HasPValue<T> extends HasPValueChangeHandlers<T> {
 
-    void addValueChangeHandler(PValueChangeHandler<T> handler);
+    T getValue();
 
-    void removeValueChangeHandler(PValueChangeHandler<T> handler);
-
-    Collection<PValueChangeHandler<T>> getValueChangeHandlers();
+    void setValue(T value);
 }

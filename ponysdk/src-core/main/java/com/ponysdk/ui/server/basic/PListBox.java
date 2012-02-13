@@ -122,7 +122,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             index = itemCount;
         }
 
-        ListItem item = new ListItem(label, value);
+        final ListItem item = new ListItem(label, value);
 
         items.add(index, item);
 
@@ -173,8 +173,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void removeItem(final String label) {
         int currentIndex = 0;
-        for (Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
-            ListItem item = iterator.next();
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+            final ListItem item = iterator.next();
             if (item.label.equals(label)) {
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
@@ -186,8 +186,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void removeItem(final Object value) {
         int currentIndex = 0;
-        for (Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
-            ListItem item = iterator.next();
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+            final ListItem item = iterator.next();
             if (item.value.equals(value)) {
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
@@ -273,7 +273,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setSelectedItem(final String item, final boolean selected) {
         for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).equals(item)) {
+            if (items.get(i).label.equals(item)) {
                 setSelectedIndex(i, selected);
                 break;
             }
@@ -282,6 +282,19 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setSelectedItem(final String item) {
         setSelectedItem(item, true);
+    }
+
+    public void setSelectedItem(final Object value, final boolean selected) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).value.equals(value)) {
+                setSelectedIndex(i, selected);
+                break;
+            }
+        }
+    }
+
+    public void setSelectedItem(final Object value) {
+        setSelectedItem(value, true);
     }
 
     @Override
