@@ -37,6 +37,7 @@ import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
+import com.ponysdk.ui.server.basic.PWidget;
 
 import de.java2html.converter.JavaSource2HTMLConverter;
 import de.java2html.javasource.JavaSource;
@@ -70,14 +71,24 @@ public class SamplePageActivity extends PageActivity {
     @Override
     protected void onFirstShowPage() {
         codePanel = new PScrollPanel();
-        examplePanel = new PSimpleLayoutPanel();
+
+        examplePanel = new PSimpleLayoutPanel() {
+
+            @Override
+            public void setWidget(final PWidget w) {
+                applyExampleStyle(w);
+                super.setWidget(w);
+            }
+        };
         examplePanel.setSizeFull();
 
         tabPanel = new PTabPanel();
 
         tabPanel.add(examplePanel, "Example");
 
-        codePanel.setWidget(new PHTML(getSource()));
+        final PHTML sourcePanel = new PHTML(getSource());
+        sourcePanel.addStyleName("codepanel");
+        codePanel.setWidget(sourcePanel);
 
         tabPanel.add(codePanel, "Source Code");
 
@@ -87,7 +98,7 @@ public class SamplePageActivity extends PageActivity {
 
     protected String getSource() {
 
-        String fileName = getClass().getName().replaceAll("\\.", "/") + ".java";
+        final String fileName = getClass().getName().replaceAll("\\.", "/") + ".java";
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = null;
         try {
@@ -95,17 +106,22 @@ public class SamplePageActivity extends PageActivity {
             inputStream = classLoader.getResourceAsStream(fileName);
             if (inputStream == null) return "Unable to load file: " + fileName;
 
-            StringWriter writer = new StringWriter();
-            JavaSource javaSource = new JavaSourceParser().parse(inputStream);
-            JavaSource2HTMLConverter converter = new JavaSource2HTMLConverter();
+            final StringWriter writer = new StringWriter();
+            final JavaSource javaSource = new JavaSourceParser().parse(inputStream);
+            final JavaSource2HTMLConverter converter = new JavaSource2HTMLConverter();
             converter.convert(javaSource, JavaSourceConversionOptions.getDefault(), writer);
 
             return writer.toString();
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("", e);
         }
 
         return "";
     }
+
+    protected void applyExampleStyle(final PWidget widget) {
+        widget.addStyleName("examplepanel");
+    }
+
 }
