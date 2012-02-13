@@ -24,7 +24,6 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PDisclosurePanel;
-import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -42,10 +41,9 @@ public class DisclosurePanelPageActivity extends SamplePageActivity {
 
         PVerticalPanel panel = new PVerticalPanel();
 
-        final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details", new PImage("images/treeRightTriangleBlack.png"), new PImage("images/treeDownTriangleBlack.png"));
+        final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details");
         disclosurePanel.setContent(getDisclosurePanelContent());
         disclosurePanel.setWidth("200px");
-        disclosurePanel.setHeight("200px");
 
         panel.setSpacing(10);
         panel.add(disclosurePanel);

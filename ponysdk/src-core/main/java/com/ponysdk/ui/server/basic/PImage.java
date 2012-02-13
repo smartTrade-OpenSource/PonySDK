@@ -43,9 +43,21 @@ public class PImage extends PFocusWidget {
 
     private String url;
 
+    private int left;
+
+    private int top;
+
     public PImage() {}
 
-    public PImage(String url) {
+    public PImage(final String url, final int left, final int top, final int width, final int height) {
+        create.getMainProperty().setProperty(PropertyKey.WIDGET_HEIGHT, width);
+        create.getMainProperty().setProperty(PropertyKey.WIDGET_WIDTH, height);
+        create.getMainProperty().setProperty(PropertyKey.IMAGE_URL, url);
+        create.getMainProperty().setProperty(PropertyKey.IMAGE_LEFT, left);
+        create.getMainProperty().setProperty(PropertyKey.IMAGE_TOP, top);
+    }
+
+    public PImage(final String url) {
         setUrl(url);
     }
 
@@ -93,14 +105,14 @@ public class PImage extends PFocusWidget {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.IMAGE_URL, url);
         getPonySession().stackInstruction(update);
     }
 
-    public void setStream(StreamHandler streamListener) {
+    public void setStream(final StreamHandler streamListener) {
         final StreamResource streamResource = new StreamResource();
         streamResource.embed(streamListener, this);
     }
@@ -109,7 +121,7 @@ public class PImage extends PFocusWidget {
 
         private final URL url;
 
-        public ClassPathURL(String resourcePath) {
+        public ClassPathURL(final String resourcePath) {
             url = getClass().getClassLoader().getResource(resourcePath);
         }
 
@@ -121,6 +133,14 @@ public class PImage extends PFocusWidget {
         public String toString() {
             return "ClassPathURL [url=" + url + "]";
         }
+    }
+
+    public int getLeft() {
+        return left;
+    }
+
+    public int getTop() {
+        return top;
     }
 
 }

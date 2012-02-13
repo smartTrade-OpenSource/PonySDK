@@ -29,7 +29,6 @@ import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -71,6 +70,8 @@ public class TabPanelPageActivity extends SamplePageActivity {
 
         final PButton button = new PButton("Add Tab");
         button.setWidth("100px");
+        button.setStyleProperty("margin", "10px");
+
         button.addClickHandler(new PClickHandler() {
 
             @Override
@@ -79,10 +80,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
             }
         });
 
-        PVerticalPanel actionPanel = new PVerticalPanel();
-        actionPanel.setSpacing(10);
-
-        dockLayoutPanel.addNorth(button, 30);
+        dockLayoutPanel.addNorth(button, 50);
         dockLayoutPanel.add(tabPanel);
 
         addTabContent(tabPanel);
