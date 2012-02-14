@@ -23,9 +23,7 @@
 
 package com.ponysdk.ui.server.form2;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.core.activity.AbstractActivity;
@@ -40,7 +38,6 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public class FormActivity extends AbstractActivity implements Activity {
 
-    private final List<FormField<?>> formFields = new ArrayList<FormField<?>>();
     private final Map<FormField<?>, String> captionByFormField = new HashMap<FormField<?>, String>();
 
     protected final FormView formView;
@@ -60,20 +57,18 @@ public class FormActivity extends AbstractActivity implements Activity {
     }
 
     public void addFormField(final String caption, final FormField<?> formField) {
-        formFields.add(formField);
         formView.addFormField(caption, formField.asWidget());
         captionByFormField.put(formField, caption);
     }
 
     public void removeFormField(final FormField<?> formField) {
         final String caption = captionByFormField.remove(formField);
-        formFields.remove(formField);
         formView.removeFormField(caption, formField.asWidget());
     }
 
     public boolean isValid() {
         boolean valid = true;
-        for (final FormField<?> formField : formFields) {
+        for (final FormField<?> formField : captionByFormField.keySet()) {
             final ValidationResult result = formField.isValid();
             if (!result.isValid()) {
                 valid = false;
@@ -84,7 +79,7 @@ public class FormActivity extends AbstractActivity implements Activity {
     }
 
     public void reset() {
-        for (final FormField<?> formField : formFields) {
+        for (final FormField<?> formField : captionByFormField.keySet()) {
             formField.reset();
             formView.onReset(captionByFormField.get(formField), formField);
         }

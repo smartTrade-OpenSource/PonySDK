@@ -30,7 +30,7 @@ public class TextBoxFormField<T> extends FormField<T> {
 
     @Override
     public T getValue() {
-        return dataProvider.to(textBox.getValue());
+        return dataProvider.to(textBox.getText());
     }
 
     @Override
@@ -40,7 +40,7 @@ public class TextBoxFormField<T> extends FormField<T> {
 
     @Override
     protected String getStringValue() {
-        return textBox.getValue();
+        return textBox.getText();
     }
 
 }

@@ -23,8 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -44,26 +42,17 @@ import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.validator.DoubleFieldValidator;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
 
-public class FormPageActivity extends PageActivity {
+public class FormPageActivity extends SamplePageActivity {
 
     public FormPageActivity() {
         super("Form", "Rich UI Components");
     }
 
     @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(final Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
     protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
         final PVerticalPanel layout = new PVerticalPanel();
-        pageView.getBody().setWidget(layout);
 
         final FormView formView = new DefaultFormView();
         final FormConfiguration formConfiguration = new FormConfiguration();
@@ -109,6 +98,8 @@ public class FormPageActivity extends PageActivity {
             }
         });
         layout.add(validateButton);
+
+        examplePanel.setWidget(layout);
     }
 
 }

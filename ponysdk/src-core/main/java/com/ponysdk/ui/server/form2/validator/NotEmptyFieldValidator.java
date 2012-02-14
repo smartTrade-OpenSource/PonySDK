@@ -21,20 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.form2;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.form2.formfield.FormField;
-import com.ponysdk.ui.server.form2.validator.ValidationResult;
+public class NotEmptyFieldValidator implements FieldValidator {
 
-public interface FormView extends IsPWidget {
+    private static final String FIELD_MSG_EMPTY = "Empty field";
 
-    void addFormField(String caption, IsPWidget component);
-
-    void removeFormField(String caption, IsPWidget component);
-
-    void onValidationResult(String caption, ValidationResult result);
-
-    void onReset(String string, FormField<?> formField);
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(FIELD_MSG_EMPTY);
+        return ValidationResult.newOKValidationResult();
+    }
 
 }
