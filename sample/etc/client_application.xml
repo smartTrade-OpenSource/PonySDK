@@ -86,7 +86,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 <!-- 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" /> -->
-<!-- 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
 <!-- 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" /> -->
@@ -97,5 +96,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 <!-- 	<bean class="com.ponysdk.sample.client.page.MultiSelectionPageActivity" /> -->
 
  	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.Form2PageActivity" />
 
 </beans>
