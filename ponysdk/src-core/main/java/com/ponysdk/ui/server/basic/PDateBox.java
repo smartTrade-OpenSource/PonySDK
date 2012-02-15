@@ -54,17 +54,25 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     private Date date;
 
-    private DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-
-    private String pattern;
+    private SimpleDateFormat dateFormat;
 
     public PDateBox() {
-        this(null);
+        this(null, new SimpleDateFormat());
+    }
+
+    public PDateBox(final SimpleDateFormat dateFormat) {
+        this(null, dateFormat);
     }
 
     public PDateBox(final String text) {
+        this(text, new SimpleDateFormat());
+    }
+
+    public PDateBox(final String text, final SimpleDateFormat dateFormat) {
         final AddHandler addHandler = new AddHandler(getID(), HandlerType.DATE_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
+
+        setDateFormat(dateFormat);
     }
 
     @Override
@@ -79,7 +87,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
             Date date = null;
             if (data != null) {
                 try {
-                    date = getDateFormat().parse(data);
+                    date = dateFormat.parse(data);
                 } catch (final ParseException ex) {
                     log.error("Cannot parse the date", ex);
                 }
@@ -114,19 +122,11 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     }
 
-    public void setFormat(final int style) {
-        this.dateFormat = DateFormat.getDateInstance(style);
+    public void setDateFormat(final SimpleDateFormat dateFormat) {
+        this.dateFormat = dateFormat;
 
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.DATE_FORMAT, style);
-        getPonySession().stackInstruction(update);
-    }
-
-    public void setFormat(final String pattern) {
-        this.pattern = pattern;
-        this.dateFormat = new SimpleDateFormat(pattern);
-        final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.DATE_FORMAT_PATTERN, pattern);
+        update.getMainProperty().setProperty(PropertyKey.DATE_FORMAT_PATTERN, dateFormat.toPattern());
         getPonySession().stackInstruction(update);
     }
 
@@ -143,6 +143,11 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         return date;
     }
 
+    public String getDisplayedValue() {
+        if (getValue() == null) return "";
+        return getDateFormat().format(getValue());
+    }
+
     @Override
     public void setValue(final Date date) {
         this.date = date;
@@ -153,9 +158,5 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onKeyPress(final int keyCode) {}
-
-    public String getPattern() {
-        return pattern;
-    }
 
 }

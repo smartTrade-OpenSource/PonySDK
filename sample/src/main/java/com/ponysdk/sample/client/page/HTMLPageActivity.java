@@ -23,8 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PHTML;
@@ -32,44 +30,45 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class HTMLPageActivity extends PageActivity {
+public class HTMLPageActivity extends SamplePageActivity {
 
     public HTMLPageActivity() {
-        super("HTML", "Basics UI Components");
+        super("HTML", "Widgets");
     }
 
     @Override
-    protected void onInitialization() {}
+    protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
-    protected void onShowPage(final Place place) {
         final PVerticalPanel verticalPanel = new PVerticalPanel();
+        verticalPanel.setSpacing(10);
 
-        final PHTML htmlBold = new PHTML("<b>Pony Bold</b>");
-        final PHTML htmlRed = new PHTML("<font color='red'>Pony Redb</font>");
-        final PHTML htmlClickable = new PHTML("<span style='border: 3px solid black;color:white;background-color:gray;margin:5px;padding:10px;display:block'>click me!</span>");
+        final PHTML htmlBold = new PHTML("<b>Pony Bold</b> and <font color='red'>Pony Red</font> using HTML");
+        final PHTML htmlClickable = new PHTML("<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
 
         htmlClickable.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                PNotificationManager.showTrayNotification("HTML clicked!");
+                PNotificationManager.showUmanizedNotification("HTML clicked!");
             }
         });
 
+        final PCheckBox checkBox = new PCheckBox();
+        checkBox.setHTML("<font color='blue'>Pony-SDK</font>");
+
         verticalPanel.add(htmlBold);
-        verticalPanel.add(htmlRed);
+        verticalPanel.setCellWidth(htmlBold, "400px");
+        verticalPanel.setCellHeight(htmlBold, "50px");
+
         verticalPanel.add(htmlClickable);
-        verticalPanel.add(new PCheckBox("Pony-SDK"));
+        verticalPanel.setCellWidth(htmlClickable, "400px");
+        verticalPanel.setCellHeight(htmlClickable, "50px");
 
-        pageView.getBody().setWidget(verticalPanel);
-    }
+        verticalPanel.add(checkBox);
+        verticalPanel.setCellWidth(checkBox, "400px");
+        verticalPanel.setCellHeight(checkBox, "50px");
 
-    @Override
-    protected void onFirstShowPage() {
-
+        examplePanel.setWidget(verticalPanel);
     }
 }

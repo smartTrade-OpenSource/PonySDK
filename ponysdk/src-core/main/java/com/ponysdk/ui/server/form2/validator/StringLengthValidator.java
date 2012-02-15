@@ -21,27 +21,24 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.basic.PRichTextArea;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+public class StringLengthValidator implements FieldValidator {
 
-public class RichTextAreaPageActivity extends SamplePageActivity {
+    private int minLength = 0;
 
-    public RichTextAreaPageActivity() {
-        super("RichText Area", "Text Input");
+    private int maxLength = 0;
+
+    public StringLengthValidator(final int minLength, final int maxLength) {
+        this.minLength = minLength;
+        this.maxLength = maxLength;
     }
 
     @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
-
-        final PVerticalPanel layout = new PVerticalPanel();
-
-        final PRichTextArea ritchTextArea = new PRichTextArea();
-
-        layout.add(ritchTextArea);
-
-        examplePanel.setWidget(layout);
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        if (value.length() < minLength) return ValidationResult.newFailedValidationResult(minLength + " chars at minimum.");
+        if (value.length() > maxLength) return ValidationResult.newFailedValidationResult(maxLength + " chars at maximum.");
+        return ValidationResult.newOKValidationResult();
     }
 }

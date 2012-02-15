@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.form.renderer;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -47,7 +48,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
 
     private String caption;
 
-    private String dateFormat = "dd/MM/yyyy";
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     private final List<FormFieldComponent<PDateBox>> fields = new ArrayList<FormFieldComponent<PDateBox>>();
 
@@ -86,7 +87,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
         if (debugID != null) dateBox.ensureDebugId(debugID);
         final FormFieldComponent<PDateBox> dateFieldComponent = new FormFieldComponent<PDateBox>(dateBox);
         dateFieldComponent.setCaption(caption);
-        dateFieldComponent.getInput().setFormat(dateFormat);
+        dateFieldComponent.getInput().setDateFormat(dateFormat);
         dateFieldComponent.getInput().addValueChangeHandler(this);
         fields.add(dateFieldComponent);
         addListener(dateFieldComponent.getInput());
@@ -141,7 +142,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
         this.caption = caption;
     }
 
-    public void setDateFormat(final String dateFormat) {
+    public void setDateFormat(final SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
     }
 
