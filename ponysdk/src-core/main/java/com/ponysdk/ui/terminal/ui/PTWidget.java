@@ -24,8 +24,8 @@
 package com.ponysdk.ui.terminal.ui;
 
 import java.util.List;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -48,6 +48,8 @@ import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 
 public class PTWidget extends PTUIObject {
+
+    private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
     @Override
     public void create(final Create create, final UIService uiService) {
@@ -131,6 +133,9 @@ public class PTWidget extends PTUIObject {
 
                     @Override
                     public void onClick(final ClickEvent event) {
+
+                        log.info("=======================================> on click: " + event);
+
                         triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
                     }
 
@@ -214,7 +219,7 @@ public class PTWidget extends PTUIObject {
                 }
                 break;
             default:
-                GWT.log("Handler not supported #" + h);
+                log.info("Handler not supported #" + h);
                 break;
         }
     }
