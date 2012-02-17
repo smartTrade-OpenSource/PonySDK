@@ -26,9 +26,11 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
+import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -47,7 +49,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
         dockLayoutPanel.setSizeFull();
 
         final PTabPanel tabPanel = new PTabPanel();
@@ -69,7 +71,6 @@ public class TabPanelPageActivity extends SamplePageActivity {
         });
 
         final PButton button = new PButton("Add Tab");
-        button.setWidth("100px");
         button.setStyleProperty("margin", "10px");
 
         button.addClickHandler(new PClickHandler() {
@@ -80,7 +81,25 @@ public class TabPanelPageActivity extends SamplePageActivity {
             }
         });
 
-        dockLayoutPanel.addNorth(button, 50);
+        final PTextBox indexTextBox = new PTextBox();
+        final PButton selectButton = new PButton("Select Tab");
+        selectButton.setStyleProperty("margin", "10px");
+
+        selectButton.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                final String text = indexTextBox.getText();
+                tabPanel.selectTab(Integer.valueOf(text));
+            }
+        });
+
+        final PHorizontalPanel horizontalPanel = new PHorizontalPanel();
+        horizontalPanel.add(button);
+        horizontalPanel.add(indexTextBox);
+        horizontalPanel.add(selectButton);
+
+        dockLayoutPanel.addNorth(horizontalPanel, 50);
         dockLayoutPanel.add(tabPanel);
 
         addTabContent(tabPanel);

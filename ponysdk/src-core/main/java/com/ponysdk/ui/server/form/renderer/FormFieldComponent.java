@@ -42,7 +42,7 @@ public class FormFieldComponent<W extends PWidget> implements IsPWidget {
 
     private final PLabel captionLabel = new PLabel();
 
-    private final PImage errorImage = new PImage("images/error.jpg");
+    private final PImage errorImage = new PImage("images/error.png");
 
     public FormFieldComponent(final W w) {
         mainLayout = new PVerticalPanel();
@@ -60,7 +60,7 @@ public class FormFieldComponent<W extends PWidget> implements IsPWidget {
 
     }
 
-    public void setCaption(String caption) {
+    public void setCaption(final String caption) {
         if (caption != null) {
             captionLabel.setText(caption);
             captionLabel.setVisible(true);
@@ -70,11 +70,11 @@ public class FormFieldComponent<W extends PWidget> implements IsPWidget {
         }
     }
 
-    public void setRequired(boolean required) {
+    public void setRequired(final boolean required) {
         requiredLabel.setVisible(required);
     }
 
-    public void addErrorMessage(String message) {
+    public void addErrorMessage(final String message) {
         errorImage.setTitle(errorImage.getTitle() == null ? message : errorImage.getTitle() + "\n" + message);
         errorImage.setVisible(true);
     }

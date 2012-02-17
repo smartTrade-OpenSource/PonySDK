@@ -46,7 +46,7 @@ import com.ponysdk.ui.server.rich.POptionPane.POptionType;
 public class SampleHeaderActivity extends HeaderActivity {
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         super.start(world);
 
         final User user = PonySession.getCurrent().getAttribute(UISampleEntryPoint.USER, User.class);
@@ -79,14 +79,14 @@ public class SampleHeaderActivity extends HeaderActivity {
         signOutAnchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 popup.hide();
 
                 final POptionPane optionPane = POptionPane.showConfirmDialog(new PActionHandler() {
 
                     @Override
-                    public void onAction(PDialogBox dialogBox, String option) {
+                    public void onAction(final PDialogBox dialogBox, final String option) {
                         if (POption.YES_OPTION.equals(option)) {
                             dialogBox.hide();
                             final UserLoggedOutEvent userLoggedOutEvent = new UserLoggedOutEvent(this, userLogged);
@@ -104,7 +104,7 @@ public class SampleHeaderActivity extends HeaderActivity {
         optionsAnchor.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 if (popup.isShowing()) {
                     optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                     popup.hide();
@@ -113,7 +113,7 @@ public class SampleHeaderActivity extends HeaderActivity {
                     popup.setPopupPositionAndShow(new PPositionCallback() {
 
                         @Override
-                        public void setPosition(int offsetWidth, int offsetHeight, int windowWidth, int windowHeight) {
+                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                             final int left = windowWidth - 200;
                             popup.setPopupPosition(left, 26);
                         }

@@ -75,9 +75,11 @@
 	font-style: italic;
 	padding-right:10px;
 }
+
 .pony-LoginPage-Label {
 	text-align: right;
 }
+
 .pony-LoginPage-Logo {
 	font-size: 2em;
 	font-weight: bold;
@@ -85,10 +87,21 @@
 	margin-top: 0.2em;
 	margin-bottom: 1em;
 }
+
 .pony-Header {
 	background-color: #2a3f54;
 	color: #FFF;
+	width:100%;
+	height:100%;
+	border-spacing: 0px;
+	border-collapse: collapse;
 }
+
+.pony-Header table td{
+	border-spacing: 0px;
+	border-collapse: collapse;
+}
+
 .pony-Header-Logo {
 	font-size: 1.3em;
 	color: #e5e5e5;
@@ -122,20 +135,18 @@
 	outline:none;
 	text-decoration:none !important
 }
-.pony-Header-AccountMenu-Selected {
-	background-attachment: scroll;
-	background-clip: border-box;
+
+.pony-Header-AccountMenu:active {
 	background-color: white;
-	background-image: none;
-	background-origin: padding-box;
-	border-bottom-color: #BEBEBE;
-	border-left-color: #BEBEBE;
+}
+
+.pony-Header-AccountMenu-Selected {
+	background-color: white;
+	border-color: #BEBEBE;
 	border-left-style: solid;
 	border-left-width: 1px;
-	border-right-color: #BEBEBE;
 	border-right-style: solid;
 	border-right-width: 1px;
-	border-top-color: #BEBEBE;
 	color: #36C;
 	height: 23px;
 	line-height: 23px;
@@ -145,13 +156,11 @@
 	z-index: 1000;
 	position: relative;
 }
+
+
 .pony-Header-AccountMenu-Popup {
 	-webkit-box-shadow: #CCC 0px 1px 5px 0px;
-	background-attachment: scroll;
-	background-clip: border-box;
 	background-color: white;
-	background-image: none;
-	background-origin: padding-box;
 	border-bottom-color: #BEBEBE;
 	border-bottom-style: solid;
 	border-bottom-width: 1px;
@@ -661,7 +670,8 @@ table .pony-PFlexTable{
 	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
 	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
 	box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	padding:.6em;
+	padding:0 .6em;
+	line-height: 27px;
 }
 
 .pony-PButton:hover {
@@ -695,10 +705,9 @@ table .pony-PFlexTable{
 	background: #fff;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
 	background: -moz-linear-gradient(top,  #fff,  #ededed);
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
 }
 .pony-ActionToolbar .gwt-MenuItem {
-  cursor: default;
+  cursor: pointer;
   font-family: Arial Unicode MS, Arial, sans-serif;
   padding:.5em;
 }
@@ -712,14 +721,12 @@ table .pony-PFlexTable{
 	background: #ededed;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
 	background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dcdcdc');
 }
 
 .pony-ActionToolbar .gwt-MenuItem-selected:active { 
 	color: #999;
 	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
 	background: -moz-linear-gradient(top,  #ededed,  #fff);
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
 }
 
 .pony-ActionToolbar .gwt-MenuItemSeparator {
@@ -746,7 +753,7 @@ table .pony-PFlexTable{
 	border-top-left-radius: .5em;
 	padding:.1em 0 .1em 5px;
 }
-
+	
 .pony-DialogBox .dialogContent {
 	background-color:#fdfdfd;
 	border:1px solid #666;
