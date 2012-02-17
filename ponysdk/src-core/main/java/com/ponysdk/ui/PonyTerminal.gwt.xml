@@ -11,11 +11,13 @@
 	* License for the specific language governing permissions and limitations 
 	under * the License. */ -->
 <module rename-to='ponyterminal'>
+	
 	<inherits name='com.google.gwt.user.User' />
 	<!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
 	<!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
 	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
 	<!-- <inherits name="com.google.gwt.user.theme.clean.Clean"/> -->
+	
 	<inherits name="com.google.gwt.user.Debug" />
 	<entry-point class='com.ponysdk.ui.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />
@@ -23,4 +25,12 @@
 	<generate-with class="com.ponysdk.ui.server.AddonListGenerator">
 		<when-type-assignable class="com.ponysdk.ui.terminal.PonyAddonList" />
 	</generate-with>
+	
+	<!-- 
+	<inherits name="com.google.gwt.logging.Logging"/>
+	<set-property name="gwt.logging.logLevel" value="INFO" /> 
+	<set-property name="gwt.logging.consoleHandler" value="ENABLED" /> 
+	<set-property name="gwt.logging.popupHandler" value="DISABLED" /> 
+	-->
+	
 </module>

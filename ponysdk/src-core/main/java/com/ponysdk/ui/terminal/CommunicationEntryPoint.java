@@ -26,6 +26,8 @@ package com.ponysdk.ui.terminal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -38,6 +40,8 @@ import com.google.gwt.user.client.rpc.StatusCodeException;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
+    private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+
     private final PonyEngineServiceAsync communicationService = GWT.create(PonyEngineService.class);
 
     @Override
@@ -47,7 +51,7 @@ public class CommunicationEntryPoint implements EntryPoint {
             @Override
             public void onUncaughtException(final Throwable e) {
                 Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
-                GWT.log("PonySDK has encountered an internal error : ", e);
+                log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
             }
         });
 
@@ -65,7 +69,7 @@ public class CommunicationEntryPoint implements EntryPoint {
 
                 @Override
                 public void onFailure(final Throwable caught) {
-                    GWT.log("Error", caught);
+                    log.log(Level.SEVERE, "Error ", caught);
                     if (caught instanceof StatusCodeException) {
                         final StatusCodeException codeException = (StatusCodeException) caught;
                         if (codeException.getStatusCode() == 0) return;
