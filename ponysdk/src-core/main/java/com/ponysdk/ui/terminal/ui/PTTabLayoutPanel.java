@@ -119,6 +119,8 @@ public class PTTabLayoutPanel extends PTResizeComposite {
         if (PropertyKey.ANIMATION.equals(propertyKey)) {
             cast().animate(1);
             return;
+        } else if (PropertyKey.SELECTED_INDEX.equals(propertyKey)) {
+            cast().selectTab(property.getIntValue());
         }
 
         super.update(update, uiService);

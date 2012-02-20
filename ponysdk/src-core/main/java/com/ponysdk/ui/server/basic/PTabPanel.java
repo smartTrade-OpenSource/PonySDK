@@ -130,6 +130,13 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
         return children.indexOf(child);
     }
 
+    public void selectTab(final int index) {
+        this.selectedItemIndex = index;
+        final Update update = new Update(ID);
+        update.setMainPropertyValue(PropertyKey.SELECTED_INDEX, index);
+        getPonySession().stackInstruction(update);
+    }
+
     @Override
     public void add(PWidget w) {
         throw new UnsupportedOperationException("A tabText parameter must be specified with add().");

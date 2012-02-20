@@ -28,10 +28,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.command.Command;
@@ -147,7 +150,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     protected int currentPage;
 
-    protected List<PRowCheckBox> rowSelectors = new ArrayList<PRowCheckBox>();
+    protected Map<Integer, PRowCheckBox> rowSelectors = new TreeMap<Integer, PRowCheckBox>();
 
     protected PCheckBox mainCheckBox;
 
@@ -166,6 +169,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     private String debugID;
 
     private Result<List<D>> findResult;
+
+    private final Set<D> selectedAndEnabledData = new HashSet<D>();
+
+    private final Set<D> selectedAndDisabledData = new HashSet<D>();
 
     private SelectionMode selectionMode = SelectionMode.NONE;
 
@@ -254,9 +261,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         listColumnDescriptor.setCellRenderer(new CellRenderer<D, Boolean>() {
 
             @Override
-            public IsPWidget render(final int row, D data, Boolean value) {
+            public IsPWidget render(final int row, final D data, final Boolean value) {
                 final PRowCheckBox checkBox = new PRowCheckBox();
                 checkBox.setRow(row);
+                checkBox.setData(data);
 
                 checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
@@ -265,11 +273,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                         if (value) {
                             if (checkBox.getRow() != 0) {
                                 simpleListActivity.selectRow(checkBox.getRow());
+                                if (checkBox.isEnabled()) selectedAndEnabledData.add(data);
+                                else selectedAndDisabledData.add(data);
+
                                 selectionMode = SelectionMode.PARTIAL;
                             }
                             if (!mainSelectorAction) {
                                 boolean allChecked = true;
-                                for (final PCheckBox box : rowSelectors) {
+                                for (final PCheckBox box : rowSelectors.values()) {
                                     if (!box.equals(checkBox)) {
                                         if (!box.getValue()) {
                                             allChecked = false;
@@ -285,7 +296,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                                 }
                             }
                         } else {
-                            if (checkBox.getRow() != 0) simpleListActivity.unSelectRow(checkBox.getRow());
+                            if (checkBox.getRow() != 0) {
+                                simpleListActivity.unSelectRow(checkBox.getRow());
+                                selectedAndEnabledData.remove(data);
+                                selectedAndDisabledData.remove(data);
+                            }
                             hideSelectAllOption();
                             if (rowSelectors.isEmpty()) {
                                 selectionMode = SelectionMode.NONE;
@@ -301,7 +316,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                     }
                 });
 
-                rowSelectors.add(checkBox);
+                rowSelectors.put(row, checkBox);
+
+                if (selectedAndEnabledData.contains(data) || selectedAndDisabledData.contains(data)) {
+                    selectRow(row);
+                }
 
                 return checkBox;
             }
@@ -311,6 +330,8 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
             @Override
             public IsPWidget render() {
+                // PHorizontalPanel horizontalPanel = new PHorizontalPanel();
+
                 mainCheckBox = new PCheckBox();
                 mainCheckBox.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_MAINCHECKBOX);
                 mainCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
@@ -322,7 +343,24 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
                 });
 
+                // PMenuBar menuBar = new PMenuBar();
+                // menuBar.addStyleName(PonySDKTheme.MENUBAR_LIGHT);
+                // final PMenuBar menuBarAction = new PMenuBar(true);
+                // menuBarAction.addItem("All", new PCommand() {
+                //
+                // @Override
+                // public void execute() {
+                // // TODO Auto-generated method stub
+                // }
+                // });
+                //
+                // final PMenuItem item = menuBar.addItem("", menuBarAction);
+                //
+                // horizontalPanel.add(mainCheckBox);
+                // horizontalPanel.add(menuBar);
+
                 return mainCheckBox;
+
             }
 
             @Override
@@ -518,16 +556,22 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     public void setData(Result<List<D>> result) {
         findResult = result;
-        rowSelectors.clear();
-
         simpleListActivity.setData(result.getData());
 
-        if (!rowSelectors.isEmpty()) {
-            int i = 0;
-            for (final D data : result.getData()) {
-                rowSelectors.get(i).setData(data);
-                i = i + 1;
+        boolean mainCheckBoxSelected = true;
+        for (PRowCheckBox checkBox : rowSelectors.values()) {
+            if (!checkBox.getValue()) {
+                mainCheckBoxSelected = false;
+                break;
             }
+        }
+
+        if (!mainCheckBoxSelected) {
+            hideSelectAllOption();
+        }
+
+        if (mainCheckBox != null) {
+            mainCheckBox.setValue(mainCheckBoxSelected);
         }
 
         getComplexListView().addHeaderStyle("pony-ComplexList-ColumnHeader");
@@ -553,20 +597,27 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     public void insertSubList(int row, List<D> datas) {
         simpleListActivity.insertSubList(row, datas);
-        for (final PRowCheckBox c : rowSelectors) {
+
+        Map<Integer, PRowCheckBox> map = new HashMap<Integer, PRowCheckBox>();
+        for (final PRowCheckBox c : rowSelectors.values()) {
             if (c.getRow() == row) {
                 c.setDatasize(datas.size());
             }
             if (c.getRow() > row) {
                 c.setRow(c.getRow() + datas.size());
             }
+            map.put(c.getRow(), c);
         }
+        rowSelectors = map;
     }
 
     public void removeSubList(int fatherRow) {
         simpleListActivity.removeSubList(fatherRow);
         int dataSize = 0;
-        for (final PRowCheckBox c : rowSelectors) {
+
+        Map<Integer, PRowCheckBox> map = new HashMap<Integer, PRowCheckBox>();
+
+        for (final PRowCheckBox c : rowSelectors.values()) {
             if (c.getRow() == fatherRow) {
                 dataSize = c.getDatasize();
                 c.setDatasize(0);
@@ -574,7 +625,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             if (c.getRow() > fatherRow) {
                 c.setRow(c.getRow() - dataSize);
             }
+
+            map.put(c.getRow(), c);
         }
+
+        rowSelectors = map;
     }
 
     public void setCommandFactory(ComplexListCommandFactory<D> commandFactory) {
@@ -582,7 +637,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     protected void changeRowSelectorsState(final boolean selected) {
-        for (final PRowCheckBox checkBox : rowSelectors) {
+        for (final PRowCheckBox checkBox : rowSelectors.values()) {
             simpleListActivity.selectRow(checkBox.getRow());
             if (selected) {
                 selectRow(checkBox.getRow());
@@ -592,7 +647,18 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         }
     }
 
+    public void resetAllSelectedData() {
+        selectedAndDisabledData.clear();
+        selectedAndEnabledData.clear();
+        if (mainCheckBox != null) {
+            triggerMainCheckBoxValueChange(false);
+        }
+    }
+
     public void reset() {
+        selectedAndEnabledData.clear();
+        selectedAndDisabledData.clear();
+
         for (final FormField formField : formFieldsByCriterionFields.values()) {
             formField.reset();
         }
@@ -621,10 +687,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             if (!searchFormActivity.isValid()) { return; }
         }
 
-        if (complexListConfiguration.isSelectionColumnEnabled()) {
-            mainCheckBox.setValue(false);
-            triggerMainCheckBoxValueChange(false);
-        }
+        // if (complexListConfiguration.isSelectionColumnEnabled()) {
+        // mainCheckBox.setValue(false);
+        // triggerMainCheckBoxValueChange(false);
+        // }
 
         final Query query = createQuery(page);
         final Command command = commandFactory.newFindCommand(ComplexListActivity.this, query);
@@ -694,15 +760,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public SelectionResult<D> getSelectedData() {
         if (!complexListConfiguration.isSelectionColumnEnabled()) { return new SelectionResult<D>(SelectionMode.FULL, new ArrayList<D>()); }
 
-        final List<D> data = simpleListActivity.getData();
-        final List<D> selectedData = new ArrayList<D>();
-
-        for (int i = 0; i < rowSelectors.size(); i++) {
-            final PCheckBox rowSelector = rowSelectors.get(i);
-            if (rowSelector.getValue()) {
-                selectedData.add(data.get(i));
-            }
-        }
+        List<D> selectedData = new ArrayList<D>();
+        selectedData.addAll(selectedAndDisabledData);
+        selectedData.addAll(selectedAndEnabledData);
 
         final SelectionResult<D> selectionResult = new SelectionResult<D>(selectionMode, selectedData);
         return selectionResult;
@@ -711,15 +771,8 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public SelectionResult<D> getSelectedAndEnabledData() {
         if (!complexListConfiguration.isSelectionColumnEnabled()) { return new SelectionResult<D>(SelectionMode.FULL, new ArrayList<D>()); }
 
-        final List<D> data = simpleListActivity.getData();
-        final List<D> selectedData = new ArrayList<D>();
-
-        for (int i = 0; i < rowSelectors.size(); i++) {
-            final PCheckBox rowSelector = rowSelectors.get(i);
-            if (rowSelector.getValue() && rowSelector.isEnabled()) {
-                selectedData.add(data.get(i));
-            }
-        }
+        List<D> selectedData = new ArrayList<D>();
+        selectedData.addAll(selectedAndEnabledData);
 
         final SelectionResult<D> selectionResult = new SelectionResult<D>(selectionMode, selectedData);
         return selectionResult;
@@ -752,7 +805,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public int getRow(D data) {
         if (findResult == null) return -1;
 
-        for (final PRowCheckBox checkBox : rowSelectors) {
+        for (final PRowCheckBox checkBox : rowSelectors.values()) {
             if (data.equals(checkBox.getData())) { return checkBox.getRow(); }
         }
 
@@ -774,6 +827,16 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             selectRowCheckBox(row);
         }
+
+        PRowCheckBox checkBox = rowSelectors.get(row);
+        if (checkBox == null) return;
+
+        if (checkBox.isEnabled()) {
+            this.selectedAndEnabledData.add(checkBox.getData());
+        } else {
+            this.selectedAndDisabledData.add(checkBox.getData());
+        }
+
         this.simpleListActivity.selectRow(row);
     }
 
@@ -781,37 +844,38 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             enableRowCheckBox(row, enabled);
         }
+
     }
 
     public void unSelectRow(int row) {
         if (complexListConfiguration.isSelectionColumnEnabled()) {
             unselectRowCheckBox(row);
         }
+
+        PRowCheckBox checkBox = rowSelectors.get(row);
+        if (checkBox == null) return;
+        this.selectedAndEnabledData.remove(checkBox.getData());
+        this.selectedAndDisabledData.remove(checkBox.getData());
+
         this.simpleListActivity.unSelectRow(row);
     }
 
     private void enableRowCheckBox(int row, boolean enabled) {
-        for (final PRowCheckBox checkBox : rowSelectors) {
-            if (checkBox.getRow() == row) {
-                checkBox.setEnabled(enabled);
-            }
-        }
+        PRowCheckBox checkBox = rowSelectors.get(row);
+        if (checkBox == null) return;
+        checkBox.setEnabled(enabled);
     }
 
     private void selectRowCheckBox(int row) {
-        for (final PRowCheckBox checkBox : rowSelectors) {
-            if (checkBox.getRow() == row) {
-                checkBox.setValue(true);
-            }
-        }
+        PRowCheckBox checkBox = rowSelectors.get(row);
+        if (checkBox == null) return;
+        checkBox.setValue(true);
     }
 
     private void unselectRowCheckBox(int row) {
-        for (final PRowCheckBox checkBox : rowSelectors) {
-            if (checkBox.getRow() == row) {
-                checkBox.setValue(false);
-            }
-        }
+        PRowCheckBox checkBox = rowSelectors.get(row);
+        if (checkBox == null) return;
+        checkBox.setValue(false);
     }
 
     @Override
