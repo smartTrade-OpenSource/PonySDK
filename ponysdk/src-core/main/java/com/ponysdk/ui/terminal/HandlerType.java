@@ -23,60 +23,38 @@
 
 package com.ponysdk.ui.terminal;
 
-import java.io.Serializable;
+public enum HandlerType {
 
-public class HandlerType implements Serializable {
+    SELECTION_HANDLER,
 
-    private static final long serialVersionUID = -5429044523491075556L;
+    STRING_SELECTION_HANDLER,
 
-    HandlerType() {
+    STRING_VALUE_CHANGE_HANDLER,
 
-    }
+    BOOLEAN_VALUE_CHANGE_HANDLER,
 
-    public static HandlerType SELECTION_HANDLER = new HandlerType("SELECTION_HANDLER");
+    COMMAND,
 
-    public static HandlerType STRING_SELECTION_HANDLER = new HandlerType("STRING_SELECTION_HANDLER");
+    BEFORE_SELECTION_HANDLER,
 
-    public static HandlerType STRING_VALUE_CHANGE_HANDLER = new HandlerType("STRING_VALUE_CHANGE_HANDLER");
+    DATE_VALUE_CHANGE_HANDLER,
 
-    public static HandlerType BOOLEAN_VALUE_CHANGE_HANDLER = new HandlerType("BOOLEAN_VALUE_CHANGE_HANDLER");
+    STREAM_REQUEST_HANDLER,
 
-    public static HandlerType COMMAND = new HandlerType("COMMAND");
+    EMBEDED_STREAM_REQUEST_HANDLER,
 
-    public static HandlerType BEFORE_SELECTION_HANDLER = new HandlerType("BEFORE_SELECTION_HANDLER");
+    CHANGE_HANDLER,
 
-    public static HandlerType DATE_VALUE_CHANGE_HANDLER = new HandlerType("DATE_VALUE_CHANGE_HANDLER");
+    TIMER,
 
-    public static HandlerType STREAM_REQUEST_HANDLER = new HandlerType("STREAM_REQUEST_HANDLER");
+    HISTORY,
 
-    public static HandlerType EMBEDED_STREAM_REQUEST_HANDLER = new HandlerType("EMBEDED_STREAM_REQUEST_HANDLER");
+    POPUP_POSITION_CALLBACK,
 
-    public static HandlerType CHANGE_HANDLER = new HandlerType("CHANGE_HANDLER");
+    CLOSE_HANDLER,
 
-    public static HandlerType TIMER = new HandlerType("TIMER");
+    DOM_HANDLER,
 
-    public static HandlerType HISTORY = new HandlerType("HISTORY");
+    SUBMIT_COMPLETE_HANDLER,
 
-    public static HandlerType POPUP_POSITION_CALLBACK = new HandlerType("POPUP_POSITION_CALLBACK");
-
-    public static HandlerType CLOSE_HANDLER = new HandlerType("CLOSE_HANDLER");
-
-    public static HandlerType DOM_HANDLER = new HandlerType("DOM_HANDLER");
-
-    public static HandlerType SUBMIT_COMPLETE_HANDLER = new HandlerType("SUBMIT_COMPLETE_HANDLER");
-
-    private String key;
-
-    public HandlerType(final String key) {
-        this.key = key;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return key.equalsIgnoreCase(((HandlerType) obj).getKey());
-    }
 }

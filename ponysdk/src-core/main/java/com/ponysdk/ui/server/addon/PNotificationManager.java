@@ -77,6 +77,18 @@ public class PNotificationManager {
         }
     }
 
+    public static void showHumanizedNotification(final String message) {
+        showHumanizedNotification(new PLabel(message));
+    }
+
+    public static void showWarningNotification(final String message) {
+        showWarningNotification(new PLabel(message));
+    }
+
+    public static void showErrorNotification(final String message) {
+        showErrorNotification(new PLabel(message));
+    }
+
     public static void showTrayNotification(final String message) {
         showTrayNotification(new PLabel(message), 2500);
     }
@@ -154,7 +166,7 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PTimer timer = new PTimer() {
+        final PTimer timer = new PTimer() {
 
             @Override
             public void run() {

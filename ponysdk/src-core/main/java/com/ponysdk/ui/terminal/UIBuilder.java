@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -72,32 +74,23 @@ import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
+    private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
+
     private final PonyEngineServiceAsync ponyService = GWT.create(PonyEngineService.class);
 
-    private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
-
     private final UIFactory uiFactory = new UIFactory();
-
+    private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
     private final Map<Long, PTObject> objectByID = new HashMap<Long, PTObject>();
-
     private final Map<UIObject, Long> objectIDByWidget = new HashMap<UIObject, Long>();
-
     private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<Long, UIObject>();
-
-    private SimplePanel loadingMessageBox;
-
-    private PopupPanel communicationErrorMessagePanel;
-
-    private Timer timer;
-
-    private int numberOfrequestInProgress;
-
-    private Frame frame;
-
-    private boolean updateMode;
-
     private final List<Instruction> stackedInstructions = new ArrayList<Instruction>();
 
+    private SimplePanel loadingMessageBox;
+    private PopupPanel communicationErrorMessagePanel;
+    private Timer timer;
+    private int numberOfrequestInProgress;
+    private Frame frame;
+    private boolean updateMode;
     private boolean pendingClose;
 
     public static long sessionID;
@@ -158,6 +151,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         updateMode = true;
         try {
 
+            log.info("##########################################################################################################################");
+            log.info("UPDATING UI with " + instructions.size() + " instructions");
+
             for (final Instruction instruction : instructions) {
                 if (instruction instanceof Close) {
                     pendingClose = true;
@@ -190,7 +186,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                         }
                     } else {
 
-                        // GWT.log("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
+                        log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                         PTObject ptObject;
                         if (create.getAddOnSignature() != null) {
                             final AddonFactory addonFactory = addonByKey.get(create.getAddOnSignature());
@@ -210,8 +206,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof Add) {
 
                     final Add add = (Add) instruction;
-                    // GWT.log("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " +
-                    // add.getMainProperty());
+                    log.info("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " + add.getMainProperty());
 
                     final PTObject uiObject = objectByID.get(add.getParentID());
                     uiObject.add(add, this);
@@ -219,8 +214,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof AddHandler) {
 
                     final AddHandler addHandler = (AddHandler) instruction;
-                    // GWT.log("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
-                    // + addHandler.getMainProperty());
+                    log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", " + addHandler.getMainProperty());
 
                     if (HandlerType.STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
                         frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
@@ -247,7 +241,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
                 } else if (instruction instanceof GC) {
                     final GC remove = (GC) instruction;
-                    GWT.log("GC: " + remove.getObjectID());
+                    log.info("GC: " + remove.getObjectID());
+
                     final PTObject ptObject = objectByID.remove(remove.getObjectID());
                     final UIObject uiObject = widgetIDByObjectID.remove(remove.getObjectID());
                     if (uiObject != null) {
@@ -258,7 +253,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } else if (instruction instanceof Update) {
 
                     final Update update = (Update) instruction;
-                    // GWT.log("Update " + update.getMainProperty().getKey().getKey() + " / " +
+                    // log.info("Update " + update.getMainProperty().getKey() + " / " +
                     // update.getMainProperty().getValue());
 
                     final PTObject ptObject = objectByID.get(update.getObjectID());
@@ -276,7 +271,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             }
         } catch (final Throwable e) {
             Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
-            GWT.log("PonySDK has encountered an internal error : ", e);
+            log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvent();
             updateMode = false;
@@ -307,7 +302,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             @Override
             public void onFailure(final Throwable caught) {
                 if (pendingClose) return;
-                GWT.log("fireInstruction failed", caught);
+                log.log(Level.SEVERE, "fireInstruction failed", caught);
+
                 numberOfrequestInProgress--;
                 hideLoadingMessageBox();
                 instructions.clear();
@@ -425,7 +421,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
     @Override
     public PTObject getPTObject(final UIObject uiObject) {
-        Long objectID = objectIDByWidget.get(uiObject);
+        final Long objectID = objectIDByWidget.get(uiObject);
         if (objectID != null) return objectByID.get(objectID);
         return null;
     }

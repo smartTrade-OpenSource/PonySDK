@@ -28,7 +28,6 @@ import java.util.Date;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 import com.ponysdk.ui.terminal.HandlerType;
@@ -90,26 +89,26 @@ public class PTDateBox extends PTWidget {
             if (PropertyKey.VALUE.equals(propertyKey)) {
                 dateBox.getTextBox().setText(property.getValue());
             } else if (PropertyKey.DATE_FORMAT.equals(propertyKey)) {
-                DefaultFormat format = null;
-                switch (property.getIntValue()) {
-                    case 0:
-                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL));
-                        dateBox.setFormat(format);
-                        break;
-                    case 1:
-                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_LONG));
-                        break;
-                    case 2:
-                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
-                        break;
-                    case 3:
-                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-                        break;
-
-                    default:
-                        format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
-                        break;
-                }
+                final DefaultFormat format = new DefaultFormat(DateTimeFormat.getFormat(property.getValue()));
+                // switch (property.getIntValue()) {
+                // case 0:
+                // format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL));
+                // dateBox.setFormat(format);
+                // break;
+                // case 1:
+                // format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_LONG));
+                // break;
+                // case 2:
+                // format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
+                // break;
+                // case 3:
+                // format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+                // break;
+                //
+                // default:
+                // format = new DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_MEDIUM));
+                // break;
+                // }
                 dateBox.setFormat(format);
                 break;
             } else if (PropertyKey.DATE_FORMAT_PATTERN.equals(propertyKey)) {

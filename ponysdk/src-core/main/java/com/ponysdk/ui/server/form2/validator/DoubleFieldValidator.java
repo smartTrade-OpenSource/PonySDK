@@ -21,27 +21,24 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.basic.PRichTextArea;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+public class DoubleFieldValidator implements FieldValidator {
 
-public class RichTextAreaPageActivity extends SamplePageActivity {
+    private static final String ERROR_MESSAGE = "Not a double";
 
-    public RichTextAreaPageActivity() {
-        super("RichText Area", "Text Input");
+    private static ValidationResult isADouble(final String value) {
+        try {
+            Double.parseDouble(value);
+            return ValidationResult.newOKValidationResult();
+        } catch (final Exception e) {
+            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        }
     }
 
     @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
-
-        final PVerticalPanel layout = new PVerticalPanel();
-
-        final PRichTextArea ritchTextArea = new PRichTextArea();
-
-        layout.add(ritchTextArea);
-
-        examplePanel.setWidget(layout);
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isADouble(value);
     }
 }

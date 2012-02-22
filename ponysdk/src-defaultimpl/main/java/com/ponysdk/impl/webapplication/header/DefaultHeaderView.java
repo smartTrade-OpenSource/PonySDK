@@ -37,14 +37,13 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
 
     private final PHorizontalPanel actionPanel = new PHorizontalPanel();
 
-    public DefaultHeaderView(String title) {
-        addStyleName(PonySDKTheme.HEADER);
+    public DefaultHeaderView(final String title) {
         setSizeFull();
+
+        gridLayout.addStyleName(PonySDKTheme.HEADER);
 
         final PLabel logo = new PLabel(title);
         logo.addStyleName(PonySDKTheme.HEADER_LOGO);
-
-        gridLayout.setWidth("100%");
 
         gridLayout.add(logo);
         gridLayout.setCellHorizontalAlignment(logo, PHorizontalAlignment.ALIGN_LEFT);
@@ -58,7 +57,7 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
     }
 
     @Override
-    public void addActionWidget(PWidget widget) {
+    public void addActionWidget(final PWidget widget) {
         actionPanel.add(widget);
         actionPanel.setCellVerticalAlignment(widget, PVerticalAlignment.ALIGN_MIDDLE);
         actionPanel.setCellHorizontalAlignment(widget, PHorizontalAlignment.ALIGN_CENTER);

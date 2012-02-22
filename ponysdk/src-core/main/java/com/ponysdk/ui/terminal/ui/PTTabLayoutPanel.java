@@ -116,9 +116,17 @@ public class PTTabLayoutPanel extends PTResizeComposite {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
-        if (PropertyKey.ANIMATION.equals(propertyKey)) {
-            cast().animate(1);
-            return;
+
+        switch (propertyKey) {
+            case ANIMATION:
+                cast().animate(1);
+                break;
+            case SELECTED_INDEX:
+                cast().selectTab(property.getIntValue());
+                break;
+
+            default:
+                break;
         }
 
         super.update(update, uiService);

@@ -156,4 +156,8 @@ public interface PonySDKTheme {
     String DIALOGBOX = "pony-DialogBox";
 
     String DIALOGBOX_CONTROLS = "dialogControls";
+
+    String FORM = "pony-Form";
+
+    String FORM_FORMFIELD_COMPONENT = "pony-Form-FormField-Component";
 }

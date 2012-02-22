@@ -21,27 +21,17 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.basic.PRichTextArea;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+public class UncheckedFieldValidator implements FieldValidator {
 
-public class RichTextAreaPageActivity extends SamplePageActivity {
-
-    public RichTextAreaPageActivity() {
-        super("RichText Area", "Text Input");
-    }
+    private static final String ERROR_MESSAGE = "Unchecked field";
 
     @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
-
-        final PVerticalPanel layout = new PVerticalPanel();
-
-        final PRichTextArea ritchTextArea = new PRichTextArea();
-
-        layout.add(ritchTextArea);
-
-        examplePanel.setWidget(layout);
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        if (Boolean.valueOf(value)) return ValidationResult.newOKValidationResult();
+        return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
     }
+
 }
