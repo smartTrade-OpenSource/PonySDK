@@ -1,7 +1,37 @@
+@import "css/clean.css";
+
+body, table td, select, button {
+  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-size: small;
+}
+pre {
+  font-family: "courier new", courier;
+  font-size: small;
+}
+body {
+  color: black;
+  margin: 10px;
+  border: 0px;
+  padding: 0px;
+  background: #fff;
+  direction: ltr;
+}
+
 .pony-LoadingMessageBox {
 	background-color: #FFF1A8;
-	-webkit-gradient(linear, left top, left bottom, from(#FFE090),
-	to(#FFF2B0) );
+	background-image: linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -o-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -moz-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -webkit-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -ms-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.44, rgb(255,224,144)),
+		color-stop(0.72, rgb(255,242,176))
+	);
 	color: black;
 	left: 50%;
 	padding: 3px 6px;
@@ -22,13 +52,14 @@
 	border-bottom-right-radius: 5px 5px;
 	z-index: 10000
 }
+
 .pony-LoginPage {
 	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma,
 	Helvetica, sans-serif;
-	font-size: 11px;
+	font-size: 16px;
 	margin-top: 10em;
 	margin-bottom: 2em;
-	color: #777;
+	color: red;
 	-webkit-box-shadow: #C8C8C8 0px 4px 18px;
 	background: white;
 	border: 1px solid #E5E5E5;
@@ -47,6 +78,7 @@
 	height: 250px;
 	padding: 1em;
 }
+
 .pony-LoginPage-LoginTextBox {
 	background: #FBFBFB;
 	font-size: 1.8em;
