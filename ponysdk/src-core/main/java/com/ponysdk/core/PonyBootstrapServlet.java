@@ -23,6 +23,7 @@
 
 package com.ponysdk.core;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,16 +47,16 @@ public class PonyBootstrapServlet extends HttpServlet {
     private static final int BUFFER_SIZE = 4096;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
         handlePonyResource(request, response);
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
         handlePonyResource(request, response);
     }
 
-    private void handlePonyResource(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void handlePonyResource(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
         final String contextPath = request.getContextPath();
         final String requestURI = request.getRequestURI();
         final String extraPathInfo = requestURI.replaceFirst(contextPath, "");
@@ -71,7 +72,7 @@ public class PonyBootstrapServlet extends HttpServlet {
         }
     }
 
-    private void handleRequest(HttpServletRequest request, HttpServletResponse response, String path) throws ServletException, IOException {
+    private void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
         // Try to load from webapp context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
         String type;
@@ -82,9 +83,13 @@ public class PonyBootstrapServlet extends HttpServlet {
             final String jarPath = path.substring(1, path.length());
             inputStream = classLoader.getResourceAsStream(jarPath);
             if (inputStream == null) {
-                log.error("Failed to load resource: " + request.getPathInfo());
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                if (path.equals("/index.html")) {
+                    inputStream = new ByteArrayInputStream(generateIndexPage());
+                } else {
+                    log.error("Failed to load resource: " + request.getPathInfo());
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             }
 
             type = new MimetypesFileTypeMap().getContentType(new File(jarPath));
@@ -96,10 +101,10 @@ public class PonyBootstrapServlet extends HttpServlet {
         copy(inputStream, response.getOutputStream());
     }
 
-    public static int copy(InputStream in, OutputStream out) throws IOException {
+    public static int copy(final InputStream in, final OutputStream out) throws IOException {
         try {
             int byteCount = 0;
-            byte[] buffer = new byte[BUFFER_SIZE];
+            final byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead = -1;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
@@ -110,11 +115,38 @@ public class PonyBootstrapServlet extends HttpServlet {
         } finally {
             try {
                 in.close();
-            } catch (IOException ex) {}
+            } catch (final IOException ex) {}
             try {
                 out.close();
-            } catch (IOException ex) {}
+            } catch (final IOException ex) {}
         }
     }
 
+    private byte[] generateIndexPage() {
+        final StringBuilder builder = new StringBuilder();
+        // <link href="css/sample.css" type="text/css" rel="stylesheet" />
+
+        builder.append("<!doctype html>");
+        builder.append("<html>");
+        builder.append("<head>");
+        builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
+        builder.append("    <title>PonyTerminal</title>");
+        builder.append("    <script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
+        builder.append("    <link rel=\"stylesheet/less\" type=\"text/css\" href=\"css/ponysdk.less\">");
+        builder.append("    <script src=\"css/less.js\" type=\"text/javascript\"></script>");
+        builder.append("</head>");
+        builder.append("<body>");
+        builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+        builder.append("    <div id=\"loading\">loading pony application</div>");
+        builder.append("    <noscript>");
+        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">");
+        builder.append("            Your web browser must have JavaScript enabled");
+        builder.append("            in order for this application to display correctly.");
+        builder.append("        </div>");
+        builder.append("    </noscript>");
+        builder.append("</body>");
+        builder.append("</html>");
+
+        return builder.toString().getBytes();
+    }
 }
