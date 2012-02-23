@@ -68,6 +68,7 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Instruction;
 import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
@@ -222,6 +223,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                         final PTObject uiObject = objectByID.get(addHandler.getObjectID());
                         uiObject.addHandler(addHandler, this);
                     }
+
+                } else if (instruction instanceof RemoveHandler) {
+
+                    final RemoveHandler addHandler = (RemoveHandler) instruction;
+                    log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", " + addHandler.getMainProperty());
+
+                    final PTObject uiObject = objectByID.get(addHandler.getObjectID());
+                    uiObject.removeHandler(addHandler, this);
 
                 } else if (instruction instanceof Remove) {
                     final Remove remove = (Remove) instruction;

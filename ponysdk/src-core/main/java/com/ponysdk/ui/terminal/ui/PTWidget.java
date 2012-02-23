@@ -36,6 +36,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
@@ -46,6 +47,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 
 public class PTWidget extends PTUIObject {
 
@@ -71,6 +73,22 @@ public class PTWidget extends PTUIObject {
             return;
         } else {
             super.addHandler(addHandler, uiService);
+        }
+    }
+
+    @Override
+    public void removeHandler(final RemoveHandler removeHandler, final UIService uiService) {
+
+        if (HandlerType.DOM_HANDLER.equals(removeHandler.getType())) {
+            final int domHandlerType = removeHandler.getMainProperty().getIntValue();
+            final com.google.gwt.user.client.ui.Widget w = asWidget(removeHandler.getObjectID(), uiService);
+            final HandlerRegistration handlerRegistration;
+            // handlerRegistration.removeHandler()
+
+            // removeDomHandler(removeHandler, w, domHandlerType, uiService);
+            return;
+        } else {
+            super.removeHandler(removeHandler, uiService);
         }
 
     }

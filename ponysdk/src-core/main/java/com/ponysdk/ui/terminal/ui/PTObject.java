@@ -29,6 +29,7 @@ import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTObject {
@@ -44,6 +45,8 @@ public class PTObject {
     public void remove(final Remove remove, final UIService uiService) {}
 
     public void addHandler(final AddHandler addHandler, final UIService uiService) {}
+
+    public void removeHandler(final RemoveHandler addHandler, final UIService uiService) {}
 
     public void gc(final GC gc, final UIService uiService) {}
 

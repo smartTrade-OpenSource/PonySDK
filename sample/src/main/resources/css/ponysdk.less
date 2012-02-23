@@ -38,40 +38,40 @@ body {
 	position: fixed;
 	top: 0;
 	font-weight: bold;
-	border-radius: 0 0 5px 5px;
-	-moz-border-radius: 0 0 5px 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px, rgba(0, 0, 0, 0.246094)
-	0 3px 5px;
-	-moz-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	-webkit-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	border-bottom-left-radius: 5px 5px;
-	border-bottom-right-radius: 5px 5px;
+	.box-shadow(0,-3px,5px);
+	.border-radius(0,0,5px,5px);
 	z-index: 10000
 }
 
+
+.box-shadow (@x: 0, @y: 0, @blur: 1px, @color: #000) {
+  box-shadow: @arguments;
+  -moz-box-shadow: @arguments;
+  -webkit-box-shadow: @arguments;
+}
+
+.border-radius (@a,@b,@c,@d){
+	border-radius: @a @b @c @d;
+	-moz-border-radius: @a @b @c @d;
+	-khtml-border-radius: @a @b @c @d;
+	-webkit-border-radius: @a @b @c @d;
+}
+
+.border-radius (@size){
+	border-radius: @size;
+	-moz-border-radius: @size;
+	-khtml-border-radius: @size;
+	-webkit-border-radius: @size;
+}
+
 .pony-LoginPage {
-	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma,
-	Helvetica, sans-serif;
-	font-size: 16px;
+	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #777;
 	margin-top: 10em;
-	margin-bottom: 2em;
-	color: red;
-	-webkit-box-shadow: #C8C8C8 0px 4px 18px;
-	background: white;
 	border: 1px solid #E5E5E5;
-	-moz-border-radius: 0.4em;
-	-khtml-border-radius: 0.4em;
-	-webkit-border-radius: 0.4em;
-	border-radius: 0.4em;
-	-moz-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	-webkit-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	-khtml-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	position: relative;
+	.border-radius(0.4em);
+	.box-shadow(0,0.2em,1em,rgba(200, 200, 200, 1));
 	margin-left: auto;
 	margin-right: auto;
 	width: 450px;
@@ -84,23 +84,22 @@ body {
 	font-size: 1.8em;
 	border: 2px solid #E5E5E5;
 	line-height: 1.8em;
-	height: 1.8em;
 	font-weight: bold;
-	width: 98%;
+	width: 99%;
 }
+
 .pony-LoginPage-PasswordTextBox {
 	background: #FBFBFB;
 	font-size: 1.8em;
 	border: 2px solid #E5E5E5;
 	line-height: 1.8em;
-	height: 1.8em;
 	font-weight: bold;
-	width: 98%;
+	width: 99%;
 	margin-bottom: 0.8em;
 }
 
-.pony-LoginPage-SubmitButton {
-}
+.pony-LoginPage-SubmitButton {}
+
 .pony-LoginPage-VersionInformation {
 	margin-bottom: 0.8em;
 	font-style: italic;
@@ -121,14 +120,8 @@ body {
 
 .pony-Header {
 	background-color: #2a3f54;
-	color: #FFF;
 	width:100%;
 	height:100%;
-	border-spacing: 0px;
-	border-collapse: collapse;
-}
-
-.pony-Header table td{
 	border-spacing: 0px;
 	border-collapse: collapse;
 }
@@ -139,9 +132,6 @@ body {
 	font-weight: bold;
 	margin-left: 5px;
 }
-.pony-Header-Logout {
-	color: #FFFFFF;
-}
 
 .pony-Header-AccountMenu {
 	color: #FFF;
@@ -149,75 +139,43 @@ body {
 	display: block;
 	font-size: 1em;
 	font-weight: normal;
-	height: 20px;
-	line-height: 20px;
 	margin:0; 
 	margin-right:30px; 
-	padding:0; 
-	padding-bottom: 2px;
-	padding-left: 5px;
-	padding-right: 9px;
-	padding-top: 2px;
+	padding:6px; 
 	white-space: nowrap;
 	width: 5em;
 }
+
 .pony-Header-AccountMenu:hover {
-	background-color: #f4f4f4;
+	color: #85acd3;
 	outline:none;
 	text-decoration:none !important
 }
 
-.pony-Header-AccountMenu:active {
-	background-color: white;
-}
 
 .pony-Header-AccountMenu-Selected {
-	background-color: white;
-	border-color: #BEBEBE;
-	border-left-style: solid;
-	border-left-width: 1px;
-	border-right-style: solid;
-	border-right-width: 1px;
-	color: #36C;
-	height: 23px;
-	line-height: 23px;
-	text-decoration: none;
-	white-space: nowrap;
-	width: 5.1em;
+	background-color: #FFF;
+	color: #85acd3;
 	z-index: 1000;
 	position: relative;
 }
 
-
 .pony-Header-AccountMenu-Popup {
-	-webkit-box-shadow: #CCC 0px 1px 5px 0px;
 	background-color: white;
-	border-bottom-color: #BEBEBE;
-	border-bottom-style: solid;
-	border-bottom-width: 1px;
-	border-left-color: #BEBEBE;
-	border-left-style: solid;
-	border-left-width: 1px;
-	border-right-color: #BEBEBE;
-	border-right-style: solid;
-	border-right-width: 1px;
-	border-top-color: #BEBEBE;
-	border-top-style: solid;
-	border-top-width: 1px;
-	box-shadow: #CCC 0px 1px 5px 0px;
+	border: 1px solid #BEBEBE;
+	.box-shadow(0px,1px,5px,#CCC);
 	margin: 0px;
-	padding:0px;
+	padding:5px;
 	position: absolute;
-	vertical-align: baseline;
-	visibility: visible;
-	white-space: nowrap;
-	width: 195px;
+	width: 230px;
 	z-index: 999;
 }
+
 .pony-Header-AccountMenu-Popup-UserName {
 	color: black;
 	font-weight: bold;
 }
+
 .pony-Header-AccountMenu-Popup-UserLogin {
 	color: #666;
 	display: block;

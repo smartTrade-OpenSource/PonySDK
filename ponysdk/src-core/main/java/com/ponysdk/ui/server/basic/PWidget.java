@@ -27,6 +27,7 @@ import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 
 /*
@@ -184,6 +185,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void setData(final Object data) {
         this.data = data;
+    }
+
+    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HandlerType.DOM_HANDLER);
+        if (handler instanceof HasPProperties) removeHandler.getMainProperty().setProperties(((HasPProperties) handler).getProperties());
+        getPonySession().stackInstruction(removeHandler);
+        return handlerRegistration;
     }
 
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {

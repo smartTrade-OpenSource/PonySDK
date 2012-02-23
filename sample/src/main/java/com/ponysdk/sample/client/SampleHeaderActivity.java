@@ -38,12 +38,15 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.rich.POptionPane;
 import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
 import com.ponysdk.ui.server.rich.POptionPane.POption;
 import com.ponysdk.ui.server.rich.POptionPane.POptionType;
 
-public class SampleHeaderActivity extends HeaderActivity {
+public class SampleHeaderActivity extends HeaderActivity implements PClickHandler {
+
+    private PPopupPanel popup;
 
     @Override
     public void start(final PAcceptsOneWidget world) {
@@ -58,7 +61,7 @@ public class SampleHeaderActivity extends HeaderActivity {
         optionsAnchor.ensureDebugId("options_anchor");
         optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        final PPopupPanel popup = new PPopupPanel();
+        popup = new PPopupPanel();
         popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
         final PVerticalPanel panel = new PVerticalPanel();
@@ -106,7 +109,6 @@ public class SampleHeaderActivity extends HeaderActivity {
             @Override
             public void onClick(final PClickEvent clickEvent) {
                 if (popup.isShowing()) {
-                    optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                     popup.hide();
                 } else {
                     optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
@@ -114,14 +116,34 @@ public class SampleHeaderActivity extends HeaderActivity {
 
                         @Override
                         public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
-                            final int left = windowWidth - 200;
+                            final int left = windowWidth - 250;
                             popup.setPopupPosition(left, 26);
+
+                            // PonySession.getCurrent().getRootLayoutPanel().addDomHandler(SampleHeaderActivity.this,
+                            // PClickEvent.TYPE);
                         }
                     });
                 }
             }
         });
 
+        popup.addDomHandler(SampleHeaderActivity.this, PClickEvent.TYPE);
+
+        popup.addCloseHandler(new PCloseHandler() {
+
+            @Override
+            public void onClose() {
+                optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
+                // PClickEvent.TYPE);
+            }
+        });
+
         return optionsAnchor;
+    }
+
+    @Override
+    public void onClick(final PClickEvent event) {
+        if (popup.isShowing()) popup.hide();
     }
 }
