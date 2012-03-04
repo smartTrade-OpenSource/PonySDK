@@ -36,19 +36,19 @@ public class PWeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         expungeStaleEntries();
         return referenceByObjectID.containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         expungeStaleEntries();
         return referenceByObjectID.containsValue(new WeakReference<Object>(value));
     }
 
     @Override
-    public PObject get(Object key) {
+    public PObject get(final Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> value = referenceByObjectID.get(key);
         if (value == null) return null;
@@ -56,7 +56,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public PObject put(Long objectID, PObject value) {
+    public PObject put(final Long objectID, final PObject value) {
         expungeStaleEntries();
         final WeakReference<PObject> weakReference = new WeakReference<PObject>(value, queue);
         referenceByObjectID.put(objectID, weakReference);
@@ -73,7 +73,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public PObject remove(Object key) {
+    public PObject remove(final Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> reference = referenceByObjectID.remove(key);
         if (reference == null) return null;
@@ -85,7 +85,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public void putAll(Map<? extends Long, ? extends PObject> m) {
+    public void putAll(final Map<? extends Long, ? extends PObject> m) {
         expungeStaleEntries();
     }
 
@@ -112,7 +112,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
         return null;
     }
 
-    public void assignParentID(Long objectID, Long parentObjectID) {
+    public void assignParentID(final Long objectID, final Long parentObjectID) {
         parentObjectIDByReferences.put(referenceByObjectID.get(objectID), parentObjectID);
     }
 
@@ -121,6 +121,7 @@ public class PWeakHashMap implements Map<Long, PObject> {
 
         while ((reference = queue.poll()) != null) {
             final Long objectID = objectIDByReferences.remove(reference);
+            System.err.println("GC of objectID : " + objectID);
             final Long parentObjectID = parentObjectIDByReferences.remove(reference);
             referenceByObjectID.remove(objectID);
 

@@ -38,7 +38,9 @@ public abstract class PComposite extends PWidget {
     }
 
     @Override
-    protected void init(final WidgetType widgetType) {}
+    protected void init(final WidgetType widgetType) {
+
+    }
 
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
@@ -46,7 +48,7 @@ public abstract class PComposite extends PWidget {
         create = new Create(ID, getType());
 
         PonySession.getCurrent().stackInstruction(create);
-        PonySession.getCurrent().registerObject(ID, this);
+        PonySession.getCurrent().registerObject(this);
 
         child.removeFromParent();
         this.widget = child;
@@ -56,4 +58,5 @@ public abstract class PComposite extends PWidget {
 
         getPonySession().stackInstruction(create);
     }
+
 }

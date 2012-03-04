@@ -33,7 +33,9 @@ import javax.servlet.http.HttpSessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.PSystemProperty;
 import com.ponysdk.core.PonyApplicationSession;
+import com.ponysdk.core.tools.BannerPrinter;
 import com.ponysdk.spring.SpringContextLoader;
 
 public class ApplicationLoader implements ServletContextListener, HttpSessionListener {
@@ -51,50 +53,66 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     }
 
     @Override
-    public void contextInitialized(ServletContextEvent event) {
-        applicationName = event.getServletContext().getInitParameter("applicationName");
-        applicationDescription = event.getServletContext().getInitParameter("applicationDescription");
+    public void contextInitialized(final ServletContextEvent event) {
+        applicationName = System.getProperty(PSystemProperty.APPLICATION_NAME);
+        applicationDescription = System.getProperty(PSystemProperty.APPLICATION_DESCRIPTION);
 
         printLicence();
 
-        final String files = event.getServletContext().getInitParameter("contextConfigLocation");
-        if (files != null && !files.isEmpty()) {
-            contextLoader.initWebApplicationContext(event.getServletContext());
-        }
-
+        contextLoader.initWebApplicationContext(event.getServletContext());
     }
 
     @Override
-    public void contextDestroyed(ServletContextEvent event) {
-        log.info("================================================");
-        log.info("     " + applicationName.toLowerCase() + " - Context Destroyed                ");
-        log.info("================================================");
-
+    public void contextDestroyed(final ServletContextEvent event) {
         if (contextLoader != null) {
             contextLoader.closeWebApplicationContext(event.getServletContext());
         }
-    }
-
-    private void printLicence() {
-        log.info("===============================================");
-        log.info("     " + applicationName + " - " + applicationDescription + "            ");
-        log.info("             WEB APPLICATION                   ");
-        log.info("     (c) " + Calendar.getInstance().get(Calendar.YEAR) + " PonySDK         ");
-        log.info("                                               ");
-        log.info("===============================================");
+        printDestroyedBanner();
     }
 
     @Override
-    public void sessionCreated(HttpSessionEvent arg0) {
+    public void sessionCreated(final HttpSessionEvent arg0) {
         if (log.isDebugEnabled()) {
             log.debug("Session created #" + arg0.getSession().getId());
         }
     }
 
     @Override
-    public void sessionDestroyed(HttpSessionEvent arg0) {
+    public void sessionDestroyed(final HttpSessionEvent arg0) {
         final PonyApplicationSession applicationSession = (PonyApplicationSession) arg0.getSession().getAttribute(PonyApplicationSession.class.getCanonicalName());
         applicationSession.fireSessionDestroyed(arg0);
+    }
+
+    private void printDestroyedBanner() {
+        final int columnCount = applicationName.length() + 30;
+
+        final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
+        bannerPrinter.appendNewEmptyLine(2);
+        bannerPrinter.appendLineSeparator();
+        bannerPrinter.appendNewLine(2);
+        bannerPrinter.appendCenteredLine(applicationName + " - Context Destroyed");
+        bannerPrinter.appendNewLine(2);
+        bannerPrinter.appendLineSeparator();
+
+        log.info(bannerPrinter.toString());
+    }
+
+    private void printLicence() {
+        final int columnCount = applicationName.length() + applicationDescription.length() + 30;
+
+        final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
+        bannerPrinter.appendNewEmptyLine();
+        bannerPrinter.appendLineSeparator();
+        bannerPrinter.appendNewLine();
+        bannerPrinter.appendCenteredLine(applicationName + " - " + applicationDescription);
+        bannerPrinter.appendNewLine();
+        bannerPrinter.appendCenteredLine("WEB  APPLICATION");
+        bannerPrinter.appendNewLine();
+        bannerPrinter.appendCenteredLine("(c) " + Calendar.getInstance().get(Calendar.YEAR) + " PonySDK");
+        bannerPrinter.appendNewLine();
+        bannerPrinter.appendLineSeparator();
+
+        log.info(bannerPrinter.toString());
     }
 
 }
