@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionListener;
@@ -91,6 +92,8 @@ public class PonySession {
     private PCookies cookies;
 
     private final PonyApplicationSession applicationSession;
+
+    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>();
 
     public PonySession(final PonyApplicationSession applicationSession) {
         this.applicationSession = applicationSession;
@@ -281,10 +284,6 @@ public class PonySession {
         this.permissions = permissions;
     }
 
-    public void setAttribute(final String name, final Object value) {
-        this.applicationSession.setAttribute(name, value);
-    }
-
     public void addSessionListener(final HttpSessionListener sessionListener) {
         this.applicationSession.addSessionListener(sessionListener);
     }
@@ -293,8 +292,21 @@ public class PonySession {
         return this.applicationSession.removeSessionListener(sessionListener);
     }
 
+    public void setAttribute(final String name, final Object value) {
+        ponySessionAttributes.put(name, value);
+    }
+
     @SuppressWarnings("unchecked")
-    public <T> T getAttribute(final String name, final Class<T> clazz) {
+    public <T> T getAttribute(final String name) {
+        return (T) ponySessionAttributes.get(name);
+    }
+
+    public void setApplicationAttribute(final String name, final Object value) {
+        this.applicationSession.setAttribute(name, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getApplicationAttribute(final String name) {
         return (T) this.applicationSession.getAttribute(name);
     }
 

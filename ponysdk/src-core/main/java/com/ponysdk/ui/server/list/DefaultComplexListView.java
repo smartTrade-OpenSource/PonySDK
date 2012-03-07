@@ -86,7 +86,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
         bottomListLayout.setWidget(searchResultTimeLabel);
 
-        simpleListView.asWidget().addStyleName("pony-ComplexList");
+        simpleListView.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
 
         add(positionPanel);
         add(simpleListView.asWidget());

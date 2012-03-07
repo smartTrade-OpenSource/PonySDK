@@ -31,7 +31,6 @@ import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
@@ -56,15 +55,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
 
     @Override
-    public void start(PonySession session) {
+    public void start(final PonySession session) {
         panel.setSizeFull();
         session.getRootLayoutPanel().add(panel);
         placeController.goTo(loginActivity, new LoginPlace(), panel);
     }
 
     @Override
-    public void restart(PonySession session) {
-        if (session.getAttribute(USER, User.class) == null) {
+    public void restart(final PonySession session) {
+        if (session.getApplicationAttribute(USER) == null) {
             start(session);
         } else {
             panel.setSizeFull();
@@ -76,7 +75,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     }
 
     @Override
-    public void onUserLoggedOut(UserLoggedOutEvent event) {
+    public void onUserLoggedOut(final UserLoggedOutEvent event) {
         PonySession.getCurrent().close();
     }
 

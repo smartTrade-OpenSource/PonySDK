@@ -28,24 +28,19 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ponysdk.core.command.Command;
-import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.ExportableField;
-import com.ponysdk.core.export.command.ExportCommand;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.application.ApplicationView;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.command.pony.CreatePonyCommand;
-import com.ponysdk.sample.command.pony.FindPonyChildsCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
+import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -61,25 +56,24 @@ import com.ponysdk.ui.server.form.renderer.TextBoxBaseFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.validator.IntegerFieldValidator;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
-import com.ponysdk.ui.server.list.ComplexListActivity;
-import com.ponysdk.ui.server.list.ComplexListCommandFactory;
-import com.ponysdk.ui.server.list.ComplexListConfiguration;
-import com.ponysdk.ui.server.list.ComplexListView;
-import com.ponysdk.ui.server.list.DefaultComplexListView;
+import com.ponysdk.ui.server.list.DefaultSimpleListView;
 import com.ponysdk.ui.server.list.ExportConfiguration;
-import com.ponysdk.ui.server.list.ListColumnDescriptor;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
-import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.cell.StringCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
+import com.ponysdk.ui.server.list2.DataGridActivity;
+import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
+import com.ponysdk.ui.server.list2.DataGridConfiguration;
+import com.ponysdk.ui.server.list2.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
-public class ComplexListPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
+public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
 
     @Autowired
     protected ApplicationView applicationView;
 
-    private ComplexListActivity<Pony> complexListActivity;
+    private DataGridActivity<Pony> dataGrid;
     private FormField nameSearchField;
     private FormField ageSearchField;
 
@@ -89,75 +83,35 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
     private FormField nameFormField;
     private FormField ageFormField;
 
-    public ComplexListPageActivity() {
-        super("Complex List", "Rich UI Components");
+    public DataGridPageActivity() {
+        super("Data Grid", "Rich UI Components");
     }
-
-    @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(final Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {
 
         super.onFirstShowPage();
 
-        final PScrollPanel scrolPanel = new PScrollPanel();
-        examplePanel.setWidget(scrolPanel);
+        final PHorizontalPanel formContainer = new PHorizontalPanel();
+        final PScrollPanel gridContainer = new PScrollPanel();
+
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        dockLayoutPanel.addNorth(formContainer, 100);
+        dockLayoutPanel.add(gridContainer);
+
+        examplePanel.setWidget(dockLayoutPanel);
 
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
         addHandler(ShowSubListEvent.TYPE, this);
 
-        final ComplexListConfiguration<Pony> complexListConfiguration = new ComplexListConfiguration<Pony>();
-        complexListConfiguration.setEnableForm(true);
-        complexListConfiguration.setFormLayout(new PHorizontalPanel());
-        complexListConfiguration.setShowSubListColumnEnabled(true);
-        complexListConfiguration.setSelectionColumnEnabled(true);
-        complexListConfiguration.setPageSize(20);
-        complexListConfiguration.setTableName("Pony List");
-        complexListConfiguration.setExportConfiguration(initExportConfiguration());
-        complexListConfiguration.setColumnDescriptors(initListColumnDescriptors());
-        complexListConfiguration.setCustomColumnEnabled(true, Pony.class);
-        complexListConfiguration.setShowPreferences(true);
+        final DataGridConfiguration<Pony> configuration = new DataGridConfiguration<Pony>();
+        configuration.setShowSubListEnabled(true);
+        configuration.setSelectionEnabled(true);
+        configuration.setColumnDescriptors(initListColumnDescriptors());
 
-        final ComplexListView complexListView = new DefaultComplexListView();
-        complexListView.setFloatableToolBar(scrolPanel);
-
-        complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());
-
-        complexListActivity.registerSearchCriteria(new CriterionField("name"), nameSearchField);
-        complexListActivity.registerSearchCriteria(new CriterionField("age"), ageSearchField);
-
-        complexListActivity.getForm().addFormField(nameSearchField);
-        complexListActivity.getForm().addFormField(ageSearchField);
-
-        complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
-
-            @Override
-            public Command<Result<List<Pony>>> newFindCommand(final ComplexListActivity<Pony> complexListActivity, final Query query) {
-                return new FindPonysCommand(query) {
-
-                    @Override
-                    protected void doAfterSuccess(final Result<List<Pony>> result) {
-                        complexListActivity.setData(result);
-                    }
-                };
-            }
-
-            @Override
-            public Command<String> newExportCommand(final ComplexListActivity<Pony> complexListActivity, final ExportContext<Pony> exportContext) {
-                return new ExportCommand<Pony>(exportContext);
-            }
-
-        });
-
-        complexListActivity.start(examplePanel);
+        dataGrid = new DataGridActivity<Pony>(configuration, new DefaultSimpleListView());
+        dataGrid.start(gridContainer);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
@@ -169,13 +123,13 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
-        complexListView.getToolbarLayout().add(addPonyButton);
-
-        // Load initial datas
-        complexListActivity.refresh();
 
         // Build create pony form
         buildCreatePonyActivity();
+
+        //
+        final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
+        dataGrid.setRowData(0, result.getData());
     }
 
     private ExportConfiguration initExportConfiguration() {
@@ -186,7 +140,7 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         return exportConfiguration;
     }
 
-    private List<ListColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
+    private List<DataGridColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
 
         final ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
         for (int i = 0; i < 30; i++)
@@ -195,21 +149,27 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         ageSearchField = new FormField(ageListBoxRenderer);
         nameSearchField = new FormField(new TextBoxBaseFormFieldRenderer("Name"));
 
-        final List<ListColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<ListColumnDescriptor<Pony, ?>>();
+        final List<DataGridColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<DataGridColumnDescriptor<Pony, ?>>();
 
-        final ListColumnDescriptor<Pony, String> nameColumnDescriptor = new ListColumnDescriptor<Pony, String>();
+        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name"));
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name", "name"));
+        nameColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+
         listColumnDescriptors.add(nameColumnDescriptor);
 
-        final ListColumnDescriptor<Pony, String> ageColumnDescriptor = new ListColumnDescriptor<Pony, String>("Age");
+        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
-        ageColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Age", "age"));
+        final StringHeaderCellRenderer ageHeaderCellRender = new StringHeaderCellRenderer("Age");
+        ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
+        ageColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
         listColumnDescriptors.add(ageColumnDescriptor);
 
-        final ListColumnDescriptor<Pony, String> raceColumnDescriptor = new ListColumnDescriptor<Pony, String>("Race");
+        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
-        raceColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
+        final StringHeaderCellRenderer raceHeaderCellRender = new StringHeaderCellRenderer("Race");
+        raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
+        raceColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
         listColumnDescriptors.add(raceColumnDescriptor);
 
         return listColumnDescriptors;
@@ -217,20 +177,21 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
     @Override
     public void onSubmitForm(final SubmitFormEvent event) {
-        complexListActivity.refresh();
+        //
+        // final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
     }
 
     @Override
     public void onShowSubList(final ShowSubListEvent<Pony> event) {
-        if (event.isShow()) {
-            final FindPonyChildsCommand command = new FindPonyChildsCommand(event.getData().getId());
-            final Result<List<Pony>> result = command.execute();
-            if (command.isSuccessful()) {
-                complexListActivity.insertSubList(event.getRow(), result.getData());
-            }
-        } else {
-            complexListActivity.removeSubList(event.getRow());
-        }
+        // if (event.isShow()) {
+        // final FindPonyChildsCommand command = new FindPonyChildsCommand(event.getData().getId());
+        // final Result<List<Pony>> result = command.execute();
+        // if (command.isSuccessful()) {
+        // complexListActivity.insertSubList(event.getRow(), result.getData());
+        // }
+        // } else {
+        // complexListActivity.removeSubList(event.getRow());
+        // }
     }
 
     protected void showCreatePonyPopup() {
@@ -275,9 +236,6 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         createPonyActivity.addFormField(nameFormField);
         createPonyActivity.addFormField(ageFormField);
         createPonyActivity.addFormField(raceFormField);
-
-        final FindPonysCommand command = new FindPonysCommand(null);
-        final Result<List<Pony>> execute = command.execute();
 
         createPonyActivity.start(createPonyActivityPanel);
     }

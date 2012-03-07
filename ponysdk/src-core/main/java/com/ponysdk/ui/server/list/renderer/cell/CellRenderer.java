@@ -27,6 +27,6 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 
 public interface CellRenderer<D, V> {
 
-    public IsPWidget render(final int row, D data, V value);
+    public IsPWidget render(final int row, final D data, V value);
 
 }

@@ -52,7 +52,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     public void start(final PAcceptsOneWidget world) {
         super.start(world);
 
-        final User user = PonySession.getCurrent().getAttribute(UISampleEntryPoint.USER, User.class);
+        final User user = PonySession.getCurrent().getApplicationAttribute(UISampleEntryPoint.USER);
         getHeaderView().addActionWidget(createUserAccountMenu(user));
     }
 

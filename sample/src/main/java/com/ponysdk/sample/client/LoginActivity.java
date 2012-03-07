@@ -98,7 +98,7 @@ public class LoginActivity extends AbstractActivity {
         user.setName(loginPageView.getLogin());
         user.setPassword(loginPageView.getPassword());
 
-        PonySession.getCurrent().setAttribute(UISampleEntryPoint.USER, user);
+        PonySession.getCurrent().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
