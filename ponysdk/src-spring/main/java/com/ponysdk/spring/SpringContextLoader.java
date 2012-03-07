@@ -33,14 +33,24 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.ponysdk.core.PSystemProperty;
+
 public class SpringContextLoader {
 
     private static final Logger log = LoggerFactory.getLogger(SpringContextLoader.class);
 
     private XmlWebApplicationContext context;
 
-    public void initWebApplicationContext(ServletContext servletContext) {
-        final String configFiles = "classpath:conf/server_application.inc.xml," + servletContext.getInitParameter(org.springframework.web.context.ContextLoader.CONFIG_LOCATION_PARAM);
+    public void initWebApplicationContext(final ServletContext servletContext) {
+        String configFiles = "";
+        String conf = System.getProperty(PSystemProperty.CONTEXT_CONFIG_LOCATION);
+        if (conf != null) {
+            conf = "classpath:" + conf;
+        } else {
+            conf = "classpath:server_application.xml";
+        }
+        configFiles = "classpath:conf/server_application.inc.xml, " + conf;
+
         context = new XmlWebApplicationContext();
         context.setServletContext(servletContext);
         context.setConfigLocations(StringUtils.tokenizeToStringArray(configFiles, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
@@ -48,7 +58,7 @@ public class SpringContextLoader {
         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
     }
 
-    public void closeWebApplicationContext(ServletContext servletContext) {
+    public void closeWebApplicationContext(final ServletContext servletContext) {
         servletContext.log("Closing Spring context");
         try {
             if (this.context instanceof ConfigurableWebApplicationContext) {

@@ -49,7 +49,11 @@ public abstract class PObject {
             create.setAddOnSignature(((PAddOn) this).getSignature());
         }
         PonySession.getCurrent().stackInstruction(create);
-        PonySession.getCurrent().registerObject(ID, this);
+        registerObject();
+    }
+
+    protected void registerObject() {
+        PonySession.getCurrent().registerObject(this);
     }
 
     public long getID() {

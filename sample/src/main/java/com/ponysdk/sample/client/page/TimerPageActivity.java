@@ -23,9 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PHTML;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PTimer;
@@ -33,80 +36,64 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class TimerPageActivity extends PageActivity {
+public class TimerPageActivity extends SamplePageActivity {
 
     protected long time = 0;
 
-    protected PTimer currentTimer;
-
     protected PTimer timer;
 
-    private PVerticalPanel verticalPanel;
-
     public TimerPageActivity() {
-        super("Timer Page", "Category");
-    }
-
-    @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
-    protected void onShowPage(Place place) {
-        pageView.getBody().setWidget(verticalPanel);
+        super("Timer Page", "Timer");
     }
 
     @Override
     protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-        verticalPanel = new PVerticalPanel();
+        final PVerticalPanel panel = new PVerticalPanel();
         final PLabel label = new PLabel("0");
-        verticalPanel.add(label);
 
         final PTextBox textBox = new PTextBox("1000");
-
-        final PButton scheduleRepeatingButton = new PButton("Schedule repeating");
-        scheduleRepeatingButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(PClickEvent clickEvent) {
-                if (currentTimer != null) {
-                    currentTimer.cancel();
-                }
-                currentTimer = new PTimer() {
-
-                    @Override
-                    public void run() {
-                        time++;
-                        label.setText("" + time);
-                    }
-                };
-                currentTimer.scheduleRepeating(Integer.valueOf(textBox.getText()));
-            }
-        });
-        verticalPanel.add(textBox);
-        verticalPanel.add(scheduleRepeatingButton);
 
         timer = new PTimer() {
 
             @Override
             public void run() {
                 time++;
-                label.setText("Timer executed" + time);
+                label.setText("" + time);
             }
         };
 
-        PButton scheduleButton = new PButton("Schedule");
-        scheduleButton.addClickHandler(new PClickHandler() {
+        final PButton scheduleRepeatingButton = new PButton("Schedule repeating");
+        scheduleRepeatingButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
-                label.setText("Timer scheduled....");
-                timer.schedule(Integer.valueOf(textBox.getText()));
+            public void onClick(final PClickEvent clickEvent) {
+                if (timer != null) timer.cancel();
+                timer.scheduleRepeating(Integer.valueOf(textBox.getText()));
             }
         });
-        verticalPanel.add(scheduleButton);
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
+        final PLabel date = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
+
+        new PTimer() {
+
+            @Override
+            public void run() {
+                date.setText(dateFormat.format(Calendar.getInstance().getTime()));
+            }
+        }.scheduleRepeating(1000);
+
+        final PHorizontalPanel datePanel = new PHorizontalPanel();
+        datePanel.add(new PHTML("Date :"));
+        datePanel.add(date);
+
+        panel.add(label);
+        panel.add(textBox);
+        panel.add(scheduleRepeatingButton);
+        panel.add(datePanel);
+
+        examplePanel.setWidget(panel);
     }
 }

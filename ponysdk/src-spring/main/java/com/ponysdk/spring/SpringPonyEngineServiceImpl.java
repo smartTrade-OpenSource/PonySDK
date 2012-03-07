@@ -27,7 +27,6 @@ package com.ponysdk.spring;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -58,12 +57,7 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
     private static final Logger log = LoggerFactory.getLogger(PonyEngineServiceImpl.class);
 
     @Override
-    public void init() throws ServletException {
-        super.init();
-    }
-
-    @Override
-    public PonySessionContext startApplication(String token, Map<String, String> cookiesByName) throws Exception {
+    public PonySessionContext startApplication(final String token, final Map<String, String> cookiesByName) throws Exception {
         try {
             boolean isNewHttpSession = false;
             final HttpSession session = getThreadLocalRequest().getSession();

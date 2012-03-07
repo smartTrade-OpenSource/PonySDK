@@ -51,6 +51,7 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
+import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
@@ -70,7 +71,9 @@ public class PonySession {
 
     private long streamRequestCounter = 0;
 
-    private final PWeakHashMap objectByID = new PWeakHashMap();
+    private final PWeakHashMap weakReferences = new PWeakHashMap();
+
+    private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
 
     // to do a weak reference ?
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
@@ -97,13 +100,13 @@ public class PonySession {
 
     public PonySession(final PonyApplicationSession applicationSession) {
         this.applicationSession = applicationSession;
-        objectByID.put(0l, rootPanel);
+        weakReferences.put(0l, rootPanel);
     }
 
     public void stackInstruction(final Instruction instruction) {
         if (instruction instanceof Add) {
             final Add add = (Add) instruction;
-            objectByID.assignParentID(add.getObjectID(), add.getParentID());
+            weakReferences.assignParentID(add.getObjectID(), add.getParentID());
         }
         pendingInstructions.add(instruction);
     }
@@ -132,7 +135,7 @@ public class PonySession {
 
         }
 
-        final PObject object = objectByID.get(instruction.getObjectID());
+        final PObject object = weakReferences.get(instruction.getObjectID());
 
         if (object == null) {
             log.warn("unknown reference from the browser #" + instruction.getObjectID());
@@ -158,13 +161,23 @@ public class PonySession {
         return streamRequestCounter++;
     }
 
-    public void registerObject(final long objectID, final PObject object) {
-        objectByID.put(objectID, object);
+    public void registerObject(final PObject object) {
+        if (object instanceof PTimer) {
+            // avoid GC for Timer but memory leak ....
+            timers.put(object.getID(), (PTimer) object);
+        } else {
+            weakReferences.put(object.getID(), object);
+        }
+    }
+
+    public void unRegisterObject(final PObject object) {
+        timers.remove(object.getID());
+        weakReferences.remove(object.getID());
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getObject(final long objectID) {
-        return (T) objectByID.get(objectID);
+        return (T) weakReferences.get(objectID);
     }
 
     public HttpSession getHttpSession() {

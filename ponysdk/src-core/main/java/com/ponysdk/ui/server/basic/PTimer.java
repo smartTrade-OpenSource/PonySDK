@@ -28,6 +28,7 @@ import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.Update;
 
@@ -38,20 +39,20 @@ public abstract class PTimer extends PObject {
         return WidgetType.TIMER;
     }
 
-    public void scheduleRepeating(int delayMillis) {
+    public void scheduleRepeating(final int delayMillis) {
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.REPEATING_DELAY, delayMillis);
         PonySession.getCurrent().stackInstruction(update);
     }
 
-    public void schedule(int delayMillis) {
+    public void schedule(final int delayMillis) {
         final Update update = new Update(ID);
         update.setMainPropertyValue(PropertyKey.DELAY, delayMillis);
         PonySession.getCurrent().stackInstruction(update);
     }
 
     @Override
-    public void onEventInstruction(EventInstruction instruction) {
+    public void onEventInstruction(final EventInstruction instruction) {
         if (HandlerType.TIMER.equals(instruction.getHandlerType())) {
             run();
         } else {
@@ -59,11 +60,18 @@ public abstract class PTimer extends PObject {
         }
     }
 
+    public void destroy() {
+        final GC gc = new GC(ID, -1);
+        PonySession.getCurrent().stackInstruction(gc);
+        PonySession.getCurrent().unRegisterObject(this);// avoid memory leak but if destroy => cannot reuse
+                                                        // this Timer
+    }
+
     public void cancel() {
         final Remove remove = new Remove(ID, -1);
         PonySession.getCurrent().stackInstruction(remove);
     }
 
-    public abstract void run();
+    protected abstract void run();
 
 }
