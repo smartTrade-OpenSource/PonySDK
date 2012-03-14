@@ -38,7 +38,7 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public class FormActivity extends AbstractActivity implements Activity {
 
-    private final Map<FormField<?>, String> captionByFormField = new HashMap<FormField<?>, String>();
+    protected final Map<FormField<?>, String> captionByFormField = new HashMap<FormField<?>, String>();
 
     protected final FormView formView;
 

@@ -21,15 +21,25 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list.renderer.cell;
+package com.ponysdk.ui.server.list2;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.core.query.SortingType;
+import com.ponysdk.ui.server.list.SimpleListView;
 
-public class StringCellRenderer<D, V> extends AbstractCellRenderer<D, V> {
+public class DataGridActivity<D> extends SimpleListActivity<D> {
 
-    @Override
-    public IsPWidget render0(final int rowCount, final D data, final V value) {
-        return new PLabel(value.toString());
+    private final SimpleListView view;
+    private final DataGridConfiguration<D> configuration;
+
+    private final SortingType currentSortingType = SortingType.NONE;
+    private String currentSortingPojoPropertyKey;
+
+    public DataGridActivity(final DataGridConfiguration<D> configuration, final SimpleListView view) {
+
+        super(view, configuration.getColumnDescriptors());
+
+        this.view = view;
+        this.configuration = configuration;
     }
+
 }

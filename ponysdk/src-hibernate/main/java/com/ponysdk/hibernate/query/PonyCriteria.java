@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.hibernate.query.decorator;
+package com.ponysdk.hibernate.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,41 +33,24 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
-import com.ponysdk.core.query.SortingType;
-import com.ponysdk.hibernate.query.OrderingCriteria;
-import com.ponysdk.hibernate.query.PaginatingCriteria;
+import com.ponysdk.hibernate.query.decorator.DefaultQueryGenerator;
 
 public class PonyCriteria<T> {
 
     private static final Logger log = LoggerFactory.getLogger(PonyCriteria.class);
 
-    private final Class<?> clazz;
-
     private final Session session;
-
-    private String propertyKey;
 
     private final Query query;
 
     private final List<Criterion> criterions = new ArrayList<Criterion>();
 
-    private SortingType sortingType;
+    private final Class<T> persistentClass;
 
-    public PonyCriteria(Session session, Class<T> clazz, Query query) {
-        this(session, clazz, query, null);
-    }
-
-    public PonyCriteria(Session session, Class<T> clazz, Query query, String propertyKey) {
+    public PonyCriteria(final Session session, final Class<T> persistentClass, final Query query) {
         this.session = session;
+        this.persistentClass = persistentClass;
         this.query = query;
-        this.clazz = clazz;
-        this.propertyKey = propertyKey;
-    }
-
-    public PonyCriteria<T> setDefaultSortingProperty(String property, SortingType sortingType) {
-        this.propertyKey = property;
-        this.sortingType = sortingType;
-        return this;
     }
 
     public Result<List<T>> listAndCommit() {
@@ -77,22 +60,19 @@ public class PonyCriteria<T> {
             session.getTransaction().commit();
             return result;
         } catch (final Exception e) {
-            final String message = "Cannot find " + clazz.getSimpleName();
-            log.error(message, e);
+            log.error("list and commit failed", e);
             session.getTransaction().rollback();
-            throw new RuntimeException(message, e);
+            throw new RuntimeException("list and commit failed", e);
         }
     }
 
-    public void add(Criterion criterion) {
+    public void add(final Criterion criterion) {
         criterions.add(criterion);
     }
 
     @SuppressWarnings("unchecked")
     public Result<List<T>> list() {
-        final PaginatingCriteria pagingCriteria = new PaginatingCriteria(clazz, session, propertyKey);
-
-        final DefaultQueryGenerator queryGenerator = new DefaultQueryGenerator(pagingCriteria, propertyKey, sortingType);
+        final DefaultQueryGenerator<T> queryGenerator = new DefaultQueryGenerator<T>(new PaginatingCriteria<T>(session, persistentClass));
         final OrderingCriteria criteria = queryGenerator.generate(query);
 
         for (final Criterion criterion : criterions) {
@@ -108,5 +88,4 @@ public class PonyCriteria<T> {
         result.setFullSize(count);
         return result;
     }
-
 }

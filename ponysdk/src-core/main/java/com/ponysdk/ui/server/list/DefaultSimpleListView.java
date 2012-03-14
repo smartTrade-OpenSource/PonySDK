@@ -31,7 +31,7 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     public DefaultSimpleListView() {
         super();
-        setWidth("98%");
+        addStyleName(PonySDKTheme.SIMPLELIST);
     }
 
     @Override
@@ -48,53 +48,53 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     }
 
     @Override
-    public void selectRow(int row) {
+    public void selectRow(final int row) {
         getRowFormatter().addStyleName(row, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override
-    public void unSelectRow(int row) {
+    public void unSelectRow(final int row) {
         getRowFormatter().removeStyleName(row, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override
-    public void setColumns(int size) {
+    public void setColumns(final int size) {
 
     }
 
     @Override
-    public void addRowStyle(int row, String styleName) {
+    public void addRowStyle(final int row, final String styleName) {
         getRowFormatter().addStyleName(row, styleName);
     }
 
     @Override
-    public void addHeaderStyle(String styleName) {
+    public void addHeaderStyle(final String styleName) {
         getRowFormatter().addStyleName(0, styleName);
     }
 
     @Override
-    public void addCellStyle(int row, int col, String styleName) {
+    public void addCellStyle(final int row, final int col, final String styleName) {
         getCellFormatter().addStyleName(row, col, styleName);
 
     }
 
     @Override
-    public void removeCellStyle(int row, int column, String styleName) {
+    public void removeCellStyle(final int row, final int column, final String styleName) {
         getCellFormatter().removeStyleName(row, column, styleName);
     }
 
     @Override
-    public void addColumnStyle(int column, String styleName) {
+    public void addColumnStyle(final int column, final String styleName) {
         getColumnFormatter().addStyleName(column, styleName);
     }
 
     @Override
-    public void removeColumnStyle(int column, String styleName) {
+    public void removeColumnStyle(final int column, final String styleName) {
         getColumnFormatter().removeStyleName(column, styleName);
     }
 
     @Override
-    public void setColumnWidth(int column, String width) {
+    public void setColumnWidth(final int column, final String width) {
         getColumnFormatter().setWidth(column, width);
     }
 

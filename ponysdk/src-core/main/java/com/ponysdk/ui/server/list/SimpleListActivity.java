@@ -55,6 +55,14 @@ public class SimpleListActivity<T> extends AbstractActivity {
 
     private int colCount;
 
+    public SimpleListActivity(final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
+        this.ID = null;
+        this.listFields = listFields;
+        this.listView = listView;
+        this.eventBus = eventBus;
+        buildHeaders();
+    }
+
     public SimpleListActivity(final String ID, final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
         this.ID = ID;
         this.listFields = listFields;

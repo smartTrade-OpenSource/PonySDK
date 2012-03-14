@@ -118,7 +118,7 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
         return caught;
     }
 
-    public boolean isSuccessful() {
+    public boolean isSuccessfull() {
         return (caught == null);
     }
 

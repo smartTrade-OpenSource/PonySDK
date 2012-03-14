@@ -27,8 +27,8 @@ import com.ponysdk.core.PonySession;
 
 public class SecurityManager {
 
-    public static boolean checkPermission(Permission permission) {
+    public static boolean checkPermission(final Permission permission) {
         if (Permission.ALLOWED.equals(permission)) return true;
-        return PonySession.getCurrent().getPermissions().contains(permission);
+        return PonySession.getCurrent().hasPermission(permission.getKey());
     }
 }

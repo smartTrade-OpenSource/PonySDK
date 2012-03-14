@@ -43,17 +43,17 @@ public class PonyApplicationSession {
 
     private static final AtomicLong ponySessionIDcount = new AtomicLong();
 
-    public PonyApplicationSession(HttpSession httpSession) {
+    public PonyApplicationSession(final HttpSession httpSession) {
         this.httpSession = httpSession;
     }
 
-    public long registerPonySession(PonySession ponySession) {
+    public long registerPonySession(final PonySession ponySession) {
         final long id = ponySessionIDcount.incrementAndGet();
         ponySessions.put(id, ponySession);
         return id;
     }
 
-    public PonySession getPonySession(long key) {
+    public PonySession getPonySession(final long key) {
         return ponySessions.get(key);
     }
 
@@ -61,32 +61,32 @@ public class PonyApplicationSession {
         return httpSession;
     }
 
-    public void fireSessionCreated(HttpSessionEvent event) {
+    public void fireSessionCreated(final HttpSessionEvent event) {
         for (final HttpSessionListener listener : sessionListeners) {
             listener.sessionCreated(event);
         }
     }
 
-    public void fireSessionDestroyed(HttpSessionEvent event) {
+    public void fireSessionDestroyed(final HttpSessionEvent event) {
         for (final HttpSessionListener listener : sessionListeners) {
             listener.sessionDestroyed(event);
         }
     }
 
-    public void addSessionListener(HttpSessionListener sessionListener) {
+    public void addSessionListener(final HttpSessionListener sessionListener) {
         sessionListeners.add(sessionListener);
     }
 
-    public boolean removeSessionListener(HttpSessionListener sessionListener) {
+    public boolean removeSessionListener(final HttpSessionListener sessionListener) {
         return sessionListeners.remove(sessionListeners);
     }
 
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         httpSession.setAttribute(name, value);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getAttribute(String name) {
+    public <T> T getAttribute(final String name) {
         return (T) httpSession.getAttribute(name);
     }
 
