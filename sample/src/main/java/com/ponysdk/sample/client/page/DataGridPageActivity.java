@@ -206,7 +206,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                     final Pony pony = new Pony(null, nameFormField.getStringValue(), ageFormField.getIntegerValue(), raceFormField.getStringValue());
                     final CreatePonyCommand command = new CreatePonyCommand(pony);
                     final Pony newPony = command.execute();
-                    if (command.isSuccessful()) {
+                    if (command.isSuccessfull()) {
                         final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
                         event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
                         fireEvent(event);

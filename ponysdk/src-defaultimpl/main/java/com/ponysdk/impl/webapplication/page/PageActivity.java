@@ -42,8 +42,6 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     protected final String pageCategory;
 
-    protected Permission permission;
-
     protected PageView pageView;
 
     protected PagePlace homePlace;
@@ -60,10 +58,11 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         this(pageName, pageCategory, Permission.ALLOWED);
     }
 
-    public PageActivity(final String pageName, final String pageCategory, Permission permission) {
+    public PageActivity(final String pageName, final String pageCategory, final Permission permission) {
+        super(permission);
+
         this.pageName = pageName;
         this.pageCategory = pageCategory;
-        this.permission = permission;
 
         homePlace = new PagePlace(this) {
 
@@ -75,12 +74,12 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         onFirstShowPage();
     }
 
     @Override
-    public void goTo(Place place, PAcceptsOneWidget world) {
+    public void goTo(final Place place, final PAcceptsOneWidget world) {
         if (currentPage != null) currentPage.onLeavingPage();
 
         currentPage = this;
@@ -100,7 +99,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         }
     }
 
-    public void goToPage(PagePlace place) {
+    public void goToPage(final PagePlace place) {
         applicationActivity.goTo(place);
     }
 
@@ -120,7 +119,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         return pageView;
     }
 
-    public void setPageView(PageView pageView) {
+    public void setPageView(final PageView pageView) {
         this.pageView = pageView;
     }
 
@@ -128,11 +127,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         return homePlace;
     }
 
-    public Permission getPermission() {
-        return permission;
-    }
-
-    public void setApplicationActivity(ApplicationActivity applicationActivity) {
+    public void setApplicationActivity(final ApplicationActivity applicationActivity) {
         this.applicationActivity = applicationActivity;
     }
 
@@ -155,7 +150,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

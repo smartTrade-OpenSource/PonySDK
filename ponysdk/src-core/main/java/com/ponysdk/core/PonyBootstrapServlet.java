@@ -158,12 +158,13 @@ public class PonyBootstrapServlet extends HttpServlet {
         builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         builder.append("    <title>" + applicationName + "</title>");
         builder.append("    <script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
+
         for (final String style : stylesheets) {
             final String contentType = new MimetypesFileTypeMap().getContentType(style);
             if (!contentType.equals("text/css")) builder.append("    <link rel=\"stylesheet/less\" type=\"" + contentType + "\" href=\"" + style + "\">");
             else builder.append("    <link rel=\"stylesheet\" type=\"" + contentType + "\" href=\"" + style + "\">");
         }
-        builder.append("    <script src=\"css/less.js\" type=\"text/javascript\"></script>");
+        builder.append("    <script src=\"script/less.js\" type=\"text/javascript\"></script>");
         builder.append("</head>");
         builder.append("<body>");
         builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");

@@ -24,10 +24,12 @@
 package com.ponysdk.core.activity;
 
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.security.Permission;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public interface Activity {
 
     void goTo(Place place, PAcceptsOneWidget world);
 
+    Permission getPermission();
 }

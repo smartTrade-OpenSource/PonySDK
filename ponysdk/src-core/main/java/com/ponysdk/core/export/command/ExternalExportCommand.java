@@ -44,7 +44,7 @@ public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportC
     public String execute() {
         if (exportContext.getSelectionResult().getSelectionMode() == SelectionMode.FULL) {
             U findResult = findCommand.execute();
-            if (findCommand.isSuccessful()) {
+            if (findCommand.isSuccessfull()) {
                 exportContext.setSelectionResult(new SelectionResult<T>(SelectionMode.FULL, findResult.getData()));
                 return super.execute();
             } else {

@@ -56,7 +56,7 @@ public class ApplicationActivity extends AbstractActivity implements PValueChang
     public void start(final PAcceptsOneWidget world) {
         PonySession.getCurrent().getHistory().addValueChangeHandler(this);
 
-        for (PageActivity page : pageProvider.getPageActivities()) {
+        for (final PageActivity page : pageProvider.getPageActivities()) {
             page.setApplicationActivity(this);
         }
 

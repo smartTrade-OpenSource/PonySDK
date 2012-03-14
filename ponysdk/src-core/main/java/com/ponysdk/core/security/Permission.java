@@ -29,7 +29,7 @@ public class Permission {
 
     private final String key;
 
-    public Permission(String key) {
+    public Permission(final String key) {
         this.key = key;
     }
 
@@ -42,7 +42,7 @@ public class Permission {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
@@ -54,6 +54,11 @@ public class Permission {
     }
 
     public String getKey() {
+        return key;
+    }
+
+    @Override
+    public String toString() {
         return key;
     }
 }

@@ -36,42 +36,29 @@ import com.ponysdk.hibernate.query.CriteriaContext;
 import com.ponysdk.hibernate.query.OrderingCriteria;
 import com.ponysdk.hibernate.query.QueryGenerator;
 
-public class DefaultQueryGenerator implements QueryGenerator {
+public class DefaultQueryGenerator<T> implements QueryGenerator {
 
     private final Map<String, CriteriaDecorator> criteriaDecoratorByPojoPropertyKey = new HashMap<String, CriteriaDecorator>();
 
     private CriteriaDecorator sortCriteriaDecorator;
 
-    private final String defaultSortingProperty;
-
     private final OrderingCriteria criteria;
 
-    private SortingType sortingType = SortingType.NONE;
-
-    public DefaultQueryGenerator(OrderingCriteria criteria) {
-        this(criteria, null, SortingType.NONE);
-    }
-
-    public DefaultQueryGenerator(OrderingCriteria criteria, String defaultSortingProperty, SortingType sortingType) {
-        this.defaultSortingProperty = defaultSortingProperty;
-        this.sortingType = sortingType;
-
-        sortCriteriaDecorator = new DefaultSortCriteriaDecorator();
-
+    public DefaultQueryGenerator(final OrderingCriteria criteria) {
+        this.sortCriteriaDecorator = new DefaultSortCriteriaDecorator();
         this.criteria = criteria;
     }
 
-    public void putDecorator(String pojoPropertyKey, CriteriaDecorator criteriaDecorator) {
+    public void putDecorator(final String pojoPropertyKey, final CriteriaDecorator criteriaDecorator) {
         criteriaDecoratorByPojoPropertyKey.put(pojoPropertyKey, criteriaDecorator);
     }
 
-    public void setSortCriteriaDecorator(CriteriaDecorator sortCriteriaDecorator) {
+    public void setSortCriteriaDecorator(final CriteriaDecorator sortCriteriaDecorator) {
         this.sortCriteriaDecorator = sortCriteriaDecorator;
     }
 
     @Override
-    public OrderingCriteria generate(Query query) {
-        String ordering = null;
+    public OrderingCriteria generate(final Query query) {
         final List<CriterionField> fields = query.getCriteria();
         if (fields != null) {
             for (final CriterionField criterion : fields) {
@@ -88,20 +75,7 @@ public class DefaultQueryGenerator implements QueryGenerator {
                 }
                 if (criterion.getSortingType() != SortingType.NONE) {
                     sortCriteriaDecorator.render(context);
-                    ordering = criterion.getPojoProperty();
                 }
-            }
-        }
-
-        // sort forced on the default property
-        if (ordering == null || !ordering.equals(defaultSortingProperty)) {
-            if (defaultSortingProperty != null) {
-                final CriterionField field = new CriterionField(defaultSortingProperty);
-                field.setSortingType(sortingType);
-                final CriteriaContext context = new CriteriaContext();
-                context.setCriterion(field);
-                context.setSTCriteria(criteria);
-                sortCriteriaDecorator.render(context);
             }
         }
 

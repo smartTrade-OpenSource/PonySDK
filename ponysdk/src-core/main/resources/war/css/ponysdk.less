@@ -1,76 +1,139 @@
+@import "css/clean.css";
+
+body, table td, select, button {
+  font-family: "Arial Unicode MS", Arial, sans-serif;
+  font-size: small;
+}
+pre {
+  font-family: "courier new", courier;
+  font-size: small;
+}
+body {
+  color: black;
+  margin: 10px;
+  border: 0px;
+  padding: 0px;
+  background: #fff;
+  direction: ltr;
+}
+
+.gwt-TabLayoutPanel {
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
+  background: #ccc;
+  padding-top: 6px;
+  padding-left: 5px;
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContentContainer {
+  border-color: #ccc;
+  border-style: solid;
+  border-width: 0px 1px 1px;
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+  overflow: hidden;
+  padding: 6px;
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+  margin-left: 4px;
+  padding: 4px 8px 4px 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: normal;
+  text-align: center;
+  background: #8E8E8E;
+  .border-radius(3px,px,0px,0px);
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected {
+  cursor: default;
+  background: white;
+  color: #333;
+  font-weight: bold;
+}
 
 
 .pony-LoadingMessageBox {
 	background-color: #FFF1A8;
-	-webkit-gradient(linear, left top, left bottom, from(#FFE090),
-	to(#FFF2B0) );
+	background-image: linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -o-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -moz-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -webkit-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	background-image: -ms-linear-gradient(bottom, rgb(255,224,144) 44%, rgb(255,242,176) 72%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.44, rgb(255,224,144)),
+		color-stop(0.72, rgb(255,242,176))
+	);
 	color: black;
 	left: 50%;
 	padding: 3px 6px;
 	position: fixed;
 	top: 0;
 	font-weight: bold;
-	border-radius: 0 0 5px 5px;
-	-moz-border-radius: 0 0 5px 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px, rgba(0, 0, 0, 0.246094)
-	0 3px 5px;
-	-moz-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	-webkit-box-shadow: rgba(0, 0, 0, 0.246094) 0 -3px 5px,
-	rgba(0, 0, 0, 0.246094) 0 3px 5px;
-	border-bottom-left-radius: 5px 5px;
-	border-bottom-right-radius: 5px 5px;
+	.box-shadow(0,-3px,5px);
+	.border-radius(0,0,5px,5px);
 	z-index: 10000
 }
+
+
+.box-shadow (@x: 0, @y: 0, @blur: 1px, @color: #000) {
+  box-shadow: @arguments;
+  -moz-box-shadow: @arguments;
+  -webkit-box-shadow: @arguments;
+}
+
+.border-radius (@a,@b,@c,@d){
+	border-radius: @a @b @c @d;
+	-moz-border-radius: @a @b @c @d;
+	-khtml-border-radius: @a @b @c @d;
+	-webkit-border-radius: @a @b @c @d;
+}
+
+.border-radius (@size){
+	border-radius: @size;
+	-moz-border-radius: @size;
+	-khtml-border-radius: @size;
+	-webkit-border-radius: @size;
+}
+
 .pony-LoginPage {
-	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma,
-	Helvetica, sans-serif;
+	font-family: Lucida, Arial, Geneva, Verdana, "Lucida Grande", Tahoma, Helvetica, sans-serif;
 	font-size: 11px;
-	margin-top: 10em;
-	margin-bottom: 2em;
 	color: #777;
-	-webkit-box-shadow: #C8C8C8 0px 4px 18px;
-	background: white;
+	margin-top: 10em;
 	border: 1px solid #E5E5E5;
-	-moz-border-radius: 0.4em;
-	-khtml-border-radius: 0.4em;
-	-webkit-border-radius: 0.4em;
-	border-radius: 0.4em;
-	-moz-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	-webkit-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	-khtml-box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	box-shadow: rgba(200, 200, 200, 1) 0 0.2em 1em;
-	position: relative;
+	.border-radius(0.4em);
+	.box-shadow(0,0.2em,1em,rgba(200, 200, 200, 1));
 	margin-left: auto;
 	margin-right: auto;
 	width: 450px;
 	height: 250px;
 	padding: 1em;
 }
+
 .pony-LoginPage-LoginTextBox {
 	background: #FBFBFB;
 	font-size: 1.8em;
 	border: 2px solid #E5E5E5;
 	line-height: 1.8em;
-	height: 1.8em;
 	font-weight: bold;
-	width: 98%;
+	width: 99%;
 }
+
 .pony-LoginPage-PasswordTextBox {
 	background: #FBFBFB;
 	font-size: 1.8em;
 	border: 2px solid #E5E5E5;
 	line-height: 1.8em;
-	height: 1.8em;
 	font-weight: bold;
-	width: 98%;
+	width: 99%;
 	margin-bottom: 0.8em;
 }
 
-.pony-LoginPage-SubmitButton {
-}
+.pony-LoginPage-SubmitButton {}
+
 .pony-LoginPage-VersionInformation {
 	margin-bottom: 0.8em;
 	font-style: italic;
@@ -91,14 +154,8 @@
 
 .pony-Header {
 	background-color: #2a3f54;
-	color: #FFF;
 	width:100%;
 	height:100%;
-	border-spacing: 0px;
-	border-collapse: collapse;
-}
-
-.pony-Header table td{
 	border-spacing: 0px;
 	border-collapse: collapse;
 }
@@ -109,9 +166,6 @@
 	font-weight: bold;
 	margin-left: 5px;
 }
-.pony-Header-Logout {
-	color: #FFFFFF;
-}
 
 .pony-Header-AccountMenu {
 	color: #FFF;
@@ -119,75 +173,43 @@
 	display: block;
 	font-size: 1em;
 	font-weight: normal;
-	height: 20px;
-	line-height: 20px;
 	margin:0; 
 	margin-right:30px; 
-	padding:0; 
-	padding-bottom: 2px;
-	padding-left: 5px;
-	padding-right: 9px;
-	padding-top: 2px;
+	padding:6px; 
 	white-space: nowrap;
 	width: 5em;
 }
+
 .pony-Header-AccountMenu:hover {
-	background-color: #f4f4f4;
+	color: #85acd3;
 	outline:none;
 	text-decoration:none !important
 }
 
-.pony-Header-AccountMenu:active {
-	background-color: white;
-}
 
 .pony-Header-AccountMenu-Selected {
-	background-color: white;
-	border-color: #BEBEBE;
-	border-left-style: solid;
-	border-left-width: 1px;
-	border-right-style: solid;
-	border-right-width: 1px;
-	color: #36C;
-	height: 23px;
-	line-height: 23px;
-	text-decoration: none;
-	white-space: nowrap;
-	width: 5.1em;
+	background-color: #FFF;
+	color: #85acd3;
 	z-index: 1000;
 	position: relative;
 }
 
-
 .pony-Header-AccountMenu-Popup {
-	-webkit-box-shadow: #CCC 0px 1px 5px 0px;
 	background-color: white;
-	border-bottom-color: #BEBEBE;
-	border-bottom-style: solid;
-	border-bottom-width: 1px;
-	border-left-color: #BEBEBE;
-	border-left-style: solid;
-	border-left-width: 1px;
-	border-right-color: #BEBEBE;
-	border-right-style: solid;
-	border-right-width: 1px;
-	border-top-color: #BEBEBE;
-	border-top-style: solid;
-	border-top-width: 1px;
-	box-shadow: #CCC 0px 1px 5px 0px;
+	border: 1px solid #BEBEBE;
+	.box-shadow(0px,1px,5px,#CCC);
 	margin: 0px;
-	padding:0px;
+	padding:5px;
 	position: absolute;
-	vertical-align: baseline;
-	visibility: visible;
-	white-space: nowrap;
-	width: 195px;
+	width: 230px;
 	z-index: 999;
 }
+
 .pony-Header-AccountMenu-Popup-UserName {
 	color: black;
 	font-weight: bold;
 }
+
 .pony-Header-AccountMenu-Popup-UserLogin {
 	color: #666;
 	display: block;
@@ -201,8 +223,7 @@
 	background: url("../images/hborder.png") repeat-x 0px -2077px;
 	border: 1px solid #bbb;
 	border-bottom: 1px solid #a0a0a0;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
+	.border-radius(3px);
 }
 .gwt-MenuBar .gwt-MenuItem {
 	cursor: pointer;
@@ -618,7 +639,7 @@
 	border:1 px solid red;
 }
 
-table .pony-PFlexTable{
+.pony-PFlexTable{
 	border-spacing: 0px;
 	border-collapse: collapse;
 	overflow:hidden;
@@ -656,19 +677,13 @@ table .pony-PFlexTable{
 	display: inline-block;
 	zoom: 1; /* zoom and *display = ie7 hack for display:inline-block */
 	*display: inline;
-	vertical-align: baseline;
 	margin: 0 2px;
-	outline: none;
 	cursor: pointer;
 	text-align: center;
 	text-decoration: none;
 	font: 14px/100% Arial, Helvetica, sans-serif;
-	-webkit-border-radius: .2em; 
-	-moz-border-radius: .2em;
-	border-radius: .2em;
-	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	.border-radius(.2em);
+	.box-shadow(0,1px,4px,rgba(0,0,0,.3));
 	padding:0 .6em;
 	line-height: 27px;
 }
@@ -682,28 +697,23 @@ table .pony-PFlexTable{
 }
 
 .pony-ActionToolbar {
+	border: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	color: #606060;
 	padding:0;
 	display: inline-block;
 	zoom: 1; /* zoom and *display = ie7 hack for display:inline-block */
 	*display: inline;
-	vertical-align: middle;
 	margin: 0 2px;
 	outline: none;
 	cursor: pointer;
 	text-align: center;
 	text-decoration: none;
 	font: 14px/100% Arial, Helvetica, sans-serif;
-	-webkit-border-radius: .2em; 
-	-moz-border-radius: .2em;
-	border-radius: .2em;
-	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	color: #606060;
-	border: solid 1px #b7b7b7;
-	background: #fff;
-	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
-	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	.border-radius(.2em);
+	.box-shadow(0px,1px,2px,rgba(0,0,0,.2));
 }
 .pony-ActionToolbar .gwt-MenuItem {
   cursor: pointer;
@@ -711,15 +721,11 @@ table .pony-PFlexTable{
   padding:.5em;
 }
 .pony-ActionToolbar .gwt-MenuItem-selected {
-  	-webkit-border-radius: .2em; 
-	-moz-border-radius: .2em;
-	border-radius: .2em;
-	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-	box-shadow: 0 1px 2px rgba(0,0,0,.2);
 	background: #ededed;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
 	background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
+  	.border-radius(.2em);
+	.box-shadow(0px,1px,2px,rgba(0,0,0,.2));
 }
 
 .pony-ActionToolbar .gwt-MenuItem-selected:active { 
@@ -744,12 +750,7 @@ table .pony-PFlexTable{
 	background-image: -webkit-gradient(linear, 0% 100%, 0% 0%, from(#666), to(#999) );
 	color: white;
 	text-decoration: none;
-	-webkit-border-top-left-radius: .5em;
-	-webkit-border-top-right-radius: .5em;
-	-moz-border-top-right-radius: .5em;
-	-moz-border-top-left-radius: .5em;
-	border-top-right-radius: .5em;
-	border-top-left-radius: .5em;
+	.border-radius(.5em,.5em,0px,0px);
 	padding:.1em 0 .1em 5px;
 }
 	
@@ -772,19 +773,11 @@ table .pony-PFlexTable{
 	background-color:#e7e7e7;
 	border:1px solid #666;
 	border-top:none;
-	-webkit-border-bottom-left-radius: .5em;
-	-webkit-border-bottom-right-radius: .5em;
-	-moz-border-bottom-right-radius: .5em;
-	-moz-border-bottom-left-radius: .5em;
-	border-bottom-right-radius: .5em;
-	border-bottom-left-radius: .5em;
+	.border-radius(0px,0px,.5em,.5em);
+	.box-shadow(0,3px,2px,rgba(0,0,0,.2));
 	height:.5em;
 	margin-bottom: 5px;
-	-webkit-box-shadow: 0 3px 2px rgba(0,0,0,.2);
-	-moz-box-shadow: 0 3px 2px rgba(0,0,0,.2);
-	box-shadow: 0 3px 2px rgba(0,0,0,.2);
 }
-
 
 .black {
 	color: #d7d7d7;
@@ -987,10 +980,8 @@ table .pony-PFlexTable{
 }
  
 .pony-PCPositionPanel-Floating{
-	-webkit-box-shadow: 0 2px 0px rgba(0,0,0,.2);
-	-moz-box-shadow: 0 2px 0px rgba(0,0,0,.2);
-	box-shadow: 0 2px 0px rgba(0,0,0,.2);
 	background-color: white;
+	.box-shadow(0px,2px,0px,rgba(0,0,0,.2));
 	overflow:hidden;
 }
 
@@ -1007,8 +998,6 @@ table .pony-PFlexTable{
 }
 
 .pony-ComplexList-ColumnHeader .pony-PFlextable-Cell {
-	-webkit-border-horizontal-spacing: 0px;
-	-webkit-border-vertical-spacing: 0px;
 	background-clip: border-box;
 	background-color: #777;
 	background-image: -webkit-gradient(linear, 0% 100%, 0% 0%, from(#666), to(#999) );

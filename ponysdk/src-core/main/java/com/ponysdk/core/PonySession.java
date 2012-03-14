@@ -25,10 +25,8 @@ package com.ponysdk.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
@@ -82,7 +80,7 @@ public class PonySession {
 
     private final PRootLayoutPanel rootPanel = new PRootLayoutPanel();
 
-    private Set<Permission> permissions = new HashSet<Permission>();
+    private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private EntryPoint entryPoint;
 
@@ -289,11 +287,11 @@ public class PonySession {
         this.entryPoint = entryPoint;
     }
 
-    public Set<Permission> getPermissions() {
-        return permissions;
+    public boolean hasPermission(final String key) {
+        return permissions.containsKey(key);
     }
 
-    public void setPermissions(final Set<Permission> permissions) {
+    public void setPermissions(final Map<String, Permission> permissions) {
         this.permissions = permissions;
     }
 

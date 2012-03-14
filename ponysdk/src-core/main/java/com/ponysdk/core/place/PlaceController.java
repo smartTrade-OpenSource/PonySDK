@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.activity.Activity;
+import com.ponysdk.core.security.SecurityManager;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
@@ -61,6 +62,9 @@ public class PlaceController implements PValueChangeHandler<String> {
      * @param world
      */
     public void goTo(final Activity activity, final Place place, final PAcceptsOneWidget world) {
+
+        if (!SecurityManager.checkPermission(activity.getPermission())) throw new RuntimeException("Missing permission #" + activity.getPermission());
+
         final PlaceContext context = new PlaceContext();
         context.setPlace(place);
         context.setActivity(activity);

@@ -41,33 +41,26 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.transform.ResultTransformer;
 
-public class PaginatingCriteria implements OrderingCriteria {
+public class PaginatingCriteria<T> implements OrderingCriteria {
 
     private final Criteria mainCriteria;
 
     private final Criteria cloneCriteria;
 
-    boolean isOrderedByIDProperty = false;
-
-    private final String IDProperty;
-
     private Map<String, OrderingCriteria> subCriteriaByAlias = new HashMap<String, OrderingCriteria>();
 
-    public PaginatingCriteria(Class<?> clazz, Session session, String IDProperty) {
-        mainCriteria = session.createCriteria(clazz);
-        mainCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+    public PaginatingCriteria(final Session session, final Class<T> persistentClass) {
+        this.mainCriteria = session.createCriteria(persistentClass);
+        this.mainCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
 
-        cloneCriteria = session.createCriteria(clazz);
-        cloneCriteria.setProjection(Projections.rowCount());
-        cloneCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-
-        this.IDProperty = IDProperty;
+        this.cloneCriteria = session.createCriteria(persistentClass);
+        this.cloneCriteria.setProjection(Projections.rowCount());
+        this.cloneCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
     }
 
-    public PaginatingCriteria(Criteria mainCriteria, Criteria clonedCriteria, String IDProperty, Map<String, OrderingCriteria> subCriteriaByAlias) {
+    private PaginatingCriteria(final Criteria mainCriteria, final Criteria clonedCriteria, final Map<String, OrderingCriteria> subCriteriaByAlias) {
         this.mainCriteria = mainCriteria;
         this.cloneCriteria = clonedCriteria;
-        this.IDProperty = IDProperty;
         this.subCriteriaByAlias = subCriteriaByAlias;
     }
 
@@ -77,49 +70,46 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public OrderingCriteria setProjection(Projection projection) {
+    public OrderingCriteria setProjection(final Projection projection) {
         mainCriteria.setProjection(projection);
         return this;
     }
 
     @Override
-    public OrderingCriteria add(Criterion criterion) {
+    public OrderingCriteria add(final Criterion criterion) {
         cloneCriteria.add(criterion);
         mainCriteria.add(criterion);
         return this;
     }
 
     @Override
-    public OrderingCriteria addOrder(Order order) {
-        if (order.toString().contains(IDProperty)) {
-            isOrderedByIDProperty = true;
-        }
+    public OrderingCriteria addOrder(final Order order) {
         mainCriteria.addOrder(order);
         return this;
     }
 
     @Override
-    public OrderingCriteria setFetchMode(String associationPath, FetchMode mode) throws HibernateException {
+    public OrderingCriteria setFetchMode(final String associationPath, final FetchMode mode) throws HibernateException {
         cloneCriteria.setFetchMode(associationPath, mode);
         mainCriteria.setFetchMode(associationPath, mode);
         return this;
     }
 
     @Override
-    public OrderingCriteria setLockMode(LockMode lockMode) {
+    public OrderingCriteria setLockMode(final LockMode lockMode) {
         mainCriteria.setLockMode(lockMode);
         return this;
     }
 
     @Override
-    public OrderingCriteria setLockMode(String alias, LockMode lockMode) {
+    public OrderingCriteria setLockMode(final String alias, final LockMode lockMode) {
         mainCriteria.setLockMode(alias, lockMode);
         cloneCriteria.setLockMode(alias, lockMode);
         return this;
     }
 
     @Override
-    public OrderingCriteria createAlias(String associationPath, String alias) throws HibernateException {
+    public OrderingCriteria createAlias(final String associationPath, final String alias) throws HibernateException {
         final OrderingCriteria orderingCriteria = subCriteriaByAlias.get(alias);
         if (orderingCriteria != null) return orderingCriteria;
         mainCriteria.createAlias(associationPath, alias);
@@ -129,7 +119,7 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public OrderingCriteria createAlias(String arg0, String arg1, int arg2) throws HibernateException {
+    public OrderingCriteria createAlias(final String arg0, final String arg1, final int arg2) throws HibernateException {
         final OrderingCriteria orderingCriteria = subCriteriaByAlias.get(arg1);
         if (orderingCriteria != null) return orderingCriteria;
         mainCriteria.createAlias(arg0, arg1, arg2);
@@ -139,97 +129,97 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public OrderingCriteria createCriteria(String associationPath) throws HibernateException {
-        return new PaginatingCriteria(mainCriteria.createCriteria(associationPath), cloneCriteria.createCriteria(associationPath), IDProperty, subCriteriaByAlias);
+    public OrderingCriteria createCriteria(final String associationPath) throws HibernateException {
+        return new PaginatingCriteria<T>(mainCriteria.createCriteria(associationPath), cloneCriteria.createCriteria(associationPath), subCriteriaByAlias);
     }
 
     @Override
-    public OrderingCriteria createCriteria(String arg0, int arg1) throws HibernateException {
-        return new PaginatingCriteria(mainCriteria.createCriteria(arg0, arg1), cloneCriteria.createCriteria(arg0, arg1), IDProperty, subCriteriaByAlias);
+    public OrderingCriteria createCriteria(final String arg0, final int arg1) throws HibernateException {
+        return new PaginatingCriteria<T>(mainCriteria.createCriteria(arg0, arg1), cloneCriteria.createCriteria(arg0, arg1), subCriteriaByAlias);
     }
 
     @Override
-    public OrderingCriteria createCriteria(String associationPath, String alias) throws HibernateException {
+    public OrderingCriteria createCriteria(final String associationPath, final String alias) throws HibernateException {
         mainCriteria.createCriteria(associationPath, alias);
         cloneCriteria.createCriteria(associationPath, alias);
         return this;
     }
 
     @Override
-    public OrderingCriteria createCriteria(String arg0, String arg1, int arg2) throws HibernateException {
+    public OrderingCriteria createCriteria(final String arg0, final String arg1, final int arg2) throws HibernateException {
 
         OrderingCriteria orderingCriteria = subCriteriaByAlias.get(arg1);
         if (orderingCriteria == null) {
-            orderingCriteria = new PaginatingCriteria(mainCriteria.createCriteria(arg0, arg1, arg2), cloneCriteria.createCriteria(arg0, arg1, arg2), IDProperty, subCriteriaByAlias);
+            orderingCriteria = new PaginatingCriteria<T>(mainCriteria.createCriteria(arg0, arg1, arg2), cloneCriteria.createCriteria(arg0, arg1, arg2), subCriteriaByAlias);
             subCriteriaByAlias.put(arg1, orderingCriteria);
         }
         return orderingCriteria;
     }
 
     @Override
-    public OrderingCriteria setResultTransformer(ResultTransformer resultTransformer) {
+    public OrderingCriteria setResultTransformer(final ResultTransformer resultTransformer) {
         mainCriteria.setResultTransformer(resultTransformer);
         cloneCriteria.setResultTransformer(resultTransformer);
         return this;
     }
 
     @Override
-    public OrderingCriteria setMaxResults(int maxResults) {
+    public OrderingCriteria setMaxResults(final int maxResults) {
         mainCriteria.setMaxResults(maxResults);
         return this;
     }
 
     @Override
-    public OrderingCriteria setFirstResult(int firstResult) {
+    public OrderingCriteria setFirstResult(final int firstResult) {
         mainCriteria.setFirstResult(firstResult);
         return this;
     }
 
     @Override
-    public OrderingCriteria setFetchSize(int fetchSize) {
+    public OrderingCriteria setFetchSize(final int fetchSize) {
         mainCriteria.setFetchSize(fetchSize);
         return this;
     }
 
     @Override
-    public OrderingCriteria setTimeout(int timeout) {
+    public OrderingCriteria setTimeout(final int timeout) {
         mainCriteria.setTimeout(timeout);
         return this;
     }
 
     @Override
-    public OrderingCriteria setCacheable(boolean cacheable) {
+    public OrderingCriteria setCacheable(final boolean cacheable) {
         mainCriteria.setCacheable(cacheable);
         return this;
     }
 
     @Override
-    public OrderingCriteria setCacheRegion(String cacheRegion) {
+    public OrderingCriteria setCacheRegion(final String cacheRegion) {
         mainCriteria.setCacheRegion(cacheRegion);
         return this;
     }
 
     @Override
-    public OrderingCriteria setComment(String comment) {
+    public OrderingCriteria setComment(final String comment) {
         cloneCriteria.setComment(comment);
         return this;
     }
 
     @Override
-    public OrderingCriteria setFlushMode(FlushMode flushMode) {
+    public OrderingCriteria setFlushMode(final FlushMode flushMode) {
         mainCriteria.setFlushMode(flushMode);
         return this;
     }
 
     @Override
-    public OrderingCriteria setCacheMode(CacheMode cacheMode) {
+    public OrderingCriteria setCacheMode(final CacheMode cacheMode) {
         mainCriteria.setCacheMode(cacheMode);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<?> list() throws HibernateException {
-        if (!isOrderedByIDProperty) mainCriteria.addOrder(Order.asc(IDProperty));
+    public List<T> list() throws HibernateException {
         mainCriteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
         return mainCriteria.list();
     }
@@ -240,14 +230,15 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public ScrollableResults scroll(ScrollMode scrollMode) throws HibernateException {
+    public ScrollableResults scroll(final ScrollMode scrollMode) throws HibernateException {
         return mainCriteria.scroll(scrollMode);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object uniqueResult() throws HibernateException {
+    public T uniqueResult() throws HibernateException {
         mainCriteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
-        return mainCriteria.uniqueResult();
+        return (T) mainCriteria.uniqueResult();
     }
 
     @Override
@@ -258,14 +249,14 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public Criteria createAlias(String arg0, String arg1, int arg2, Criterion arg3) throws HibernateException {
+    public Criteria createAlias(final String arg0, final String arg1, final int arg2, final Criterion arg3) throws HibernateException {
         mainCriteria.createAlias(arg0, arg1, arg2, arg3);
         cloneCriteria.createAlias(arg0, arg1, arg2, arg3);
         return this;
     }
 
     @Override
-    public Criteria createCriteria(String arg0, String arg1, int arg2, Criterion arg3) throws HibernateException {
+    public Criteria createCriteria(final String arg0, final String arg1, final int arg2, final Criterion arg3) throws HibernateException {
         mainCriteria.createCriteria(arg0, arg1, arg2, arg3);
         cloneCriteria.createCriteria(arg0, arg1, arg2, arg3);
         return this;
@@ -282,7 +273,7 @@ public class PaginatingCriteria implements OrderingCriteria {
     }
 
     @Override
-    public Criteria setReadOnly(boolean arg0) {
+    public Criteria setReadOnly(final boolean arg0) {
         return mainCriteria.setReadOnly(arg0);
     }
 }

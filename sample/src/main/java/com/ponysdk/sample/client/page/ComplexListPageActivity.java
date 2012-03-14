@@ -225,7 +225,7 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         if (event.isShow()) {
             final FindPonyChildsCommand command = new FindPonyChildsCommand(event.getData().getId());
             final Result<List<Pony>> result = command.execute();
-            if (command.isSuccessful()) {
+            if (command.isSuccessfull()) {
                 complexListActivity.insertSubList(event.getRow(), result.getData());
             }
         } else {
@@ -245,7 +245,7 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
                     final Pony pony = new Pony(null, nameFormField.getStringValue(), ageFormField.getIntegerValue(), raceFormField.getStringValue());
                     final CreatePonyCommand command = new CreatePonyCommand(pony);
                     final Pony newPony = command.execute();
-                    if (command.isSuccessful()) {
+                    if (command.isSuccessfull()) {
                         final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
                         event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
                         fireEvent(event);
