@@ -36,7 +36,7 @@ import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PTabPanel;
+import com.ponysdk.ui.server.basic.PTabLayoutPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
 import de.java2html.converter.JavaSource2HTMLConverter;
@@ -48,7 +48,7 @@ public class SamplePageActivity extends PageActivity {
 
     private static Logger log = LoggerFactory.getLogger(SamplePageActivity.class);
 
-    private PTabPanel tabPanel;
+    private PTabLayoutPanel tabPanel;
 
     protected PSimpleLayoutPanel examplePanel;
 
@@ -82,7 +82,7 @@ public class SamplePageActivity extends PageActivity {
         };
         examplePanel.setSizeFull();
 
-        tabPanel = new PTabPanel();
+        tabPanel = new PTabLayoutPanel();
 
         tabPanel.add(examplePanel, "Example");
 

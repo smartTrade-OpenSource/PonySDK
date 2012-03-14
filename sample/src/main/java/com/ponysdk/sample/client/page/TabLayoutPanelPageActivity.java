@@ -28,8 +28,9 @@ import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTabPanel;
+import com.ponysdk.ui.server.basic.PTabLayoutPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -38,12 +39,12 @@ import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
-public class TabPanelPageActivity extends SamplePageActivity {
+public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
     protected int tabCount = 0;
 
-    public TabPanelPageActivity() {
-        super("Tab Panel", "Panels");
+    public TabLayoutPanelPageActivity() {
+        super("Tab Layout Panel", "Panels");
     }
 
     @Override
@@ -53,7 +54,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
         final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
         dockLayoutPanel.setSizeFull();
 
-        final PTabPanel tabPanel = new PTabPanel();
+        final PTabLayoutPanel tabPanel = new PTabLayoutPanel();
         tabPanel.setSizeFull();
 
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
@@ -110,19 +111,16 @@ public class TabPanelPageActivity extends SamplePageActivity {
         horizontalPanel.add(indexTextBox);
         horizontalPanel.add(selectButton);
 
-        final PHorizontalPanel tabPanelContainer = new PHorizontalPanel();
-        tabPanelContainer.add(tabPanel);
-
         dockLayoutPanel.addNorth(horizontalPanel, 50);
-        dockLayoutPanel.add(tabPanelContainer);
+        dockLayoutPanel.add(tabPanel);
 
         addTabContent(tabPanel);
 
         examplePanel.setWidget(dockLayoutPanel);
     }
 
-    protected void addTabContent(final PTabPanel tabPanel) {
-        final PSimplePanel tabContent = new PSimplePanel();
+    protected void addTabContent(final PTabLayoutPanel tabPanel) {
+        final PSimpleLayoutPanel tabContent = new PSimpleLayoutPanel();
 
         final int tabIndex = tabCount;
         final PLabel label = new PLabel("content-" + tabIndex);
@@ -131,7 +129,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
         tabCount++;
     }
 
-    protected void addCustomTabContent(final PTabPanel tabPanel) {
+    protected void addCustomTabContent(final PTabLayoutPanel tabPanel) {
         final PSimplePanel tabContent = new PSimplePanel();
 
         final int tabIndex = tabCount;

@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -40,18 +39,18 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTTabLayoutPanel extends PTResizeComposite {
+public class PTTabPanel extends PTWidget {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.TabLayoutPanel(2, Unit.EM));
+        init(create, uiService, new com.google.gwt.user.client.ui.TabPanel());
     }
 
     @Override
     public void add(final Add add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.TabLayoutPanel tabPanel = cast();
+        final com.google.gwt.user.client.ui.TabPanel tabPanel = cast();
 
         final Property beforeIndex = add.getMainProperty().getChildProperty(PropertyKey.BEFORE_INDEX);
         final Property tabText = add.getMainProperty().getChildProperty(PropertyKey.TAB_TEXT);
@@ -63,19 +62,23 @@ public class PTTabLayoutPanel extends PTResizeComposite {
             final PTWidget ptWidget = (PTWidget) uiService.getPTObject(tabWidget.getLongValue());
             tabPanel.insert(w, ptWidget.cast(), beforeIndex.getIntValue());
         }
+
+        if (tabPanel.getWidgetCount() == 1) {
+            tabPanel.selectTab(0);
+        }
     }
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
         if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
-            final com.google.gwt.user.client.ui.TabLayoutPanel tabLayoutPanel = cast();
-            tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            final com.google.gwt.user.client.ui.TabPanel tabPanel = cast();
+            tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, tabLayoutPanel.getSelectedIndex());
+                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getSelectedItem());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
@@ -111,9 +114,6 @@ public class PTTabLayoutPanel extends PTResizeComposite {
         final PropertyKey propertyKey = property.getKey();
 
         switch (propertyKey) {
-            case ANIMATION:
-                cast().animate(1);
-                break;
             case SELECTED_INDEX:
                 cast().selectTab(property.getIntValue());
                 break;
@@ -126,7 +126,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     }
 
     @Override
-    public com.google.gwt.user.client.ui.TabLayoutPanel cast() {
-        return (com.google.gwt.user.client.ui.TabLayoutPanel) uiObject;
+    public com.google.gwt.user.client.ui.TabPanel cast() {
+        return (com.google.gwt.user.client.ui.TabPanel) uiObject;
     }
 }

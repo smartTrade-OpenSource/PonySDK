@@ -60,6 +60,7 @@ import com.ponysdk.ui.terminal.ui.PTSplitLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTStackLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSuggestBox;
 import com.ponysdk.ui.terminal.ui.PTTabLayoutPanel;
+import com.ponysdk.ui.terminal.ui.PTTabPanel;
 import com.ponysdk.ui.terminal.ui.PTTextArea;
 import com.ponysdk.ui.terminal.ui.PTTextBox;
 import com.ponysdk.ui.terminal.ui.PTTimer;
@@ -78,8 +79,10 @@ public class UIFactory {
                 return new PTAnchor();
             case LAYOUT_PANEL:
                 return new PTButton();
-            case TABLAYOUTPANEL:
+            case TAB_LAYOUT_PANEL:
                 return new PTTabLayoutPanel();
+            case TAB_PANEL:
+                return new PTTabPanel();
             case VERTICAL_PANEL:
                 return new PTVerticalPanel();
             case HORIZONTAL_PANEL:
