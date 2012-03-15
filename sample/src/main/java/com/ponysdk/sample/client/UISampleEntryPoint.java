@@ -34,6 +34,7 @@ import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
+import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
@@ -57,7 +58,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     @Override
     public void start(final PonySession session) {
         panel.setSizeFull();
-        session.getRootLayoutPanel().add(panel);
+        PRootLayoutPanel.get().add(panel);
         placeController.goTo(loginActivity, new LoginPlace(), panel);
     }
 
@@ -67,7 +68,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
             start(session);
         } else {
             panel.setSizeFull();
-            session.getRootLayoutPanel().add(panel);
+            PRootLayoutPanel.get().add(panel);
             final String currentToken = session.getHistory().getToken();
             applicationActivity.start(panel);
             PonySession.getCurrent().getHistory().newItem(currentToken);

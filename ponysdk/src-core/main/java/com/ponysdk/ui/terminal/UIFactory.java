@@ -25,6 +25,7 @@ package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
@@ -43,6 +44,7 @@ import com.ponysdk.ui.terminal.ui.PTHTML;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
 import com.ponysdk.ui.terminal.ui.PTImage;
 import com.ponysdk.ui.terminal.ui.PTLabel;
+import com.ponysdk.ui.terminal.ui.PTLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTListBox;
 import com.ponysdk.ui.terminal.ui.PTMenuBar;
 import com.ponysdk.ui.terminal.ui.PTMenuItem;
@@ -53,6 +55,8 @@ import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
 import com.ponysdk.ui.terminal.ui.PTRadioButton;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea;
+import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
+import com.ponysdk.ui.terminal.ui.PTRootPanel;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 import com.ponysdk.ui.terminal.ui.PTSimpleLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
@@ -77,10 +81,16 @@ public class UIFactory {
                 return new PTButton();
             case ANCHOR:
                 return new PTAnchor();
+            case ROOT_LAYOUT_PANEL:
+                return new PTRootLayoutPanel();
+            case ROOT_PANEL:
+                return new PTRootPanel();
             case LAYOUT_PANEL:
-                return new PTButton();
+                return new PTLayoutPanel();
             case TAB_LAYOUT_PANEL:
                 return new PTTabLayoutPanel();
+            case ABSOLUTE_PANEL:
+                return new PTAbsolutePanel();
             case TAB_PANEL:
                 return new PTTabPanel();
             case VERTICAL_PANEL:

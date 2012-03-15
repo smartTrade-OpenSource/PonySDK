@@ -23,14 +23,21 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.ui.ComplexPanel;
+import com.ponysdk.ui.terminal.Property;
+import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 
-public class PTComplexPanel extends PTPanel {
+public class PTRootPanel extends PTAbsolutePanel {
 
-    public void create(final Create create, final UIService uiService, final ComplexPanel complexPanel) {
-        init(create, uiService, complexPanel);
+    @Override
+    public void create(final Create create, final UIService uiService) {
+        final Property id = create.getMainProperty().getChildProperty(PropertyKey.ID);
+        if (id == null) {
+            init(create, uiService, com.google.gwt.user.client.ui.RootPanel.get());
+        } else {
+            init(create, uiService, com.google.gwt.user.client.ui.RootPanel.get(id.getValue()));
+        }
     }
 
 }

@@ -48,7 +48,6 @@ import com.ponysdk.core.security.Permission;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PropertyKey;
@@ -78,8 +77,6 @@ public class PonySession {
 
     private final List<Instruction> pendingInstructions = new ArrayList<Instruction>();
 
-    private final PRootLayoutPanel rootPanel = new PRootLayoutPanel();
-
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private EntryPoint entryPoint;
@@ -98,7 +95,6 @@ public class PonySession {
 
     public PonySession(final PonyApplicationSession applicationSession) {
         this.applicationSession = applicationSession;
-        weakReferences.put(0l, rootPanel);
     }
 
     public void stackInstruction(final Instruction instruction) {
@@ -136,7 +132,11 @@ public class PonySession {
         final PObject object = weakReferences.get(instruction.getObjectID());
 
         if (object == null) {
-            log.warn("unknown reference from the browser #" + instruction.getObjectID());
+            log.warn("unknown reference from the browser. Unable to execute instruction: " + instruction);
+            if (instruction.getParentID() != null) {
+                final PObject parentOfGarbageObject = weakReferences.get(instruction.getParentID());
+                log.warn("parent: " + parentOfGarbageObject);
+            }
             return;
         }
 
@@ -180,10 +180,6 @@ public class PonySession {
 
     public HttpSession getHttpSession() {
         return applicationSession.getHttpSession();
-    }
-
-    public PRootLayoutPanel getRootLayoutPanel() {
-        return rootPanel;
     }
 
     public StreamHandler removeStreamListener(final Long streamID) {

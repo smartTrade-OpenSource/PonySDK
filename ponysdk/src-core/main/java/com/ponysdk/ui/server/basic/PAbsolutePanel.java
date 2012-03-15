@@ -23,29 +23,13 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.terminal.WidgetType;
 
-public class PRootLayoutPanel extends PLayoutPanel {
-
-    private static final String ROOT = "PRootLayoutPanel";
-
-    private PRootLayoutPanel() {}
-
-    public static PRootLayoutPanel get() {
-        final PonySession session = PonySession.getCurrent();
-        PRootLayoutPanel root = session.getAttribute(ROOT);
-        if (root == null) {
-            root = new PRootLayoutPanel();
-            session.setAttribute(ROOT, root);
-        }
-
-        return root;
-    }
+public class PAbsolutePanel extends PComplexPanel {
 
     @Override
     protected WidgetType getType() {
-        return WidgetType.ROOT_LAYOUT_PANEL;
+        return WidgetType.ABSOLUTE_PANEL;
     }
 
 }

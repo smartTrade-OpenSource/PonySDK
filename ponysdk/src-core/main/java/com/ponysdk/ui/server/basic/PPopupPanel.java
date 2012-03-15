@@ -26,7 +26,6 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.HandlerType;
@@ -68,9 +67,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         this.autoHide = autoHide;
 
         removeFromParent();
-        final PWidgetCollection children = PonySession.getCurrent().getRootLayoutPanel().getChildren();
+
+        final PRootPanel root = PRootPanel.get();
+        final PWidgetCollection children = root.getChildren();
         children.insert(this, children.size());
-        PonySession.getCurrent().getRootLayoutPanel().adopt(this);
+        root.adopt(this);
 
         final Property mainProperty = new Property();
         mainProperty.setProperty(PropertyKey.POPUP_AUTO_HIDE, autoHide);
@@ -198,7 +199,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     }
 
     private void fireOnClose() {
-        for (PCloseHandler handler : listeners) {
+        for (final PCloseHandler handler : listeners) {
             handler.onClose();
         }
     }

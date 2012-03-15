@@ -39,6 +39,7 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 public class FormActivity extends AbstractActivity implements Activity {
 
     protected final Map<FormField<?>, String> captionByFormField = new HashMap<FormField<?>, String>();
+    protected final Map<String, FormField<?>> formFieldByCaption = new HashMap<String, FormField<?>>();
 
     protected final FormView formView;
 
@@ -59,11 +60,17 @@ public class FormActivity extends AbstractActivity implements Activity {
     public void addFormField(final String caption, final FormField<?> formField) {
         formView.addFormField(caption, formField.asWidget());
         captionByFormField.put(formField, caption);
+        formFieldByCaption.put(caption, formField);
     }
 
     public void removeFormField(final FormField<?> formField) {
         final String caption = captionByFormField.remove(formField);
+        formFieldByCaption.remove(caption);
         formView.removeFormField(caption, formField.asWidget());
+    }
+
+    public FormField<?> getFormField(final String caption) {
+        return formFieldByCaption.get(caption);
     }
 
     public boolean isValid() {

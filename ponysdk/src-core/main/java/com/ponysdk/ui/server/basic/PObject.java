@@ -86,4 +86,9 @@ public abstract class PObject {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "PObject [ID=" + ID + ", widgetType=" + getType().name() + "]";
+    }
+
 }

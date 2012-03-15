@@ -71,7 +71,6 @@ import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 import com.ponysdk.ui.terminal.ui.PTObject;
-import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
@@ -110,11 +109,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
     public void init() {
 
-        final PTRootLayoutPanel rootPanel = new PTRootLayoutPanel();
-        rootPanel.create(null, null);
-
-        objectByID.put(0l, rootPanel);
-
         loadingMessageBox = new SimplePanel();
 
         communicationErrorMessagePanel = new PopupPanel(false, true);
@@ -152,7 +146,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         updateMode = true;
         try {
 
-            log.info("##########################################################################################################################");
             log.info("UPDATING UI with " + instructions.size() + " instructions");
 
             for (final Instruction instruction : instructions) {
