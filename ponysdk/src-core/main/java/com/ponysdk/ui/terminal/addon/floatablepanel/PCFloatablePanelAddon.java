@@ -30,10 +30,11 @@ import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 
 @PonyAddOn
-public class PCFloatablePanelAddon extends PTAddon {
+public class PCFloatablePanelAddon extends PTComposite implements PTAddon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon";
 
@@ -41,7 +42,11 @@ public class PCFloatablePanelAddon extends PTAddon {
 
     @Override
     public void create(final Create create, final UIService uiService) {
+        super.create(create, uiService);
+
         this.floatablePanel = new PCFloatablePanel();
+
+        initWidget(floatablePanel);
     }
 
     @Override
@@ -57,7 +62,7 @@ public class PCFloatablePanelAddon extends PTAddon {
     }
 
     @Override
-    protected String getSignature() {
+    public String getSignature() {
         return SIGNATURE;
     }
 

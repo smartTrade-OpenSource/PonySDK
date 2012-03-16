@@ -25,8 +25,8 @@ package com.ponysdk.ui.terminal;
 
 import com.ponysdk.ui.terminal.ui.PTObject;
 
-public abstract class PTAddon extends PTObject {
+public interface PTAddon extends PTObject {
 
-    protected abstract String getSignature();
+    public String getSignature();
 
 }

@@ -29,7 +29,6 @@ import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
-import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPanel;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
@@ -153,8 +152,6 @@ public class UIFactory {
                 return new PTDecoratedPopupPanel();
             case TIMER:
                 return new PTTimer();
-            case COMPOSITE:
-                return new PTComposite();
             case RICH_TEXT_AREA:
                 return new PTRichTextArea();
             case DIALOG_BOX:

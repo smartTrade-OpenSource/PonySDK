@@ -30,7 +30,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public abstract class PTUIObject extends PTObject {
+public abstract class PTUIObject extends AbstractPTObject {
 
     private static final String FONT_SIZE = "fontSize";
 
