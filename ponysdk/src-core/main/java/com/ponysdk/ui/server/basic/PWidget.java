@@ -213,7 +213,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
 
-        if (HandlerType.DOM_HANDLER.equals(instruction.getHandlerType())) {
+        if (HandlerType.DOM_HANDLER.equals(instruction.getType())) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntPropertyValue(PropertyKey.DOM_HANDLER)];
             switch (domHandler) {
                 case KEY_PRESS:

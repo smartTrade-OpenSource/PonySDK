@@ -57,7 +57,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     @Override
     public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
+        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getType())) {
             onValueChange(new PValueChangeEvent<String>(this, e.getMainProperty().getValue()));
         } else {
             super.onEventInstruction(e);

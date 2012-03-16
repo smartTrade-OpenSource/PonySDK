@@ -25,30 +25,23 @@ package com.ponysdk.ui.terminal.instruction;
 
 import com.ponysdk.ui.terminal.HandlerType;
 
-public class EventInstruction extends Instruction {
+public class EventInstruction extends Handler {
 
     private static final long serialVersionUID = -3194913240376942319L;
 
-    private HandlerType handlerType;
-
     public EventInstruction() {}
 
-    public EventInstruction(long objectID, HandlerType handlerType) {
-        super(objectID);
-        this.handlerType = handlerType;
+    public EventInstruction(final long objectID, final HandlerType handlerType) {
+        super(objectID, handlerType);
     }
 
-    public HandlerType getHandlerType() {
-        return this.handlerType;
-    }
-
-    public void setHandlerType(HandlerType handlerType) {
-        this.handlerType = handlerType;
+    public EventInstruction(final long objectID, final String addOnHandlerType) {
+        super(objectID, addOnHandlerType);
     }
 
     @Override
     public String toString() {
-        return "EventInstruction [handlerType=" + handlerType + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+        return "EventInstruction [handlerType=" + handlerType + ", addOnHandlerType=" + addOnHandlerType + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
     }
 
 }

@@ -126,7 +126,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
+        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(e.getType())) {
             onValueChange(new PValueChangeEvent<Boolean>(this, e.getMainProperty().getBooleanValue()));
         } else {
             super.onEventInstruction(e);

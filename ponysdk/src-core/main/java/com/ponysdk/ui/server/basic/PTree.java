@@ -128,7 +128,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
 
     @Override
     public void onEventInstruction(final EventInstruction event) {
-        if (HandlerType.SELECTION_HANDLER.equals(event.getHandlerType())) {
+        if (HandlerType.SELECTION_HANDLER.equals(event.getType())) {
             PTreeItem treeItem = PonySession.getCurrent().getObject(event.getMainProperty().getLongValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {

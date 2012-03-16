@@ -61,13 +61,13 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     @Override
     public void onEventInstruction(EventInstruction instruction) {
-        if (HandlerType.CHANGE_HANDLER.equals(instruction.getHandlerType())) {
+        if (HandlerType.CHANGE_HANDLER.equals(instruction.getType())) {
             final PropertyKey key = instruction.getMainProperty().getKey();
             if (PropertyKey.FILE_NAME.equals(key)) {
                 setFileName(instruction.getMainProperty().getValue());
             }
             onChange(this, 0);
-        } else if (HandlerType.SUBMIT_COMPLETE_HANDLER.equals(instruction.getHandlerType())) {
+        } else if (HandlerType.SUBMIT_COMPLETE_HANDLER.equals(instruction.getType())) {
             onSubmitComplete();
         } else {
             super.onEventInstruction(instruction);

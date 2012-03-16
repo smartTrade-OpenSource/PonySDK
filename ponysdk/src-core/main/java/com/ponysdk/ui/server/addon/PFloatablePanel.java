@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.addon;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -32,9 +31,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PFloatablePanel extends PAddOn implements IsPWidget {
-
-    private final PSimplePanel simplePanel = new PSimplePanel();
+public class PFloatablePanel extends PSimplePanel implements PAddOn {
 
     private PScrollPanel linkedScrollPanel;
 
@@ -64,8 +61,4 @@ public class PFloatablePanel extends PAddOn implements IsPWidget {
         return PCFloatablePanelAddon.SIGNATURE;
     }
 
-    @Override
-    public PSimplePanel asWidget() {
-        return simplePanel;
-    }
 }
