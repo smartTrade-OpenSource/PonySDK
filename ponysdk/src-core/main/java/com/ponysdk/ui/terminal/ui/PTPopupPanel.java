@@ -61,9 +61,9 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
+        final boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
 
-        com.google.gwt.user.client.ui.PopupPanel popup = new com.google.gwt.user.client.ui.PopupPanel(autoHide) {
+        final com.google.gwt.user.client.ui.PopupPanel popup = new com.google.gwt.user.client.ui.PopupPanel(autoHide) {
 
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
@@ -137,7 +137,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             final int top = property.getIntPropertyValue(PropertyKey.POPUP_POSITION_TOP);
             popup.setPopupPosition(left, top);
         } else if (PropertyKey.POPUP_DRAGGABLE.equals(propertyKey)) {
-            boolean draggable = property.getBooleanValue();
+            final boolean draggable = property.getBooleanValue();
             if (draggable) {
                 popup.addDomHandler(this, MouseDownEvent.getType());
                 popup.addDomHandler(this, MouseUpEvent.getType());
@@ -168,8 +168,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     @Override
     public void onMouseMove(final MouseMoveEvent event) {
         if (dragging) {
-            int absX = event.getX() + uiObject.getAbsoluteLeft();
-            int absY = event.getY() + uiObject.getAbsoluteTop();
+            final int absX = event.getX() + uiObject.getAbsoluteLeft();
+            final int absY = event.getY() + uiObject.getAbsoluteTop();
 
             if (absX < clientLeft || absX >= windowWidth || absY < clientTop) { return; }
 

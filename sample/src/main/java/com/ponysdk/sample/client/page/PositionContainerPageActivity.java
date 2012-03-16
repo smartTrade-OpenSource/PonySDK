@@ -57,7 +57,7 @@ public class PositionContainerPageActivity extends PageActivity {
         controlBar.add(new PButton("Button 1"));
         controlBar.add(new PButton("Button 2"));
         final PFloatablePanel positionContainer = new PFloatablePanel();
-        positionContainer.asWidget().setWidget(controlBar);
+        positionContainer.setWidget(controlBar);
 
         content.add(positionContainer);
         for (int i = 0; i < 50; i++) {

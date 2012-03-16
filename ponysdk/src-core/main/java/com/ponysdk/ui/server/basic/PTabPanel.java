@@ -191,7 +191,7 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
 
     @Override
     public void onEventInstruction(final EventInstruction eventInstruction) {
-        final HandlerType handlerType = eventInstruction.getHandlerType();
+        final HandlerType handlerType = eventInstruction.getType();
         if (HandlerType.SELECTION_HANDLER.equals(handlerType)) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
                 final PSelectionEvent<Integer> selection = new PSelectionEvent<Integer>(this, eventInstruction.getMainProperty().getIntValue());

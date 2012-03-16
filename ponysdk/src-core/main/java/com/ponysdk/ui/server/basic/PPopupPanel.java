@@ -183,13 +183,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getHandlerType())) {
+        if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getType())) {
             final Integer windowWidth = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETWIDTH);
             final Integer windowHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETHEIGHT);
             final Integer clientWith = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_WIDTH);
             final Integer clientHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
-        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getHandlerType())) {
+        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getType())) {
             this.showing = false;
             fireOnClose();
         } else {

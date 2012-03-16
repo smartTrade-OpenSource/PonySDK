@@ -118,7 +118,7 @@ public class PonySession {
         }
 
         if (instruction instanceof EventInstruction) {
-            final HandlerType handlerType = ((EventInstruction) instruction).getHandlerType();
+            final HandlerType handlerType = ((EventInstruction) instruction).getType();
 
             if (HandlerType.HISTORY.equals(handlerType)) {
                 if (history != null) {

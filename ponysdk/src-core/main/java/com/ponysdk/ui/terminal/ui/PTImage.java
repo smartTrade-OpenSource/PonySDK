@@ -39,11 +39,11 @@ public class PTImage extends PTWidget {
     @Override
     public void create(final Create create, final UIService uiService) {
         if (create.getMainProperty().hasChildProperty(PropertyKey.IMAGE_URL)) {
-            String url = create.getMainProperty().getStringPropertyValue(PropertyKey.IMAGE_URL);
-            int left = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_LEFT);
-            int top = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_TOP);
-            int width = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_WIDTH);
-            int height = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_HEIGHT);
+            final String url = create.getMainProperty().getStringPropertyValue(PropertyKey.IMAGE_URL);
+            final int left = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_LEFT);
+            final int top = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_TOP);
+            final int width = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_WIDTH);
+            final int height = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_HEIGHT);
 
             init(create, uiService, new Image(url, left, top, width, height));
         } else {

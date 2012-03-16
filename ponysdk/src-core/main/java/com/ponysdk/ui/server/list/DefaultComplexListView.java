@@ -82,7 +82,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         headerPanel.add(topListLayout);
         headerPanel.setWidth("100%");
 
-        positionPanel.asWidget().setWidget(headerPanel);
+        positionPanel.setWidget(headerPanel);
 
         bottomListLayout.setWidget(searchResultTimeLabel);
 

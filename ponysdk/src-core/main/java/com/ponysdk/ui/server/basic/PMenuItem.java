@@ -125,7 +125,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void onEventInstruction(EventInstruction event) {
-        if (HandlerType.COMMAND.equals(event.getHandlerType())) {
+        if (HandlerType.COMMAND.equals(event.getType())) {
             cmd.execute();
         } else {
             super.onEventInstruction(event);
