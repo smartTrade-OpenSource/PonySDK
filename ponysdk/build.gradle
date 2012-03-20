@@ -138,7 +138,7 @@ task jarSource(type: Jar){
 	baseName = 'ponysdk-src'
 	from sourceSets.main.allJava
 	from(srcCore) {
-		include '*.xml'
+		include '**/*.xml'
 	}
 }
 

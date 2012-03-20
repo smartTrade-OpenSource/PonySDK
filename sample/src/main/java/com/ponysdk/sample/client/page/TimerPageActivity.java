@@ -30,6 +30,8 @@ import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PScheduler;
+import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -77,13 +79,22 @@ public class TimerPageActivity extends SamplePageActivity {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
         final PLabel date = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
 
-        new PTimer() {
+        // new PTimer() {
+        //
+        // @Override
+        // public void run() {
+        // date.setText(dateFormat.format(Calendar.getInstance().getTime()));
+        // }
+        // }.scheduleRepeating(1000);
+
+        PScheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 
             @Override
-            public void run() {
+            public boolean execute() {
                 date.setText(dateFormat.format(Calendar.getInstance().getTime()));
+                return true;
             }
-        }.scheduleRepeating(1000);
+        }, 1000);
 
         final PHorizontalPanel datePanel = new PHorizontalPanel();
         datePanel.add(new PHTML("Date :"));

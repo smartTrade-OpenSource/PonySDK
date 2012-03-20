@@ -37,7 +37,7 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Remove;
 
-public class PTScheduler extends PTObject {
+public class PTScheduler extends AbstractPTObject {
 
     private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<Long, PTScheduler.SchedulerCommand>();
 

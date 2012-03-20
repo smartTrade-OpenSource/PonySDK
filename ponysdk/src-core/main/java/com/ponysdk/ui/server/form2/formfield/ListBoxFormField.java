@@ -44,4 +44,8 @@ public class ListBoxFormField<T> extends FormField<T> {
         listBox.setSelectedIndex(-1);
     }
 
+    public PListBox getListBox() {
+        return listBox;
+    }
+
 }

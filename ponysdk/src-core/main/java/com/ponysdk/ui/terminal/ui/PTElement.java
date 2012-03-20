@@ -21,49 +21,60 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.addon.floatablepanel;
+package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.PTAddon;
-import com.ponysdk.ui.terminal.PonyAddOn;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.Update;
-import com.ponysdk.ui.terminal.ui.PTComposite;
-import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 
-@PonyAddOn
-public class PCFloatablePanelAddon extends PTComposite implements PTAddon {
-
-    public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon";
-
-    private PCFloatablePanel floatablePanel;
+public class PTElement extends PTComplexPanel {
 
     @Override
     public void create(final Create create, final UIService uiService) {
-        super.create(create, uiService);
-
-        this.floatablePanel = new PCFloatablePanel();
-
-        initWidget(floatablePanel);
+        init(create, uiService, new MyWidget(create.getMainProperty().getValue()));
     }
 
     @Override
     public void update(final Update update, final UIService uiService) {
-        final Property mainProperty = update.getMainProperty();
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
-            if (PropertyKey.REFERENCE_SCROLL_PANEL.equals(propertyKey)) {
-                final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getPTObject(property.getLongValue());
-                floatablePanel.setScrollPanel(scrollPanel.cast());
-            }
+
+        final Property property = update.getMainProperty();
+        final PropertyKey propertyKey = property.getKey();
+
+        final MyWidget cast = cast();
+
+        switch (propertyKey) {
+            case INNER_HTML:
+                cast.getElement().setInnerHTML(property.getValue());
+                break;
+            case INNER_TEXT:
+                cast.getElement().setInnerText(property.getValue());
+                break;
+            default:
+                super.update(update, uiService);
         }
     }
 
     @Override
-    public String getSignature() {
-        return SIGNATURE;
+    public MyWidget cast() {
+        return (MyWidget) uiObject;
+    }
+
+    private class MyWidget extends ComplexPanel {
+
+        public MyWidget(final String tagName) {
+            setElement(DOM.createElement(tagName));
+        }
+
+        @Override
+        public void add(final Widget w) {
+            super.add(w, getElement());
+        }
+
     }
 
 }

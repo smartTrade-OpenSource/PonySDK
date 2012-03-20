@@ -276,9 +276,6 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         createPonyActivity.addFormField(ageFormField);
         createPonyActivity.addFormField(raceFormField);
 
-        final FindPonysCommand command = new FindPonysCommand(null);
-        final Result<List<Pony>> execute = command.execute();
-
         createPonyActivity.start(createPonyActivityPanel);
     }
 }

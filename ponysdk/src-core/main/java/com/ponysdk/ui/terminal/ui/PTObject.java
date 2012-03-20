@@ -32,26 +32,21 @@ import com.ponysdk.ui.terminal.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTObject {
+public interface PTObject {
 
-    protected Long objectID;
+    public void create(final Create create, final UIService uiService);
 
-    public void create(final Create create, final UIService uiService) {}
+    public void update(final Update update, final UIService uiService);
 
-    public void update(final Update update, final UIService uiService) {}
+    public void add(final Add add, final UIService uiService);
 
-    public void add(final Add add, final UIService uiService) {}
+    public void remove(final Remove remove, final UIService uiService);
 
-    public void remove(final Remove remove, final UIService uiService) {}
+    public void addHandler(final AddHandler addHandler, final UIService uiService);
 
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {}
+    public void removeHandler(final RemoveHandler addHandler, final UIService uiService);
 
-    public void removeHandler(final RemoveHandler addHandler, final UIService uiService) {}
+    public void gc(final GC gc, final UIService uiService);
 
-    public void gc(final GC gc, final UIService uiService) {}
-
-    public Long getObjectID() {
-        return objectID;
-    }
-
+    public Long getObjectID();
 }

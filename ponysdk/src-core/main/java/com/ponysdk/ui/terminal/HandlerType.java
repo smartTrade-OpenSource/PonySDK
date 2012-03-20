@@ -47,6 +47,8 @@ public enum HandlerType {
 
     TIMER,
 
+    SCHEDULER,
+
     HISTORY,
 
     POPUP_POSITION_CALLBACK,

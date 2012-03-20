@@ -29,7 +29,7 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public interface FormView extends IsPWidget {
 
-    void addFormField(String caption, IsPWidget component);
+    void addFormField(String caption, IsPWidget widget);
 
     void removeFormField(String caption, IsPWidget component);
 
