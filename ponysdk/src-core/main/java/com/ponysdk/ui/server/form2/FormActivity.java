@@ -41,7 +41,7 @@ public class FormActivity extends AbstractActivity implements Activity {
     protected final Map<FormField<?>, String> captionByFormField = new HashMap<FormField<?>, String>();
     protected final Map<String, FormField<?>> formFieldByCaption = new HashMap<String, FormField<?>>();
 
-    protected final FormView formView;
+    private final FormView formView;
 
     public FormActivity(final FormView formView) {
         this.formView = formView;
@@ -69,10 +69,6 @@ public class FormActivity extends AbstractActivity implements Activity {
         formView.removeFormField(caption, formField.asWidget());
     }
 
-    public FormField<?> getFormField(final String caption) {
-        return formFieldByCaption.get(caption);
-    }
-
     public boolean isValid() {
         boolean valid = true;
         for (final FormField<?> formField : captionByFormField.keySet()) {
@@ -92,9 +88,17 @@ public class FormActivity extends AbstractActivity implements Activity {
         }
     }
 
+    public FormField<?> getFormField(final String caption) {
+        return formFieldByCaption.get(caption);
+    }
+
     @Override
     public void start(final PAcceptsOneWidget world) {
         world.setWidget(formView.asWidget());
+    }
+
+    public FormView getFormView() {
+        return formView;
     }
 
 }

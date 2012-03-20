@@ -57,6 +57,7 @@ import com.ponysdk.ui.terminal.ui.PTRadioButton;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea;
 import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTRootPanel;
+import com.ponysdk.ui.terminal.ui.PTScheduler;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 import com.ponysdk.ui.terminal.ui.PTSimpleLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
@@ -153,6 +154,8 @@ public class UIFactory {
                 return new PTDecoratedPopupPanel();
             case TIMER:
                 return new PTTimer();
+            case SCHEDULER:
+                return new PTScheduler();
             case COMPOSITE:
                 return new PTComposite();
             case RICH_TEXT_AREA:
