@@ -32,7 +32,7 @@ public class PDecoratorPanel extends PSimplePanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.DECORATOR_PANEL;
     }
 }

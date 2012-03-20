@@ -97,7 +97,7 @@ public class PImage extends PFocusWidget {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.IMAGE;
     }
 

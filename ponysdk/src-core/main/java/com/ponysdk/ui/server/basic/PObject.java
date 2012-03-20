@@ -36,10 +36,10 @@ public abstract class PObject {
     protected Create create;
 
     PObject() {
-        init(getType());
+        init(getWidgetType());
     }
 
-    protected abstract WidgetType getType();
+    protected abstract WidgetType getWidgetType();
 
     protected void init(final WidgetType widgetType) {
         if (widgetType == null) { return; }
@@ -88,7 +88,7 @@ public abstract class PObject {
 
     @Override
     public String toString() {
-        return "PObject [ID=" + ID + ", widgetType=" + getType().name() + "]";
+        return "PObject [ID=" + ID + ", widgetType=" + getWidgetType().name() + "]";
     }
 
 }

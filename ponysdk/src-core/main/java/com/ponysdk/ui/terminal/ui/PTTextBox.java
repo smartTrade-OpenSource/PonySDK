@@ -43,7 +43,7 @@ public class PTTextBox extends PTTextBoxBase {
         final com.google.gwt.user.client.ui.TextBox textBox = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.TEXT.equals(propertyKey)) {
                 textBox.setText(property.getValue());
             } else if (PropertyKey.VALUE.equals(propertyKey)) {

@@ -52,7 +52,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.DISCLOSURE_PANEL;
     }
 

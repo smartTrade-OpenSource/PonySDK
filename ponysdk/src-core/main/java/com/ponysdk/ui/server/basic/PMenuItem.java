@@ -74,7 +74,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.MENU_ITEM;
     }
 
@@ -125,7 +125,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void onEventInstruction(EventInstruction event) {
-        if (HandlerType.COMMAND.equals(event.getType())) {
+        if (HandlerType.COMMAND.equals(event.getHandlerType())) {
             cmd.execute();
         } else {
             super.onEventInstruction(event);

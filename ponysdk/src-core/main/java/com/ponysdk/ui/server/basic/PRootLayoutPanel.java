@@ -44,7 +44,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ROOT_LAYOUT_PANEL;
     }
 

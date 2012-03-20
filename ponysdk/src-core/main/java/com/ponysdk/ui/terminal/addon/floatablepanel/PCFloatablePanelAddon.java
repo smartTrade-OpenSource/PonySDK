@@ -53,7 +53,7 @@ public class PCFloatablePanelAddon extends PTComposite implements PTAddon {
     public void update(final Update update, final UIService uiService) {
         final Property mainProperty = update.getMainProperty();
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.REFERENCE_SCROLL_PANEL.equals(propertyKey)) {
                 final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getPTObject(property.getLongValue());
                 floatablePanel.setScrollPanel(scrollPanel.cast());

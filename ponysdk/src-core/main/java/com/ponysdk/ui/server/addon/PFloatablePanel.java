@@ -38,7 +38,7 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
     public PFloatablePanel() {}
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ADDON;
     }
 

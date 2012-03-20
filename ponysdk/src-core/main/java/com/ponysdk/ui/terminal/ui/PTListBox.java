@@ -46,7 +46,7 @@ public class PTListBox extends PTFocusWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.client.ui.ListBox listBox = cast();
             listBox.addChangeHandler(new ChangeHandler() {
 
@@ -83,7 +83,7 @@ public class PTListBox extends PTFocusWidget {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         final com.google.gwt.user.client.ui.ListBox listBox = cast();
 
         switch (propertyKey) {

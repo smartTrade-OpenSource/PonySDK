@@ -41,7 +41,7 @@ public class PRadioButton extends PCheckBox {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.RADIO_BUTTON;
     }
 

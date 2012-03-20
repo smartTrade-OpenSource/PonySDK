@@ -49,7 +49,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
 
         final Property mainProperty = update.getMainProperty();
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.POPUP_CAPTION.equals(propertyKey)) {
                 dialogBox.setHTML(property.getValue());
             }

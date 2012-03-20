@@ -43,7 +43,7 @@ public class PTTreeItem extends PTUIObject {
     @Override
     public void create(final Create create, final UIService uiService) {
         this.isRoot = create.getMainProperty().getChildProperty(PropertyKey.ROOT).getBooleanValue();
-        Property textProperty = create.getMainProperty().getChildProperty(PropertyKey.TEXT);
+        final Property textProperty = create.getMainProperty().getChildProperty(PropertyKey.TEXT);
         TreeItem treeItem;
         if (textProperty == null) {
             treeItem = new TreeItem();
@@ -55,7 +55,7 @@ public class PTTreeItem extends PTUIObject {
 
     @Override
     public void add(final Add add, final UIService uiService) {
-        UIObject widget = asWidget(add.getObjectID(), uiService);
+        final UIObject widget = asWidget(add.getObjectID(), uiService);
 
         if (widget instanceof Tree) {
             this.tree = (Tree) widget;
@@ -64,7 +64,7 @@ public class PTTreeItem extends PTUIObject {
                 cast().setWidget((Widget) widget);
             } else {
                 final TreeItem w = (TreeItem) widget;
-                int index = add.getMainProperty().getIntValue();
+                final int index = add.getMainProperty().getIntValue();
                 if (isRoot) {
                     tree.insertItem(index, w);
                 } else {
@@ -76,9 +76,9 @@ public class PTTreeItem extends PTUIObject {
 
     @Override
     public void update(final Update update, final UIService uiService) {
-        Property property = update.getMainProperty();
+        final Property property = update.getMainProperty();
 
-        switch (property.getKey()) {
+        switch (property.getPropertyKey()) {
             case SELECTED:
                 cast().setSelected(property.getBooleanValue());
                 break;

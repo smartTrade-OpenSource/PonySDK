@@ -68,7 +68,7 @@ public class PTreeItem extends PObject {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.TREE_ITEM;
     }
 

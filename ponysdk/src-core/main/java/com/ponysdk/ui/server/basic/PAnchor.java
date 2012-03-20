@@ -44,7 +44,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ANCHOR;
     }
 

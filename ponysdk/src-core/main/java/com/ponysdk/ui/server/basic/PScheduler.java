@@ -19,7 +19,7 @@ public abstract class PScheduler extends PObject {
     private PScheduler() {}
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.SCHEDULER;
     }
 
@@ -44,7 +44,7 @@ public abstract class PScheduler extends PObject {
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.SCHEDULER.equals(instruction.getType())) {
+        if (HandlerType.SCHEDULER.equals(instruction.getHandlerType())) {
             final long cmdID = instruction.getMainProperty().getChildProperty(PropertyKey.ID).getLongValue();
             final RepeatingCommand command = commands.get(cmdID);
             final boolean invokeAgain = command.execute();

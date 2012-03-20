@@ -30,7 +30,7 @@ public class PTSuggestBox extends PTWidget {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         switch (propertyKey) {
             case FOCUSED:
@@ -51,7 +51,7 @@ public class PTSuggestBox extends PTWidget {
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
@@ -61,7 +61,7 @@ public class PTSuggestBox extends PTWidget {
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(addHandler.getType())) {
+        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override

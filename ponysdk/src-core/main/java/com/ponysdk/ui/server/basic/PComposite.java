@@ -33,7 +33,7 @@ public abstract class PComposite extends PWidget {
     private PWidget widget;
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.COMPOSITE;
     }
 
@@ -45,7 +45,7 @@ public abstract class PComposite extends PWidget {
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
         ID = PonySession.getCurrent().nextID();
-        create = new Create(ID, getType());
+        create = new Create(ID, getWidgetType());
 
         PonySession.getCurrent().stackInstruction(create);
         PonySession.getCurrent().registerObject(this);

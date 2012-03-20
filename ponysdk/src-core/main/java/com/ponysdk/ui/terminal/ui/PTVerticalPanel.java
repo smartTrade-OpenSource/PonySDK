@@ -54,7 +54,7 @@ public class PTVerticalPanel extends PTCellPanel {
 
         final com.google.gwt.user.client.ui.VerticalPanel verticalPanel = cast();
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         if (PropertyKey.BORDER_WIDTH.equals(propertyKey)) {
             verticalPanel.setBorderWidth(property.getIntValue());
         } else if (PropertyKey.SPACING.equals(propertyKey)) {

@@ -80,7 +80,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.CHANGE_HANDLER.equals(instruction.getType())) {
+        if (HandlerType.CHANGE_HANDLER.equals(instruction.getHandlerType())) {
             final String data = instruction.getMainProperty().getValue();
             final String[] tokens = data.split(",");
             Integer selectedItemIndex = null;
@@ -99,7 +99,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.LISTBOX;
     }
 

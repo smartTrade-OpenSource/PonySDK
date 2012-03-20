@@ -68,7 +68,7 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ROOT_PANEL;
     }
 

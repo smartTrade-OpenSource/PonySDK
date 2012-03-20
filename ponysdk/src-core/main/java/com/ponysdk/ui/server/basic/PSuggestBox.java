@@ -50,10 +50,10 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
 
     @Override
     public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getType())) {
+        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
             this.text = e.getMainProperty().getValue();
             onValueChange(new PValueChangeEvent<String>(this, text));
-        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(e.getType())) {
+        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(e.getHandlerType())) {
             this.replacementString = e.getMainProperty().getStringPropertyValue(PropertyKey.REPLACEMENT_STRING);
             this.displayString = e.getMainProperty().getStringPropertyValue(PropertyKey.DISPLAY_STRING);
 
@@ -79,7 +79,7 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.SUGGESTBOX;
     }
 

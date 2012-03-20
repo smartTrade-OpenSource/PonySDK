@@ -36,7 +36,7 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
     private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.VERTICAL_PANEL;
     }
 

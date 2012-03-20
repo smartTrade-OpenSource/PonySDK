@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.instruction.Add;
 public class PDockLayoutPanel extends PComplexPanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.DOCK_LAYOUT_PANEL;
     }
 

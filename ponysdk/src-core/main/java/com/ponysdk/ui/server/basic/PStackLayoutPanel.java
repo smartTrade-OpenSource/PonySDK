@@ -56,7 +56,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.STACKLAYOUT_PANEL;
     }
 

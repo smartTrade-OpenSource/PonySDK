@@ -60,14 +60,14 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void onEventInstruction(EventInstruction instruction) {
-        if (HandlerType.CHANGE_HANDLER.equals(instruction.getType())) {
-            final PropertyKey key = instruction.getMainProperty().getKey();
+    public void onEventInstruction(final EventInstruction instruction) {
+        if (HandlerType.CHANGE_HANDLER.equals(instruction.getHandlerType())) {
+            final PropertyKey key = instruction.getMainProperty().getPropertyKey();
             if (PropertyKey.FILE_NAME.equals(key)) {
                 setFileName(instruction.getMainProperty().getValue());
             }
             onChange(this, 0);
-        } else if (HandlerType.SUBMIT_COMPLETE_HANDLER.equals(instruction.getType())) {
+        } else if (HandlerType.SUBMIT_COMPLETE_HANDLER.equals(instruction.getHandlerType())) {
             onSubmitComplete();
         } else {
             super.onEventInstruction(instruction);
@@ -75,11 +75,11 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void addSubmitCompleteHandler(PSubmitCompleteHandler handler) {
+    public void addSubmitCompleteHandler(final PSubmitCompleteHandler handler) {
         submitCompleteHandlers.add(handler);
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.NAME, this.name);
@@ -96,11 +96,11 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.FILE_UPLOAD;
     }
 
-    public void addStreamHandler(StreamHandler streamHandler) {
+    public void addStreamHandler(final StreamHandler streamHandler) {
         this.streamHandler = streamHandler;
     }
 
@@ -108,7 +108,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.setMainPropertyValue(PropertyKey.ENABLED, this.enabled);
@@ -120,7 +120,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void addChangeHandler(PChangeHandler handler) {
+    public void addChangeHandler(final PChangeHandler handler) {
         changeHandlers.add(handler);
     }
 
@@ -129,12 +129,12 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         return changeHandlers;
     }
 
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
     @Override
-    public void onChange(Object source, int selectedIndex) {
+    public void onChange(final Object source, final int selectedIndex) {
         for (final PChangeHandler handler : changeHandlers) {
             handler.onChange(source, selectedIndex);
         }

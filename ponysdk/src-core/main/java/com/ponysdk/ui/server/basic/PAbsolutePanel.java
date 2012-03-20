@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PAbsolutePanel extends PComplexPanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ABSOLUTE_PANEL;
     }
 

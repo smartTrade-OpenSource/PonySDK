@@ -43,7 +43,7 @@ public class PTTextArea extends PTTextBoxBase {
         final com.google.gwt.user.client.ui.TextArea textArea = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.VISIBLE_LINES.equals(propertyKey)) {
                 textArea.setVisibleLines(property.getIntValue());
             } else if (PropertyKey.CHARACTER_WIDTH.equals(propertyKey)) {

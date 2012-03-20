@@ -23,40 +23,42 @@
 
 package com.ponysdk.ui.terminal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum HandlerType {
 
     SELECTION_HANDLER,
-
     STRING_SELECTION_HANDLER,
-
     STRING_VALUE_CHANGE_HANDLER,
-
     BOOLEAN_VALUE_CHANGE_HANDLER,
-
     COMMAND,
-
     BEFORE_SELECTION_HANDLER,
-
     DATE_VALUE_CHANGE_HANDLER,
-
     STREAM_REQUEST_HANDLER,
-
     EMBEDED_STREAM_REQUEST_HANDLER,
-
     CHANGE_HANDLER,
-
     TIMER,
-
     SCHEDULER,
-
     HISTORY,
-
     POPUP_POSITION_CALLBACK,
-
     CLOSE_HANDLER,
-
     DOM_HANDLER,
+    SUBMIT_COMPLETE_HANDLER;
 
-    SUBMIT_COMPLETE_HANDLER,
+    private static Map<String, HandlerType> typeByCode = new HashMap<String, HandlerType>();
 
+    static {
+        for (final HandlerType handlerType : HandlerType.values()) {
+            typeByCode.put(handlerType.getCode(), handlerType);
+        }
+    }
+
+    public String getCode() {
+        return String.valueOf(ordinal());
+    }
+
+    public static HandlerType from(final String code) {
+        return typeByCode.get(code);
+    }
 }

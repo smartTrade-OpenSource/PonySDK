@@ -36,7 +36,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.DIALOG_BOX;
     }
 

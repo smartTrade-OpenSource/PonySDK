@@ -44,7 +44,7 @@ public class PTextArea extends PTextBoxBase {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.TEXT_AREA;
     }
 

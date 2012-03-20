@@ -49,7 +49,7 @@ public class PTDateBox extends PTWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.datepicker.client.DateBox dateBox = cast();
             final TextBox textBox = dateBox.getTextBox();
             dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
@@ -85,7 +85,7 @@ public class PTDateBox extends PTWidget {
         final com.google.gwt.user.datepicker.client.DateBox dateBox = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.VALUE.equals(propertyKey)) {
                 dateBox.getTextBox().setText(property.getValue());
             } else if (PropertyKey.DATE_FORMAT.equals(propertyKey)) {

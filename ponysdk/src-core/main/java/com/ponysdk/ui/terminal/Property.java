@@ -34,10 +34,7 @@ public class Property implements Serializable {
 
     private static final long serialVersionUID = -2137273148825763591L;
 
-    private PropertyKey key = PropertyKey.ROOT;
-
-    private String addOnKey;
-
+    private String key = PropertyKey.ROOT.getCode();
     private String value;
 
     private List<String> values;
@@ -47,22 +44,22 @@ public class Property implements Serializable {
     public Property() {}
 
     public Property(final PropertyKey key, final String value) {
-        this.key = key;
+        this.key = key.getCode();
         this.value = value;
     }
 
     public Property(final String key, final String value) {
-        this.addOnKey = key;
+        this.key = key;
         this.value = value;
     }
 
     public Property(final PropertyKey key, final List<String> values) {
-        this.key = key;
+        this.key = key.getCode();
         this.values = values;
     }
 
     public Property(final String key, final List<String> values) {
-        this.addOnKey = key;
+        this.key = key;
         this.values = values;
     }
 
@@ -106,11 +103,19 @@ public class Property implements Serializable {
         this(key, asStringList(values));
     }
 
-    public void setKey(final PropertyKey key) {
+    public void setPropertyKey(final PropertyKey key) {
+        this.key = key.getCode();
+    }
+
+    public PropertyKey getPropertyKey() {
+        return PropertyKey.from(key);
+    }
+
+    public void setKey(final String key) {
         this.key = key;
     }
 
-    public PropertyKey getKey() {
+    public String getKey() {
         return key;
     }
 
@@ -284,25 +289,8 @@ public class Property implements Serializable {
 
     public void setProperties(final Collection<Property> properties) {
         for (final Property property : properties) {
-            if (property.getKey() != null) {
-                this.childProperties.put(property.getKey().name(), property);
-            } else {
-                this.childProperties.put(property.getAddonKey(), property);
-            }
+            this.childProperties.put(property.getKey(), property);
         }
-    }
-
-    public String getAddonKey() {
-        return addOnKey;
-    }
-
-    public void setAddonKey(final String customKey) {
-        this.addOnKey = customKey;
-    }
-
-    @Override
-    public String toString() {
-        return "Property [key=" + key + ", value=" + value + ", addOnKey=" + addOnKey + ", childProperties=" + childProperties + "]";
     }
 
     private static List<String> asStringList(final int... values) {
@@ -319,6 +307,11 @@ public class Property implements Serializable {
             integerList.add(Integer.parseInt(value));
         }
         return integerList;
+    }
+
+    @Override
+    public String toString() {
+        return "Property [key=" + key + ", value=" + value + ", values=" + values + ", childProperties=" + childProperties + "]";
     }
 
 }

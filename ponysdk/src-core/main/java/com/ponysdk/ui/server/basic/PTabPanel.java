@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PTabPanel extends PTabLayoutPanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.TAB_PANEL;
     }
 

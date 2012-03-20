@@ -68,13 +68,13 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.client.ui.TabLayoutPanel tabLayoutPanel = cast();
             tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, tabLayoutPanel.getSelectedIndex());
                     uiService.triggerEvent(eventInstruction);
                 }
@@ -82,7 +82,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
             return;
         }
 
-        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
@@ -108,7 +108,7 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         switch (propertyKey) {
             case ANIMATION:

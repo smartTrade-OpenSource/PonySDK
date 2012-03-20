@@ -32,7 +32,7 @@ public class PMenuItemSeparator extends PWidget {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.MENU_ITEM_SEPARATOR;
     }
 

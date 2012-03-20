@@ -37,7 +37,7 @@ public class PTTextBoxBase extends PTValueBoxBase<String> {
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
@@ -57,7 +57,7 @@ public class PTTextBoxBase extends PTValueBoxBase<String> {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         if (PropertyKey.TEXT.equals(propertyKey)) {
             cast().setText(property.getValue());
             return;

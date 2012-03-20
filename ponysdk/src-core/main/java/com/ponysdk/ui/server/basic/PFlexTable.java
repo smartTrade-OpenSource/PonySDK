@@ -39,7 +39,7 @@ public class PFlexTable extends PHTMLTable {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.FLEX_TABLE;
     }
 

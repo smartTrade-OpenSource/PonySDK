@@ -45,7 +45,7 @@ public class PTFocusWidget extends PTWidget {
     public void update(Update update, UIService uiService) {
 
         final Property mainProperty = update.getMainProperty();
-        final PropertyKey mainPropertyKey = mainProperty.getKey();
+        final PropertyKey mainPropertyKey = mainProperty.getPropertyKey();
 
         switch (mainPropertyKey) {
             case LOADING_ON_REQUEST:
@@ -68,7 +68,7 @@ public class PTFocusWidget extends PTWidget {
         }
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.ENABLED.equals(propertyKey)) {
                 this.enabled = property.getBooleanValue();
                 cast().setEnabled(enabled);

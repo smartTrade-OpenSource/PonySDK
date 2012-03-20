@@ -42,7 +42,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.RICH_TEXT_AREA;
     }
 

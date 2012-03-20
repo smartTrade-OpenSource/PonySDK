@@ -45,7 +45,7 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.HTML;
     }
 

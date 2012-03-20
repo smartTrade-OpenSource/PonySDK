@@ -35,7 +35,7 @@ public class PTValueBoxBase<T> extends PTFocusWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addChangeHandler(new ChangeHandler() {
 
                 @Override

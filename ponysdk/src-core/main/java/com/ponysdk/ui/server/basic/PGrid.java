@@ -45,7 +45,7 @@ public class PGrid extends PHTMLTable {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.GRID;
     }
 

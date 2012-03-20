@@ -44,7 +44,7 @@ public class PTCheckBox extends PTButtonBase {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             addValueChangeHandler(addHandler, uiService);
             return;
         }
@@ -71,7 +71,7 @@ public class PTCheckBox extends PTButtonBase {
         final com.google.gwt.user.client.ui.CheckBox checkBox = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.VALUE.equals(propertyKey)) {
                 checkBox.setValue(property.getBooleanValue());
             } else if (PropertyKey.TEXT.equals(propertyKey)) {

@@ -39,7 +39,7 @@ public class PTCellPanel extends PTComplexPanel {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         final com.google.gwt.user.client.ui.CellPanel cellPanel = cast();
 
         if (PropertyKey.CELL_HORIZONTAL_ALIGNMENT.equals(propertyKey)) {

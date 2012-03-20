@@ -45,7 +45,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.LABEL;
     }
 

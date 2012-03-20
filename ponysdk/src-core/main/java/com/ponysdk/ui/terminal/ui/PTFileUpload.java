@@ -72,7 +72,7 @@ public class PTFileUpload extends PTWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
         // TODO change to STRING CHANGE HANDLER
-        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
             fileUpload.addChangeHandler(new ChangeHandler() {
 
                 @Override
@@ -85,7 +85,7 @@ public class PTFileUpload extends PTWidget {
             return;
         }
 
-        if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getHandlerType())) {
             final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue();
             wrappedFormPanel.setAction(action);
             wrappedFormPanel.submit();
@@ -97,7 +97,7 @@ public class PTFileUpload extends PTWidget {
     @Override
     public void update(final Update update, final UIService uiService) {
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         if (PropertyKey.NAME.equals(propertyKey)) {
             fileUpload.setName(property.getValue());
         } else if (PropertyKey.ENABLED.equals(propertyKey)) {

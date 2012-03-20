@@ -38,7 +38,7 @@ public class PAttachedPopupPanel extends PPopupPanel implements PAddOn {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ADDON;
     }
 

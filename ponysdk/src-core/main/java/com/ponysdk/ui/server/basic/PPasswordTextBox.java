@@ -36,7 +36,7 @@ public class PPasswordTextBox extends PTextBox {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.PASSWORD_TEXTBOX;
     }
 

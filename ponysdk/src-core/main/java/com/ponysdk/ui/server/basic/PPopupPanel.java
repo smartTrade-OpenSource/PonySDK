@@ -79,7 +79,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.POPUP_PANEL;
     }
 
@@ -184,13 +184,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getType())) {
+        if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getHandlerType())) {
             final Integer windowWidth = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETWIDTH);
             final Integer windowHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETHEIGHT);
             final Integer clientWith = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_WIDTH);
             final Integer clientHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
-        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getType())) {
+        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getHandlerType())) {
             this.showing = false;
             fireOnClose();
         } else {

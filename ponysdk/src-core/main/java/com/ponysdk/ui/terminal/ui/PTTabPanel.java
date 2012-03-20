@@ -71,13 +71,13 @@ public class PTTabPanel extends PTWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.client.ui.TabPanel tabPanel = cast();
             tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getSelectedItem());
                     uiService.triggerEvent(eventInstruction);
                 }
@@ -85,7 +85,7 @@ public class PTTabPanel extends PTWidget {
             return;
         }
 
-        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
@@ -111,7 +111,7 @@ public class PTTabPanel extends PTWidget {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         switch (propertyKey) {
             case SELECTED_INDEX:

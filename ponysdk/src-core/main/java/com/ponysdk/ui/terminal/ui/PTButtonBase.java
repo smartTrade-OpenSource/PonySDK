@@ -34,7 +34,7 @@ public class PTButtonBase extends PTFocusWidget {
     public void update(Update update, UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         if (PropertyKey.TEXT.equals(propertyKey)) {
             cast().setText(property.getValue());

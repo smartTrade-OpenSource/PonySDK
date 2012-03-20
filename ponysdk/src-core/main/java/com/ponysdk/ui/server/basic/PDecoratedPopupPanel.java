@@ -36,7 +36,7 @@ public class PDecoratedPopupPanel extends PPopupPanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.DECORATED_POPUP_PANEL;
     }
 }

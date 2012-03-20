@@ -51,7 +51,7 @@ public class PTScrollPanel extends PTSimplePanel {
         final com.google.gwt.user.client.ui.ScrollPanel scrollPanel = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.HORIZONTAL_SCROLL_POSITION.equals(propertyKey)) {
                 scrollPanel.setHorizontalScrollPosition(property.getIntValue());
             }

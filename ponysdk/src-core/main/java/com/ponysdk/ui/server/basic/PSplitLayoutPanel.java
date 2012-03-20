@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.SPLIT_LAYOUT_PANEL;
     }
 

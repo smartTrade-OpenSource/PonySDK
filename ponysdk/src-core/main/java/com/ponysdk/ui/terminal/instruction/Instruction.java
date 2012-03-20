@@ -94,52 +94,52 @@ public class Instruction implements Serializable {
 
     public void setMainPropertyValue(final PropertyKey key, final String value) {
         this.property.setValue(value);
-        this.property.setKey(key);
+        this.property.setPropertyKey(key);
     }
 
     public void setMainAddonPropertyValue(final String key, final String value) {
         this.property.setValue(value);
-        this.property.setAddonKey(key);
+        this.property.setKey(key);
     }
 
     public void setMainPropertyValue(final PropertyKey key, final int value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setKey(key);
+        this.property.setPropertyKey(key);
     }
 
     public void setMainAddonPropertyValue(final String key, final int value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setAddonKey(key);
+        this.property.setKey(key);
     }
 
     public void setMainPropertyValue(final PropertyKey key, final long value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setKey(key);
+        this.property.setPropertyKey(key);
     }
 
     public void setMainAddonPropertyValue(final String key, final long value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setAddonKey(key);
+        this.property.setKey(key);
     }
 
     public void setMainPropertyValue(final PropertyKey key, final boolean value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setKey(key);
+        this.property.setPropertyKey(key);
     }
 
     public void setMainAddonPropertyValue(final String key, final boolean value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setAddonKey(key);
+        this.property.setKey(key);
     }
 
     public void setMainPropertyValue(final PropertyKey key, final double value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setKey(key);
+        this.property.setPropertyKey(key);
     }
 
     public void setMainAddonPropertyValue(final String key, final double value) {
         this.property.setValue(String.valueOf(value));
-        this.property.setAddonKey(key);
+        this.property.setKey(key);
     }
 
     @Override

@@ -46,14 +46,14 @@ public class PTTree extends PTWidget {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.client.ui.Tree tree = cast();
             tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
                     PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                     eventInstruction.setMainPropertyValue(PropertyKey.WIDGET, ptObject.getObjectID());
                     uiService.triggerEvent(eventInstruction);
                 }

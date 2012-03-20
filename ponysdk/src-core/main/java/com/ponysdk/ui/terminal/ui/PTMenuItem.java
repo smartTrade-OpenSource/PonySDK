@@ -60,7 +60,7 @@ public class PTMenuItem extends PTUIObject {
         }
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.HTML.equals(propertyKey)) {
                 menuItem.setHTML(property.getValue());
             } else if (PropertyKey.TEXT.equals(propertyKey)) {
@@ -75,7 +75,7 @@ public class PTMenuItem extends PTUIObject {
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.COMMAND.equals(addHandler.getType())) {
+        if (HandlerType.COMMAND.equals(addHandler.getHandlerType())) {
             cast().setCommand(new Command() {
 
                 @Override

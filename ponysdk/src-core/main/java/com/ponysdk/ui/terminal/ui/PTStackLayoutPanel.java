@@ -63,13 +63,13 @@ public class PTStackLayoutPanel extends PTResizeComposite {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             final StackLayoutPanel stackLayoutPanel = cast();
             stackLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                     eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getSelectedItem());
                     uiService.triggerEvent(eventInstruction);
                 }
@@ -77,7 +77,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
             return;
         }
 
-        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
             cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override

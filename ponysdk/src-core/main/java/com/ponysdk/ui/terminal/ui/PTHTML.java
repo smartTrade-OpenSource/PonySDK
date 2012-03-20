@@ -39,7 +39,7 @@ public class PTHTML extends PTLabel {
     @Override
     public void update(final Update update, final UIService uiService) {
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         if (PropertyKey.HTML.equals(propertyKey)) {
             cast().setHTML(property.getValue());
         } else if (PropertyKey.WORD_WRAP.equals(propertyKey)) {

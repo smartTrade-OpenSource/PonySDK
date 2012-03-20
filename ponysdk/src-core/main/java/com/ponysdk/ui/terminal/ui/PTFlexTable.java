@@ -40,7 +40,7 @@ public class PTFlexTable extends PTHTMLTable {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
             cast().removeRow(property.getIntValue());

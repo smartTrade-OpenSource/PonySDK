@@ -41,6 +41,6 @@ public class AddHandler extends Handler {
 
     @Override
     public String toString() {
-        return "AddHandler [type=" + handlerType + ", addonType=" + addOnHandlerType + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+        return "AddHandler [type=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
     }
 }

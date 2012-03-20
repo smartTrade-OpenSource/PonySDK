@@ -36,7 +36,7 @@ public class PPushButton extends PButton {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.PUSH_BUTTON;
     }
 }

@@ -41,7 +41,7 @@ public class EventInstruction extends Handler {
 
     @Override
     public String toString() {
-        return "EventInstruction [handlerType=" + handlerType + ", addOnHandlerType=" + addOnHandlerType + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+        return "EventInstruction [handlerType=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
     }
 
 }

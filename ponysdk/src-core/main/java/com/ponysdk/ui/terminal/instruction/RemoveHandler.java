@@ -41,7 +41,7 @@ public class RemoveHandler extends Handler {
 
     @Override
     public String toString() {
-        return "RemoveHandler [type=" + handlerType + ", addHandlerType=" + addOnHandlerType + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+        return "RemoveHandler [type=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
     }
 
 }

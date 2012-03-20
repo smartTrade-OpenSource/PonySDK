@@ -40,7 +40,7 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.ELEMENT;
     }
 

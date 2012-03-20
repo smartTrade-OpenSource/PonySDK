@@ -30,7 +30,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public class PScrollPanel extends PSimplePanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.SCROLL_PANEL;
     }
 

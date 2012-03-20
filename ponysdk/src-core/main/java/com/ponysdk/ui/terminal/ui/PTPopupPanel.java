@@ -94,7 +94,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.POPUP_POSITION_CALLBACK.equals(addHandler.getType())) {
+        if (HandlerType.POPUP_POSITION_CALLBACK.equals(addHandler.getHandlerType())) {
             final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
 
             popupPanel.setVisible(false);
@@ -117,7 +117,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         final com.google.gwt.user.client.ui.PopupPanel popup = cast();
 
         if (PropertyKey.ANIMATION.equals(propertyKey)) {

@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PSimpleLayoutPanel extends PSimplePanel {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.SIMPLE_LAYOUT_PANEL;
     }
 }

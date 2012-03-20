@@ -53,7 +53,7 @@ public class PTImage extends PTWidget {
 
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getHandlerType())) {
             cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
             return;
         }
@@ -65,7 +65,7 @@ public class PTImage extends PTWidget {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
         switch (propertyKey) {
             case IMAGE_URL:
                 cast().setUrl(property.getValue());

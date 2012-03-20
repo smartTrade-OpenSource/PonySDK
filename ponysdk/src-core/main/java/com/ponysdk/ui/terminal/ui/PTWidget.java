@@ -66,7 +66,7 @@ public class PTWidget extends PTUIObject {
     @Override
     public void addHandler(final AddHandler addHandler, final UIService uiService) {
 
-        if (HandlerType.DOM_HANDLER.equals(addHandler.getType())) {
+        if (HandlerType.DOM_HANDLER.equals(addHandler.getHandlerType())) {
             final int domHandlerType = addHandler.getMainProperty().getIntValue();
             final com.google.gwt.user.client.ui.Widget w = asWidget(addHandler.getObjectID(), uiService);
             addDomHandler(addHandler, w, domHandlerType, uiService);
@@ -79,7 +79,7 @@ public class PTWidget extends PTUIObject {
     @Override
     public void removeHandler(final RemoveHandler removeHandler, final UIService uiService) {
 
-        if (HandlerType.DOM_HANDLER.equals(removeHandler.getType())) {
+        if (HandlerType.DOM_HANDLER.equals(removeHandler.getHandlerType())) {
             final int domHandlerType = removeHandler.getMainProperty().getIntValue();
             final com.google.gwt.user.client.ui.Widget w = asWidget(removeHandler.getObjectID(), uiService);
             final HandlerRegistration handlerRegistration;
@@ -100,7 +100,7 @@ public class PTWidget extends PTUIObject {
     }
 
     protected void triggerOnClick(final AddHandler addHandler, final com.google.gwt.user.client.ui.Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
         final Property main = new Property();
         main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
         main.setProperty(PropertyKey.CLIENT_X, event.getClientX());
@@ -114,13 +114,13 @@ public class PTWidget extends PTUIObject {
     }
 
     protected void triggerOnMouseOver(final AddHandler addHandler, final int domHandlerType, final UIService uiService) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
         eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
 
     protected void triggerOnMouseOut(final AddHandler addHandler, final int domHandlerType, final UIService uiService) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
         eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
@@ -131,12 +131,12 @@ public class PTWidget extends PTUIObject {
         if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
             final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
             if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
-                final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                 eventInstruction.setMainProperty(main);
                 uiService.triggerEvent(eventInstruction);
             }
         } else {
-            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
             eventInstruction.setMainProperty(main);
             uiService.triggerEvent(eventInstruction);
         }
@@ -199,7 +199,7 @@ public class PTWidget extends PTUIObject {
                         public void onKeyUp(final KeyUpEvent event) {
                             final EventInstruction changeHandlerInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.setMainPropertyValue(PropertyKey.VALUE, textBox.getText());
-                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                             final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
                             main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
                             eventInstruction.setMainProperty(main);
@@ -220,7 +220,7 @@ public class PTWidget extends PTUIObject {
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getType());
+                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
                             final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
                             main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
                             eventInstruction.setMainProperty(main);

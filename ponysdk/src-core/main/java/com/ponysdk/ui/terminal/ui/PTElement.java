@@ -43,7 +43,7 @@ public class PTElement extends PTComplexPanel {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         final MyWidget cast = cast();
 

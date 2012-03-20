@@ -44,7 +44,7 @@ public class PButton extends PButtonBase {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.BUTTON;
     }
 

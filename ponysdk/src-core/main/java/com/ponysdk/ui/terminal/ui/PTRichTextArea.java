@@ -41,7 +41,7 @@ public class PTRichTextArea extends PTWidget {
     public void update(final Update update, final UIService uiService) {
 
         final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getKey();
+        final PropertyKey propertyKey = property.getPropertyKey();
 
         switch (propertyKey) {
             case HTML:

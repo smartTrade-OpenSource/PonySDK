@@ -54,7 +54,7 @@ public class PTRadioButton extends PTCheckBox {
         final com.google.gwt.user.client.ui.RadioButton radioButton = cast();
 
         for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getKey();
+            final PropertyKey propertyKey = property.getPropertyKey();
             if (PropertyKey.NAME.equals(propertyKey)) {
                 radioButton.setName(property.getValue());
             }

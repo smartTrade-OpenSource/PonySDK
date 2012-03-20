@@ -53,7 +53,7 @@ public class PMenuBar extends PWidget {
     }
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.MENU_BAR;
     }
 

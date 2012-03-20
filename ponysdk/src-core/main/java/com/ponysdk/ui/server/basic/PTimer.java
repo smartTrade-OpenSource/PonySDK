@@ -35,7 +35,7 @@ import com.ponysdk.ui.terminal.instruction.Update;
 public abstract class PTimer extends PObject {
 
     @Override
-    protected WidgetType getType() {
+    protected WidgetType getWidgetType() {
         return WidgetType.TIMER;
     }
 
@@ -53,7 +53,7 @@ public abstract class PTimer extends PObject {
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.TIMER.equals(instruction.getType())) {
+        if (HandlerType.TIMER.equals(instruction.getHandlerType())) {
             run();
         } else {
             super.onEventInstruction(instruction);
