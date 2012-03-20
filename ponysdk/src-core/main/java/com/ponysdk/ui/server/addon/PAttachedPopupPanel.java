@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.addon;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -31,12 +30,10 @@ import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon;
 
-public class PAttachedPopupPanel extends PAddOn implements IsPWidget {
-
-    private final PPopupPanel popupPanel;
+public class PAttachedPopupPanel extends PPopupPanel implements PAddOn {
 
     public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
-        popupPanel = new PPopupPanel(autoHide);
+        super(autoHide);
         create.getMainProperty().setProperty(PropertyKey.WIDGET, attached.getID());
     }
 
@@ -48,11 +45,6 @@ public class PAttachedPopupPanel extends PAddOn implements IsPWidget {
     @Override
     public String getSignature() {
         return PCAttachedPopupPanelAddon.SIGNATURE;
-    }
-
-    @Override
-    public PPopupPanel asWidget() {
-        return popupPanel;
     }
 
 }

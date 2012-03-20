@@ -59,7 +59,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         popupContent.add(from.render().asWidget());
         popupContent.add(new PLabel("to"));
         popupContent.add(to.render().asWidget());
-        PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
+        final PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
 
             @Override
             public void onKeyUp(final int keyCode) {
@@ -87,7 +87,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         from.addDomHandler(handler, PKeyUpEvent.TYPE);
         to.addDomHandler(handler, PKeyUpEvent.TYPE);
 
-        DateBoxFormFieldRenderer fromRenderer = (DateBoxFormFieldRenderer) from.getFormFieldRenderer();
+        final DateBoxFormFieldRenderer fromRenderer = (DateBoxFormFieldRenderer) from.getFormFieldRenderer();
         fromRenderer.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
             @Override
@@ -97,7 +97,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
 
         });
 
-        DateBoxFormFieldRenderer toRenderer = (DateBoxFormFieldRenderer) to.getFormFieldRenderer();
+        final DateBoxFormFieldRenderer toRenderer = (DateBoxFormFieldRenderer) to.getFormFieldRenderer();
         toRenderer.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
             @Override
@@ -126,8 +126,8 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
     }
 
     protected void updateMainFormField() {
-        String fromFormat = from.getValue() == null ? null : dateFormat.format(from.getValue());
-        String toFormat = to.getValue() == null ? null : dateFormat.format(to.getValue());
+        final String fromFormat = from.getValue() == null ? null : dateFormat.format(from.getValue());
+        final String toFormat = to.getValue() == null ? null : dateFormat.format(to.getValue());
 
         if (fromFormat == null && toFormat == null) mainformFieldRenderer.reset();
         else if (fromFormat == null) mainformFieldRenderer.setText("<= " + toFormat);
@@ -137,7 +137,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
 
     protected void showPopup() {
         final PAttachedPopupPanel levelPopupPanel = new PAttachedPopupPanel(true, fieldContainer);
-        PPopupPanel popupWidget = levelPopupPanel.asWidget();
+        final PPopupPanel popupWidget = levelPopupPanel;
         popupWidget.setWidget(popupContent);
         popupWidget.show();
 

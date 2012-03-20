@@ -41,6 +41,7 @@ public class PTLabel extends PTLabelBase<String> {
 
         final Property property = update.getMainProperty();
         final PropertyKey propertyKey = property.getKey();
+
         if (PropertyKey.TEXT.equals(propertyKey)) {
             cast().setText(property.getValue());
             return;

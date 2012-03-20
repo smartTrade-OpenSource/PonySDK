@@ -184,10 +184,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                         PTObject ptObject;
                         if (create.getAddOnSignature() != null) {
                             final AddonFactory addonFactory = addonByKey.get(create.getAddOnSignature());
+                            if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + create.getAddOnSignature() + ", available: " + addonByKey.keySet()); }
+
                             ptObject = addonFactory.newAddon();
-                            if (ptObject == null) {
-                                Window.alert("UIBuilder: AddOn factory not found, type : " + create.getWidgetType());
-                            }
+                            if (ptObject == null) { throw new Exception("UIBuilder: Failed to instanciate an Addon of type: " + create.getAddOnSignature()); }
                             ptObject.create(create, this);
                         } else {
                             ptObject = uiFactory.newUIObject(this, create);

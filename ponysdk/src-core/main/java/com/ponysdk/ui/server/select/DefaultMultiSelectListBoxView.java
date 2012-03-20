@@ -11,7 +11,6 @@ import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -35,23 +34,23 @@ public class DefaultMultiSelectListBoxView implements PMultiSelectListBoxView {
         flowPanel.setWidth("300px");
         panel.add(flowPanel);
 
-        PButton button = new PButton("+");
+        final PButton button = new PButton("+");
         panel.add(button);
 
         final PAttachedPopupPanel attachedPopup = new PAttachedPopupPanel(true, panel);
-        final PPopupPanel popup = attachedPopup.asWidget();
-        popup.setStyleName(PonySDKTheme.ORACLE_POPUP_PANEL);
+
+        attachedPopup.setStyleName(PonySDKTheme.ORACLE_POPUP_PANEL);
 
         button.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                if (popup.isShowing()) popup.hide();
-                else popup.show();
+                if (attachedPopup.isShowing()) attachedPopup.hide();
+                else attachedPopup.show();
             }
         });
 
-        popup.setWidget(listBox);
+        attachedPopup.setWidget(listBox);
     }
 
     @Override

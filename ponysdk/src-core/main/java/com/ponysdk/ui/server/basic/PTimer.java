@@ -53,7 +53,7 @@ public abstract class PTimer extends PObject {
 
     @Override
     public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.TIMER.equals(instruction.getHandlerType())) {
+        if (HandlerType.TIMER.equals(instruction.getType())) {
             run();
         } else {
             super.onEventInstruction(instruction);

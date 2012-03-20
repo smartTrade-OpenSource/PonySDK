@@ -23,46 +23,41 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.Timer;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.GC;
 import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.RemoveHandler;
 import com.ponysdk.ui.terminal.instruction.Update;
 
-public class PTTimer extends AbstractPTObject {
+public class AbstractPTObject implements PTObject {
 
-    private Timer timer;
+    protected Long objectID;
 
-    @Override
-    public void create(final Create create, final UIService uiService) {
-        timer = new Timer() {
-
-            @Override
-            public void run() {
-                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.TIMER));
-            }
-        };
+    public Long getObjectID() {
+        return objectID;
     }
 
     @Override
-    public void remove(final Remove remove, final UIService uiService) {
-        timer.cancel();
-    }
+    public void create(final Create create, final UIService uiService) {}
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property property = update.getMainProperty();
-        if (property.getKey().equals(PropertyKey.REPEATING_DELAY)) timer.scheduleRepeating(update.getMainProperty().getIntValue());
-        else timer.schedule(update.getMainProperty().getIntValue());
-    }
+    public void update(final Update update, final UIService uiService) {}
 
     @Override
-    public void gc(final GC gc, final UIService uiService) {
-        timer.cancel();
-    }
+    public void add(final Add add, final UIService uiService) {}
+
+    @Override
+    public void remove(final Remove remove, final UIService uiService) {}
+
+    @Override
+    public void addHandler(final AddHandler addHandler, final UIService uiService) {}
+
+    @Override
+    public void removeHandler(final RemoveHandler addHandler, final UIService uiService) {}
+
+    @Override
+    public void gc(final GC gc, final UIService uiService) {}
 }

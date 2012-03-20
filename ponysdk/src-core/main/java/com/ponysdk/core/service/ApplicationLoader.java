@@ -45,7 +45,6 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     private final SpringContextLoader contextLoader;
 
     private String applicationName;
-
     private String applicationDescription;
 
     public ApplicationLoader() {
@@ -98,13 +97,24 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     }
 
     private void printLicence() {
-        final int columnCount = applicationName.length() + applicationDescription.length() + 30;
+        String title = "";
+        if (applicationName == null && applicationDescription == null) {
+            title = "Powered by PonySDK http://www.ponysdk.com";
+        } else if (applicationName == null && applicationDescription != null) {
+            title = applicationDescription;
+        } else if (applicationName == null && applicationDescription != null) {
+            title = applicationName;
+        } else {
+            title = applicationName + " - " + applicationDescription;
+        }
+
+        final int columnCount = title.length() + 30;
 
         final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
         bannerPrinter.appendNewEmptyLine();
         bannerPrinter.appendLineSeparator();
         bannerPrinter.appendNewLine();
-        bannerPrinter.appendCenteredLine(applicationName + " - " + applicationDescription);
+        bannerPrinter.appendCenteredLine(title);
         bannerPrinter.appendNewLine();
         bannerPrinter.appendCenteredLine("WEB  APPLICATION");
         bannerPrinter.appendNewLine();
@@ -114,5 +124,4 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
         log.info(bannerPrinter.toString());
     }
-
 }

@@ -177,7 +177,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         @Override
         public void onKeyUp(final int keyCode) {
-            PKeyCode code = PKeyCode.fromInt(keyCode);
+            final PKeyCode code = PKeyCode.fromInt(keyCode);
 
             if (code == null) {
                 currentSelected = -1;
@@ -421,7 +421,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         popup.asWidget().setStyleName(PonySDKTheme.ORACLE_POPUP_PANEL);
 
         final PButton deploy = new PButton("+");
-        final KeyUpHandler keyUphandler = new KeyUpHandler(textbox, popup.asWidget(), deploy);
+        final KeyUpHandler keyUphandler = new KeyUpHandler(textbox, popup, deploy);
         textbox.setStyleName(PonySDKTheme.ORACLE_TEXT_BOX);
         textbox.addKeyUpHandler(keyUphandler);
         textbox.addClickHandler(new PClickHandler() {

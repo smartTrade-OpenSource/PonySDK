@@ -64,7 +64,7 @@ public class Instruction implements Serializable {
 
     public Instruction() {}
 
-    public Instruction(long objectID) {
+    public Instruction(final long objectID) {
         this.objectID = objectID;
     }
 
@@ -76,45 +76,70 @@ public class Instruction implements Serializable {
         return parentID;
     }
 
-    public void setObjectID(long objectID) {
-        this.objectID = objectID;
-    }
-
     public Property getMainProperty() {
         return property;
     }
 
-    public void setMainProperty(Property property) {
+    public void setMainProperty(final Property property) {
         this.property = property;
     }
 
-    public void setMainPropertyKey(PropertyKey key) {
+    public void setMainPropertyKey(final PropertyKey key) {
         setMainPropertyValue(key, null);
     }
 
-    public void setMainPropertyValue(PropertyKey key, String value) {
+    public void setMainAddonPropertyKey(final String key) {
+        setMainAddonPropertyValue(key, null);
+    }
+
+    public void setMainPropertyValue(final PropertyKey key, final String value) {
         this.property.setValue(value);
         this.property.setKey(key);
     }
 
-    public void setMainPropertyValue(PropertyKey key, int value) {
+    public void setMainAddonPropertyValue(final String key, final String value) {
+        this.property.setValue(value);
+        this.property.setAddonKey(key);
+    }
+
+    public void setMainPropertyValue(final PropertyKey key, final int value) {
         this.property.setValue(String.valueOf(value));
         this.property.setKey(key);
     }
 
-    public void setMainPropertyValue(PropertyKey key, long value) {
+    public void setMainAddonPropertyValue(final String key, final int value) {
+        this.property.setValue(String.valueOf(value));
+        this.property.setAddonKey(key);
+    }
+
+    public void setMainPropertyValue(final PropertyKey key, final long value) {
         this.property.setValue(String.valueOf(value));
         this.property.setKey(key);
     }
 
-    public void setMainPropertyValue(PropertyKey key, boolean value) {
+    public void setMainAddonPropertyValue(final String key, final long value) {
+        this.property.setValue(String.valueOf(value));
+        this.property.setAddonKey(key);
+    }
+
+    public void setMainPropertyValue(final PropertyKey key, final boolean value) {
         this.property.setValue(String.valueOf(value));
         this.property.setKey(key);
     }
 
-    public void setMainPropertyValue(PropertyKey key, double value) {
+    public void setMainAddonPropertyValue(final String key, final boolean value) {
+        this.property.setValue(String.valueOf(value));
+        this.property.setAddonKey(key);
+    }
+
+    public void setMainPropertyValue(final PropertyKey key, final double value) {
         this.property.setValue(String.valueOf(value));
         this.property.setKey(key);
+    }
+
+    public void setMainAddonPropertyValue(final String key, final double value) {
+        this.property.setValue(String.valueOf(value));
+        this.property.setAddonKey(key);
     }
 
     @Override
@@ -127,7 +152,7 @@ public class Instruction implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
@@ -143,7 +168,7 @@ public class Instruction implements Serializable {
         return addOnSignature;
     }
 
-    public void setAddOnSignature(String addOnSignature) {
+    public void setAddOnSignature(final String addOnSignature) {
         this.addOnSignature = addOnSignature;
     }
 

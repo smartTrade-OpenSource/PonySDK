@@ -26,27 +26,32 @@ package com.ponysdk.ui.terminal.addon.attachedpopuppanel;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.HandlerType;
+import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.PonyAddOn;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
 
 @PonyAddOn
-public class PCAttachedPopupPanelAddon extends PTAddon {
+public class PCAttachedPopupPanelAddon extends PTComposite implements PTAddon {
 
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon";
 
-    private PCAttachedPopupPanel popup;
-
     @Override
     public void create(final Create create, final UIService uiService) {
+
+        super.create(create, uiService);
+
         final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getMainProperty().getLongPropertyValue(PropertyKey.WIDGET));
         final boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
-        popup = new PCAttachedPopupPanel(autoHide, attached.cast());
+        final PCAttachedPopupPanel popup = new PCAttachedPopupPanel(autoHide, attached.cast());
+
+        initWidget(popup);
+
         popup.show();
 
         popup.addCloseHandler(new CloseHandler<PopupPanel>() {
@@ -60,7 +65,7 @@ public class PCAttachedPopupPanelAddon extends PTAddon {
     }
 
     @Override
-    protected String getSignature() {
+    public String getSignature() {
         return SIGNATURE;
     }
 
