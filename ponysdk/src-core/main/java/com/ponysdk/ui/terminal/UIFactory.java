@@ -36,6 +36,7 @@ import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDialogBox;
 import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
+import com.ponysdk.ui.terminal.ui.PTElement;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
 import com.ponysdk.ui.terminal.ui.PTFlowPanel;
@@ -167,6 +168,8 @@ public class UIFactory {
                 return new PTDisclosurePanel();
             case DECORATOR_PANEL:
                 return new PTDecoratedPanel();
+            case ELEMENT:
+                return new PTElement();
             default:
                 Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
                 return null;

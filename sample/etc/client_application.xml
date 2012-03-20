@@ -67,6 +67,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.DatePickerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.ElementPageActivity" />
 
 	<!-- Lists and Menus pages -->
 	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" />
