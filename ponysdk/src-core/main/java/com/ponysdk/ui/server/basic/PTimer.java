@@ -23,53 +23,33 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
 
-public abstract class PTimer extends PObject {
+public abstract class PTimer {
 
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.TIMER;
-    }
+    private boolean repeat = false;
+
+    private final RepeatingCommand cmd = new RepeatingCommand() {
+
+        @Override
+        public boolean execute() {
+            run();
+            return repeat;
+        }
+    };
 
     public void scheduleRepeating(final int delayMillis) {
-        final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.REPEATING_DELAY, delayMillis);
-        PonySession.getCurrent().stackInstruction(update);
+        repeat = true;
+        PScheduler.get().scheduleFixedDelay(cmd, delayMillis);
     }
 
     public void schedule(final int delayMillis) {
-        final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.DELAY, delayMillis);
-        PonySession.getCurrent().stackInstruction(update);
-    }
-
-    @Override
-    public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.TIMER.equals(instruction.getHandlerType())) {
-            run();
-        } else {
-            super.onEventInstruction(instruction);
-        }
-    }
-
-    public void destroy() {
-        final GC gc = new GC(ID, -1);
-        PonySession.getCurrent().stackInstruction(gc);
-        PonySession.getCurrent().unRegisterObject(this);// avoid memory leak but if destroy => cannot reuse
-                                                        // this Timer
+        repeat = false;
+        PScheduler.get().scheduleFixedDelay(cmd, delayMillis);
     }
 
     public void cancel() {
-        final Remove remove = new Remove(ID, -1);
-        PonySession.getCurrent().stackInstruction(remove);
+        repeat = false;
     }
 
     protected abstract void run();

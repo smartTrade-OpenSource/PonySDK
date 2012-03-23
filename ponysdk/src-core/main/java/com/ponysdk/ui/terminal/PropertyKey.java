@@ -176,7 +176,10 @@ public enum PropertyKey {
     ID,
     TAG,
     INNER_HTML,
-    INNER_TEXT;
+    INNER_TEXT,
+    START,
+    COMMAND_ID,
+    STOP;
 
     private static Map<String, PropertyKey> keyByCode = new HashMap<String, PropertyKey>();
 

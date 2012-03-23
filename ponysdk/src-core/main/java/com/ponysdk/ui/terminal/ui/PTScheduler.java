@@ -29,13 +29,13 @@ import java.util.Map;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.ponysdk.ui.terminal.HandlerType;
+import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTScheduler extends AbstractPTObject {
 
@@ -45,17 +45,25 @@ public class PTScheduler extends AbstractPTObject {
     public void create(final Create create, final UIService uiService) {}
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final int delayMs = add.getMainProperty().getChildProperty(PropertyKey.DELAY).getIntValue();
-        final SchedulerCommand command = new SchedulerCommand(uiService, add.getParentID(), add.getObjectID());
-        Scheduler.get().scheduleFixedDelay(command, delayMs);
-        commandByIDs.put(add.getObjectID(), command);
-    }
+    public void update(final Update update, final UIService uiService) {
+        final Property main = update.getMainProperty();
+        final long commandID = main.getChildProperty(PropertyKey.COMMAND_ID).getLongValue();
+        final Property startProperty = main.getChildProperty(PropertyKey.START);
+        final Property stopProperty = main.getChildProperty(PropertyKey.STOP);
+        if (startProperty != null) {
+            final int delayMs = main.getChildProperty(PropertyKey.DELAY).getIntValue();
 
-    @Override
-    public void remove(final Remove remove, final UIService uiService) {
-        final SchedulerCommand command = commandByIDs.remove(remove.getObjectID());
-        command.cancel();
+            final SchedulerCommand previousCmd = commandByIDs.get(commandID);
+            if (previousCmd != null) previousCmd.cancel();
+
+            final SchedulerCommand command = new SchedulerCommand(uiService, update.getObjectID(), commandID);
+            Scheduler.get().scheduleFixedDelay(command, delayMs);
+            commandByIDs.put(commandID, command);
+
+        } else if (stopProperty != null) {
+            final SchedulerCommand command = commandByIDs.remove(commandID);
+            command.cancel();
+        }
     }
 
     @Override

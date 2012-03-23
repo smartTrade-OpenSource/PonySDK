@@ -159,12 +159,7 @@ public class PonySession {
     }
 
     public void registerObject(final PObject object) {
-        if (object instanceof PTimer) {
-            // avoid GC for Timer but memory leak ....
-            timers.put(object.getID(), (PTimer) object);
-        } else {
-            weakReferences.put(object.getID(), object);
-        }
+        weakReferences.put(object.getID(), object);
     }
 
     public void unRegisterObject(final PObject object) {

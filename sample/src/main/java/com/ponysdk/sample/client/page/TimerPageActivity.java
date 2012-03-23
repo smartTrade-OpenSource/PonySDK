@@ -71,21 +71,12 @@ public class TimerPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                if (timer != null) timer.cancel();
                 timer.scheduleRepeating(Integer.valueOf(textBox.getText()));
             }
         });
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
         final PLabel date = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
-
-        // new PTimer() {
-        //
-        // @Override
-        // public void run() {
-        // date.setText(dateFormat.format(Calendar.getInstance().getTime()));
-        // }
-        // }.scheduleRepeating(1000);
 
         PScheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 

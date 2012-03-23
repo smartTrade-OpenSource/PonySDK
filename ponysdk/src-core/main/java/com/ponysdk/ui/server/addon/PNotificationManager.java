@@ -171,7 +171,6 @@ public class PNotificationManager {
             @Override
             public void run() {
                 popupPanel.addStyleName("closing");
-                destroy();
             }
         };
         timer.schedule(delayBeforeClosing);
