@@ -56,6 +56,12 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
 
     public PTabPanel() {
         addSelectionHandler(this);
+
+        final AddHandler beforeHandler = new AddHandler(getID(), HandlerType.BEFORE_SELECTION_HANDLER);
+        getPonySession().stackInstruction(beforeHandler);
+
+        final AddHandler selectionHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
+        getPonySession().stackInstruction(selectionHandler);
     }
 
     @Override
@@ -158,8 +164,6 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     @Override
     public void addBeforeSelectionHandler(PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.BEFORE_SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
     }
 
     @Override
@@ -175,9 +179,6 @@ public class PTabPanel extends PComplexPanel implements HasPAnimation, HasPBefor
     @Override
     public void addSelectionHandler(PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
-
     }
 
     @Override
