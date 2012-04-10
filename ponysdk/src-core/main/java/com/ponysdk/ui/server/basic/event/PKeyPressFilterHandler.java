@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.basic.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 
@@ -33,8 +34,13 @@ public abstract class PKeyPressFilterHandler implements PKeyPressHandler, HasPPr
 
     private final List<Property> properties = new ArrayList<Property>();
 
-    public PKeyPressFilterHandler(int... keyCodes) {
-        final Property filter = new Property(PropertyKey.KEY_FILTER, keyCodes);
+    public PKeyPressFilterHandler(final PKeyCode... keyCodes) {
+        final List<String> codes = new ArrayList<String>();
+        for (final PKeyCode code : keyCodes) {
+            codes.add(code.getCodeToString());
+        }
+
+        final Property filter = new Property(PropertyKey.KEY_FILTER, codes);
         properties.add(filter);
     }
 
@@ -44,7 +50,7 @@ public abstract class PKeyPressFilterHandler implements PKeyPressHandler, HasPPr
     }
 
     @Override
-    public void addProperty(Property property) {
+    public void addProperty(final Property property) {
         properties.add(property);
     }
 

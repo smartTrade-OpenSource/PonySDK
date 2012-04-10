@@ -137,134 +137,68 @@ public class Property implements Serializable {
 
     public void setProperty(final PropertyKey propertyKey, final String value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.name(), property);
-    }
-
-    public void setAddonProperty(final String propertyKey, final String value) {
-        final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey, property);
+        childProperties.put(propertyKey.getCode(), property);
     }
 
     public void setProperty(final PropertyKey propertyKey, final int value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.name(), property);
-    }
-
-    public void setAddonProperty(final String propertyKey, final int value) {
-        final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey, property);
+        childProperties.put(propertyKey.getCode(), property);
     }
 
     public void setProperty(final PropertyKey propertyKey, final long value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.name(), property);
-    }
-
-    public void setAddonProperty(final String propertyKey, final long value) {
-        final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey, property);
+        childProperties.put(propertyKey.getCode(), property);
     }
 
     public void setProperty(final PropertyKey propertyKey, final double value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.name(), property);
-    }
-
-    public void setAddonProperty(final String propertyKey, final double value) {
-        final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey, property);
+        childProperties.put(propertyKey.getCode(), property);
     }
 
     public void setProperty(final PropertyKey propertyKey, final boolean value) {
         final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey.name(), property);
-    }
-
-    public void setAddonProperty(final String propertyKey, final boolean value) {
-        final Property property = new Property(propertyKey, value);
-        childProperties.put(propertyKey, property);
+        childProperties.put(propertyKey.getCode(), property);
     }
 
     public boolean containsChildProperty(final PropertyKey propertyKey) {
-        return childProperties.containsKey(propertyKey.name());
-    }
-
-    public boolean containsChildAddonProperty(final String propertyKey) {
-        return childProperties.containsKey(propertyKey);
+        return childProperties.containsKey(propertyKey.getCode());
     }
 
     public Property getChildProperty(final PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.name());
-    }
-
-    public Property getChildAddonProperty(final String propertyKey) {
-        return childProperties.get(propertyKey);
+        return childProperties.get(propertyKey.getCode());
     }
 
     public String getStringPropertyValue(final PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.name()).getValue();
-    }
-
-    public String getStringAddonPropertyValue(final String propertyKey) {
-        return childProperties.get(propertyKey).getValue();
+        return childProperties.get(propertyKey.getCode()).getValue();
     }
 
     public int getIntPropertyValue(final PropertyKey propertyKey) {
-        return Integer.parseInt(childProperties.get(propertyKey.name()).getValue());
-    }
-
-    public int getIntAddonPropertyValue(final String propertyKey) {
-        return Integer.parseInt(childProperties.get(propertyKey).getValue());
+        return Integer.parseInt(childProperties.get(propertyKey.getCode()).getValue());
     }
 
     public long getLongPropertyValue(final PropertyKey propertyKey) {
-        return Long.parseLong(childProperties.get(propertyKey.name()).getValue());
-    }
-
-    public long getLongAddonPropertyValue(final String propertyKey) {
-        return Long.parseLong(childProperties.get(propertyKey).getValue());
+        return Long.parseLong(childProperties.get(propertyKey.getCode()).getValue());
     }
 
     public double getDoublePropertyValue(final PropertyKey propertyKey) {
-        return Double.parseDouble(childProperties.get(propertyKey.name()).getValue());
-    }
-
-    public double getDoubleAddonPropertyValue(final String propertyKey) {
-        return Double.parseDouble(childProperties.get(propertyKey).getValue());
+        return Double.parseDouble(childProperties.get(propertyKey.getCode()).getValue());
     }
 
     public boolean getBooleanPropertyValue(final PropertyKey propertyKey) {
-        return Boolean.parseBoolean(childProperties.get(propertyKey.name()).getValue());
-    }
-
-    public boolean getBooleanAddonPropertyValue(final String propertyKey) {
-        return Boolean.parseBoolean(childProperties.get(propertyKey).getValue());
+        return Boolean.parseBoolean(childProperties.get(propertyKey.getCode()).getValue());
     }
 
     public List<String> getListStringProperty(final PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.name()).getValues();
-    }
-
-    public List<String> getListAddonStringProperty(final String propertyKey) {
-        return childProperties.get(propertyKey).getValues();
+        return childProperties.get(propertyKey.getCode()).getValues();
     }
 
     public List<Integer> getListIntegerProperty(final PropertyKey propertyKey) {
-        final List<String> values = childProperties.get(propertyKey.name()).getValues();
-        return asIntegerList(values);
-    }
-
-    public List<Integer> getListAddonIntegerProperty(final String propertyKey) {
-        final List<String> values = childProperties.get(propertyKey).getValues();
+        final List<String> values = childProperties.get(propertyKey.getCode()).getValues();
         return asIntegerList(values);
     }
 
     public boolean hasChildProperty(final PropertyKey propertyKey) {
-        return childProperties.get(propertyKey.name()) != null;
-    }
-
-    public boolean hasChildAddonProperty(final String propertyKey) {
-        return childProperties.get(propertyKey) != null;
+        return childProperties.get(propertyKey.getCode()) != null;
     }
 
     public int getIntValue() {

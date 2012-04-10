@@ -47,7 +47,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = new PVerticalPanel();
         panel.setSpacing(10);
 
         final PFileUpload fileUpload = new PFileUpload();

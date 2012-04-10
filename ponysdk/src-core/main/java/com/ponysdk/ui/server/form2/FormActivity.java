@@ -52,7 +52,6 @@ public class FormActivity extends AbstractActivity implements Activity {
                 if (isValid()) {
                     fireEvent(new SubmitFormEvent(FormActivity.this));
                 }
-
             }
         }, PKeyUpEvent.TYPE);
     }

@@ -151,9 +151,6 @@ public class PTWidget extends PTUIObject {
 
                     @Override
                     public void onClick(final ClickEvent event) {
-
-                        log.info("=======================================> on click: " + event);
-
                         triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
                     }
 
