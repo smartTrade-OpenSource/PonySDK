@@ -152,6 +152,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         child.setParent(this);
     }
 
+
     public void setOpen(final boolean isOpen) {
     	if (this.isOpen != isOpen) {
     	    this.isOpen = isOpen;
@@ -170,6 +171,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
     public boolean isOpen() {
         return isOpen;
-    }
+	}
 
 }
