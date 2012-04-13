@@ -23,12 +23,19 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTDisclosurePanel extends PTWidget {
 
@@ -41,19 +48,53 @@ public class PTDisclosurePanel extends PTWidget {
 
         final String headerText = mainProperty.getValue();
 
-        PTImage open = (PTImage) uiService.getPTObject(openImg);
-        PTImage close = (PTImage) uiService.getPTObject(closeImg);
+        final PTImage open = (PTImage) uiService.getPTObject(openImg);
+        final PTImage close = (PTImage) uiService.getPTObject(closeImg);
 
-        PImageResource openImageResource = new PImageResource(open.cast());
-        PImageResource closeImageResource = new PImageResource(close.cast());
+        final PImageResource openImageResource = new PImageResource(open.cast());
+        final PImageResource closeImageResource = new PImageResource(close.cast());
 
         init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
+
+        addHandlers(create, uiService);
+    }
+
+    private void addHandlers(final Create create, final UIService uiService) {
+        cast().addCloseHandler(new CloseHandler<DisclosurePanel>() {
+
+            @Override
+            public void onClose(final CloseEvent<DisclosurePanel> event) {
+                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
+            }
+        });
+
+        cast().addOpenHandler(new OpenHandler<DisclosurePanel>() {
+
+            @Override
+            public void onOpen(final OpenEvent<DisclosurePanel> event) {
+                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.OPEN_HANDLER));
+            }
+        });
     }
 
     @Override
     public void add(final Add add, final UIService uiService) {
         final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
         cast().setContent(w);
+    }
+
+    @Override
+    public void update(final Update update, final UIService uiService) {
+
+        final Property property = update.getMainProperty();
+        final PropertyKey propertyKey = property.getPropertyKey();
+        switch (propertyKey) {
+            case OPEN:
+                cast().setOpen(property.getBooleanValue());
+                break;
+            default:
+                super.update(update, uiService);
+        }
     }
 
     @Override

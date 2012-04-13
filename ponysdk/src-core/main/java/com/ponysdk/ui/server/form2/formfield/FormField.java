@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.form2.formfield;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.ponysdk.ui.server.basic.HasPValue;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -37,7 +37,9 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
 
-    private final List<PValueChangeHandler<T>> handlers = new ArrayList<PValueChangeHandler<T>>();
+    private final Set<FormFieldListener> listeners = new HashSet<FormFieldListener>();
+
+    private final Set<PValueChangeHandler<T>> handlers = new HashSet<PValueChangeHandler<T>>();
 
     private FieldValidator validator;
 
@@ -48,10 +50,14 @@ public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
     }
 
     public ValidationResult isValid() {
+        ValidationResult result;
 
-        if (validator == null) return ValidationResult.newOKValidationResult();
+        if (validator == null) result = ValidationResult.newOKValidationResult();
+        else result = validator.isValid(getStringValue());
 
-        return validator.isValid(getStringValue());
+        fireAfterValidation(result);
+
+        return result;
     }
 
     public void setValidator(final FieldValidator validator) {
@@ -73,7 +79,29 @@ public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
         return Collections.unmodifiableCollection(handlers);
     }
 
+    public void addFormFieldListener(final FormFieldListener listener) {
+        listeners.add(listener);
+    }
+
+    public void reset() {
+        reset0();
+        fireAfterReset();
+    }
+
+    private void fireAfterReset() {
+        for (final FormFieldListener listener : listeners) {
+            listener.afterReset();
+        }
+    }
+
+    private void fireAfterValidation(final ValidationResult result) {
+        for (final FormFieldListener listener : listeners) {
+            listener.afterValidation(result);
+        }
+    }
+
     protected abstract String getStringValue();
 
-    public abstract void reset();
+    protected abstract void reset0();
+
 }

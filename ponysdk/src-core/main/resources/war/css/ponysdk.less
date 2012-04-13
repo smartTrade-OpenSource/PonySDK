@@ -21,7 +21,7 @@
 
 @warningColor:		#FDF3B5;
 @errorColor:		#B40000;
-@highlight:			#33B5E5;
+@highlight:			#498BF4;
 
 
 // Mixins
@@ -484,6 +484,14 @@ input, select {
 			border: 1px solid @grayLighter;
 			color: @grayDark;
 			.transition(e("background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s"));
+		
+			.selectedItem {
+				color: white;
+			}
+		}
+		
+		&:hover &.selectedItem {
+			color: white;
 		}
 	}
 }

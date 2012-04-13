@@ -179,7 +179,8 @@ public enum PropertyKey {
     INNER_TEXT,
     START,
     COMMAND_ID,
-    STOP;
+    STOP,
+    OPEN;
 
     private static Map<String, PropertyKey> keyByCode = new HashMap<String, PropertyKey>();
 

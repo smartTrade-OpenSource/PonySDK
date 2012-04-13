@@ -30,10 +30,6 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
 
     private String text;
 
-    private String replacementString;
-
-    private String displayString;
-
     public PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
         if (suggestOracle == null) {
@@ -54,10 +50,10 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
             this.text = e.getMainProperty().getValue();
             onValueChange(new PValueChangeEvent<String>(this, text));
         } else if (HandlerType.STRING_SELECTION_HANDLER.equals(e.getHandlerType())) {
-            this.replacementString = e.getMainProperty().getStringPropertyValue(PropertyKey.REPLACEMENT_STRING);
-            this.displayString = e.getMainProperty().getStringPropertyValue(PropertyKey.DISPLAY_STRING);
-
-            MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
+            final String replacementString = e.getMainProperty().getStringPropertyValue(PropertyKey.REPLACEMENT_STRING);
+            final String displayString = e.getMainProperty().getStringPropertyValue(PropertyKey.DISPLAY_STRING);
+            this.text = replacementString;
+            final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
         } else {
             super.onEventInstruction(e);
@@ -186,7 +182,7 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
 
         @Override
         public final void addAll(final Collection<String> collection) {
-            for (String suggestion : collection) {
+            for (final String suggestion : collection) {
                 add(suggestion);
             }
         }

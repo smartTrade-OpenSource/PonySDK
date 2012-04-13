@@ -23,18 +23,39 @@
 
 package com.ponysdk.ui.server.form2;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ponysdk.ui.server.form2.formfield.FormField;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
-public interface FormView extends IsPWidget {
+public class Form {
 
-    void addFormField(String caption, IsPWidget widget);
+    protected final List<FormField<?>> formFields = new ArrayList<FormField<?>>();
 
-    void removeFormField(String caption, IsPWidget component);
+    public void addFormField(final FormField<?> formField) {
+        formFields.add(formField);
+    }
 
-    void onValidationResult(String caption, ValidationResult result);
+    public void removeFormField(final FormField<?> formField) {
+        formFields.remove(formField);
+    }
 
-    void onReset(String string, FormField<?> formField);
+    public boolean isValid() {
+        boolean valid = true;
+        for (final FormField<?> formField : formFields) {
+            final ValidationResult result = formField.isValid();
+            if (!result.isValid()) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    public void reset() {
+        for (final FormField<?> formField : formFields) {
+            formField.reset();
+        }
+    }
 
 }

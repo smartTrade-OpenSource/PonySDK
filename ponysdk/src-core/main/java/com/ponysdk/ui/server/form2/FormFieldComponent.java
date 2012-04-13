@@ -5,27 +5,32 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.form2.formfield.FormField;
+import com.ponysdk.ui.server.form2.formfield.FormFieldListener;
+import com.ponysdk.ui.server.form2.validator.ValidationResult;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class FormFieldComponent extends PFlexTable {
+public class FormFieldComponent extends PFlexTable implements FormFieldListener {
 
     private final PLabel captionLabel = new PLabel();
 
     private final PHTML errorLabel = new PHTML();
 
-    public FormFieldComponent(final String caption, final PWidget w) {
+    public FormFieldComponent(final String caption, final FormField<?> formField) {
         addStyleName(PonySDKTheme.FORM_FORMFIELD_COMPONENT);
-        captionLabel.setVisible(false);
-        errorLabel.setVisible(false);
+        formField.addFormFieldListener(this);
+
+        this.captionLabel.setVisible(false);
+        this.errorLabel.setVisible(false);
 
         setCaption(caption);
         setWidget(0, 0, captionLabel);
         setWidget(0, 1, errorLabel);
-        setWidget(1, 0, w);
+        setWidget(1, 0, formField.asWidget());
         getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
         getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         getFlexCellFormatter().setColSpan(1, 0, 2);
+
     }
 
     public void setCaption(final String caption) {
@@ -38,12 +43,18 @@ public class FormFieldComponent extends PFlexTable {
         }
     }
 
-    public void addErrorMessage(final String msg) {
-        errorLabel.setHTML("<a class=\"htooltip\">invalid field<span>" + msg + "<img src=\"images/error_16.png\"/></span></a>");
-        errorLabel.setVisible(true);
+    @Override
+    public void afterReset() {
+        errorLabel.setVisible(false);
     }
 
-    public void clearErrors() {
-        errorLabel.setVisible(false);
+    @Override
+    public void afterValidation(final ValidationResult validationResult) {
+        if (validationResult.isValid()) {
+            errorLabel.setVisible(false);
+        } else {
+            errorLabel.setHTML("<a class=\"htooltip\">invalid field<span>" + validationResult.getErrorMessage() + "<img src=\"images/error_16.png\"/></span></a>");
+            errorLabel.setVisible(true);
+        }
     }
 }
