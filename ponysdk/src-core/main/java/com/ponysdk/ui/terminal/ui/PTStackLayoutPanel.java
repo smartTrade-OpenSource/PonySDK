@@ -31,6 +31,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.HandlerType;
+import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Add;
@@ -38,6 +39,7 @@ import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Create;
 import com.ponysdk.ui.terminal.instruction.EventInstruction;
 import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTStackLayoutPanel extends PTResizeComposite {
 
@@ -91,6 +93,20 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         }
 
         super.addHandler(addHandler, uiService);
+    }
+
+    @Override
+    public void update(final Update update, final UIService uiService) {
+        final Property mainProperty = update.getMainProperty();
+
+        for (final Property property : mainProperty.getChildProperties().values()) {
+            final PropertyKey propertyKey = property.getPropertyKey();
+            if (PropertyKey.OPEN.equals(propertyKey)) {
+                cast().showWidget(asWidget(property.getLongValue(), uiService));
+                return;
+            }
+        }
+        super.update(update, uiService);
     }
 
     @Override

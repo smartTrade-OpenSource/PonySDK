@@ -26,6 +26,7 @@ package com.ponysdk.impl.webapplication.menu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -47,6 +49,8 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private final Map<String, PAnchor> anchorByName = new LinkedHashMap<String, PAnchor>();
 
     private final Map<String, PVerticalPanel> categoriesByName = new LinkedHashMap<String, PVerticalPanel>();
+
+    private final Map<String, PWidget> categoryDisclosureByName = new LinkedHashMap<String, PWidget>();
 
     private final double headerWidth = 2;// em
 
@@ -80,10 +84,14 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         createCategoryItemIfNeeded(category);
     }
 
-    private String getCategory(final String[] split, final int index) {
-        String category = split[0];
-        for (int i = 0; i <= index; i++) {
-            category = category + "," + split[i];
+    private String getCategory(final List<String> split, final int index) {
+        final Iterator<String> iterator = split.iterator();
+        int currentIndex = 0;
+        String category = "";
+        while (iterator.hasNext() && currentIndex <= index) {
+            category += iterator.next();
+            currentIndex++;
+            if (iterator.hasNext() && currentIndex <= index) category += ",";
         }
         return category;
     }
@@ -94,7 +102,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         int i = 0;
         PVerticalPanel categoryPanel = null;
         while (i != list.size()) {
-            final String currentCategory = getCategory(split, i);
+            final String currentCategory = getCategory(list, i);
             categoryPanel = categoriesByName.get(currentCategory);
             if (categoryPanel == null) {
                 final String currentCategoryHeader = split[i];
@@ -104,8 +112,9 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
                 categoriesByName.put(currentCategory, categoryPanel);
                 if (i == 0) {
                     layoutPanel.add(categoryPanel, currentCategoryHeader, true, headerWidth);
+                    categoryDisclosureByName.put(currentCategory, this);
                 } else {
-                    final String containingCategory = getCategory(split, i - 1);
+                    final String containingCategory = getCategory(list, i - 1);
                     final PVerticalPanel containingPanel = categoriesByName.get(containingCategory);
                     final PImage openImage = new PImage("images/treeDownTriangleBlack.png");
                     final PImage closeImage = new PImage("images/treeRightTriangleBlack.png");
@@ -114,6 +123,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
                     containingPanel.add(newCategoryStackPanel);
                     newCategoryStackPanel.add(categoryPanel);
                     newCategoryStackPanel.setSizeFull();
+                    categoryDisclosureByName.put(currentCategory, newCategoryStackPanel);
                 }
             }
             i++;
@@ -133,7 +143,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
                 @Override
                 public void onClick(final PClickEvent clickEvent) {
                     final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
-                    for (PSelectionHandler<String> handler : selectionHandlers) {
+                    for (final PSelectionHandler<String> handler : selectionHandlers) {
                         handler.onSelection(event);
                     }
                 }
@@ -150,6 +160,20 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             final PAnchor item = anchorByName.get(caption);
             item.addStyleName("selectedItem");
             selectedItem = item;
+            final String[] split = category.split(",");
+            final List<String> list = Arrays.asList(split);
+            int i = 0;
+            while (i != list.size()) {
+                final String currentCategory = getCategory(list, i);
+                if (i == 0) {
+                    final PVerticalPanel verticalPanel = categoriesByName.get(currentCategory);
+                    layoutPanel.showWidget(verticalPanel);
+                } else {
+                    final PDisclosurePanel containingPanel = (PDisclosurePanel) categoryDisclosureByName.get(currentCategory);
+                    containingPanel.setOpen(true);
+                }
+                i++;
+            }
         } else {
             // tree.setSelectedItem(anchorByName.get(category));
         }

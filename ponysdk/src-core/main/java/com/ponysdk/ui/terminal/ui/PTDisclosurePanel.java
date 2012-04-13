@@ -23,12 +23,13 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.addon.disclosurepanel.PCDisclosurePanel;
 import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PTDisclosurePanel extends PTWidget {
 
@@ -41,13 +42,10 @@ public class PTDisclosurePanel extends PTWidget {
 
         final String headerText = mainProperty.getValue();
 
-        PTImage open = (PTImage) uiService.getPTObject(openImg);
-        PTImage close = (PTImage) uiService.getPTObject(closeImg);
+        final PTImage open = (PTImage) uiService.getPTObject(openImg);
+        final PTImage close = (PTImage) uiService.getPTObject(closeImg);
 
-        PImageResource openImageResource = new PImageResource(open.cast());
-        PImageResource closeImageResource = new PImageResource(close.cast());
-
-        init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
+        init(create, uiService, new PCDisclosurePanel(open.cast(), close.cast(), headerText));
     }
 
     @Override
@@ -57,7 +55,21 @@ public class PTDisclosurePanel extends PTWidget {
     }
 
     @Override
-    public DisclosurePanel cast() {
-        return (DisclosurePanel) uiObject;
+    public void update(final Update update, final UIService uiService) {
+        final Property mainProperty = update.getMainProperty();
+
+        for (final Property property : mainProperty.getChildProperties().values()) {
+            final PropertyKey propertyKey = property.getPropertyKey();
+            if (PropertyKey.OPEN.equals(propertyKey)) {
+                cast().setOpen(property.getBooleanValue());
+                return;
+            }
+        }
+        super.update(update, uiService);
+    }
+
+    @Override
+    public PCDisclosurePanel cast() {
+        return (PCDisclosurePanel) uiObject;
     }
 }

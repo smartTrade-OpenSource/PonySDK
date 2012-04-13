@@ -40,6 +40,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Add;
 import com.ponysdk.ui.terminal.instruction.AddHandler;
 import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer> {
 
@@ -149,6 +150,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public Collection<PSelectionHandler<Integer>> getSelectionHandlers() {
         return Collections.unmodifiableCollection(selectionHandlers);
+    }
+
+    public void showWidget(final PWidget widget) {
+        final Update update = new Update(getID());
+        update.getMainProperty().setProperty(PropertyKey.OPEN, widget.getID());
+        getPonySession().stackInstruction(update);
     }
 
 }

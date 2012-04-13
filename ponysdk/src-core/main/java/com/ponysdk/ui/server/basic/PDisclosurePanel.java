@@ -31,6 +31,7 @@ import com.ponysdk.ui.terminal.Property;
 import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
@@ -38,6 +39,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     private static final String OPENNED = "images/disclosure_openned.png";
 
     private PWidget content;
+    private boolean isOpened;
 
     public PDisclosurePanel(final String headerText) {
         this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
@@ -122,6 +124,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     private final void adopt(final PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
+    }
+
+    public void setOpen(final boolean isOpened) {
+        this.isOpened = isOpened;
+        final Update update = new Update(getID());
+        update.getMainProperty().setProperty(PropertyKey.OPEN, isOpened);
+        getPonySession().stackInstruction(update);
     }
 
 }
