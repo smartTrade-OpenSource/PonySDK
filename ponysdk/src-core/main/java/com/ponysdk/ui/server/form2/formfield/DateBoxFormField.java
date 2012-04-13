@@ -36,7 +36,7 @@ public class DateBoxFormField extends FormField<Date> {
     }
 
     @Override
-    public void reset() {
+    public void reset0() {
         dateBox.setValue(null);
     }
 
@@ -53,6 +53,10 @@ public class DateBoxFormField extends FormField<Date> {
     @Override
     protected String getStringValue() {
         return dataProvider.from(getValue());
+    }
+
+    public PDateBox getDateBox() {
+        return dateBox;
     }
 
 }

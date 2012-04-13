@@ -24,7 +24,7 @@ public class TextBoxFormField<T> extends FormField<T> {
     }
 
     @Override
-    public void reset() {
+    public void reset0() {
         textBox.setText(null);
     }
 
@@ -41,6 +41,10 @@ public class TextBoxFormField<T> extends FormField<T> {
     @Override
     protected String getStringValue() {
         return textBox.getText();
+    }
+
+    public PTextBox getTextBox() {
+        return textBox;
     }
 
 }

@@ -9,6 +9,10 @@ public class ListBoxFormField<T> extends FormField<T> {
 
     private PListBox listBox;
 
+    public ListBoxFormField() {
+        this(new PListBox(), null);
+    }
+
     public ListBoxFormField(final DataConverter<String, T> dataProvider) {
         this(new PListBox(), dataProvider);
     }
@@ -21,12 +25,14 @@ public class ListBoxFormField<T> extends FormField<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T getValue() {
+        if (dataProvider != null) return dataProvider.to(listBox.getSelectedItem());
         return (T) listBox.getSelectedValue();
     }
 
     @Override
     public void setValue(final T value) {
-        listBox.setSelectedItem(value);
+        if (dataProvider != null) listBox.setSelectedItem(dataProvider.from(value));
+        else listBox.setSelectedValue(value);
     }
 
     @Override
@@ -40,7 +46,7 @@ public class ListBoxFormField<T> extends FormField<T> {
     }
 
     @Override
-    public void reset() {
+    public void reset0() {
         listBox.setSelectedIndex(-1);
     }
 

@@ -38,10 +38,13 @@ import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PMenuBar;
+import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -113,6 +116,17 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         dataGrid = new DataGridActivity<Pony>(configuration, new DefaultSimpleListView());
         dataGrid.start(gridContainer);
 
+        final PMenuBar actionBar = new PMenuBar();
+        actionBar.setStyleName("pony-ActionToolbar");
+        final PMenuItem clearMenuItem = new PMenuItem("Clear", new PCommand() {
+
+            @Override
+            public void execute() {
+                dataGrid.clear();
+            }
+        });
+        actionBar.addItem(clearMenuItem);
+
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
 
@@ -123,6 +137,9 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
+
+        // formContainer.add(actionBar);
+        // formContainer.add(addPonyButton);
 
         // Build create pony form
         buildCreatePonyActivity();
