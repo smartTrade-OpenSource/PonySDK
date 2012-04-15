@@ -37,9 +37,7 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 public class MenuActivity extends AbstractActivity implements PageDisplayHandler, InitializingActivity, PSelectionHandler<String> {
 
     private MenuView menuView;
-
     private ApplicationActivity applicationActivity;
-
     private PageProvider pageProvider;
 
     @Override
@@ -48,7 +46,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
 
         final PageActivity pageActivity = event.getPageActivity();
         if (pageActivity.getPageName() != null) {
-            menuView.selectItem(pageActivity.getPageCategory(), pageActivity.getPageName());
+            menuView.selectItem(pageActivity.getPageCategories(), pageActivity.getPageName());
         }
     }
 
@@ -56,7 +54,7 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
     public void start(final PAcceptsOneWidget world) {
         world.setWidget(menuView);
         for (final PageActivity pageActivity : pageProvider.getPageActivities()) {
-            menuView.addItem(pageActivity.getPageCategory(), pageActivity.getPageName());
+            menuView.addItem(pageActivity.getPageCategories(), pageActivity.getPageName());
         }
     }
 

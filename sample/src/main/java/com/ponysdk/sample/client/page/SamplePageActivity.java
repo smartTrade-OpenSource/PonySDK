@@ -26,6 +26,8 @@ package com.ponysdk.sample.client.page;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +57,11 @@ public class SamplePageActivity extends PageActivity {
     private PScrollPanel codePanel;
 
     public SamplePageActivity(final String pageName, final String pageCategory) {
-        super(pageName, pageCategory);
+        this(pageName, Collections.singleton(pageCategory));
+    }
+
+    public SamplePageActivity(final String pageName, final Collection<String> pageCategories) {
+        super(pageName, pageCategories);
         setPageView(new DefaultPageView(pageName));
     }
 

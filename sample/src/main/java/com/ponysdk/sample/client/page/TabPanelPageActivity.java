@@ -23,6 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.Arrays;
+
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
@@ -43,7 +45,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
     protected int tabCount = 0;
 
     public TabPanelPageActivity() {
-        super("Tab Panel", "Panels");
+        super("Tab Panel", Arrays.asList("Panels", "Tab"));
     }
 
     @Override
