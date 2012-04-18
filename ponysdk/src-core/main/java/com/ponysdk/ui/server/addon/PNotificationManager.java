@@ -98,6 +98,13 @@ public class PNotificationManager {
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_HUMANIZED);
         popupPanel.setWidget(content);
+        popupPanel.addDomHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                popupPanel.hide();
+            }
+        }, PClickEvent.TYPE);
 
         displayAtCenter(popupPanel);
         addAutoCloseTimer(popupPanel, 1000);
@@ -108,6 +115,13 @@ public class PNotificationManager {
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_WARNING);
         popupPanel.setWidget(content);
+        popupPanel.addDomHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                popupPanel.hide();
+            }
+        }, PClickEvent.TYPE);
 
         displayAtCenter(popupPanel);
         addAutoCloseTimer(popupPanel, 2500);

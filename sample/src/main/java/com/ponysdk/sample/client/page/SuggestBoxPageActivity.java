@@ -31,11 +31,14 @@ import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSuggestBox;
 import com.ponysdk.ui.server.basic.PSuggestBox.PSuggestOracle;
 import com.ponysdk.ui.server.basic.PSuggestion;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
@@ -54,26 +57,36 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         panel.add(new PLabel("Choose a word:"));
 
         final PSuggestBox suggestBox = new PSuggestBox();
-        PSuggestOracle suggestOracle = suggestBox.getSuggestOracle();
+        final PSuggestOracle suggestOracle = suggestBox.getSuggestOracle();
 
         suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
 
             @Override
             public void onSelection(final PSelectionEvent<PSuggestion> event) {
-                String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
+                final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
                 PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });
 
-        Query query = new Query();
-        FindPonysCommand command = new FindPonysCommand(query);
-        Result<List<Pony>> ponys = command.execute();
+        final Query query = new Query();
+        final FindPonysCommand command = new FindPonysCommand(query);
+        final Result<List<Pony>> ponys = command.execute();
 
-        for (Pony pony : ponys.getData()) {
+        for (final Pony pony : ponys.getData()) {
             suggestOracle.add(pony.getName());
         }
 
         panel.add(suggestBox);
+
+        final PButton child = new PButton("Select \"Friesian horse\"");
+        child.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                suggestBox.setText("Friesian horse");
+            }
+        });
+        panel.add(child);
 
         examplePanel.setWidget(panel);
     }

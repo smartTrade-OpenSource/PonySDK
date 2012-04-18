@@ -39,6 +39,9 @@ public class PTSuggestBox extends PTWidget {
             case TEXT:
                 cast().setText(property.getValue());
                 break;
+            case LIMIT:
+                cast().setLimit(property.getIntValue());
+                break;
             case SUGGESTION:
                 oracle.add(property.getValue());
                 break;

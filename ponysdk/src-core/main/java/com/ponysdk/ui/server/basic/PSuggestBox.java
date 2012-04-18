@@ -82,21 +82,21 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     @Override
     public void setFocus(final boolean focused) {
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.FOCUSED, focused);
+        update.setMainPropertyValue(PropertyKey.FOCUSED, focused);
         getPonySession().stackInstruction(update);
     }
 
     public void setLimit(final int limit) {
         this.limit = limit;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.LIMIT, limit);
+        update.setMainPropertyValue(PropertyKey.LIMIT, limit);
         getPonySession().stackInstruction(update);
     }
 
     public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.TEXT, text);
+        update.setMainPropertyValue(PropertyKey.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
