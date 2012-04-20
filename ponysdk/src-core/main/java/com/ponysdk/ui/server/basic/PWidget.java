@@ -3,6 +3,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,15 +197,22 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return handlerRegistration;
     }
 
+    @SuppressWarnings("unchecked")
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.DOM_HANDLER);
         addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
-        // TODO nciaravola temp
-
-        // if (handler instanceof JSONObject) {
-        // addHandler.put(PROPERTY.DOM_HANDLER, handler);
-        // }
+        if (handler instanceof JSONObject) {
+            try {
+                final JSONObject jso = (JSONObject) handler;
+                for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
+                    final String key = iterator.next();
+                    addHandler.put(key, jso.get(key));
+                }
+            } catch (final JSONException e) {
+                log.error("Failed to copy value", e);
+            }
+        }
         getPonySession().stackInstruction(addHandler);
         return handlerRegistration;
     }

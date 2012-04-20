@@ -24,7 +24,6 @@
 package com.ponysdk.ui.server.basic.event;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -42,13 +41,13 @@ public abstract class PKeyPressFilterHandler extends JSONObject implements PKeyP
 
     public PKeyPressFilterHandler(final PKeyCode... keyCodes) {
 
-        final List<String> codes = new ArrayList<String>();
+        final List<Integer> codes = new ArrayList<Integer>(keyCodes.length);
         for (final PKeyCode code : keyCodes) {
-            codes.add(code.getCodeToString());
+            codes.add(code.getCode());
         }
 
         try {
-            put(PROPERTY.KEY_FILTER, new JSONArray(Arrays.asList(keyCodes)));
+            put(PROPERTY.KEY_FILTER, new JSONArray(codes));
         } catch (final JSONException e) {
             log.error("Cannot update key codes : " + keyCodes, e);
         }

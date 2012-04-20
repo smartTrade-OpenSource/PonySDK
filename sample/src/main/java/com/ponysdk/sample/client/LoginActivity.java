@@ -62,15 +62,6 @@ public class LoginActivity extends AbstractActivity {
         loginPageView.getLoginTextBox().setText("Guest");
         loginPageView.getPasswordTextBox().setText("Guest");
 
-        loginPageView.getLoginTextBox().showLoadingOnRequest(true);
-        loginPageView.getLoginTextBox().addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                doLogin();
-            }
-        });
-
         loginPageView.addLoginClickHandler(new PClickHandler() {
 
             @Override

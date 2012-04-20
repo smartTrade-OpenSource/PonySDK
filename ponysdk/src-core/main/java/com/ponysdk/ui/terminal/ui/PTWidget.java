@@ -36,7 +36,8 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
@@ -107,6 +108,7 @@ public class PTWidget extends PTUIObject {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
         eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
         eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
@@ -115,23 +117,34 @@ public class PTWidget extends PTUIObject {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
         eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
         eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
 
     protected void triggerOnKeyPress(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
-        addHandler.put(TYPE.KEY, TYPE.EVENT);
-        addHandler.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+
+        final PTInstruction eventInstruction = new PTInstruction();
+        eventInstruction.setObjectID(addHandler.getObjectID());
+        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
+        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+        eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+
         if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
-            final JSONObject keys = addHandler.get(PROPERTY.KEY_FILTER).isObject();
-            if (keys.containsKey(event.getNativeEvent().getKeyCode() + "")) {
-                uiService.triggerEvent(addHandler);
+            final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+            for (int i = 0; i < jsonArray.size(); i++) {
+                final JSONNumber keyCode = jsonArray.get(i).isNumber();
+                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                    uiService.triggerEvent(eventInstruction);
+                    break;
+                }
             }
         } else {
             // final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(),
             // addHandler.getType());
             // eventInstruction.setMainProperty(main);
-            uiService.triggerEvent(addHandler);
+            uiService.triggerEvent(eventInstruction);
         }
     }
 
@@ -197,14 +210,19 @@ public class PTWidget extends PTUIObject {
                             eventInstruction.setObjectID(addHandler.getObjectID());
                             eventInstruction.put(TYPE.KEY, TYPE.EVENT);
                             eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
+                            eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
-                                final JSONObject jsonValue = addHandler.get(PROPERTY.KEY_FILTER).isObject();
-                                if (jsonValue.containsKey(event.getNativeEvent().getKeyCode() + "")) {
-                                    uiService.stackEvent(changeHandlerInstruction);
-                                    uiService.stackEvent(eventInstruction);
-                                    uiService.flushEvents();
+                                final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+                                for (int i = 0; i < jsonArray.size(); i++) {
+                                    final JSONNumber keyCode = jsonArray.get(i).isNumber();
+                                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                        uiService.stackEvent(changeHandlerInstruction);
+                                        uiService.stackEvent(eventInstruction);
+                                        uiService.flushEvents();
+                                        break;
+                                    }
                                 }
                             } else {
                                 uiService.stackEvent(changeHandlerInstruction);
@@ -219,14 +237,19 @@ public class PTWidget extends PTUIObject {
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction eventInstruction = new PTInstruction();
-                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
                             eventInstruction.setObjectID(addHandler.getObjectID());
-                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                            eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
                             eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
                             if (eventInstruction.containsKey(PROPERTY.KEY_FILTER)) {
-                                final JSONObject jsonValue = addHandler.get(PROPERTY.KEY_FILTER).isObject();
-                                if (jsonValue.containsKey(event.getNativeEvent().getKeyCode() + "")) {
-                                    uiService.triggerEvent(eventInstruction);
+                                final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+                                for (int i = 0; i < jsonArray.size(); i++) {
+                                    final JSONNumber keyCode = jsonArray.get(i).isNumber();
+                                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                        uiService.triggerEvent(eventInstruction);
+                                        break;
+                                    }
                                 }
                             } else {
                                 uiService.triggerEvent(eventInstruction);
