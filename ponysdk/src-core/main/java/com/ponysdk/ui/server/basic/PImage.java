@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PImage extends PFocusWidget {
 
@@ -50,11 +50,11 @@ public class PImage extends PFocusWidget {
     public PImage() {}
 
     public PImage(final String url, final int left, final int top, final int width, final int height) {
-        create.getMainProperty().setProperty(PropertyKey.WIDGET_HEIGHT, width);
-        create.getMainProperty().setProperty(PropertyKey.WIDGET_WIDTH, height);
-        create.getMainProperty().setProperty(PropertyKey.IMAGE_URL, url);
-        create.getMainProperty().setProperty(PropertyKey.IMAGE_LEFT, left);
-        create.getMainProperty().setProperty(PropertyKey.IMAGE_TOP, top);
+        create.put(PROPERTY.WIDGET_HEIGHT, width);
+        create.put(PROPERTY.WIDGET_WIDTH, height);
+        create.put(PROPERTY.IMAGE_URL, url);
+        create.put(PROPERTY.IMAGE_LEFT, left);
+        create.put(PROPERTY.IMAGE_TOP, top);
     }
 
     public PImage(final String url) {
@@ -92,7 +92,7 @@ public class PImage extends PFocusWidget {
         final String extension = classpathURL.getUrl().getFile().substring(classpathURL.getUrl().getFile().lastIndexOf('.') + 1);
 
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
+        update.put(PROPERTY.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
         getPonySession().stackInstruction(update);
     }
 
@@ -108,7 +108,7 @@ public class PImage extends PFocusWidget {
     public void setUrl(final String url) {
         this.url = url;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.IMAGE_URL, url);
+        update.put(PROPERTY.IMAGE_URL, url);
         getPonySession().stackInstruction(update);
     }
 

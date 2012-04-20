@@ -26,32 +26,31 @@ package com.ponysdk.ui.server.basic.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.ui.server.basic.PKeyCode;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public abstract class PKeyUpFilterHandler implements PKeyUpHandler, HasPProperties {
+public abstract class PKeyUpFilterHandler extends JSONObject implements PKeyUpHandler {
 
-    private final List<Property> properties = new ArrayList<Property>();
+    private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
 
-    public PKeyUpFilterHandler(PKeyCode... keyCodes) {
-        List<String> codes = new ArrayList<String>();
-        for (PKeyCode code : keyCodes) {
-            codes.add(code.getCodeToString());
+    public PKeyUpFilterHandler(final PKeyCode... keyCodes) {
+        final List<Integer> codes = new ArrayList<Integer>(keyCodes.length);
+
+        for (final PKeyCode code : keyCodes) {
+            codes.add(code.getCode());
         }
 
-        final Property filter = new Property(PropertyKey.KEY_FILTER, codes);
-        properties.add(filter);
-    }
-
-    @Override
-    public List<Property> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public void addProperty(Property property) {
-        properties.add(property);
+        try {
+            put(PROPERTY.KEY_FILTER, new JSONArray(codes));
+        } catch (final JSONException e) {
+            log.error("Cannot set Key Filter", e);
+        }
     }
 
 }

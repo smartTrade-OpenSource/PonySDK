@@ -26,15 +26,15 @@ package com.ponysdk.ui.server.addon;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PAttachedPopupPanel extends PPopupPanel implements PAddOn {
 
     public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
         super(autoHide);
-        create.getMainProperty().setProperty(PropertyKey.WIDGET, attached.getID());
+        create.put(PROPERTY.WIDGET, attached.getID());
     }
 
     @Override

@@ -24,42 +24,41 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DialogBox;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        Property mainProperty = create.getMainProperty();
-        boolean autoHide = mainProperty.hasChildProperty(PropertyKey.POPUP_AUTO_HIDE) ? mainProperty.getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE) : false;
-        boolean modal = mainProperty.hasChildProperty(PropertyKey.POPUP_MODAL) ? mainProperty.getBooleanPropertyValue(PropertyKey.POPUP_MODAL) : false;
+    public void create(final PTInstruction create, final UIService uiService) {
+        boolean autoHide = false;
+        boolean modal = false;
 
-        init(create, uiService, new com.google.gwt.user.client.ui.DialogBox(autoHide, modal));
+        if (create.containsKey(PROPERTY.POPUP_AUTO_HIDE)) {
+            autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
+        }
+        if (create.containsKey(PROPERTY.POPUP_MODAL)) {
+            modal = create.getBoolean(PROPERTY.POPUP_MODAL);
+        }
+
+        init(create, uiService, new DialogBox(autoHide, modal));
         addCloseHandler(create, uiService);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
+        final DialogBox dialogBox = cast();
 
-        DialogBox dialogBox = cast();
-
-        final Property mainProperty = update.getMainProperty();
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.POPUP_CAPTION.equals(propertyKey)) {
-                dialogBox.setHTML(property.getValue());
-            }
+        if (update.containsKey(PROPERTY.POPUP_CAPTION)) {
+            dialogBox.setHTML(update.getString(PROPERTY.POPUP_CAPTION));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.DialogBox cast() {
-        return (com.google.gwt.user.client.ui.DialogBox) uiObject;
+    public DialogBox cast() {
+        return (DialogBox) uiObject;
     }
 }

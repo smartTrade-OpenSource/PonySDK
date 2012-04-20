@@ -26,6 +26,7 @@ package com.ponysdk.sample.client.page;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -44,8 +45,32 @@ public class TimerPageActivity extends SamplePageActivity {
 
     protected PTimer timer;
 
+    private boolean enableDateTimer = true;
+
+    private PTextBox textBox;
+
+    private PLabel date;
+
+    private SimpleDateFormat dateFormat;
+
     public TimerPageActivity() {
         super("Timer Page", "Timer");
+    }
+
+    @Override
+    protected void onShowPage(final Place place) {
+        super.onShowPage(place);
+
+        enableDateTimer = true;
+
+        PScheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+            @Override
+            public boolean execute() {
+                date.setText(dateFormat.format(Calendar.getInstance().getTime()));
+                return enableDateTimer;
+            }
+        }, 1000);
     }
 
     @Override
@@ -55,7 +80,7 @@ public class TimerPageActivity extends SamplePageActivity {
         final PVerticalPanel panel = new PVerticalPanel();
         final PLabel label = new PLabel("0");
 
-        final PTextBox textBox = new PTextBox("1000");
+        textBox = new PTextBox("1000");
 
         timer = new PTimer() {
 
@@ -71,30 +96,12 @@ public class TimerPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                if (timer != null) timer.cancel();
                 timer.scheduleRepeating(Integer.valueOf(textBox.getText()));
             }
         });
 
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
-        final PLabel date = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
-
-        // new PTimer() {
-        //
-        // @Override
-        // public void run() {
-        // date.setText(dateFormat.format(Calendar.getInstance().getTime()));
-        // }
-        // }.scheduleRepeating(1000);
-
-        PScheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-
-            @Override
-            public boolean execute() {
-                date.setText(dateFormat.format(Calendar.getInstance().getTime()));
-                return true;
-            }
-        }, 1000);
+        dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
+        date = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
 
         final PHorizontalPanel datePanel = new PHorizontalPanel();
         datePanel.add(new PHTML("Date :"));
@@ -107,4 +114,12 @@ public class TimerPageActivity extends SamplePageActivity {
 
         examplePanel.setWidget(panel);
     }
+
+    @Override
+    protected void onLeavingPage() {
+        super.onLeavingPage();
+        enableDateTimer = false;
+        timer.cancel();
+    }
+
 }

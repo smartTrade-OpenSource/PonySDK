@@ -28,15 +28,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String>, PValueChangeHandler<String> {
 
@@ -51,14 +53,14 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     public PTextBoxBase(final String text) {
         super();
         setText(text);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.STRING_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            onValueChange(new PValueChangeEvent<String>(this, e.getMainProperty().getValue()));
+    public void onEventInstruction(final JSONObject e) throws JSONException {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.STRING_VALUE_CHANGE_HANDLER)) {
+            onValueChange(new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE)));
         } else {
             super.onEventInstruction(e);
         }
@@ -78,7 +80,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -107,7 +109,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     public void setSize(final int maxCharacterLength) {
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.SIZE, maxCharacterLength + "");
+        update.put(PROPERTY.SIZE, maxCharacterLength + "");
         getPonySession().stackInstruction(update);
     }
 

@@ -32,7 +32,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
 
     private int messageIndex = 1;
 
-    public DefaultLoginPageView(String title) {
+    public DefaultLoginPageView(final String title) {
         setSizeFull();
 
         loginTextBox.setStyleName("pony-LoginPage-LoginTextBox");
@@ -94,27 +94,27 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     @Override
-    public void addLoginShortcutListener(PKeyUpHandler handler) {
+    public void addLoginShortcutListener(final PKeyUpHandler handler) {
         loginTextBox.addKeyUpHandler(handler);
     }
 
     @Override
-    public void addLoginClickHandler(PClickHandler handler) {
+    public void addLoginClickHandler(final PClickHandler handler) {
         loginButton.addClickHandler(handler);
     }
 
     @Override
-    public void addPasswordShortcutListener(PKeyUpHandler handler) {
+    public void addPasswordShortcutListener(final PKeyUpHandler handler) {
         passwordTextBox.addKeyUpHandler(handler);
     }
 
     @Override
-    public void addVersionInformation(String version) {
+    public void addVersionInformation(final String version) {
         versionInformation.setText(version);
     }
 
     @Override
-    public void addMessage(String message) {
+    public void addMessage(final String message) {
         final PLabel messageLabel = new PLabel(message);
         messageLabel.ensureDebugId("login_page_message_" + messageIndex);
         messageIndex++;
@@ -143,7 +143,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     @Override
-    public void setFocusOnLogin(boolean focused) {
+    public void setFocusOnLogin(final boolean focused) {
         loginTextBox.setFocus(focused);
     }
 

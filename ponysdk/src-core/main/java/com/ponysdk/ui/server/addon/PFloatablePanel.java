@@ -23,13 +23,13 @@
 
 package com.ponysdk.ui.server.addon;
 
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.PAddOn;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PFloatablePanel extends PSimplePanel implements PAddOn {
 
@@ -45,14 +45,14 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
     public void setLinkedScrollPanel(final PScrollPanel linkedScrollPanel) {
         this.linkedScrollPanel = linkedScrollPanel;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.REFERENCE_SCROLL_PANEL, linkedScrollPanel.getID());
+        update.put(PROPERTY.REFERENCE_SCROLL_PANEL, linkedScrollPanel.getID());
         getPonySession().stackInstruction(update);
     }
 
     public void correct() {
         if (linkedScrollPanel == null) return;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.CORRECT_DIMENSION, linkedScrollPanel.getID());
+        update.put(PROPERTY.CORRECT_DIMENSION, linkedScrollPanel.getID());
         getPonySession().stackInstruction(update);
     }
 

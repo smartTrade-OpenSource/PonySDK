@@ -77,12 +77,13 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         styleListBox.addItem(PonySDKTheme.BUTTON_ORANGE);
         styleListBox.addItem(PonySDKTheme.BUTTON_PINK);
         styleListBox.addItem(PonySDKTheme.BUTTON_ROSY);
+        styleListBox.addItem("pony-PButton accent");
 
         styleListBox.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(Object source, int selectedIndex) {
-                String styleName = styleListBox.getItem(selectedIndex);
+            public void onChange(final Object source, final int selectedIndex) {
+                final String styleName = styleListBox.getItem(selectedIndex);
 
                 normalButton.setStyleName(styleName);
                 disabledOnRequestButton.setStyleName(styleName);
@@ -114,11 +115,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         showLoadingOnRequestButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 fireEvent(new DemoBusinessEvent("Button clicked"));
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {}
+                } catch (final InterruptedException e) {}
             }
         });
 
@@ -129,11 +130,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         disabledOnRequestButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 fireEvent(new DemoBusinessEvent("Button clicked"));
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {}
+                } catch (final InterruptedException e) {}
             }
         });
 
@@ -145,11 +146,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         comboOnRequestButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 fireEvent(new DemoBusinessEvent("Button clicked"));
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {}
+                } catch (final InterruptedException e) {}
             }
         });
 

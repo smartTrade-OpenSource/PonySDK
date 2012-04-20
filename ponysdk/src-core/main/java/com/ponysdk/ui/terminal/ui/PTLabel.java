@@ -23,35 +23,29 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTLabel extends PTLabelBase<String> {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.Label());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new Label());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        if (PropertyKey.TEXT.equals(propertyKey)) {
-            cast().setText(property.getValue());
-            return;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.getString(PROPERTY.TEXT));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.Label cast() {
-        return (com.google.gwt.user.client.ui.Label) uiObject;
+    public Label cast() {
+        return (Label) uiObject;
     }
 }

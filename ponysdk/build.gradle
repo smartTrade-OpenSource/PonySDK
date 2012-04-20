@@ -55,6 +55,7 @@ dependencies {
 	gwt 'com.google.gwt:gwt-user:2.4.0'
 	gwt 'com.google.gwt:gwt-dev:2.4.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
+	gwt 'org.json:json:20090211'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
 	spring 'org.springframework:spring-web:3.0.6.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'

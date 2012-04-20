@@ -23,14 +23,23 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.basic.event.POpenHandler;
+import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
@@ -38,6 +47,10 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     private static final String OPENNED = "images/disclosure_openned.png";
 
     private PWidget content;
+    private boolean isOpen;
+
+    private final List<PCloseHandler> closeHandlers = new ArrayList<PCloseHandler>();
+    private final List<POpenHandler> openHandlers = new ArrayList<POpenHandler>();
 
     public PDisclosurePanel(final String headerText) {
         this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
@@ -45,10 +58,29 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
     public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
         super();
-        final Property mainProperty = new Property(PropertyKey.TEXT, headerText);
-        mainProperty.setProperty(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        mainProperty.setProperty(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
-        setMainProperty(mainProperty);
+
+        create.put(PROPERTY.TEXT, headerText);
+        create.put(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
+        create.put(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
+    }
+
+    @Override
+    public void onEventInstruction(final JSONObject event) throws JSONException {
+        final String handler = event.getString(HANDLER.KEY);
+
+        if (HandlerType.CLOSE_HANDLER.equals(handler)) {
+            this.isOpen = false;
+            for (final PCloseHandler closeHandler : closeHandlers) {
+                closeHandler.onClose();
+            }
+        } else if (HandlerType.OPEN_HANDLER.equals(handler)) {
+            this.isOpen = true;
+            for (final POpenHandler openHandler : openHandlers) {
+                openHandler.onOpen();
+            }
+        } else {
+            super.onEventInstruction(event);
+        }
     }
 
     @Override
@@ -122,6 +154,27 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     private final void adopt(final PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
+    }
+
+    public void setOpen(final boolean isOpen) {
+        if (this.isOpen != isOpen) {
+            this.isOpen = isOpen;
+            final Update update = new Update(getID());
+            update.put(PROPERTY.OPEN, isOpen);
+            getPonySession().stackInstruction(update);
+        }
+    }
+
+    public void addCloseHandler(final PCloseHandler handler) {
+        closeHandlers.add(handler);
+    }
+
+    public void addOpenHandler(final POpenHandler handler) {
+        openHandlers.add(handler);
+    }
+
+    public boolean isOpen() {
+        return isOpen;
     }
 
 }

@@ -26,15 +26,15 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public abstract class PTComposite extends PTWidget {
 
     private UIService uiService;
-    private Create create;
+    private PTInstruction create;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
         this.create = create;
         this.uiService = uiService;
     }

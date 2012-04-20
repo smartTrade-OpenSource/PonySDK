@@ -21,17 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.core.instruction;
 
-import java.util.List;
-import java.util.Map;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.ponysdk.ui.terminal.instruction.Instruction;
+public class RemoveHandler extends Handler {
 
-public interface PonyEngineServiceAsync {
+    public RemoveHandler(final long objectID, final String type) {
+        super(objectID, type);
+        put(TYPE.KEY, TYPE.REMOVE_HANDLER);
+    }
 
-    void startApplication(String historyToken, Map<String, String> cookies, AsyncCallback<PonySessionContext> callback);
-
-    void fireInstructions(long key, List<Instruction> instructions, AsyncCallback<List<Instruction>> callback);
 }

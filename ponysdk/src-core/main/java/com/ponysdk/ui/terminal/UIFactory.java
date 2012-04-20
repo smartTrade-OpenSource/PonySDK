@@ -24,7 +24,8 @@
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.WIDGETTYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
@@ -68,111 +69,62 @@ import com.ponysdk.ui.terminal.ui.PTTabLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTTabPanel;
 import com.ponysdk.ui.terminal.ui.PTTextArea;
 import com.ponysdk.ui.terminal.ui.PTTextBox;
-import com.ponysdk.ui.terminal.ui.PTTimer;
 import com.ponysdk.ui.terminal.ui.PTTree;
 import com.ponysdk.ui.terminal.ui.PTTreeItem;
 import com.ponysdk.ui.terminal.ui.PTVerticalPanel;
 
 public class UIFactory {
 
-    public PTObject newUIObject(final UIService uiService, final Create create) {
-        final WidgetType widgetType = create.getWidgetType();
-        switch (widgetType) {
-            case BUTTON:
-                return new PTButton();
-            case ANCHOR:
-                return new PTAnchor();
-            case ROOT_LAYOUT_PANEL:
-                return new PTRootLayoutPanel();
-            case ROOT_PANEL:
-                return new PTRootPanel();
-            case LAYOUT_PANEL:
-                return new PTLayoutPanel();
-            case TAB_LAYOUT_PANEL:
-                return new PTTabLayoutPanel();
-            case ABSOLUTE_PANEL:
-                return new PTAbsolutePanel();
-            case TAB_PANEL:
-                return new PTTabPanel();
-            case VERTICAL_PANEL:
-                return new PTVerticalPanel();
-            case HORIZONTAL_PANEL:
-                return new PTHorizontalPanel();
-            case DOCK_LAYOUT_PANEL:
-                return new PTDockLayoutPanel();
-            case SPLIT_LAYOUT_PANEL:
-                return new PTSplitLayoutPanel();
-            case STACKLAYOUT_PANEL:
-                return new PTStackLayoutPanel();
-            case LABEL:
-                return new PTLabel();
-            case HTML:
-                return new PTHTML();
-            case TEXTBOX:
-                return new PTTextBox();
-            case PASSWORD_TEXTBOX:
-                return new PTPasswordTextBox();
-            case TEXT_AREA:
-                return new PTTextArea();
-            case CHECKBOX:
-                return new PTCheckBox();
-            case RADIO_BUTTON:
-                return new PTRadioButton();
-            case PUSH_BUTTON:
-                return new PTPushButton();
-            case LISTBOX:
-                return new PTListBox();
-            case SIMPLE_LAYOUT_PANEL:
-                return new PTSimpleLayoutPanel();
-            case SIMPLE_PANEL:
-                return new PTSimplePanel();
-            case SCROLL_PANEL:
-                return new PTScrollPanel();
-            case DATEBOX:
-                return new PTDateBox();
-            case FLEX_TABLE:
-                return new PTFlexTable();
-            case GRID:
-                return new PTGrid();
-            case IMAGE:
-                return new PTImage();
-            case FILE_UPLOAD:
-                return new PTFileUpload();
-            case TREE:
-                return new PTTree();
-            case TREE_ITEM:
-                return new PTTreeItem();
-            case MENU_BAR:
-                return new PTMenuBar();
-            case MENU_ITEM:
-                return new PTMenuItem();
-            case MENU_ITEM_SEPARATOR:
-                return new PTMenuItemSeparator();
-            case POPUP_PANEL:
-                return new PTPopupPanel();
-            case DECORATED_POPUP_PANEL:
-                return new PTDecoratedPopupPanel();
-            case TIMER:
-                return new PTTimer();
-            case SCHEDULER:
-                return new PTScheduler();
-            case RICH_TEXT_AREA:
-                return new PTRichTextArea();
-            case DIALOG_BOX:
-                return new PTDialogBox();
-            case FLOW_PANEL:
-                return new PTFlowPanel();
-            case SUGGESTBOX:
-                return new PTSuggestBox();
-            case DISCLOSURE_PANEL:
-                return new PTDisclosurePanel();
-            case DECORATOR_PANEL:
-                return new PTDecoratedPanel();
-            case ELEMENT:
-                return new PTElement();
-            default:
-                Window.alert("UIFactory: Client implementation not found, type : " + create.getWidgetType());
-                return null;
-        }
+    public PTObject newUIObject(final UIService uiService, final PTInstruction create) {
+        final WidgetType widgetType = WidgetType.values()[create.getInt(WIDGETTYPE.KEY)];
+
+        if (WidgetType.BUTTON.equals(widgetType)) { return new PTButton(); }
+        if (WidgetType.ANCHOR.equals(widgetType)) { return new PTAnchor(); }
+        if (WidgetType.ROOT_LAYOUT_PANEL.equals(widgetType)) { return new PTRootLayoutPanel(); }
+        if (WidgetType.ROOT_PANEL.equals(widgetType)) { return new PTRootPanel(); }
+        if (WidgetType.LAYOUT_PANEL.equals(widgetType)) { return new PTLayoutPanel(); }
+        if (WidgetType.TAB_LAYOUT_PANEL.equals(widgetType)) { return new PTTabLayoutPanel(); }
+        if (WidgetType.ABSOLUTE_PANEL.equals(widgetType)) { return new PTAbsolutePanel(); }
+        if (WidgetType.TAB_PANEL.equals(widgetType)) { return new PTTabPanel(); }
+        if (WidgetType.VERTICAL_PANEL.equals(widgetType)) { return new PTVerticalPanel(); }
+        if (WidgetType.HORIZONTAL_PANEL.equals(widgetType)) { return new PTHorizontalPanel(); }
+        if (WidgetType.DOCK_LAYOUT_PANEL.equals(widgetType)) { return new PTDockLayoutPanel(); }
+        if (WidgetType.SPLIT_LAYOUT_PANEL.equals(widgetType)) { return new PTSplitLayoutPanel(); }
+        if (WidgetType.STACKLAYOUT_PANEL.equals(widgetType)) { return new PTStackLayoutPanel(); }
+        if (WidgetType.LABEL.equals(widgetType)) { return new PTLabel(); }
+        if (WidgetType.HTML.equals(widgetType)) { return new PTHTML(); }
+        if (WidgetType.TEXTBOX.equals(widgetType)) { return new PTTextBox(); }
+        if (WidgetType.PASSWORD_TEXTBOX.equals(widgetType)) { return new PTPasswordTextBox(); }
+        if (WidgetType.TEXT_AREA.equals(widgetType)) { return new PTTextArea(); }
+        if (WidgetType.CHECKBOX.equals(widgetType)) { return new PTCheckBox(); }
+        if (WidgetType.RADIO_BUTTON.equals(widgetType)) { return new PTRadioButton(); }
+        if (WidgetType.PUSH_BUTTON.equals(widgetType)) { return new PTPushButton(); }
+        if (WidgetType.LISTBOX.equals(widgetType)) { return new PTListBox(); }
+        if (WidgetType.SIMPLE_LAYOUT_PANEL.equals(widgetType)) { return new PTSimpleLayoutPanel(); }
+        if (WidgetType.SIMPLE_PANEL.equals(widgetType)) { return new PTSimplePanel(); }
+        if (WidgetType.SCROLL_PANEL.equals(widgetType)) { return new PTScrollPanel(); }
+        if (WidgetType.DATEBOX.equals(widgetType)) { return new PTDateBox(); }
+        if (WidgetType.FLEX_TABLE.equals(widgetType)) { return new PTFlexTable(); }
+        if (WidgetType.GRID.equals(widgetType)) { return new PTGrid(); }
+        if (WidgetType.IMAGE.equals(widgetType)) { return new PTImage(); }
+        if (WidgetType.FILE_UPLOAD.equals(widgetType)) { return new PTFileUpload(); }
+        if (WidgetType.TREE.equals(widgetType)) { return new PTTree(); }
+        if (WidgetType.TREE_ITEM.equals(widgetType)) { return new PTTreeItem(); }
+        if (WidgetType.MENU_BAR.equals(widgetType)) { return new PTMenuBar(); }
+        if (WidgetType.MENU_ITEM.equals(widgetType)) { return new PTMenuItem(); }
+        if (WidgetType.MENU_ITEM_SEPARATOR.equals(widgetType)) { return new PTMenuItemSeparator(); }
+        if (WidgetType.POPUP_PANEL.equals(widgetType)) { return new PTPopupPanel(); }
+        if (WidgetType.DECORATED_POPUP_PANEL.equals(widgetType)) { return new PTDecoratedPopupPanel(); }
+        if (WidgetType.SCHEDULER.equals(widgetType)) { return new PTScheduler(); }
+        if (WidgetType.RICH_TEXT_AREA.equals(widgetType)) { return new PTRichTextArea(); }
+        if (WidgetType.DIALOG_BOX.equals(widgetType)) { return new PTDialogBox(); }
+        if (WidgetType.FLOW_PANEL.equals(widgetType)) { return new PTFlowPanel(); }
+        if (WidgetType.SUGGESTBOX.equals(widgetType)) { return new PTSuggestBox(); }
+        if (WidgetType.DISCLOSURE_PANEL.equals(widgetType)) { return new PTDisclosurePanel(); }
+        if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratedPanel(); }
+        if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
+        Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+
+        return null;
     }
 }

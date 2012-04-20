@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PGrid extends PHTMLTable {
 
@@ -36,8 +36,8 @@ public class PGrid extends PHTMLTable {
         this.rows = rows;
         this.columns = columns;
 
-        create.getMainProperty().setProperty(PropertyKey.ROW, rows);
-        create.getMainProperty().setProperty(PropertyKey.COLUMN, columns);
+        create.put(PROPERTY.ROW, rows);
+        create.put(PROPERTY.COLUMN, columns);
     }
 
     public PGrid() {

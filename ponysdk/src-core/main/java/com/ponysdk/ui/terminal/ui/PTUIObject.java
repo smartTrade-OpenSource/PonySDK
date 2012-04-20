@@ -24,11 +24,9 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.UIObject;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public abstract class PTUIObject extends AbstractPTObject {
 
@@ -36,7 +34,7 @@ public abstract class PTUIObject extends AbstractPTObject {
 
     protected UIObject uiObject;
 
-    protected void init(final Create create, final UIService uiService, final UIObject uiObject) {
+    protected void init(final PTInstruction create, final UIService uiService, final UIObject uiObject) {
         if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
         this.uiObject = uiObject;
         if (create != null) {
@@ -50,45 +48,27 @@ public abstract class PTUIObject extends AbstractPTObject {
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        switch (propertyKey) {
-            case WIDGET_WIDTH:
-                uiObject.setWidth(property.getValue());
-                break;
-            case WIDGET_HEIGHT:
-                uiObject.setHeight(property.getValue());
-                break;
-            case WIDGET_FONT_SIZE:
-                uiObject.getElement().getStyle().setProperty(FONT_SIZE, property.getValue());
-                break;
-            case STYLE_PROPERTY:
-                uiObject.getElement().getStyle().setProperty(property.getStringPropertyValue(PropertyKey.STYLE_KEY), property.getStringPropertyValue(PropertyKey.STYLE_VALUE));
-                break;
-            case STYLE_NAME:
-                uiObject.setStyleName(property.getValue());
-                break;
-            case ADD_STYLE_NAME:
-                uiObject.addStyleName(property.getValue());
-                break;
-            case REMOVE_STYLE_NAME:
-                uiObject.removeStyleName(property.getValue());
-                break;
-            case ENSURE_DEBUG_ID:
-                uiObject.ensureDebugId(property.getValue());
-                break;
-            case WIDGET_TITLE:
-                uiObject.setTitle(property.getValue());
-                break;
-            case WIDGET_VISIBLE:
-                uiObject.setVisible(property.getBooleanValue());
-                break;
-
-            default:
-                break;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.WIDGET_WIDTH)) {
+            uiObject.setWidth(update.getString(PROPERTY.WIDGET_WIDTH));
+        } else if (update.containsKey(PROPERTY.WIDGET_HEIGHT)) {
+            uiObject.setHeight(update.getString(PROPERTY.WIDGET_HEIGHT));
+        } else if (update.containsKey(PROPERTY.WIDGET_FONT_SIZE)) {
+            uiObject.getElement().getStyle().setProperty(FONT_SIZE, update.getString(PROPERTY.WIDGET_FONT_SIZE));
+        } else if (update.containsKey(PROPERTY.STYLE_NAME)) {
+            uiObject.setStyleName(update.getString(PROPERTY.STYLE_NAME));
+        } else if (update.containsKey(PROPERTY.ADD_STYLE_NAME)) {
+            uiObject.addStyleName(update.getString(PROPERTY.ADD_STYLE_NAME));
+        } else if (update.containsKey(PROPERTY.REMOVE_STYLE_NAME)) {
+            uiObject.removeStyleName(update.getString(PROPERTY.REMOVE_STYLE_NAME));
+        } else if (update.containsKey(PROPERTY.WIDGET_VISIBLE)) {
+            uiObject.setVisible(update.getBoolean(PROPERTY.WIDGET_VISIBLE));
+        } else if (update.containsKey(PROPERTY.ENSURE_DEBUG_ID)) {
+            uiObject.ensureDebugId(update.getString(PROPERTY.ENSURE_DEBUG_ID));
+        } else if (update.containsKey(PROPERTY.WIDGET_TITLE)) {
+            uiObject.setTitle(update.getString(PROPERTY.WIDGET_TITLE));
+        } else if (update.containsKey(PROPERTY.STYLE_KEY)) {
+            uiObject.getElement().getStyle().setProperty(update.getString(PROPERTY.STYLE_KEY), update.getString(PROPERTY.STYLE_VALUE));
         }
     }
 

@@ -24,7 +24,6 @@
 package com.ponysdk.impl.webapplication.menu;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,11 +31,11 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PDisclosurePanel;
-import com.ponysdk.ui.server.basic.PImage;
+import com.ponysdk.ui.server.basic.PComplexPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PStackLayoutPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -44,112 +43,202 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
-    private final Map<String, PAnchor> anchorByName = new LinkedHashMap<String, PAnchor>();
+    private class Node {
 
-    private final Map<String, PVerticalPanel> categoriesByName = new LinkedHashMap<String, PVerticalPanel>();
+        private PWidget ui;
+        private boolean open;
 
-    private final double headerWidth = 2;// em
+        private final String name;
+        private final Node parent;
+        private final List<Node> children;
+        private final int level;
 
-    private PAnchor selectedItem;
+        public Node(final Node parent, final String name) {
+            this.parent = parent;
+            this.name = name;
+            this.children = new ArrayList<Node>();
+
+            if (parent != null) {
+                this.parent.children.add(this);
+                this.level = parent.level + 1;
+            } else {
+                this.level = 0;
+            }
+
+            this.open = (level < 2);
+        }
+
+        public Node getChild(final String name) {
+            for (final Node child : children) {
+                if (child.name.equals(name)) return child;
+            }
+            return null;
+        }
+
+    }
+
+    private final Node root = new Node(null, "ROOT");
 
     private final PStackLayoutPanel layoutPanel;
+    private final double headerWidth = 2;// em
+    private final double paddingLeft = 16;// px
 
+    private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<Node, PComplexPanel>();
     private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
+    private final Map<String, PAnchor> anchorByName = new LinkedHashMap<String, PAnchor>();
+    private PAnchor selectedItem;
 
     public StackLayoutMenuView() {
         layoutPanel = new PStackLayoutPanel(Unit.EM);
         setWidget(layoutPanel);
         setSizeFull();
         layoutPanel.setSizeFull();
-
-        layoutPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<Integer> event) {
-                // PSelectionEvent<String> e = new PSelectionEvent<String>(StackLayoutMenuView.this, );
-                // for (PSelectionHandler<String> handler : selectionHandlers) {
-                // handler.onSelection(e);
-                // }
-            }
-        });
-
     }
 
     @Override
-    public void addCategory(final String category) {
-        createCategoryItemIfNeeded(category);
+    public void addItem(final Collection<String> categories, final String caption) {
+        final Node categoryNode = createCategoriesItemIfNeeded(categories);
+        if (caption != null) addItem(categoryNode, caption);
     }
 
-    private String getCategory(final String[] split, final int index) {
-        String category = split[0];
-        for (int i = 0; i <= index; i++) {
-            category = category + "," + split[i];
-        }
-        return category;
-    }
-
-    private PVerticalPanel createCategoryItemIfNeeded(final String category) {
-        final String[] split = category.split(",");
-        final List<String> list = Arrays.asList(split);
-        int i = 0;
-        PVerticalPanel categoryPanel = null;
-        while (i != list.size()) {
-            final String currentCategory = getCategory(split, i);
-            categoryPanel = categoriesByName.get(currentCategory);
-            if (categoryPanel == null) {
-                final String currentCategoryHeader = split[i];
-                categoryPanel = new PVerticalPanel();
-                categoryPanel.setHeight("1px");
-                categoryPanel.setWidth("100%");
-                categoriesByName.put(currentCategory, categoryPanel);
-                if (i == 0) {
-                    layoutPanel.add(categoryPanel, currentCategoryHeader, true, headerWidth);
-                } else {
-                    final String containingCategory = getCategory(split, i - 1);
-                    final PVerticalPanel containingPanel = categoriesByName.get(containingCategory);
-                    final PImage openImage = new PImage("images/treeDownTriangleBlack.png");
-                    final PImage closeImage = new PImage("images/treeRightTriangleBlack.png");
-                    openImage.addStyleName("disclosure-open");
-                    final PDisclosurePanel newCategoryStackPanel = new PDisclosurePanel(currentCategoryHeader, openImage, closeImage);
-                    containingPanel.add(newCategoryStackPanel);
-                    newCategoryStackPanel.add(categoryPanel);
-                    newCategoryStackPanel.setSizeFull();
-                }
+    private Node createCategoriesItemIfNeeded(final Collection<String> categories) {
+        Node current = root;
+        for (final String category : categories) {
+            Node categoryNode = current.getChild(category);
+            if (categoryNode == null) {
+                categoryNode = new Node(current, category);
+                addCategory(categoryNode);
             }
-            i++;
+            current = categoryNode;
         }
-        categoryPanel.ensureDebugId("category_" + category);
-        return categoryPanel;
+        return current;
     }
 
-    @Override
-    public void addItem(final String category, final String caption) {
-        final PVerticalPanel categoryPanel = createCategoryItemIfNeeded(category);
-        if (caption != null) {
-            final PAnchor item = new PAnchor(caption);
-            item.ensureDebugId("page_" + caption);
-            item.addClickHandler(new PClickHandler() {
+    private void addCategory(final Node categoryNode) {
+
+        if (categoryNode.level == 1) {
+            // Main category
+            final PVerticalPanel categoryPanel = new PVerticalPanel();
+            categoryPanel.setHeight("1px");
+            categoryPanel.setWidth("100%");
+            categoryPanel.ensureDebugId("category_" + categoryNode.name);
+
+            categoryNode.ui = categoryPanel;
+            layoutPanel.add(categoryPanel, categoryNode.name, true, headerWidth);
+            categoriesByNode.put(categoryNode, categoryPanel);
+
+        } else {
+
+            // Sub category
+            final Node parentCategory = categoryNode.parent;
+            final PComplexPanel categoryPanel = categoriesByNode.get(parentCategory);
+            if (categoryPanel == null) throw new IllegalArgumentException("Category '" + categoryNode.name + "' not assigned to a parent category");
+
+            final PAnchor category = new PAnchor(categoryNode.name);
+            applyPadding(categoryNode, category);
+            applyExpandableStyle(categoryNode, category);
+            category.addClickHandler(new PClickHandler() {
 
                 @Override
                 public void onClick(final PClickEvent clickEvent) {
-                    final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
-                    for (PSelectionHandler<String> handler : selectionHandlers) {
-                        handler.onSelection(event);
+                    if (categoryNode.open) {
+                        collapseNode(categoryNode);
+                        applyExpandableStyle(categoryNode, category);
+                    } else {
+                        expandNode(categoryNode);
+                        applyExpandableStyle(categoryNode, category);
                     }
                 }
             });
-            categoryPanel.add(item);
-            anchorByName.put(caption, item);
+
+            if (!parentCategory.open) category.setVisible(false);
+
+            categoryPanel.add(category);
+
+            categoryNode.ui = category;
+            categoriesByNode.put(categoryNode, categoryPanel);
+        }
+    }
+
+    private void applyExpandableStyle(final Node categoryNode, final PAnchor category) {
+
+        final String left = ((categoryNode.level - 1) * paddingLeft - 10) + "px";
+        category.setStyleProperty("backgroundPosition", left + " center");
+        category.setStyleProperty("backgroundRepeat", "no-repeat");
+
+        if (categoryNode.open) category.setStyleProperty("backgroundImage", "url('images/treeDownTriangleBlack.png')");
+        else category.setStyleProperty("backgroundImage", "url('images/treeRightTriangleBlack.png')");
+    }
+
+    private void applyPadding(final Node categoryNode, final PAnchor category) {
+        category.setStyleProperty("paddingLeft", (categoryNode.level - 1) * paddingLeft + "px");
+    }
+
+    private void addItem(final Node categoryNode, final String caption) {
+        final Node itemNode = new Node(categoryNode, caption);
+
+        final PComplexPanel categoryPanel = categoriesByNode.get(categoryNode);
+        final PAnchor item = new PAnchor(caption);
+        item.ensureDebugId("page_" + caption);
+        applyPadding(itemNode, item);
+        item.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
+                for (final PSelectionHandler<String> handler : selectionHandlers) {
+                    handler.onSelection(event);
+                }
+            }
+        });
+        if (!categoryNode.open) item.setVisible(false);
+
+        itemNode.ui = item;
+
+        categoryPanel.add(item);
+        anchorByName.put(caption, item);
+    }
+
+    protected void expandNode(final Node categoryNode) {
+        categoryNode.open = true;
+        for (final Node child : categoryNode.children) {
+            child.ui.setVisible(true);
+        }
+    }
+
+    protected void collapseNode(final Node categoryNode) {
+        categoryNode.open = false;
+        for (final Node child : categoryNode.children) {
+            child.ui.setVisible(false);
         }
     }
 
     @Override
-    public void selectItem(final String category, final String caption) {
+    public void selectItem(final Collection<String> categories, final String caption) {
+
         if (caption != null) {
             if (selectedItem != null) selectedItem.removeStyleName("selectedItem");
+
             final PAnchor item = anchorByName.get(caption);
             item.addStyleName("selectedItem");
             selectedItem = item;
+
+            int i = 1;
+            Node current = null;
+            for (final String category : categories) {
+                if (i == 1) {
+                    current = root.getChild(category);
+                    final PComplexPanel categoryPanel = categoriesByNode.get(current);
+                    if (categoryPanel != null) layoutPanel.showWidget(categoryPanel);
+                } else {
+                    current = current.getChild(category);
+                    if (current != null) {
+                        if (!current.open) expandNode(current);
+                    }
+                }
+                i++;
+            }
+
         } else {
             // tree.setSelectedItem(anchorByName.get(category));
         }

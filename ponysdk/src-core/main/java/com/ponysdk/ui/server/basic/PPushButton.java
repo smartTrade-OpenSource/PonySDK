@@ -23,16 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PPushButton extends PButton {
 
-    public PPushButton(PImage image) {
+    public PPushButton(final PImage image) {
         super();
-        final Property mainProperty = new Property(PropertyKey.IMAGE, image.getID());
-        setMainProperty(mainProperty);
+        create.put(PROPERTY.IMAGE, image.getID());
     }
 
     @Override

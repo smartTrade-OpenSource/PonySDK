@@ -23,14 +23,16 @@
 
 package com.ponysdk.ui.server.basic;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PMenuItem extends PWidget implements PHasHTML {
 
@@ -44,31 +46,31 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     private boolean enabled;
 
-    public PMenuItem(String text, boolean asHTML, PCommand cmd) {
+    public PMenuItem(final String text, final boolean asHTML, final PCommand cmd) {
         this(text, asHTML);
         setCommand(cmd);
     }
 
-    public PMenuItem(String text, boolean asHTML, PMenuBar subMenu) {
+    public PMenuItem(final String text, final boolean asHTML, final PMenuBar subMenu) {
         this(text, asHTML);
         setSubMenu(subMenu);
     }
 
-    public PMenuItem(String text, PCommand cmd) {
+    public PMenuItem(final String text, final PCommand cmd) {
         this(text, false);
         setCommand(cmd);
     }
 
-    public PMenuItem(String text) {
+    public PMenuItem(final String text) {
         this(text, false);
     }
 
-    public PMenuItem(String text, PMenuBar subMenu) {
+    public PMenuItem(final String text, final PMenuBar subMenu) {
         this(text, false);
         setSubMenu(subMenu);
     }
 
-    public PMenuItem(String text, boolean asHTML) {
+    public PMenuItem(final String text, final boolean asHTML) {
         if (asHTML) setHTML(text);
         else setText(text);
     }
@@ -84,10 +86,10 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -97,35 +99,39 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     @Override
-    public void setHTML(String html) {
+    public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.HTML, html);
+        update.put(PROPERTY.HTML, html);
         getPonySession().stackInstruction(update);
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.ENABLED, enabled);
+        update.put(PROPERTY.ENABLED, enabled);
         getPonySession().stackInstruction(update);
     }
 
-    private void setSubMenu(PMenuBar subMenu) {
+    private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
         final Add add = new Add(subMenu.getID(), getID());
         getPonySession().stackInstruction(add);
     }
 
-    public void setCommand(PCommand cmd) {
+    public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.COMMAND);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.COMMAND);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
-    public void onEventInstruction(EventInstruction event) {
-        if (HandlerType.COMMAND.equals(event.getHandlerType())) {
+    public void onEventInstruction(final JSONObject event) throws JSONException {
+        String handlerKey = null;
+        if (event.has(HANDLER.KEY)) {
+            handlerKey = event.getString(HANDLER.KEY);
+        }
+        if (HANDLER.COMMAND.equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onEventInstruction(event);

@@ -23,30 +23,28 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTMenuBar extends PTWidget {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.MenuBar(create.getMainProperty().getBooleanPropertyValue(PropertyKey.MENU_BAR_IS_VERTICAL)));
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new MenuBar(create.getBoolean(PROPERTY.MENU_BAR_IS_VERTICAL)));
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
 
         final PTObject child = uiService.getPTObject(add.getObjectID());
-        final com.google.gwt.user.client.ui.MenuBar menuBar = cast();
+        final MenuBar menuBar = cast();
 
-        final Property beforeIndexProperty = add.getMainProperty().getChildProperty(PropertyKey.BEFORE_INDEX);
         if (child instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) child;
-            if (beforeIndexProperty != null) {
-                menuBar.insertItem(menuItem.cast(), beforeIndexProperty.getIntValue());
+            if (add.containsKey(PROPERTY.BEFORE_INDEX)) {
+                menuBar.insertItem(menuItem.cast(), add.getInt(PROPERTY.BEFORE_INDEX));
             } else {
                 menuBar.addItem(menuItem.cast());
             }
@@ -58,8 +56,8 @@ public class PTMenuBar extends PTWidget {
     }
 
     @Override
-    public com.google.gwt.user.client.ui.MenuBar cast() {
-        return (com.google.gwt.user.client.ui.MenuBar) uiObject;
+    public MenuBar cast() {
+        return (MenuBar) uiObject;
     }
 
 }

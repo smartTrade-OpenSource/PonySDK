@@ -71,8 +71,10 @@ public class DefaultPageProvider implements PageProvider {
     public void addPageActivity(final PageActivity pageActivity) {
         if (pageActivity.getPageName() != null) {
             allPageActivitiesDeclared.put(pageActivity.getPageName(), pageActivity);
-        } else if (pageActivity.getPageCategory() != null) {
-            allPageActivitiesDeclared.put(pageActivity.getPageCategory(), pageActivity);
+        } else if (pageActivity.getPageCategories() != null) {
+            for (final String category : pageActivity.getPageCategories()) {
+                allPageActivitiesDeclared.put(category, pageActivity);
+            }
         }
     }
 

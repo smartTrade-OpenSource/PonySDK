@@ -24,9 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Create;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PComposite extends PWidget {
 
@@ -38,9 +38,7 @@ public abstract class PComposite extends PWidget {
     }
 
     @Override
-    protected void init(final WidgetType widgetType) {
-
-    }
+    protected void init(final WidgetType widgetType) {}
 
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
@@ -54,7 +52,7 @@ public abstract class PComposite extends PWidget {
         this.widget = child;
         child.setParent(this);
 
-        create.getMainProperty().setProperty(PropertyKey.WIDGET, child.getID());
+        create.put(PROPERTY.WIDGET, child.getID());
 
         getPonySession().stackInstruction(create);
     }

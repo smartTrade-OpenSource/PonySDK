@@ -6,80 +6,78 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTSuggestBox extends PTWidget {
 
     final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.SuggestBox(oracle));
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new SuggestBox(oracle));
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        switch (propertyKey) {
-            case FOCUSED:
-                cast().setFocus(property.getBooleanValue());
-                break;
-            case TEXT:
-                cast().setText(property.getValue());
-                break;
-            case SUGGESTION:
-                oracle.add(property.getValue());
-                break;
-            default:
-                break;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.FOCUSED)) {
+            cast().setFocus(update.getBoolean(PROPERTY.FOCUSED));
+        } else if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.SUGGESTION)) {
+            oracle.add(update.getString(PROPERTY.SUGGESTION));
+        } else if (update.containsKey(PROPERTY.LIMIT)) {
+            cast().setLimit(update.getInt(PROPERTY.LIMIT));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+
+        final String handler = addHandler.getString(HANDLER.KEY);
+
+        if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
             cast().addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.put(PROPERTY.TEXT, event.getValue());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
+        } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handler)) {
             cast().addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_SELECTION_HANDLER);
-                    eventInstruction.getMainProperty().setProperty(PropertyKey.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
-                    eventInstruction.getMainProperty().setProperty(PropertyKey.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.STRING_SELECTION_HANDLER);
+                    eventInstruction.put(PROPERTY.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
+                    eventInstruction.put(PROPERTY.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
         } else {
             super.addHandler(addHandler, uiService);
         }
-
     }
 
     @Override
-    public com.google.gwt.user.client.ui.SuggestBox cast() {
-        return (com.google.gwt.user.client.ui.SuggestBox) uiObject;
+    public SuggestBox cast() {
+        return (SuggestBox) uiObject;
     }
 }

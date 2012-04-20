@@ -24,45 +24,49 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.Timer;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTimer extends AbstractPTObject {
 
     private Timer timer;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
         timer = new Timer() {
 
             @Override
             public void run() {
-                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.TIMER));
+                final PTInstruction eventInstruction = new PTInstruction();
+                eventInstruction.setObjectID(create.getObjectID());
+                eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                eventInstruction.put(HANDLER.KEY, HANDLER.TIMER);
+                uiService.triggerEvent(eventInstruction);
             }
         };
     }
 
     @Override
-    public void remove(final Remove remove, final UIService uiService) {
+    public void remove(final PTInstruction remove, final UIService uiService) {
         timer.cancel();
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property property = update.getMainProperty();
-        if (property.getKey().equals(PropertyKey.REPEATING_DELAY)) timer.scheduleRepeating(update.getMainProperty().getIntValue());
-        else timer.schedule(update.getMainProperty().getIntValue());
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.REPEATING_DELAY)) {
+            timer.scheduleRepeating(update.getInt(PROPERTY.REPEATING_DELAY));
+        } else if (update.containsKey(PROPERTY.DELAY)) {
+            timer.schedule(update.getInt(PROPERTY.DELAY));
+        } else {
+            super.update(update, uiService);
+        }
     }
 
     @Override
-    public void gc(final GC gc, final UIService uiService) {
+    public void gc(final PTInstruction gc, final UIService uiService) {
         timer.cancel();
     }
 }

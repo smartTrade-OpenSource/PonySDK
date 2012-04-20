@@ -27,18 +27,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
@@ -55,19 +57,21 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     private boolean enabled = true;
 
     public PFileUpload() {
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.CHANGE_HANDLER.equals(instruction.getHandlerType())) {
-            final PropertyKey key = instruction.getMainProperty().getPropertyKey();
-            if (PropertyKey.FILE_NAME.equals(key)) {
-                setFileName(instruction.getMainProperty().getValue());
+    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+        final String handler = instruction.getString(HANDLER.KEY);
+
+        if (HANDLER.CHANGE_HANDLER.equals(handler)) {
+            final String fileName = instruction.getString(PROPERTY.FILE_NAME);
+            if (fileName != null) {
+                setFileName(fileName);
             }
             onChange(this, 0);
-        } else if (HandlerType.SUBMIT_COMPLETE_HANDLER.equals(instruction.getHandlerType())) {
+        } else if (HANDLER.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
             onSubmitComplete();
         } else {
             super.onEventInstruction(instruction);
@@ -82,7 +86,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     public void setName(final String name) {
         this.name = name;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.NAME, this.name);
+        update.put(PROPERTY.NAME, this.name);
         getPonySession().stackInstruction(update);
     }
 
@@ -111,7 +115,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.ENABLED, this.enabled);
+        update.put(PROPERTY.ENABLED, this.enabled);
         getPonySession().stackInstruction(update);
     }
 

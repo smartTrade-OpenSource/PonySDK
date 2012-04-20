@@ -4,11 +4,11 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTreeItem extends PObject {
 
@@ -28,7 +28,7 @@ public class PTreeItem extends PObject {
 
     PTreeItem(final boolean isRoot) {
         this.isRoot = isRoot;
-        create.getMainProperty().setProperty(PropertyKey.ROOT, isRoot);
+        create.put(PROPERTY.ROOT, isRoot);
     }
 
     public PTreeItem() {
@@ -38,7 +38,7 @@ public class PTreeItem extends PObject {
     public PTreeItem(final String html) {
         this();
         this.html = html;
-        create.getMainProperty().setProperty(PropertyKey.TEXT, html);
+        create.put(PROPERTY.TEXT, html);
     }
 
     public PTreeItem(final PWidget widget) {
@@ -62,7 +62,7 @@ public class PTreeItem extends PObject {
         if (tree != null) {
             tree.adopt(widget, this);
             final Add add = new Add(widget.getID(), getID());
-            add.getMainProperty().setProperty(PropertyKey.WIDGET, true);
+            add.put(PROPERTY.WIDGET, true);
             widget.getPonySession().stackInstruction(add);
         }
     }
@@ -83,7 +83,7 @@ public class PTreeItem extends PObject {
     public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.TEXT, html);
+        update.put(PROPERTY.TEXT, html);
         getPonySession().stackInstruction(update);
     }
 
@@ -91,7 +91,7 @@ public class PTreeItem extends PObject {
         this.tree = tree;
         if (isRoot) {
             final Add add = new Add(tree.getID(), getID());
-            add.setMainPropertyValue(PropertyKey.ROOT, true);
+            add.put(PROPERTY.ROOT, true);
             getPonySession().stackInstruction(add);
         }
         setWidget();
@@ -109,7 +109,7 @@ public class PTreeItem extends PObject {
         children.add(beforeIndex, item);
         item.setTree(tree);
         final Add add = new Add(item.getID(), getID());
-        add.setMainPropertyValue(PropertyKey.INDEX, beforeIndex);
+        add.put(PROPERTY.INDEX, beforeIndex);
         getPonySession().stackInstruction(add);
         return item;
     }
@@ -131,7 +131,7 @@ public class PTreeItem extends PObject {
     public void setSelected(final boolean selected) {
         this.selected = selected;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.SELECTED, selected);
+        update.put(PROPERTY.SELECTED, selected);
         getPonySession().stackInstruction(update);
     }
 
@@ -142,7 +142,7 @@ public class PTreeItem extends PObject {
     public void setState(final boolean open) {
         this.open = open;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.STATE, open);
+        update.put(PROPERTY.STATE, open);
         getPonySession().stackInstruction(update);
     }
 

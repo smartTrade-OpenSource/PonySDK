@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PRadioButton extends PCheckBox {
 
@@ -48,7 +48,7 @@ public class PRadioButton extends PCheckBox {
     public void setName(final String name) {
         this.name = name;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.NAME, name);
+        update.put(PROPERTY.NAME, name);
         getPonySession().stackInstruction(update);
     }
 

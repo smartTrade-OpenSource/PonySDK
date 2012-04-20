@@ -29,42 +29,33 @@ import java.util.Map;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTRadioButton extends PTCheckBox {
 
     private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<String, PTRadioButton>();
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.RadioButton(null));
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new RadioButton(null));
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.RadioButton radioButton = cast();
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.NAME.equals(propertyKey)) {
-                radioButton.setName(property.getValue());
-            }
+        if (update.containsKey(PROPERTY.NAME)) {
+            cast().setName(update.getString(PROPERTY.NAME));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    protected void addValueChangeHandler(final AddHandler addHandler, final UIService uiService) {
+    protected void addValueChangeHandler(final PTInstruction addHandler, final UIService uiService) {
         final RadioButton radioButton = cast();
 
         radioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -74,7 +65,7 @@ public class PTRadioButton extends PTCheckBox {
                 fireInstruction(addHandler.getObjectID(), uiService, event.getValue());
 
                 if (cast().getName() != null) {
-                    PTRadioButton previouslySelected = lastSelectedRadioButtonByGroup.get(cast().getName());
+                    final PTRadioButton previouslySelected = lastSelectedRadioButtonByGroup.get(cast().getName());
                     if (previouslySelected != null && !previouslySelected.equals(radioButton)) {
                         fireInstruction(previouslySelected.getObjectID(), uiService, previouslySelected.cast().getValue());
                     }
@@ -85,14 +76,17 @@ public class PTRadioButton extends PTCheckBox {
     }
 
     protected void fireInstruction(final long objectID, final UIService uiService, final boolean value) {
-        final EventInstruction eventInstruction = new EventInstruction(objectID, HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
-        eventInstruction.setMainPropertyValue(PropertyKey.VALUE, value);
+        final PTInstruction eventInstruction = new PTInstruction();
+        eventInstruction.setObjectID(objectID);
+        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
+        eventInstruction.put(PROPERTY.VALUE, value);
         uiService.triggerEvent(eventInstruction);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.RadioButton cast() {
-        return (com.google.gwt.user.client.ui.RadioButton) uiObject;
+    public RadioButton cast() {
+        return (RadioButton) uiObject;
     }
 
 }

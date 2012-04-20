@@ -26,11 +26,10 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ponysdk.core.instruction.Add;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PMenuBar extends PWidget {
 
@@ -43,13 +42,11 @@ public class PMenuBar extends PWidget {
         this(false);
     }
 
-    public PMenuBar(boolean vertical) {
+    public PMenuBar(final boolean vertical) {
         super();
-        addStyleName(PonySDKTheme.MENUBAR);
         this.vertical = vertical;
-        final Property mainProperty = new Property();
-        mainProperty.setProperty(PropertyKey.MENU_BAR_IS_VERTICAL, vertical);
-        setMainProperty(mainProperty);
+        addStyleName(PonySDKTheme.MENUBAR);
+        create.put(PROPERTY.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override
@@ -57,34 +54,34 @@ public class PMenuBar extends PWidget {
         return WidgetType.MENU_BAR;
     }
 
-    public PMenuItem addItem(String text) {
+    public PMenuItem addItem(final String text) {
         return addItem(new PMenuItem(text, false));
     }
 
-    public PMenuItem addItem(PMenuItem item) {
+    public PMenuItem addItem(final PMenuItem item) {
         return insertItem(item, items.size());
     }
 
-    public PMenuItem addItem(String text, boolean asHTML, PCommand cmd) {
+    public PMenuItem addItem(final String text, final boolean asHTML, final PCommand cmd) {
         return addItem(new PMenuItem(text, asHTML, cmd));
     }
 
-    public PMenuItem addItem(String text, boolean asHTML, PMenuBar popup) {
+    public PMenuItem addItem(final String text, final boolean asHTML, final PMenuBar popup) {
         return addItem(new PMenuItem(text, asHTML, popup));
     }
 
-    public PMenuItem addItem(String text, PCommand cmd) {
+    public PMenuItem addItem(final String text, final PCommand cmd) {
         return addItem(new PMenuItem(text, cmd));
     }
 
-    public PMenuItem addItem(String text, PMenuBar popup) {
+    public PMenuItem addItem(final String text, final PMenuBar popup) {
         return addItem(new PMenuItem(text, popup));
     }
 
-    public PMenuItem insertItem(PMenuItem item, int beforeIndex) throws IndexOutOfBoundsException {
+    public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, item);
         final Add add = new Add(item.getID(), getID());
-        add.getMainProperty().setProperty(PropertyKey.BEFORE_INDEX, beforeIndex);
+        add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         getPonySession().stackInstruction(add);
         return item;
     }
@@ -93,14 +90,14 @@ public class PMenuBar extends PWidget {
         addSeparator(new PMenuItemSeparator());
     }
 
-    public PMenuItemSeparator addSeparator(PMenuItemSeparator itemSeparator) {
+    public PMenuItemSeparator addSeparator(final PMenuItemSeparator itemSeparator) {
         return insertSeparator(itemSeparator, items.size());
     }
 
-    public PMenuItemSeparator insertSeparator(PMenuItemSeparator itemSeparator, int beforeIndex) throws IndexOutOfBoundsException {
+    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, itemSeparator);
         final Add add = new Add(itemSeparator.getID(), getID());
-        add.getMainProperty().setProperty(PropertyKey.BEFORE_INDEX, beforeIndex);
+        add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         getPonySession().stackInstruction(add);
         return itemSeparator;
     }

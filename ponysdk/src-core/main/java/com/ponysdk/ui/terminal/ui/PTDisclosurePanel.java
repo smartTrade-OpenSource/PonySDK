@@ -23,37 +23,76 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDisclosurePanel extends PTWidget {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        final Property mainProperty = create.getMainProperty();
+    public void create(final PTInstruction create, final UIService uiService) {
+        final Long openImg = create.getLong(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG);
+        final Long closeImg = create.getLong(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG);
+        final String headerText = create.getString(PROPERTY.TEXT);
 
-        final Long openImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_OPEN_IMG);
-        final Long closeImg = mainProperty.getLongPropertyValue(PropertyKey.DISCLOSURE_PANEL_CLOSE_IMG);
+        final PTImage open = (PTImage) uiService.getPTObject(openImg);
+        final PTImage close = (PTImage) uiService.getPTObject(closeImg);
 
-        final String headerText = mainProperty.getValue();
-
-        PTImage open = (PTImage) uiService.getPTObject(openImg);
-        PTImage close = (PTImage) uiService.getPTObject(closeImg);
-
-        PImageResource openImageResource = new PImageResource(open.cast());
-        PImageResource closeImageResource = new PImageResource(close.cast());
+        final PImageResource openImageResource = new PImageResource(open.cast());
+        final PImageResource closeImageResource = new PImageResource(close.cast());
 
         init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
+
+        addHandlers(create, uiService);
+    }
+
+    private void addHandlers(final PTInstruction create, final UIService uiService) {
+        cast().addCloseHandler(new CloseHandler<DisclosurePanel>() {
+
+            @Override
+            public void onClose(final CloseEvent<DisclosurePanel> event) {
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(create.getObjectID());
+                instruction.put(TYPE.KEY, TYPE.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.CLOSE_HANDLER);
+
+                uiService.triggerEvent(instruction);
+            }
+        });
+
+        cast().addOpenHandler(new OpenHandler<DisclosurePanel>() {
+
+            @Override
+            public void onOpen(final OpenEvent<DisclosurePanel> event) {
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(create.getObjectID());
+                instruction.put(TYPE.KEY, TYPE.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.OPEN_HANDLER);
+
+                uiService.triggerEvent(instruction);
+            }
+        });
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
-        cast().setContent(w);
+    public void add(final PTInstruction add, final UIService uiService) {
+        cast().setContent(asWidget(add.getObjectID(), uiService));
+    }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.OPEN)) {
+            cast().setOpen(update.getBoolean(PROPERTY.OPEN));
+        } else {
+            super.update(update, uiService);
+        }
     }
 
     @Override

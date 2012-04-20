@@ -33,18 +33,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date>, PKeyPressHandler {
 
@@ -69,7 +70,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final String text, final SimpleDateFormat dateFormat) {
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.DATE_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.DATE_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
 
         setDateFormat(dateFormat);
@@ -81,9 +82,9 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.DATE_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            final String data = e.getMainProperty().getValue();
+    public void onEventInstruction(final JSONObject e) throws JSONException {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.DATE_VALUE_CHANGE_HANDLER)) {
+            final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
             if (data != null) {
                 try {
@@ -126,7 +127,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         this.dateFormat = dateFormat;
 
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+        update.put(PROPERTY.DATE_FORMAT_PATTERN, dateFormat.toPattern());
         getPonySession().stackInstruction(update);
     }
 
@@ -152,7 +153,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     public void setValue(final Date date) {
         this.date = date;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.VALUE, date != null ? dateFormat.format(date) : null);
+        update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : null);
         getPonySession().stackInstruction(update);
     }
 

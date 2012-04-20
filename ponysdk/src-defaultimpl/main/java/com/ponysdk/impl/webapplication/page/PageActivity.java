@@ -23,6 +23,9 @@
 
 package com.ponysdk.impl.webapplication.page;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.security.Permission;
@@ -40,7 +43,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     protected final String pageName;
 
-    protected final String pageCategory;
+    protected final Collection<String> pageCategories;
 
     protected PageView pageView;
 
@@ -55,20 +58,28 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     protected abstract void onLeavingPage();
 
     public PageActivity(final String pageName, final String pageCategory) {
-        this(pageName, pageCategory, Permission.ALLOWED);
+        this(pageName, Collections.singleton(pageCategory), Permission.ALLOWED);
+    }
+
+    public PageActivity(final String pageName, final Collection<String> pageCategories) {
+        this(pageName, pageCategories, Permission.ALLOWED);
     }
 
     public PageActivity(final String pageName, final String pageCategory, final Permission permission) {
+        this(pageName, Collections.singleton(pageCategory), permission);
+    }
+
+    public PageActivity(final String pageName, final Collection<String> pageCategories, final Permission permission) {
         super(permission);
 
         this.pageName = pageName;
-        this.pageCategory = pageCategory;
+        this.pageCategories = pageCategories;
 
         homePlace = new PagePlace(this) {
 
             @Override
             public String getToken() {
-                return pageName != null ? pageName : pageCategory;
+                return pageName != null ? pageName : pageCategories.toString();
             }
         };
     }
@@ -111,8 +122,8 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         return pageName;
     }
 
-    public String getPageCategory() {
-        return pageCategory;
+    public Collection<String> getPageCategories() {
+        return pageCategories;
     }
 
     public PageView getPageView() {
@@ -144,7 +155,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((pageCategory == null) ? 0 : pageCategory.hashCode());
+        result = prime * result + ((pageCategories == null) ? 0 : pageCategories.hashCode());
         result = prime * result + ((pageName == null) ? 0 : pageName.hashCode());
         return result;
     }
@@ -155,9 +166,9 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final PageActivity other = (PageActivity) obj;
-        if (pageCategory == null) {
-            if (other.pageCategory != null) return false;
-        } else if (!pageCategory.equals(other.pageCategory)) return false;
+        if (pageCategories == null) {
+            if (other.pageCategories != null) return false;
+        } else if (!pageCategories.equals(other.pageCategories)) return false;
         if (pageName == null) {
             if (other.pageName != null) return false;
         } else if (!pageName.equals(other.pageName)) return false;

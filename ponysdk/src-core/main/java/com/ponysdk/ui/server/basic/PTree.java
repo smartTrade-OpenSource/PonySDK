@@ -28,15 +28,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.ponysdk.core.PonySession;
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.RemoveHandler;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
 
@@ -110,14 +112,14 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
-        final RemoveHandler removeHandler = new RemoveHandler(getID(), HandlerType.SELECTION_HANDLER);
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.SELECTION_HANDLER);
         getPonySession().stackInstruction(removeHandler);
     }
 
@@ -127,9 +129,9 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction event) {
-        if (HandlerType.SELECTION_HANDLER.equals(event.getHandlerType())) {
-            PTreeItem treeItem = PonySession.getCurrent().getObject(event.getMainProperty().getLongValue());
+    public void onEventInstruction(final JSONObject event) throws JSONException {
+        if (HANDLER.SELECTION_HANDLER.equals(event.getString(HANDLER.KEY))) {
+            final PTreeItem treeItem = PonySession.getCurrent().getObject(event.getLong(HANDLER.SELECTION_HANDLER));
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);

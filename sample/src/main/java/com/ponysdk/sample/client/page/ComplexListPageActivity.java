@@ -157,7 +157,7 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
         });
 
-        complexListActivity.start(examplePanel);
+        complexListActivity.start(scrolPanel);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {

@@ -21,21 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class Update extends Instruction {
+import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.WIDGETTYPE;
 
-    private static final long serialVersionUID = -664165558060579491L;
+public class Create extends Instruction {
 
-    public Update() {}
-
-    public Update(long objectID) {
-        this(objectID, null);
-    }
-
-    public Update(long objectID, Long parentID) {
+    public Create(final long objectID, final WidgetType widgetType) {
         super(objectID);
-        this.parentID = parentID;
+        put(TYPE.KEY, TYPE.CREATE);
+        put(WIDGETTYPE.KEY, widgetType.ordinal());
     }
 
 }

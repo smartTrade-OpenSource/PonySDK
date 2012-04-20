@@ -25,9 +25,9 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PComplexPanel extends PPanel {
 
@@ -44,7 +44,7 @@ public abstract class PComplexPanel extends PPanel {
         adopt(child);
 
         final Add add = new Add(child.getID(), getID());
-        add.setMainPropertyValue(PropertyKey.INDEX, beforeIndex);
+        add.put(PROPERTY.INDEX, beforeIndex);
         getPonySession().stackInstruction(add);
     }
 

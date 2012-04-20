@@ -25,12 +25,12 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDecoratedPanel extends PTSimplePanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new DecoratorPanel());
     }
 

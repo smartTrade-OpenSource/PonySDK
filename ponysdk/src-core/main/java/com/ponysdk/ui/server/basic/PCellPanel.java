@@ -23,11 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PCellPanel extends PComplexPanel {
 
@@ -35,49 +34,45 @@ public abstract class PCellPanel extends PComplexPanel {
 
     private int spacing;
 
-    public void setBorderWidth(int width) {
+    public void setBorderWidth(final int width) {
         this.borderWidth = width;
         final Update update = new Update(getID());
-        final Property property = new Property(PropertyKey.BORDER_WIDTH);
-        property.setValue(String.valueOf(width));
-        update.setMainProperty(property);
+        update.put(PROPERTY.BORDER_WIDTH, width);
         getPonySession().stackInstruction(update);
     }
 
-    public void setSpacing(int spacing) {
+    public void setSpacing(final int spacing) {
         this.spacing = spacing;
         final Update update = new Update(getID());
-        final Property property = new Property(PropertyKey.SPACING);
-        property.setValue(String.valueOf(spacing));
-        update.setMainProperty(property);
+        update.put(PROPERTY.SPACING, spacing);
         getPonySession().stackInstruction(update);
     }
 
-    public void setCellHorizontalAlignment(PWidget widget, PHorizontalAlignment horizontalAlignment) {
+    public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        update.getMainProperty().setProperty(PropertyKey.CELL, widget.getID());
+        update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
+        update.put(PROPERTY.CELL, widget.getID());
         getPonySession().stackInstruction(update);
     }
 
-    public void setCellVerticalAlignment(PWidget widget, PVerticalAlignment verticalAlignment) {
+    public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        update.getMainProperty().setProperty(PropertyKey.CELL, widget.getID());
+        update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
+        update.put(PROPERTY.CELL, widget.getID());
         getPonySession().stackInstruction(update);
     }
 
-    public void setCellHeight(PWidget widget, String height) {
+    public void setCellHeight(final PWidget widget, final String height) {
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.CELL_HEIGHT, height);
-        update.getMainProperty().setProperty(PropertyKey.CELL, widget.getID());
+        update.put(PROPERTY.CELL_HEIGHT, height);
+        update.put(PROPERTY.CELL, widget.getID());
         getPonySession().stackInstruction(update);
     }
 
-    public void setCellWidth(PWidget widget, String width) {
+    public void setCellWidth(final PWidget widget, final String width) {
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.CELL_WIDTH, width);
-        update.getMainProperty().setProperty(PropertyKey.CELL, widget.getID());
+        update.put(PROPERTY.CELL_WIDTH, width);
+        update.put(PROPERTY.CELL, widget.getID());
         getPonySession().stackInstruction(update);
     }
 

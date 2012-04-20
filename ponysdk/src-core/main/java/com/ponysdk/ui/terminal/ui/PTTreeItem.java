@@ -27,12 +27,9 @@ import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTreeItem extends PTUIObject {
 
@@ -41,30 +38,28 @@ public class PTTreeItem extends PTUIObject {
     private Tree tree;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        this.isRoot = create.getMainProperty().getChildProperty(PropertyKey.ROOT).getBooleanValue();
-        final Property textProperty = create.getMainProperty().getChildProperty(PropertyKey.TEXT);
-        TreeItem treeItem;
-        if (textProperty == null) {
-            treeItem = new TreeItem();
+    public void create(final PTInstruction create, final UIService uiService) {
+        this.isRoot = create.getBoolean(PROPERTY.ROOT);
+
+        if (create.containsKey(PROPERTY.TEXT)) {
+            init(create, uiService, new TreeItem(create.getString(PROPERTY.TEXT)));
         } else {
-            treeItem = new TreeItem(textProperty.getValue());
+            init(create, uiService, new TreeItem());
         }
-        init(create, uiService, treeItem);
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
         final UIObject widget = asWidget(add.getObjectID(), uiService);
 
         if (widget instanceof Tree) {
             this.tree = (Tree) widget;
         } else {
-            if (add.getMainProperty().containsChildProperty(PropertyKey.WIDGET)) {
+            if (add.containsKey(PROPERTY.WIDGET)) {
                 cast().setWidget((Widget) widget);
             } else {
                 final TreeItem w = (TreeItem) widget;
-                final int index = add.getMainProperty().getIntValue();
+                final int index = add.getInt(PROPERTY.INDEX);
                 if (isRoot) {
                     tree.insertItem(index, w);
                 } else {
@@ -75,20 +70,14 @@ public class PTTreeItem extends PTUIObject {
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property property = update.getMainProperty();
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        switch (property.getPropertyKey()) {
-            case SELECTED:
-                cast().setSelected(property.getBooleanValue());
-                break;
-            case STATE:
-                cast().setState(property.getBooleanValue());
-                break;
-
-            default:
-                super.update(update, uiService);
-                break;
+        if (update.containsKey(PROPERTY.SELECTED)) {
+            cast().setSelected(update.getBoolean(PROPERTY.SELECTED));
+        } else if (update.containsKey(PROPERTY.STATE)) {
+            cast().setState(update.getBoolean(PROPERTY.STATE));
+        } else {
+            super.update(update, uiService);
         }
     }
 

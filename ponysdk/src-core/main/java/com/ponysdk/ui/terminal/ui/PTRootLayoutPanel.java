@@ -23,13 +23,14 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTRootLayoutPanel extends PTLayoutPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, com.google.gwt.user.client.ui.RootLayoutPanel.get());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, RootLayoutPanel.get());
     }
 }

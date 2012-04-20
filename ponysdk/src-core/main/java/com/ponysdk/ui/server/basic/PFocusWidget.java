@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.HasPMouseOverHandlers;
@@ -37,8 +38,7 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers {
 
@@ -61,17 +61,17 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public HandlerRegistration addMouseOverHandler(PMouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
     @Override
-    public HandlerRegistration addKeyUpHandler(PKeyUpHandler handler) {
+    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     @Override
-    public HandlerRegistration addKeyPressHandler(PKeyPressHandler handler) {
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
@@ -85,24 +85,24 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         return getHandlerSet(PKeyUpEvent.TYPE, this);
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.ENABLED, enabled);
+        update.put(PROPERTY.ENABLED, enabled);
         getPonySession().stackInstruction(update);
     }
 
-    public void setEnabledOnRequest(boolean enabledOnRequest) {
+    public void setEnabledOnRequest(final boolean enabledOnRequest) {
         this.enabledOnRequest = enabledOnRequest;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.ENABLED_ON_REQUEST, enabledOnRequest);
+        update.put(PROPERTY.ENABLED_ON_REQUEST, enabledOnRequest);
         getPonySession().stackInstruction(update);
     }
 
-    public void showLoadingOnRequest(boolean showLoadingOnRequest) {
+    public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         this.showLoadingOnRequest = showLoadingOnRequest;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.LOADING_ON_REQUEST, showLoadingOnRequest);
+        update.put(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest);
         getPonySession().stackInstruction(update);
     }
 
@@ -115,10 +115,10 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public void setFocus(boolean focused) {
+    public void setFocus(final boolean focused) {
         this.focused = focused;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.FOCUSED, focused);
+        update.put(PROPERTY.FOCUSED, focused);
         getPonySession().stackInstruction(update);
     }
 
@@ -128,10 +128,10 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
             final PClickHandler clickHandler = new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent event) {
+                public void onClick(final PClickEvent event) {
                     handler.onClick(event);
                     final Update update = new Update(ID);
-                    update.setMainPropertyValue(PropertyKey.END_OF_PROCESSING, true);
+                    update.put(PROPERTY.END_OF_PROCESSING, true);
                     getPonySession().stackInstruction(update);
                 }
             };

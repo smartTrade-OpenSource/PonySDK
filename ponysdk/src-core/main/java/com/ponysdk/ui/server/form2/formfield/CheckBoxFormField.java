@@ -23,7 +23,7 @@ public class CheckBoxFormField extends FormField<Boolean> {
     }
 
     @Override
-    public void reset() {
+    public void reset0() {
         checkBox.setValue(false);
     }
 
@@ -40,6 +40,10 @@ public class CheckBoxFormField extends FormField<Boolean> {
     @Override
     protected String getStringValue() {
         return checkBox.getValue().toString();
+    }
+
+    public PCheckBox getCheckBox() {
+        return checkBox;
     }
 
 }

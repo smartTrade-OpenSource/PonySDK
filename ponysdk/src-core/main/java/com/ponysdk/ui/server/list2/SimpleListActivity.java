@@ -127,6 +127,10 @@ public class SimpleListActivity<T> extends AbstractActivity implements HasPData<
         subListSizeByFather = temp;
     }
 
+    public void clear() {
+        view.clearList();
+    }
+
     public void selectRow(final int row) {
         view.selectRow(row);
     }
@@ -171,7 +175,6 @@ public class SimpleListActivity<T> extends AbstractActivity implements HasPData<
         for (final T t : data) {
             int col = 0;
             for (final DataGridColumnDescriptor<T, ?> field : listFields) {
-
                 view.addWidget(field.renderCell(rowIndex, t), col++, rowIndex);
             }
             view.addWidget(new PSimplePanel(), col, rowIndex);// Why ?

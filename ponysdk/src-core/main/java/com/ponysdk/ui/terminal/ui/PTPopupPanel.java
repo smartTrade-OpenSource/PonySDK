@@ -36,14 +36,12 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
@@ -60,10 +58,10 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     private int clientTop;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        final boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
+    public void create(final PTInstruction create, final UIService uiService) {
+        final boolean autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
 
-        final com.google.gwt.user.client.ui.PopupPanel popup = new com.google.gwt.user.client.ui.PopupPanel(autoHide) {
+        final PopupPanel popup = new PopupPanel(autoHide) {
 
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
@@ -81,31 +79,39 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         clientTop = Document.get().getBodyOffsetTop();
     }
 
-    protected void addCloseHandler(final Create create, final UIService uiService) {
+    protected void addCloseHandler(final PTInstruction create, final UIService uiService) {
         final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
         popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
             public void onClose(final CloseEvent<PopupPanel> event) {
-                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(create.getObjectID());
+                instruction.put(TYPE.KEY, TYPE.EVENT);
+                instruction.put(HANDLER.KEY, Dictionnary.HANDLER.CLOSE_HANDLER);
+                uiService.triggerEvent(instruction);
             }
         });
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.POPUP_POSITION_CALLBACK.equals(addHandler.getHandlerType())) {
-            final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        final String handler = addHandler.getString(HANDLER.KEY);
+
+        if (HANDLER.POPUP_POSITION_CALLBACK.equals(handler)) {
+            final PopupPanel popupPanel = cast();
 
             popupPanel.setVisible(false);
             popupPanel.show();
 
-            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.POPUP_POSITION_CALLBACK);
-            eventInstruction.getMainProperty().setProperty(PropertyKey.OFFSETWIDTH, popupPanel.getOffsetWidth());
-            eventInstruction.getMainProperty().setProperty(PropertyKey.OFFSETHEIGHT, popupPanel.getOffsetHeight());
-            eventInstruction.getMainProperty().setProperty(PropertyKey.CLIENT_WIDTH, Window.getClientWidth());
-            eventInstruction.getMainProperty().setProperty(PropertyKey.CLIENT_HEIGHT, Window.getClientHeight());
-
+            final PTInstruction eventInstruction = new PTInstruction();
+            eventInstruction.setObjectID(addHandler.getObjectID());
+            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+            eventInstruction.put(HANDLER.KEY, HANDLER.POPUP_POSITION_CALLBACK);
+            eventInstruction.put(PROPERTY.OFFSETWIDTH, popupPanel.getOffsetWidth());
+            eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
+            eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
+            eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
             uiService.triggerEvent(eventInstruction);
             return;
         }
@@ -114,45 +120,35 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
+        final PopupPanel popup = cast();
 
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        final com.google.gwt.user.client.ui.PopupPanel popup = cast();
-
-        if (PropertyKey.ANIMATION.equals(propertyKey)) {
-            popup.setAnimationEnabled(property.getBooleanValue());
-        } else if (PropertyKey.WORD_WRAP.equals(propertyKey)) {} else if (PropertyKey.POPUP_CENTER.equals(propertyKey)) {
+        if (update.containsKey(PROPERTY.ANIMATION)) {
+            popup.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
+        } else if (update.containsKey(PROPERTY.POPUP_CENTER)) {
             popup.center();
-        } else if (PropertyKey.POPUP_SHOW.equals(propertyKey)) {
+        } else if (update.containsKey(PROPERTY.POPUP_SHOW)) {
             popup.show();
-        } else if (PropertyKey.POPUP_HIDE.equals(propertyKey)) {
+        } else if (update.containsKey(PROPERTY.POPUP_HIDE)) {
             popup.hide();
-        } else if (PropertyKey.POPUP_GLASS_ENABLED.equals(propertyKey)) {
-            popup.setGlassEnabled(property.getBooleanValue());
-        } else if (PropertyKey.POPUP_MODAL.equals(propertyKey)) {
-            popup.setModal(property.getBooleanValue());
-        } else if (PropertyKey.POPUP_POSITION.equals(propertyKey)) {
-            final int left = property.getIntPropertyValue(PropertyKey.POPUP_POSITION_LEFT);
-            final int top = property.getIntPropertyValue(PropertyKey.POPUP_POSITION_TOP);
+        } else if (update.containsKey(PROPERTY.POPUP_GLASS_ENABLED)) {
+            popup.setGlassEnabled(update.getBoolean(PROPERTY.POPUP_GLASS_ENABLED));
+        } else if (update.containsKey(PROPERTY.POPUP_MODAL)) {
+            popup.setModal(update.getBoolean(PROPERTY.POPUP_MODAL));
+        } else if (update.containsKey(PROPERTY.POPUP_POSITION)) {
+            final int left = update.getInt(PROPERTY.POPUP_POSITION_LEFT);
+            final int top = update.getInt(PROPERTY.POPUP_POSITION_TOP);
             popup.setPopupPosition(left, top);
-        } else if (PropertyKey.POPUP_DRAGGABLE.equals(propertyKey)) {
-            final boolean draggable = property.getBooleanValue();
+        } else if (update.containsKey(PROPERTY.POPUP_DRAGGABLE)) {
+            final boolean draggable = update.containsKey(PROPERTY.POPUP_DRAGGABLE);
             if (draggable) {
                 popup.addDomHandler(this, MouseDownEvent.getType());
                 popup.addDomHandler(this, MouseUpEvent.getType());
                 popup.addDomHandler(this, MouseMoveEvent.getType());
-
             }
         } else {
             super.update(update, uiService);
         }
-
-    }
-
-    @Override
-    public com.google.gwt.user.client.ui.PopupPanel cast() {
-        return (com.google.gwt.user.client.ui.PopupPanel) uiObject;
     }
 
     @Override
@@ -181,6 +177,11 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     public void onMouseUp(final MouseUpEvent event) {
         dragging = false;
         DOM.releaseCapture(uiObject.getElement());
+    }
+
+    @Override
+    public PopupPanel cast() {
+        return (PopupPanel) uiObject;
     }
 
     protected void onPreviewNativeEvent(final NativePreviewEvent event) {

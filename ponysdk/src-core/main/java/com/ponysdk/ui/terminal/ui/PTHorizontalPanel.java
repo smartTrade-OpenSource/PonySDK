@@ -25,42 +25,35 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTHorizontalPanel extends PTCellPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.HorizontalPanel());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new HorizontalPanel());
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final Widget w = asWidget(add.getObjectID(), uiService);
-        final int beforeIndex = add.getMainProperty().getIntValue();
-        cast().insert(w, beforeIndex);
+    public void add(final PTInstruction add, final UIService uiService) {
+        cast().insert(asWidget(add.getObjectID(), uiService), add.getInt(PROPERTY.INDEX));
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
+        final HorizontalPanel horizontalPanel = cast();
 
-        final com.google.gwt.user.client.ui.HorizontalPanel horizontalPanel = cast();
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        if (PropertyKey.BORDER_WIDTH.equals(propertyKey)) {
-            horizontalPanel.setBorderWidth(property.getIntValue());
-        } else if (PropertyKey.SPACING.equals(propertyKey)) {
-            horizontalPanel.setSpacing(property.getIntValue());
-        } else if (PropertyKey.HORIZONTAL_ALIGNMENT.equals(propertyKey)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[property.getIntValue()];
+        if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
+            horizontalPanel.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
+        } else if (update.containsKey(PROPERTY.SPACING)) {
+            horizontalPanel.setSpacing(update.getInt(PROPERTY.SPACING));
+        } else if (update.containsKey(PROPERTY.HORIZONTAL_ALIGNMENT)) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.HORIZONTAL_ALIGNMENT)];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -74,8 +67,8 @@ public class PTHorizontalPanel extends PTCellPanel {
                 default:
                     break;
             }
-        } else if (PropertyKey.VERTICAL_ALIGNMENT.equals(propertyKey)) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[property.getIntValue()];
+        } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.VERTICAL_ALIGNMENT)];
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
@@ -96,7 +89,7 @@ public class PTHorizontalPanel extends PTCellPanel {
     }
 
     @Override
-    public com.google.gwt.user.client.ui.HorizontalPanel cast() {
-        return (com.google.gwt.user.client.ui.HorizontalPanel) uiObject;
+    public HorizontalPanel cast() {
+        return (HorizontalPanel) uiObject;
     }
 }

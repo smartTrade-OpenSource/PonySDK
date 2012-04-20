@@ -25,49 +25,48 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTextBoxBase extends PTValueBoxBase<String> {
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        final String handler = addHandler.getString(HANDLER.KEY);
+
+        if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
             cast().addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.put(PROPERTY.VALUE, event.getValue());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
-
-        super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        if (PropertyKey.TEXT.equals(propertyKey)) {
-            cast().setText(property.getValue());
-            return;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.getString(PROPERTY.TEXT));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.TextBoxBase cast() {
-        return (com.google.gwt.user.client.ui.TextBoxBase) uiObject;
+    public TextBoxBase cast() {
+        return (TextBoxBase) uiObject;
     }
 }

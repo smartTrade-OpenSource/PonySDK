@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PRootPanel extends PAbsolutePanel {
 
@@ -39,7 +39,7 @@ public class PRootPanel extends PAbsolutePanel {
 
     private PRootPanel(final String id) {
         super();
-        create.getMainProperty().setProperty(PropertyKey.ID, id);
+        create.put(PROPERTY.ID, id);
     }
 
     public static PRootPanel get() {

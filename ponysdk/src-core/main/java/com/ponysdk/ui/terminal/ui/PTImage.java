@@ -25,25 +25,22 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTImage extends PTWidget {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        if (create.getMainProperty().hasChildProperty(PropertyKey.IMAGE_URL)) {
-            final String url = create.getMainProperty().getStringPropertyValue(PropertyKey.IMAGE_URL);
-            final int left = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_LEFT);
-            final int top = create.getMainProperty().getIntPropertyValue(PropertyKey.IMAGE_TOP);
-            final int width = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_WIDTH);
-            final int height = create.getMainProperty().getIntPropertyValue(PropertyKey.WIDGET_HEIGHT);
+    public void create(final PTInstruction create, final UIService uiService) {
+        if (create.containsKey(PROPERTY.IMAGE_URL)) {
+            final String url = create.getString(PROPERTY.IMAGE_URL);
+            final int left = create.getInt(PROPERTY.IMAGE_LEFT);
+            final int top = create.getInt(PROPERTY.IMAGE_TOP);
+            final int width = create.getInt(PROPERTY.WIDGET_WIDTH);
+            final int height = create.getInt(PROPERTY.WIDGET_HEIGHT);
 
             init(create, uiService, new Image(url, left, top, width, height));
         } else {
@@ -52,33 +49,26 @@ public class PTImage extends PTWidget {
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.EMBEDED_STREAM_REQUEST_HANDLER.equals(addHandler.getHandlerType())) {
-            cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" + addHandler.getMainProperty().getValue());
-            return;
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        if (addHandler.containsKey(HANDLER.EMBEDED_STREAM_REQUEST_HANDLER)) {
+            cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getString(PROPERTY.STREAM_REQUEST_ID));
+        } else {
+            super.addHandler(addHandler, uiService);
         }
 
-        super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        switch (propertyKey) {
-            case IMAGE_URL:
-                cast().setUrl(property.getValue());
-                break;
-
-            default:
-                super.update(update, uiService);
-                break;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.IMAGE_URL)) {
+            cast().setUrl(update.getString(PROPERTY.IMAGE_URL));
+        } else {
+            super.update(update, uiService);
         }
     }
 
     @Override
-    public com.google.gwt.user.client.ui.Image cast() {
-        return (com.google.gwt.user.client.ui.Image) uiObject;
+    public Image cast() {
+        return (Image) uiObject;
     }
 }

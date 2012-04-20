@@ -23,38 +23,33 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTFlexTable extends PTHTMLTable {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.FlexTable());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new FlexTable());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
-            cast().removeRow(property.getIntValue());
-        } else if (PropertyKey.INSERT_ROW.equals(propertyKey)) {
-            cast().insertRow(property.getIntValue());
-        } else if (PropertyKey.FLEXTABLE_CELL_FORMATTER.equals(propertyKey)) {
-            final int cellFormatterRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
-            final int cellFormatterColumn = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-            final Property colSpanProperty = property.getChildProperty(PropertyKey.SET_COL_SPAN);
-            final Property rowSpanProperty = property.getChildProperty(PropertyKey.SET_ROW_SPAN);
-            if (colSpanProperty != null) {
-                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, colSpanProperty.getIntValue());
-            } else if (rowSpanProperty != null) {
-                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, rowSpanProperty.getIntValue());
+        if (update.containsKey(PROPERTY.CLEAR_ROW)) {
+            cast().removeRow(update.getInt(PROPERTY.CLEAR_ROW));
+        } else if (update.containsKey(PROPERTY.INSERT_ROW)) {
+            cast().insertRow(update.getInt(PROPERTY.INSERT_ROW));
+        } else if (update.containsKey(PROPERTY.FLEXTABLE_CELL_FORMATTER)) {
+            final int cellFormatterRow = update.getInt(PROPERTY.ROW);
+            final int cellFormatterColumn = update.getInt(PROPERTY.COLUMN);
+            if (update.containsKey(PROPERTY.SET_COL_SPAN)) {
+                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, update.getInt(PROPERTY.SET_COL_SPAN));
+            }
+            if (update.containsKey(PROPERTY.SET_ROW_SPAN)) {
+                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, update.getInt(PROPERTY.SET_ROW_SPAN));
             }
         } else {
             super.update(update, uiService);
@@ -63,7 +58,7 @@ public class PTFlexTable extends PTHTMLTable {
     }
 
     @Override
-    public com.google.gwt.user.client.ui.FlexTable cast() {
-        return (com.google.gwt.user.client.ui.FlexTable) uiObject;
+    public FlexTable cast() {
+        return (FlexTable) uiObject;
     }
 }

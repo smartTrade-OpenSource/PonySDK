@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
@@ -38,10 +39,13 @@ import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PMenuBar;
+import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -95,7 +99,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         final PHorizontalPanel formContainer = new PHorizontalPanel();
         final PScrollPanel gridContainer = new PScrollPanel();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
         dockLayoutPanel.addNorth(formContainer, 100);
         dockLayoutPanel.add(gridContainer);
 
@@ -113,6 +117,17 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         dataGrid = new DataGridActivity<Pony>(configuration, new DefaultSimpleListView());
         dataGrid.start(gridContainer);
 
+        final PMenuBar actionBar = new PMenuBar();
+        actionBar.setStyleName("pony-ActionToolbar");
+        final PMenuItem clearMenuItem = new PMenuItem("Clear", new PCommand() {
+
+            @Override
+            public void execute() {
+                dataGrid.clear();
+            }
+        });
+        actionBar.addItem(clearMenuItem);
+
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
 
@@ -123,6 +138,9 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
+
+        // formContainer.add(actionBar);
+        // formContainer.add(addPonyButton);
 
         // Build create pony form
         buildCreatePonyActivity();

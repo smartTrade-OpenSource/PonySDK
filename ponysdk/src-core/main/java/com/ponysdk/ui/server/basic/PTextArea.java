@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTextArea extends PTextBoxBase {
 
@@ -37,7 +37,7 @@ public class PTextArea extends PTextBoxBase {
         this(null);
     }
 
-    public PTextArea(String text) {
+    public PTextArea(final String text) {
         super();
         setVisibleLines(visibleLines);
         setCharacterWidth(characterWidth);
@@ -52,10 +52,10 @@ public class PTextArea extends PTextBoxBase {
         return visibleLines;
     }
 
-    public void setVisibleLines(int visibleLines) {
+    public void setVisibleLines(final int visibleLines) {
         this.visibleLines = visibleLines;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.VISIBLE_LINES, visibleLines);
+        update.put(PROPERTY.VISIBLE_LINES, visibleLines);
         getPonySession().stackInstruction(update);
     }
 
@@ -63,10 +63,10 @@ public class PTextArea extends PTextBoxBase {
         return characterWidth;
     }
 
-    public void setCharacterWidth(int characterWidth) {
+    public void setCharacterWidth(final int characterWidth) {
         this.characterWidth = characterWidth;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.CHARACTER_WIDTH, characterWidth);
+        update.put(PROPERTY.CHARACTER_WIDTH, characterWidth);
         getPonySession().stackInstruction(update);
     }
 

@@ -23,11 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PVerticalPanel extends PCellPanel implements HasPAlignment {
 
@@ -41,18 +41,18 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
     }
 
     @Override
-    public void setHorizontalAlignment(PHorizontalAlignment horizontalAlignment) {
+    public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
+        update.put(PROPERTY.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
         getPonySession().stackInstruction(update);
     }
 
     @Override
-    public void setVerticalAlignment(PVerticalAlignment verticalAlignment) {
+    public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
+        update.put(PROPERTY.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
         getPonySession().stackInstruction(update);
     }
 

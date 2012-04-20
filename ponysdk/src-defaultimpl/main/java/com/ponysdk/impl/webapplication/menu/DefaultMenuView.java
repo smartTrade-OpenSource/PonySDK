@@ -43,16 +43,11 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
                 final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getHtml());
-                for (PSelectionHandler<String> handler : selectionHandlers) {
+                for (final PSelectionHandler<String> handler : selectionHandlers) {
                     handler.onSelection(e);
                 }
             }
         });
-    }
-
-    @Override
-    public void addCategory(final String category) {
-        createCategoryItemIfNeeded(category);
     }
 
     private PTreeItem createCategoryItemIfNeeded(final String category) {
@@ -65,8 +60,8 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     }
 
     @Override
-    public void addItem(final String category, final String caption) {
-        final PTreeItem categoryItem = createCategoryItemIfNeeded(category);
+    public void addItem(final Collection<String> categories, final String caption) {
+        final PTreeItem categoryItem = createCategoryItemIfNeeded(categories.iterator().next());
         if (caption != null) {
             final PTreeItem captionItem = new PTreeItem(caption);
             categoryItem.addItem(captionItem);
@@ -75,11 +70,11 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     }
 
     @Override
-    public void selectItem(final String category, final String caption) {
+    public void selectItem(final Collection<String> categories, final String caption) {
         if (caption != null) {
             tree.setSelectedItem(itemsByName.get(caption));
         } else {
-            tree.setSelectedItem(itemsByName.get(category));
+            tree.setSelectedItem(itemsByName.get(categories.iterator().next()));
         }
     }
 

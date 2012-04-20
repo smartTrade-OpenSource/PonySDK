@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PElement extends PComplexPanel {
 
@@ -36,7 +36,7 @@ public class PElement extends PComplexPanel {
         super();
 
         this.tagName = tagName;
-        this.create.setMainPropertyValue(PropertyKey.TAG, tagName);
+        this.create.put(PROPERTY.TAG, tagName);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PElement extends PComplexPanel {
         this.innerTxt = innerHTML;
 
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.INNER_HTML, innerTxt);
+        update.put(PROPERTY.INNER_HTML, innerTxt);
         getPonySession().stackInstruction(update);
     }
 
@@ -60,7 +60,7 @@ public class PElement extends PComplexPanel {
         this.innerTxt = innerTxt;
 
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.INNER_TEXT, innerTxt);
+        update.put(PROPERTY.INNER_TEXT, innerTxt);
         getPonySession().stackInstruction(update);
     }
 

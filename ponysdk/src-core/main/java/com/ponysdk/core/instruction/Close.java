@@ -21,16 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class GC extends Instruction {
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-    private static final long serialVersionUID = 3879458689907358583L;
+public class Close extends Instruction {
 
-    public GC() {}
-
-    public GC(long objectID, long parentID) {
-        super(objectID);
-        this.parentID = parentID;
+    public Close() {
+        put(TYPE.KEY, TYPE.CLOSE);
     }
+
 }

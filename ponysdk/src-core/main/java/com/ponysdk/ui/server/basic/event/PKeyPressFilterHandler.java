@@ -24,28 +24,34 @@
 package com.ponysdk.ui.server.basic.event;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class PKeyPressFilterHandler implements PKeyPressHandler, HasPProperties {
+import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-    private final List<Property> properties = new ArrayList<Property>();
+public abstract class PKeyPressFilterHandler extends JSONObject implements PKeyPressHandler {
 
-    public PKeyPressFilterHandler(int... keyCodes) {
-        final Property filter = new Property(PropertyKey.KEY_FILTER, keyCodes);
-        properties.add(filter);
-    }
+    private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
 
-    @Override
-    public List<Property> getProperties() {
-        return properties;
-    }
+    public PKeyPressFilterHandler(final PKeyCode... keyCodes) {
 
-    @Override
-    public void addProperty(Property property) {
-        properties.add(property);
+        final List<String> codes = new ArrayList<String>();
+        for (final PKeyCode code : keyCodes) {
+            codes.add(code.getCodeToString());
+        }
+
+        try {
+            put(PROPERTY.KEY_FILTER, new JSONArray(Arrays.asList(keyCodes)));
+        } catch (final JSONException e) {
+            log.error("Cannot update key codes : " + keyCodes, e);
+        }
     }
 
 }

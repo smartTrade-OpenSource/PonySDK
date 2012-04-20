@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-context-3.0.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-core-3.0.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="libs/java2html/java2html-1.0.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/gwt/json-20090211.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

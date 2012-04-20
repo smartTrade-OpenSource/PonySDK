@@ -23,30 +23,25 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTButtonBase extends PTFocusWidget {
 
     @Override
-    public void update(Update update, UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        if (PropertyKey.TEXT.equals(propertyKey)) {
-            cast().setText(property.getValue());
-            return;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.get(PROPERTY.TEXT).isString().stringValue());
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.ButtonBase cast() {
-        return (com.google.gwt.user.client.ui.ButtonBase) uiObject;
+    public ButtonBase cast() {
+        return (ButtonBase) uiObject;
     }
 
 }

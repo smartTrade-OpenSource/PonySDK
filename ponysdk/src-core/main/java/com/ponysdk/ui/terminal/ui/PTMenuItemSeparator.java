@@ -23,20 +23,21 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTMenuItemSeparator extends PTUIObject {
 
-    private com.google.gwt.user.client.ui.MenuItemSeparator separator;
+    private MenuItemSeparator separator;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, separator = new com.google.gwt.user.client.ui.MenuItemSeparator());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, separator = new MenuItemSeparator());
     }
 
     @Override
-    public com.google.gwt.user.client.ui.MenuItemSeparator cast() {
+    public MenuItemSeparator cast() {
         return separator;
     }
 }

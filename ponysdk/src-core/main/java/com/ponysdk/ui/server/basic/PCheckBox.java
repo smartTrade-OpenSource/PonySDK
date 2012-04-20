@@ -28,14 +28,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
@@ -53,7 +55,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     public PCheckBox(final String text) {
         setText(text);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -86,7 +88,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.HTML, html);
+        update.put(PROPERTY.HTML, html);
         getPonySession().stackInstruction(update);
     }
 
@@ -99,7 +101,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -112,7 +114,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setValue(final Boolean value) {
         this.value = value;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.VALUE, value);
+        update.put(PROPERTY.VALUE, value);
         getPonySession().stackInstruction(update);
     }
 
@@ -125,9 +127,9 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            onValueChange(new PValueChangeEvent<Boolean>(this, e.getMainProperty().getBooleanValue()));
+    public void onEventInstruction(final JSONObject e) throws JSONException {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER)) {
+            onValueChange(new PValueChangeEvent<Boolean>(this, e.getBoolean(PROPERTY.VALUE)));
         } else {
             super.onEventInstruction(e);
         }

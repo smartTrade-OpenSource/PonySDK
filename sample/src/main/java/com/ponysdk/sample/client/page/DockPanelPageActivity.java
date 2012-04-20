@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -40,7 +41,7 @@ public class DockPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
 
         dockLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         dockLayoutPanel.addSouth(buildComponent("south", "#75ffdc"), 50);
@@ -52,7 +53,7 @@ public class DockPanelPageActivity extends SamplePageActivity {
     }
 
     private PScrollPanel buildCenterPanel() {
-        PScrollPanel panel = new PScrollPanel();
+        final PScrollPanel panel = new PScrollPanel();
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", "#c17d7d");
         panel.setWidget(new PLabel(
@@ -61,10 +62,10 @@ public class DockPanelPageActivity extends SamplePageActivity {
     }
 
     private PHorizontalPanel buildComponent(final String name, final String color) {
-        PHorizontalPanel panel = new PHorizontalPanel();
+        final PHorizontalPanel panel = new PHorizontalPanel();
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", color);
-        PLabel label = new PLabel("The " + name + " component");
+        final PLabel label = new PLabel("The " + name + " component");
         panel.add(label);
         panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
         panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);

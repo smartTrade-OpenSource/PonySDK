@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PScrollPanel extends PSimplePanel {
 
@@ -34,9 +34,9 @@ public class PScrollPanel extends PSimplePanel {
         return WidgetType.SCROLL_PANEL;
     }
 
-    public void setHorizontalScrollPosition(int position) {
+    public void setHorizontalScrollPosition(final int position) {
         final Update update = new Update(ID);
-        update.getMainProperty().setProperty(PropertyKey.HORIZONTAL_SCROLL_POSITION, position);
+        update.put(PROPERTY.HORIZONTAL_SCROLL_POSITION, position);
         getPonySession().stackInstruction(update);
 
     }

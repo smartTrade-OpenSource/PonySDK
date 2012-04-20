@@ -26,13 +26,13 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
 
@@ -59,7 +59,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
         if (text == null) return;
         this.text = text;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 

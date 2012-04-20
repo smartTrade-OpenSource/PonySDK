@@ -23,28 +23,26 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTCellPanel extends PTComplexPanel {
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        final com.google.gwt.user.client.ui.CellPanel cellPanel = cast();
+        final CellPanel cellPanel = cast();
 
-        if (PropertyKey.CELL_HORIZONTAL_ALIGNMENT.equals(propertyKey)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[property.getIntValue()];
-            final Widget w = asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService);
+        if (update.containsKey(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)];
+            final Widget w = asWidget(update.getLong(PROPERTY.CELL), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
@@ -58,9 +56,9 @@ public class PTCellPanel extends PTComplexPanel {
                 default:
                     break;
             }
-        } else if (PropertyKey.CELL_VERTICAL_ALIGNMENT.equals(propertyKey)) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[property.getIntValue()];
-            final Widget w = asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService);
+        } else if (update.containsKey(PROPERTY.CELL_VERTICAL_ALIGNMENT)) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.CELL_VERTICAL_ALIGNMENT)];
+            final Widget w = asWidget(update.getLong(PROPERTY.CELL), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
@@ -74,19 +72,18 @@ public class PTCellPanel extends PTComplexPanel {
                 default:
                     break;
             }
-        } else if (PropertyKey.CELL_WIDTH.equals(propertyKey)) {
-            cellPanel.setCellWidth(asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService), property.getValue());
-        } else if (PropertyKey.CELL_HEIGHT.equals(propertyKey)) {
-            cellPanel.setCellHeight(asWidget(property.getLongPropertyValue(PropertyKey.CELL), uiService), property.getValue());
+        } else if (update.containsKey(PROPERTY.CELL_WIDTH)) {
+            cellPanel.setCellWidth(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_WIDTH).isString().stringValue());
+        } else if (update.containsKey(PROPERTY.CELL_HEIGHT)) {
+            cellPanel.setCellHeight(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_HEIGHT).isString().stringValue());
         } else {
             super.update(update, uiService);
         }
-
     }
 
     @Override
-    public com.google.gwt.user.client.ui.CellPanel cast() {
-        return (com.google.gwt.user.client.ui.CellPanel) uiObject;
+    public CellPanel cast() {
+        return (CellPanel) uiObject;
     }
 
 }

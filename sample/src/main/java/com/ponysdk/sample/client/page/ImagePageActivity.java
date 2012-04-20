@@ -23,34 +23,23 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PImage.ClassPathURL;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 
-public class ImagePageActivity extends PageActivity {
+public class ImagePageActivity extends SamplePageActivity {
 
     public ImagePageActivity() {
-        super("Images", "Basics UI Components");
+        super("Images", "Widgets");
     }
-
-    @Override
-    protected void onInitialization() {}
 
     @Override
     protected void onFirstShowPage() {
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        final PImage image = new PImage(new ClassPathURL("pony.png"));
-        verticalPanel.add(image);
-        pageView.getBody().setWidget(verticalPanel);
+        super.onFirstShowPage();
+
+        final PFlowPanel panel = new PFlowPanel();
+        panel.add(new PImage("images/pony.png"));
+
+        examplePanel.setWidget(panel);
     }
 
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
-    protected void onShowPage(Place place) {
-
-    }
 }

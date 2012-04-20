@@ -21,27 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.HandlerType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-public class RemoveHandler extends Handler {
+public class AddHandler extends Handler {
 
-    private static final long serialVersionUID = -6724549463244696256L;
-
-    public RemoveHandler() {}
-
-    public RemoveHandler(final long objectID, final HandlerType type) {
-        super(objectID, type);
-    }
-
-    public RemoveHandler(final long objectID, final String type) {
-        super(objectID, type);
-    }
-
-    @Override
-    public String toString() {
-        return "RemoveHandler [type=" + type + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
+    public AddHandler(final long objectID, final String handlerType) {
+        super(objectID, handlerType);
+        put(TYPE.KEY, TYPE.ADD_HANDLER);
     }
 
 }

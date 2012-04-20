@@ -23,80 +23,70 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTHTMLTable extends PTPanel {
 
     @Override
-    public com.google.gwt.user.client.ui.HTMLTable cast() {
-        return (com.google.gwt.user.client.ui.HTMLTable) uiObject;
-    }
-
-    @Override
-    public void add(final Add add, final UIService uiService) {
-
+    public void add(final PTInstruction add, final UIService uiService) {
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.HTMLTable table = cast();
 
-        final int row = add.getMainProperty().getIntPropertyValue(PropertyKey.ROW);
-        final int cell = add.getMainProperty().getIntPropertyValue(PropertyKey.CELL);
-        table.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");// temp nciaravola we
-        // don't
-        // // have this mirro server
-        // // side
-        table.setWidget(row, cell, w);
+        final int row = add.getInt(PROPERTY.ROW);
+        final int cell = add.getInt(PROPERTY.CELL);
+
+        cast().getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
+        cast().setWidget(row, cell, w);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        if (PropertyKey.CLEAR.equals(propertyKey)) {
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.CLEAR)) {
             cast().clear();
-        } else if (PropertyKey.CELL_SPACING.equals(propertyKey)) {
-            cast().setCellSpacing(property.getIntValue());
-        } else if (PropertyKey.CELL_PADDING.equals(propertyKey)) {
-            cast().setCellPadding(property.getIntValue());
-        } else if (PropertyKey.HTMLTABLE_ROW_STYLE.equals(propertyKey)) {
-            final int row = property.getChildProperty(PropertyKey.ROW).getIntValue();
-            final Property addProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_ADD_STYLE_NAME);
-            final Property removeProperty = property.getChildProperty(PropertyKey.ROW_FORMATTER_REMOVE_STYLE_NAME);
-            if (addProperty != null) {
-                cast().getRowFormatter().addStyleName(row, addProperty.getValue());
+        } else if (update.containsKey(PROPERTY.CELL_SPACING)) {
+            cast().setCellSpacing(update.getInt(PROPERTY.CELL_SPACING));
+        } else if (update.containsKey(PROPERTY.CELL_PADDING)) {
+            cast().setCellPadding(update.getInt(PROPERTY.CELL_PADDING));
+        } else if (update.containsKey(PROPERTY.HTMLTABLE_ROW_STYLE)) {
+            final int row = update.getInt(PROPERTY.ROW);
+            if (update.containsKey(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME)) {
+                cast().getRowFormatter().addStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME));
             } else {
-                cast().getRowFormatter().removeStyleName(row, removeProperty.getValue());
+                cast().getRowFormatter().removeStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME));
             }
-        } else if (PropertyKey.HTMLTABLE_CELL_STYLE.equals(propertyKey)) {
-            final int cellRow = property.getChildProperty(PropertyKey.ROW).getIntValue();
-            final int cellColumn = property.getChildProperty(PropertyKey.COLUMN).getIntValue();
-            final Property addCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_ADD_STYLE_NAME);
-            if (addCellProperty != null) {
-                cast().getCellFormatter().addStyleName(cellRow, cellColumn, addCellProperty.getValue());
-            }
-            final Property removeCellProperty = property.getChildProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME);
-            if (removeCellProperty != null) {
-                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, removeCellProperty.getValue());
-            }
-            final Property verticalAlignmentProperty = property.getChildProperty(PropertyKey.CELL_VERTICAL_ALIGNMENT);
-            if (verticalAlignmentProperty != null) {
-                cast().getCellFormatter().setVerticalAlignment(cellRow, cellColumn, PVerticalAlignment.values()[verticalAlignmentProperty.getIntValue()].asVerticalAlignmentConstant());
-            }
-            final Property horizontalAlignmentProperty = property.getChildProperty(PropertyKey.CELL_HORIZONTAL_ALIGNMENT);
-            if (horizontalAlignmentProperty != null) {
-                cast().getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, PHorizontalAlignment.values()[horizontalAlignmentProperty.getIntValue()].asHorizontalAlignmentConstant());
-            }
+        } else if (update.containsKey(PROPERTY.HTMLTABLE_CELL_STYLE)) {
+            final int cellRow = update.getInt(PROPERTY.ROW);
+            final int cellColumn = update.getInt(PROPERTY.COLUMN);
 
+            if (update.containsKey(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME)) {
+                cast().getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME));
+            }
+            if (update.containsKey(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME)) {
+                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME));
+            }
+            if (update.containsKey(PROPERTY.CELL_VERTICAL_ALIGNMENT)) {
+                final VerticalAlignmentConstant asVerticalAlignmentConstant = PVerticalAlignment.values()[update.getInt(PROPERTY.CELL_VERTICAL_ALIGNMENT)].asVerticalAlignmentConstant();
+                cast().getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
+            }
+            if (update.containsKey(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)) {
+                final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PHorizontalAlignment.values()[update.getInt(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)].asHorizontalAlignmentConstant();
+                cast().getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
+            }
         } else {
             super.update(update, uiService);
         }
+    }
+
+    @Override
+    public HTMLTable cast() {
+        return (HTMLTable) uiObject;
     }
 
 }

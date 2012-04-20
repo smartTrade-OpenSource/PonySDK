@@ -68,6 +68,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.ElementPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" />
 
 	<!-- Lists and Menus pages -->
 	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" />
@@ -109,7 +110,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<!-- Timer pages -->
 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
 	<!-- <bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
-	<!-- <bean class="com.ponysdk.sample.client.page.ImagePageActivity" /> -->
 	<!-- <bean class="com.ponysdk.sample.client.page.CookiePageActivity" /> -->
 	<!-- <bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" /> -->
 	<!-- <bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" /> -->

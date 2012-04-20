@@ -21,12 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class Close extends Instruction {
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-    private static final long serialVersionUID = 5712036611348256066L;
+public class EventInstruction extends Handler {
 
-    public Close() {}
+    public EventInstruction(final long objectID, final String handlerType) {
+        super(objectID, handlerType);
+        put(TYPE.KEY, TYPE.EVENT);
+    }
 
 }

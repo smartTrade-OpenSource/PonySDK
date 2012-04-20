@@ -24,40 +24,30 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTScrollPanel extends PTSimplePanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new PCScrollPanel());
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
         final Widget w = asWidget(add.getObjectID(), uiService);
         cast().setWidget(w);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.ScrollPanel scrollPanel = cast();
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.HORIZONTAL_SCROLL_POSITION.equals(propertyKey)) {
-                scrollPanel.setHorizontalScrollPosition(property.getIntValue());
-            }
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.HORIZONTAL_SCROLL_POSITION)) {
+            cast().setHorizontalScrollPosition(update.getInt(PROPERTY.HORIZONTAL_SCROLL_POSITION));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override

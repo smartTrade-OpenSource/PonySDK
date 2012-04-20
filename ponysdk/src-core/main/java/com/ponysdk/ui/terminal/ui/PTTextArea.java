@@ -23,39 +23,31 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTTextArea extends PTTextBoxBase {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.TextArea());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new TextArea());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.TextArea textArea = cast();
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.VISIBLE_LINES.equals(propertyKey)) {
-                textArea.setVisibleLines(property.getIntValue());
-            } else if (PropertyKey.CHARACTER_WIDTH.equals(propertyKey)) {
-                textArea.setCharacterWidth(property.getIntValue());
-            }
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.VISIBLE_LINES)) {
+            cast().setVisibleLines(update.getInt(PROPERTY.VISIBLE_LINES));
+        } else if (update.containsKey(PROPERTY.CHARACTER_WIDTH)) {
+            cast().setCharacterWidth(update.getInt(PROPERTY.CHARACTER_WIDTH));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.TextArea cast() {
-        return (com.google.gwt.user.client.ui.TextArea) uiObject;
+    public TextArea cast() {
+        return (TextArea) uiObject;
     }
 }

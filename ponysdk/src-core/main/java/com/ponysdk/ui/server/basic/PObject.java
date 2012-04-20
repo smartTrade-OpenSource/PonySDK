@@ -1,11 +1,3 @@
-
-package com.ponysdk.ui.server.basic;
-
-import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-
 /*
  * Copyright (c) 2011 PonySDK
  *  Owners:
@@ -28,6 +20,15 @@ import com.ponysdk.ui.terminal.instruction.EventInstruction;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+package com.ponysdk.ui.server.basic;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.PonySession;
+import com.ponysdk.core.instruction.Create;
+import com.ponysdk.ui.terminal.WidgetType;
 
 public abstract class PObject {
 
@@ -60,7 +61,7 @@ public abstract class PObject {
         return ID;
     }
 
-    public void onEventInstruction(final EventInstruction event) {
+    public void onEventInstruction(final JSONObject event) throws JSONException {
         // override
     }
 

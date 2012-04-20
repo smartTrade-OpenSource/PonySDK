@@ -26,15 +26,16 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositionCallback {
 
@@ -73,9 +74,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         children.insert(this, children.size());
         root.adopt(this);
 
-        final Property mainProperty = new Property();
-        mainProperty.setProperty(PropertyKey.POPUP_AUTO_HIDE, autoHide);
-        setMainProperty(mainProperty);
+        create.put(PROPERTY.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override
@@ -85,21 +84,21 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
 
     public void setModal(final boolean modal) {
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.POPUP_MODAL, modal);
+        update.put(PROPERTY.POPUP_MODAL, modal);
         getPonySession().stackInstruction(update);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.POPUP_GLASS_ENABLED, glassEnabled);
+        update.put(PROPERTY.POPUP_GLASS_ENABLED, glassEnabled);
         getPonySession().stackInstruction(update);
     }
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
             final Update update = new Update(ID);
-            update.setMainPropertyValue(PropertyKey.POPUP_DRAGGABLE, true);
+            update.put(PROPERTY.POPUP_DRAGGABLE, true);
             getPonySession().stackInstruction(update);
         }
     }
@@ -108,14 +107,14 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.ANIMATION, animationEnabled);
+        update.put(PROPERTY.ANIMATION, animationEnabled);
         getPonySession().stackInstruction(update);
     }
 
     public void center() {
         this.center = true;
         final Update update = new Update(ID);
-        update.setMainPropertyKey(PropertyKey.POPUP_CENTER);
+        update.put(PROPERTY.POPUP_CENTER, center);
         getPonySession().stackInstruction(update);
     }
 
@@ -123,7 +122,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         if (!showing) {
             this.showing = true;
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.POPUP_SHOW);
+            update.put(PROPERTY.POPUP_SHOW, showing);
             getPonySession().stackInstruction(update);
         }
     }
@@ -132,7 +131,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         if (showing) {
             this.showing = false;
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.POPUP_HIDE);
+            update.put(PROPERTY.POPUP_HIDE, showing);
             getPonySession().stackInstruction(update);
         }
     }
@@ -140,7 +139,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.POPUP_GLASS_STYLE_NAME, glassStyleName);
+        update.put(PROPERTY.POPUP_GLASS_STYLE_NAME, glassStyleName);
         getPonySession().stackInstruction(update);
     }
 
@@ -161,20 +160,20 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         leftPosition = left;
         topPosition = top;
 
-        final Property property = new Property(PropertyKey.POPUP_POSITION);
-        property.setProperty(PropertyKey.POPUP_POSITION_LEFT, leftPosition);
-        property.setProperty(PropertyKey.POPUP_POSITION_TOP, topPosition);
+        final Update update = new Update(ID);
+        update.put(PROPERTY.POPUP_POSITION);
+        update.put(PROPERTY.POPUP_POSITION_LEFT, leftPosition);
+        update.put(PROPERTY.POPUP_POSITION_TOP, topPosition);
 
-        final Update updateLeft = new Update(ID);
-        updateLeft.setMainProperty(property);
-        getPonySession().stackInstruction(updateLeft);
+        getPonySession().stackInstruction(update);
     }
 
     public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-        final AddHandler handler = new AddHandler(ID, HandlerType.POPUP_POSITION_CALLBACK); // remove ordinal
-                                                                                            // ?
+        final AddHandler handler = new AddHandler(ID, HANDLER.POPUP_POSITION_CALLBACK); // remove
+                                                                                        // ordinal
+        // ?
         getPonySession().stackInstruction(handler);
     }
 
@@ -183,14 +182,14 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction instruction) {
-        if (HandlerType.POPUP_POSITION_CALLBACK.equals(instruction.getHandlerType())) {
-            final Integer windowWidth = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETWIDTH);
-            final Integer windowHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.OFFSETHEIGHT);
-            final Integer clientWith = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_WIDTH);
-            final Integer clientHeight = instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_HEIGHT);
+    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+        if (instruction.getString(HANDLER.KEY).equals(HANDLER.POPUP_POSITION_CALLBACK)) {
+            final Integer windowWidth = instruction.getInt(PROPERTY.OFFSETWIDTH);
+            final Integer windowHeight = instruction.getInt(PROPERTY.OFFSETHEIGHT);
+            final Integer clientWith = instruction.getInt(PROPERTY.CLIENT_WIDTH);
+            final Integer clientHeight = instruction.getInt(PROPERTY.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
-        } else if (HandlerType.CLOSE_HANDLER.equals(instruction.getHandlerType())) {
+        } else if (HANDLER.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
             this.showing = false;
             fireOnClose();
         } else {

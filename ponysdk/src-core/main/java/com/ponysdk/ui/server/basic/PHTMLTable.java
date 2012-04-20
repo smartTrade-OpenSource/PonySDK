@@ -33,12 +33,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PHTMLTable extends PPanel {
 
@@ -94,9 +94,8 @@ public abstract class PHTMLTable extends PPanel {
             }
             if (styles.add(styleName)) {
                 final Update update = new Update(ID);
-                update.setMainPropertyKey(PropertyKey.HTMLTABLE_ROW_STYLE);
-                update.getMainProperty().setProperty(PropertyKey.ROW, row);
-                update.getMainProperty().setProperty(PropertyKey.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
+                update.put(PROPERTY.ROW, row);
+                update.put(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
                 getPonySession().stackInstruction(update);
             }
         }
@@ -108,9 +107,8 @@ public abstract class PHTMLTable extends PPanel {
 
             if (styles.remove(styleName)) {
                 final Update update = new Update(ID);
-                update.setMainPropertyKey(PropertyKey.HTMLTABLE_ROW_STYLE);
-                update.getMainProperty().setProperty(PropertyKey.ROW, row);
-                update.getMainProperty().setProperty(PropertyKey.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                update.put(PROPERTY.ROW, row);
+                update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 getPonySession().stackInstruction(update);
             }
         }
@@ -142,37 +140,33 @@ public abstract class PHTMLTable extends PPanel {
 
         public void addStyleName(final int row, final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
             final Update update = new Update(getID());
-            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.CELL_VERTICAL_ALIGNMENT, align.ordinal());
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, align.ordinal());
             getPonySession().stackInstruction(update);
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
             final Update update = new Update(getID());
-            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
             getPonySession().stackInstruction(update);
         }
     }
@@ -181,26 +175,26 @@ public abstract class PHTMLTable extends PPanel {
 
         public void setWidth(final int column, final String width) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.HTMLTABLE_CELL_STYLE);
-            update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_COLUMN_WIDTH);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.WIDTH, width);
+
+            update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.WIDTH, width);
             getPonySession().stackInstruction(update);
         }
 
         public void addStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_ADD_STYLE_NAME);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.STYLE_NAME, styleName);
+            update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
 
         public void removeStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.COLUMN_FORMATTER_REMOVE_STYLE_NAME);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.STYLE_NAME, styleName);
+            update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
     }
@@ -274,7 +268,7 @@ public abstract class PHTMLTable extends PPanel {
             remove(w, false);
         }
 
-        stackUpdate(PropertyKey.CLEAR, "");
+        stackUpdate(PROPERTY.CLEAR, "");
     }
 
     public void removeRow(final int row) {
@@ -298,7 +292,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        stackUpdate(PropertyKey.CLEAR_ROW, Integer.toString(row));
+        stackUpdate(PROPERTY.CLEAR_ROW, Integer.toString(row));
 
     }
 
@@ -314,7 +308,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        stackUpdate(PropertyKey.INSERT_ROW, Integer.toString(row));
+        stackUpdate(PROPERTY.INSERT_ROW, Integer.toString(row));
     }
 
     @Override
@@ -344,17 +338,17 @@ public abstract class PHTMLTable extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        stackUpdate(PropertyKey.BORDER_WIDTH, Integer.toString(width));
+        stackUpdate(PROPERTY.BORDER_WIDTH, width);
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        stackUpdate(PropertyKey.CELL_PADDING, Integer.toString(padding));
+        stackUpdate(PROPERTY.CELL_PADDING, padding);
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        stackUpdate(PropertyKey.CELL_SPACING, Integer.toString(spacing));
+        stackUpdate(PROPERTY.CELL_SPACING, spacing);
     }
 
     protected void setCellFormatter(final PCellFormatter cellFormatter) {
@@ -373,8 +367,8 @@ public abstract class PHTMLTable extends PPanel {
 
             // Physical attach.
             final Add add = new Add(widget.getID(), getID());
-            add.getMainProperty().setProperty(PropertyKey.ROW, row);
-            add.getMainProperty().setProperty(PropertyKey.CELL, column);
+            add.put(PROPERTY.ROW, row);
+            add.put(PROPERTY.CELL, column);
             getPonySession().stackInstruction(add);
             adopt(widget);
         }

@@ -23,35 +23,31 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.HTML;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTHTML extends PTLabel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.HTML());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new HTML());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-        if (PropertyKey.HTML.equals(propertyKey)) {
-            cast().setHTML(property.getValue());
-        } else if (PropertyKey.WORD_WRAP.equals(propertyKey)) {
-            cast().setWordWrap(property.getBooleanValue());
-            return;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.HTML)) {
+            cast().setHTML(update.getString(PROPERTY.HTML));
+        } else if (update.containsKey(PROPERTY.WORD_WRAP)) {
+            cast().setWordWrap(update.getBoolean(PROPERTY.WORD_WRAP));
         } else {
             super.update(update, uiService);
         }
     }
 
     @Override
-    public com.google.gwt.user.client.ui.HTML cast() {
-        return (com.google.gwt.user.client.ui.HTML) uiObject;
+    public HTML cast() {
+        return (HTML) uiObject;
     }
 }

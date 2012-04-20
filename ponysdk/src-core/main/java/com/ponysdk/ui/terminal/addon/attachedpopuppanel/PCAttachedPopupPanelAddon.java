@@ -26,13 +26,12 @@ package com.ponysdk.ui.terminal.addon.attachedpopuppanel;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.ponysdk.ui.terminal.HandlerType;
 import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.PonyAddOn;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
 
@@ -42,12 +41,12 @@ public class PCAttachedPopupPanelAddon extends PTComposite implements PTAddon {
     public static final String SIGNATURE = "com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon";
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
 
         super.create(create, uiService);
 
-        final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getMainProperty().getLongPropertyValue(PropertyKey.WIDGET));
-        final boolean autoHide = create.getMainProperty().getBooleanPropertyValue(PropertyKey.POPUP_AUTO_HIDE);
+        final PTUIObject attached = (PTUIObject) uiService.getPTObject(create.getLong(PROPERTY.WIDGET));
+        final boolean autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
         final PCAttachedPopupPanel popup = new PCAttachedPopupPanel(autoHide, attached.cast());
 
         initWidget(popup);
@@ -58,7 +57,10 @@ public class PCAttachedPopupPanelAddon extends PTComposite implements PTAddon {
 
             @Override
             public void onClose(final CloseEvent<PopupPanel> event) {
-                uiService.triggerEvent(new EventInstruction(create.getObjectID(), HandlerType.CLOSE_HANDLER));
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(create.getObjectID());
+                instruction.put(HANDLER.KEY, HANDLER.CLOSE_HANDLER);
+                uiService.triggerEvent(instruction);
             }
         });
 

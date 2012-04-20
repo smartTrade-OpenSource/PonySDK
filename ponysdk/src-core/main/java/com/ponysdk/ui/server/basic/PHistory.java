@@ -27,9 +27,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.PonySession;
+import com.ponysdk.core.instruction.History;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.instruction.History;
 
 public class PHistory {
 

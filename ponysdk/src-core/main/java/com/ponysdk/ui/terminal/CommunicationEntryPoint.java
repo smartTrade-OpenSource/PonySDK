@@ -23,26 +23,35 @@
 
 package com.ponysdk.ui.terminal;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
     private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
-
-    private final PonyEngineServiceAsync communicationService = GWT.create(PonyEngineService.class);
 
     @Override
     public void onModuleLoad() {
@@ -56,33 +65,60 @@ public class CommunicationEntryPoint implements EntryPoint {
         });
 
         try {
+
+            final PTInstruction requestData = new PTInstruction();
+
+            final JSONArray cookies = new JSONArray();
+
             // load all cookies at startup
-            final Map<String, String> cookies = new HashMap<String, String>();
             final Collection<String> cookieNames = Cookies.getCookieNames();
             if (cookieNames != null) {
-                for (final String cookieName : cookieNames) {
-                    cookies.put(cookieName, Cookies.getCookie(cookieName));
+                final int i = 0;
+                for (final String cookie : cookieNames) {
+                    cookies.set(i, new JSONString(Cookies.getCookie(cookie)));
                 }
             }
 
-            communicationService.startApplication(History.getToken(), cookies, new AsyncCallback<PonySessionContext>() {
+            final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() + "p");
+
+            requestData.put(APPLICATION.KEY, APPLICATION.START);
+            requestData.put(HISTORY.TOKEN, History.getToken());
+            requestData.put(PROPERTY.COOKIE, cookies);
+
+            builder.sendRequest(requestData.toString(), new RequestCallback() {
 
                 @Override
-                public void onFailure(final Throwable caught) {
-                    log.log(Level.SEVERE, "Error ", caught);
-                    if (caught instanceof StatusCodeException) {
-                        final StatusCodeException codeException = (StatusCodeException) caught;
+                public void onError(final Request request, final Throwable exception) {
+                    log.log(Level.SEVERE, "Error ", exception);
+                    if (exception instanceof StatusCodeException) {
+                        final StatusCodeException codeException = (StatusCodeException) exception;
                         if (codeException.getStatusCode() == 0) return;
 
                     }
-                    Window.alert("Cannot inititialize the application : " + caught.getMessage() + "\n" + caught + "\nPlease reload your application");
+                    Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
                 }
 
                 @Override
-                public void onSuccess(final PonySessionContext ponySessionContext) {
-                    final UIBuilder uiBuilder = new UIBuilder(ponySessionContext.getID());
-                    uiBuilder.init();
-                    uiBuilder.update(ponySessionContext.getInstructions());
+                public void onResponseReceived(final Request request, final Response response) {
+                    if (200 == response.getStatusCode()) {
+
+                        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+
+                        final JSONObject object = JSONParser.parseLenient(response.getText()).isObject();
+
+                        final long viewID = (long) object.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
+                        final JSONArray jsonArray = object.get(APPLICATION.INSTRUCTIONS).isArray();
+
+                        for (int i = 0; i < jsonArray.size(); i++) {
+                            instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+                        }
+
+                        final UIBuilder uiBuilder = new UIBuilder(viewID);
+                        uiBuilder.init();
+                        uiBuilder.update(instructions);
+                    } else {
+                        Window.alert("Couldn't retrieve JSON (" + response.getStatusText() + ")");
+                    }
                 }
             });
 

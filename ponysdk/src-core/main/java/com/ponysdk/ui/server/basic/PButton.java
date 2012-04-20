@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PButton extends PButtonBase {
 
@@ -38,7 +38,7 @@ public class PButton extends PButtonBase {
         setStyleName(PonySDKTheme.BUTTON_WHITE);
     }
 
-    public PButton(String text) {
+    public PButton(final String text) {
         this();
         setText(text);
     }
@@ -49,10 +49,10 @@ public class PButton extends PButtonBase {
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -62,7 +62,7 @@ public class PButton extends PButtonBase {
     }
 
     @Override
-    public void setHTML(String html) {
+    public void setHTML(final String html) {
         this.html = html;
         setText(html);
     }

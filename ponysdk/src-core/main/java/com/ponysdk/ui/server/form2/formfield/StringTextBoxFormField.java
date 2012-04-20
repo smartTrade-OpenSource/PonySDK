@@ -11,6 +11,6 @@ public class StringTextBoxFormField extends TextBoxFormField<String> {
     }
 
     public StringTextBoxFormField(final PTextBox textBox) {
-        super(IdentityConverter.STRING);
+        super(textBox, IdentityConverter.STRING);
     }
 }

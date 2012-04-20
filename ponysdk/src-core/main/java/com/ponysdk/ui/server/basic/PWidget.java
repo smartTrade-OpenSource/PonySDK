@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +15,9 @@ import com.ponysdk.core.event.Event;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
-import com.ponysdk.ui.server.basic.event.HasPProperties;
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.RemoveHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
@@ -22,13 +26,8 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.terminal.DomHandlerType;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.RemoveHandler;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /*
  * Copyright (c) 2011 PonySDK
@@ -79,28 +78,30 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private String debugID;
 
-    protected void setMainProperty(final Property mainProperty) {
-        create.setMainProperty(mainProperty);
-    }
-
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
 
-    protected void stackUpdate(final PropertyKey key, final String value) {
+    protected void stackUpdate(final String key, final int value) {
         final Update update = new Update(getID());
-        update.setMainPropertyValue(key, value);
+        update.put(key, value);
+        getPonySession().stackInstruction(update);
+    }
+
+    protected void stackUpdate(final String key, final String value) {
+        final Update update = new Update(getID());
+        update.put(key, value);
         getPonySession().stackInstruction(update);
     }
 
     public void setWidth(final String width) {
         this.width = width;
-        stackUpdate(PropertyKey.WIDGET_WIDTH, width);
+        stackUpdate(PROPERTY.WIDGET_WIDTH, width);
     }
 
     public void setHeight(final String height) {
         this.height = height;
-        stackUpdate(PropertyKey.WIDGET_HEIGHT, height);
+        stackUpdate(PROPERTY.WIDGET_HEIGHT, height);
     }
 
     public PWidget getParent() {
@@ -114,24 +115,22 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setStyleProperty(final String name, final String value) {
         styleProperties.put(name, value);
         final Update update = new Update(ID);
-        update.setMainPropertyKey(PropertyKey.STYLE_PROPERTY);
-        update.getMainProperty().setProperty(PropertyKey.STYLE_KEY, name);
-        update.getMainProperty().setProperty(PropertyKey.STYLE_VALUE, value);
+        update.put(PROPERTY.STYLE_KEY, name);
+        update.put(PROPERTY.STYLE_VALUE, value);
         getPonySession().stackInstruction(update);
     }
 
     public void setStyleName(final String styleName) {
         this.styleName = styleName;
-
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.STYLE_NAME, styleName);
+        update.put(PROPERTY.STYLE_NAME, styleName);
         getPonySession().stackInstruction(update);
     }
 
     public void addStyleName(final String styleName) {
         if (styleNames.add(styleName)) {
             final Update update = new Update(ID);
-            update.setMainPropertyValue(PropertyKey.ADD_STYLE_NAME, styleName);
+            update.put(PROPERTY.ADD_STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
     }
@@ -139,7 +138,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void removeStyleName(final String styleName) {
         if (styleNames.remove(styleName)) {
             final Update update = new Update(ID);
-            update.setMainPropertyValue(PropertyKey.REMOVE_STYLE_NAME, styleName);
+            update.put(PROPERTY.REMOVE_STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
     }
@@ -147,7 +146,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void ensureDebugId(final String debugID) {
         this.debugID = debugID;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.ENSURE_DEBUG_ID, debugID);
+        update.put(PROPERTY.ENSURE_DEBUG_ID, debugID);
         getPonySession().stackInstruction(update);
     }
 
@@ -164,14 +163,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setVisible(final boolean visible) {
         this.visible = visible;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.WIDGET_VISIBLE, visible);
+        update.put(PROPERTY.WIDGET_VISIBLE, visible);
         getPonySession().stackInstruction(update);
     }
 
     public void setTitle(final String title) {
         this.title = title;
         final Update update = new Update(ID);
-        update.setMainPropertyValue(PropertyKey.WIDGET_TITLE, title);
+        update.put(PROPERTY.WIDGET_TITLE, title);
         getPonySession().stackInstruction(update);
     }
 
@@ -189,47 +188,46 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
-        final RemoveHandler removeHandler = new RemoveHandler(getID(), HandlerType.DOM_HANDLER);
-        if (handler instanceof HasPProperties) removeHandler.getMainProperty().setProperties(((HasPProperties) handler).getProperties());
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.DOM_HANDLER);
+        if (handler instanceof JSONObject) {
+            removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
+        }
         getPonySession().stackInstruction(removeHandler);
         return handlerRegistration;
     }
 
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
-        final AddHandler addHandler = createAddHandlerInstruction(type);
-        if (handler instanceof HasPProperties) addHandler.getMainProperty().setProperties(((HasPProperties) handler).getProperties());
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.DOM_HANDLER);
+        addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
+        // TODO nciaravola temp
+
+        // if (handler instanceof JSONObject) {
+        // addHandler.put(PROPERTY.DOM_HANDLER, handler);
+        // }
         getPonySession().stackInstruction(addHandler);
         return handlerRegistration;
     }
 
-    private <H extends EventHandler> AddHandler createAddHandlerInstruction(final PDomEvent.Type<H> type) {
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.DOM_HANDLER);
-        final Property property = new Property(PropertyKey.DOM_HANDLER, type.getDomHandlerType().ordinal());
-        addHandler.setMainProperty(property);
-        return addHandler;
-    }
-
     @Override
-    public void onEventInstruction(final EventInstruction instruction) {
-
-        if (HandlerType.DOM_HANDLER.equals(instruction.getHandlerType())) {
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getMainProperty().getIntPropertyValue(PropertyKey.DOM_HANDLER)];
+    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+        if (instruction.getString(HANDLER.KEY).equals(HANDLER.DOM_HANDLER)) {
+            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(PROPERTY.DOM_HANDLER_TYPE)];
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getMainProperty().getIntValue()));
+                    fireEvent(new PKeyPressEvent(this, instruction.getInt(PROPERTY.VALUE)));
                     break;
                 case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getMainProperty().getIntValue()));
+                    fireEvent(new PKeyUpEvent(this, instruction.getInt(PROPERTY.VALUE)));
                     break;
                 case CLICK:
                     final PClickEvent event = new PClickEvent(this);
-                    event.setClientX(instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_X));
-                    event.setClientY(instruction.getMainProperty().getIntPropertyValue(PropertyKey.CLIENT_Y));
-                    event.setSourceAbsoluteLeft((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_ABSOLUTE_LEFT));
-                    event.setSourceAbsoluteTop((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_ABSOLUTE_TOP));
-                    event.setSourceOffsetHeight((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_OFFSET_HEIGHT));
-                    event.setSourceOffsetWidth((int) instruction.getMainProperty().getDoublePropertyValue(PropertyKey.SOURCE_OFFSET_WIDTH));
+                    event.setClientX(instruction.getInt(PROPERTY.CLIENT_X));
+                    event.setClientY(instruction.getInt(PROPERTY.CLIENT_Y));
+                    event.setSourceAbsoluteLeft((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_LEFT));
+                    event.setSourceAbsoluteTop((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_TOP));
+                    event.setSourceOffsetHeight((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_HEIGHT));
+                    event.setSourceOffsetWidth((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_WIDTH));
                     fireEvent(event);
                     break;
                 case MOUSE_OVER:

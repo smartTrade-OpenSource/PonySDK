@@ -24,19 +24,17 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTGrid extends PTHTMLTable {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        if (create.getMainProperty().containsChildProperty(PropertyKey.ROW)) {
-            int rows = create.getMainProperty().getIntPropertyValue(PropertyKey.ROW);
-            int columns = create.getMainProperty().getIntPropertyValue(PropertyKey.COLUMN);
+    public void create(final PTInstruction create, final UIService uiService) {
+        if (create.containsKey(PROPERTY.ROW)) {
+            final int rows = create.getInt(PROPERTY.ROW);
+            final int columns = create.getInt(PROPERTY.COLUMN);
             init(create, uiService, new Grid(rows, columns));
         } else {
             init(create, uiService, new Grid());
@@ -44,15 +42,11 @@ public class PTGrid extends PTHTMLTable {
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        if (PropertyKey.CLEAR_ROW.equals(propertyKey)) {
-            cast().removeRow(property.getIntValue());
-        } else if (PropertyKey.INSERT_ROW.equals(propertyKey)) {
-            cast().insertRow(property.getIntValue());
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.CLEAR_ROW)) {
+            cast().removeRow(update.getInt(PROPERTY.CLEAR_ROW));
+        } else if (update.containsKey(PROPERTY.INSERT_ROW)) {
+            cast().insertRow(update.getInt(PROPERTY.INSERT_ROW));
         } else {
             super.update(update, uiService);
         }

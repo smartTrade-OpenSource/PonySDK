@@ -24,43 +24,75 @@ package com.ponysdk.spring;
  * the License.
  */
 
-import java.util.List;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.ponysdk.core.PonyApplicationSession;
 import com.ponysdk.core.PonyEngineServiceImpl;
-import com.ponysdk.core.PonyRemoteServiceServlet;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.terminal.PonyEngineService;
-import com.ponysdk.ui.terminal.PonySessionContext;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
-import com.ponysdk.ui.terminal.instruction.Instruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
-public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implements PonyEngineService {
+public class SpringPonyEngineServiceImpl extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(PonyEngineServiceImpl.class);
 
     @Override
-    public PonySessionContext startApplication(final String token, final Map<String, String> cookiesByName) throws Exception {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doProcess(req, resp);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doProcess(req, resp);
+    }
+
+    protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
+            final JSONObject data = new JSONObject(new JSONTokener(req.getReader()));
+
+            if (data.has(APPLICATION.KEY)) {
+                startApplication(data, req, resp);
+            } else {
+                fireInstructions(data, req, resp);
+            }
+        } catch (final Exception e) {
+            resp.sendError(501, e.getMessage());
+            e.printStackTrace();
+
+        }
+    }
+
+    public void startApplication(final JSONObject data, final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            final JSONObject response = new JSONObject();
+
             boolean isNewHttpSession = false;
-            final HttpSession session = getThreadLocalRequest().getSession();
+            final HttpSession session = req.getSession();
             PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
             if (applicationSession == null) {
                 log.info("Creating a new application ... session[" + session.getId() + "]");
@@ -73,7 +105,8 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
 
                 final PonySession ponySession = new PonySession(applicationSession);
 
-                final long ponySessionID = applicationSession.registerPonySession(ponySession);
+                response.put(APPLICATION.VIEW_ID, applicationSession.registerPonySession(ponySession));
+
                 PonySession.setCurrent(ponySession);
 
                 final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { "conf/client_application.inc.xml", "client_application.xml" });
@@ -88,8 +121,8 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
                 ponySession.setPlaceController(placeController);
                 ponySession.setEntryPoint(entryPoint);
 
-                final PCookies cookies = new PCookies(cookiesByName);
-                ponySession.setCookies(cookies);
+                // final PCookies cookies = new PCookies(cookiesByName);
+                // ponySession.setCookies(cookies);
 
                 final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
                 if (initializingPages != null && !initializingPages.isEmpty()) {
@@ -103,13 +136,16 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
                     entryPoint.restart(ponySession);
                 }
 
-                ponySession.getHistory().fireHistoryChanged(token); // update current token
+                ponySession.getHistory().fireHistoryChanged(data.getString(HISTORY.TOKEN));
 
-                final PonySessionContext ponySessionContext = new PonySessionContext();
-                ponySessionContext.setID(ponySessionID);
-                ponySessionContext.setInstructions(ponySession.flushInstructions());
-
-                return ponySessionContext;
+                try {
+                    ponySession.flushInstructions(response);
+                    final PrintWriter writer = resp.getWriter();
+                    writer.write(response.toString());
+                    writer.flush();
+                } catch (final Throwable e) {
+                    log.error("Cannot send instructions to the browser, Session ID #" + req.getSession().getId(), e);
+                }
             }
 
         } catch (final Throwable e) {
@@ -118,12 +154,15 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
         }
     }
 
-    @Override
-    public List<Instruction> fireInstructions(final long key, final List<Instruction> instructions) throws Exception {
+    private void fireInstructions(final JSONObject data, final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+        final JSONObject response = new JSONObject();
+
+        final long key = data.getLong(APPLICATION.VIEW_ID);
         final long start = System.currentTimeMillis();
+
         try {
 
-            final HttpSession session = getThreadLocalRequest().getSession();
+            final HttpSession session = req.getSession();
             final PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
 
             if (applicationSession == null) { throw new PonySessionException("Invalid session, please reload your application"); }
@@ -134,14 +173,28 @@ public class SpringPonyEngineServiceImpl extends PonyRemoteServiceServlet implem
 
             synchronized (ponySession) {
                 PonySession.setCurrent(ponySession);
-                ponySession.fireInstructions(instructions);
-                return ponySession.flushInstructions();
+                if (data.has(APPLICATION.INSTRUCTIONS)) {
+                    final JSONArray instructions = data.getJSONArray(APPLICATION.INSTRUCTIONS);
+                    for (int i = 0; i < instructions.length(); i++) {
+                        ponySession.fireInstruction(instructions.getJSONObject(i));
+                    }
+                }
+
+                try {
+                    if (ponySession.flushInstructions(response)) {
+                        final PrintWriter writer = resp.getWriter();
+                        writer.write(response.toString());
+                        writer.flush();
+                    }
+                } catch (final Throwable e) {
+                    log.error("Cannot send instructions to the browser, Session ID #" + req.getSession().getId(), e);
+                }
             }
         } catch (final PonySessionException e) {
-            log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
+            // log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
             throw e;
         } catch (final Throwable e) {
-            log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
+            // log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
             throw new RuntimeException(e);
         } finally {
             if (log.isDebugEnabled()) {

@@ -25,68 +25,63 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTCheckBox extends PTButtonBase {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.CheckBox());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new CheckBox());
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-
-        if (HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        if (HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
             addValueChangeHandler(addHandler, uiService);
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
 
-        super.addHandler(addHandler, uiService);
     }
 
-    protected void addValueChangeHandler(final AddHandler addHandler, final UIService uiService) {
+    protected void addValueChangeHandler(final PTInstruction addHandler, final UIService uiService) {
         cast().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BOOLEAN_VALUE_CHANGE_HANDLER);
-                eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getValue());
-                uiService.triggerEvent(eventInstruction);
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(addHandler.getObjectID());
+                instruction.put(TYPE.KEY, TYPE.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
+                instruction.put(PROPERTY.VALUE, event.getValue());
+                uiService.triggerEvent(instruction);
             }
         });
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
+        final CheckBox checkBox = cast();
 
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.CheckBox checkBox = cast();
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.VALUE.equals(propertyKey)) {
-                checkBox.setValue(property.getBooleanValue());
-            } else if (PropertyKey.TEXT.equals(propertyKey)) {
-                checkBox.setText(property.getValue());
-            } else if (PropertyKey.HTML.equals(propertyKey)) {
-                checkBox.setHTML(property.getValue());
-            }
+        if (update.containsKey(PROPERTY.VALUE)) {
+            checkBox.setValue(update.getBoolean(PROPERTY.VALUE));
+        } else if (update.containsKey(PROPERTY.TEXT)) {
+            checkBox.setText(update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.HTML)) {
+            checkBox.setHTML(update.getString(PROPERTY.HTML));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.CheckBox cast() {
-        return (com.google.gwt.user.client.ui.CheckBox) uiObject;
+    public CheckBox cast() {
+        return (CheckBox) uiObject;
     }
 
 }

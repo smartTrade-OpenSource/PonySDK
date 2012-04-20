@@ -24,74 +24,64 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.Command;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTMenuItem extends PTUIObject {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        final com.google.gwt.user.client.ui.MenuItem menuItem = new com.google.gwt.user.client.ui.MenuItem("?", (Command) null);
+    public void create(final PTInstruction create, final UIService uiService) {
+        final MenuItem menuItem = new MenuItem("?", (Command) null);
         init(create, uiService, menuItem);
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
         final PTMenuBar child = (PTMenuBar) uiService.getPTObject(add.getObjectID());
         cast().setSubMenu(child.cast());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.MenuItem menuItem = cast();
-
-        if (PropertyKey.TEXT.equals(mainProperty.getKey())) {
-            menuItem.setText(mainProperty.getValue());
-            return;
+        if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.HTML)) {
+            cast().setHTML(update.getString(PROPERTY.HTML));
+        } else if (update.containsKey(PROPERTY.ENABLED)) {
+            cast().setEnabled(update.getBoolean(PROPERTY.ENABLED));
+        } else {
+            super.update(update, uiService);
         }
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.HTML.equals(propertyKey)) {
-                menuItem.setHTML(property.getValue());
-            } else if (PropertyKey.TEXT.equals(propertyKey)) {
-                menuItem.setText(property.getValue());
-            } else if (PropertyKey.ENABLED.equals(propertyKey)) {
-                menuItem.setEnabled(property.getBooleanValue());
-            }
-        }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-        if (HandlerType.COMMAND.equals(addHandler.getHandlerType())) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        final String handler = addHandler.getString(HANDLER.KEY);
+        if (HANDLER.COMMAND.equals(handler)) {
             cast().setCommand(new Command() {
 
                 @Override
                 public void execute() {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.COMMAND);
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.COMMAND);
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
 
-        super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.MenuItem cast() {
-        return (com.google.gwt.user.client.ui.MenuItem) uiObject;
+    public MenuItem cast() {
+        return (MenuItem) uiObject;
     }
 }

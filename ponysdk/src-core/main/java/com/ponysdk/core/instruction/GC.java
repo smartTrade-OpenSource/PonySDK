@@ -21,16 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class Remove extends Instruction {
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-    private static final long serialVersionUID = -7279461230051812100L;
+public class GC extends Instruction {
 
-    public Remove() {}
-
-    public Remove(long objectID, long parentID) {
-        super(objectID);
-        this.parentID = parentID;
+    public GC(final long objectID, final long parentID) {
+        super(objectID, parentID);
+        put(TYPE.KEY, TYPE.GC);
     }
 }

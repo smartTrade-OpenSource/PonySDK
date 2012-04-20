@@ -23,25 +23,24 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTSimplePanel extends PTPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.SimplePanel());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new SimplePanel());
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
-        cast().setWidget(w);
+    public void add(final PTInstruction add, final UIService uiService) {
+        cast().setWidget(asWidget(add.getObjectID(), uiService));
     }
 
     @Override
-    public com.google.gwt.user.client.ui.SimplePanel cast() {
-        return (com.google.gwt.user.client.ui.SimplePanel) uiObject;
+    public SimplePanel cast() {
+        return (SimplePanel) uiObject;
     }
 }

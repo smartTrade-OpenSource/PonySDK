@@ -23,6 +23,7 @@
 
 package com.ponysdk.impl.webapplication.application;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -41,13 +42,14 @@ public class DefaultApplicationView2 extends PDockLayoutPanel implements Applica
     private final PSimpleLayoutPanel logs = new PSimpleLayoutPanel();
 
     public DefaultApplicationView2() {
+        super(Unit.PX);
         setSizeFull();
 
         addNorth(header, 4);
         addSouth(footer, 3);
         addWest(menu, 10);
 
-        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel();
+        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel(Unit.PX);
         splitLayoutPanel.setSizeFull();
         splitLayoutPanel.addSouth(logs, 70);
         splitLayoutPanel.add(body);

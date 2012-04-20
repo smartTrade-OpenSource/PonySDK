@@ -25,11 +25,11 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTComplexPanel extends PTPanel {
 
-    public void create(final Create create, final UIService uiService, final ComplexPanel complexPanel) {
+    public void create(final PTInstruction create, final UIService uiService, final ComplexPanel complexPanel) {
         init(create, uiService, complexPanel);
     }
 

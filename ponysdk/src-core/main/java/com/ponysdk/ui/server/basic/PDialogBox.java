@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PDialogBox extends PDecoratedPopupPanel {
 
@@ -43,7 +43,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
     public void setCaption(final String caption) {
         this.caption = caption;
         final Update update = new Update(ID);
-        update.getMainProperty().setProperty(PropertyKey.POPUP_CAPTION, caption);
+        update.put(PROPERTY.POPUP_CAPTION, caption);
         getPonySession().stackInstruction(update);
     }
 

@@ -29,34 +29,17 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.PonySession;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PCookies {
 
-    // private static final Logger log = LoggerFactory.getLogger(PCookies.class);
-
-    // public static SecretKey key;
-    // static {
-    // try {
-    // final DESKeySpec KEY = new DESKeySpec("PONY_COOKIE".getBytes("UTF8"));
-    // final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-    // key = keyFactory.generateSecret(KEY);
-    // } catch (final Exception e) {
-    // throw new RuntimeException("Error occured when instantiating key", e);
-    // }
-    // }
-
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<String, String>();
 
-    public PCookies(Map<String, String> cookies) throws Exception {
+    public PCookies(final Map<String, String> cookies) throws Exception {
         for (final Entry<String, String> entry : cookies.entrySet()) {
-            // final String name = decode(entry.getKey());
-            // final String value = decode(entry.getValue());
-
             cachedCookies.put(entry.getKey(), entry.getValue());
         }
     }
@@ -65,38 +48,28 @@ public class PCookies {
         return cachedCookies.get(name);
     }
 
-    public String removeCookie(String name) {
+    public String removeCookie(final String name) {
         final Remove remove = new Remove();
-        final Property property = new Property(PropertyKey.COOKIE, name);
-        remove.setMainProperty(property);
+        remove.put(PROPERTY.COOKIE, name);
         PonySession.getCurrent().stackInstruction(remove);
         return cachedCookies.remove(name);
     }
 
-    public void setCookie(String name, String value) {
+    public void setCookie(final String name, final String value) {
         setCookie(name, value, null);
     }
 
-    public void setCookie(String name, String value, Date expires) {
+    public void setCookie(final String name, final String value, final Date expires) {
         try {
-            // final byte[] clearName = name.getBytes("UTF8");
-            // final byte[] clearValue = value.getBytes("UTF8");
-            // final Cipher cipher = Cipher.getInstance("DES");
-            // cipher.init(Cipher.ENCRYPT_MODE, key);
             cachedCookies.put(name, value);
-
-            // final String encryptedName = new String(cipher.doFinal(clearName));
-            // final String encryptedValue = new String(cipher.doFinal(clearValue));
 
             final long ID = PonySession.getCurrent().nextID();
             final Create create = new Create(ID, WidgetType.COOKIE);
-            final Property property = new Property();
-            property.setProperty(PropertyKey.NAME, name);
-            property.setProperty(PropertyKey.VALUE, value);
+            create.put(PROPERTY.NAME, name);
+            create.put(PROPERTY.VALUE, value);
             if (expires != null) {
-                property.setProperty(PropertyKey.COOKIE_EXPIRE, expires.getTime());
+                create.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
             }
-            create.setMainProperty(property);
 
             PonySession.getCurrent().stackInstruction(create);
         } catch (final Exception e) {
@@ -104,15 +77,4 @@ public class PCookies {
         }
     }
 
-    // private String decode(String source) {
-    // String value = null;
-    // try {
-    // // final Cipher cipher = Cipher.getInstance("DES");// cipher is not thread safe
-    // // cipher.init(Cipher.DECRYPT_MODE, key);
-    // value = new String(cipher.doFinal(source.getBytes()));
-    // } catch (final Exception e) {
-    // log.warn("Cannot decode cookie # " + source);
-    // }
-    // return value;
-    // }
 }

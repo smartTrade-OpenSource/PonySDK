@@ -26,12 +26,11 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTFocusWidget extends PTWidget {
 
@@ -42,64 +41,41 @@ public class PTFocusWidget extends PTWidget {
     private boolean enabled = true;
 
     @Override
-    public void update(Update update, UIService uiService) {
+    public void update(final PTInstruction update, final UIService uiService) {
 
-        final Property mainProperty = update.getMainProperty();
-        final PropertyKey mainPropertyKey = mainProperty.getPropertyKey();
+        if (update.containsKey(PROPERTY.LOADING_ON_REQUEST)) {
+            showLoadingOnRequest = update.getBoolean(PROPERTY.LOADING_ON_REQUEST);
+        } else if (update.containsKey(PROPERTY.ENABLED_ON_REQUEST)) {
+            enabledOnRequest = update.getBoolean(PROPERTY.ENABLED_ON_REQUEST);
+        } else if (update.containsKey(PROPERTY.END_OF_PROCESSING)) {
+            if (showLoadingOnRequest) cast().removeStyleName("pony-Loading");
+            if (!enabledOnRequest) cast().setEnabled(enabled);
+        } else if (update.containsKey(PROPERTY.ENABLED)) {
+            this.enabled = update.getBoolean(PROPERTY.ENABLED);
+            cast().setEnabled(enabled);
+        } else if (update.containsKey(PROPERTY.FOCUSED)) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-        switch (mainPropertyKey) {
-            case LOADING_ON_REQUEST:
-                showLoadingOnRequest = mainProperty.getBooleanValue();
-                break;
-            case ENABLED_ON_REQUEST:
-                enabledOnRequest = mainProperty.getBooleanValue();
-                break;
-            case END_OF_PROCESSING:
-                if (showLoadingOnRequest) {
-                    cast().removeStyleName("pony-Loading");
+                @Override
+                public void execute() {
+                    cast().setFocus(update.getBoolean(PROPERTY.FOCUSED));
                 }
-                if (!enabledOnRequest) {
-                    cast().setEnabled(enabled);
-                }
-                break;
-
-            default:
-                break;
+            });
+        } else {
+            super.update(update, uiService);
         }
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.ENABLED.equals(propertyKey)) {
-                this.enabled = property.getBooleanValue();
-                cast().setEnabled(enabled);
-            } else if (PropertyKey.FOCUSED.equals(propertyKey)) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        cast().setFocus(property.getBooleanValue());
-                    }
-                });
-            }
-        }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.FocusWidget cast() {
-        return (com.google.gwt.user.client.ui.FocusWidget) uiObject;
-    }
-
-    @Override
-    protected void triggerOnClick(AddHandler addHandler, Widget widget, int domHandlerType, UIService uiService, ClickEvent event) {
-        if (!enabledOnRequest) {
-            cast().setEnabled(false);
-        }
-        if (showLoadingOnRequest) {
-            cast().addStyleName("pony-Loading");
-        }
+    protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
+        if (!enabledOnRequest) cast().setEnabled(false);
+        if (showLoadingOnRequest) cast().addStyleName("pony-Loading");
         super.triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
+    }
+
+    @Override
+    public FocusWidget cast() {
+        return (FocusWidget) uiObject;
     }
 
 }

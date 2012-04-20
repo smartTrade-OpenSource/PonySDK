@@ -24,34 +24,29 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTDockLayoutPanel extends PTComplexPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.DockLayoutPanel(Unit.PX));// must be a
-                                                                                            // parametter
+    public void create(final PTInstruction create, final UIService uiService) {
+        final Unit unit = Unit.values()[create.getInt(PROPERTY.UNIT)];
+        init(create, uiService, new DockLayoutPanel(unit));
     }
 
     @Override
-    public com.google.gwt.user.client.ui.DockLayoutPanel cast() {
-        return (com.google.gwt.user.client.ui.DockLayoutPanel) uiObject;
-    }
-
-    @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.DockLayoutPanel dockLayoutPanel = cast();
+        final DockLayoutPanel dockLayoutPanel = cast();
 
-        final Direction direction = Direction.values()[add.getMainProperty().getIntPropertyValue(PropertyKey.DIRECTION)];
-        final double size = add.getMainProperty().getDoublePropertyValue(PropertyKey.SIZE);
+        final Direction direction = Direction.values()[add.getInt(PROPERTY.DIRECTION)];
+        final double size = add.getDouble(PROPERTY.SIZE);
         switch (direction) {
             case CENTER: {
                 dockLayoutPanel.add(w);
@@ -82,6 +77,11 @@ public class PTDockLayoutPanel extends PTComplexPanel {
                 break;
             }
         }
-
     }
+
+    @Override
+    public DockLayoutPanel cast() {
+        return (DockLayoutPanel) uiObject;
+    }
+
 }

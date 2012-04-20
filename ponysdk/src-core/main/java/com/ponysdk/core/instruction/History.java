@@ -21,17 +21,23 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class Add extends Instruction {
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-    private static final long serialVersionUID = 2471039740559239983L;
+public class History extends Instruction {
 
-    public Add() {}
+    private final String token;
 
-    public Add(long objectID, long parentID) {
-        super(objectID);
-        this.parentID = parentID;
+    public History(final String token) {
+        put(HISTORY.TOKEN, token);
+        put(TYPE.KEY, TYPE.HISTORY);
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
     }
 
 }

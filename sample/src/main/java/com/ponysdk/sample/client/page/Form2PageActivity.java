@@ -29,12 +29,10 @@ import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.form2.DefaultFormView;
-import com.ponysdk.ui.server.form2.FormActivity;
-import com.ponysdk.ui.server.form2.FormView;
+import com.ponysdk.ui.server.form2.Form;
+import com.ponysdk.ui.server.form2.FormFieldComponent;
 import com.ponysdk.ui.server.form2.formfield.CheckBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.DateBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.FormField;
@@ -59,8 +57,7 @@ public class Form2PageActivity extends SamplePageActivity {
 
         final PFlexTable panel = new PFlexTable();
 
-        final FormView formView = new DefaultFormView();
-        final FormActivity formActivity = new FormActivity(formView);
+        final Form form = new Form();
 
         final FormField<String> field1 = new StringTextBoxFormField();
         field1.setValidator(new NotEmptyFieldValidator());
@@ -90,21 +87,31 @@ public class Form2PageActivity extends SamplePageActivity {
         final FormField<Date> field8 = new DateBoxFormField();
         field7.setValidator(new NotEmptyFieldValidator());
 
-        formActivity.addFormField("Field1", field1);
-        formActivity.addFormField("Field2", field2);
-        formActivity.addFormField("Field3", field3);
-        formActivity.addFormField("Field4", field4);
-        formActivity.addFormField("Field5", field5);
-        formActivity.addFormField("Field6", field6);
-        formActivity.addFormField("Field7", field7);
-        formActivity.addFormField("Field8", field8);
+        form.addFormField(field1);
+        form.addFormField(field2);
+        form.addFormField(field3);
+        form.addFormField(field4);
+        form.addFormField(field5);
+        form.addFormField(field6);
+        form.addFormField(field7);
+        form.addFormField(field8);
+
+        final PFlexTable formLayout = new PFlexTable();
+        formLayout.setWidget(0, 0, new FormFieldComponent("field1", field1));
+        formLayout.setWidget(0, 1, new FormFieldComponent("field2", field2));
+        formLayout.setWidget(1, 0, new FormFieldComponent("field3", field3));
+        formLayout.setWidget(1, 1, new FormFieldComponent("field4", field4));
+        formLayout.setWidget(2, 0, new FormFieldComponent("field5", field5));
+        formLayout.setWidget(2, 1, new FormFieldComponent("field6", field6));
+        formLayout.setWidget(3, 0, new FormFieldComponent("field7", field7));
+        formLayout.setWidget(3, 1, new FormFieldComponent("field8", field8));
 
         final PButton validateButton = new PButton("Validate");
         validateButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final boolean isValid = formActivity.isValid();
+                final boolean isValid = form.isValid();
                 PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
             }
         });
@@ -114,13 +121,10 @@ public class Form2PageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                formActivity.reset();
+                form.reset();
                 PNotificationManager.showHumanizedNotification("The form has been reseted");
             }
         });
-
-        final PSimplePanel formLayout = new PSimplePanel();
-        formActivity.start(formLayout);
 
         panel.setWidget(0, 0, validateButton);
         panel.getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);

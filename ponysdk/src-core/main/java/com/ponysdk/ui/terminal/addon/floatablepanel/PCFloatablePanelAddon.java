@@ -25,11 +25,9 @@ package com.ponysdk.ui.terminal.addon.floatablepanel;
 
 import com.ponysdk.ui.terminal.PTAddon;
 import com.ponysdk.ui.terminal.PonyAddOn;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.ui.PTComposite;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 
@@ -41,7 +39,7 @@ public class PCFloatablePanelAddon extends PTComposite implements PTAddon {
     private PCFloatablePanel floatablePanel;
 
     @Override
-    public void create(final Create create, final UIService uiService) {
+    public void create(final PTInstruction create, final UIService uiService) {
         super.create(create, uiService);
 
         this.floatablePanel = new PCFloatablePanel();
@@ -50,14 +48,12 @@ public class PCFloatablePanelAddon extends PTComposite implements PTAddon {
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-        final Property mainProperty = update.getMainProperty();
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.REFERENCE_SCROLL_PANEL.equals(propertyKey)) {
-                final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getPTObject(property.getLongValue());
-                floatablePanel.setScrollPanel(scrollPanel.cast());
-            }
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.REFERENCE_SCROLL_PANEL)) {
+            final PTScrollPanel scrollPanel = (PTScrollPanel) uiService.getPTObject(update.getLong(PROPERTY.REFERENCE_SCROLL_PANEL));
+            floatablePanel.setScrollPanel(scrollPanel.cast());
+        } else {
+            super.update(update, uiService);
         }
     }
 

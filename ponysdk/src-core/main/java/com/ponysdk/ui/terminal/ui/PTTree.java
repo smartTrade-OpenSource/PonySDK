@@ -25,54 +25,56 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTree extends PTWidget {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Tree tree = new com.google.gwt.user.client.ui.Tree();
+    public void create(final PTInstruction create, final UIService uiService) {
+        final Tree tree = new Tree();
         tree.setAnimationEnabled(true);
         init(create, uiService, tree);
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        final String handler = addHandler.getString(HANDLER.KEY);
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
-            final com.google.gwt.user.client.ui.Tree tree = cast();
-            tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
+        if (HANDLER.SELECTION_HANDLER.equals(handler)) {
+            cast().addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
-                    PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-                    eventInstruction.setMainPropertyValue(PropertyKey.WIDGET, ptObject.getObjectID());
+                    final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
+
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.EVENT, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.SELECTION_HANDLER);
+                    eventInstruction.put(PROPERTY.WIDGET, ptObject.getObjectID());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
 
-        super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public void remove(final Remove remove, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
-        cast().remove(w);
+    public void remove(final PTInstruction remove, final UIService uiService) {
+        cast().remove(asWidget(remove.getObjectID(), uiService));
     }
 
     @Override
-    public com.google.gwt.user.client.ui.Tree cast() {
-        return (com.google.gwt.user.client.ui.Tree) uiObject;
+    public Tree cast() {
+        return (Tree) uiObject;
     }
 
 }

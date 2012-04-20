@@ -28,105 +28,91 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTabLayoutPanel extends PTResizeComposite {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.TabLayoutPanel(2, Unit.EM));
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new TabLayoutPanel(2, Unit.EM));
     }
 
     @Override
-    public void add(final Add add, final UIService uiService) {
+    public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final com.google.gwt.user.client.ui.TabLayoutPanel tabPanel = cast();
+        final TabLayoutPanel tabPanel = cast();
 
-        final Property beforeIndex = add.getMainProperty().getChildProperty(PropertyKey.BEFORE_INDEX);
-        final Property tabText = add.getMainProperty().getChildProperty(PropertyKey.TAB_TEXT);
-        final Property tabWidget = add.getMainProperty().getChildProperty(PropertyKey.TAB_WIDGET);
+        final int beforeIndex = add.getInt(PROPERTY.BEFORE_INDEX);
 
-        if (tabText != null) {
-            tabPanel.insert(w, tabText.getValue(), beforeIndex.getIntValue());
-        } else if (tabWidget != null) {
-            final PTWidget ptWidget = (PTWidget) uiService.getPTObject(tabWidget.getLongValue());
-            tabPanel.insert(w, ptWidget.cast(), beforeIndex.getIntValue());
+        if (add.containsKey(PROPERTY.TAB_TEXT)) {
+            tabPanel.insert(w, add.getString(PROPERTY.TAB_TEXT), beforeIndex);
+        } else if (add.containsKey(PROPERTY.TAB_WIDGET)) {
+            final PTWidget ptWidget = (PTWidget) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
+            tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
     }
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
 
-        if (HandlerType.SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
-            final com.google.gwt.user.client.ui.TabLayoutPanel tabLayoutPanel = cast();
-            tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        final String handler = addHandler.getString(HANDLER.KEY);
+
+        if (HANDLER.SELECTION_HANDLER.equals(handler)) {
+            cast().addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, tabLayoutPanel.getSelectedIndex());
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(PROPERTY.INDEX, cast().getSelectedIndex());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
-        }
-
-        if (HandlerType.BEFORE_SELECTION_HANDLER.equals(addHandler.getHandlerType())) {
+        } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handler)) {
             cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.BEFORE_SELECTION_HANDLER);
-                    eventInstruction.setMainPropertyValue(PropertyKey.VALUE, event.getItem());
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(PROPERTY.INDEX, event.getItem());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
 
-        super.addHandler(addHandler, uiService);
     }
 
     @Override
-    public void remove(final Remove remove, final UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
+    public void remove(final PTInstruction remove, final UIService uiService) {
+        final Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
-        switch (propertyKey) {
-            case ANIMATION:
-                cast().animate(1);
-                break;
-            case SELECTED_INDEX:
-                cast().selectTab(property.getIntValue());
-                break;
-
-            default:
-                break;
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.ANIMATION)) {
+            cast().animate(1);
+        } else if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
+            cast().selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.TabLayoutPanel cast() {
-        return (com.google.gwt.user.client.ui.TabLayoutPanel) uiObject;
+    public TabLayoutPanel cast() {
+        return (TabLayoutPanel) uiObject;
     }
 }

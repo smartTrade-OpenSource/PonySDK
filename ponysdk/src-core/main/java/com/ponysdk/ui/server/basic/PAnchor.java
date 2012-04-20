@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
@@ -34,9 +34,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     private String html;
 
-    public PAnchor(String text) {
+    public PAnchor(final String text) {
         setText(text);
-        setStyleProperty("cursor", "pointer");
     }
 
     public PAnchor() {
@@ -54,10 +53,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -67,10 +66,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    public void setHTML(String html) {
+    public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.HTML, text);
+        update.put(PROPERTY.HTML, text);
         getPonySession().stackInstruction(update);
     }
 

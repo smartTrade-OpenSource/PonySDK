@@ -26,36 +26,27 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTElement extends PTComplexPanel {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new MyWidget(create.getMainProperty().getValue()));
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new MyWidget(create.getString(PROPERTY.TAG)));
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property property = update.getMainProperty();
-        final PropertyKey propertyKey = property.getPropertyKey();
-
+    public void update(final PTInstruction update, final UIService uiService) {
         final MyWidget cast = cast();
 
-        switch (propertyKey) {
-            case INNER_HTML:
-                cast.getElement().setInnerHTML(property.getValue());
-                break;
-            case INNER_TEXT:
-                cast.getElement().setInnerText(property.getValue());
-                break;
-            default:
-                super.update(update, uiService);
+        if (update.containsKey(PROPERTY.INNER_HTML)) {
+            cast.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));
+        } else if (update.containsKey(PROPERTY.INNER_TEXT)) {
+            cast.getElement().setInnerText(update.getString(PROPERTY.INNER_TEXT));
+        } else {
+            super.update(update, uiService);
         }
     }
 

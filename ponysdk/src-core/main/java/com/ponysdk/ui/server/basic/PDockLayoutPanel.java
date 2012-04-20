@@ -23,12 +23,18 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Add;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PDockLayoutPanel extends PComplexPanel {
+
+    public PDockLayoutPanel(final Unit unit) {
+        super();
+        create.put(PROPERTY.UNIT, unit.ordinal());
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -36,46 +42,45 @@ public class PDockLayoutPanel extends PComplexPanel {
     }
 
     @Override
-    public void add(PWidget child) {
+    public void add(final PWidget child) {
         add(child, Direction.CENTER, 0);
     }
 
-    public void addNorth(PWidget widget, double size) {
+    public void addNorth(final PWidget widget, final double size) {
         add(widget, Direction.NORTH, size);
     }
 
-    public void addSouth(PWidget widget, double size) {
+    public void addSouth(final PWidget widget, final double size) {
         add(widget, Direction.SOUTH, size);
     }
 
-    public void addEast(PWidget widget, double size) {
+    public void addEast(final PWidget widget, final double size) {
         add(widget, Direction.EAST, size);
     }
 
-    public void addWest(PWidget widget, double size) {
+    public void addWest(final PWidget widget, final double size) {
         add(widget, Direction.WEST, size);
     }
 
-    public void addLineEnd(PWidget widget, double size) {
+    public void addLineEnd(final PWidget widget, final double size) {
         add(widget, Direction.LINE_END, size);
     }
 
-    public void addLineStart(PWidget widget, double size) {
+    public void addLineStart(final PWidget widget, final double size) {
         add(widget, Direction.LINE_START, size);
     }
 
-    public void add(PWidget child, Direction direction, double size) {
+    public void add(final PWidget child, final Direction direction, final double size) {
         // Detach new child.
         child.removeFromParent();
-
         // Logical attach.
         getChildren().add(child);
         // Adopt.
         adopt(child);
-        final Add add = new Add(child.getID(), getID());
 
-        add.getMainProperty().setProperty(PropertyKey.DIRECTION, direction.ordinal());
-        add.getMainProperty().setProperty(PropertyKey.SIZE, size);
+        final Add add = new Add(child.getID(), getID());
+        add.put(PROPERTY.DIRECTION, direction.ordinal());
+        add.put(PROPERTY.SIZE, size);
 
         getPonySession().stackInstruction(add);
     }

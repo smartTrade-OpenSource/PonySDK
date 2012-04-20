@@ -25,35 +25,35 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
+import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTValueBoxBase<T> extends PTFocusWidget {
 
     @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-
-        if (HandlerType.CHANGE_HANDLER.equals(addHandler.getHandlerType())) {
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.CHANGE_HANDLER)) {
             cast().addChangeHandler(new ChangeHandler() {
 
                 @Override
-                public void onChange(ChangeEvent event) {
-                    final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.CHANGE_HANDLER);
+                public void onChange(final ChangeEvent event) {
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(HANDLER.KEY, HANDLER.CHANGE_HANDLER);
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-            return;
+        } else {
+            super.addHandler(addHandler, uiService);
         }
-
-        super.addHandler(addHandler, uiService);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public com.google.gwt.user.client.ui.ValueBoxBase<T> cast() {
-        return (com.google.gwt.user.client.ui.ValueBoxBase<T>) uiObject;
+    public ValueBoxBase<T> cast() {
+        return (ValueBoxBase<T>) uiObject;
     }
 
 }

@@ -23,9 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.terminal.WidgetType;
 
 public class PSplitLayoutPanel extends PDockLayoutPanel {
+
+    public PSplitLayoutPanel(final Unit unit) {
+        super(unit);
+    }
 
     @Override
     protected WidgetType getWidgetType() {

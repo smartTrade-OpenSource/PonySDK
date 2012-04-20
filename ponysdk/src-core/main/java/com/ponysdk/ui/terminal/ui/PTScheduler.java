@@ -28,40 +28,39 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTScheduler extends AbstractPTObject {
 
     private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<Long, PTScheduler.SchedulerCommand>();
 
     @Override
-    public void create(final Create create, final UIService uiService) {}
+    public void create(final PTInstruction create, final UIService uiService) {}
 
     @Override
-    public void add(final Add add, final UIService uiService) {
-        final int delayMs = add.getMainProperty().getChildProperty(PropertyKey.DELAY).getIntValue();
-        final SchedulerCommand command = new SchedulerCommand(uiService, add.getParentID(), add.getObjectID());
-        Scheduler.get().scheduleFixedDelay(command, delayMs);
-        commandByIDs.put(add.getObjectID(), command);
+    public void update(final PTInstruction update, final UIService uiService) {
+        final long commandID = update.getLong(PROPERTY.COMMAND_ID);
+        if (update.containsKey(PROPERTY.START)) {
+            final SchedulerCommand previousCmd = commandByIDs.get(commandID);
+            if (previousCmd != null) previousCmd.cancel();
+
+            final SchedulerCommand command = new SchedulerCommand(uiService, update.getObjectID(), commandID);
+            Scheduler.get().scheduleFixedDelay(command, update.getInt(PROPERTY.DELAY));
+            commandByIDs.put(commandID, command);
+        } else {
+            commandByIDs.remove(commandID).cancel();
+        }
     }
 
     @Override
-    public void remove(final Remove remove, final UIService uiService) {
-        final SchedulerCommand command = commandByIDs.remove(remove.getObjectID());
-        command.cancel();
-    }
-
-    @Override
-    public void gc(final GC gc, final UIService uiService) {
-        for (final SchedulerCommand command : commandByIDs.values())
+    public void gc(final PTInstruction gc, final UIService uiService) {
+        for (final SchedulerCommand command : commandByIDs.values()) {
             command.cancel();
+        }
         commandByIDs.clear();
     }
 
@@ -83,8 +82,12 @@ public class PTScheduler extends AbstractPTObject {
 
             if (cancelled) return false;
 
-            final EventInstruction instruction = new EventInstruction(schedulerID, HandlerType.SCHEDULER);
-            instruction.getMainProperty().setProperty(PropertyKey.ID, commandID);
+            final PTInstruction instruction = new PTInstruction();
+            instruction.setObjectID(schedulerID);
+            instruction.put(TYPE.KEY, TYPE.EVENT);
+            instruction.put(HANDLER.KEY, HANDLER.SCHEDULER);
+            instruction.put(PROPERTY.ID, commandID);
+
             uiService.triggerEvent(instruction);
 
             return true;

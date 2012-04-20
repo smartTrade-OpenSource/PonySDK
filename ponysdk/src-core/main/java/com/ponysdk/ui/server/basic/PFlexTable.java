@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PFlexTable extends PHTMLTable {
 
@@ -45,21 +45,22 @@ public class PFlexTable extends PHTMLTable {
 
     public class PFlexCellFormatter extends PCellFormatter {
 
-        public void setColSpan(int row, int column, int colSpan) {
+        public void setColSpan(final int row, final int column, final int colSpan) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.FLEXTABLE_CELL_FORMATTER);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.SET_COL_SPAN, colSpan);
+            // TODO lbroussal decide what value put if key mandatory but no value tested on the terminal side
+            update.put(PROPERTY.FLEXTABLE_CELL_FORMATTER, -1);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.SET_COL_SPAN, colSpan);
             getPonySession().stackInstruction(update);
         }
 
-        public void setRowSpan(int row, int column, int rowSpan) {
+        public void setRowSpan(final int row, final int column, final int rowSpan) {
             final Update update = new Update(ID);
-            update.setMainPropertyKey(PropertyKey.FLEXTABLE_CELL_FORMATTER);
-            update.getMainProperty().setProperty(PropertyKey.ROW, row);
-            update.getMainProperty().setProperty(PropertyKey.COLUMN, column);
-            update.getMainProperty().setProperty(PropertyKey.SET_ROW_SPAN, rowSpan);
+            update.put(PROPERTY.FLEXTABLE_CELL_FORMATTER, -1);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.SET_ROW_SPAN, rowSpan);
             getPonySession().stackInstruction(update);
         }
     }

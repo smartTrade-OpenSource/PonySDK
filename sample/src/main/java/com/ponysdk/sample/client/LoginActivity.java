@@ -25,7 +25,6 @@ package com.ponysdk.sample.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
@@ -37,6 +36,7 @@ import com.ponysdk.sample.client.event.UserLoggedInEvent;
 import com.ponysdk.sample.client.page.CheckBoxPageActivity;
 import com.ponysdk.sample.client.place.ApplicationPlace;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
@@ -81,7 +81,7 @@ public class LoginActivity extends AbstractActivity {
         });
         world.setWidget(loginPageView);
 
-        loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(KeyCodes.KEY_ENTER) {
+        loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCode.ENTER) {
 
             @Override
             public void onKeyPress(final int keyCode) {

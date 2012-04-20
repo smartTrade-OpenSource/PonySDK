@@ -21,22 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.core.instruction;
 
-import java.util.List;
-import java.util.Map;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.ponysdk.ui.terminal.instruction.Instruction;
+public class Update extends Instruction {
 
-/**
- * The client side stub for the RPC service.
- */
-@RemoteServiceRelativePath("p")
-public interface PonyEngineService extends RemoteService {
+    public Update(final long objectID) {
+        super(objectID);
+        put(TYPE.KEY, TYPE.UPDATE);
+    }
 
-    PonySessionContext startApplication(String historyToken, Map<String, String> cookies) throws Exception;
-
-    List<Instruction> fireInstructions(long key, List<Instruction> instructions) throws Exception;
 }

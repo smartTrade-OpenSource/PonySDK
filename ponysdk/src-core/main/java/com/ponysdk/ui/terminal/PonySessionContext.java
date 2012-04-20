@@ -24,9 +24,6 @@
 package com.ponysdk.ui.terminal;
 
 import java.io.Serializable;
-import java.util.List;
-
-import com.ponysdk.ui.terminal.instruction.Instruction;
 
 public class PonySessionContext implements Serializable {
 
@@ -34,24 +31,14 @@ public class PonySessionContext implements Serializable {
 
     private long ID;
 
-    private List<Instruction> instructions;
-
     public PonySessionContext() {}
 
     public long getID() {
         return ID;
     }
 
-    public void setID(long ID) {
+    public void setID(final long ID) {
         this.ID = ID;
-    }
-
-    public List<Instruction> getInstructions() {
-        return instructions;
-    }
-
-    public void setInstructions(List<Instruction> instructions) {
-        this.instructions = instructions;
     }
 
 }

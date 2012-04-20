@@ -6,17 +6,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandler<String>, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
@@ -40,8 +42,8 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
             this.suggestOracle = new PMultiWordSuggestOracle();
         }
 
-        getPonySession().stackInstruction(new AddHandler(getID(), HandlerType.STRING_VALUE_CHANGE_HANDLER));
-        getPonySession().stackInstruction(new AddHandler(getID(), HandlerType.STRING_SELECTION_HANDLER));
+        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_VALUE_CHANGE_HANDLER));
+        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_SELECTION_HANDLER));
     }
 
     public PSuggestBox() {
@@ -49,18 +51,22 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     }
 
     @Override
-    public void onEventInstruction(final EventInstruction e) {
-        if (HandlerType.STRING_VALUE_CHANGE_HANDLER.equals(e.getHandlerType())) {
-            this.text = e.getMainProperty().getValue();
+    public void onEventInstruction(final JSONObject event) throws JSONException {
+        String handlerKey = null;
+        if (event.has(HANDLER.KEY)) {
+            handlerKey = event.getString(HANDLER.KEY);
+        }
+        if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
+            this.text = event.getString(PROPERTY.TEXT);
             onValueChange(new PValueChangeEvent<String>(this, text));
-        } else if (HandlerType.STRING_SELECTION_HANDLER.equals(e.getHandlerType())) {
-            this.replacementString = e.getMainProperty().getStringPropertyValue(PropertyKey.REPLACEMENT_STRING);
-            this.displayString = e.getMainProperty().getStringPropertyValue(PropertyKey.DISPLAY_STRING);
-
-            MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
+        } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handlerKey)) {
+            this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
+            this.displayString = event.getString(PROPERTY.DISPLAY_STRING);
+            this.text = replacementString;
+            final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
         } else {
-            super.onEventInstruction(e);
+            super.onEventInstruction(event);
         }
     }
 
@@ -86,21 +92,21 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     @Override
     public void setFocus(final boolean focused) {
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.FOCUSED, focused);
+        update.put(PROPERTY.FOCUSED, focused);
         getPonySession().stackInstruction(update);
     }
 
     public void setLimit(final int limit) {
         this.limit = limit;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.LIMIT, limit);
+        update.put(PROPERTY.LIMIT, limit);
         getPonySession().stackInstruction(update);
     }
 
     public void setText(final String text) {
         this.text = text;
         final Update update = new Update(getID());
-        update.getMainProperty().setProperty(PropertyKey.TEXT, text);
+        update.put(PROPERTY.TEXT, text);
         getPonySession().stackInstruction(update);
     }
 
@@ -180,13 +186,13 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
         @Override
         public void add(final String suggestion) {
             final Update update = new Update(getID());
-            update.setMainPropertyValue(PropertyKey.SUGGESTION, suggestion);
+            update.put(PROPERTY.SUGGESTION, suggestion);
             getPonySession().stackInstruction(update);
         }
 
         @Override
         public final void addAll(final Collection<String> collection) {
-            for (String suggestion : collection) {
+            for (final String suggestion : collection) {
                 add(suggestion);
             }
         }

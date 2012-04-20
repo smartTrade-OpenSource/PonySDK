@@ -24,29 +24,23 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.GC;
-import com.ponysdk.ui.terminal.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.RemoveHandler;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public interface PTObject {
 
-    public void create(final Create create, final UIService uiService);
+    public void create(final PTInstruction create, final UIService uiService);
 
-    public void update(final Update update, final UIService uiService);
+    public void update(final PTInstruction update, final UIService uiService);
 
-    public void add(final Add add, final UIService uiService);
+    public void add(final PTInstruction add, final UIService uiService);
 
-    public void remove(final Remove remove, final UIService uiService);
+    public void remove(final PTInstruction remove, final UIService uiService);
 
-    public void addHandler(final AddHandler addHandler, final UIService uiService);
+    public void addHandler(final PTInstruction addHandler, final UIService uiService);
 
-    public void removeHandler(final RemoveHandler addHandler, final UIService uiService);
+    public void removeHandler(final PTInstruction addHandler, final UIService uiService);
 
-    public void gc(final GC gc, final UIService uiService);
+    public void gc(final PTInstruction gc, final UIService uiService);
 
     public Long getObjectID();
 }

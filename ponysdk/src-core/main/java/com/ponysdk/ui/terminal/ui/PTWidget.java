@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,56 +36,46 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.EventInstruction;
-import com.ponysdk.ui.terminal.instruction.RemoveHandler;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTWidget extends PTUIObject {
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.Widget());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new Widget());
     }
 
     @Override
-    public com.google.gwt.user.client.ui.Widget cast() {
-        return (com.google.gwt.user.client.ui.Widget) uiObject;
-    }
+    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
+        final String handlerType = addHandler.getString(HANDLER.KEY);
 
-    @Override
-    public void addHandler(final AddHandler addHandler, final UIService uiService) {
-
-        if (HandlerType.DOM_HANDLER.equals(addHandler.getHandlerType())) {
-            final int domHandlerType = addHandler.getMainProperty().getIntValue();
-            final com.google.gwt.user.client.ui.Widget w = asWidget(addHandler.getObjectID(), uiService);
+        if (handlerType.equals(HANDLER.DOM_HANDLER)) {
+            final int domHandlerType = addHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
+            final Widget w = asWidget(addHandler.getObjectID(), uiService);
             addDomHandler(addHandler, w, domHandlerType, uiService);
-            return;
         } else {
             super.addHandler(addHandler, uiService);
         }
     }
 
     @Override
-    public void removeHandler(final RemoveHandler removeHandler, final UIService uiService) {
-
-        if (HandlerType.DOM_HANDLER.equals(removeHandler.getHandlerType())) {
-            final int domHandlerType = removeHandler.getMainProperty().getIntValue();
-            final com.google.gwt.user.client.ui.Widget w = asWidget(removeHandler.getObjectID(), uiService);
+    public void removeHandler(final PTInstruction removeHandler, final UIService uiService) {
+        if (removeHandler.containsKey(HANDLER.DOM_HANDLER)) {
+            final int domHandlerType = removeHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
+            final Widget w = asWidget(removeHandler.getObjectID(), uiService);
             final HandlerRegistration handlerRegistration;
             // handlerRegistration.removeHandler()
-
             // removeDomHandler(removeHandler, w, domHandlerType, uiService);
-            return;
         } else {
             super.removeHandler(removeHandler, uiService);
         }
@@ -95,54 +84,58 @@ public class PTWidget extends PTUIObject {
 
     @Override
     public Widget asWidget(final Long objectID, final UIService uiService) {
-        final com.ponysdk.ui.terminal.ui.PTWidget child = (com.ponysdk.ui.terminal.ui.PTWidget) uiService.getPTObject(objectID);
+        final PTWidget child = (PTWidget) uiService.getPTObject(objectID);
         return child.cast();
     }
 
-    protected void triggerOnClick(final AddHandler addHandler, final com.google.gwt.user.client.ui.Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-        final Property main = new Property();
-        main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-        main.setProperty(PropertyKey.CLIENT_X, event.getClientX());
-        main.setProperty(PropertyKey.CLIENT_Y, event.getClientY());
-        main.setProperty(PropertyKey.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
-        main.setProperty(PropertyKey.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
-        main.setProperty(PropertyKey.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
-        main.setProperty(PropertyKey.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
-        eventInstruction.setMainProperty(main);
+    protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
+        final PTInstruction eventInstruction = new PTInstruction();
+        eventInstruction.setObjectID(addHandler.getObjectID());
+        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
+        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType); // TODO nciaravola must be a property
+        eventInstruction.put(PROPERTY.CLIENT_X, event.getClientX());
+        eventInstruction.put(PROPERTY.CLIENT_Y, event.getClientY());
+        eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
+        eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
+        eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
+        eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
         uiService.triggerEvent(eventInstruction);
     }
 
-    protected void triggerOnMouseOver(final AddHandler addHandler, final int domHandlerType, final UIService uiService) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-        eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
+    protected void triggerOnMouseOver(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
+        final PTInstruction eventInstruction = new PTInstruction();
+        eventInstruction.setObjectID(addHandler.getObjectID());
+        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
 
-    protected void triggerOnMouseOut(final AddHandler addHandler, final int domHandlerType, final UIService uiService) {
-        final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-        eventInstruction.getMainProperty().setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
+    protected void triggerOnMouseOut(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
+        final PTInstruction eventInstruction = new PTInstruction();
+        eventInstruction.setObjectID(addHandler.getObjectID());
+        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
         uiService.triggerEvent(eventInstruction);
     }
 
-    protected void triggerOnKeyPress(final AddHandler addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
-        final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
-        main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-        if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
-            final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
-            if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
-                final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-                eventInstruction.setMainProperty(main);
-                uiService.triggerEvent(eventInstruction);
+    protected void triggerOnKeyPress(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
+        addHandler.put(TYPE.KEY, TYPE.EVENT);
+        addHandler.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+        if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
+            final JSONObject keys = addHandler.get(PROPERTY.KEY_FILTER).isObject();
+            if (keys.containsKey(event.getNativeEvent().getKeyCode() + "")) {
+                uiService.triggerEvent(addHandler);
             }
         } else {
-            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-            eventInstruction.setMainProperty(main);
-            uiService.triggerEvent(eventInstruction);
+            // final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(),
+            // addHandler.getType());
+            // eventInstruction.setMainProperty(main);
+            uiService.triggerEvent(addHandler);
         }
     }
 
-    private void addDomHandler(final AddHandler addHandler, final com.google.gwt.user.client.ui.Widget widget, final int domHandlerType, final UIService uiService) {
+    private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService) {
 
         final DomHandlerType h = DomHandlerType.values()[domHandlerType];
         switch (h) {
@@ -151,9 +144,6 @@ public class PTWidget extends PTUIObject {
 
                     @Override
                     public void onClick(final ClickEvent event) {
-
-                        log.info("=======================================> on click: " + event);
-
                         triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
                     }
 
@@ -197,21 +187,29 @@ public class PTWidget extends PTUIObject {
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final EventInstruction changeHandlerInstruction = new EventInstruction(addHandler.getObjectID(), HandlerType.STRING_VALUE_CHANGE_HANDLER);
-                            changeHandlerInstruction.setMainPropertyValue(PropertyKey.VALUE, textBox.getText());
-                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-                            final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
-                            main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-                            eventInstruction.setMainProperty(main);
-                            if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
-                                final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
-                                if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
-                                    uiService.triggerEvent(changeHandlerInstruction);
-                                    uiService.triggerEvent(eventInstruction);
+                            final PTInstruction changeHandlerInstruction = new PTInstruction();
+                            changeHandlerInstruction.setObjectID(addHandler.getObjectID());
+                            changeHandlerInstruction.put(TYPE.KEY, TYPE.EVENT);
+                            changeHandlerInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.put(PROPERTY.VALUE, textBox.getText());
+
+                            final PTInstruction eventInstruction = new PTInstruction();
+                            eventInstruction.setObjectID(addHandler.getObjectID());
+                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                            eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
+                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+
+                            if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
+                                final JSONObject jsonValue = addHandler.get(PROPERTY.KEY_FILTER).isObject();
+                                if (jsonValue.containsKey(event.getNativeEvent().getKeyCode() + "")) {
+                                    uiService.stackEvent(changeHandlerInstruction);
+                                    uiService.stackEvent(eventInstruction);
+                                    uiService.flushEvents();
                                 }
                             } else {
-                                uiService.triggerEvent(changeHandlerInstruction);
-                                uiService.triggerEvent(eventInstruction);
+                                uiService.stackEvent(changeHandlerInstruction);
+                                uiService.stackEvent(eventInstruction);
+                                uiService.flushEvents();
                             }
                         }
                     });
@@ -220,13 +218,14 @@ public class PTWidget extends PTUIObject {
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(), addHandler.getHandlerType());
-                            final Property main = new Property(PropertyKey.VALUE, event.getNativeEvent().getKeyCode());
-                            main.setProperty(PropertyKey.DOM_HANDLER, domHandlerType);
-                            eventInstruction.setMainProperty(main);
-                            if (addHandler.getMainProperty().hasChildProperty(PropertyKey.KEY_FILTER)) {
-                                final List<Integer> keyCodes = addHandler.getMainProperty().getListIntegerProperty(PropertyKey.KEY_FILTER);
-                                if (keyCodes.contains(event.getNativeEvent().getKeyCode())) {
+                            final PTInstruction eventInstruction = new PTInstruction();
+                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                            eventInstruction.setObjectID(addHandler.getObjectID());
+                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+                            if (eventInstruction.containsKey(PROPERTY.KEY_FILTER)) {
+                                final JSONObject jsonValue = addHandler.get(PROPERTY.KEY_FILTER).isObject();
+                                if (jsonValue.containsKey(event.getNativeEvent().getKeyCode() + "")) {
                                     uiService.triggerEvent(eventInstruction);
                                 }
                             } else {
@@ -240,6 +239,11 @@ public class PTWidget extends PTUIObject {
                 log.info("Handler not supported #" + h);
                 break;
         }
+    }
+
+    @Override
+    public Widget cast() {
+        return (Widget) uiObject;
     }
 
 }

@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PHTML extends PLabel implements PHasHTML {
 
@@ -36,11 +36,11 @@ public class PHTML extends PLabel implements PHasHTML {
 
     public PHTML() {}
 
-    public PHTML(String text) {
+    public PHTML(final String text) {
         this(text, false);
     }
 
-    public PHTML(String text, boolean wordWrap) {
+    public PHTML(final String text, final boolean wordWrap) {
         setHTML(text);
     }
 
@@ -55,10 +55,10 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     @Override
-    public void setHTML(String html) {
+    public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.HTML, html);
+        update.put(PROPERTY.HTML, html);
         getPonySession().stackInstruction(update);
     }
 
@@ -66,10 +66,10 @@ public class PHTML extends PLabel implements PHasHTML {
         return wordWrap;
     }
 
-    public void setWordWrap(boolean wordWrap) {
+    public void setWordWrap(final boolean wordWrap) {
         this.wordWrap = wordWrap;
         final Update update = new Update(getID());
-        update.setMainPropertyValue(PropertyKey.WORD_WRAP, wordWrap);
+        update.put(PROPERTY.WORD_WRAP, wordWrap);
         getPonySession().stackInstruction(update);
     }
 

@@ -23,27 +23,28 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTPanel extends PTWidget {
 
     @Override
-    public void add(Add add, UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(add.getObjectID(), uiService);
+    public void add(final PTInstruction add, final UIService uiService) {
+        final Widget w = asWidget(add.getObjectID(), uiService);
         cast().add(w);
     }
 
     @Override
-    public void remove(Remove remove, UIService uiService) {
-        final com.google.gwt.user.client.ui.Widget w = asWidget(remove.getObjectID(), uiService);
+    public void remove(final PTInstruction remove, final UIService uiService) {
+        final Widget w = asWidget(remove.getObjectID(), uiService);
         cast().remove(w);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.Panel cast() {
-        return (com.google.gwt.user.client.ui.Panel) uiObject;
+    public Panel cast() {
+        return (Panel) uiObject;
     }
 
 }

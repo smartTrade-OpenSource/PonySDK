@@ -23,6 +23,7 @@
 
 package com.ponysdk.impl.webapplication.application;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -51,12 +52,13 @@ public class DefaultApplicationView extends PDockLayoutPanel implements Applicat
     private final int menuWidth = 190;
 
     public DefaultApplicationView() {
+        super(Unit.PX);
         setSizeFull();
 
         addNorth(header, headerHeight);
         addSouth(footer, footerHeight);
 
-        center = new PSplitLayoutPanel();
+        center = new PSplitLayoutPanel(Unit.PX);
         center.setSizeFull();
         center.addSouth(logs, logsHeight);
         center.addWest(menu, menuWidth);
@@ -90,15 +92,15 @@ public class DefaultApplicationView extends PDockLayoutPanel implements Applicat
         return logs;
     }
 
-    public void setHeaderHeight(int height) {
+    public void setHeaderHeight(final int height) {
         this.headerHeight = height;
     }
 
-    public void setFooterHeight(int height) {
+    public void setFooterHeight(final int height) {
         this.footerHeight = height;
     }
 
-    public void setLogsHeight(int height) {
+    public void setLogsHeight(final int height) {
         this.logsHeight = height;
     }
 

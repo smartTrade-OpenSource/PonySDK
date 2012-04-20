@@ -23,41 +23,33 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Property;
-import com.ponysdk.ui.terminal.PropertyKey;
+import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Create;
-import com.ponysdk.ui.terminal.instruction.Update;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTTextBox extends PTTextBoxBase {
 
     @Override
-    public void create(final Create create, final UIService uiService) {
-        init(create, uiService, new com.google.gwt.user.client.ui.TextBox());
+    public void create(final PTInstruction create, final UIService uiService) {
+        init(create, uiService, new TextBox());
     }
 
     @Override
-    public void update(final Update update, final UIService uiService) {
-
-        final Property mainProperty = update.getMainProperty();
-        final com.google.gwt.user.client.ui.TextBox textBox = cast();
-
-        for (final Property property : mainProperty.getChildProperties().values()) {
-            final PropertyKey propertyKey = property.getPropertyKey();
-            if (PropertyKey.TEXT.equals(propertyKey)) {
-                textBox.setText(property.getValue());
-            } else if (PropertyKey.VALUE.equals(propertyKey)) {
-                textBox.setValue(property.getValue());
-            } else if (PropertyKey.SIZE.equals(propertyKey)) {
-                textBox.setVisibleLength(property.getIntValue());
-            }
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.TEXT)) {
+            cast().setText(update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.VALUE)) {
+            cast().setValue(update.getString(PROPERTY.VALUE));
+        } else if (update.containsKey(PROPERTY.VISIBLE_LENGTH)) {
+            cast().setVisibleLength(update.getInt(PROPERTY.VISIBLE_LENGTH));
+        } else {
+            super.update(update, uiService);
         }
-
-        super.update(update, uiService);
     }
 
     @Override
-    public com.google.gwt.user.client.ui.TextBox cast() {
-        return (com.google.gwt.user.client.ui.TextBox) uiObject;
+    public TextBox cast() {
+        return (TextBox) uiObject;
     }
 }

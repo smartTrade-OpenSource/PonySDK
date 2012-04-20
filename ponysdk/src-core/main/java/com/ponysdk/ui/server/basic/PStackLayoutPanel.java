@@ -29,17 +29,18 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.HandlerType;
-import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Add;
-import com.ponysdk.ui.terminal.instruction.AddHandler;
-import com.ponysdk.ui.terminal.instruction.Remove;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer> {
 
@@ -52,7 +53,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public PStackLayoutPanel(final Unit unit) {
         super();
         initWidget(new PLayoutPanel());
-        create.getMainProperty().setProperty(PropertyKey.UNIT, unit.toString());
+        create.put(PROPERTY.UNIT, unit.toString());
     }
 
     @Override
@@ -66,8 +67,8 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         adopt(child);
 
         final Add add = new Add(child.getID(), getID());
-        add.getMainProperty().setProperty(PropertyKey.HTML, header);
-        add.getMainProperty().setProperty(PropertyKey.SIZE, headerSize);
+        add.put(PROPERTY.HTML, header);
+        add.put(PROPERTY.SIZE, headerSize);
         getPonySession().stackInstruction(add);
     }
 
@@ -120,7 +121,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.BEFORE_SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.BEFORE_SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -137,7 +138,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HandlerType.SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -149,6 +150,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public Collection<PSelectionHandler<Integer>> getSelectionHandlers() {
         return Collections.unmodifiableCollection(selectionHandlers);
+    }
+
+    public void showWidget(final PWidget widget) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.OPEN, widget.getID());
+        getPonySession().stackInstruction(update);
     }
 
 }

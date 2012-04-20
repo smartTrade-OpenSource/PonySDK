@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ponysdk.core.instruction.GC;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.terminal.instruction.GC;
 
 public class PWeakHashMap implements Map<Long, PObject> {
 

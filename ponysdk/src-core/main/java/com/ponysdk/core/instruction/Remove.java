@@ -21,27 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.instruction;
+package com.ponysdk.core.instruction;
 
-public class History extends Instruction {
+import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
-    private static final long serialVersionUID = -881219734311901808L;
+public class Remove extends Instruction {
 
-    private String token;
+    public Remove() {}
 
-    public History() {}
-
-    public History(String token) {
-        this.token = token;
+    public Remove(final long objectID, final long parentID) {
+        super(objectID, parentID);
+        put(TYPE.KEY, TYPE.REMOVE);
     }
-
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String toString() {
-        return "History [token=" + token + ", objectID=" + objectID + ", parentID=" + parentID + ", property=" + property + "]";
-    }
-
 }

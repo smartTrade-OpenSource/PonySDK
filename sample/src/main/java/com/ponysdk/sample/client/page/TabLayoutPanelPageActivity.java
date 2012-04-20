@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.Arrays;
+
+import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.addon.PNotificationManager;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
@@ -44,14 +47,14 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
     protected int tabCount = 0;
 
     public TabLayoutPanelPageActivity() {
-        super("Tab Layout Panel", "Panels");
+        super("Tab Layout Panel", Arrays.asList("Panels", "Tab"));
     }
 
     @Override
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
         dockLayoutPanel.setSizeFull();
 
         final PTabLayoutPanel tabPanel = new PTabLayoutPanel();
@@ -135,7 +138,7 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         final int tabIndex = tabCount;
         final PLabel tabLabel = new PLabel("CustomTab-" + tabIndex);
         tabLabel.setStyleProperty("color", "blue");
-        tabLabel.setStyleProperty("white-space", "nowrap");
+        tabLabel.setStyleProperty("whiteSpace", "nowrap");
         final PLabel label = new PLabel("content-" + tabIndex);
         tabContent.setWidget(label);
         tabPanel.add(tabContent, tabLabel);
