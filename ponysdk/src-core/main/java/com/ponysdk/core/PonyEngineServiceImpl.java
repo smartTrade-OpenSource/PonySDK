@@ -23,41 +23,21 @@
 
 package com.ponysdk.core;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.SimpleEventBus;
-import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
-import com.ponysdk.spring.SpringPonyEngineServiceImpl;
 import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.terminal.exception.PonySessionException;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
-public class PonyEngineServiceImpl extends HttpServlet {
+public class PonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
 
-    private static final Logger log = LoggerFactory.getLogger(SpringPonyEngineServiceImpl.class);
-
-    private EntryPoint entryPoint;
+    private String entryPointClassName;
 
     @Override
     public void init() throws ServletException {
@@ -66,6 +46,12 @@ public class PonyEngineServiceImpl extends HttpServlet {
         final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
 
         if (entryPointClassName == null || entryPointClassName.isEmpty()) throw new ServletException("The entry point must be defined in your web.xml.");
+    }
+
+    @Override
+    protected EntryPoint initializePonySession(final PonySession ponySession) throws Exception {
+
+        EntryPoint entryPoint = null;
         try {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final Class<?> clazz = classLoader.loadClass(entryPointClassName);
@@ -75,138 +61,22 @@ public class PonyEngineServiceImpl extends HttpServlet {
         } catch (final Exception e) {
             throw new ServletException("Failed to instantiate the entry point #" + entryPointClassName, e);
         }
+
+        final EventBus rootEventBus = new SimpleEventBus();
+
+        final PlaceController placeController = new PlaceController();
+        final PHistory history = new PHistory();
+        placeController.setHistory(history);
+
+        ponySession.setRootEventBus(rootEventBus);
+        ponySession.setHistory(history);
+        ponySession.setPlaceController(placeController);
+        ponySession.setEntryPoint(entryPoint);
+
+        // final PCookies cookies = new PCookies(data.getString(PROPERTY.COOKIE));
+        // ponySession.setCookies(cookies);
+
+        return entryPoint;
     }
 
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doProcess(req, resp);
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doProcess(req, resp);
-    }
-
-    protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            final Instruction data = new Instruction(new JSONTokener(req.getReader()));
-
-            if (data.getString(APPLICATION.KEY).equals(APPLICATION.START)) {
-                startApplication(data, req, resp);
-            } else {
-                fireInstructions(data, req, resp);
-            }
-        } catch (final Exception e) {}
-    }
-
-    public void startApplication(final JSONObject data, final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-
-            final JSONObject response = new JSONObject();
-
-            boolean isNewHttpSession = false;
-            final HttpSession session = req.getSession();
-            PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
-
-            if (applicationSession == null) {
-                log.info("Creating a new application ... session[" + session.getId() + "]");
-                applicationSession = new PonyApplicationSession(session);
-                session.setAttribute(PonyApplicationSession.class.getCanonicalName(), applicationSession);
-                isNewHttpSession = true;
-            }
-
-            synchronized (applicationSession) {
-                final PonySession ponySession = new PonySession(applicationSession);
-
-                response.put(APPLICATION.VIEW_ID, applicationSession.registerPonySession(ponySession));
-                PonySession.setCurrent(ponySession);
-
-                final EventBus rootEventBus = new SimpleEventBus();
-
-                final PlaceController placeController = new PlaceController();
-                final PHistory history = new PHistory();
-                placeController.setHistory(history);
-
-                ponySession.setRootEventBus(rootEventBus);
-                ponySession.setHistory(history);
-                ponySession.setPlaceController(placeController);
-                ponySession.setEntryPoint(entryPoint);
-
-                // final PCookies cookies = new PCookies(data.getString(PROPERTY.COOKIE));
-                // ponySession.setCookies(cookies);
-
-                if (isNewHttpSession) {
-                    entryPoint.start(ponySession);
-                } else {
-                    entryPoint.restart(ponySession);
-                }
-
-                ponySession.getHistory().fireHistoryChanged(data.getString(HISTORY.TOKEN));
-
-                try {
-                    if (ponySession.flushInstructions(response)) {
-                        final PrintWriter writer = resp.getWriter();
-                        writer.write(response.toString());
-                        writer.flush();
-                    }
-                } catch (final Throwable e) {
-                    log.error("Cannot send instructions to the browser, Session ID #" + req.getSession().getId(), e);
-                }
-            }
-
-        } catch (final Throwable e) {
-            log.error("[PonyEngineServiceImpl::startApplication]=>failed ", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void fireInstructions(final Instruction data, final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
-
-        final Instruction response = new Instruction();
-
-        final long key = data.getLong(APPLICATION.VIEW_ID);
-
-        final long start = System.currentTimeMillis();
-        try {
-
-            final HttpSession session = req.getSession();
-            final PonyApplicationSession applicationSession = (PonyApplicationSession) session.getAttribute(PonyApplicationSession.class.getCanonicalName());
-
-            if (applicationSession == null) { throw new PonySessionException("Invalid session, please reload your application"); }
-
-            final PonySession ponySession = applicationSession.getPonySession(key);
-
-            if (ponySession == null) { throw new PonySessionException("Invalid session, please reload your application"); }
-
-            synchronized (ponySession) {
-                PonySession.setCurrent(ponySession);
-
-                final JSONArray instructions = data.getJSONArray(APPLICATION.INSTRUCTIONS);
-                for (int i = 0; i < instructions.length(); i++) {
-                    ponySession.fireInstruction(instructions.getJSONObject(i));
-                }
-
-                try {
-                    if (ponySession.flushInstructions(response)) {
-                        final PrintWriter writer = resp.getWriter();
-                        writer.write(response.toString());
-                        writer.flush();
-                    }
-                } catch (final Throwable e) {
-                    log.error("Cannot send instructions to the browser, Session ID #" + req.getSession().getId(), e);
-                }
-
-            }
-        } catch (final PonySessionException e) {
-            // log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
-            throw e;
-        } catch (final Throwable e) {
-            // log.error("[PonyEngineServiceImpl::fireInstructions]=>failed : " + instructions.toString(), e);
-            throw new RuntimeException(e);
-        } finally {
-            if (log.isDebugEnabled()) {
-                log.debug("Server call took " + (System.currentTimeMillis() - start) + " millis");
-            }
-        }
-    }
 }
