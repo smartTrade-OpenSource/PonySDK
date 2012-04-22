@@ -129,7 +129,6 @@ public class UIFactory {
         if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratedPanel(); }
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
         if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
-        
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;
