@@ -38,6 +38,27 @@ public class PScrollPanel extends PSimplePanel {
         final Update update = new Update(ID);
         update.put(PROPERTY.HORIZONTAL_SCROLL_POSITION, position);
         getPonySession().stackInstruction(update);
+    }
 
+    public void scrollToBottom() {
+        scrollTo(0);
+    }
+
+    public void scrollToLeft() {
+        scrollTo(1);
+    }
+
+    public void scrollToRight() {
+        scrollTo(2);
+    }
+
+    public void scrollToTop() {
+        scrollTo(3);
+    }
+
+    private void scrollTo(final int type) {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.SCROLL_TO, type);
+        getPonySession().stackInstruction(update);
     }
 }

@@ -273,6 +273,10 @@ public interface Dictionnary {
         public static final String START = "001";
         public static final String COMMAND_ID = "002";
         public static final String STOP = "003";
+        public static final String EVAL = "004";
+        public static final String RESULT = "005";
+        public static final String ERROR_MSG = "006";
+        public static final String SCROLL_TO = "007";
         public static final String OBJECT_ID = "#";
         public static final String PARENT_ID = "##";
 

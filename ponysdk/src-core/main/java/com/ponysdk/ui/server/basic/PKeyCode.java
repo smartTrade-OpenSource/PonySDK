@@ -11,15 +11,19 @@ public enum PKeyCode {
     private static Map<Integer, PKeyCode> codesByKey;
     static {
         codesByKey = new HashMap<Integer, PKeyCode>();
-        for (PKeyCode code : PKeyCode.values()) {
+        for (final PKeyCode code : PKeyCode.values()) {
             codesByKey.put(code.getCode(), code);
         }
     }
 
     private int code;
 
-    PKeyCode(int code) {
+    PKeyCode(final int code) {
         this.code = code;
+    }
+
+    public boolean equals(final int code) {
+        return this.code == code;
     }
 
     public int getCode() {
@@ -30,7 +34,7 @@ public enum PKeyCode {
         return this.code + "";
     }
 
-    public static PKeyCode fromInt(int code) {
+    public static PKeyCode fromInt(final int code) {
         return codesByKey.get(code);
     }
 }
