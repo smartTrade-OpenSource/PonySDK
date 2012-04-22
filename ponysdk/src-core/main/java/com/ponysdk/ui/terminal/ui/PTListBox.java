@@ -32,25 +32,21 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTListBox extends PTFocusWidget {
+public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final boolean multiselect = create.getBoolean(PROPERTY.MULTISELECT);
-        final ListBox listBox = new ListBox(multiselect);
-        init(create, uiService, listBox);
+        init(create, uiService, new ListBox(create.getBoolean(PROPERTY.MULTISELECT)));
     }
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final ListBox listBox = cast();
-
         if (addHandler.getString(HANDLER.KEY).equals(HANDLER.CHANGE_HANDLER)) {
-            listBox.addChangeHandler(new ChangeHandler() {
+            uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
-                    final int selectedIndex = listBox.getSelectedIndex();
+                    final int selectedIndex = uiObject.getSelectedIndex();
                     if (selectedIndex == -1) {
                         final PTInstruction eventInstruction = new PTInstruction();
                         eventInstruction.setObjectID(addHandler.getObjectID());
@@ -60,8 +56,8 @@ public class PTListBox extends PTFocusWidget {
                         uiService.triggerEvent(eventInstruction);
                     } else {
                         String selectedIndexes = selectedIndex + "";
-                        for (int i = 0; i < listBox.getItemCount(); i++) {
-                            if (listBox.isItemSelected(i)) {
+                        for (int i = 0; i < uiObject.getItemCount(); i++) {
+                            if (uiObject.isItemSelected(i)) {
                                 if (i != selectedIndex) {
                                     selectedIndexes += "," + i;
                                 }
@@ -86,31 +82,27 @@ public class PTListBox extends PTFocusWidget {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.CLEAR)) {
-            cast().clear();
+            uiObject.clear();
         } else if (update.containsKey(PROPERTY.ITEM_INSERTED)) {
             final int index = update.getInt(PROPERTY.INDEX);
             final String item = update.getString(PROPERTY.ITEM_TEXT);
             final String value = update.getString(PROPERTY.VALUE);
-            cast().insertItem(item, value, index);
+            uiObject.insertItem(item, value, index);
         } else if (update.containsKey(PROPERTY.ITEM_REMOVED)) {
-            cast().removeItem(update.getInt(PROPERTY.INDEX));
+            uiObject.removeItem(update.getInt(PROPERTY.INDEX));
         } else if (update.containsKey(PROPERTY.SELECTED)) {
             final boolean selected = update.getBoolean(PROPERTY.SELECTED);
             final int index = update.getInt(PROPERTY.SELECTED_INDEX);
-            if (index == -1) cast().setSelectedIndex(index);
-            else cast().setItemSelected(index, selected);
+            if (index == -1) uiObject.setSelectedIndex(index);
+            else uiObject.setItemSelected(index, selected);
         } else if (update.containsKey(PROPERTY.VISIBLE_ITEM_COUNT)) {
-            cast().setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
+            uiObject.setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
         } else if (update.containsKey(PROPERTY.MULTISELECT)) {
-            cast().setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
+            uiObject.setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
         } else {
             super.update(update, uiService);
         }
 
     }
 
-    @Override
-    public ListBox cast() {
-        return (ListBox) uiObject;
-    }
 }

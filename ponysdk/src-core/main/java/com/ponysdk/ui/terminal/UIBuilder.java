@@ -75,8 +75,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
-    private static final String JSON_URL = GWT.getModuleBaseURL() + "stockPrices?q=";
-
     private final UIFactory uiFactory = new UIFactory();
     private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
     private final Map<Long, PTObject> objectByID = new HashMap<Long, PTObject>();
@@ -322,7 +320,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
             requestData.put(APPLICATION.INSTRUCTIONS, jsonArray);
 
-            final Request request = builder.sendRequest(requestData.toString(), new RequestCallback() {
+            builder.sendRequest(requestData.toString(), new RequestCallback() {
 
                 @Override
                 public void onError(final Request request, final Throwable exception) {

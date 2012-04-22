@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,8 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.basic.event;
 
-public enum NotificationType {
-    CENTER, TRAY;
+import com.ponysdk.core.event.PEvent;
+
+public interface HasPHandlers {
+
+    void fireEvent(PEvent<?> event);
 }

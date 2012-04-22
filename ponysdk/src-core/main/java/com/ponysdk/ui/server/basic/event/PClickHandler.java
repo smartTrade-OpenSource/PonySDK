@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface PClickHandler extends EventHandler {
+public interface PClickHandler extends PEventHandler {
 
     void onClick(PClickEvent event);
 }

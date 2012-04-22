@@ -32,14 +32,14 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTextBoxBase extends PTValueBoxBase<String> {
+public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, String> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
 
         if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
-            cast().addValueChangeHandler(new ValueChangeHandler<String>() {
+            uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
@@ -59,14 +59,10 @@ public class PTTextBoxBase extends PTValueBoxBase<String> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.getString(PROPERTY.TEXT));
+            uiObject.setText(update.getString(PROPERTY.TEXT));
         } else {
             super.update(update, uiService);
         }
     }
 
-    @Override
-    public TextBoxBase cast() {
-        return (TextBoxBase) uiObject;
-    }
 }

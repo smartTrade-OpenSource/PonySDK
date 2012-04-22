@@ -23,16 +23,16 @@
 
 package com.ponysdk.core;
 
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.ui.server.basic.PWidget;
 
 public class StreamResource {
 
-    public void open(StreamHandler streamListener) {
+    public void open(PStreamHandler streamListener) {
         PonySession.getCurrent().stackStreamRequest(streamListener);
     }
 
-    public void embed(StreamHandler streamListener, PWidget widget) {
+    public void embed(PStreamHandler streamListener, PWidget widget) {
         PonySession.getCurrent().stackEmbededStreamRequest(streamListener, widget.getID());
     }
 }

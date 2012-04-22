@@ -12,16 +12,18 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.EventHandler;
-import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.event.SimpleEventBus;
+import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.PSimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
+import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
+import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
@@ -69,7 +71,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> styleProperties = new HashMap<String, String>();
 
-    private final SimpleEventBus domHandler = new SimpleEventBus();
+    private final PSimpleEventBus domHandler = new PSimpleEventBus();
 
     private String width;
 
@@ -187,8 +189,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.data = data;
     }
 
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+    public <H extends PEventHandler> PHandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.DOM_HANDLER);
         if (handler instanceof JSONObject) {
             removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
@@ -198,8 +200,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     @SuppressWarnings("unchecked")
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+    public <H extends PEventHandler> PHandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.DOM_HANDLER);
         addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
         if (handler instanceof JSONObject) {
@@ -241,6 +243,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 case MOUSE_OVER:
                     fireEvent(new PMouseOverEvent(this));
                     break;
+                case FOCUS:
+                    fireEvent(new PFocusEvent(this));
+                    break;
+                case BLUR:
+                    fireEvent(new PBlurEvent(this));
+                    break;
                 case MOUSE_OUT:
                     fireEvent(new PMouseOutEvent(this));
                     break;
@@ -251,11 +259,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
+    protected <H extends PEventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
         return domHandler.getHandlerSet(type, null);
     }
 
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final PEvent<?> event) {
         domHandler.fireEvent(event);
     }
 

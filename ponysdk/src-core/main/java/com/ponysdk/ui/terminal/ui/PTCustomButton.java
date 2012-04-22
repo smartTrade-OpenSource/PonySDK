@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-public class PTCustomButton extends PTButtonBase {
+import com.google.gwt.user.client.ui.CustomButton;
+
+public class PTCustomButton<W extends CustomButton> extends PTButtonBase<W> {
 
 }

@@ -24,12 +24,12 @@
 package com.ponysdk.core.activity;
 
 import com.ponysdk.core.PonySession;
-import com.ponysdk.core.event.BroadcastEventHandler;
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.Event.Type;
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventHandler;
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.PBroadcastEventHandler;
+import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.PEvent.Type;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.security.SecurityManager;
@@ -66,32 +66,32 @@ public abstract class AbstractActivity implements Activity {
         return permission;
     }
 
-    public EventBus getRootEventBus() {
+    public PEventBus getRootEventBus() {
         return PonySession.getRootEventBus();
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public <H extends PEventHandler> PHandlerRegistration addHandler(final Type<H> type, final H handler) {
         return PonySession.addHandler(type, handler);
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
         return PonySession.addHandlerToSource(type, source, handler);
     }
 
     @SuppressWarnings("unchecked")
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
+    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
         return addHandlerToSource(type, source, (H) this);
     }
 
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final PEvent<?> event) {
         PonySession.fireEvent(event);
     }
 
-    public void fireEventFromSource(final Event<?> event, final Object source) {
+    public void fireEventFromSource(final PEvent<?> event, final Object source) {
         PonySession.fireEventFromSource(event, source);
     }
 
-    public void addHandler(final BroadcastEventHandler handler) {
+    public void addHandler(final PBroadcastEventHandler handler) {
         PonySession.addHandler(handler);
     }
 }

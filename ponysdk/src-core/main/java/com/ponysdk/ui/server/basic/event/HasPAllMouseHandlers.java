@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,12 +21,8 @@
  * the License.
  */
 
-package com.ponysdk.core.event;
+package com.ponysdk.ui.server.basic.event;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+public interface HasPAllMouseHandlers extends HasPMouseOverHandlers {
 
-public interface StreamHandler {
-
-    void onStream(HttpServletRequest request, HttpServletResponse response);
 }

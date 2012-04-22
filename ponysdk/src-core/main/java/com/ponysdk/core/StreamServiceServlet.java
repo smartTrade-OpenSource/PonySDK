@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 
 /**
  * The server side implementation of the RPC service.
@@ -62,7 +62,7 @@ public class StreamServiceServlet extends HttpServlet {
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
             final PonySession ponySession = ponyApplicationSession.getPonySession(ponySessionID);
 
-            final StreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(STREAM_REQUEST_ID)));
+            final PStreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(STREAM_REQUEST_ID)));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

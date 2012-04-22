@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface PValueChangeHandler<T> extends EventHandler {
+public interface PValueChangeHandler<T> extends PEventHandler {
 
     void onValueChange(PValueChangeEvent<T> event);
 }

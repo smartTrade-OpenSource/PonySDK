@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -281,7 +281,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends PEventHandler> void addDomHandler(H handler, Type<H> type) {
         selected.addDomHandler(handler, type);
         unselected.addDomHandler(handler, type);
     }

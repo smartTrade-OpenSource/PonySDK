@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,19 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.core.event;
+package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.Event.Type;
+import com.ponysdk.core.event.PHandlerRegistration;
 
-public interface EventBus {
+public interface HasPDragEndHandlers extends HasPHandlers {
 
-    public <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler);
-
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(Type<H> type, Object source, H handler);
-
-    public void fireEvent(Event<?> event);
-
-    public void fireEventFromSource(Event<?> event, Object source);
-
-    public void addHandler(BroadcastEventHandler handler);
+    PHandlerRegistration addDragEndHandler(PDragEndHandler handler);
 }

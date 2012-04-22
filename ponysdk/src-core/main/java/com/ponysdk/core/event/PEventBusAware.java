@@ -21,25 +21,9 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.addon.attachedpopuppanel;
+package com.ponysdk.core.event;
 
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.UIObject;
+public interface PEventBusAware {
 
-public class PCAttachedPopupPanel extends PopupPanel {
-
-    private final UIObject uiObject;
-
-    public PCAttachedPopupPanel(boolean autoHide, UIObject uiObject) {
-        super(autoHide);
-        this.uiObject = uiObject;
-    }
-
-    @Override
-    public void show() {
-        setPopupPosition(uiObject.getAbsoluteLeft(), uiObject.getAbsoluteTop() + uiObject.getOffsetHeight());
-        setWidth(uiObject.getOffsetWidth() + "px");
-        super.show();
-    }
-
+    void setEventBus(PEventBus eventBus);
 }

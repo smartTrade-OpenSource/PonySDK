@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.event;
 
-public interface HasEvent {
+public interface PBroadcastEventHandler {
 
-    public BusinessEvent<?> getEvent();
-
-    public void addEvent(BusinessEvent<?> event);
+    public void onEvent(PEvent<?> event);
 }

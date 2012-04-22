@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
@@ -48,7 +48,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     private final List<PSubmitCompleteHandler> submitCompleteHandlers = new ArrayList<PSubmitCompleteHandler>();
 
-    private StreamHandler streamHandler;
+    private PStreamHandler streamHandler;
 
     private String name;
 
@@ -104,7 +104,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         return WidgetType.FILE_UPLOAD;
     }
 
-    public void addStreamHandler(final StreamHandler streamHandler) {
+    public void addStreamHandler(final PStreamHandler streamHandler) {
         this.streamHandler = streamHandler;
     }
 

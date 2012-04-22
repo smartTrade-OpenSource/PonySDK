@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTMenuBar extends PTWidget {
+public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -53,11 +53,6 @@ public class PTMenuBar extends PTWidget {
             menuBar.addSeparator(menuItem.cast());
         }
 
-    }
-
-    @Override
-    public MenuBar cast() {
-        return (MenuBar) uiObject;
     }
 
 }

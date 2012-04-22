@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.PButton;
@@ -69,7 +69,7 @@ public class StreamResourcePageActivity extends PageActivity {
             @Override
             public void onClick(final PClickEvent event) {
                 final StreamResource streamResource = new StreamResource();
-                streamResource.open(new StreamHandler() {
+                streamResource.open(new PStreamHandler() {
 
                     @Override
                     public void onStream(final HttpServletRequest request, final HttpServletResponse response) {

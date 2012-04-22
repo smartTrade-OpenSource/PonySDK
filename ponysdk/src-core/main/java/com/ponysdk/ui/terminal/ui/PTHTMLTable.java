@@ -30,10 +30,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTHTMLTable extends PTPanel {
+public class PTHTMLTable extends PTPanel<HTMLTable> {
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
@@ -42,51 +42,46 @@ public class PTHTMLTable extends PTPanel {
         final int row = add.getInt(PROPERTY.ROW);
         final int cell = add.getInt(PROPERTY.CELL);
 
-        cast().getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
-        cast().setWidget(row, cell, w);
+        uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
+        uiObject.setWidget(row, cell, w);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.CLEAR)) {
-            cast().clear();
+            uiObject.clear();
         } else if (update.containsKey(PROPERTY.CELL_SPACING)) {
-            cast().setCellSpacing(update.getInt(PROPERTY.CELL_SPACING));
+            uiObject.setCellSpacing(update.getInt(PROPERTY.CELL_SPACING));
         } else if (update.containsKey(PROPERTY.CELL_PADDING)) {
-            cast().setCellPadding(update.getInt(PROPERTY.CELL_PADDING));
+            uiObject.setCellPadding(update.getInt(PROPERTY.CELL_PADDING));
         } else if (update.containsKey(PROPERTY.HTMLTABLE_ROW_STYLE)) {
             final int row = update.getInt(PROPERTY.ROW);
             if (update.containsKey(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME)) {
-                cast().getRowFormatter().addStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME));
+                uiObject.getRowFormatter().addStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME));
             } else {
-                cast().getRowFormatter().removeStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME));
+                uiObject.getRowFormatter().removeStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME));
             }
         } else if (update.containsKey(PROPERTY.HTMLTABLE_CELL_STYLE)) {
             final int cellRow = update.getInt(PROPERTY.ROW);
             final int cellColumn = update.getInt(PROPERTY.COLUMN);
 
             if (update.containsKey(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME)) {
-                cast().getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME));
+                uiObject.getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME));
             }
             if (update.containsKey(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME)) {
-                cast().getCellFormatter().removeStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME));
+                uiObject.getCellFormatter().removeStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME));
             }
             if (update.containsKey(PROPERTY.CELL_VERTICAL_ALIGNMENT)) {
                 final VerticalAlignmentConstant asVerticalAlignmentConstant = PVerticalAlignment.values()[update.getInt(PROPERTY.CELL_VERTICAL_ALIGNMENT)].asVerticalAlignmentConstant();
-                cast().getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
+                uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
             }
             if (update.containsKey(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)) {
                 final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PHorizontalAlignment.values()[update.getInt(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)].asHorizontalAlignmentConstant();
-                cast().getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
+                uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
             }
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public HTMLTable cast() {
-        return (HTMLTable) uiObject;
     }
 
 }

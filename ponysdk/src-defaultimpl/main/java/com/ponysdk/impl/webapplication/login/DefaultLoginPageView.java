@@ -4,17 +4,14 @@ package com.ponysdk.impl.webapplication.login;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 
@@ -26,21 +23,19 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
 
     private final PCheckBox rememberMe = new PCheckBox("Stay signed in");
 
-    private final PVerticalPanel messagePanel = new PVerticalPanel();
+    private final PFlowPanel messagePanel = new PFlowPanel();
 
-    private final PLabel versionInformation = new PLabel("");
+    private final PLabel versionInformation = new PLabel();
 
     private int messageIndex = 1;
 
     public DefaultLoginPageView(final String title) {
-        setSizeFull();
-
         loginTextBox.setStyleName("pony-LoginPage-LoginTextBox");
         passwordTextBox.setStyleName("pony-LoginPage-PasswordTextBox");
         loginButton.addStyleName("pony-LoginPage-SubmitButton");
         versionInformation.addStyleName("pony-LoginPage-VersionInformation");
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PFlowPanel panel = new PFlowPanel();
         panel.setStyleName("pony-LoginPage");
 
         // logo
@@ -49,28 +44,21 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
         panel.add(logo);
 
         // input
-        final PVerticalPanel inputPanel = new PVerticalPanel();
-        inputPanel.setSizeFull();
+        final PFlowPanel inputPanel = new PFlowPanel();
         inputPanel.add(buildLoginInput());
         inputPanel.add(buildPasswordInput());
         panel.add(inputPanel);
 
-        final PHorizontalPanel buttonAndCheckbox = new PHorizontalPanel();
+        final PFlowPanel buttonAndCheckbox = new PFlowPanel();
         panel.add(buttonAndCheckbox);
         buttonAndCheckbox.add(loginButton);
-        final PSimplePanel separator = new PSimplePanel();
-        separator.setWidth("20px");
-        buttonAndCheckbox.add(separator);
         buttonAndCheckbox.add(rememberMe);
-        buttonAndCheckbox.setCellVerticalAlignment(rememberMe, PVerticalAlignment.ALIGN_MIDDLE);
 
-        loginButton.setStyleName(PonySDKTheme.BUTTON);
-        loginButton.addStyleName("blue");
+        loginButton.setStyleName(PonySDKTheme.BUTTON_BLUE);
 
         // messages
         panel.add(messagePanel);
         panel.add(versionInformation);
-        panel.setCellHorizontalAlignment(versionInformation, PHorizontalAlignment.ALIGN_RIGHT);
 
         setWidget(panel);
 
@@ -78,16 +66,14 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     private PWidget buildLoginInput() {
-        final PVerticalPanel panel = new PVerticalPanel();
-        panel.setSizeFull();
+        final PFlowPanel panel = new PFlowPanel();
         panel.add(new PLabel("Login:"));
         panel.add(loginTextBox);
         return panel;
     }
 
     private PWidget buildPasswordInput() {
-        final PVerticalPanel panel = new PVerticalPanel();
-        panel.setSizeFull();
+        final PFlowPanel panel = new PFlowPanel();
         panel.add(new PLabel("Password:"));
         panel.add(passwordTextBox);
         return panel;
@@ -118,7 +104,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
         final PLabel messageLabel = new PLabel(message);
         messageLabel.ensureDebugId("login_page_message_" + messageIndex);
         messageIndex++;
-        this.messagePanel.add(messageLabel);
+        messagePanel.add(messageLabel);
     }
 
     @Override

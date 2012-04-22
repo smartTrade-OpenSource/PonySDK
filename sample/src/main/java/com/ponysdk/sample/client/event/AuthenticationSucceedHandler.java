@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface AuthenticationSucceedHandler extends EventHandler {
+public interface AuthenticationSucceedHandler extends PEventHandler {
 
     public void onAuthenticationSucceed(AuthenticationSucceedEvent event);
 }

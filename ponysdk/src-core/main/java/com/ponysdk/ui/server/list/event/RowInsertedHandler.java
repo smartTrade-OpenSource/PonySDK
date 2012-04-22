@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface RowInsertedHandler extends EventHandler {
+public interface RowInsertedHandler extends PEventHandler {
 
     public void onRowInserted(RowInsertedEvent event);
 }

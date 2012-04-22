@@ -26,14 +26,13 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTVerticalPanel extends PTCellPanel {
+public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -42,27 +41,26 @@ public class PTVerticalPanel extends PTCellPanel {
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        final Widget w = asWidget(add.getObjectID(), uiService);
-        cast().insert(w, add.getInt(PROPERTY.INDEX));
+        uiObject.insert(asWidget(add.getObjectID(), uiService), add.getInt(PROPERTY.INDEX));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
-            cast().setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
+            uiObject.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
         } else if (update.containsKey(PROPERTY.SPACING)) {
-            cast().setSpacing(update.getInt(PROPERTY.SPACING));
+            uiObject.setSpacing(update.getInt(PROPERTY.SPACING));
         } else if (update.containsKey(PROPERTY.HORIZONTAL_ALIGNMENT)) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.HORIZONTAL_ALIGNMENT)];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
-                    cast().setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
                     break;
                 case ALIGN_CENTER:
-                    cast().setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
                     break;
                 case ALIGN_RIGHT:
-                    cast().setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
                     break;
                 default:
                     break;
@@ -71,13 +69,13 @@ public class PTVerticalPanel extends PTCellPanel {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.VERTICAL_ALIGNMENT)];
             switch (verticalAlignment) {
                 case ALIGN_TOP:
-                    cast().setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
                     break;
                 case ALIGN_MIDDLE:
-                    cast().setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
                     break;
                 case ALIGN_BOTTOM:
-                    cast().setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
                     break;
                 default:
                     break;
@@ -87,8 +85,4 @@ public class PTVerticalPanel extends PTCellPanel {
         }
     }
 
-    @Override
-    public VerticalPanel cast() {
-        return (VerticalPanel) uiObject;
-    }
 }

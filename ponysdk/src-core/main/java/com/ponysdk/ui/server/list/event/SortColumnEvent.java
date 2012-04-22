@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PSystemEvent;
 import com.ponysdk.core.query.SortingType;
 
-public class SortColumnEvent extends SystemEvent<SortColumnHandler> {
+public class SortColumnEvent extends PSystemEvent<SortColumnHandler> {
 
     public static final Type<SortColumnHandler> TYPE = new Type<SortColumnHandler>();
 

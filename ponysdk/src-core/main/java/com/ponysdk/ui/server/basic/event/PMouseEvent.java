@@ -1,9 +1,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEvent<H> {
+public abstract class PMouseEvent<H extends PEventHandler> extends PHumanInputEvent<H> {
 
     private int clientX;
 

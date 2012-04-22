@@ -23,14 +23,13 @@
 
 package com.ponysdk.ui.server.addon;
 
-import com.ponysdk.ui.server.basic.PAddOn;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PCAttachedPopupPanelAddon;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public class PAttachedPopupPanel extends PPopupPanel implements PAddOn {
+public class PAttachedPopupPanel extends PPopupPanel {
 
     public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
         super(autoHide);
@@ -39,12 +38,13 @@ public class PAttachedPopupPanel extends PPopupPanel implements PAddOn {
 
     @Override
     protected WidgetType getWidgetType() {
-        return WidgetType.ADDON;
+        return WidgetType.ATTACHED_POPUP_PABEL;
     }
 
-    @Override
-    public String getSignature() {
-        return PCAttachedPopupPanelAddon.SIGNATURE;
+    public void repaint() {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.REPAINT, "");
+        getPonySession().stackInstruction(update);
     }
 
 }

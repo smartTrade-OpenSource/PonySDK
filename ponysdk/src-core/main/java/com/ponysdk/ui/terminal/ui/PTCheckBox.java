@@ -32,7 +32,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTCheckBox extends PTButtonBase {
+public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -50,7 +50,7 @@ public class PTCheckBox extends PTButtonBase {
     }
 
     protected void addValueChangeHandler(final PTInstruction addHandler, final UIService uiService) {
-        cast().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        uiObject.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
@@ -66,22 +66,15 @@ public class PTCheckBox extends PTButtonBase {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        final CheckBox checkBox = cast();
-
         if (update.containsKey(PROPERTY.VALUE)) {
-            checkBox.setValue(update.getBoolean(PROPERTY.VALUE));
+            uiObject.setValue(update.getBoolean(PROPERTY.VALUE));
         } else if (update.containsKey(PROPERTY.TEXT)) {
-            checkBox.setText(update.getString(PROPERTY.TEXT));
+            uiObject.setText(update.getString(PROPERTY.TEXT));
         } else if (update.containsKey(PROPERTY.HTML)) {
-            checkBox.setHTML(update.getString(PROPERTY.HTML));
+            uiObject.setHTML(update.getString(PROPERTY.HTML));
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public CheckBox cast() {
-        return (CheckBox) uiObject;
     }
 
 }

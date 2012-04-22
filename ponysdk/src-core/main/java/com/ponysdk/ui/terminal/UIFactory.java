@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
+import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.WIDGETTYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
@@ -40,6 +41,7 @@ import com.ponysdk.ui.terminal.ui.PTElement;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
 import com.ponysdk.ui.terminal.ui.PTFlowPanel;
+import com.ponysdk.ui.terminal.ui.PTFocusPanel;
 import com.ponysdk.ui.terminal.ui.PTGrid;
 import com.ponysdk.ui.terminal.ui.PTHTML;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
@@ -59,6 +61,7 @@ import com.ponysdk.ui.terminal.ui.PTRichTextArea;
 import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTRootPanel;
 import com.ponysdk.ui.terminal.ui.PTScheduler;
+import com.ponysdk.ui.terminal.ui.PTScript;
 import com.ponysdk.ui.terminal.ui.PTScrollPanel;
 import com.ponysdk.ui.terminal.ui.PTSimpleLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSimplePanel;
@@ -102,6 +105,7 @@ public class UIFactory {
         if (WidgetType.LISTBOX.equals(widgetType)) { return new PTListBox(); }
         if (WidgetType.SIMPLE_LAYOUT_PANEL.equals(widgetType)) { return new PTSimpleLayoutPanel(); }
         if (WidgetType.SIMPLE_PANEL.equals(widgetType)) { return new PTSimplePanel(); }
+        if (WidgetType.FOCUS_PANEL.equals(widgetType)) { return new PTFocusPanel(); }
         if (WidgetType.SCROLL_PANEL.equals(widgetType)) { return new PTScrollPanel(); }
         if (WidgetType.DATEBOX.equals(widgetType)) { return new PTDateBox(); }
         if (WidgetType.FLEX_TABLE.equals(widgetType)) { return new PTFlexTable(); }
@@ -115,6 +119,7 @@ public class UIFactory {
         if (WidgetType.MENU_ITEM_SEPARATOR.equals(widgetType)) { return new PTMenuItemSeparator(); }
         if (WidgetType.POPUP_PANEL.equals(widgetType)) { return new PTPopupPanel(); }
         if (WidgetType.DECORATED_POPUP_PANEL.equals(widgetType)) { return new PTDecoratedPopupPanel(); }
+        if (WidgetType.ATTACHED_POPUP_PABEL.equals(widgetType)) { return new PTAttachedPopupPanel(); }
         if (WidgetType.SCHEDULER.equals(widgetType)) { return new PTScheduler(); }
         if (WidgetType.RICH_TEXT_AREA.equals(widgetType)) { return new PTRichTextArea(); }
         if (WidgetType.DIALOG_BOX.equals(widgetType)) { return new PTDialogBox(); }
@@ -123,6 +128,8 @@ public class UIFactory {
         if (WidgetType.DISCLOSURE_PANEL.equals(widgetType)) { return new PTDisclosurePanel(); }
         if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratedPanel(); }
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
+        if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
+        
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

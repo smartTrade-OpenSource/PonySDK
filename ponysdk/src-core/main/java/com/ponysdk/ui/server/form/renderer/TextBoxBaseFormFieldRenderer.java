@@ -28,8 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.ponysdk.core.event.EventHandler;
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.ui.server.basic.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PTextBoxBase;
@@ -191,13 +191,13 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().addKeyPressHandler(handler);
         }
         keypPressHandlers.add(handler);
 
-        return new HandlerRegistration() {
+        return new PHandlerRegistration() {
 
             @Override
             public void removeHandler() {
@@ -244,7 +244,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
+    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

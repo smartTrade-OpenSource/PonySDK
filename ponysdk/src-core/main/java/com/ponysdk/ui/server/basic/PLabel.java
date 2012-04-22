@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -64,7 +64,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     }
 
     @Override
-    public HandlerRegistration addClickHandler(final PClickHandler handler) {
+    public PHandlerRegistration addClickHandler(final PClickHandler handler) {
         return addDomHandler(handler, PClickEvent.TYPE);
     }
 

@@ -37,7 +37,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTDateBox extends PTWidget {
+public class PTDateBox extends PTWidget<DateBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -99,8 +99,4 @@ public class PTDateBox extends PTWidget {
         }
     }
 
-    @Override
-    public DateBox cast() {
-        return (DateBox) uiObject;
-    }
 }

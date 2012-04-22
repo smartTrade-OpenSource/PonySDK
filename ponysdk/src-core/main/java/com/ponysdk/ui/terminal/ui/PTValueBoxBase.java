@@ -30,12 +30,12 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTValueBoxBase<T> extends PTFocusWidget {
+public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<W> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         if (addHandler.getString(HANDLER.KEY).equals(HANDLER.CHANGE_HANDLER)) {
-            cast().addChangeHandler(new ChangeHandler() {
+            uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
@@ -48,12 +48,6 @@ public class PTValueBoxBase<T> extends PTFocusWidget {
         } else {
             super.addHandler(addHandler, uiService);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public ValueBoxBase<T> cast() {
-        return (ValueBoxBase<T>) uiObject;
     }
 
 }

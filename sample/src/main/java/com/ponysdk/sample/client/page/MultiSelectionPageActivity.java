@@ -24,42 +24,37 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.select.DefaultMultiSelectListBoxView;
-import com.ponysdk.ui.server.select.PMultiSelectListBoxActivity;
-import com.ponysdk.ui.server.select.PMultiSelectListBoxView;
+import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.select.PMultiSelectListBox;
 
-public class MultiSelectionPageActivity extends PageActivity {
+public class MultiSelectionPageActivity extends SamplePageActivity {
 
     public MultiSelectionPageActivity() {
-        super("MultiPageActivity", "Basics UI Components");
+        super("MultiSelectListBox", "Rich UI Components");
     }
 
     @Override
-    protected void onInitialization() {}
+    protected void onShowPage(final Place place) {
+        super.onFirstShowPage();
 
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
-    protected void onShowPage(Place place) {
-
-        PMultiSelectListBoxView multiSelectListBoxView = new DefaultMultiSelectListBoxView();
-        final PMultiSelectListBoxActivity listViewActivity = new PMultiSelectListBoxActivity(multiSelectListBoxView);
+        final PMultiSelectListBox listViewActivity = new PMultiSelectListBox();
 
         listViewActivity.addItem("zoubozu");
         listViewActivity.addItem("zoubodsqdqzu");
         listViewActivity.addItem("zoubdqsdozu");
         listViewActivity.addItem("zodqsdqsubozu");
+        listViewActivity.addItem("dsqkdhq dqsjdhqskjh");
         listViewActivity.addItem("dqsdqszoubozu");
+        listViewActivity.addItem("dqsdqszoubozu");
+        listViewActivity.addItem("dqsdqs  zoubozu");
         listViewActivity.addItem("zodqsdqsddqsqsdubozu");
 
-        listViewActivity.start(getPageView().getBody());
+        final PSimplePanel panel = new PSimplePanel();
+
+        panel.setWidget(listViewActivity);
+
+        examplePanel.setWidget(panel);
 
     }
 
-    @Override
-    protected void onFirstShowPage() {
-
-    }
 }

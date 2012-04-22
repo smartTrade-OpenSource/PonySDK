@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTextArea extends PTTextBoxBase {
+public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -38,16 +38,12 @@ public class PTTextArea extends PTTextBoxBase {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.VISIBLE_LINES)) {
-            cast().setVisibleLines(update.getInt(PROPERTY.VISIBLE_LINES));
+            uiObject.setVisibleLines(update.getInt(PROPERTY.VISIBLE_LINES));
         } else if (update.containsKey(PROPERTY.CHARACTER_WIDTH)) {
-            cast().setCharacterWidth(update.getInt(PROPERTY.CHARACTER_WIDTH));
+            uiObject.setCharacterWidth(update.getInt(PROPERTY.CHARACTER_WIDTH));
         } else {
             super.update(update, uiService);
         }
     }
 
-    @Override
-    public TextArea cast() {
-        return (TextArea) uiObject;
-    }
 }

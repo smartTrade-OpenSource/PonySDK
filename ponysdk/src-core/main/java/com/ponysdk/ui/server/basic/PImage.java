@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
@@ -112,7 +112,7 @@ public class PImage extends PFocusWidget {
         getPonySession().stackInstruction(update);
     }
 
-    public void setStream(final StreamHandler streamListener) {
+    public void setStream(final PStreamHandler streamListener) {
         final StreamResource streamResource = new StreamResource();
         streamResource.embed(streamListener, this);
     }

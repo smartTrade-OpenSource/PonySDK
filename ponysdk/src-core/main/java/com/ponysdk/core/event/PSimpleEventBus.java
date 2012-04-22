@@ -32,19 +32,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ponysdk.core.event.Event.Type;
+import com.ponysdk.core.event.PEvent.Type;
 
-public class SimpleEventBus implements EventBus {
+public class PSimpleEventBus implements PEventBus {
 
     /**
      * Map of event type to map of event source to list of their handlers.
      */
     private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<Type<?>, Map<Object, Set<?>>>();
 
-    private final List<BroadcastEventHandler> broadcastHandlerManager = new ArrayList<BroadcastEventHandler>();
+    private final List<PBroadcastEventHandler> broadcastHandlerManager = new ArrayList<PBroadcastEventHandler>();
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler) {
+    public <H extends PEventHandler> PHandlerRegistration addHandler(Type<H> type, H handler) {
         if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
         if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
 
@@ -52,7 +52,7 @@ public class SimpleEventBus implements EventBus {
     }
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
         if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
         if (source == null) { throw new NullPointerException("Cannot add a handler with a null source"); }
         if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
@@ -61,43 +61,43 @@ public class SimpleEventBus implements EventBus {
     }
 
     @Override
-    public void fireEvent(Event<?> event) {
+    public void fireEvent(PEvent<?> event) {
         if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         doFire(event, null);
         fireBroadcastEvent(event);
     }
 
     @Override
-    public void addHandler(BroadcastEventHandler handler) {
+    public void addHandler(PBroadcastEventHandler handler) {
         broadcastHandlerManager.add(handler);
     }
 
-    private void fireBroadcastEvent(Event<?> event) {
-        for (final BroadcastEventHandler handler : broadcastHandlerManager) {
+    private void fireBroadcastEvent(PEvent<?> event) {
+        for (final PBroadcastEventHandler handler : broadcastHandlerManager) {
             handler.onEvent(event);
         }
     }
 
     @Override
-    public void fireEventFromSource(Event<?> event, Object source) {
+    public void fireEventFromSource(PEvent<?> event, Object source) {
         if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         if (source == null) { throw new NullPointerException("Cannot fire from a null source"); }
         doFire(event, source);
     }
 
-    protected <H extends EventHandler> void doRemove(Event.Type<H> type, Object source, H handler) {
+    protected <H extends PEventHandler> void doRemove(PEvent.Type<H> type, Object source, H handler) {
         doRemoveNow(type, source, handler);
     }
 
-    private <H extends EventHandler> HandlerRegistration doAdd(final Event.Type<H> type, final Object source, final H handler) {
+    private <H extends PEventHandler> PHandlerRegistration doAdd(final PEvent.Type<H> type, final Object source, final H handler) {
         return doAddNow(type, source, handler);
     }
 
-    private <H extends EventHandler> HandlerRegistration doAddNow(final Event.Type<H> type, final Object source, final H handler) {
+    private <H extends PEventHandler> PHandlerRegistration doAddNow(final PEvent.Type<H> type, final Object source, final H handler) {
         final Set<H> l = ensureHandlerSet(type, source);
         l.add(handler);
 
-        return new HandlerRegistration() {
+        return new PHandlerRegistration() {
 
             @Override
             public void removeHandler() {
@@ -106,7 +106,7 @@ public class SimpleEventBus implements EventBus {
         };
     }
 
-    private <H extends EventHandler> void doFire(Event<H> event, Object source) {
+    private <H extends PEventHandler> void doFire(PEvent<H> event, Object source) {
         if (source != null) {
             event.setSource(source);
         }
@@ -125,7 +125,7 @@ public class SimpleEventBus implements EventBus {
         }
     }
 
-    private <H> void doRemoveNow(Event.Type<H> type, Object source, H handler) {
+    private <H> void doRemoveNow(PEvent.Type<H> type, Object source, H handler) {
         final Set<H> l = getHandlerSet(type, source);
 
         final boolean removed = l.remove(handler);
@@ -135,7 +135,7 @@ public class SimpleEventBus implements EventBus {
         }
     }
 
-    private <H> Set<H> ensureHandlerSet(Event.Type<H> type, Object source) {
+    private <H> Set<H> ensureHandlerSet(PEvent.Type<H> type, Object source) {
         Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<Object, Set<?>>();
@@ -153,7 +153,7 @@ public class SimpleEventBus implements EventBus {
         return handlers;
     }
 
-    private <H> Set<H> getDispatchSet(Event.Type<H> type, Object source) {
+    private <H> Set<H> getDispatchSet(PEvent.Type<H> type, Object source) {
         final Set<H> directHandlers = getHandlerSet(type, source);
         if (source == null) { return directHandlers; }
 
@@ -164,7 +164,7 @@ public class SimpleEventBus implements EventBus {
         return rtn;
     }
 
-    public <H> Set<H> getHandlerSet(Event.Type<H> type, Object source) {
+    public <H> Set<H> getHandlerSet(PEvent.Type<H> type, Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) { return Collections.emptySet(); }
 
@@ -176,7 +176,7 @@ public class SimpleEventBus implements EventBus {
         return handlers;
     }
 
-    private void prune(Event.Type<?> type, Object source) {
+    private void prune(PEvent.Type<?> type, Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
 
         final Set<?> pruned = sourceMap.remove(source);

@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PRadioButton;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -177,5 +177,5 @@ public class RadioButtonGroupFormFieldRenderer implements FormFieldRenderer, Has
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(H handler, Type<H> type) {}
+    public <H extends PEventHandler> void addDomHandler(H handler, Type<H> type) {}
 }

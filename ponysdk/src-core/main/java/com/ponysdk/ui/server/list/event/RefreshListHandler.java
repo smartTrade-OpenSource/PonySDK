@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface RefreshListHandler extends EventHandler {
+public interface RefreshListHandler extends PEventHandler {
 
     public void onRefreshList(RefreshListEvent event);
 }

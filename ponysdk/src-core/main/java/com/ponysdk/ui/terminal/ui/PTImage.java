@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTImage extends PTWidget {
+public class PTImage extends PTWidget<Image> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -67,8 +67,4 @@ public class PTImage extends PTWidget {
         }
     }
 
-    @Override
-    public Image cast() {
-        return (Image) uiObject;
-    }
 }

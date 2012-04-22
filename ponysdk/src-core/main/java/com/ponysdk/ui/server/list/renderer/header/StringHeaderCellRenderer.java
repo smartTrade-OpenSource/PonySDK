@@ -23,12 +23,12 @@
 
 package com.ponysdk.ui.server.list.renderer.header;
 
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class StringHeaderCellRenderer implements HeaderCellRenderer, EventBusAware {
+public class StringHeaderCellRenderer implements HeaderCellRenderer, PEventBusAware {
 
     private final PLabel caption;
     private final String pojoPropertyKey;
@@ -53,7 +53,7 @@ public class StringHeaderCellRenderer implements HeaderCellRenderer, EventBusAwa
     }
 
     @Override
-    public void setEventBus(final EventBus eventBus) {
+    public void setEventBus(final PEventBus eventBus) {
         if (pojoPropertyKey != null) {
             SortableHeader sortableHeader = new SortableHeader(caption, pojoPropertyKey);
             sortableHeader.setEventBus(eventBus);

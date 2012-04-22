@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTButton extends PTButtonBase {
+public class PTButton extends PTButtonBase<Button> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {

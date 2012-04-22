@@ -27,7 +27,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.PBusinessEvent;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -76,7 +76,7 @@ public class LogsListPanel extends PScrollPanel {
         actionPanel.add(clearLogs);
     }
 
-    public void addEvent(BusinessEvent<?> event) {
+    public void addEvent(PBusinessEvent<?> event) {
         final String time = "[" + dateFormat.format(new Date()) + "]";
         final PLabel label = new PLabel(time + " [" + event.getLevel().name() + "] " + event.getBusinessMessage());
         logsPanel.insert(label, 0);

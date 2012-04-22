@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
@@ -51,11 +51,11 @@ public class SimpleListActivity<T> extends AbstractActivity {
 
     private Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
 
-    private final EventBus eventBus;
+    private final PEventBus eventBus;
 
     private int colCount;
 
-    public SimpleListActivity(final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
+    public SimpleListActivity(final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final PEventBus eventBus) {
         this.ID = null;
         this.listFields = listFields;
         this.listView = listView;
@@ -63,7 +63,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         buildHeaders();
     }
 
-    public SimpleListActivity(final String ID, final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
+    public SimpleListActivity(final String ID, final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final PEventBus eventBus) {
         this.ID = ID;
         this.listFields = listFields;
         this.listView = listView;
@@ -93,8 +93,8 @@ public class SimpleListActivity<T> extends AbstractActivity {
                 rowIndex++;
             }
         }
-        if (customDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
-            ((EventBusAware) customDescriptor.getHeaderCellRenderer()).setEventBus(eventBus);
+        if (customDescriptor.getHeaderCellRenderer() instanceof PEventBusAware) {
+            ((PEventBusAware) customDescriptor.getHeaderCellRenderer()).setEventBus(eventBus);
         }
         colCount++;
         listView.addWidget(widget, colCount, 0);

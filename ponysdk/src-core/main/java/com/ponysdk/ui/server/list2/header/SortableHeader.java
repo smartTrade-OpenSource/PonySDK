@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.list2.header;
 
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -35,10 +35,10 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.list.event.SortColumnEvent;
 import com.ponysdk.ui.server.list.event.SortColumnHandler;
 
-public class SortableHeader implements HeaderCellRenderer, SortColumnHandler, EventBusAware {
+public class SortableHeader implements HeaderCellRenderer, SortColumnHandler, PEventBusAware {
 
     private SortingType sortingType = SortingType.NONE;
-    private EventBus eventBus;
+    private PEventBus eventBus;
 
     private final HeaderCellRenderer renderer;
     private final CriterionField criterionField;
@@ -50,7 +50,7 @@ public class SortableHeader implements HeaderCellRenderer, SortColumnHandler, Ev
     }
 
     @Override
-    public void setEventBus(final EventBus eventBus) {
+    public void setEventBus(final PEventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.addHandler(SortColumnEvent.TYPE, this);
     }

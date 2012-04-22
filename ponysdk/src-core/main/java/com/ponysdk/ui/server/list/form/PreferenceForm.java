@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
@@ -54,7 +54,7 @@ public class PreferenceForm extends PScrollPanel {
 
     List<SelectableLabel> labels = new ArrayList<SelectableLabel>();
 
-    private final EventBus eventBus;
+    private final PEventBus eventBus;
 
     private final PFlexTable labelPanel = new PFlexTable();
 
@@ -78,7 +78,7 @@ public class PreferenceForm extends PScrollPanel {
 
     }
 
-    public PreferenceForm(final Collection<ListColumnDescriptor<?, ?>> captions, final EventBus eventBus, final String tableName) {
+    public PreferenceForm(final Collection<ListColumnDescriptor<?, ?>> captions, final PEventBus eventBus, final String tableName) {
         this.eventBus = eventBus;
         this.tableName = tableName;
         init(captions);

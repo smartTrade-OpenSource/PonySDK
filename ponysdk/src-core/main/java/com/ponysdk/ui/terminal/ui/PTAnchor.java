@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTAnchor extends PTFocusWidget {
+public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -38,15 +38,10 @@ public class PTAnchor extends PTFocusWidget {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.get(PROPERTY.TEXT).isString().stringValue());
+            uiObject.setText(update.get(PROPERTY.TEXT).isString().stringValue());
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public Anchor cast() {
-        return (Anchor) uiObject;
     }
 
 }

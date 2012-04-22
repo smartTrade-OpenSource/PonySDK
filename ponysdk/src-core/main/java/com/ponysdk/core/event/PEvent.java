@@ -25,7 +25,7 @@ package com.ponysdk.core.event;
 
 import java.util.UUID;
 
-public abstract class Event<H extends EventHandler> {
+public abstract class PEvent<H extends PEventHandler> {
 
     public static class Type<H> {
 
@@ -66,12 +66,12 @@ public abstract class Event<H extends EventHandler> {
         this.data = data;
     }
 
-    protected Event(Object source) {
+    protected PEvent(Object source) {
         this.source = source;
         eventID = count++;
     }
 
-    protected Event(Object source, UUID uuid) {
+    protected PEvent(Object source, UUID uuid) {
         this.source = source;
         this.uuid = uuid;
         eventID = count++;

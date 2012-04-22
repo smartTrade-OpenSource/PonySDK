@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTSimplePanel extends PTPanel {
+public class PTSimplePanel extends PTPanel<SimplePanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -36,11 +36,7 @@ public class PTSimplePanel extends PTPanel {
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        cast().setWidget(asWidget(add.getObjectID(), uiService));
+        uiObject.setWidget(asWidget(add.getObjectID(), uiService));
     }
 
-    @Override
-    public SimplePanel cast() {
-        return (SimplePanel) uiObject;
-    }
 }

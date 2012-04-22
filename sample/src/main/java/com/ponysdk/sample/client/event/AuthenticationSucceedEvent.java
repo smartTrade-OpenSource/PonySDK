@@ -23,13 +23,13 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.PSystemEvent;
 import com.ponysdk.sample.client.datamodel.User;
 
-public class AuthenticationSucceedEvent extends SystemEvent<AuthenticationSucceedHandler> {
+public class AuthenticationSucceedEvent extends PSystemEvent<AuthenticationSucceedHandler> {
 
-    public static final Event.Type<AuthenticationSucceedHandler> TYPE = new Event.Type<AuthenticationSucceedHandler>();
+    public static final PEvent.Type<AuthenticationSucceedHandler> TYPE = new PEvent.Type<AuthenticationSucceedHandler>();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class AuthenticationSucceedEvent extends SystemEvent<AuthenticationSuccee
     }
 
     @Override
-    public Event.Type<AuthenticationSucceedHandler> getAssociatedType() {
+    public PEvent.Type<AuthenticationSucceedHandler> getAssociatedType() {
         return TYPE;
     }
 

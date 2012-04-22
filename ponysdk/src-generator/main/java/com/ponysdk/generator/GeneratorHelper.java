@@ -101,8 +101,8 @@ public class GeneratorHelper {
 
     // Business event extend
     public static String getBusinessEventExtends(final Event event) {
-        if (event.isBusiness()) return "com.ponysdk.core.event.BusinessEvent <" + getHandlerClassName(event) + ">";
-        else return "com.ponysdk.core.event.SystemEvent<" + getHandlerClassName(event) + ">";
+        if (event.isBusiness()) return "com.ponysdk.core.event.PBusinessEvent <" + getHandlerClassName(event) + ">";
+        else return "com.ponysdk.core.event.PSystemEvent<" + getHandlerClassName(event) + ">";
     }
 
     // UserService

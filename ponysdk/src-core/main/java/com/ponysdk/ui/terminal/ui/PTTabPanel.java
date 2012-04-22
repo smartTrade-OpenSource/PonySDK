@@ -35,7 +35,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTabPanel extends PTWidget {
+public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -46,14 +46,14 @@ public class PTTabPanel extends PTWidget {
     public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final TabPanel tabPanel = cast();
+        final TabPanel tabPanel = uiObject;
 
         final int beforeIndex = add.getInt(PROPERTY.BEFORE_INDEX);
 
         if (add.containsKey(PROPERTY.TAB_TEXT)) {
             tabPanel.insert(w, add.getString(PROPERTY.TAB_TEXT), beforeIndex);
         } else if (add.containsKey(PROPERTY.TAB_WIDGET)) {
-            final PTWidget ptWidget = (PTWidget) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
     }
@@ -62,7 +62,7 @@ public class PTTabPanel extends PTWidget {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
         if (HANDLER.SELECTION_HANDLER.equals(handler)) {
-            cast().addSelectionHandler(new SelectionHandler<Integer>() {
+            uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
@@ -75,7 +75,7 @@ public class PTTabPanel extends PTWidget {
                 }
             });
         } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handler)) {
-            cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+            uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
@@ -95,20 +95,16 @@ public class PTTabPanel extends PTWidget {
     @Override
     public void remove(final PTInstruction remove, final UIService uiService) {
         final Widget w = asWidget(remove.getObjectID(), uiService);
-        cast().remove(w);
+        uiObject.remove(w);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
-            cast().selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
+            uiObject.selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
         } else {
             super.update(update, uiService);
         }
     }
 
-    @Override
-    public TabPanel cast() {
-        return (TabPanel) uiObject;
-    }
 }

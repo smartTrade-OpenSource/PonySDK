@@ -203,7 +203,7 @@ public class ServiceGenerator extends BaseGenerator {
                 classWriter.addLine("public " + returnClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method) + ") throws Exception;");
             }
 
-            Dao dao = domain.getService().getDao();
+            final Dao dao = domain.getService().getDao();
             if (dao != null) {
                 if (dao.getDaoLayer() == DaoLayer.HIBERNATE) {
                     generateDAO(dao);
@@ -302,7 +302,7 @@ public class ServiceGenerator extends BaseGenerator {
         final Constructor constructor = new Constructor();
         final Parameter eventBusParameter = new Parameter();
         eventBusParameter.setName("eventBus");
-        eventBusParameter.setClazz("com.ponysdk.core.event.EventBus");
+        eventBusParameter.setClazz("com.ponysdk.core.event.PEventBus");
 
         final List<Parameter> parameters = method.getParameter();
         final List<Parameter> clonedParameters = new ArrayList<Parameter>();
@@ -397,8 +397,8 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addExtend(GeneratorHelper.getBusinessEventExtends(event));
 
         // Constant
-        classWriter.addConstants("public static final com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event) + "> TYPE = new com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event)
-            + ">();");
+        classWriter.addConstants("public static final com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event) + "> TYPE = new com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event)
+                + ">();");
 
         // Build constructor
         final Parameter sourceComponentParameter = new Parameter();
@@ -421,7 +421,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addNewLine();
 
         classWriter.addLine("@Override");
-        classWriter.addLine("public com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event) + "> getAssociatedType() {");
+        classWriter.addLine("public com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event) + "> getAssociatedType() {");
         classWriter.addLine("   return TYPE;");
         classWriter.addLine("}");
 
@@ -434,7 +434,7 @@ public class ServiceGenerator extends BaseGenerator {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getHandlerClassName(event));
 
         classWriter.setInterface(true);
-        classWriter.addExtend("com.ponysdk.core.event.EventHandler");
+        classWriter.addExtend("com.ponysdk.core.event.PEventHandler");
 
         // Build event method
         classWriter.addLine("public void on" + event.getName() + "(" + GeneratorHelper.getEventClassName(event) + " event);");

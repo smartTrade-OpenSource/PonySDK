@@ -28,13 +28,13 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public abstract class PTUIObject extends AbstractPTObject {
+public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     private static final String FONT_SIZE = "fontSize";
 
-    protected UIObject uiObject;
+    protected T uiObject;
 
-    protected void init(final PTInstruction create, final UIService uiService, final UIObject uiObject) {
+    protected void init(final PTInstruction create, final UIService uiService, final T uiObject) {
         if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
         this.uiObject = uiObject;
         if (create != null) {
@@ -43,7 +43,7 @@ public abstract class PTUIObject extends AbstractPTObject {
         }
     }
 
-    public UIObject cast() {
+    public T cast() {
         return uiObject;
     }
 
@@ -73,7 +73,7 @@ public abstract class PTUIObject extends AbstractPTObject {
     }
 
     public UIObject asWidget(final Long objectID, final UIService uiService) {
-        if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject) uiService.getPTObject(objectID)).cast(); }
+        if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast(); }
         throw new IllegalStateException("This object is not an UIObject");
     }
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.PBusinessEvent;
 
 class DefaultNotificationView extends LogsListPanel implements NotificationView {
 
@@ -35,7 +35,7 @@ class DefaultNotificationView extends LogsListPanel implements NotificationView 
     }
 
     @Override
-    public void addEvent(BusinessEvent<?> event) {
+    public void addEvent(PBusinessEvent<?> event) {
         super.addEvent(event);
         if (popupPanel == null) {
             popupPanel = new LogsPopupPanel();

@@ -23,14 +23,11 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTElement extends PTComplexPanel {
+public class PTElement extends PTComplexPanel<MyWidget> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -39,33 +36,13 @@ public class PTElement extends PTComplexPanel {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        final MyWidget cast = cast();
-
         if (update.containsKey(PROPERTY.INNER_HTML)) {
-            cast.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));
+            uiObject.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));
         } else if (update.containsKey(PROPERTY.INNER_TEXT)) {
-            cast.getElement().setInnerText(update.getString(PROPERTY.INNER_TEXT));
+            uiObject.getElement().setInnerText(update.getString(PROPERTY.INNER_TEXT));
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public MyWidget cast() {
-        return (MyWidget) uiObject;
-    }
-
-    private class MyWidget extends ComplexPanel {
-
-        public MyWidget(final String tagName) {
-            setElement(DOM.createElement(tagName));
-        }
-
-        @Override
-        public void add(final Widget w) {
-            super.add(w, getElement());
-        }
-
     }
 
 }

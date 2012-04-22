@@ -54,7 +54,7 @@ public class TimerPageActivity extends SamplePageActivity {
     private SimpleDateFormat dateFormat;
 
     public TimerPageActivity() {
-        super("Timer Page", "Timer");
+        super("Timer", "Extra");
     }
 
     @Override

@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
@@ -259,7 +259,7 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
+    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

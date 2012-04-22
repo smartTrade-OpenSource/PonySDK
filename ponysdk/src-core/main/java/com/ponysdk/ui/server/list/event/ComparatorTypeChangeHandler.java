@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface ComparatorTypeChangeHandler extends EventHandler {
+public interface ComparatorTypeChangeHandler extends PEventHandler {
 
     public void onComparatorTypeChange(ComparatorTypeChangeEvent event);
 }

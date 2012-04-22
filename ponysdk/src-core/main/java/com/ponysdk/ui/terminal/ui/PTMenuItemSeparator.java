@@ -27,17 +27,11 @@ import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTMenuItemSeparator extends PTUIObject {
-
-    private MenuItemSeparator separator;
+public class PTMenuItemSeparator extends PTUIObject<MenuItemSeparator> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, separator = new MenuItemSeparator());
+        init(create, uiService, new MenuItemSeparator());
     }
 
-    @Override
-    public MenuItemSeparator cast() {
-        return separator;
-    }
 }

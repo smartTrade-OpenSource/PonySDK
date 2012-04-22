@@ -23,34 +23,17 @@
 
 package com.ponysdk.core.event;
 
-public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
+import com.ponysdk.core.event.PEvent.Type;
 
-    public static enum Level {
-        INFO, WARNING, ERROR;
-    }
+public interface PEventBus {
 
-    private String businessMessage;
+    public <H extends PEventHandler> PHandlerRegistration addHandler(Type<H> type, H handler);
 
-    private Level level = Level.INFO;
+    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(Type<H> type, Object source, H handler);
 
-    public BusinessEvent(Object sourceComponent) {
-        super(sourceComponent);
-    }
+    public void fireEvent(PEvent<?> event);
 
-    public String getBusinessMessage() {
-        return businessMessage;
-    }
+    public void fireEventFromSource(PEvent<?> event, Object source);
 
-    public void setBusinessMessage(String businessMessage) {
-        this.businessMessage = businessMessage;
-    }
-
-    public Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
-    }
-
+    public void addHandler(PBroadcastEventHandler handler);
 }

@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -61,17 +61,17 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+    public PHandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
     @Override
-    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+    public PHandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
@@ -123,7 +123,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public HandlerRegistration addClickHandler(final PClickHandler handler) {
+    public PHandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PClickHandler clickHandler = new PClickHandler() {
 

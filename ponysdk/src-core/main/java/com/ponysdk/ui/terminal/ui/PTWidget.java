@@ -25,8 +25,12 @@ package com.ponysdk.ui.terminal.ui;
 
 import java.util.logging.Logger;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -35,7 +39,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -47,14 +50,9 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTWidget extends PTUIObject {
+public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
-
-    @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new Widget());
-    }
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
@@ -72,9 +70,9 @@ public class PTWidget extends PTUIObject {
     @Override
     public void removeHandler(final PTInstruction removeHandler, final UIService uiService) {
         if (removeHandler.containsKey(HANDLER.DOM_HANDLER)) {
-            final int domHandlerType = removeHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
-            final Widget w = asWidget(removeHandler.getObjectID(), uiService);
-            final HandlerRegistration handlerRegistration;
+            // final int domHandlerType = removeHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
+            // final Widget w = asWidget(removeHandler.getObjectID(), uiService);
+            // final HandlerRegistration handlerRegistration;
             // handlerRegistration.removeHandler()
             // removeDomHandler(removeHandler, w, domHandlerType, uiService);
         } else {
@@ -85,9 +83,14 @@ public class PTWidget extends PTUIObject {
 
     @Override
     public Widget asWidget(final Long objectID, final UIService uiService) {
-        final PTWidget child = (PTWidget) uiService.getPTObject(objectID);
-        return child.cast();
+        return ((PTWidget<?>) uiService.getPTObject(objectID)).cast();
     }
+
+    //
+    // @Override
+    // public W cast() {
+    // return uiObject;
+    // }
 
     protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
         final PTInstruction eventInstruction = new PTInstruction();
@@ -104,16 +107,7 @@ public class PTWidget extends PTUIObject {
         uiService.triggerEvent(eventInstruction);
     }
 
-    protected void triggerOnMouseOver(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
-        final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
-        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
-        uiService.triggerEvent(eventInstruction);
-    }
-
-    protected void triggerOnMouseOut(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
+    protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
         eventInstruction.put(TYPE.KEY, TYPE.EVENT);
@@ -167,17 +161,37 @@ public class PTWidget extends PTUIObject {
 
                     @Override
                     public void onMouseOver(final MouseOverEvent event) {
-                        triggerOnMouseOver(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
                     }
 
                 }, MouseOverEvent.getType());
+                break;
+            case BLUR:
+                widget.addDomHandler(new BlurHandler() {
+
+                    @Override
+                    public void onBlur(final BlurEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+
+                }, BlurEvent.getType());
+                break;
+            case FOCUS:
+                widget.addDomHandler(new FocusHandler() {
+
+                    @Override
+                    public void onFocus(final FocusEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+
+                }, FocusEvent.getType());
                 break;
             case MOUSE_OUT:
                 widget.addDomHandler(new MouseOutHandler() {
 
                     @Override
                     public void onMouseOut(final MouseOutEvent event) {
-                        triggerOnMouseOut(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
                     }
 
                 }, MouseOutEvent.getType());
@@ -262,11 +276,6 @@ public class PTWidget extends PTUIObject {
                 log.info("Handler not supported #" + h);
                 break;
         }
-    }
-
-    @Override
-    public Widget cast() {
-        return (Widget) uiObject;
     }
 
 }

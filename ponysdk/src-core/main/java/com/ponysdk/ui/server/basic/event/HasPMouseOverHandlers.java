@@ -25,11 +25,11 @@ package com.ponysdk.ui.server.basic.event;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.PHandlerRegistration;
 
 public interface HasPMouseOverHandlers {
 
-    HandlerRegistration addMouseOverHandler(PMouseOverHandler handler);
+    PHandlerRegistration addMouseOverHandler(PMouseOverHandler handler);
 
     Collection<PMouseOverHandler> getMouseOverHandlers();
 }

@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTRichTextArea extends PTWidget {
+public class PTRichTextArea extends PTWidget<RichTextArea> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -39,46 +39,46 @@ public class PTRichTextArea extends PTWidget {
     public void update(final PTInstruction update, final UIService uiService) {
 
         if (update.containsKey(PROPERTY.HTML)) {
-            cast().setHTML(update.getString(PROPERTY.HTML));
+            uiObject.setHTML(update.getString(PROPERTY.HTML));
         } else if (update.containsKey(PROPERTY.CREATE_LINK)) {
-            cast().getFormatter().createLink(update.getString(PROPERTY.CREATE_LINK));
+            uiObject.getFormatter().createLink(update.getString(PROPERTY.CREATE_LINK));
         } else if (update.containsKey(PROPERTY.INSERT_HORIZONTAL_RULE)) {
-            cast().getFormatter().insertHorizontalRule();
+            uiObject.getFormatter().insertHorizontalRule();
         } else if (update.containsKey(PROPERTY.INSERT_HTML)) {
-            cast().getFormatter().insertHTML(update.getString(PROPERTY.INSERT_HTML));
+            uiObject.getFormatter().insertHTML(update.getString(PROPERTY.INSERT_HTML));
         } else if (update.containsKey(PROPERTY.IMAGE)) {
-            cast().getFormatter().insertImage(update.getString(PROPERTY.IMAGE));
+            uiObject.getFormatter().insertImage(update.getString(PROPERTY.IMAGE));
         } else if (update.containsKey(PROPERTY.ORDERED)) {
-            cast().getFormatter().insertOrderedList();
+            uiObject.getFormatter().insertOrderedList();
         } else if (update.containsKey(PROPERTY.UNORDERED)) {
-            cast().getFormatter().insertUnorderedList();
+            uiObject.getFormatter().insertUnorderedList();
         } else if (update.containsKey(PROPERTY.BACK_COLOR)) {
-            cast().getFormatter().setBackColor(update.getString(PROPERTY.BACK_COLOR));
+            uiObject.getFormatter().setBackColor(update.getString(PROPERTY.BACK_COLOR));
         } else if (update.containsKey(PROPERTY.FONT_NAME)) {
-            cast().getFormatter().setFontName(update.getString(PROPERTY.FONT_NAME));
+            uiObject.getFormatter().setFontName(update.getString(PROPERTY.FONT_NAME));
         } else if (update.containsKey(PROPERTY.FONT_SIZE)) {
             final FontSize fontSize = FontSize.valueOf(update.getString(PROPERTY.FONT_SIZE));
             switch (fontSize) {
                 case LARGE:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
                     break;
                 case SMALL:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
                     break;
                 case MEDIUM:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
                     break;
                 case X_LARGE:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
                     break;
                 case X_SMALL:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
                     break;
                 case XX_LARGE:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
                     break;
                 case XX_SMALL:
-                    cast().getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
+                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
                     break;
 
                 default:
@@ -89,11 +89,6 @@ public class PTRichTextArea extends PTWidget {
             super.update(update, uiService);
         }
 
-    }
-
-    @Override
-    public RichTextArea cast() {
-        return (RichTextArea) uiObject;
     }
 
     public enum FontSize {

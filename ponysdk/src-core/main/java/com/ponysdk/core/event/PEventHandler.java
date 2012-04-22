@@ -23,10 +23,5 @@
 
 package com.ponysdk.core.event;
 
-public abstract class SystemEvent<T extends EventHandler> extends Event<T> {
 
-    public SystemEvent(Object sourceComponent) {
-        super(sourceComponent);
-    }
-
-}
+public interface PEventHandler {}

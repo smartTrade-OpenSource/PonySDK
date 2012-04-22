@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.form.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface SubmitFormHandler extends EventHandler {
+public interface SubmitFormHandler extends PEventHandler {
 
     public void onSubmitForm(SubmitFormEvent event);
 }

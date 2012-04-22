@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTreeItem extends PTUIObject {
+public class PTTreeItem extends PTUIObject<TreeItem> {
 
     private boolean isRoot = false;
 
@@ -56,14 +56,14 @@ public class PTTreeItem extends PTUIObject {
             this.tree = (Tree) widget;
         } else {
             if (add.containsKey(PROPERTY.WIDGET)) {
-                cast().setWidget((Widget) widget);
+                uiObject.setWidget((Widget) widget);
             } else {
                 final TreeItem w = (TreeItem) widget;
                 final int index = add.getInt(PROPERTY.INDEX);
                 if (isRoot) {
                     tree.insertItem(index, w);
                 } else {
-                    cast().insertItem(index, w);
+                    uiObject.insertItem(index, w);
                 }
             }
         }
@@ -73,17 +73,12 @@ public class PTTreeItem extends PTUIObject {
     public void update(final PTInstruction update, final UIService uiService) {
 
         if (update.containsKey(PROPERTY.SELECTED)) {
-            cast().setSelected(update.getBoolean(PROPERTY.SELECTED));
+            uiObject.setSelected(update.getBoolean(PROPERTY.SELECTED));
         } else if (update.containsKey(PROPERTY.STATE)) {
-            cast().setState(update.getBoolean(PROPERTY.STATE));
+            uiObject.setState(update.getBoolean(PROPERTY.STATE));
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public TreeItem cast() {
-        return (TreeItem) uiObject;
     }
 
 }

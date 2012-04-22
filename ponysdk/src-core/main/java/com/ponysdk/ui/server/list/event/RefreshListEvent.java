@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PSystemEvent;
 import com.ponysdk.ui.server.form.FormField;
 
-public class RefreshListEvent extends SystemEvent<RefreshListHandler> {
+public class RefreshListEvent extends PSystemEvent<RefreshListHandler> {
 
     public static final Type<RefreshListHandler> TYPE = new Type<RefreshListHandler>();
 

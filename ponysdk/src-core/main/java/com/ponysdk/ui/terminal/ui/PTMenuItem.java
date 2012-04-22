@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTMenuItem extends PTUIObject {
+public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -42,18 +42,18 @@ public class PTMenuItem extends PTUIObject {
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
         final PTMenuBar child = (PTMenuBar) uiService.getPTObject(add.getObjectID());
-        cast().setSubMenu(child.cast());
+        uiObject.setSubMenu(child.uiObject);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
         if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.getString(PROPERTY.TEXT));
+            uiObject.setText(update.getString(PROPERTY.TEXT));
         } else if (update.containsKey(PROPERTY.HTML)) {
-            cast().setHTML(update.getString(PROPERTY.HTML));
+            uiObject.setHTML(update.getString(PROPERTY.HTML));
         } else if (update.containsKey(PROPERTY.ENABLED)) {
-            cast().setEnabled(update.getBoolean(PROPERTY.ENABLED));
+            uiObject.setEnabled(update.getBoolean(PROPERTY.ENABLED));
         } else {
             super.update(update, uiService);
         }
@@ -63,7 +63,7 @@ public class PTMenuItem extends PTUIObject {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
         if (HANDLER.COMMAND.equals(handler)) {
-            cast().setCommand(new Command() {
+            uiObject.setCommand(new Command() {
 
                 @Override
                 public void execute() {
@@ -80,8 +80,4 @@ public class PTMenuItem extends PTUIObject {
 
     }
 
-    @Override
-    public MenuItem cast() {
-        return (MenuItem) uiObject;
-    }
 }

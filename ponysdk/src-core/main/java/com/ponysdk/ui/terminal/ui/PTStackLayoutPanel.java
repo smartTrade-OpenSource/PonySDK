@@ -36,7 +36,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTStackLayoutPanel extends PTResizeComposite {
+public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -49,12 +49,10 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         super.add(add, uiService);
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final StackLayoutPanel stackLayoutPanel = cast();
-
         final String header = add.getString(PROPERTY.HTML);
         final double headerSize = add.getDouble(PROPERTY.SIZE);
 
-        stackLayoutPanel.add(w, header, true, headerSize);
+        uiObject.add(w, header, true, headerSize);
     }
 
     @Override
@@ -62,7 +60,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         final String handlerType = addHandler.getString(HANDLER.KEY);
 
         if (handlerType.equals(HANDLER.SELECTION_HANDLER)) {
-            final StackLayoutPanel stackLayoutPanel = cast();
+            final StackLayoutPanel stackLayoutPanel = uiObject;
             stackLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
@@ -79,7 +77,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
         }
 
         if (handlerType.equals(HANDLER.BEFORE_SELECTION_HANDLER)) {
-            cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+            uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
@@ -100,7 +98,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.OPEN)) {
-            cast().showWidget(asWidget(update.getLong(PROPERTY.OPEN), uiService));
+            uiObject.showWidget(asWidget(update.getLong(PROPERTY.OPEN), uiService));
         } else {
             super.update(update, uiService);
         }
@@ -108,12 +106,7 @@ public class PTStackLayoutPanel extends PTResizeComposite {
 
     @Override
     public void remove(final PTInstruction remove, final UIService uiService) {
-        final Widget w = asWidget(remove.getObjectID(), uiService);
-        cast().remove(w);
+        uiObject.remove(asWidget(remove.getObjectID(), uiService));
     }
 
-    @Override
-    public StackLayoutPanel cast() {
-        return (StackLayoutPanel) uiObject;
-    }
 }

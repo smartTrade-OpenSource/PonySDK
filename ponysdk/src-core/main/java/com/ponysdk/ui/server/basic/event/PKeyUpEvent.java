@@ -15,7 +15,7 @@ public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.Event.Type<PKeyUpHandler> getAssociatedType() {
+    public com.ponysdk.core.event.PEvent.Type<PKeyUpHandler> getAssociatedType() {
         return TYPE;
     }
 

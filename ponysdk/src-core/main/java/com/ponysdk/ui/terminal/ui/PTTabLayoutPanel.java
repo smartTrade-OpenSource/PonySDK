@@ -36,7 +36,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTabLayoutPanel extends PTResizeComposite {
+public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -47,14 +47,14 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final TabLayoutPanel tabPanel = cast();
+        final TabLayoutPanel tabPanel = uiObject;
 
         final int beforeIndex = add.getInt(PROPERTY.BEFORE_INDEX);
 
         if (add.containsKey(PROPERTY.TAB_TEXT)) {
             tabPanel.insert(w, add.getString(PROPERTY.TAB_TEXT), beforeIndex);
         } else if (add.containsKey(PROPERTY.TAB_WIDGET)) {
-            final PTWidget ptWidget = (PTWidget) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
     }
@@ -65,18 +65,18 @@ public class PTTabLayoutPanel extends PTResizeComposite {
         final String handler = addHandler.getString(HANDLER.KEY);
 
         if (HANDLER.SELECTION_HANDLER.equals(handler)) {
-            cast().addSelectionHandler(new SelectionHandler<Integer>() {
+            uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(PROPERTY.INDEX, cast().getSelectedIndex());
+                    eventInstruction.put(PROPERTY.INDEX, uiObject.getSelectedIndex());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
         } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handler)) {
-            cast().addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
+            uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
@@ -97,22 +97,18 @@ public class PTTabLayoutPanel extends PTResizeComposite {
     @Override
     public void remove(final PTInstruction remove, final UIService uiService) {
         final Widget w = asWidget(remove.getObjectID(), uiService);
-        cast().remove(w);
+        uiObject.remove(w);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.ANIMATION)) {
-            cast().animate(1);
+            uiObject.animate(1);
         } else if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
-            cast().selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
+            uiObject.selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
         } else {
             super.update(update, uiService);
         }
     }
 
-    @Override
-    public TabLayoutPanel cast() {
-        return (TabLayoutPanel) uiObject;
-    }
 }

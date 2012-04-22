@@ -161,4 +161,13 @@ public interface PonySDKTheme {
 
     String FORM_FORMFIELD_COMPONENT = "pony-Form-FormField-Component";
 
+    String MULTISELECTLISTBOX = "pony-MultiSelectListBox";
+    String MULTISELECTLISTBOX_FOCUS = "pony-MultiSelectListBox-Focus";
+    String MULTISELECTLISTBOX_VALUE_ITEM = "pony-MultiSelectListBox-ValueItem";
+    String MULTISELECTLISTBOX_VALUE_TEXT = "pony-MultiSelectListBox-ValueText";
+    String MULTISELECTLISTBOX_SELECTED_PANEL = "pony-MultiSelectListBox-SelectedPanel";
+    String MULTISELECTLISTBOX_SELECTED_ITEMS_PANEL = "pony-MultiSelectListBox-SelectedItemsPanel";
+    String MULTISELECTLISTBOX_POPUP_PANEL = "pony-MultiSelectListBox-PopupPanel";
+    String MULTISELECTLISTBOX_ITEMS_SELECTION_PANEL = "pony-MultiSelectListBox-ItemsSelectionPanel";
+
 }

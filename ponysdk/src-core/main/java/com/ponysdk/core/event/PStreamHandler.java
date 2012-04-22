@@ -23,7 +23,10 @@
 
 package com.ponysdk.core.event;
 
-public interface EventBusAware {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-    void setEventBus(EventBus eventBus);
+public interface PStreamHandler {
+
+    void onStream(HttpServletRequest request, HttpServletResponse response);
 }

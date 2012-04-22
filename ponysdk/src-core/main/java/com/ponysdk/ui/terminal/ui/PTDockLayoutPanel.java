@@ -28,60 +28,53 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTDockLayoutPanel extends PTComplexPanel {
+public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final Unit unit = Unit.values()[create.getInt(PROPERTY.UNIT)];
-        init(create, uiService, new DockLayoutPanel(unit));
+        init(create, uiService, new DockLayoutPanel(Unit.values()[create.getInt(PROPERTY.UNIT)]));
     }
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final DockLayoutPanel dockLayoutPanel = cast();
-
         final Direction direction = Direction.values()[add.getInt(PROPERTY.DIRECTION)];
         final double size = add.getDouble(PROPERTY.SIZE);
+
         switch (direction) {
             case CENTER: {
-                dockLayoutPanel.add(w);
+                uiObject.add(w);
                 break;
             }
             case NORTH: {
-                dockLayoutPanel.addNorth(w, size);
+                uiObject.addNorth(w, size);
                 break;
             }
             case SOUTH: {
-                dockLayoutPanel.addSouth(w, size);
+                uiObject.addSouth(w, size);
                 break;
             }
             case EAST: {
-                dockLayoutPanel.addEast(w, size);
+                uiObject.addEast(w, size);
                 break;
             }
             case WEST: {
-                dockLayoutPanel.addWest(w, size);
+                uiObject.addWest(w, size);
                 break;
             }
             case LINE_START: {
-                dockLayoutPanel.addLineStart(w, size);
+                uiObject.addLineStart(w, size);
                 break;
             }
             case LINE_END: {
-                dockLayoutPanel.addLineEnd(w, size);
+                uiObject.addLineEnd(w, size);
                 break;
             }
         }
-    }
-
-    @Override
-    public DockLayoutPanel cast() {
-        return (DockLayoutPanel) uiObject;
     }
 
 }

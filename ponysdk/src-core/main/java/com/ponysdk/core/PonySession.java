@@ -37,13 +37,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.BroadcastEventHandler;
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.Event.Type;
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventHandler;
-import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PBroadcastEventHandler;
+import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.PEvent.Type;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Close;
@@ -77,7 +77,7 @@ public class PonySession {
     private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
 
     // to do a weak reference ?
-    private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
+    private final Map<Long, PStreamHandler> streamListenerByID = new HashMap<Long, PStreamHandler>();
 
     private final List<Instruction> pendingInstructions = new ArrayList<Instruction>();
 
@@ -89,7 +89,7 @@ public class PonySession {
 
     private PlaceController placeController;
 
-    private EventBus rootEventBus;
+    private PEventBus rootEventBus;
 
     private PCookies cookies;
 
@@ -178,11 +178,11 @@ public class PonySession {
         return applicationSession.getHttpSession();
     }
 
-    public StreamHandler removeStreamListener(final Long streamID) {
+    public PStreamHandler removeStreamListener(final Long streamID) {
         return streamListenerByID.remove(streamID);
     }
 
-    public void stackStreamRequest(final StreamHandler streamListener) {
+    public void stackStreamRequest(final PStreamHandler streamListener) {
         final AddHandler addHandler = new AddHandler(0, HANDLER.STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
@@ -190,7 +190,7 @@ public class PonySession {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final long objectID) {
+    public void stackEmbededStreamRequest(final PStreamHandler streamListener, final long objectID) {
         final AddHandler addHandler = new AddHandler(objectID, HANDLER.EMBEDED_STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
@@ -206,7 +206,7 @@ public class PonySession {
         return placeController;
     }
 
-    private EventBus getEventBus() {
+    private PEventBus getEventBus() {
         return rootEventBus;
     }
 
@@ -222,7 +222,7 @@ public class PonySession {
         this.placeController = placeController;
     }
 
-    public void setRootEventBus(final EventBus eventBus) {
+    public void setRootEventBus(final PEventBus eventBus) {
         this.rootEventBus = eventBus;
     }
 
@@ -238,27 +238,27 @@ public class PonySession {
         currentSession.set(ponySession);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public static <H extends PEventHandler> PHandlerRegistration addHandler(final Type<H> type, final H handler) {
         return getCurrent().getEventBus().addHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public static <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
         return getCurrent().getEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static void fireEvent(final Event<?> event) {
+    public static void fireEvent(final PEvent<?> event) {
         getCurrent().getEventBus().fireEvent(event);
     }
 
-    public static void fireEventFromSource(final Event<?> event, final Object source) {
+    public static void fireEventFromSource(final PEvent<?> event, final Object source) {
         getCurrent().getEventBus().fireEventFromSource(event, source);
     }
 
-    public static void addHandler(final BroadcastEventHandler handler) {
+    public static void addHandler(final PBroadcastEventHandler handler) {
         getCurrent().getEventBus().addHandler(handler);
     }
 
-    public static EventBus getRootEventBus() {
+    public static PEventBus getRootEventBus() {
         return getCurrent().getEventBus();
     }
 

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.command.event.ServiceFailedEvent;
-import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.PEventBus;
 
 public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Command<T> {
 
@@ -40,7 +40,7 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
 
     private final Set<AsyncCallback<T>> callbacks = new HashSet<AsyncCallback<T>>();
 
-    private final EventBus eventBus;
+    private final PEventBus eventBus;
 
     private Throwable caught;
 
@@ -50,7 +50,7 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
         this(PonySession.getRootEventBus());
     }
 
-    public AbstractServiceCommand(final EventBus eventBus) {
+    public AbstractServiceCommand(final PEventBus eventBus) {
         this.eventBus = eventBus;
     }
 

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface PKeyPressHandler extends EventHandler {
+public interface PKeyPressHandler extends PEventHandler {
 
     void onKeyPress(int keyCode);
 }

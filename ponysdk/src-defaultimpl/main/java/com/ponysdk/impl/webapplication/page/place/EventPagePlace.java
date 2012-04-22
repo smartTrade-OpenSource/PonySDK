@@ -23,14 +23,14 @@
 
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.PEvent;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 
 public class EventPagePlace extends PagePlace {
 
-    private final Event<?> event;
+    private final PEvent<?> event;
 
-    public EventPagePlace(PageActivity activity, Event<?> event) {
+    public EventPagePlace(PageActivity activity, PEvent<?> event) {
         super(activity);
         this.event = event;
     }
@@ -40,7 +40,7 @@ public class EventPagePlace extends PagePlace {
         return pageActivity.getClass().getSimpleName() + "#" + event.getClass().getSimpleName();
     }
 
-    public Event<?> getEvent() {
+    public PEvent<?> getEvent() {
         return event;
     }
 

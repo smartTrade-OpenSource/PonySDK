@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTAbsolutePanel extends PTComplexPanel {
+public class PTAbsolutePanel extends PTComplexPanel<AbsolutePanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {

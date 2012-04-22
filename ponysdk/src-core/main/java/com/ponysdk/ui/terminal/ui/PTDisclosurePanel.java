@@ -34,7 +34,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTDisclosurePanel extends PTWidget {
+public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -54,7 +54,7 @@ public class PTDisclosurePanel extends PTWidget {
     }
 
     private void addHandlers(final PTInstruction create, final UIService uiService) {
-        cast().addCloseHandler(new CloseHandler<DisclosurePanel>() {
+        uiObject.addCloseHandler(new CloseHandler<DisclosurePanel>() {
 
             @Override
             public void onClose(final CloseEvent<DisclosurePanel> event) {
@@ -67,7 +67,7 @@ public class PTDisclosurePanel extends PTWidget {
             }
         });
 
-        cast().addOpenHandler(new OpenHandler<DisclosurePanel>() {
+        uiObject.addOpenHandler(new OpenHandler<DisclosurePanel>() {
 
             @Override
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
@@ -83,20 +83,16 @@ public class PTDisclosurePanel extends PTWidget {
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        cast().setContent(asWidget(add.getObjectID(), uiService));
+        uiObject.setContent(asWidget(add.getObjectID(), uiService));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.OPEN)) {
-            cast().setOpen(update.getBoolean(PROPERTY.OPEN));
+            uiObject.setOpen(update.getBoolean(PROPERTY.OPEN));
         } else {
             super.update(update, uiService);
         }
     }
 
-    @Override
-    public DisclosurePanel cast() {
-        return (DisclosurePanel) uiObject;
-    }
 }

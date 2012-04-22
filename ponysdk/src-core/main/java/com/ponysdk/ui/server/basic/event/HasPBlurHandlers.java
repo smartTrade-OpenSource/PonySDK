@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,8 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.server.basic.event;
 
-public class PTLabelBase<T> extends PTWidget {
+import com.ponysdk.core.event.PHandlerRegistration;
 
+public interface HasPBlurHandlers extends HasPHandlers {
+
+    PHandlerRegistration addBlurHandler(PBlurHandler handler);
 }

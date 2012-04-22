@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTLayoutPanel extends PTComplexPanel {
+public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {

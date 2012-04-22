@@ -61,6 +61,16 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     public void create(final PTInstruction create, final UIService uiService) {
         final boolean autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
 
+        init(create, uiService, createPopupPanel(autoHide));
+
+        addCloseHandler(create, uiService);
+
+        windowWidth = Window.getClientWidth();
+        clientLeft = Document.get().getBodyOffsetLeft();
+        clientTop = Document.get().getBodyOffsetTop();
+    }
+
+    protected PopupPanel createPopupPanel(final boolean autoHide) {
         final PopupPanel popup = new PopupPanel(autoHide) {
 
             @Override
@@ -70,18 +80,11 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 super.onPreviewNativeEvent(event);
             }
         };
-
-        init(create, uiService, popup);
-        addCloseHandler(create, uiService);
-
-        windowWidth = Window.getClientWidth();
-        clientLeft = Document.get().getBodyOffsetLeft();
-        clientTop = Document.get().getBodyOffsetTop();
+        return popup;
     }
 
     protected void addCloseHandler(final PTInstruction create, final UIService uiService) {
-        final com.google.gwt.user.client.ui.PopupPanel popupPanel = cast();
-        popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+        cast().addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
             public void onClose(final CloseEvent<PopupPanel> event) {

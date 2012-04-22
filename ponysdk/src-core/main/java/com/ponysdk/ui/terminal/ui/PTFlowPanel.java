@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTFlowPanel extends PTComplexPanel {
+public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {

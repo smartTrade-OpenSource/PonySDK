@@ -28,20 +28,15 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTButtonBase extends PTFocusWidget {
+public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.get(PROPERTY.TEXT).isString().stringValue());
+            uiObject.setText(update.get(PROPERTY.TEXT).isString().stringValue());
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public ButtonBase cast() {
-        return (ButtonBase) uiObject;
     }
 
 }

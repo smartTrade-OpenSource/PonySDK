@@ -21,8 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.server.basic.event;
 
-public class PTResizeComposite extends PTWidget {
+import com.ponysdk.core.event.PEventHandler;
 
+public interface PDragHandler extends PEventHandler {
+
+    void onDrag(PDragEvent event);
 }

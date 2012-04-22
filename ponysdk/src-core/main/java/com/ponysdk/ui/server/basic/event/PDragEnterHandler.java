@@ -21,9 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.core.event;
+package com.ponysdk.ui.server.basic.event;
 
-public interface BroadcastEventHandler {
+import com.ponysdk.core.event.PEventHandler;
 
-    public void onEvent(Event<?> event);
+public interface PDragEnterHandler extends PEventHandler {
+
+    void onDragEnter(PDragEnterEvent event);
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.form.renderer;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
 import com.ponysdk.ui.server.form.FormField;
@@ -48,6 +48,6 @@ public interface FormFieldRenderer {
 
     public void ensureDebugID(String id);
 
-    public <H extends EventHandler> void addDomHandler(final H handler, final PDomEvent.Type<H> type);
+    public <H extends PEventHandler> void addDomHandler(final H handler, final PDomEvent.Type<H> type);
 
 }

@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.command.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface ServiceFailedHandler extends EventHandler {
+public interface ServiceFailedHandler extends PEventHandler {
 
     public void onServiceFailed(ServiceFailedEvent event);
 }

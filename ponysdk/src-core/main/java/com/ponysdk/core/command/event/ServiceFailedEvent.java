@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.command.event;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.PBusinessEvent;
+import com.ponysdk.core.event.PEvent;
 
-public class ServiceFailedEvent extends BusinessEvent<ServiceFailedHandler> {
+public class ServiceFailedEvent extends PBusinessEvent<ServiceFailedHandler> {
 
-    public static final Event.Type<ServiceFailedHandler> TYPE = new Event.Type<ServiceFailedHandler>();
+    public static final PEvent.Type<ServiceFailedHandler> TYPE = new PEvent.Type<ServiceFailedHandler>();
 
     private final Throwable throwable;
 
@@ -47,7 +47,7 @@ public class ServiceFailedEvent extends BusinessEvent<ServiceFailedHandler> {
     }
 
     @Override
-    public Event.Type<ServiceFailedHandler> getAssociatedType() {
+    public PEvent.Type<ServiceFailedHandler> getAssociatedType() {
         return TYPE;
     }
 

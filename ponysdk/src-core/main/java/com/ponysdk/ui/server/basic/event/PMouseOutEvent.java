@@ -12,7 +12,7 @@ public class PMouseOutEvent extends PMouseEvent<PMouseOutHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.Event.Type<PMouseOutHandler> getAssociatedType() {
+    public com.ponysdk.core.event.PEvent.Type<PMouseOutHandler> getAssociatedType() {
         return TYPE;
     }
 

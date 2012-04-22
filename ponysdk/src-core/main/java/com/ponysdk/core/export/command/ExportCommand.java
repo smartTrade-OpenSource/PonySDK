@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.command.Command;
-import com.ponysdk.core.event.BusinessEvent.Level;
-import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.PBusinessEvent.Level;
+import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.event.DataExportedEvent;
@@ -38,7 +38,7 @@ public class ExportCommand<T> implements Command<String> {
 
     protected final ExportContext<T> exportContext;
 
-    private final EventBus eventBus;
+    private final PEventBus eventBus;
 
     private final static Logger log = LoggerFactory.getLogger(ExportCommand.class);
 
@@ -46,7 +46,7 @@ public class ExportCommand<T> implements Command<String> {
         this(exportContext, PonySession.getRootEventBus());
     }
 
-    public ExportCommand(final ExportContext<T> exportContext, final EventBus eventBus) {
+    public ExportCommand(final ExportContext<T> exportContext, final PEventBus eventBus) {
         this.exportContext = exportContext;
         this.eventBus = eventBus;
     }

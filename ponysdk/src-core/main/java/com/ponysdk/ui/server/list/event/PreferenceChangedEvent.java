@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PSystemEvent;
 
-public class PreferenceChangedEvent extends SystemEvent<PreferenceChangedHandler> {
+public class PreferenceChangedEvent extends PSystemEvent<PreferenceChangedHandler> {
 
     public static final Type<PreferenceChangedHandler> TYPE = new Type<PreferenceChangedHandler>();
 

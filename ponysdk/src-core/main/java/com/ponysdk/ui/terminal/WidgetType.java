@@ -72,5 +72,8 @@ public enum WidgetType {
     SUGGESTBOX,
     DECORATOR_PANEL,
     ELEMENT,
-    SCHEDULER;
+    SCHEDULER,
+    ATTACHED_POPUP_PABEL,
+    FOCUS_PANEL,
+    SCRIPT;
 }

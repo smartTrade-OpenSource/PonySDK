@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PSystemEvent;
 
-public class RowDeletedEvent extends SystemEvent<RowDeletedHandler> {
+public class RowDeletedEvent extends PSystemEvent<RowDeletedHandler> {
 
     public static final Type<RowDeletedHandler> TYPE = new Type<RowDeletedHandler>();
 

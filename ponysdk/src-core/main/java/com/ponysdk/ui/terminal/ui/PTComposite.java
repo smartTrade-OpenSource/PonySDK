@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public abstract class PTComposite extends PTWidget {
+public abstract class PTComposite extends PTWidget<Composite> {
 
     private UIService uiService;
     private PTInstruction create;
@@ -39,17 +39,12 @@ public abstract class PTComposite extends PTWidget {
         this.uiService = uiService;
     }
 
-    protected void initWidget(final PTWidget widget) {
+    protected void initWidget(final PTWidget<?> widget) {
         init(create, uiService, new MyComposite(widget.cast()));
     }
 
     protected void initWidget(final Widget widget) {
         init(create, uiService, new MyComposite(widget));
-    }
-
-    @Override
-    public Composite cast() {
-        return (Composite) super.cast();
     }
 
     class MyComposite extends Composite {

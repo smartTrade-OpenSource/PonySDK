@@ -33,25 +33,23 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTCellPanel extends PTComplexPanel {
+public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
-        final CellPanel cellPanel = cast();
 
         if (update.containsKey(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)];
             final Widget w = asWidget(update.getLong(PROPERTY.CELL), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
-                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
+                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
                     break;
                 case ALIGN_CENTER:
-                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_CENTER);
+                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_CENTER);
                     break;
                 case ALIGN_RIGHT:
-                    cellPanel.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_RIGHT);
+                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_RIGHT);
                     break;
                 default:
                     break;
@@ -61,29 +59,24 @@ public class PTCellPanel extends PTComplexPanel {
             final Widget w = asWidget(update.getLong(PROPERTY.CELL), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
-                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
+                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
                     break;
                 case ALIGN_MIDDLE:
-                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_MIDDLE);
+                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_MIDDLE);
                     break;
                 case ALIGN_BOTTOM:
-                    cellPanel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_BOTTOM);
+                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_BOTTOM);
                     break;
                 default:
                     break;
             }
         } else if (update.containsKey(PROPERTY.CELL_WIDTH)) {
-            cellPanel.setCellWidth(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_WIDTH).isString().stringValue());
+            uiObject.setCellWidth(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_WIDTH).isString().stringValue());
         } else if (update.containsKey(PROPERTY.CELL_HEIGHT)) {
-            cellPanel.setCellHeight(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_HEIGHT).isString().stringValue());
+            uiObject.setCellHeight(asWidget(update.getLong(PROPERTY.CELL), uiService), update.get(PROPERTY.CELL_HEIGHT).isString().stringValue());
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public CellPanel cast() {
-        return (CellPanel) uiObject;
     }
 
 }

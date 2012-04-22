@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,24 +21,8 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.basic.event;
 
-import java.io.Serializable;
-
-public class PonySessionContext implements Serializable {
-
-    private static final long serialVersionUID = 9221240689602616478L;
-
-    private long ID;
-
-    public PonySessionContext() {}
-
-    public long getID() {
-        return ID;
-    }
-
-    public void setID(final long ID) {
-        this.ID = ID;
-    }
+public interface HasPAllDragAndDropHandlers extends HasPDragEndHandlers, HasPDragEnterHandlers {
 
 }

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEventHandler;
 
-public interface PMouseOverHandler extends EventHandler {
+public interface PMouseOverHandler extends PEventHandler {
 
     void onMouseOver();
 }

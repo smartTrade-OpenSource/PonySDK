@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.event.PSystemEvent;
 import com.ponysdk.ui.server.list.ColumnDescriptorFieldHolder;
 
-public class CustomColumnDescriptorAddedEvent extends SystemEvent<CustomColumnDescriptorAddedHandler> {
+public class CustomColumnDescriptorAddedEvent extends PSystemEvent<CustomColumnDescriptorAddedHandler> {
 
     public static final Type<CustomColumnDescriptorAddedHandler> TYPE = new Type<CustomColumnDescriptorAddedHandler>();
 

@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTLabel extends PTLabelBase<String> {
+public class PTLabel extends PTWidget<Label> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -38,14 +38,9 @@ public class PTLabel extends PTLabelBase<String> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.getString(PROPERTY.TEXT));
+            uiObject.setText(update.getString(PROPERTY.TEXT));
         } else {
             super.update(update, uiService);
         }
-    }
-
-    @Override
-    public Label cast() {
-        return (Label) uiObject;
     }
 }

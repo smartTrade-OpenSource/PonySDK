@@ -38,7 +38,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTFileUpload extends PTWidget {
+public class PTFileUpload extends PTWidget<FormPanel> {
 
     private FormPanel wrappedFormPanel;
 
@@ -106,8 +106,4 @@ public class PTFileUpload extends PTWidget {
         }
     }
 
-    @Override
-    public FormPanel cast() {
-        return (FormPanel) uiObject;
-    }
 }

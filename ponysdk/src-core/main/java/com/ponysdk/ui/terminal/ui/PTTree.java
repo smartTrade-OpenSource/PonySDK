@@ -33,7 +33,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTTree extends PTWidget {
+public class PTTree extends PTWidget<Tree> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -47,7 +47,7 @@ public class PTTree extends PTWidget {
         final String handler = addHandler.getString(HANDLER.KEY);
 
         if (HANDLER.SELECTION_HANDLER.equals(handler)) {
-            cast().addSelectionHandler(new SelectionHandler<TreeItem>() {
+            uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
@@ -69,12 +69,7 @@ public class PTTree extends PTWidget {
 
     @Override
     public void remove(final PTInstruction remove, final UIService uiService) {
-        cast().remove(asWidget(remove.getObjectID(), uiService));
-    }
-
-    @Override
-    public Tree cast() {
-        return (Tree) uiObject;
+        uiObject.remove(asWidget(remove.getObjectID(), uiService));
     }
 
 }

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.xml.XMLExporter;
@@ -61,7 +61,7 @@ public class CSVExporter<T> implements Exporter<T> {
         }
 
         final StreamResource streamResource = new StreamResource();
-        streamResource.open(new StreamHandler() {
+        streamResource.open(new PStreamHandler() {
 
             @Override
             public void onStream(HttpServletRequest req, HttpServletResponse response) {

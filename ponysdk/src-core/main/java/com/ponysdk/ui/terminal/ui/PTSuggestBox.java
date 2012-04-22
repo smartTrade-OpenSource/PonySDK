@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.ui.terminal.ui;
 
@@ -15,7 +37,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTSuggestBox extends PTWidget {
+public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 
@@ -27,13 +49,13 @@ public class PTSuggestBox extends PTWidget {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.FOCUSED)) {
-            cast().setFocus(update.getBoolean(PROPERTY.FOCUSED));
+            uiObject.setFocus(update.getBoolean(PROPERTY.FOCUSED));
         } else if (update.containsKey(PROPERTY.TEXT)) {
-            cast().setText(update.getString(PROPERTY.TEXT));
+            uiObject.setText(update.getString(PROPERTY.TEXT));
         } else if (update.containsKey(PROPERTY.SUGGESTION)) {
             oracle.add(update.getString(PROPERTY.SUGGESTION));
         } else if (update.containsKey(PROPERTY.LIMIT)) {
-            cast().setLimit(update.getInt(PROPERTY.LIMIT));
+            uiObject.setLimit(update.getInt(PROPERTY.LIMIT));
         } else {
             super.update(update, uiService);
         }
@@ -45,7 +67,7 @@ public class PTSuggestBox extends PTWidget {
         final String handler = addHandler.getString(HANDLER.KEY);
 
         if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
-            cast().addValueChangeHandler(new ValueChangeHandler<String>() {
+            uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
@@ -58,7 +80,7 @@ public class PTSuggestBox extends PTWidget {
                 }
             });
         } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handler)) {
-            cast().addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+            uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
@@ -76,8 +98,4 @@ public class PTSuggestBox extends PTWidget {
         }
     }
 
-    @Override
-    public SuggestBox cast() {
-        return (SuggestBox) uiObject;
-    }
 }

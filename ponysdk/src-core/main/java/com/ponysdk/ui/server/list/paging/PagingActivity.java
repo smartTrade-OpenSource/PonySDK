@@ -24,13 +24,13 @@
 package com.ponysdk.ui.server.list.paging;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.list.paging.event.PagingSelectionChangeEvent;
 
-public class PagingActivity extends AbstractActivity implements EventBusAware {
+public class PagingActivity extends AbstractActivity implements PEventBusAware {
 
     private int pageSize = 20;
 
@@ -40,7 +40,7 @@ public class PagingActivity extends AbstractActivity implements EventBusAware {
 
     protected int activePageIndex;
 
-    private EventBus eventBus;
+    private PEventBus eventBus;
 
     public PagingActivity(PagingView pagingView) {
         this.pagingView = pagingView;
@@ -119,11 +119,11 @@ public class PagingActivity extends AbstractActivity implements EventBusAware {
     }
 
     @Override
-    public void setEventBus(EventBus eventBus) {
+    public void setEventBus(PEventBus eventBus) {
         this.eventBus = eventBus;
     }
 
-    public EventBus getEventBus() {
+    public PEventBus getEventBus() {
         return eventBus;
     }
 

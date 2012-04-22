@@ -62,57 +62,6 @@ public interface Dictionnary {
 
         public static final String KEY = "5";
 
-        public static final String ROOT_LAYOUT_PANEL = "0";
-        public static final String ROOT_PANEL = "1";
-        public static final String DOCK_LAYOUT_PANEL = "2";
-        public static final String ABSOLUTE_PANEL = "3";
-        public static final String SPLIT_LAYOUT_PANEL = "4";
-        public static final String SIMPLE_PANEL = "5";
-        public static final String TAB_PANEL = "6";
-        public static final String SCROLL_PANEL = "7";
-        public static final String FLOW_PANEL = "8";
-        public static final String VERTICAL_PANEL = "9";
-        public static final String HORIZONTAL_PANEL = "a";
-        public static final String BUTTON = "b";
-        public static final String LABEL = "c";
-        public static final String FLEX_TABLE = "d";
-        public static final String GRID = "e";
-        public static final String TREE = "f";
-        public static final String TREE_ITEM = "g";
-        public static final String COMPOSITE = "h";
-        public static final String DATEBOX = "i";
-        public static final String TEXTBOX = "j";
-        public static final String PASSWORD_TEXTBOX = "k";
-        public static final String LISTBOX = "l";
-        public static final String IMAGE = "m";
-        public static final String ANCHOR = "n";
-        public static final String CHECKBOX = "o";
-        public static final String MENU_BAR = "p";
-        public static final String MENU_ITEM = "q";
-        public static final String MENU_ITEM_SEPARATOR = "r";
-        public static final String TAB_LAYOUT_PANEL = "s";
-        public static final String LAYOUT_PANEL = "t";
-        public static final String SIMPLE_LAYOUT_PANEL = "u";
-        public static final String TIMER = "v";
-        public static final String STACKLAYOUT_PANEL = "w";
-        public static final String HTML = "x";
-        public static final String RADIO_BUTTON = "y";
-        public static final String TEXT_AREA = "z";
-        public static final String POPUP_PANEL = "A";
-        public static final String CELLLIST = "B";
-        public static final String COOKIE = "C";
-        public static final String FILE_UPLOAD = "D";
-        public static final String PUSH_BUTTON = "E";
-        public static final String ADDON = "F";
-        public static final String RICH_TEXT_AREA = "G";
-        public static final String DISCLOSURE_PANEL = "H";
-        public static final String DECORATED_POPUP_PANEL = "I";
-        public static final String DIALOG_BOX = "J";
-        public static final String SUGGESTBOX = "K";
-        public static final String DECORATOR_PANEL = "L";
-        public static final String ELEMENT = "M";
-        public static final String SCHEDULER = "N";
-
     }
 
     public interface PROPERTY {
@@ -273,6 +222,11 @@ public interface Dictionnary {
         public static final String START = "001";
         public static final String COMMAND_ID = "002";
         public static final String STOP = "003";
+        public static final String EVAL = "004";
+        public static final String RESULT = "005";
+        public static final String ERROR_MSG = "006";
+        public static final String SCROLL_TO = "007";
+        public static final String REPAINT = "008";
         public static final String OBJECT_ID = "#";
         public static final String PARENT_ID = "##";
 

@@ -23,19 +23,19 @@
 
 package com.ponysdk.impl.webapplication.page.event;
 
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.event.PageDisplayedEvent.PageDisplayHandler;
 
-public class PageDisplayedEvent extends Event<PageDisplayHandler> {
+public class PageDisplayedEvent extends PEvent<PageDisplayHandler> {
 
-    public interface PageDisplayHandler extends EventHandler {
+    public interface PageDisplayHandler extends PEventHandler {
 
         public void onPageDisplayed(PageDisplayedEvent event);
     }
 
-    public static final Event.Type<PageDisplayHandler> TYPE = new Event.Type<PageDisplayHandler>();
+    public static final PEvent.Type<PageDisplayHandler> TYPE = new PEvent.Type<PageDisplayHandler>();
 
     private final PageActivity page;
 
@@ -50,7 +50,7 @@ public class PageDisplayedEvent extends Event<PageDisplayHandler> {
     }
 
     @Override
-    public Event.Type<PageDisplayHandler> getAssociatedType() {
+    public PEvent.Type<PageDisplayHandler> getAssociatedType() {
         return TYPE;
     }
 
