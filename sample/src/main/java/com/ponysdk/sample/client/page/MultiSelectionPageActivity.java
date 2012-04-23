@@ -39,15 +39,11 @@ public class MultiSelectionPageActivity extends SamplePageActivity {
 
         final PMultiSelectListBox listViewActivity = new PMultiSelectListBox();
 
-        listViewActivity.addItem("zoubozu");
-        listViewActivity.addItem("zoubodsqdqzu");
-        listViewActivity.addItem("zoubdqsdozu");
-        listViewActivity.addItem("zodqsdqsubozu");
-        listViewActivity.addItem("dsqkdhq dqsjdhqskjh");
-        listViewActivity.addItem("dqsdqszoubozu");
-        listViewActivity.addItem("dqsdqszoubozu");
-        listViewActivity.addItem("dqsdqs  zoubozu");
-        listViewActivity.addItem("zodqsdqsddqsqsdubozu");
+        listViewActivity.addItem("Friesian horse");
+        listViewActivity.addItem("Altai horseBengin");
+        listViewActivity.addItem("Altai horse");
+        listViewActivity.addItem("American Warmblood");
+        listViewActivity.addItem("Falabella");
 
         final PSimplePanel panel = new PSimplePanel();
 
