@@ -33,6 +33,7 @@ import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
@@ -94,9 +95,10 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, PEventBusA
             listBox.addChangeHandler(new PChangeHandler() {
 
                 @Override
-                public void onChange(final Object source, final int selectedIndex) {
-                    if (listBox.getItem(selectedIndex).isEmpty()) return;
-                    fireComparatorTypeChange(pojoPropertyKey, ComparatorType.fromName(listBox.getItem(selectedIndex)));
+                public void onChange(final PChangeEvent event) {
+                    final String selectedItem = listBox.getSelectedItem();
+                    if (selectedItem == null) return;
+                    fireComparatorTypeChange(pojoPropertyKey, ComparatorType.fromName(selectedItem));
                 }
             });
 

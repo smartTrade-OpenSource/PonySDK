@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -33,6 +34,7 @@ import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.form.FormField;
@@ -227,13 +229,14 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
     }
 
     @Override
-    public void onChange(final Object source, final int selectedIndex) {
+    public void onChange(final PChangeEvent event) {
 
         // Propagate to all listbox first
         for (final FormFieldComponent<PListBox> field : fields) {
             final PListBox listBox = field.getInput();
-            if (!listBox.equals(source)) { // avoid call again the selected value update
-                listBox.setSelectedIndex(selectedIndex);
+            if (!listBox.equals(event.getSource())) { // avoid call again the selected value update
+                final PListBox source = (PListBox) event.getSource();
+                listBox.setSelectedIndex(source.getSelectedIndex());
             }
         }
 

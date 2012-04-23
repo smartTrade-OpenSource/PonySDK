@@ -31,6 +31,7 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -82,8 +83,8 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         styleListBox.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
-                final String styleName = styleListBox.getItem(selectedIndex);
+            public void onChange(final PChangeEvent event) {
+                final String styleName = styleListBox.getSelectedItem();
 
                 normalButton.setStyleName(styleName);
                 disabledOnRequestButton.setStyleName(styleName);

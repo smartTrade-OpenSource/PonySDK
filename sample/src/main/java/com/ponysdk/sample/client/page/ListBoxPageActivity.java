@@ -28,6 +28,7 @@ import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -54,14 +55,14 @@ public class ListBoxPageActivity extends SamplePageActivity {
         listBoxApplied.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
+            public void onChange(final PChangeEvent event) {
                 PNotificationManager.showTrayNotification("Item selected : " + listBoxApplied.getSelectedItem());
             }
         });
 
         fillSports(listBoxApplied);
 
-        PCheckBox checkBox = new PCheckBox("Enable multi-selection");
+        final PCheckBox checkBox = new PCheckBox("Enable multi-selection");
         checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
 
             @Override
@@ -73,10 +74,10 @@ public class ListBoxPageActivity extends SamplePageActivity {
         listBoxCategory.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
+            public void onChange(final PChangeEvent event) {
                 listBoxApplied.clear();
 
-                if (listBoxCategory.getItem(selectedIndex).equals("Sports")) {
+                if ("Sports".equals(listBoxCategory.getSelectedItem())) {
                     fillSports(listBoxApplied);
                 } else {
                     fillPony(listBoxApplied);

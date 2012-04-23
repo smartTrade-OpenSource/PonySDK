@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -63,7 +64,7 @@ public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
 
     protected void fireChangeHandler(final String item) {
         for (final PChangeHandler handler : handlers) {
-            handler.onChange(this, -1);
+            handler.onChange(new PChangeEvent(this));
         }
 
     }

@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,8 +21,26 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.basic.event;
 
-public enum DomHandlerType {
-    CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP, MOUSE_OUT, FOCUS, BLUR, DRAG_ENTER, DRAG_END, CHANGE_HANDLER;
+import com.ponysdk.ui.terminal.DomHandlerType;
+
+public class PChangeEvent extends PDomEvent<PChangeHandler> {
+
+    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<PChangeHandler>(DomHandlerType.CHANGE_HANDLER);
+
+    public PChangeEvent(final Object sourceComponent) {
+        super(sourceComponent);
+    }
+
+    @Override
+    public PDomEvent.Type<PChangeHandler> getAssociatedType() {
+        return TYPE;
+    }
+
+    @Override
+    protected void dispatch(final PChangeHandler handler) {
+        handler.onChange(this);
+    }
+
 }

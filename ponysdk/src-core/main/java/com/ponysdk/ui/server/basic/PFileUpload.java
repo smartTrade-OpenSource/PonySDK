@@ -36,6 +36,7 @@ import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -70,7 +71,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
             if (fileName != null) {
                 setFileName(fileName);
             }
-            onChange(this, 0);
+            onChange(new PChangeEvent(this));
         } else if (HANDLER.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
             onSubmitComplete();
         } else {
@@ -138,9 +139,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void onChange(final Object source, final int selectedIndex) {
+    public void onChange(final PChangeEvent event) {
         for (final PChangeHandler handler : changeHandlers) {
-            handler.onChange(source, selectedIndex);
+            handler.onChange(event);
         }
     }
 

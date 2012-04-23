@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -75,12 +76,12 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
         this(null);
     }
 
-    public TwinListBoxFormFieldRenderer(String caption) {
+    public TwinListBoxFormFieldRenderer(final String caption) {
         this.caption = caption;
     }
 
     @Override
-    public IsPWidget render(FormField formField) {
+    public IsPWidget render(final FormField formField) {
         selected = new PListBox(true, true);
         unselected = new PListBox(true, true);
         final PHorizontalPanel panel = new PHorizontalPanel();
@@ -101,7 +102,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
         switchButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent clickEvent) {
+            public void onClick(final PClickEvent clickEvent) {
                 selectValues.clear();
                 for (int i = 1; i < unselected.getItemCount(); i++) {
                     if (unselected.isItemSelected(i)) {
@@ -133,7 +134,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public void addErrorMessage(String errorMessage) {
+    public void addErrorMessage(final String errorMessage) {
         formFieldComponent.addErrorMessage(errorMessage);
     }
 
@@ -165,7 +166,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
         addItem(item, item);
     }
 
-    public void addItem(final String item, Object hiddenValue) {
+    public void addItem(final String item, final Object hiddenValue) {
         unselected.addItem(item);
         items.add(item);
         hiddenValueByItems.put(item, hiddenValue);
@@ -173,7 +174,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         unselected.setEnabled(enabled);
         selected.setEnabled(enabled);
@@ -199,7 +200,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
         }
     }
 
-    public void setSelectedItem(final String text, boolean selected) {
+    public void setSelectedItem(final String text, final boolean selected) {
 
         final Object selectedValue = hiddenValueByItems.get(text);
         if (selectedValue != null) {
@@ -225,7 +226,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
         setSelectedItem(text, true);
     }
 
-    public void setSelectedValue(final Object value, boolean selected) {
+    public void setSelectedValue(final Object value, final boolean selected) {
         final String item = itemsByHiddenValue.get(value);
         setSelectedItem(item, selected);
     }
@@ -235,7 +236,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public void addChangeHandler(PChangeHandler handler) {
+    public void addChangeHandler(final PChangeHandler handler) {
         changeHandlers.add(handler);
     }
 
@@ -256,19 +257,19 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public void onChange(Object source, int selectedIndex) {
+    public void onChange(final PChangeEvent source) {
         for (final PChangeHandler changeHandler : changeHandlers) {
-            changeHandler.onChange(source, selectedIndex);
+            changeHandler.onChange(source);
         }
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         setSelectedValue(value);
     }
 
     @Override
-    public void ensureDebugID(String id) {
+    public void ensureDebugID(final String id) {
         this.debugID = id;
         if (selected == null) return;
         onEnsureDebugID();
@@ -281,7 +282,7 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     }
 
     @Override
-    public <H extends PEventHandler> void addDomHandler(H handler, Type<H> type) {
+    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
         selected.addDomHandler(handler, type);
         unselected.addDomHandler(handler, type);
     }

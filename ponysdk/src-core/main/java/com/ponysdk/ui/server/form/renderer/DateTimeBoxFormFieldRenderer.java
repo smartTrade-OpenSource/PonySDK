@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
@@ -130,7 +131,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         hours.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
+            public void onChange(final PChangeEvent event) {
                 if (calendar != null) {
                     calendar.set(Calendar.HOUR_OF_DAY, (Integer) hours.getSelectedValue());
                 }
@@ -139,7 +140,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         minutes.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
+            public void onChange(final PChangeEvent event) {
                 if (calendar != null) {
                     calendar.set(Calendar.MINUTE, (Integer) minutes.getSelectedValue());
                 }
@@ -148,7 +149,7 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         seconds.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onChange(final Object source, final int selectedIndex) {
+            public void onChange(final PChangeEvent event) {
                 if (calendar != null) {
                     calendar.set(Calendar.SECOND, (Integer) seconds.getSelectedValue());
                 }

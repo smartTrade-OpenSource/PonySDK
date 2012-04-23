@@ -23,7 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-public interface PChangeHandler {
+import com.ponysdk.core.event.PEventHandler;
 
-    void onChange(Object source, int selectedIndex);
+public interface PChangeHandler extends PEventHandler {
+
+    void onChange(PChangeEvent event);
 }

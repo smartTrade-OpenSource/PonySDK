@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -69,15 +70,15 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
         this(null, true, false);
     }
 
-    public PTwinListBox(String caption) {
+    public PTwinListBox(final String caption) {
         this(caption, true, false);
     }
 
-    public PTwinListBox(String caption, boolean containsEmptyItem) {
+    public PTwinListBox(final String caption, final boolean containsEmptyItem) {
         this(caption, containsEmptyItem, false);
     }
 
-    public PTwinListBox(String caption, boolean containsEmptyItem, boolean multiButton) {
+    public PTwinListBox(final String caption, final boolean containsEmptyItem, final boolean multiButton) {
         this.caption = caption;
         this.multiButton = multiButton;
         init(containsEmptyItem);
@@ -101,7 +102,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
             switchButton.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     selectValues.clear();
                     int start = 0;
                     if (containsEmptyItem) {
@@ -128,7 +129,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
             selectButton.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     int start = 0;
                     if (containsEmptyItem) {
                         start++;
@@ -146,7 +147,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
             unselectButton.addClickHandler(new PClickHandler() {
 
                 @Override
-                public void onClick(PClickEvent clickEvent) {
+                public void onClick(final PClickEvent clickEvent) {
                     int start = 0;
                     if (containsEmptyItem) {
                         start++;
@@ -183,14 +184,14 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
         items.add(item);
     }
 
-    public void addItem(final String item, Object hiddenValue) {
+    public void addItem(final String item, final Object hiddenValue) {
         unselectedListBox.addItem(item);
         items.add(item);
         hiddenValueByItems.put(item, hiddenValue);
         itemsByHiddenValue.put(hiddenValue, item);
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         unselectedListBox.setEnabled(enabled);
         selectedListBox.setEnabled(enabled);
@@ -220,7 +221,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
         }
     }
 
-    public void setSelectedItem(final String text, boolean selected) {
+    public void setSelectedItem(final String text, final boolean selected) {
 
         final Object selectedValue = hiddenValueByItems.get(text);
         if (selectedValue != null) {
@@ -246,7 +247,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
         setSelectedItem(text, true);
     }
 
-    public void setSelectedValue(final Object value, boolean selected) {
+    public void setSelectedValue(final Object value, final boolean selected) {
         final String item = itemsByHiddenValue.get(value);
         setSelectedItem(item, selected);
     }
@@ -256,7 +257,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
     }
 
     @Override
-    public void addChangeHandler(PChangeHandler handler) {
+    public void addChangeHandler(final PChangeHandler handler) {
         changeHandlers.add(handler);
     }
 
@@ -276,13 +277,13 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
     }
 
     @Override
-    public void onChange(Object source, int selectedIndex) {
+    public void onChange(final PChangeEvent event) {
         for (final PChangeHandler changeHandler : changeHandlers) {
-            changeHandler.onChange(source, selectedIndex);
+            changeHandler.onChange(event);
         }
     }
 
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         setSelectedValue(value);
     }
 

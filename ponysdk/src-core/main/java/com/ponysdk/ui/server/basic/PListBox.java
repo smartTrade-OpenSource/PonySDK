@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
@@ -48,7 +49,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private List<Integer> selectedItems = new ArrayList<Integer>();
 
-    private int selectedIndex = -1;
+    protected int selectedIndex = -1;
 
     private boolean isMultipleSelect;
 
@@ -83,16 +84,16 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (instruction.getString(HANDLER.KEY).contains(HANDLER.CHANGE_HANDLER)) {
             final String data = instruction.getString(PROPERTY.VALUE);
             final String[] tokens = data.split(",");
-            Integer selectedItemIndex = null;
             final List<Integer> selectedItems = new ArrayList<Integer>();
+
+            selectedIndex = Integer.parseInt(tokens[0]);
+
             for (final String index : tokens) {
-                if (selectedItemIndex == null) {
-                    selectedItemIndex = Integer.valueOf(index);
-                    selectedItems.add(selectedItemIndex);
-                } else selectedItems.add(Integer.valueOf(index));
+                selectedItems.add(Integer.valueOf(index));
             }
             syncSelectedItems(selectedItems);
-            onChange(this, selectedItemIndex);
+
+            onChange(new PChangeEvent(PListBox.this));
         } else {
             super.onEventInstruction(instruction);
         }
@@ -290,10 +291,9 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    public void onChange(final Object source, final int selectedIndex) {
-        this.selectedIndex = selectedIndex;
+    public void onChange(final PChangeEvent event) {
         for (final PChangeHandler handler : handlers) {
-            handler.onChange(source, selectedIndex);
+            handler.onChange(event);
         }
     }
 
