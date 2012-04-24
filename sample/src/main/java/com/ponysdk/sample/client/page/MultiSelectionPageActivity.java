@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.select.PMultiSelectListBox;
 
@@ -34,7 +33,7 @@ public class MultiSelectionPageActivity extends SamplePageActivity {
     }
 
     @Override
-    protected void onShowPage(final Place place) {
+    protected void onFirstShowPage() {
         super.onFirstShowPage();
 
         final PMultiSelectListBox listViewActivity = new PMultiSelectListBox();

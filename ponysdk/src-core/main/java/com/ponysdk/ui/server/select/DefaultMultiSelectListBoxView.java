@@ -21,7 +21,7 @@ import com.ponysdk.ui.server.basic.event.PFocusHandler;
 
 public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMultiSelectListBoxView, PFocusHandler, PBlurHandler {
 
-    private static final String OPENNED = "images/disclosure_openned.png";
+    private final PImage button = new PImage("images/disclosure_openned.png", 0, 0, 14, 14);
 
     private final PFlowPanel panel = new PFlowPanel();
 
@@ -35,6 +35,8 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
 
     private final PAttachedPopupPanel attachedPopup;
 
+    private final PImage cursor = new PImage("images/caret.gif");
+
     DefaultMultiSelectListBoxView() {
         setStyleName(PonySDKTheme.MULTISELECTLISTBOX);
 
@@ -43,13 +45,13 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
         panel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SELECTED_PANEL);
         selectedItemsPabel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SELECTED_ITEMS_PANEL);
         itemsSelectionPanel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_ITEMS_SELECTION_PANEL);
+        button.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SHOW_SELECTION_PANEL_BUTTON);
+        cursor.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_CARET);
 
         addFocusHandler(this);
         addBlurHandler(this);
 
         panel.add(selectedItemsPabel);
-
-        final PImage button = new PImage(OPENNED, 0, 0, 14, 14);
 
         panel.add(button);
 
@@ -67,6 +69,7 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
         });
 
         attachedPopup.setWidget(itemsSelectionPanel);
+
     }
 
     @Override
@@ -118,11 +121,22 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
 
     @Override
     public void onBlur(final PBlurEvent event) {
-        removeStyleName("test");
+        if (cursor.getParent() != null) cursor.removeFromParent();
     }
 
     @Override
     public void onFocus(final PFocusEvent event) {
-        addStyleName("test");
+        System.err.println("focus");
+        if (cursor.getParent() == null) selectedItemsPabel.add(cursor);
+    }
+
+    @Override
+    public void focusSelectedItem(final String item) {
+        buttonByItem.get(item).addStyleName("toto");
+    }
+
+    @Override
+    public void blurSelectedItem(final String item) {
+        buttonByItem.get(item).removeStyleName("toto");
     }
 }

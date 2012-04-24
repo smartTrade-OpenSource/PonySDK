@@ -169,5 +169,7 @@ public interface PonySDKTheme {
     String MULTISELECTLISTBOX_SELECTED_ITEMS_PANEL = "pony-MultiSelectListBox-SelectedItemsPanel";
     String MULTISELECTLISTBOX_POPUP_PANEL = "pony-MultiSelectListBox-PopupPanel";
     String MULTISELECTLISTBOX_ITEMS_SELECTION_PANEL = "pony-MultiSelectListBox-ItemsSelectionPanel";
+    String MULTISELECTLISTBOX_SHOW_SELECTION_PANEL_BUTTON = "pony-MultiSelectListBox-ShowSelectionPanelButton";
+    String MULTISELECTLISTBOX_CARET = "pony-MultiSelectListBox-Caret";
 
 }

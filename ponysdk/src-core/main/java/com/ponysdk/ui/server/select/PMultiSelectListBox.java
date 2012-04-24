@@ -1,10 +1,12 @@
 
 package com.ponysdk.ui.server.select;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,12 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PKeyCode;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PBlurEvent;
+import com.ponysdk.ui.server.basic.event.PBlurHandler;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PFocusEvent;
+import com.ponysdk.ui.server.basic.event.PFocusHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
 public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
 
@@ -27,18 +35,69 @@ public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
 
     private final PMultiSelectListBoxView multiSelectListBoxView;
 
-    private final Set<String> items = new HashSet<String>();
+    private final List<String> items = new ArrayList<String>();
 
-    private final Set<String> selectedItems = new HashSet<String>();
+    private final List<String> selectedItems = new ArrayList<String>();
 
-    private final Set<String> unSelectedItems = new HashSet<String>();
+    private final List<String> unSelectedItems = new ArrayList<String>();
 
     private final Map<String, PClickHandler> selectedItemClickHandler = new HashMap<String, PClickHandler>();
 
     private final Map<String, PClickHandler> shownItemClickHandler = new HashMap<String, PClickHandler>();
 
+    private Integer selectedItem;
+
     public PMultiSelectListBox() {
-        this.multiSelectListBoxView = new DefaultMultiSelectListBoxView();
+        multiSelectListBoxView = new DefaultMultiSelectListBoxView();
+        multiSelectListBoxView.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCode.BACKSPACE, PKeyCode.LEFT, PKeyCode.RIGHT) {
+
+            @Override
+            public void onKeyUp(final int keyCode) {
+                if (selectedItems.isEmpty()) return;
+
+                if (PKeyCode.BACKSPACE.equals(keyCode)) {
+                    if (selectedItem == null) return;
+                    multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));
+                    if (selectedItem > 0) {
+                        selectedItem--;
+                        multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
+                    }
+                    unSelectItem(selectedItems.get(selectedItem));
+                } else if (PKeyCode.LEFT.equals(keyCode)) {
+                    if (selectedItem == null) {
+                        selectedItem = selectedItems.size() - 1;
+                        multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
+                    } else if (selectedItem > 0) {
+                        multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));
+                        selectedItem--;
+                        multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
+                    }
+                } else if (PKeyCode.RIGHT.equals(keyCode)) {
+                    if (selectedItem == null) return;
+                    if (selectedItem < selectedItems.size() - 1) {
+                        multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));
+                        selectedItem++;
+                        multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
+                    }
+                }
+            }
+        });
+
+        multiSelectListBoxView.addFocusHandler(new PFocusHandler() {
+
+            @Override
+            public void onFocus(final PFocusEvent event) {
+
+            }
+        });
+        multiSelectListBoxView.addBlurHandler(new PBlurHandler() {
+
+            @Override
+            public void onBlur(final PBlurEvent event) {
+                if (selectedItem != null) multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));
+                selectedItem = null;
+            }
+        });
     }
 
     public void addItem(final String item) {
