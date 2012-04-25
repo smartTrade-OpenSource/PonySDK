@@ -143,6 +143,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
             getPonySession().stackInstruction(update);
         }
 
@@ -151,6 +152,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
             getPonySession().stackInstruction(update);
         }
 
@@ -159,6 +161,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, align.ordinal());
+            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
             getPonySession().stackInstruction(update);
         }
 
@@ -167,6 +170,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
+            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
             getPonySession().stackInstruction(update);
         }
     }

@@ -3,12 +3,20 @@
 // Override variables
 // -------------------------
 
-@header:			#498BF4;
-@headerTextColor:	#EDEDED;
-@footer:			@header;
-@footerTextColor:	@headerTextColor;
+@black:				color(`(window.colors!=undefined && window.colors.black!=undefined)? window.colors.black : "#000"`);
+@grayDarker:		color(`(window.colors!=undefined && window.colors.grayDarker!=undefined)? window.colors.grayDarker : "#222"`);
+@grayDark:			color(`(window.colors!=undefined && window.colors.grayDark!=undefined)? window.colors.grayDark : "#333"`);
+@gray:				color(`(window.colors!=undefined && window.colors.gray!=undefined)? window.colors.gray : "#555"`);
+@grayLight:			color(`(window.colors!=undefined && window.colors.grayLight!=undefined)? window.colors.grayLight : "#999"`);
+@grayLighter:		color(`(window.colors!=undefined && window.colors.grayLighter!=undefined)? window.colors.grayLighter : "#eee"`);
+@white:				color(`(window.colors!=undefined && window.colors.white!=undefined)? window.colors.white : "#fff"`);
 
+@highlight:			color(`(window.colors!=undefined && window.colors.highlight!=undefined)? window.colors.highlight : "#498BF4"`);
 
+@header: 			color(`(window.colors!=undefined && window.colors.header!=undefined)? window.colors.header : "#498BF4"`);
+@headerTextColor:	color(`(window.colors!=undefined && window.colors.headerTextColor!=undefined)? window.colors.headerTextColor : "#EDEDED"`);
+@footer:			color(`(window.colors!=undefined && window.colors.footer!=undefined)? window.colors.footer : "#498BF4"`);
+@footerTextColor:	color(`(window.colors!=undefined && window.colors.footerTextColor!=undefined)? window.colors.footerTextColor : "#EDEDED"`);
 
 // Custom style
 // -------------------------
