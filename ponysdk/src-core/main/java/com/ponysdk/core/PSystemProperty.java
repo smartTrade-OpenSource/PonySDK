@@ -7,5 +7,6 @@ public interface PSystemProperty {
     String APPLICATION_DESCRIPTION = "pony.application.description";
     String CONTEXT_CONFIG_LOCATION = "pony.application.configuration.file";
     String STYLESHEETS = "pony.application.stylesheets";
+    String JAVASCRIPTS = "pony.application.javascripts";
 
 }

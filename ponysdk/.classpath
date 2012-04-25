@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="libs/jasper/jasperreports-3.5.1.jar"/>
 	<classpathentry kind="lib" path="libs/hibernate/hibernate-core-3.6.7.Final.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-web-3.0.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="libs/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/json-20090211.jar"/>
+	<classpathentry kind="lib" path="libs/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
