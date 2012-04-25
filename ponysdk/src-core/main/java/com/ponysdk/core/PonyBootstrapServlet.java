@@ -54,6 +54,7 @@ public class PonyBootstrapServlet extends HttpServlet {
     private String applicationName;
 
     private final List<String> stylesheets = new ArrayList<String>();
+    private final List<String> javascripts = new ArrayList<String>();
 
     @Override
     public void init() throws ServletException {
@@ -64,6 +65,10 @@ public class PonyBootstrapServlet extends HttpServlet {
         final String styles = System.getProperty(PSystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             stylesheets.addAll(Arrays.asList(styles.trim().split(";")));
+        }
+        final String scripts = System.getProperty(PSystemProperty.JAVASCRIPTS);
+        if (scripts != null && !scripts.isEmpty()) {
+            javascripts.addAll(Arrays.asList(scripts.trim().split(";")));
         }
     }
 
@@ -163,6 +168,10 @@ public class PonyBootstrapServlet extends HttpServlet {
             final String contentType = new MimetypesFileTypeMap().getContentType(style);
             if (!contentType.equals("text/css")) builder.append("    <link rel=\"stylesheet/less\" type=\"" + contentType + "\" href=\"" + style + "\">");
             else builder.append("    <link rel=\"stylesheet\" type=\"" + contentType + "\" href=\"" + style + "\">");
+        }
+
+        for (final String script : javascripts) {
+            builder.append("    <script type=\"text/javascript\" src=\"" + script + "\"></script>");
         }
         builder.append("    <script src=\"script/less.js\" type=\"text/javascript\"></script>");
         builder.append("</head>");

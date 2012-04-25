@@ -177,21 +177,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                     PTObject ptObject;
-                    // if (create.getAddOnSignature() != null) {
-                    // final AddonFactory addonFactory = addonByKey.get(create.getAddOnSignature());
-                    // if (addonFactory == null) { throw new
-                    // Exception("UIBuilder: AddOn factory not found for signature: " +
-                    // create.getAddOnSignature() + ", available: " + addonByKey.keySet()); }
-                    //
-                    // ptObject = addonFactory.newAddon();
-                    // if (ptObject == null) { throw new
-                    // Exception("UIBuilder: Failed to instanciate an Addon of type: " +
-                    // create.getAddOnSignature()); }
-                    // ptObject.create(instruction, this);
-                    // } else {
-                    ptObject = uiFactory.newUIObject(this, instruction);
-                    ptObject.create(instruction, this);
-                    // }
+                    final boolean isAddon = instruction.containsKey("addOnSignature");  
+                    if (isAddon) {
+                    	final String addOnSignature = instruction.getString("addOnSignature");
+                        final AddonFactory addonFactory = addonByKey.get(addOnSignature);
+                        if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
+
+                        ptObject = addonFactory.newAddon();
+                        if (ptObject == null) { throw new Exception("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
+                        ptObject.create(instruction, this);
+                    } else {
+                        ptObject = uiFactory.newUIObject(this, instruction);
+                        ptObject.create(instruction, this);
+                    }
 
                     objectByID.put(instruction.getObjectID(), ptObject);
                     // }
