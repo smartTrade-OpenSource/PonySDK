@@ -47,9 +47,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     protected void init(final WidgetType widgetType) {
-
         this.textBox = new PTextBox();
-
         super.init(widgetType);
     }
 

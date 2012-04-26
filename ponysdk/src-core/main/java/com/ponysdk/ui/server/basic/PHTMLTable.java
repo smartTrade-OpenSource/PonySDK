@@ -95,6 +95,7 @@ public abstract class PHTMLTable extends PPanel {
             if (styles.add(styleName)) {
                 final Update update = new Update(ID);
                 update.put(PROPERTY.ROW, row);
+                update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
                 getPonySession().stackInstruction(update);
             }
@@ -108,6 +109,7 @@ public abstract class PHTMLTable extends PPanel {
             if (styles.remove(styleName)) {
                 final Update update = new Update(ID);
                 update.put(PROPERTY.ROW, row);
+                update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 getPonySession().stackInstruction(update);
             }

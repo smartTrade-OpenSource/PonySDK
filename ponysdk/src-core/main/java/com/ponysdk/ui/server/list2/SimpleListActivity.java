@@ -171,15 +171,19 @@ public class SimpleListActivity<T> extends AbstractActivity implements HasPData<
 
     @Override
     public void setRowData(final int start, final List<T> data) {
+        // int rowIndex = 1;
+        // for (final T t : data) {
+        // int col = 0;
+        // for (final DataGridColumnDescriptor<T, ?> field : listFields) {
+        // view.addWidget(field.renderCell(rowIndex, t), col++, rowIndex);
+        // }
+        // view.addWidget(new PSimplePanel(), col, rowIndex);// Why ?
+        // view.addRowStyle(rowIndex, PonySDKTheme.SIMPLELIST_ROW);
+        // rowIndex++;
+        // }
         int rowIndex = 1;
         for (final T t : data) {
-            int col = 0;
-            for (final DataGridColumnDescriptor<T, ?> field : listFields) {
-                view.addWidget(field.renderCell(rowIndex, t), col++, rowIndex);
-            }
-            view.addWidget(new PSimplePanel(), col, rowIndex);// Why ?
-            view.addRowStyle(rowIndex, PonySDKTheme.SIMPLELIST_ROW);
-            rowIndex++;
+            insertData(rowIndex++, t);
         }
     }
 
