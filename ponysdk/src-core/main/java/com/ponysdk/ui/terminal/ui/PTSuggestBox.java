@@ -43,16 +43,13 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new SuggestBox(oracle));
+        final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getLong(PROPERTY.TEXTBOX_ID));
+        init(create, uiService, new SuggestBox(oracle, ptTextBox.cast()));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.FOCUSED)) {
-            uiObject.setFocus(update.getBoolean(PROPERTY.FOCUSED));
-        } else if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.SUGGESTION)) {
+        if (update.containsKey(PROPERTY.SUGGESTION)) {
             oracle.add(update.getString(PROPERTY.SUGGESTION));
         } else if (update.containsKey(PROPERTY.LIMIT)) {
             uiObject.setLimit(update.getInt(PROPERTY.LIMIT));
