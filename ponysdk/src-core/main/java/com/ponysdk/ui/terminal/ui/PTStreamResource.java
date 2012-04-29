@@ -27,7 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
@@ -45,7 +45,7 @@ public class PTStreamResource extends AbstractPTObject {
         frame.setHeight("0px");
         frame.getElement().getStyle().setProperty("visibility", "hidden");
         frame.getElement().getStyle().setProperty("position", "fixed");
-        RootLayoutPanel.get().add(frame);
+        RootPanel.get().add(frame);
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
