@@ -298,7 +298,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        stackUpdate(PROPERTY.CLEAR_ROW, Integer.toString(row));
+        stackUpdate(PROPERTY.CLEAR_ROW, row);
 
     }
 
@@ -314,7 +314,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        stackUpdate(PROPERTY.INSERT_ROW, Integer.toString(row));
+        stackUpdate(PROPERTY.INSERT_ROW, row);
     }
 
     @Override

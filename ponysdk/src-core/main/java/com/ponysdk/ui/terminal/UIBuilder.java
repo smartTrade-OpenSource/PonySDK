@@ -133,11 +133,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
     public void update(final List<PTInstruction> instructions) {
         updateMode = true;
+        PTInstruction currentInstruction = null;
         try {
-
             log.info("UPDATING UI with " + instructions.size() + " instructions");
 
             for (final PTInstruction instruction : instructions) {
+                currentInstruction = instruction;
                 final String type = instruction.getString(TYPE.KEY);
 
                 if (TYPE.CLOSE.equals(type)) {
@@ -261,7 +262,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 }
             }
         } catch (final Throwable e) {
-            Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage());
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvents();
