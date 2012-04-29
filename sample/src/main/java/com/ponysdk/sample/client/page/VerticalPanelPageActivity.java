@@ -36,7 +36,7 @@ public class VerticalPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = new PVerticalPanel();
         panel.setSpacing(10);
 
         panel.add(new PButton("Button 1"));
