@@ -52,7 +52,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -86,7 +85,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
     private int numberOfrequestInProgress;
-    private Frame frame;
+
     private boolean updateMode;
     private boolean pendingClose;
 
@@ -106,7 +105,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     public void init() {
-
         loadingMessageBox = new SimplePanel();
 
         communicationErrorMessagePanel = new PopupPanel(false, true);
@@ -120,14 +118,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
         loadingMessageBox.getElement().setInnerText("Loading ...");
 
-        /* Frame for stream resource handling */
-        frame = new Frame();
-
-        frame.setWidth("0px");
-        frame.setHeight("0px");
-        frame.getElement().getStyle().setProperty("visibility", "hidden");
-        frame.getElement().getStyle().setProperty("position", "fixed");
-
         // hide loading component
         final Widget w = RootPanel.get("loading");
         if (w == null) {
@@ -137,7 +127,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             w.setVisible(false);
         }
 
-        RootPanel.get().add(frame);
     }
 
     public void update(final List<PTInstruction> instructions) {
@@ -179,7 +168,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     PTObject ptObject;
                     final boolean isAddon = instruction.containsKey("addOnSignature");  
                     if (isAddon) {
-                    	final String addOnSignature = instruction.getString("addOnSignature");
+                        final String addOnSignature = instruction.getString("addOnSignature");
                         final AddonFactory addonFactory = addonByKey.get(addOnSignature);
                         if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
 
@@ -206,16 +195,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
                     // + addHandler.getProterty());
-
-                    // if (HANDLER.STREAM_REQUEST_HANDLER.getCode().equals(addHandler.getType())) {
-                    // frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" +
-                    // UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" +
-                    // addHandler.getProterty().getValue());
-                    // } else {
                     final PTObject uiObject = objectByID.get(instruction.getObjectID());
                     uiObject.addHandler(instruction, this);
-                    // }
-
                 } else if (TYPE.REMOVE_HANDLER.equals(type)) {
                     // log.info("AddHandler: " + instruction.getType() + ", " + instruction.getObjectID() +
                     // ", " + instruction.getProterty());
