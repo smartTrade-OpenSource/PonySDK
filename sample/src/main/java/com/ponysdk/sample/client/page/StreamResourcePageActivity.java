@@ -62,7 +62,7 @@ public class StreamResourcePageActivity extends PageActivity {
     protected void onFirstShowPage() {
         verticalPanel = new PVerticalPanel();
 
-        final PButton downloadImageButton = new PButton("Downlaod Pony image");
+        final PButton downloadImageButton = new PButton("Download Pony image");
 
         downloadImageButton.addClickHandler(new PClickHandler() {
 

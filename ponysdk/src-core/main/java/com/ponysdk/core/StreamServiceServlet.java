@@ -61,7 +61,7 @@ public class StreamServiceServlet extends HttpServlet {
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
             final PonySession ponySession = ponyApplicationSession.getPonySession(ponySessionID);
 
- final PStreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
+            final PStreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

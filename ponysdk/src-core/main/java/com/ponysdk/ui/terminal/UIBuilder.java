@@ -65,10 +65,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
+import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
@@ -166,7 +168,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                     PTObject ptObject;
-                    final boolean isAddon = instruction.containsKey("addOnSignature");  
+                    final boolean isAddon = instruction.containsKey("addOnSignature");
                     if (isAddon) {
                         final String addOnSignature = instruction.getString("addOnSignature");
                         final AddonFactory addonFactory = addonByKey.get(addOnSignature);
@@ -195,8 +197,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
                     // + addHandler.getProterty());
-                    final PTObject uiObject = objectByID.get(instruction.getObjectID());
-                    uiObject.addHandler(instruction, this);
+                    final String handler = instruction.getString(HANDLER.KEY);
+                    if (HANDLER.STREAM_REQUEST_HANDLER.equals(handler)) {
+                        new PTStreamResource().addHandler(instruction, this);
+                    } else {
+                        final PTObject uiObject = objectByID.get(instruction.getObjectID());
+                        uiObject.addHandler(instruction, this);
+                    }
                 } else if (TYPE.REMOVE_HANDLER.equals(type)) {
                     // log.info("AddHandler: " + instruction.getType() + ", " + instruction.getObjectID() +
                     // ", " + instruction.getProterty());
