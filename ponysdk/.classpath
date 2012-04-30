@@ -8,6 +8,8 @@
 	<classpathentry kind="src" path="src-jasper/main/java"/>
 	<classpathentry kind="src" path="src-jetty/main/java"/>
 	<classpathentry kind="src" path="src-spring/main/java"/>
+	<classpathentry kind="src" path="src-persistency/main/java"/>
+	<classpathentry kind="src" path="src-mongodb/main/java"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev-2.4.0.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.4.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -20,5 +22,8 @@
 	<classpathentry kind="lib" path="libs/spring/spring-web-3.0.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/json-20090211.jar"/>
 	<classpathentry kind="lib" path="libs/logging/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="libs/json_jackson/jackson-core-2.0.1.jar"/>
+	<classpathentry kind="lib" path="libs/json_jackson/jackson-databind-2.0.1.jar"/>
+	<classpathentry kind="lib" path="libs/mongodb/mongo-java-driver-2.7.3.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

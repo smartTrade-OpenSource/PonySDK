@@ -31,17 +31,19 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DAO {
+import com.ponysdk.persistency.DAO;
 
-    private static final Logger log = LoggerFactory.getLogger(DAO.class);
+public class HibernateDAO implements DAO {
+
+    private static final Logger log = LoggerFactory.getLogger(HibernateDAO.class);
 
     protected SessionFactory sessionFactory;
 
-    public DAO(SessionFactory sessionFactory) {
+    public HibernateDAO(final SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-    public Serializable save(Object object) {
+    public Serializable save(final Object object) {
         try {
             return sessionFactory.getCurrentSession().save(object);
         } catch (final RuntimeException e) {
@@ -50,7 +52,8 @@ public class DAO {
         }
     }
 
-    public void saveOrUpdate(Object object) {
+    @Override
+    public void saveOrUpdate(final Object object) {
         try {
             sessionFactory.getCurrentSession().saveOrUpdate(object);
         } catch (final RuntimeException e) {
@@ -59,7 +62,7 @@ public class DAO {
         }
     }
 
-    public void merge(Object object) {
+    public void merge(final Object object) {
         try {
             sessionFactory.getCurrentSession().merge(object);
         } catch (final RuntimeException e) {
@@ -68,7 +71,8 @@ public class DAO {
         }
     }
 
-    public void delete(Object object) {
+    @Override
+    public void delete(final Object object) {
         try {
             sessionFactory.getCurrentSession().delete(object);
         } catch (final RuntimeException e) {
@@ -81,39 +85,42 @@ public class DAO {
         sessionFactory.getCurrentSession().flush();
     }
 
-    public void evict(Object object) {
+    public void evict(final Object object) {
         sessionFactory.getCurrentSession().evict(object);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> findAll(Class<T> _class) {
+    public <T> List<T> findAll(final Class<T> _class) {
         final Criteria criteria = createCriteria(_class);
         return criteria.list();
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> findAll(Class<T> _class, int maxResults, int firstResult) {
+    public <T> List<T> findAll(final Class<T> _class, final int maxResults, final int firstResult) {
         final Criteria criteria = createCriteria(_class);
         return criteria.setMaxResults(maxResults).setFirstResult(firstResult).list();
     }
 
+    @Override
     public void beginTransaction() {
         sessionFactory.getCurrentSession().beginTransaction();
     }
 
+    @Override
     public void commit() {
         sessionFactory.getCurrentSession().getTransaction().commit();
     }
 
+    @Override
     public void rollback() {
         sessionFactory.getCurrentSession().getTransaction().rollback();
     }
 
-    public Criteria createCriteria(Class<?> persistentClass) {
+    public Criteria createCriteria(final Class<?> persistentClass) {
         return sessionFactory.getCurrentSession().createCriteria(persistentClass);
     }
 
-    public Criteria createCriteria(Class<?> pojoName, String alias) {
+    public Criteria createCriteria(final Class<?> pojoName, final String alias) {
         return sessionFactory.getCurrentSession().createCriteria(pojoName, alias);
     }
 

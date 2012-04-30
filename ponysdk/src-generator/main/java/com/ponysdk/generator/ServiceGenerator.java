@@ -68,7 +68,7 @@ public class ServiceGenerator extends BaseGenerator {
             final Method updateMethod = createCRUDMethod("update" + domain.getName(), crudParameter, crudReturn);
             final Method deleteMethod = createCRUDMethod("delete" + domain.getName(), crudIDParameter, new Return());
 
-            // Create the implementation class of these CRUD methods if the DAO is set
+            // Create the implementation class of these CRUD methods if the HibernateDAO is set
             if (domain.getService().getDao() != null) {
                 final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServerServicePackage(domain), GeneratorHelper.getServiceImplClassName(domain));
                 classWriter.addImplements(GeneratorHelper.getServiceClassName(domain));
@@ -78,7 +78,7 @@ public class ServiceGenerator extends BaseGenerator {
                 // Add static logger
                 classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getServiceImplClassName(domain) + ".class);");
 
-                // Add service DAO object
+                // Add service HibernateDAO object
                 final Parameter daoParameter = new Parameter();
                 daoParameter.setClazz(GeneratorHelper.getDAOPackage(domain) + "." + GeneratorHelper.getDAOClassName(domain));
                 daoParameter.setName(GeneratorHelper.getFirstCharToLower(GeneratorHelper.getDAOClassName(domain)));
@@ -208,7 +208,7 @@ public class ServiceGenerator extends BaseGenerator {
                 if (dao.getDaoLayer() == DaoLayer.HIBERNATE) {
                     generateDAO(dao);
                 } else {
-                    System.err.println(dao.getDaoLayer() + " DAO generation ignored for class" + domain.getService().getDao().getClazz() + ". Only " + DaoLayer.HIBERNATE + " is supported");
+                    System.err.println(dao.getDaoLayer() + " HibernateDAO generation ignored for class" + domain.getService().getDao().getClazz() + ". Only " + DaoLayer.HIBERNATE + " is supported");
                 }
             }
         }
@@ -217,13 +217,13 @@ public class ServiceGenerator extends BaseGenerator {
     }
 
     /*
-     * Services : DAO
+     * Services : HibernateDAO
      */
 
     private void generateDAO(final Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
-        classWriter.addExtend("com.ponysdk.hibernate.dao.DAO");
+        classWriter.addExtend("com.ponysdk.hibernate.dao.HibernateDAO");
 
         // Add static logger
         classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");
