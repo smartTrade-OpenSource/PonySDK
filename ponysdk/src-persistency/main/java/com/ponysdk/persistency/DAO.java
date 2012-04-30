@@ -23,7 +23,13 @@
 
 package com.ponysdk.persistency;
 
+import java.util.List;
+
 public interface DAO {
+
+    public abstract <T> List<T> find(final Object query);
+
+    public abstract Object save(Object o);
 
     public abstract void saveOrUpdate(Object o);
 
@@ -34,4 +40,5 @@ public interface DAO {
     public abstract void commit();
 
     public abstract void beginTransaction();
+
 }

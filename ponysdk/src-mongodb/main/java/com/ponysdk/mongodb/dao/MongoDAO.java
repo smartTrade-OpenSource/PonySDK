@@ -21,18 +21,20 @@
  * the License.
  */
 
-package com.ponysdk.mongodb;
+package com.ponysdk.mongodb.dao;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.types.ObjectId;
-import org.mortbay.util.ajax.JSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
+import com.mongodb.util.JSON;
 import com.ponysdk.persistency.DAO;
 import com.ponysdk.persistency.Identifiable;
 
@@ -42,6 +44,12 @@ public class MongoDAO implements DAO {
     protected DB db;
 
     public MongoDAO() {}
+
+    @Override
+    public Object save(final Object o) {
+        saveOrUpdate(o);
+        return null;
+    }
 
     @Override
     public void saveOrUpdate(final Object o) {
@@ -85,4 +93,8 @@ public class MongoDAO implements DAO {
         this.db = mongo.getDB("mydb");
     }
 
+    @Override
+    public <T> List<T> find(final Object query) {
+        return new ArrayList<T>();
+    }
 }

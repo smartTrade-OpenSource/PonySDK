@@ -24,6 +24,7 @@
 package com.ponysdk.hibernate.dao;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -43,6 +44,7 @@ public class HibernateDAO implements DAO {
         this.sessionFactory = sessionFactory;
     }
 
+    @Override
     public Serializable save(final Object object) {
         try {
             return sessionFactory.getCurrentSession().save(object);
@@ -130,6 +132,11 @@ public class HibernateDAO implements DAO {
 
     public SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+
+    @Override
+    public <T> List<T> find(final Object query) {
+        return new ArrayList<T>();
     }
 
 }

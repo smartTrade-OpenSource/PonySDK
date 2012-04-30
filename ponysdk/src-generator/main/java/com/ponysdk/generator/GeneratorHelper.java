@@ -96,14 +96,7 @@ public class GeneratorHelper {
 
     // HibernateDAO
     public static String getDAOClassName(final Domain domain) {
-        switch (domain.getService().getDao().getDaoLayer()) {
-            case HIBERNATE:
-                return domain.getName() + "HibernateDAO";
-            case MONGODB:
-                return domain.getName() + "MongoDAO";
-        }
-        return null;
-
+        return domain.getName() + "DAO";
     }
 
     // Business event extend
