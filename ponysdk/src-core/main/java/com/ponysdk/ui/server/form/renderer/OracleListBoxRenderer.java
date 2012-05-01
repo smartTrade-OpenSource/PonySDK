@@ -37,13 +37,13 @@ import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.addon.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.Focusable;
 import com.ponysdk.ui.server.basic.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
@@ -177,7 +177,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
 
         @Override
         public void onKeyUp(final int keyCode) {
-            final PKeyCode code = PKeyCode.fromInt(keyCode);
+            final PKeyCodes code = PKeyCodes.fromInt(keyCode);
 
             if (code == null) {
                 currentSelected = -1;

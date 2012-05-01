@@ -21,22 +21,28 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.ui;
+package com.ponysdk.ui.server.basic;
 
-import com.google.gwt.user.client.ui.DecoratorPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public class PTDecoratedPanel extends PTSimplePanel {
+public class PAttachedPopupPanel extends PPopupPanel {
 
-    @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new DecoratorPanel());
+    public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
+        super(autoHide);
+        create.put(PROPERTY.WIDGET, attached.getID());
     }
 
     @Override
-    public DecoratorPanel cast() {
-        return (DecoratorPanel) uiObject;
+    protected WidgetType getWidgetType() {
+        return WidgetType.ATTACHED_POPUP_PABEL;
+    }
+
+    public void repaint() {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.REPAINT, "");
+        getPonySession().stackInstruction(update);
     }
 
 }

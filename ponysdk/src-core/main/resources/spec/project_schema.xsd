@@ -159,6 +159,7 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="memory" />
             <xs:enumeration value="hibernate" />
+            <xs:enumeration value="mongodb" />
             <xs:enumeration value="mybatis" />
         </xs:restriction>
     </xs:simpleType>

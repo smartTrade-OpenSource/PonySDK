@@ -24,8 +24,8 @@
 package com.ponysdk.impl.webapplication.notification;
 
 import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.ui.server.addon.PNotificationManager;
-import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
+import com.ponysdk.ui.server.basic.PNotificationManager;
+import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
 
 public class LogsPopupPanel {
 

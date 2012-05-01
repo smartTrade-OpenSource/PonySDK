@@ -27,27 +27,30 @@ import java.util.Iterator;
 
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 
+/**
+ * Abstract base class for all panels, which are widgets that can contain other widgets.
+ */
 public abstract class PPanel extends PWidget implements HasPWidgets {
 
     @Override
     public abstract boolean remove(PWidget child);
 
     @Override
-    public void add(PWidget child) {
+    public void add(final PWidget child) {
         throw new UnsupportedOperationException("This panel does not support no-arg add()");
     }
 
     @Override
-    public void add(IsPWidget w) {
+    public void add(final IsPWidget w) {
         add(w.asWidget());
     }
 
-    protected final void adopt(PWidget child) {
+    protected final void adopt(final PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
     }
 
-    protected final void orphan(PWidget child) {
+    protected final void orphan(final PWidget child) {
         assert (child.getParent() == this);
         child.setParent(null);
     }

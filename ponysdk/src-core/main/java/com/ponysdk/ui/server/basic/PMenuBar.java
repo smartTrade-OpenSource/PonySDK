@@ -31,6 +31,71 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can either fire
+ * a {@link PCommand} or open a cascaded menu bar.
+ * <p>
+ * <img class='gallery' src='doc-files/PMenuBar.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-MenuBar</dt>
+ * <dd>the menu bar itself</dd>
+ * <dt>.gwt-MenuBar-horizontal</dt>
+ * <dd>dependent style applied to horizontal menu bars</dd>
+ * <dt>.gwt-MenuBar-vertical</dt>
+ * <dd>dependent style applied to vertical menu bars</dd>
+ * <dt>.gwt-MenuBar .gwt-MenuItem</dt>
+ * <dd>menu items</dd>
+ * <dt>.gwt-MenuBar .gwt-MenuItem-selected</dt>
+ * <dd>selected menu items</dd>
+ * <dt>.gwt-MenuBar .gwt-MenuItemSeparator</dt>
+ * <dd>section breaks between menu items</dd>
+ * <dt>.gwt-MenuBar .gwt-MenuItemSeparator .menuSeparatorInner</dt>
+ * <dd>inner component of section separators</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopLeft</dt>
+ * <dd>the top left cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopLeftInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopCenter</dt>
+ * <dd>the top center cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopCenterInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopRight</dt>
+ * <dd>the top right cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupTopRightInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleLeft</dt>
+ * <dd>the middle left cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleLeftInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleCenter</dt>
+ * <dd>the middle center cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleCenterInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleRight</dt>
+ * <dd>the middle right cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupMiddleRightInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomLeft</dt>
+ * <dd>the bottom left cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomLeftInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomCenter</dt>
+ * <dd>the bottom center cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomCenterInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomRight</dt>
+ * <dd>the bottom right cell</dd>
+ * <dt>.gwt-MenuBarPopup .menuPopupBottomRightInner</dt>
+ * <dd>the inner element of the cell</dd>
+ * </dl>
+ * <p>
+ * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute (which
+ * defaults to false), and may have only MenuItem elements as children. MenuItems may contain HTML and
+ * MenuBars.
+ * </p>
+ */
 public class PMenuBar extends PWidget {
 
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
@@ -45,7 +110,7 @@ public class PMenuBar extends PWidget {
     public PMenuBar(final boolean vertical) {
         super();
         this.vertical = vertical;
-        addStyleName(PonySDKTheme.MENUBAR);
+        addStyleName(PonySDKTheme.MENUBAR); // TODO nciaravola must be moved terminal side
         create.put(PROPERTY.MENU_BAR_IS_VERTICAL, vertical);
     }
 

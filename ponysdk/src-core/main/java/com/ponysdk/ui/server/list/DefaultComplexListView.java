@@ -24,10 +24,10 @@
 package com.ponysdk.ui.server.list;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.addon.PFloatablePanel;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PFloatablePanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;

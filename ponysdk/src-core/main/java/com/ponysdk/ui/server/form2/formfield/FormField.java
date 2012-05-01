@@ -23,23 +23,17 @@
 
 package com.ponysdk.ui.server.form2.formfield;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ponysdk.ui.server.basic.HasPValue;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.server.form2.dataconverter.DataConverter;
 import com.ponysdk.ui.server.form2.validator.FieldValidator;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
-public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
+public abstract class FormField<T> implements IsPWidget {
 
     private final Set<FormFieldListener> listeners = new HashSet<FormFieldListener>();
-
-    private final Set<PValueChangeHandler<T>> handlers = new HashSet<PValueChangeHandler<T>>();
 
     private FieldValidator validator;
 
@@ -62,21 +56,6 @@ public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
 
     public void setValidator(final FieldValidator validator) {
         this.validator = validator;
-    }
-
-    @Override
-    public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        handlers.add(handler);
-    }
-
-    @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<T> handler) {
-        handlers.remove(handler);
-    }
-
-    @Override
-    public Collection<PValueChangeHandler<T>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
     }
 
     public void addFormFieldListener(final FormFieldListener listener) {
@@ -103,5 +82,9 @@ public abstract class FormField<T> implements HasPValue<T>, IsPWidget {
     protected abstract String getStringValue();
 
     protected abstract void reset0();
+
+    public abstract T getValue();
+
+    public abstract void setValue(T value);
 
 }

@@ -25,12 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.event.PBusinessEvent.Level;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.addon.PNotificationManager;
-import com.ponysdk.ui.server.addon.PNotificationManager.Notification;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 

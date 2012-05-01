@@ -268,8 +268,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                             } else {
                                 uiService.triggerEvent(eventInstruction);
                             }
-
-                            event.stopPropagation();// temp
                         }
                     }, KeyUpEvent.getType());
                 }

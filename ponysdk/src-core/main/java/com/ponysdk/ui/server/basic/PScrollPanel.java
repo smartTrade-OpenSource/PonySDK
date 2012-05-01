@@ -27,6 +27,9 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A simple panel that wraps its contents in a scrollable area.
+ */
 public class PScrollPanel extends PSimplePanel {
 
     @Override

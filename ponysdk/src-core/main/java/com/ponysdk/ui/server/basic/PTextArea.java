@@ -27,6 +27,17 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A text box that allows multiple lines of text to be entered.
+ * <p>
+ * <img class='gallery' src='doc-files/PTextArea.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-TextArea { primary style }</li>
+ * <li>.gwt-TextArea-readonly { dependent style set when the text area is read-only }</li>
+ * </ul>
+ */
 public class PTextArea extends PTextBoxBase {
 
     private int visibleLines = 5;

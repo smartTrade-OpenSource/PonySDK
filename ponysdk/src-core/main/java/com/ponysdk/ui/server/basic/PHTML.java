@@ -28,6 +28,18 @@ import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt; element, causing it to be
+ * displayed with block layout.
+ * <p>
+ * If you only need a simple label (text, but not HTML), then the {@link PLabel} widget is more appropriate,
+ * as it disallows the use of HTML, which can lead to potential security issues if not used properly.
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-HTML { }</li>
+ * </ul>
+ */
 public class PHTML extends PLabel implements PHasHTML {
 
     private String html;

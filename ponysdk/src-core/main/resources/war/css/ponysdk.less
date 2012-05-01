@@ -4,7 +4,7 @@
 
 @black:				#000;
 @grayDarker:		#222;
-@grayDark:			 #333;
+@grayDark:			#333;
 @gray:				#555;
 @grayLight:			#999;
 @grayLighter:		#eee;
@@ -162,8 +162,15 @@ a, a:visited {
 }
 
 input, select {
+    border: 1px solid @grayLight;
 	margin: 0px 2px;
-	padding: 5px 4px;
+	padding: 6px 4px;
+	background: @white;
+	color: @black;
+	
+	&[disabled] {
+		background: @grayLighter;
+	}
 }
 
 // Menubar
@@ -675,7 +682,7 @@ td.datePickerMonth {
 	.buttoncolor(#fae7e9, #b73948, #f16c7c, #bf404f);
 }
 
- .green {
+.green {
 	.buttoncolor(#e8f0de, #538312, #7db72f, #4e7d0e);
 }
  
@@ -959,7 +966,8 @@ td.datePickerMonth {
 	border: 2px solid @grayLighter;
 	line-height: 1.8em;
 	font-weight: bold;
-	width: 99%;
+	width: 100%;
+	.box-sizing(border-box);
 }
 
 .pony-LoginPage-PasswordTextBox {
@@ -968,8 +976,9 @@ td.datePickerMonth {
 	border: 2px solid @grayLighter;
 	line-height: 1.8em;
 	font-weight: bold;
-	width: 99%;
+	width: 100%;
 	margin-bottom: 0.8em;
+	.box-sizing(border-box);
 }
 
 .pony-LoginPage-SubmitButton {}

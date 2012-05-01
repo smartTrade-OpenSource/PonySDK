@@ -227,8 +227,10 @@ public interface Dictionnary {
         public static final String ERROR_MSG = "006";
         public static final String SCROLL_TO = "007";
         public static final String REPAINT = "008";
+        public static final String TEXTBOX_ID = "009";
         public static final String OBJECT_ID = "#";
         public static final String PARENT_ID = "##";
+        public static final String CLEAR_INNER_TEXT = "010";
 
     }
 

@@ -25,6 +25,9 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A single column list of cells.
+ */
 public class PCellList extends PWidget {
 
     @Override

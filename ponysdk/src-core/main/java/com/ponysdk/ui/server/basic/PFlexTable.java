@@ -27,9 +27,17 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A flexible table that creates cells on demand. It can be jagged (that is, each row can contain a different
+ * number of cells) and individual cells can be set to span multiple rows or columns.
+ * <p>
+ * <img class='gallery' src='doc-files/PFlexTable.png'/>
+ * </p>
+ */
 public class PFlexTable extends PHTMLTable {
 
     public PFlexTable() {
+        // TODO nciaravola must be moved in terminal classes
         addStyleName("pony-PFlexTable");
         setCellFormatter(new PFlexCellFormatter());
     }

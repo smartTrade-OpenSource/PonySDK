@@ -68,7 +68,7 @@ public class ServiceGenerator extends BaseGenerator {
             final Method updateMethod = createCRUDMethod("update" + domain.getName(), crudParameter, crudReturn);
             final Method deleteMethod = createCRUDMethod("delete" + domain.getName(), crudIDParameter, new Return());
 
-            // Create the implementation class of these CRUD methods if the DAO is set
+            // Create the implementation class of these CRUD methods if the HibernateDAO is set
             if (domain.getService().getDao() != null) {
                 final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServerServicePackage(domain), GeneratorHelper.getServiceImplClassName(domain));
                 classWriter.addImplements(GeneratorHelper.getServiceClassName(domain));
@@ -78,7 +78,7 @@ public class ServiceGenerator extends BaseGenerator {
                 // Add static logger
                 classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getServiceImplClassName(domain) + ".class);");
 
-                // Add service DAO object
+                // Add service HibernateDAO object
                 final Parameter daoParameter = new Parameter();
                 daoParameter.setClazz(GeneratorHelper.getDAOPackage(domain) + "." + GeneratorHelper.getDAOClassName(domain));
                 daoParameter.setName(GeneratorHelper.getFirstCharToLower(GeneratorHelper.getDAOClassName(domain)));
@@ -205,10 +205,15 @@ public class ServiceGenerator extends BaseGenerator {
 
             final Dao dao = domain.getService().getDao();
             if (dao != null) {
-                if (dao.getDaoLayer() == DaoLayer.HIBERNATE) {
-                    generateDAO(dao);
-                } else {
-                    System.err.println(dao.getDaoLayer() + " DAO generation ignored for class" + domain.getService().getDao().getClazz() + ". Only " + DaoLayer.HIBERNATE + " is supported");
+                switch (dao.getDaoLayer()) {
+                    case HIBERNATE:
+                        generateHibernateDAO(dao);
+                        break;
+                    case MONGODB:
+                        generateMongoDBDAO(dao);
+                        break;
+                    default:
+                        System.err.println(dao.getDaoLayer() + " HibernateDAO generation ignored for class" + domain.getService().getDao().getClazz() + ". Only " + DaoLayer.HIBERNATE + " is supported");
                 }
             }
         }
@@ -217,13 +222,13 @@ public class ServiceGenerator extends BaseGenerator {
     }
 
     /*
-     * Services : DAO
+     * Services : HibernateDAO
      */
 
-    private void generateDAO(final Dao dao) throws Exception {
+    private void generateHibernateDAO(final Dao dao) throws Exception {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
-        classWriter.addExtend("com.ponysdk.hibernate.dao.DAO");
+        classWriter.addExtend("com.ponysdk.hibernate.dao.HibernateDAO");
 
         // Add static logger
         classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");
@@ -267,6 +272,121 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addLine("   } catch (final RuntimeException re) {");
         classWriter.addLine("       log.error(\"finding all " + domain.getName() + " failed\", re);");
         classWriter.addLine("       throw re;");
+        classWriter.addLine("   }");
+        classWriter.addLine("}");
+
+        classWriter.generateContentAndStore();
+    }
+
+    /*
+     * Services : MongoDBDAO
+     */
+    private void generateMongoDBDAO(final Dao dao) throws Exception {
+        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
+
+        classWriter.addImport("com.fasterxml.jackson.databind.ObjectMapper");
+        classWriter.addImport("com.mongodb.BasicDBObject");
+        classWriter.addImport("com.mongodb.DBCollection");
+        classWriter.addImport("com.mongodb.DBObject");
+        classWriter.addImport("com.mongodb.DBCursor");
+        classWriter.addImport("java.util.List");
+        classWriter.addImport("java.util.ArrayList");
+
+        classWriter.addExtend("com.ponysdk.mongodb.dao.MongoDAO");
+
+        // Add static logger
+        classWriter.addConstants("private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(" + GeneratorHelper.getDAOClassName(domain) + ".class);");
+
+        // Create constructor
+        final List<Parameter> parameters = new ArrayList<Parameter>();
+        final Parameter sessionFactoryParameter = new Parameter();
+        sessionFactoryParameter.setName("sessionFactory");
+        sessionFactoryParameter.setClazz("org.hibernate.SessionFactory");
+        // parameters.add(sessionFactoryParameter);
+        final Constructor constructor = new Constructor(parameters, parameters);
+        classWriter.addConstructor(constructor);
+
+        // Create findById method
+        classWriter.addNewLine();
+        classWriter.addLine("final public " + dao.getClazz() + " findById(final long id) {");
+        classWriter.addLine("   if (log.isDebugEnabled()) {");
+        classWriter.addLine("       log.debug(\"getting " + domain.getName() + " instance with id: \" + id);");
+        classWriter.addLine("   }");
+        classWriter.addNewLine();
+        classWriter.addLine("   try {");
+
+        classWriter.addLine("       DBCollection collection = db.getCollection(\"" + domain.getName().toLowerCase() + "\");");
+        classWriter.addLine("       BasicDBObject basicDBObject = new BasicDBObject(\"id\"," + "id);");
+        classWriter.addLine("       final DBObject foundInstance = collection.findOne(basicDBObject);");
+        classWriter.addLine("       " + dao.getClazz() + " instance = null;");
+        classWriter.addLine("       return toModel(foundInstance);");
+        classWriter.addLine("   } catch (final Exception re) {");
+        classWriter.addLine("       log.error(\"getting " + domain.getName() + " by id failed\", re);");
+        classWriter.addLine("       throw new RuntimeException(re);");
+        classWriter.addLine("   }");
+        classWriter.addLine("}");
+
+        classWriter.addLine("private " + dao.getClazz() + " toModel(DBObject dbObject) {");
+        classWriter.addLine("   if (dbObject == null) return null;");
+        classWriter.addLine("   final ObjectMapper mapper = new ObjectMapper();");
+        classWriter.addLine("   try{");
+        classWriter.addLine("       " + dao.getClazz() + " model = mapper.readValue(dbObject.toString(), " + dao.getClazz() + ".class);");
+        classWriter.addLine("       model.setID(dbObject.get(\"_id\"));");
+        classWriter.addLine("       return model;");
+        classWriter.addLine("   } catch (final Exception e) {");
+        classWriter.addLine("       log.error(\"toModel " + domain.getName() + " failed\", e);");
+        classWriter.addLine("       throw new RuntimeException(e);");
+        classWriter.addLine("   }");
+        classWriter.addLine("}");
+
+        // Create findAll method
+        classWriter.addNewLine();
+        classWriter.addLine("@SuppressWarnings(\"unchecked\")");
+        classWriter.addLine("public java.util.List<" + dao.getClazz() + "> findAll() {");
+        classWriter.addLine("   if (log.isDebugEnabled()) {");
+        classWriter.addLine("       log.debug(\"finding all " + domain.getName() + "\");");
+        classWriter.addLine("   }");
+        classWriter.addNewLine();
+        classWriter.addLine("   DBCursor cursor = null;");
+        classWriter.addLine("   try {");
+        classWriter.addLine("       DBCollection collection = db.getCollection(\"" + domain.getName().toLowerCase() + "\");");
+        classWriter.addLine("       cursor = collection.find();");
+        classWriter.addLine("       List<" + dao.getClazz() + "> result = new ArrayList<" + dao.getClazz() + ">();");
+        classWriter.addLine("       while(cursor.hasNext()){");
+        classWriter.addLine("           result.add(toModel(cursor.next()));");
+        classWriter.addLine("       }");
+        classWriter.addLine("       return result;");
+        classWriter.addLine("   } catch (final RuntimeException re) {");
+        classWriter.addLine("       log.error(\"finding all " + domain.getName() + " failed\", re);");
+        classWriter.addLine("       throw re;");
+        classWriter.addLine("   } finally{");
+        classWriter.addLine("       cursor.close();");
+        classWriter.addLine("   }");
+        classWriter.addLine("}");
+
+        // Create find by query method
+        classWriter.addNewLine();
+        classWriter.addLine("@SuppressWarnings(\"unchecked\")");
+        classWriter.addLine("@Override");
+        classWriter.addLine("public java.util.List<" + dao.getClazz() + "> find(Object query) {");
+        classWriter.addLine("   if (log.isDebugEnabled()) {");
+        classWriter.addLine("       log.debug(\"finding " + domain.getName() + "  by query\");");
+        classWriter.addLine("   }");
+        classWriter.addNewLine();
+        classWriter.addLine("   DBCursor cursor = null;");
+        classWriter.addLine("   try {");
+        classWriter.addLine("       DBCollection collection = db.getCollection(\"" + domain.getName().toLowerCase() + "\");");
+        classWriter.addLine("       cursor = collection.find((DBObject)query);");
+        classWriter.addLine("       List<" + dao.getClazz() + "> result = new ArrayList<" + dao.getClazz() + ">();");
+        classWriter.addLine("       while(cursor.hasNext()){");
+        classWriter.addLine("           result.add(toModel(cursor.next()));");
+        classWriter.addLine("       }");
+        classWriter.addLine("       return result;");
+        classWriter.addLine("   } catch (final RuntimeException re) {");
+        classWriter.addLine("       log.error(\"find " + domain.getName() + " failed\", re);");
+        classWriter.addLine("       throw re;");
+        classWriter.addLine("   } finally{");
+        classWriter.addLine("       cursor.close();");
         classWriter.addLine("   }");
         classWriter.addLine("}");
 

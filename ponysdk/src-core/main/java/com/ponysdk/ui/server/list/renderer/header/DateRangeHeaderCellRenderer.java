@@ -5,11 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.addon.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -59,7 +59,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         popupContent.add(from.render().asWidget());
         popupContent.add(new PLabel("to"));
         popupContent.add(to.render().asWidget());
-        final PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
+        final PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyUp(final int keyCode) {

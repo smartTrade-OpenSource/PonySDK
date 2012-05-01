@@ -37,7 +37,45 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositionCallback {
+/**
+ * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
+ * previously-created popups).
+ * <p>
+ * A PPopupPanel should not generally be added to other panels; rather, it should be shown and hidden using
+ * the {@link #show()} and {@link #hide()} methods.
+ * </p>
+ * <p>
+ * The width and height of the PPopupPanel cannot be explicitly set; they are determined by the PPopupPanel's
+ * widget. Calls to {@link #setWidth(String)} and {@link #setHeight(String)} will call these methods on the
+ * PPopupPanel's widget.
+ * </p>
+ * <p>
+ * <img class='gallery' src='doc-files/PPopupPanel.png'/>
+ * </p>
+ * <p>
+ * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly used to gray
+ * out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}. It has a default
+ * style name of "gwt-PopupPanelGlass", which can be changed using {@link #setGlassStyleName(String)}.
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-PopupPanel</dt>
+ * <dd>the outside of the popup</dd>
+ * <dt>.gwt-PopupPanel .popupContent</dt>
+ * <dd>the wrapper around the content</dd>
+ * <dt>.gwt-PopupPanelGlass</dt>
+ * <dd>the glass background behind the popup</dd>
+ * </dl>
+ */
+public class PPopupPanel extends PSimplePanel implements HasPAnimation {
+
+    /**
+     * A callback that is used to set the position of a {@link PPopupPanel} right before it is shown.
+     */
+    public interface PPositionCallback {
+
+        void setPosition(int offsetWidth, int offsetHeight, int windowWidth, int windowHeight);
+    }
 
     private final boolean autoHide;
 
@@ -171,9 +209,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
     public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-        final AddHandler handler = new AddHandler(ID, HANDLER.POPUP_POSITION_CALLBACK); // remove
-                                                                                        // ordinal
-        // ?
+
+        final AddHandler handler = new AddHandler(ID, HANDLER.POPUP_POSITION_CALLBACK);
         getPonySession().stackInstruction(handler);
     }
 
@@ -203,7 +240,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation, PPositio
         }
     }
 
-    @Override
     public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
         this.positionCallback.setPosition(offsetWidth, offsetHeight, windowWidth, windowHeight);
         setVisible(true);

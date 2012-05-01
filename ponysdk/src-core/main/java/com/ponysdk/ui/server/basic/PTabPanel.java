@@ -25,6 +25,24 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are
+ * shown as the user selects the various tabs associated with them. The tabs can contain arbitrary HTML.
+ * <p>
+ * This widget will <em>only</em> work in quirks mode. If your application is in Standards Mode, use
+ * {@link PTabLayoutPanel} instead.
+ * </p>
+ * <p>
+ * <img class='gallery' src='doc-files/PTabPanel.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-TabPanel { the tab panel itself }</li>
+ * <li>.gwt-TabPanelBottom { the bottom section of the tab panel (the deck containing the widget) }</li>
+ * </ul>
+ * 
+ * @see PTabLayoutPanel
+ */
 public class PTabPanel extends PTabLayoutPanel {
 
     @Override

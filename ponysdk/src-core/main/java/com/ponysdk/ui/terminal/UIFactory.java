@@ -32,7 +32,7 @@ import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
-import com.ponysdk.ui.terminal.ui.PTDecoratedPanel;
+import com.ponysdk.ui.terminal.ui.PTDecoratorPanel;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDialogBox;
 import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
@@ -126,7 +126,7 @@ public class UIFactory {
         if (WidgetType.FLOW_PANEL.equals(widgetType)) { return new PTFlowPanel(); }
         if (WidgetType.SUGGESTBOX.equals(widgetType)) { return new PTSuggestBox(); }
         if (WidgetType.DISCLOSURE_PANEL.equals(widgetType)) { return new PTDisclosurePanel(); }
-        if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratedPanel(); }
+        if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratorPanel(); }
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
         if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);

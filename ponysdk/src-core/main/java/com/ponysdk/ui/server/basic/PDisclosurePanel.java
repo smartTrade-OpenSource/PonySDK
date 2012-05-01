@@ -40,8 +40,28 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that consists of a header and a content panel that discloses the content when a user clicks on the
+ * header. <h3>CSS Style Rules</h3>
+ * <dl class="css">
+ * <dt>.gwt-DisclosurePanel
+ * <dd>the panel's primary style
+ * <dt>.gwt-DisclosurePanel-open
+ * <dd>dependent style set when panel is open
+ * <dt>.gwt-DisclosurePanel-closed
+ * <dd>dependent style set when panel is closed
+ * </dl>
+ * <p>
+ * <img class='gallery' src='doc-files/PDisclosurePanel.png'/>
+ * </p>
+ * <p>
+ * The header and content sections can be easily selected using css with a child selector:<br/>
+ * .gwt-DisclosurePanel-open .header { ... }
+ * </p>
+ */
 public class PDisclosurePanel extends PWidget implements HasPWidgets {
 
+    // TODO nciaravola must be moved in PTDisclosurePanel
     private static final String CLOSED = "images/disclosure_closed.png";
     private static final String OPENNED = "images/disclosure_openned.png";
 

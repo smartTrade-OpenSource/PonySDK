@@ -42,6 +42,25 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A panel that stacks its children vertically, displaying only one at a time, with a header for each child
+ * which the user can click to display.
+ * <p>
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
+ * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-StackLayoutPanel
+ * <dd>the panel itself
+ * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader
+ * <dd>applied to each header widget
+ * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader-hovering
+ * <dd>applied to each header widget on mouse hover
+ * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent
+ * <dd>applied to each child widget
+ * </dl>
+ */
 public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer> {
 
     private final PWidgetCollection children = new PWidgetCollection(this);

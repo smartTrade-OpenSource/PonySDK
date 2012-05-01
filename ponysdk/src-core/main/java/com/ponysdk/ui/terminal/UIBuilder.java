@@ -52,7 +52,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -66,10 +65,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
+import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
@@ -86,7 +87,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
     private int numberOfrequestInProgress;
-    private Frame frame;
+
     private boolean updateMode;
     private boolean pendingClose;
 
@@ -120,14 +121,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
         loadingMessageBox.getElement().setInnerText("Loading ...");
 
-        /* Frame for stream resource handling */
-        frame = new Frame();
-
-        frame.setWidth("0px");
-        frame.setHeight("0px");
-        frame.getElement().getStyle().setProperty("visibility", "hidden");
-        frame.getElement().getStyle().setProperty("position", "fixed");
-
         // hide loading component
         final Widget w = RootPanel.get("loading");
         if (w == null) {
@@ -137,16 +130,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             w.setVisible(false);
         }
 
-        RootPanel.get().add(frame);
     }
 
     public void update(final List<PTInstruction> instructions) {
         updateMode = true;
+        PTInstruction currentInstruction = null;
         try {
 
             log.info("UPDATING UI with " + instructions.size() + " instructions");
 
             for (final PTInstruction instruction : instructions) {
+                currentInstruction = instruction;
                 final String type = instruction.getString(TYPE.KEY);
 
                 if (TYPE.CLOSE.equals(type)) {
@@ -177,21 +171,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                     PTObject ptObject;
-                    // if (create.getAddOnSignature() != null) {
-                    // final AddonFactory addonFactory = addonByKey.get(create.getAddOnSignature());
-                    // if (addonFactory == null) { throw new
-                    // Exception("UIBuilder: AddOn factory not found for signature: " +
-                    // create.getAddOnSignature() + ", available: " + addonByKey.keySet()); }
-                    //
-                    // ptObject = addonFactory.newAddon();
-                    // if (ptObject == null) { throw new
-                    // Exception("UIBuilder: Failed to instanciate an Addon of type: " +
-                    // create.getAddOnSignature()); }
-                    // ptObject.create(instruction, this);
-                    // } else {
-                    ptObject = uiFactory.newUIObject(this, instruction);
-                    ptObject.create(instruction, this);
-                    // }
+                    final boolean isAddon = instruction.containsKey("addOnSignature");  
+                    if (isAddon) {
+                    	final String addOnSignature = instruction.getString("addOnSignature");
+                        final AddonFactory addonFactory = addonByKey.get(addOnSignature);
+                        if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
+
+                        ptObject = addonFactory.newAddon();
+                        if (ptObject == null) { throw new Exception("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
+                        ptObject.create(instruction, this);
+                    } else {
+                        ptObject = uiFactory.newUIObject(this, instruction);
+                        ptObject.create(instruction, this);
+                    }
 
                     objectByID.put(instruction.getObjectID(), ptObject);
                     // }
@@ -208,16 +200,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
                     // + addHandler.getProterty());
-
-                    // if (HANDLER.STREAM_REQUEST_HANDLER.getCode().equals(addHandler.getType())) {
-                    // frame.setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" +
-                    // UIBuilder.sessionID + "&" + PropertyKey.STREAM_REQUEST_ID.name() + "=" +
-                    // addHandler.getProterty().getValue());
-                    // } else {
+                    final String handler = instruction.getString(HANDLER.KEY);
+                    if (HANDLER.STREAM_REQUEST_HANDLER.equals(handler)) {
+                        new PTStreamResource().addHandler(instruction, this);
+                    } else {
                     final PTObject uiObject = objectByID.get(instruction.getObjectID());
                     uiObject.addHandler(instruction, this);
-                    // }
-
+                    }
                 } else if (TYPE.REMOVE_HANDLER.equals(type)) {
                     // log.info("AddHandler: " + instruction.getType() + ", " + instruction.getObjectID() +
                     // ", " + instruction.getProterty());
@@ -275,7 +264,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 }
             }
         } catch (final Throwable e) {
-            Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage());
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvents();

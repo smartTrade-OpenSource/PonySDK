@@ -29,6 +29,12 @@ import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A panel that lays all of its widgets out in a single vertical column.
+ * <p>
+ * <img class='gallery' src='doc-files/PVerticalPanel.png'/>
+ * </p>
+ */
 public class PVerticalPanel extends PCellPanel implements HasPAlignment {
 
     private PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.ALIGN_LEFT;

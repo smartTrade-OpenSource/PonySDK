@@ -39,6 +39,19 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
+ * <p>
+ * <img class='gallery' src='doc-files/PCheckBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-CheckBox</dt>
+ * <dd>the outer element</dd>
+ * <dt>.gwt-CheckBox-disabled</dt>
+ * <dd>applied when PCheckbox is disabled</dd>
+ * </dl>
+ */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
     private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<PValueChangeHandler<Boolean>>();

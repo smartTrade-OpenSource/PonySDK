@@ -21,12 +21,9 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.addon;
+package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
-import com.ponysdk.ui.server.basic.PAddOn;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;

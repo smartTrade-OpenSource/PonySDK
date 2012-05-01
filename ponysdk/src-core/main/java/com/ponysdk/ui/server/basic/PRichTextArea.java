@@ -29,6 +29,20 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
+/**
+ * A rich text editor that allows complex styling and formatting.there is a formatter interface, accessed via
+ * {@link #getFormatter()}.A browser that does not support rich text editing at all will return
+ * <code>null</code> for both of these, while one that supports only the basic functionality will return
+ * <code>null</code> for the latter.
+ * <p>
+ * <img class='gallery' src='doc-files/PRichTextArea.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-RichTextArea</dt>
+ * <dd>Applied to the rich text element.</dd>
+ * </dl>
+ */
 public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
     private String text;

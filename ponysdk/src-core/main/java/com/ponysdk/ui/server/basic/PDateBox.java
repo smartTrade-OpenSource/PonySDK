@@ -47,6 +47,17 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A text box that shows a {@link PDatePicker} when the user focuses on it. <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-DateBox</dt>
+ * <dd>default style name</dd>
+ * <dt>.dateBoxPopup</dt>
+ * <dd>Applied to the popup around the PDatePicker</dd>
+ * <dt>.dateBoxFormatError</dt>
+ * <dd>Default style for when the date box has bad input.</dd>
+ * </dl>
+ */
 public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date>, PKeyPressHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);

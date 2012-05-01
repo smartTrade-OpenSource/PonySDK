@@ -29,6 +29,27 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up
+ * the remaining space in its center.
+ * <p>
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
+ * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * </p>
+ * DockLayoutPanel contains children tagged with the cardinal directions, and center:
+ * <p>
+ * <dl>
+ * <dt>center</dt>
+ * <dt>north</dt>
+ * <dt>south</dt>
+ * <dt>west</dt>
+ * <dt>east</dt>
+ * </dl>
+ * <p>
+ * Each child can hold only widget, and there can be only one &lt;g:center>. However, there can be any number
+ * of the directional children.
+ * </p>
+ */
 public class PDockLayoutPanel extends PComplexPanel {
 
     public PDockLayoutPanel(final Unit unit) {

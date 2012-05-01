@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.list2;
 
 import com.ponysdk.core.query.SortingType;
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.list.SimpleListView;
 
 public class DataGridActivity<D> extends SimpleListActivity<D> {
@@ -40,6 +41,7 @@ public class DataGridActivity<D> extends SimpleListActivity<D> {
 
         this.view = view;
         this.configuration = configuration;
+        this.view.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
     }
 
 }

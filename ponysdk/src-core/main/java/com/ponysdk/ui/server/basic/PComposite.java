@@ -28,6 +28,14 @@ import com.ponysdk.core.instruction.Create;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A type of widget that can wrap another widget, hiding the wrapped widget's methods. When added to a panel,
+ * a composite behaves exactly as if the widget it wraps had been added.
+ * <p>
+ * The composite is useful for creating a single widget out of an aggregate of multiple other widgets
+ * contained in a single panel.
+ * </p>
+ */
 public abstract class PComposite extends PWidget {
 
     private PWidget widget;

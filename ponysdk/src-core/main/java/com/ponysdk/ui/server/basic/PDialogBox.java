@@ -27,6 +27,38 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a PPopupPanel,
+ * calls to {@link #setWidth(String)} and {@link #setHeight(String)} will set the width and height of the
+ * dialog box itself, even if a widget has not been added as yet.
+ * <p>
+ * <img class='gallery' src='doc-files/PDialogBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul>
+ * <li>.gwt-DialogBox { the outside of the dialog }</li>
+ * <li>.gwt-DialogBox .Caption { the caption }</li>
+ * <li>.gwt-DialogBox .dialogContent { the wrapper around the content }</li>
+ * <li>.gwt-DialogBox .dialogTopLeft { the top left cell }</li>
+ * <li>.gwt-DialogBox .dialogTopLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopCenter { the top center cell, where the caption is located }</li>
+ * <li>.gwt-DialogBox .dialogTopCenterInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li>
+ * <li>.gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the content is located }</li>
+ * <li>.gwt-DialogBox .dialogMiddleCenterInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleRight { the middle right cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleRightInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomLeft { the bottom left cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomCenter { the bottom center cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomCenterInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomRight { the bottom right cell }</li>
+ * <li>.gwt-DialogBox .dialogBottomRightInner { the inner element of the cell }</li>
+ * </ul>
+ */
 public class PDialogBox extends PDecoratedPopupPanel {
 
     private String caption;

@@ -26,6 +26,16 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A normal push button with custom styling.
+ * <p>
+ * <img class='gallery' src='doc-files/PPushButton.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class="css">
+ * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-disabled {.html-face}</li>
+ * </ul>
+ */
 public class PPushButton extends PButton {
 
     public PPushButton(final PImage image) {

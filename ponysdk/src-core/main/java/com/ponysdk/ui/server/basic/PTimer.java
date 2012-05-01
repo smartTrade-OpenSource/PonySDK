@@ -25,6 +25,14 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
 
+/**
+ * A simplified, browser-safe timer class. This class serves the same purpose as java.util.Timer, but is
+ * simplified because of the single-threaded environment.
+ * <p>
+ * To schedule a timer, simply create a subclass of it (overriding {@link #run}) and call {@link #schedule} or
+ * {@link #scheduleRepeating}.
+ * </p>
+ */
 public abstract class PTimer {
 
     private boolean repeat = false;

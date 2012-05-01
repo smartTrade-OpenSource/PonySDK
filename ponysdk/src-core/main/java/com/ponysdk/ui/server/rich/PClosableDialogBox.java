@@ -5,7 +5,6 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PPositionCallback;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -36,7 +35,7 @@ public class PClosableDialogBox extends PPopupPanel {
         closeContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CLOSE);
         contentContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CONTENT);
 
-        PFlexTable layout = new PFlexTable();
+        final PFlexTable layout = new PFlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         layout.setStyleProperty("border", "none");

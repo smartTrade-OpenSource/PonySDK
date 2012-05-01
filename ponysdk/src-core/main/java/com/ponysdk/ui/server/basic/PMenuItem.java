@@ -34,6 +34,11 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand} when they are clicked, or
+ * open a cascading sub-menu. Each menu item is assigned a unique DOM id in order to support ARIA. See
+ * {@link com.google.gwt.user.client.ui.Accessibility} for more information.
+ */
 public class PMenuItem extends PWidget implements PHasHTML {
 
     private String text;

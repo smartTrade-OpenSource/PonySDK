@@ -1,14 +1,24 @@
 /*
- * Copyright (c) 2011 PonySDK Owners: Luciano Broussal <luciano.broussal AT gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
  * 
- * WebSite: http://code.google.com/p/pony-sdk/
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.ponysdk.ui.server.basic;
@@ -18,6 +28,15 @@ import java.util.NoSuchElementException;
 
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 
+/**
+ * A simple collection of widgets to be used by {@link com.google.gwt.user.client.ui.Panel panels} and
+ * {@link com.google.gwt.user.client.ui.Composite composites}.
+ * <p>
+ * The main purpose of this specialized collection is to implement {@link java.util.Iterator#remove()} in a
+ * way that delegates removal to its panel. This makes it much easier for the panel to implement an
+ * {@link com.google.gwt.user.client.ui.HasWidgets#iterator() iterator} that supports removal of widgets.
+ * </p>
+ */
 public class PWidgetCollection implements Iterable<PWidget> {
 
     private class WidgetIterator implements Iterator<PWidget> {

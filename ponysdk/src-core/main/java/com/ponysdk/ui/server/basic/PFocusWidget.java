@@ -28,10 +28,16 @@ import java.util.Collection;
 import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
+import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
+import com.ponysdk.ui.server.basic.event.HasPFocusHandlers;
 import com.ponysdk.ui.server.basic.event.HasPMouseOverHandlers;
+import com.ponysdk.ui.server.basic.event.PBlurEvent;
+import com.ponysdk.ui.server.basic.event.PBlurHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PFocusEvent;
+import com.ponysdk.ui.server.basic.event.PFocusHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
@@ -40,7 +46,10 @@ import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers {
+/**
+ * Abstract base class for most widgets that can receive keyboard focus.
+ */
+public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
 
@@ -73,6 +82,16 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     @Override
     public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addFocusHandler(final PFocusHandler handler) {
+        return addDomHandler(handler, PFocusEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addBlurHandler(final PBlurHandler handler) {
+        return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
     @Override

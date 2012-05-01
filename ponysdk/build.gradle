@@ -8,7 +8,9 @@ srcGenerator = 'src-generator/main/java';
 srcGenerated = 'src-generated/main/java';
 srcJetty = 'src-jetty/main/java';
 srcSpring = 'src-spring/main/java';
+srcPersistency = 'src-persistency/main/java';
 srcHibernate = 'src-hibernate/main/java';
+srcMongoDB = 'src-mongodb/main/java';
 srcJasper = 'src-jasper/main/java';
 
 gwtOutputDirName = buildDir.name + '/gwt';
@@ -24,7 +26,9 @@ sourceSets {
 			srcDir srcGenerated
 			srcDir srcJetty
 			srcDir srcSpring
+			srcDir srcPersistency
 			srcDir srcHibernate
+			srcDir srcMongoDB
 		}
 	}
 }
@@ -40,13 +44,15 @@ configurations {
 	sl4j
 	hibernate
 	jasper
+	mongodb
+	json_jackson
 	
 	compile {
-		extendsFrom gwt, spring, sl4j, hibernate, jasper
+		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson
 	}
 	
 	runtime {
-		extendsFrom spring, sl4j, hibernate
+		extendsFrom spring, sl4j, hibernate, mongodb, json_jackson
 	}
 }
 
@@ -62,6 +68,8 @@ dependencies {
 	sl4j 'ch.qos.logback:logback-classic:1.0.0'
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
+	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
+	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
 }
 
 manifest {
@@ -164,6 +172,14 @@ task copyAllLibs << {
 	copy {
 		from configurations.jasper
 		into 'libs/jasper'
+	}
+	copy {
+		from configurations.mongodb
+		into 'libs/mongodb'
+	}
+	copy {
+		from configurations.json_jackson
+		into 'libs/json_jackson'
 	}
 }
 

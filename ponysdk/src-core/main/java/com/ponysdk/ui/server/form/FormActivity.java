@@ -33,7 +33,7 @@ import com.ponysdk.core.activity.Activity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
@@ -52,7 +52,7 @@ public class FormActivity extends AbstractActivity implements Activity {
 
     public FormActivity(FormConfiguration formConfiguration, FormView formView) {
         this.formView = formView;
-        this.formView.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCode.ENTER) {
+        this.formView.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {

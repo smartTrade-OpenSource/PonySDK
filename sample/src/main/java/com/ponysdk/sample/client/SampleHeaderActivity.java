@@ -33,7 +33,7 @@ import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PPositionCallback;
+import com.ponysdk.ui.server.basic.PPopupPanel.PPositionCallback;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;

@@ -25,6 +25,9 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A simple panel that provides resize to its one child.
+ */
 public class PSimpleLayoutPanel extends PSimplePanel {
 
     @Override

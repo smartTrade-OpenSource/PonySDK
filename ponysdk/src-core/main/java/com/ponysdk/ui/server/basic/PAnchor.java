@@ -28,6 +28,12 @@ import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that represents a simple &lt;a&gt; element. <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-Anchor { }</li>
+ * </ul>
+ */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
     private String text;

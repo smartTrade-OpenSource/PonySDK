@@ -21,15 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.addon;
+package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PPositionCallback;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTimer;
+import com.ponysdk.ui.server.basic.PPopupPanel.PPositionCallback;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 

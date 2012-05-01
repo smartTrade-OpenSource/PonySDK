@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.PStreamHandler;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * The server side implementation of the RPC service.
@@ -44,25 +45,23 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
-    private static final String STREAM_REQUEST_ID = "STREAM_REQUEST_ID";
-
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
-    private void streamRequest(HttpServletRequest req, HttpServletResponse resp) {
+    private void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             final PonyApplicationSession ponyApplicationSession = (PonyApplicationSession) req.getSession().getAttribute(PonyApplicationSession.class.getCanonicalName());
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
             final PonySession ponySession = ponyApplicationSession.getPonySession(ponySessionID);
 
-            final PStreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(STREAM_REQUEST_ID)));
+            final PStreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
@@ -20,23 +21,56 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
-public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandler<String>, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
-
-    private final List<PValueChangeHandler<String>> valueChangeHandler = new ArrayList<PValueChangeHandler<String>>();
+/**
+ * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of selections that
+ * match the user's input. Each {@link PSuggestBox} is associated with a single {@link PSuggestOracle}. The
+ * {@link PSuggestBox} is used to provide a set of selections given a specific query string.
+ * <p>
+ * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as its oracle. Below we show how
+ * a {@link PMultiWordSuggestOracle} can be configured:
+ * </p>
+ * 
+ * <pre>
+ * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
+ * oracle.add(&quot;Cat&quot;);
+ * oracle.add(&quot;Dog&quot;);
+ * oracle.add(&quot;Horse&quot;);
+ * oracle.add(&quot;Canary&quot;);
+ * 
+ * PSuggestBox box = new PSuggestBox(oracle);
+ * </pre>
+ * 
+ * Using the example above, if the user types "C" into the text widget, the oracle will configure the
+ * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key into the
+ * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
+ * <p>
+ * <img class='gallery' src='doc-files/SuggestBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-SuggestBox</dt>
+ * <dd>the suggest box itself</dd>
+ * </dl>
+ * TODO(pdr): Add SafeHtml support to this and implementing classes.
+ * 
+ * @see PSuggestOracle
+ * @see PMultiWordSuggestOracle
+ * @see PTextBoxBase
+ */
+public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<PSelectionHandler<PSuggestion>>();
 
     private PSuggestOracle suggestOracle;
+    private PTextBox textBox;
 
     private int limit;
 
-    private String text;
-
     private String replacementString;
-
     private String displayString;
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
+
         this.suggestOracle = suggestOracle;
         if (suggestOracle == null) {
             this.suggestOracle = new PMultiWordSuggestOracle();
@@ -44,6 +78,14 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
 
         getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_VALUE_CHANGE_HANDLER));
         getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_SELECTION_HANDLER));
+
+        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
+    }
+
+    @Override
+    protected void init(final WidgetType widgetType) {
+        this.textBox = new PTextBox();
+        super.init(widgetType);
     }
 
     public PSuggestBox() {
@@ -57,12 +99,12 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
             handlerKey = event.getString(HANDLER.KEY);
         }
         if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
-            this.text = event.getString(PROPERTY.TEXT);
-            onValueChange(new PValueChangeEvent<String>(this, text));
+            final String text = event.getString(PROPERTY.TEXT);
+            textBox.onValueChange(new PValueChangeEvent<String>(this, text));
         } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handlerKey)) {
             this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
             this.displayString = event.getString(PROPERTY.DISPLAY_STRING);
-            this.text = replacementString;
+            this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
         } else {
@@ -78,22 +120,17 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     }
 
     @Override
-    public void onValueChange(final PValueChangeEvent<String> event) {
-        for (final PValueChangeHandler<String> handler : valueChangeHandler) {
-            handler.onValueChange(event);
-        }
-    }
-
-    @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SUGGESTBOX;
     }
 
     @Override
     public void setFocus(final boolean focused) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.FOCUSED, focused);
-        getPonySession().stackInstruction(update);
+        textBox.setFocus(focused);
+    }
+
+    public PTextBox getTextBox() {
+        return textBox;
     }
 
     public void setLimit(final int limit) {
@@ -104,10 +141,7 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     }
 
     public void setText(final String text) {
-        this.text = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
+        textBox.setText(text);
     }
 
     public int getLimit() {
@@ -115,22 +149,22 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
     }
 
     public String getText() {
-        return text;
+        return textBox.getText();
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
-        valueChangeHandler.add(handler);
+        textBox.addValueChangeHandler(handler);
     }
 
     @Override
     public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        valueChangeHandler.remove(handler);
+        textBox.removeValueChangeHandler(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(valueChangeHandler);
+        return textBox.getValueChangeHandlers();
     }
 
     public PSuggestOracle getSuggestOracle() {
@@ -172,13 +206,6 @@ public class PSuggestBox extends PWidget implements Focusable, PValueChangeHandl
         public String getReplacementString() {
             return replacementString;
         }
-    }
-
-    public abstract class PSuggestOracle {
-
-        public abstract void add(final String suggestion);
-
-        public abstract void addAll(final Collection<String> collection);
     }
 
     public class PMultiWordSuggestOracle extends PSuggestOracle {

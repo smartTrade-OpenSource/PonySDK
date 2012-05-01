@@ -94,7 +94,7 @@ public class GeneratorHelper {
         return name.replaceFirst(String.valueOf(name.charAt(0)), String.valueOf(name.charAt(0)).toLowerCase());
     }
 
-    // DAO
+    // HibernateDAO
     public static String getDAOClassName(final Domain domain) {
         return domain.getName() + "DAO";
     }

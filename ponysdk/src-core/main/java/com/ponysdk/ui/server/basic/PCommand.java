@@ -23,6 +23,16 @@
 
 package com.ponysdk.ui.server.basic;
 
+/**
+ * Encapsulates an action for later execution, often from a different context.
+ * <p>
+ * The Command interface provides a layer of separation between the code specifying some behavior and the code
+ * invoking that behavior. This separation aids in creating reusable code. For example, a {@link PMenuItem}
+ * can have a PCommand associated with it that it executes when the menu item is chosen by the user.
+ * Importantly, the code that constructed the PCommand to be executed when the menu item is invoked knows
+ * nothing about the internals of the MenuItem class and vice-versa.
+ * </p>
+ */
 public interface PCommand {
 
     void execute();

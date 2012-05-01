@@ -34,6 +34,13 @@ import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;
+ * element, causing it to be displayed with block layout. <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-Label { }</li>
+ * </ul>
+ */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
 
     private String text;

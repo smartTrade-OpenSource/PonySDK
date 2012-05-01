@@ -27,9 +27,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.PonySession;
+import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * The panel to which all other widgets must ultimately be added. RootPanels are never created directly.
+ * Rather, they are accessed via {@link PRootPanel#get()} .
+ * <p>
+ * Most applications will add widgets to the default root panel in their {@link EntryPoint#start(PonySession)}
+ * methods.
+ * </p>
+ */
 public class PRootPanel extends PAbsolutePanel {
 
     private static final String ROOTID = "PRootPanel";

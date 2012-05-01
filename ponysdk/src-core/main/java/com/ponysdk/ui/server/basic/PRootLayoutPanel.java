@@ -26,6 +26,14 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A singleton implementation of {@link PLayoutPanel} that always attaches itself to the document body (i.e.
+ * {@link PRootPanel#get()}).
+ * <p>
+ * NOTE: This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it
+ * is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * </p>
+ */
 public class PRootLayoutPanel extends PLayoutPanel {
 
     private static final String ROOT = "PRootLayoutPanel";

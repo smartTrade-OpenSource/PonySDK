@@ -33,6 +33,9 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * Base class for panels that contain only one widget.
+ */
 public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     private static final Logger log = LoggerFactory.getLogger(PSimplePanel.class);

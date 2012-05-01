@@ -75,5 +75,6 @@ public enum WidgetType {
     SCHEDULER,
     ATTACHED_POPUP_PABEL,
     FOCUS_PANEL,
+    DATEPICKER,
     SCRIPT;
 }

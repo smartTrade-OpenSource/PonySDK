@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
@@ -39,10 +40,11 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTFileUpload extends PTWidget<FormPanel> {
+    private static Frame frame;
 
     private FormPanel wrappedFormPanel;
 
-    final FileUpload fileUpload = new FileUpload();
+    private final FileUpload fileUpload = new FileUpload();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -86,6 +88,9 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                     uiService.triggerEvent(eventInstruction);
                 }
             });
+        } else if (HANDLER.STREAM_REQUEST_HANDLER.equals(handler)) {
+            final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+            getFrame().setUrl(action);
         } else if (HANDLER.EMBEDED_STREAM_REQUEST_HANDLER.equals(handler)) {
             final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
             wrappedFormPanel.setAction(action);
@@ -104,6 +109,21 @@ public class PTFileUpload extends PTWidget<FormPanel> {
         } else {
             super.update(update, uiService);
         }
+    }
+
+
+    private static Frame getFrame() {
+        /* Frame for stream resource handling */
+        if (frame == null) {
+            frame = new Frame();
+
+            frame.setWidth("0px");
+            frame.setHeight("0px");
+            frame.getElement().getStyle().setProperty("visibility", "hidden");
+            frame.getElement().getStyle().setProperty("position", "fixed");
+        }
+        return frame;
+
     }
 
 }

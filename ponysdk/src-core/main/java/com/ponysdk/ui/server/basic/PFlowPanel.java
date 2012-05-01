@@ -25,6 +25,12 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A panel that formats its child widgets using the default HTML layout behavior.
+ * <p>
+ * <img class='gallery' src='doc-files/PFlowPanel.png'/>
+ * </p>
+ */
 public class PFlowPanel extends PComplexPanel {
 
     @Override

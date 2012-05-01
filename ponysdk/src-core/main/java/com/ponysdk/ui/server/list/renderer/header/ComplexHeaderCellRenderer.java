@@ -29,7 +29,7 @@ import com.ponysdk.core.query.ComparatorType;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -114,7 +114,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, PEventBusA
             container.getFlexCellFormatter().setColSpan(0, 0, 2);
         }
 
-        formField.addDomHandler(new PKeyUpFilterHandler(PKeyCode.ENTER) {
+        formField.addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyUp(final int keyCode) {

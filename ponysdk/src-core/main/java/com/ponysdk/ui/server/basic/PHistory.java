@@ -31,6 +31,30 @@ import com.ponysdk.core.instruction.History;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
+/**
+ * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented
+ * by a single string, referred to as a "token". You can create new history items (which have a token
+ * associated with them when they are created), and you can programmatically force the current history to move
+ * back or forward.
+ * <p>
+ * In order to receive notification of user-directed changes to the current history item, implement the
+ * {@link PValueChangeHandler} interface and attach it via {@link #addValueChangeHandler(PValueChangeHandler)}
+ * .
+ * </p>
+ * <p>
+ * <h3>URL Encoding</h3> Any valid characters may be used in the history token and will survive round-trips
+ * through {@link #newItem(String)} to {@link #getToken()}/
+ * {@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but most will be encoded in the user-visible
+ * URL. The following US-ASCII characters are not encoded on any currently supported browser (but may be in
+ * the future due to future browser changes):
+ * <ul>
+ * <li>a-z
+ * <li>A-Z
+ * <li>0-9
+ * <li>;,/?:@&=+$-_.!~*()
+ * </ul>
+ * </p>
+ */
 public class PHistory {
 
     private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<PValueChangeHandler<String>>();
@@ -53,7 +77,7 @@ public class PHistory {
 
     public void fireHistoryChanged(final String token) {
         this.token = token;
-        PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, token);
+        final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, token);
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
         }

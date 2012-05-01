@@ -25,8 +25,8 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.addon.PFloatablePanel;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PFloatablePanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;

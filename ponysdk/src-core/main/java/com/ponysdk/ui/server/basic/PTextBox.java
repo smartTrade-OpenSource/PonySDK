@@ -23,13 +23,25 @@
 
 package com.ponysdk.ui.server.basic;
 
+/**
+ * A standard single-line text box.
+ * <p>
+ * <img class='gallery' src='doc-files/PTextBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-TextBox { primary style }</li>
+ * <li>.gwt-TextBox-readonly { dependent style set when the text box is read-only }</li>
+ * </ul>
+ * <p>
+ */
 public class PTextBox extends PTextBoxBase {
 
     public PTextBox() {
         this(null);
     }
 
-    public PTextBox(String text) {
+    public PTextBox(final String text) {
         super(text);
     }
 

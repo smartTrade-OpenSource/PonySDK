@@ -49,6 +49,9 @@ import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A simple panel that makes its contents focusable, and adds the ability to catch mouse and keyboard events.
+ */
 public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandlers, HasPAllMouseHandlers, HasPClickHandlers, HasPAllKeyHandlers, HasPAllFocusHandlers {
 
     @Override

@@ -31,21 +31,22 @@ import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PSuggestBox;
-import com.ponysdk.ui.server.basic.PSuggestBox.PSuggestOracle;
-import com.ponysdk.ui.server.basic.PSuggestion;
+import com.ponysdk.ui.server.basic.PSuggestOracle;
+import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
+import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
 
     public SuggestBoxPageActivity() {
-        super("Suggest Box", "Lists and Menus");
+        super("Suggest Box", "Text Input");
     }
 
     @Override
@@ -78,15 +79,30 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
 
         panel.add(suggestBox);
 
-        final PButton child = new PButton("Select \"Friesian horse\"");
-        child.addClickHandler(new PClickHandler() {
+        panel.add(new PHTML("<br><br>"));
+
+        panel.add(new PLabel("Manipulate the suggest box:"));
+        final PListBox operation = new PListBox(true);
+        operation.addItem("Select \"Friesian horse\"", 0);
+        operation.addItem("Get textbox value", 1);
+        operation.addItem("Enable/Disable textbox", 2);
+        operation.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onClick(final PClickEvent event) {
-                suggestBox.setText("Friesian horse");
+            public void onChange(final PChangeEvent event) {
+                final Integer item = (Integer) operation.getSelectedValue();
+                if (item == null) return;
+
+                if (item.equals(0)) {
+                    suggestBox.setText("Friesian horse");
+                } else if (item.equals(1)) {
+                    PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
+                } else if (item.equals(2)) {
+                    suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
+                }
             }
         });
-        panel.add(child);
+        panel.add(operation);
 
         examplePanel.setWidget(panel);
     }

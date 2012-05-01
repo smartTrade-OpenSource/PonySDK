@@ -36,7 +36,7 @@ import com.ponysdk.sample.client.event.UserLoggedInEvent;
 import com.ponysdk.sample.client.page.CheckBoxPageActivity;
 import com.ponysdk.sample.client.place.ApplicationPlace;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
@@ -72,7 +72,7 @@ public class LoginActivity extends AbstractActivity {
         });
         world.setWidget(loginPageView);
 
-        loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCode.ENTER) {
+        loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyPress(final int keyCode) {

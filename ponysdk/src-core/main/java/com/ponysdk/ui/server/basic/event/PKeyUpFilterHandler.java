@@ -32,17 +32,17 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PKeyUpFilterHandler extends JSONObject implements PKeyUpHandler {
 
     private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
 
-    public PKeyUpFilterHandler(final PKeyCode... keyCodes) {
+    public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
         final List<Integer> codes = new ArrayList<Integer>(keyCodes.length);
 
-        for (final PKeyCode code : keyCodes) {
+        for (final PKeyCodes code : keyCodes) {
             codes.add(code.getCode());
         }
 

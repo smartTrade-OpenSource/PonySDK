@@ -29,7 +29,7 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
@@ -66,19 +66,19 @@ public class JavascriptPageActivity extends SamplePageActivity {
         history.add(new PLabel("> With PonySDK, you can also execute native javascript"));
         history.add(new PLabel("> Try it out.. "));
 
-        inputTextBox.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCode.ENTER, PKeyCode.DOWN, PKeyCode.UP) {
+        inputTextBox.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP) {
 
             @Override
             public void onKeyUp(final int keyCode) {
-                if (PKeyCode.ENTER.equals(keyCode)) {
+                if (PKeyCodes.ENTER.equals(keyCode)) {
                     executeJS(inputTextBox.getText());
                     commandIndex = 0;
-                } else if (PKeyCode.UP.equals(keyCode)) {
+                } else if (PKeyCodes.UP.equals(keyCode)) {
                     if (commandIndex < commands.size()) {
                         commandIndex++;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));
                     }
-                } else if (PKeyCode.DOWN.equals(keyCode)) {
+                } else if (PKeyCodes.DOWN.equals(keyCode)) {
                     if (commandIndex > 1) {
                         commandIndex--;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));

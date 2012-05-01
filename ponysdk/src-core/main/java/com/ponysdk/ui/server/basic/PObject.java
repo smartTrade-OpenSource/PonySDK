@@ -30,6 +30,9 @@ import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * The superclass for all PonySDK objects.
+ */
 public abstract class PObject {
 
     protected long ID;

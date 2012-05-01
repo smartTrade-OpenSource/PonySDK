@@ -10,6 +10,13 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id in order
+ * to support ARIA.
+ * <p>
+ * <h3>Example</h3> {@example http://ponysdk.com/sample/#Tree}
+ * </p>
+ */
 public class PTreeItem extends PObject {
 
     private PTree tree;

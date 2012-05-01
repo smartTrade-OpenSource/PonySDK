@@ -3,12 +3,20 @@
 // Override variables
 // -------------------------
 
-@header:			#498BF4;
-@headerTextColor:	#EDEDED;
-@footer:			@header;
-@footerTextColor:	@headerTextColor;
+@black:				color(`(window.colors!=undefined && window.colors.black!=undefined)? window.colors.black : "#000"`);
+@grayDarker:		color(`(window.colors!=undefined && window.colors.grayDarker!=undefined)? window.colors.grayDarker : "#222"`);
+@grayDark:			color(`(window.colors!=undefined && window.colors.grayDark!=undefined)? window.colors.grayDark : "#333"`);
+@gray:				color(`(window.colors!=undefined && window.colors.gray!=undefined)? window.colors.gray : "#555"`);
+@grayLight:			color(`(window.colors!=undefined && window.colors.grayLight!=undefined)? window.colors.grayLight : "#999"`);
+@grayLighter:		color(`(window.colors!=undefined && window.colors.grayLighter!=undefined)? window.colors.grayLighter : "#eee"`);
+@white:				color(`(window.colors!=undefined && window.colors.white!=undefined)? window.colors.white : "#fff"`);
 
+@highlight:			color(`(window.colors!=undefined && window.colors.highlight!=undefined)? window.colors.highlight : "#498BF4"`);
 
+@header: 			color(`(window.colors!=undefined && window.colors.header!=undefined)? window.colors.header : "#498BF4"`);
+@headerTextColor:	color(`(window.colors!=undefined && window.colors.headerTextColor!=undefined)? window.colors.headerTextColor : "#EDEDED"`);
+@footer:			color(`(window.colors!=undefined && window.colors.footer!=undefined)? window.colors.footer : "#498BF4"`);
+@footerTextColor:	color(`(window.colors!=undefined && window.colors.footerTextColor!=undefined)? window.colors.footerTextColor : "#EDEDED"`);
 
 // Custom style
 // -------------------------
@@ -35,5 +43,150 @@
 .toto span.pony-MultiSelectListBox-ValueText{
 	border:1px solid #08447f;
 	.border-radius(4px);	
+}
+
+
+
+.pony-MultiSelectListBox-Caret{
+	-webkit-appearance: textfield;
+	-webkit-box-orient: vertical;
+	-webkit-rtl-ordering: logical;
+	-webkit-user-select: text;
+	background-attachment: scroll;
+	background-clip: border-box;
+	background-color: white;
+	background-image: none;
+	background-origin: padding-box;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	border-left-style: solid;
+	border-left-width: 1px;
+	border-right-style: solid;
+	border-right-width: 1px;
+	border-top-style: solid;
+	border-top-width: 1px;
+	box-sizing: border-box;
+	color: black;
+	cursor: auto;
+	display: block;
+	float: left;
+	font-family: arial, tahoma, verdana, sans-serif;
+	font-size: 13px;
+	height: 23px;
+	letter-spacing: normal;
+	line-height: 15px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-top: 0px;
+	max-width: 100%;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	padding-bottom: 3px;
+	padding-left: 180px;
+	padding-right: 18px;
+	padding-top: 3px;
+	position: static;
+	resize: none;
+	text-align: -webkit-auto;
+	text-indent: 0px;
+	text-shadow: none;
+	text-transform: none;
+	white-space: pre;
+	width: 500px;
+	word-spacing: 0px;
+	word-wrap: normal;
+}
+
+.pony-MultiSelectListBox-SelectedPanel{
+background-attachment: scroll;
+background-clip: border-box;
+background-color: transparent;
+background-image: none;
+background-origin: padding-box;
+box-sizing: border-box;
+color: #333;
+display: block;
+font-family: arial, tahoma, verdana, sans-serif;
+font-size: 13px;
+height: 0px;
+line-height: 18px;
+margin-bottom: 0px;
+margin-left: 0px;
+margin-right: 0px;
+margin-top: 0px;
+min-width: 250px;
+padding-bottom: 0px;
+padding-left: 0px;
+padding-right: 0px;
+padding-top: 0px;
+position: relative;
+width: 500px;
+}
+.pony-MultiSelectListBox-SelectedItemsPanel{
+background-attachment: scroll;
+background-clip: border-box;
+background-color: transparent;
+background-image: none;
+background-origin: padding-box;
+color: #333;
+display: block;
+font-family: arial, tahoma, verdana, sans-serif;
+font-size: 13px;
+height: 19px;
+left: 0px;
+line-height: 18px;
+margin-bottom: 0px;
+margin-left: 1px;
+margin-right: 20px;
+margin-top: 1px;
+overflow-x: hidden;
+overflow-y: hidden;
+padding-bottom: 0px;
+padding-left: 0px;
+padding-right: 0px;
+padding-top: 1px;
+position: absolute;
+top: 0px;
+width: 178px;
+}
+.toto span.pony-MultiSelectListBox-ValueText{
+	border:1px solid #08447f;
+	.border-radius(4px);	
+}
+
+
+
+.pony-BreadCrumbs {
+    font:11px Arial, sans-serif;
+    color:#111;
+    list-style:none;
+    padding:0; margin:0;
+    background:url("../images/breadcrumb-bg.png") repeat-x center;
+    border:1px solid #CCC;
+    border-radius:0.4em;
+    -moz-border-radius:0.4em;
+    -webkit-border-radius:0.4em;
+    overflow:hidden;
+}
+.pony-BreadCrumbs li {
+    float:left;
+    background:url("../images/breadcrumb-right.png") no-repeat right center;
+    padding:0 20px 0 10px;
+    height:28px; line-height:28px;
+}
+/**
+.pony-BreadCrumbs li:first-child a {
+    display:block;
+    width:30px;
+    text-indent:-9999px;
+    background:url(home.png) no-repeat center center;
+}**/
+.pony-BreadCrumbs a {
+    text-decoration:none;
+    color:#999;
+}
+.pony-BreadCrumbs a:hover {
+    color:#CC6600;
 }
 

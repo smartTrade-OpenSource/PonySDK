@@ -26,6 +26,24 @@ package com.ponysdk.ui.server.basic;
 import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A panel that adds user-positioned splitters between each of its child widgets.
+ * <p>
+ * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes are always
+ * specified in {@link Unit#PX} units, and each pair of child widgets has a splitter between them that the
+ * user can drag.
+ * </p>
+ * <p>
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
+ * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li>
+ * </ul>
+ */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     public PSplitLayoutPanel(final Unit unit) {

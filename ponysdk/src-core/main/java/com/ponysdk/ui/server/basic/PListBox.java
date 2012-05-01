@@ -41,6 +41,16 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
+ * <p>
+ * <img class='gallery' src='doc-files/PistBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-ListBox { }</li>
+ * </ul>
+ */
 public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
 
     private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
@@ -80,6 +90,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.LISTBOX;
+    }
+
+    @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
         if (instruction.getString(HANDLER.KEY).contains(HANDLER.CHANGE_HANDLER)) {
             final String data = instruction.getString(PROPERTY.VALUE);
@@ -97,11 +112,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         } else {
             super.onEventInstruction(instruction);
         }
-    }
-
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.LISTBOX;
     }
 
     public void addItem(final String item) {

@@ -25,13 +25,24 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * A text box that visually masks its input to prevent eavesdropping.
+ * <p>
+ * <img class='gallery' src='doc-files/PPasswordTextBox.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-PasswordTextBox { primary style }</li>
+ * <li>.gwt-PasswordTextBox-readonly { dependent style set when the password text box is read-only }</li>
+ * </ul>
+ */
 public class PPasswordTextBox extends PTextBox {
 
     public PPasswordTextBox() {
         super();
     }
 
-    public PPasswordTextBox(String text) {
+    public PPasswordTextBox(final String text) {
         super(text);
     }
 

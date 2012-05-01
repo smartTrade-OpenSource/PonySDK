@@ -25,7 +25,7 @@ package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.PKeyCode;
+import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
@@ -61,7 +61,7 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
 
     public void setLoginPageView(final LoginPageView loginPageView) {
         this.loginPageView = loginPageView;
-        final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCode.ENTER) {
+        final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyUp(int keyCode) {

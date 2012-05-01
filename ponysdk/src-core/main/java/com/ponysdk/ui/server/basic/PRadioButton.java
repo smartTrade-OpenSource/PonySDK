@@ -24,9 +24,25 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A mutually-exclusive selection radio button widget. Fires {@link PClickEvent}s when the radio button is
+ * clicked, and {@link PValueChangeEvent}s when the button becomes checked. Note, however, that browser
+ * limitations prevent PValueChangeEvents from being sent when the radio button is cleared as a side effect of
+ * another in the group being clicked.
+ * <p>
+ * <img class='gallery' src='doc-files/PRadioButton.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-RadioButton</dt>
+ * <dd>the outer element</dd>
+ * </dl>
+ */
 public class PRadioButton extends PCheckBox {
 
     private String name;

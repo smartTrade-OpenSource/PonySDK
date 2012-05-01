@@ -1,29 +1,32 @@
 
 package com.ponysdk.ui.server.select;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.addon.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PAttachedPopupPanel;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PFocusPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PImage;
+import com.ponysdk.ui.server.basic.PTextArea;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PBlurHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 
-public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMultiSelectListBoxView, PFocusHandler, PBlurHandler {
+public class DefaultMultiSelectListBoxView extends PFlowPanel implements PMultiSelectListBoxView, PFocusHandler, PBlurHandler {
 
     private final PImage button = new PImage("images/disclosure_openned.png", 0, 0, 14, 14);
 
-    private final PFlowPanel panel = new PFlowPanel();
+    // private final PFlowPanel panel = new PFlowPanel();
 
     private final PElement itemsSelectionPanel = new PElement("ul");
 
@@ -35,27 +38,29 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
 
     private final PAttachedPopupPanel attachedPopup;
 
-    private final PImage cursor = new PImage("images/caret.gif");
+    // private final PImage cursor = new PImage("images/caret.gif");
+    private final PTextArea cursor = new PTextArea();
 
     DefaultMultiSelectListBoxView() {
         setStyleName(PonySDKTheme.MULTISELECTLISTBOX);
 
-        setWidget(panel);
+        // setWidget(panel);
 
-        panel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SELECTED_PANEL);
+        // panel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SELECTED_PANEL);
         selectedItemsPabel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SELECTED_ITEMS_PANEL);
         itemsSelectionPanel.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_ITEMS_SELECTION_PANEL);
         button.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_SHOW_SELECTION_PANEL_BUTTON);
         cursor.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_CARET);
 
-        addFocusHandler(this);
-        addBlurHandler(this);
+        // addFocusHandler(this);
+        // addBlurHandler(this);
+        add(cursor);
 
-        panel.add(selectedItemsPabel);
+        add(selectedItemsPabel);
 
-        panel.add(button);
+        add(button);
 
-        attachedPopup = new PAttachedPopupPanel(true, panel);
+        attachedPopup = new PAttachedPopupPanel(true, this);
 
         attachedPopup.setStyleName(PonySDKTheme.MULTISELECTLISTBOX_POPUP_PANEL);
 
@@ -121,13 +126,14 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
 
     @Override
     public void onBlur(final PBlurEvent event) {
-        if (cursor.getParent() != null) cursor.removeFromParent();
+        // if (cursor.getParent() != null) cursor.removeFromParent();
     }
 
     @Override
     public void onFocus(final PFocusEvent event) {
-        System.err.println("focus");
-        if (cursor.getParent() == null) selectedItemsPabel.add(cursor);
+        // System.err.println("focus");
+        // if (cursor.getParent() == null) selectedItemsPabel.add(cursor);
+        // cursor.setFocus(true);
     }
 
     @Override
@@ -138,5 +144,25 @@ public class DefaultMultiSelectListBoxView extends PFocusPanel implements PMulti
     @Override
     public void blurSelectedItem(final String item) {
         buttonByItem.get(item).removeStyleName("toto");
+    }
+
+    @Override
+    public PHandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+        return cursor.addKeyUpHandler(handler);
+    }
+
+    @Override
+    public Collection<PKeyUpHandler> getKeyUpHandlers() {
+        return cursor.getKeyUpHandlers();
+    }
+
+    @Override
+    public PHandlerRegistration addFocusHandler(final PFocusHandler handler) {
+        return cursor.addFocusHandler(handler);
+    }
+
+    @Override
+    public PHandlerRegistration addBlurHandler(final PBlurHandler handler) {
+        return cursor.addBlurHandler(handler);
     }
 }

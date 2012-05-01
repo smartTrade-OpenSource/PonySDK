@@ -40,6 +40,25 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 
+/**
+ * A standard hierarchical tree widget. The tree contains a hierarchy of {@link PTreeItem TreeItems} that the
+ * user can open, close, and select.
+ * <p>
+ * <img class='gallery' src='doc-files/PTree.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <dl>
+ * <dt>.gwt-Tree</dt>
+ * <dd>the tree itself</dd>
+ * <dt>.gwt-Tree .gwt-TreeItem</dt>
+ * <dd>a tree item</dd>
+ * <dt>.gwt-Tree .gwt-TreeItem-selected</dt>
+ * <dd>a selected tree item</dd>
+ * </dl>
+ * <p>
+ * <h3>Example</h3> {@example http://ponysdk.com/sample/#Tree}
+ * </p>
+ */
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
 
     private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<PSelectionHandler<PTreeItem>>();

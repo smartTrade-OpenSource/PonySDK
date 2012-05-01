@@ -29,6 +29,9 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * Abstract base class for panels that can contain multiple child widgets.
+ */
 public abstract class PComplexPanel extends PPanel {
 
     private final PWidgetCollection children = new PWidgetCollection(this);

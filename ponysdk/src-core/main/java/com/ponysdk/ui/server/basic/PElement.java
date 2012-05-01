@@ -27,6 +27,9 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * All HTML element interfaces derive from this class.Useful to create native HTML component.
+ */
 public class PElement extends PComplexPanel {
 
     private final String tagName;
@@ -60,7 +63,12 @@ public class PElement extends PComplexPanel {
         this.innerTxt = innerTxt;
 
         final Update update = new Update(ID);
-        update.put(PROPERTY.INNER_TEXT, innerTxt);
+        if (innerTxt == null) {
+            update.put(PROPERTY.CLEAR_INNER_TEXT, true);
+        } else {
+            update.put(PROPERTY.INNER_TEXT, innerTxt);
+        }
+
         getPonySession().stackInstruction(update);
     }
 

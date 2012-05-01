@@ -43,6 +43,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
+/**
+ * A widget that wraps the HTML &lt;input type='file'&gt; element.
+ */
 public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
@@ -60,6 +63,11 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     public PFileUpload() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
+    }
+
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.FILE_UPLOAD;
     }
 
     @Override
@@ -98,11 +106,6 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public String getName() {
         return name;
-    }
-
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.FILE_UPLOAD;
     }
 
     public void addStreamHandler(final PStreamHandler streamHandler) {

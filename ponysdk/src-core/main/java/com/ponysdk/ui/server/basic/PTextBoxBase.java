@@ -44,7 +44,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
-    private String text;
+    private String text = "";
 
     public PTextBoxBase() {
         this(null);
@@ -77,7 +77,8 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     @Override
-    public void setText(final String text) {
+    public void setText(String text) {
+        if (text == null) text = "";
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
