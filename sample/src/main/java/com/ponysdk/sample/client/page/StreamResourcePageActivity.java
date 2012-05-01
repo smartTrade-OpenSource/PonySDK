@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -32,35 +32,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.PStreamHandler;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class StreamResourcePageActivity extends PageActivity {
-
-    private PVerticalPanel verticalPanel;
+public class StreamResourcePageActivity extends SamplePageActivity {
 
     public StreamResourcePageActivity() {
         super("Stream resource", "Resource management");
     }
 
     @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onLeavingPage() {}
-
-    @Override
-    protected void onShowPage(final Place place) {
-        pageView.getBody().setWidget(verticalPanel);
-    }
-
-    @Override
     protected void onFirstShowPage() {
-        verticalPanel = new PVerticalPanel();
+        super.onFirstShowPage();
+
+        final PFlowPanel panel = new PFlowPanel();
 
         final PButton downloadImageButton = new PButton("Download Pony image");
 
@@ -97,6 +84,8 @@ public class StreamResourcePageActivity extends PageActivity {
             }
         });
 
-        verticalPanel.add(downloadImageButton);
+        panel.add(downloadImageButton);
+
+        examplePanel.setWidget(panel);
     }
 }

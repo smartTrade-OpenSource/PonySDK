@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -44,7 +44,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     private FormPanel wrappedFormPanel;
 
-    private final FileUpload fileUpload = new FileUpload();
+    final FileUpload fileUpload = new FileUpload();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
