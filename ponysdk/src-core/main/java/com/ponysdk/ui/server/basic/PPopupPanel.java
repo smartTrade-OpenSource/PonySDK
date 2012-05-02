@@ -151,6 +151,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void center() {
         this.center = true;
+        this.showing = true;
+
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_CENTER, center);
         getPonySession().stackInstruction(update);
