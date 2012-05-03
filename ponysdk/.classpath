@@ -10,6 +10,7 @@
 	<classpathentry kind="src" path="src-spring/main/java"/>
 	<classpathentry kind="src" path="src-persistency/main/java"/>
 	<classpathentry kind="src" path="src-mongodb/main/java"/>
+	<classpathentry kind="src" path="src-core/test/java"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev-2.4.0.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.4.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -25,5 +26,10 @@
 	<classpathentry kind="lib" path="libs/json_jackson/jackson-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/json_jackson/jackson-databind-2.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/mongodb/mongo-java-driver-2.7.3.jar"/>
+	<classpathentry kind="lib" path="libs/tests/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-api-2.21.0.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-firefox-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-java-2.21.0.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-remote-driver-2.21.0.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

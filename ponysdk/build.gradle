@@ -45,10 +45,15 @@ configurations {
 	hibernate
 	jasper
 	mongodb
+	selenium
 	json_jackson
 	
 	compile {
 		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson
+	}
+
+	testCompile {
+		extendsFrom selenium
 	}
 	
 	runtime {
@@ -69,6 +74,8 @@ dependencies {
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
+	selenium 'org.seleniumhq.selenium:selenium-java:2.21.0'
+	selenium 'junit:junit:4.10'  
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
 }
 
@@ -176,6 +183,10 @@ task copyAllLibs << {
 	copy {
 		from configurations.mongodb
 		into 'libs/mongodb'
+	}
+	copy {
+		from configurations.selenium
+		into 'libs/tests'
 	}
 	copy {
 		from configurations.json_jackson
