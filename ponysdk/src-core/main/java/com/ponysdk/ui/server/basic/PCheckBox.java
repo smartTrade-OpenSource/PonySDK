@@ -58,10 +58,6 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     private boolean value;
 
-    private String text;
-
-    private String html;
-
     public PCheckBox() {
         this(null);
     }
@@ -90,32 +86,6 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Override
     public Collection<PValueChangeHandler<Boolean>> getValueChangeHandlers() {
         return Collections.unmodifiableCollection(handlers);
-    }
-
-    @Override
-    public String getHTML() {
-        return html;
-    }
-
-    @Override
-    public void setHTML(final String html) {
-        this.html = html;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.HTML, html);
-        getPonySession().stackInstruction(update);
-    }
-
-    @Override
-    public String getText() {
-        return text;
-    }
-
-    @Override
-    public void setText(final String text) {
-        this.text = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
     }
 
     @Override

@@ -68,10 +68,6 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.VALUE)) {
             uiObject.setValue(update.getBoolean(PROPERTY.VALUE));
-        } else if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.HTML)) {
-            uiObject.setHTML(update.getString(PROPERTY.HTML));
         } else {
             super.update(update, uiService);
         }
