@@ -29,7 +29,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.core.event.PHandlerRegistration;
@@ -286,10 +285,4 @@ public class DateTimeBoxFormFieldRenderer extends DateBoxFormFieldRenderer {
         }
     }
 
-    @Override
-    public void setTimeZone(final TimeZone timeZone) {
-        for (final FormFieldComponent<PDateBox> p : fields) {
-            p.getInput().setTimeZone(timeZone);
-        }
-    }
 }

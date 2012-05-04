@@ -21,29 +21,26 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.ui.server.basic.PDateBox;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.core.event.PEvent;
 
-public class DatePickerPageActivity extends SamplePageActivity {
+public class PCloseEvent extends PEvent<PCloseHandler> {
 
-    public DatePickerPageActivity() {
-        super("Date Picker", "Widgets");
+    public static final Type<PCloseHandler> TYPE = new Type<PCloseHandler>();
+
+    public PCloseEvent(final Object sourceComponent) {
+        super(sourceComponent);
     }
 
     @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
-
-        final PVerticalPanel panel = new PVerticalPanel();
-        panel.setSpacing(10);
-
-        panel.add(new PLabel("Permanent DatePicker:"));
-        panel.add(new PLabel("DateBox with popup DatePicker:"));
-        panel.add(new PDateBox());
-
-        examplePanel.setWidget(panel);
+    public Type<PCloseHandler> getAssociatedType() {
+        return TYPE;
     }
+
+    @Override
+    protected void dispatch(final PCloseHandler handler) {
+        handler.onClose(this);
+    }
+
 }

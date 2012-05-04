@@ -67,6 +67,10 @@ public class PDialogBox extends PDecoratedPopupPanel {
         super(false);
     }
 
+    public PDialogBox(final boolean autoHide) {
+        super(autoHide);
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.DIALOG_BOX;

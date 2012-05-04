@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.rich.POptionPane;
 import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
@@ -132,7 +133,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         popup.addCloseHandler(new PCloseHandler() {
 
             @Override
-            public void onClose() {
+            public void onClose(final PCloseEvent closeEvent) {
                 optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
                 // PClickEvent.TYPE);

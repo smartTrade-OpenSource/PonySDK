@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,22 +63,13 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private final List<PValueChangeHandler<Date>> handlers = new ArrayList<PValueChangeHandler<Date>>();
 
     private Date date;
-
     private SimpleDateFormat dateFormat;
 
     public PDateBox() {
-        this(null, new SimpleDateFormat());
+        this(new SimpleDateFormat());
     }
 
     public PDateBox(final SimpleDateFormat dateFormat) {
-        this(null, dateFormat);
-    }
-
-    public PDateBox(final String text) {
-        this(text, new SimpleDateFormat());
-    }
-
-    public PDateBox(final String text, final SimpleDateFormat dateFormat) {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.DATE_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
 
@@ -97,7 +86,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         if (e.getString(HANDLER.KEY).equals(HANDLER.DATE_VALUE_CHANGE_HANDLER)) {
             final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
-            if (data != null) {
+            if (data != null && !data.isEmpty()) {
                 try {
                     date = dateFormat.parse(data);
                 } catch (final ParseException ex) {
@@ -142,12 +131,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         getPonySession().stackInstruction(update);
     }
 
-    public DateFormat getDateFormat() {
+    public SimpleDateFormat getDateFormat() {
         return dateFormat;
-    }
-
-    public void setTimeZone(final TimeZone timeZone) {
-        dateFormat.setTimeZone(timeZone);
     }
 
     @Override

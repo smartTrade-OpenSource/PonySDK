@@ -1,7 +1,12 @@
 
 package com.ponysdk.test;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,8 +33,18 @@ import com.ponysdk.test.UiBuilderTestEntryPoint.RequestHandler;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PComplexPanel;
+import com.ponysdk.ui.server.basic.PDateBox;
+import com.ponysdk.ui.server.basic.PDialogBox;
+import com.ponysdk.ui.server.basic.PDisclosurePanel;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRootPanel;
+import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
+import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 
 public class UiBuilderTest {
@@ -49,7 +64,7 @@ public class UiBuilderTest {
     public static void runBeforeClass() throws Exception {
         log.info("Starting jetty webserver");
 
-        // System.setProperty("webdriver.firefox.bin", "PATH TO/firefox.exe");
+        // System.setProperty("webdriver.firefox.bin", "PATH/firefox.exe");
 
         eventsListener = new PEventsListener();
 
@@ -84,13 +99,14 @@ public class UiBuilderTest {
 
     @Before
     public void beforeTest() {
-        log.info(name.getMethodName());
+        log.info("Running #" + name.getMethodName());
     }
 
     @After
     public void afterTest() {
+        eventsListener.clear();
         widgetByDebugID.clear();
-        sleep(1000);
+        sleep(200);
     }
 
     @Test
@@ -243,6 +259,299 @@ public class UiBuilderTest {
         Assert.assertEquals(Boolean.FALSE, checkbox1.getValue());
     }
 
+    @Test
+    public void testPComplexPanel() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PComplexPanel complexPanel1 = new PVerticalPanel();
+                complexPanel1.ensureDebugId("complexPanel1");
+                PRootPanel.get().add(complexPanel1);
+                register(complexPanel1);
+            }
+        });
+
+        WebElement element = findElementById("complexPanel1");
+        final PComplexPanel complexPanel1 = get("complexPanel1");
+
+        // add child
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PComplexPanel complexPanel1 = get("complexPanel1");
+                complexPanel1.add(new PAnchor("child1"));
+                complexPanel1.add(new PAnchor("child3"));
+            }
+        });
+
+        element = findElementById("complexPanel1");
+        List<WebElement> anchors = element.findElements(By.tagName("a"));
+        Assert.assertEquals(2, anchors.size());
+        Assert.assertEquals(2, complexPanel1.getWidgetCount());
+
+        // insert child
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PComplexPanel complexPanel1 = get("complexPanel1");
+                final PAnchor child2 = new PAnchor("child2");
+                child2.ensureDebugId("child2");
+                complexPanel1.insert(child2, 1);
+                register(child2);
+            }
+        });
+
+        element = findElementById("complexPanel1");
+        anchors = element.findElements(By.tagName("a"));
+        Assert.assertEquals(3, anchors.size());
+        Assert.assertEquals("child1", anchors.get(0).getText());
+        Assert.assertEquals("child2", anchors.get(1).getText());
+        Assert.assertEquals("child3", anchors.get(2).getText());
+
+        Assert.assertEquals(3, complexPanel1.getWidgetCount());
+        Assert.assertEquals("child1", ((PAnchor) complexPanel1.getWidget(0)).getText());
+        Assert.assertEquals("child2", ((PAnchor) complexPanel1.getWidget(1)).getText());
+        Assert.assertEquals("child3", ((PAnchor) complexPanel1.getWidget(2)).getText());
+
+        // remove child
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PComplexPanel complexPanel1 = get("complexPanel1");
+                final PAnchor child2 = get("child2");
+                complexPanel1.remove(child2);
+            }
+        });
+
+        element = findElementById("complexPanel1");
+        anchors = element.findElements(By.tagName("a"));
+        Assert.assertEquals(2, anchors.size());
+        Assert.assertEquals("child1", anchors.get(0).getText());
+        Assert.assertEquals("child3", anchors.get(1).getText());
+
+        Assert.assertEquals(2, complexPanel1.getWidgetCount());
+        Assert.assertEquals("child1", ((PAnchor) complexPanel1.getWidget(0)).getText());
+        Assert.assertEquals("child3", ((PAnchor) complexPanel1.getWidget(1)).getText());
+    }
+
+    // TODO PCookies
+
+    @Test
+    public void testPDateBox() {
+
+        final String datePattern = "yyyy-MM-dd";
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+        final Calendar calendar = new GregorianCalendar(2012, 10, 27);
+        final Date date = calendar.getTime();
+        final String dateAsString = dateFormat.format(date);
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PLabel label1 = new PLabel("Date test");
+                label1.ensureDebugId("label1");
+                PRootPanel.get().add(label1);
+                register(label1);
+
+                final PDateBox dateBox1 = new PDateBox(new SimpleDateFormat(datePattern));
+                dateBox1.ensureDebugId("dateBox1");
+                PRootPanel.get().add(dateBox1);
+                register(dateBox1);
+            }
+        });
+
+        WebElement element = findElementById("dateBox1");
+        final PDateBox dateBox1 = get("dateBox1");
+        Assert.assertEquals(datePattern, dateBox1.getDateFormat().toPattern());
+
+        // update date
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDateBox dateBox1 = get("dateBox1");
+                dateBox1.setValue(date);
+            }
+        });
+
+        element = findElementById("dateBox1");
+        Assert.assertEquals(dateAsString, element.getAttribute("value"));
+        Assert.assertEquals(dateAsString, dateBox1.getDisplayedValue());
+
+        // add value change handler
+        updateUI(new RequestHandler() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onRequest() {
+                final PDateBox dateBox1 = get("dateBox1");
+                dateBox1.addValueChangeHandler(eventsListener);
+            }
+        });
+
+        element = findElementById("dateBox1");
+        element.clear();
+        final PValueChangeEvent<Date> e1 = eventsListener.poll();
+        Assert.assertNull(e1.getValue());
+
+        element.sendKeys(new String("2012-10-30"));
+        element = findElementById("label1");
+        element.click();
+
+        final PValueChangeEvent<Date> e2 = eventsListener.poll();
+        Assert.assertEquals("2012-10-30", dateFormat.format(e2.getValue()));
+        Assert.assertEquals("2012-10-30", dateBox1.getDisplayedValue());
+    }
+
+    @Test
+    public void testPDialogBox() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDialogBox dialogBox1 = new PDialogBox();
+                dialogBox1.ensureDebugId("dialogBox1");
+                dialogBox1.show();
+                register(dialogBox1);
+            }
+        });
+
+        findElementById("dialogBox1");
+
+        // set caption
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDialogBox dialogBox1 = get("dialogBox1");
+                dialogBox1.setCaption("The Caption");
+            }
+        });
+
+        final WebElement caption = findElementById("dialogBox1-caption");
+        Assert.assertEquals("The Caption", caption.getText());
+
+        // add close button
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDialogBox dialogBox1 = get("dialogBox1");
+                final PButton close1 = new PButton("Close");
+                close1.ensureDebugId("close1");
+                dialogBox1.setWidget(close1);
+                dialogBox1.addCloseHandler(eventsListener);
+                close1.addClickHandler(new PClickHandler() {
+
+                    @Override
+                    public void onClick(final PClickEvent event) {
+                        dialogBox1.hide();
+                    }
+                });
+                register(close1);
+            }
+        });
+
+        final WebElement close1 = findElementById("close1");
+        close1.click();
+
+        // check that we received close event
+        final PCloseEvent e1 = eventsListener.poll();
+        Assert.assertNotNull(e1);
+    }
+
+    @Test
+    public void testPDisclosurePanel() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDisclosurePanel disclosurePanel1 = new PDisclosurePanel("A disclosure panel");
+                disclosurePanel1.ensureDebugId("disclosurePanel1");
+                PRootPanel.get().add(disclosurePanel1);
+                register(disclosurePanel1);
+            }
+        });
+
+        WebElement disclosure = findElementById("disclosurePanel1");
+        Assert.assertTrue(disclosure.getAttribute("class").contains("gwt-DisclosurePanel-closed"));
+        final PDisclosurePanel disclosurePanel1 = get("disclosurePanel1");
+        Assert.assertEquals(false, disclosurePanel1.isOpen());
+
+        WebElement disclosureHeader = findElementById("disclosurePanel1-header");
+        Assert.assertEquals("A disclosure panel", disclosureHeader.getText());
+
+        // set content
+        // open / close
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDisclosurePanel disclosurePanel1 = get("disclosurePanel1");
+                final PLabel label = new PLabel("Text");
+                label.ensureDebugId("label1");
+                disclosurePanel1.setContent(label);
+                disclosurePanel1.addOpenHandler(eventsListener);
+                disclosurePanel1.addCloseHandler(eventsListener);
+                register(disclosurePanel1);
+            }
+        });
+
+        disclosureHeader = findElementById("disclosurePanel1-header");
+        disclosureHeader.click();
+        final POpenEvent e2 = eventsListener.poll();
+        Assert.assertNotNull(e2);
+        Assert.assertTrue(disclosurePanel1.isOpen());
+
+        disclosure = findElementById("disclosurePanel1");
+        final WebElement content = findElementById(disclosure, "label1");
+        Assert.assertEquals("Text", content.getText());
+
+        disclosureHeader.click();
+        final PCloseEvent e1 = eventsListener.poll();
+        Assert.assertNotNull(e1);
+        Assert.assertTrue(!disclosurePanel1.isOpen());
+
+        // server side open
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDisclosurePanel disclosurePanel1 = get("disclosurePanel1");
+                disclosurePanel1.setOpen(true);
+            }
+        });
+
+        disclosure = findElementById("disclosurePanel1");
+        Assert.assertTrue(disclosure.getAttribute("class").contains("gwt-DisclosurePanel-open"));
+
+        // server side close
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PDisclosurePanel disclosurePanel1 = get("disclosurePanel1");
+                disclosurePanel1.setOpen(false);
+            }
+        });
+
+        disclosure = findElementById("disclosurePanel1");
+        Assert.assertTrue(disclosure.getAttribute("class").contains("gwt-DisclosurePanel-closed"));
+
+    }
+
     protected void register(final PWidget widget) {
         widgetByDebugID.put(widget.getDebugID(), widget);
     }
@@ -253,10 +562,11 @@ public class UiBuilderTest {
     }
 
     private static WebElement findElementById(final String id) {
-
-        sleep(200);
-
         return webDriver.findElement(By.id("gwt-debug-" + id));
+    }
+
+    private static WebElement findElementById(final WebElement element, final String id) {
+        return element.findElement(By.id("gwt-debug-" + id));
     }
 
     private static void updateUI(final RequestHandler handler) {
