@@ -37,6 +37,7 @@ import com.ponysdk.ui.server.basic.PComplexPanel;
 import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PDisclosurePanel;
+import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRootPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -61,31 +62,42 @@ public class UiBuilderTest {
     public TestName name = new TestName();
 
     @BeforeClass
-    public static void runBeforeClass() throws Exception {
-        log.info("Starting jetty webserver");
+    public static void runBeforeClass() throws Throwable {
 
-        // System.setProperty("webdriver.firefox.bin", "PATH/firefox.exe");
+        try {
+            log.info("Starting jetty webserver");
 
-        eventsListener = new PEventsListener();
+            // System.setProperty("webdriver.firefox.bin", "PATH/firefox.exe");
+            // System.setProperty("webdriver.firefox.bin",
+            // "C:/Program Files (x86)/Mozilla Firefox 9/firefox.exe");
+            // System.setProperty("webdriver.chrome.driver",
+            // "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe");
 
-        webServer = new Server(5000);
-        final WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/test");
-        webapp.setDescriptor("test");
-        webapp.setWar("src-core/test/resources/war");
-        webapp.setExtractWAR(true);
-        webapp.setParentLoaderPriority(true);
-        webapp.setClassLoader(new WebAppClassLoader(UiBuilderTest.class.getClassLoader(), webapp));
+            eventsListener = new PEventsListener();
 
-        webServer.addHandler(webapp);
-        webServer.start();
+            webServer = new Server(5000);
+            final WebAppContext webapp = new WebAppContext();
+            webapp.setContextPath("/test");
+            webapp.setDescriptor("test");
+            webapp.setWar("src-core/test/resources/war");
+            webapp.setExtractWAR(true);
+            webapp.setParentLoaderPriority(true);
+            webapp.setClassLoader(new WebAppClassLoader(UiBuilderTest.class.getClassLoader(), webapp));
 
-        webDriver = new FirefoxDriver();
+            webServer.addHandler(webapp);
+            webServer.start();
 
-        webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        webDriver.manage().deleteAllCookies();
+            webDriver = new FirefoxDriver();
+            // webDriver = new ChromeDriver();
 
-        webDriver.navigate().to("http://localhost:5000/test");
+            webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            webDriver.manage().deleteAllCookies();
+
+            webDriver.navigate().to("http://localhost:5000/test");
+        } catch (final Throwable e) {
+            log.error("", e);
+            throw e;
+        }
     }
 
     @AfterClass
@@ -236,8 +248,9 @@ public class UiBuilderTest {
             }
         });
 
-        final WebElement element = findElementById("checkbox1");
+        WebElement element = findElementById("checkbox1-label");
         Assert.assertEquals("A checkbox", element.getText());
+        element = findElementById("checkbox1-input");
         element.click();
 
         // check event
@@ -549,6 +562,44 @@ public class UiBuilderTest {
 
         disclosure = findElementById("disclosurePanel1");
         Assert.assertTrue(disclosure.getAttribute("class").contains("gwt-DisclosurePanel-closed"));
+
+    }
+
+    @Test
+    public void testPElement() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PElement ul1 = new PElement("ul");
+                ul1.ensureDebugId("ul1");
+                final PElement li1 = new PElement("li");
+                li1.setInnerText("1rst element");
+                final PElement li2 = new PElement("li");
+                li2.setInnerHTML("<font color='red'>2d</font> element");
+                final PLabel label1 = new PLabel("A widget");
+                ul1.add(li1);
+                ul1.add(li2);
+                ul1.add(label1);
+                PRootPanel.get().add(ul1);
+                register(ul1);
+            }
+        });
+
+        final WebElement ul1 = findElementById("ul1");
+        final List<WebElement> liElements = ul1.findElements(By.tagName("li"));
+        Assert.assertEquals(2, liElements.size());
+        Assert.assertEquals("1rst element", liElements.get(0).getText());
+        Assert.assertEquals("2d element", liElements.get(1).getText());
+
+        final WebElement font = liElements.get(1).findElement(By.tagName("font"));
+        final String color = font.getAttribute("color");
+        Assert.assertEquals("red", color);
+
+        final List<WebElement> divElements = ul1.findElements(By.tagName("div"));
+        Assert.assertEquals(1, divElements.size());
 
     }
 

@@ -23,9 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.Date;
+
 import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class DatePickerPageActivity extends SamplePageActivity {
 
@@ -40,9 +45,18 @@ public class DatePickerPageActivity extends SamplePageActivity {
         final PVerticalPanel panel = new PVerticalPanel();
         panel.setSpacing(10);
 
+        final PDateBox dateBox = new PDateBox();
+        dateBox.addValueChangeHandler(new PValueChangeHandler<Date>() {
+
+            @Override
+            public void onValueChange(final PValueChangeEvent<Date> event) {
+                PNotificationManager.showHumanizedNotification("New date: " + event.getValue());
+            }
+        });
+
         panel.add(new PLabel("Permanent DatePicker:"));
         panel.add(new PLabel("DateBox with popup DatePicker:"));
-        panel.add(new PDateBox());
+        panel.add(dateBox);
 
         examplePanel.setWidget(panel);
     }

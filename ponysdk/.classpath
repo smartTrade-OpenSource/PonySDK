@@ -31,5 +31,6 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-firefox-driver-2.21.0.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-java-2.21.0.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-remote-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-chrome-driver-2.21.0.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
