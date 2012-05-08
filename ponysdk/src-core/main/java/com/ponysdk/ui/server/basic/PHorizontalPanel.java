@@ -38,7 +38,6 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
 
     private PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.ALIGN_LEFT;
-
     private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
 
     @Override

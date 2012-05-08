@@ -56,14 +56,14 @@ public class AddCustomColumnDescriptorForm extends FormActivity {
 
     private final ComplexListActivity<?> complexListActivity;
 
-    public AddCustomColumnDescriptorForm(FormConfiguration formConfiguration, FormView formView, Class<?> instanceClass, ComplexListActivity<?> complexListActivity) {
+    public AddCustomColumnDescriptorForm(final FormConfiguration formConfiguration, final FormView formView, final Class<?> instanceClass, final ComplexListActivity<?> complexListActivity) {
         super(formConfiguration, formView);
         this.clas = instanceClass;
         this.complexListActivity = complexListActivity;
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         super.start(world);
         captionFormField = new FormField("Caption");
         captionFormField.addValidator(new NotEmptyFieldValidator());
@@ -75,7 +75,7 @@ public class AddCustomColumnDescriptorForm extends FormActivity {
         addFormField(fieldPathFormField);
         addHandlerToFormField(fieldPathFormField);
 
-        ListBoxFormFieldRenderer typeRenderer = new ListBoxFormFieldRenderer("Field Type");
+        final ListBoxFormFieldRenderer typeRenderer = new ListBoxFormFieldRenderer("Field Type");
         typeRenderer.addItem(String.class.getSimpleName(), String.class);
         typeRenderer.addItem(Integer.class.getSimpleName(), Integer.class);
         typeRenderer.addItem(Long.class.getSimpleName(), Long.class);
@@ -89,12 +89,12 @@ public class AddCustomColumnDescriptorForm extends FormActivity {
 
     }
 
-    private void addHandlerToFormField(FormField formField) {
+    private void addHandlerToFormField(final FormField formField) {
         formField.addDomHandler(new PKeyUpHandler() {
 
             @Override
-            public void onKeyUp(int keyCode) {
-                if (keyCode != KEY_ENTER) return;
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+                if (keyUpEvent.getKeyCode() != KEY_ENTER) return;
             }
         }, PKeyUpEvent.TYPE);
     }
@@ -129,7 +129,7 @@ public class AddCustomColumnDescriptorForm extends FormActivity {
         return fieldPathFormField.getStringValue();
     }
 
-    private static boolean hasProperty(Class<?> clas, String property) {
+    private static boolean hasProperty(final Class<?> clas, final String property) {
         final String propertyPath = property;
         boolean isValid = true;
         Class<?> propertyClass = null;

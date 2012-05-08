@@ -75,7 +75,7 @@ public class LoginActivity extends AbstractActivity {
         loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyPress(final int keyCode) {
+            public void onKeyPress(final PKeyPressEvent keyPressEvent) {
                 doLogin();
             }
         }, PKeyPressEvent.TYPE);

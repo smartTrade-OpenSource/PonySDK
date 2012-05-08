@@ -50,6 +50,8 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.CLEAR)) {
             uiObject.clear();
+        } else if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
+            uiObject.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
         } else if (update.containsKey(PROPERTY.CELL_SPACING)) {
             uiObject.setCellSpacing(update.getInt(PROPERTY.CELL_SPACING));
         } else if (update.containsKey(PROPERTY.CELL_PADDING)) {
@@ -64,7 +66,6 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
         } else if (update.containsKey(PROPERTY.HTMLTABLE_CELL_STYLE)) {
             final int cellRow = update.getInt(PROPERTY.ROW);
             final int cellColumn = update.getInt(PROPERTY.COLUMN);
-
             if (update.containsKey(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME)) {
                 uiObject.getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME));
             }
@@ -79,9 +80,19 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
                 final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PHorizontalAlignment.values()[update.getInt(PROPERTY.CELL_HORIZONTAL_ALIGNMENT)].asHorizontalAlignmentConstant();
                 uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
             }
+        } else if (update.containsKey(PROPERTY.HTMLTABLE_COLUMN_STYLE)) {
+            final int column = update.getInt(PROPERTY.COLUMN);
+            if (update.containsKey(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME)) {
+                uiObject.getColumnFormatter().addStyleName(column, update.getString(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME));
+            }
+            if (update.containsKey(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME)) {
+                uiObject.getColumnFormatter().removeStyleName(column, update.getString(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME));
+            }
+            if (update.containsKey(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH)) {
+                uiObject.getColumnFormatter().setWidth(column, update.getString(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH));
+            }
         } else {
             super.update(update, uiService);
         }
     }
-
 }

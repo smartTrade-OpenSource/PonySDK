@@ -25,6 +25,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
 public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
@@ -52,10 +53,10 @@ public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
         multiSelectListBoxView.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCodes.BACKSPACE, PKeyCodes.LEFT, PKeyCodes.RIGHT) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 if (selectedItems.isEmpty()) return;
 
-                if (PKeyCodes.BACKSPACE.equals(keyCode)) {
+                if (PKeyCodes.BACKSPACE.equals(keyUpEvent.getKeyCode())) {
                     if (selectedItem == null) return;
                     multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));
                     if (selectedItem > 0) {
@@ -63,7 +64,7 @@ public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
                         multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
                     }
                     unSelectItem(selectedItems.get(selectedItem));
-                } else if (PKeyCodes.LEFT.equals(keyCode)) {
+                } else if (PKeyCodes.LEFT.equals(keyUpEvent.getKeyCode())) {
                     if (selectedItem == null) {
                         selectedItem = selectedItems.size() - 1;
                         multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
@@ -72,7 +73,7 @@ public class PMultiSelectListBox implements IsPWidget, HasPChangeHandlers {
                         selectedItem--;
                         multiSelectListBoxView.focusSelectedItem(selectedItems.get(selectedItem));
                     }
-                } else if (PKeyCodes.RIGHT.equals(keyCode)) {
+                } else if (PKeyCodes.RIGHT.equals(keyUpEvent.getKeyCode())) {
                     if (selectedItem == null) return;
                     if (selectedItem < selectedItems.size() - 1) {
                         multiSelectListBoxView.blurSelectedItem(selectedItems.get(selectedItem));

@@ -9,15 +9,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.PEvent;
+import com.ponysdk.ui.server.basic.event.PBlurEvent;
+import com.ponysdk.ui.server.basic.event.PBlurHandler;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.basic.event.PFocusEvent;
+import com.ponysdk.ui.server.basic.event.PFocusHandler;
+import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
+import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
+import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
+import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 @SuppressWarnings("rawtypes")
-public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpenHandler {
+public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpenHandler, PBlurHandler, PFocusHandler, PKeyPressHandler, PKeyUpHandler, PMouseOverHandler {
 
     private static Logger log = LoggerFactory.getLogger(PEventsListener.class);
 
@@ -55,6 +65,36 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
     public void onOpen(final POpenEvent openEvent) {
         log.info("onOpen");
         eventQueue.add(openEvent);
+    }
+
+    @Override
+    public void onMouseOver(final PMouseOverEvent mouseOverEvent) {
+        log.info("onMouseOver");
+        eventQueue.add(mouseOverEvent);
+    }
+
+    @Override
+    public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+        log.info("onKeyUp");
+        eventQueue.add(keyUpEvent);
+    }
+
+    @Override
+    public void onKeyPress(final PKeyPressEvent keyPressEvent) {
+        log.info("onKeyPress");
+        eventQueue.add(keyPressEvent);
+    }
+
+    @Override
+    public void onFocus(final PFocusEvent event) {
+        log.info("onFocus");
+        eventQueue.add(event);
+    }
+
+    @Override
+    public void onBlur(final PBlurEvent event) {
+        log.info("onBlur");
+        eventQueue.add(event);
     }
 
 }

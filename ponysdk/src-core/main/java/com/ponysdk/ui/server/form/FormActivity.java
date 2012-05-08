@@ -46,16 +46,16 @@ public class FormActivity extends AbstractActivity implements Activity {
 
     protected final FormView formView;
 
-    public FormActivity(FormView formView) {
+    public FormActivity(final FormView formView) {
         this(null, formView);
     }
 
-    public FormActivity(FormConfiguration formConfiguration, FormView formView) {
+    public FormActivity(final FormConfiguration formConfiguration, final FormView formView) {
         this.formView = formView;
         this.formView.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyUp(int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 if (isValid()) {
                     fireEvent(new SubmitFormEvent(FormActivity.this));
                 }
@@ -64,14 +64,14 @@ public class FormActivity extends AbstractActivity implements Activity {
         }, PKeyUpEvent.TYPE);
     }
 
-    public void addFormField(FormField formField) {
+    public void addFormField(final FormField formField) {
         formFields.add(formField);
         final IsPWidget renderer = formField.render();
         formView.addFormField(renderer);
         widgetByFormField.put(formField, renderer);
     }
 
-    public void removeFormField(FormField formField) {
+    public void removeFormField(final FormField formField) {
         formFields.remove(formField);
         formView.removeFormField(widgetByFormField.get(formField));
     }
@@ -93,12 +93,12 @@ public class FormActivity extends AbstractActivity implements Activity {
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         world.setWidget(formView.asWidget());
     }
 
     @Override
-    public void goTo(Place newPlace, PAcceptsOneWidget world) {
+    public void goTo(final Place newPlace, final PAcceptsOneWidget world) {
         super.goTo(newPlace, world);
         world.setWidget(formView.asWidget());
     }

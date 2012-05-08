@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
-import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -56,7 +55,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
  * <dd>Default style for when the date box has bad input.</dd>
  * </dl>
  */
-public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date>, PKeyPressHandler {
+public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
@@ -152,8 +151,5 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : null);
         getPonySession().stackInstruction(update);
     }
-
-    @Override
-    public void onKeyPress(final int keyCode) {}
 
 }

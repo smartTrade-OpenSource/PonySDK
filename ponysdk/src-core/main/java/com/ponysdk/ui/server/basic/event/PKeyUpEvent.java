@@ -9,7 +9,7 @@ public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
 
     private final int keyCode;
 
-    public PKeyUpEvent(Object sourceComponent, int keyCode) {
+    public PKeyUpEvent(final Object sourceComponent, final int keyCode) {
         super(sourceComponent);
         this.keyCode = keyCode;
     }
@@ -20,8 +20,12 @@ public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
     }
 
     @Override
-    protected void dispatch(PKeyUpHandler handler) {
-        handler.onKeyUp(keyCode);
+    protected void dispatch(final PKeyUpHandler handler) {
+        handler.onKeyUp(this);
+    }
+
+    public int getKeyCode() {
+        return keyCode;
     }
 
 }

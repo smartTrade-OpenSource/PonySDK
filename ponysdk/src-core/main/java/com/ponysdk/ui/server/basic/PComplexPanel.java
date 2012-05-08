@@ -62,6 +62,10 @@ public abstract class PComplexPanel extends PPanel {
         return true;
     }
 
+    public boolean remove(final int index) {
+        return remove(getWidget(index));
+    }
+
     protected PWidgetCollection getChildren() {
         return children;
     }

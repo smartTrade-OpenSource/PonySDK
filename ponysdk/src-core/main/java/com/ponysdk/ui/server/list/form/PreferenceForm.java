@@ -143,7 +143,7 @@ public class PreferenceForm extends PScrollPanel {
             panel.addDomHandler(new PMouseOverHandler() {
 
                 @Override
-                public void onMouseOver() {
+                public void onMouseOver(final PMouseOverEvent mouseOverEvent) {
                     buttonPanel.setVisible(true);
                 }
             }, PMouseOverEvent.TYPE);
@@ -160,7 +160,7 @@ public class PreferenceForm extends PScrollPanel {
             if (i != 1) {
 
                 // up image
-                PImage upImage = new PImage(ARROW_UP_IMAGE_URL);
+                final PImage upImage = new PImage(ARROW_UP_IMAGE_URL);
                 upImage.setTitle("Move column up");
                 buttonPanel.add(upImage);
                 buttonPanel.setCellHorizontalAlignment(upImage, PHorizontalAlignment.ALIGN_LEFT);
@@ -168,7 +168,7 @@ public class PreferenceForm extends PScrollPanel {
 
                     @Override
                     public void onClick(final PClickEvent event) {
-                        int index = labels.indexOf(label) - 1;
+                        final int index = labels.indexOf(label) - 1;
                         labels.remove(label);
                         labels.add(index, label);
                         fireColumnMoved();
@@ -181,7 +181,7 @@ public class PreferenceForm extends PScrollPanel {
             }
             if (i != labels.size()) {
                 // down image
-                PImage downImage = new PImage(ARROW_DOWN_IMAGE_URL);
+                final PImage downImage = new PImage(ARROW_DOWN_IMAGE_URL);
                 downImage.setTitle("Move column down");
                 buttonPanel.add(downImage);
                 buttonPanel.setCellHorizontalAlignment(downImage, PHorizontalAlignment.ALIGN_RIGHT);
@@ -189,7 +189,7 @@ public class PreferenceForm extends PScrollPanel {
 
                     @Override
                     public void onClick(final PClickEvent event) {
-                        int index = labels.indexOf(label) + 1;
+                        final int index = labels.indexOf(label) + 1;
                         labels.remove(label);
                         labels.add(index, label);
                         fireColumnMoved();
@@ -202,7 +202,7 @@ public class PreferenceForm extends PScrollPanel {
             }
             // add erase button for custom column
             if (label.custom) {
-                PButton eraseButton = new PButton("Erase");
+                final PButton eraseButton = new PButton("Erase");
                 eraseButton.addClickHandler(new PClickHandler() {
 
                     @Override

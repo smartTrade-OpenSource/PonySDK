@@ -27,5 +27,5 @@ import com.ponysdk.core.event.PEventHandler;
 
 public interface PKeyPressHandler extends PEventHandler {
 
-    void onKeyPress(int keyCode);
+    void onKeyPress(PKeyPressEvent keyPressEvent);
 }

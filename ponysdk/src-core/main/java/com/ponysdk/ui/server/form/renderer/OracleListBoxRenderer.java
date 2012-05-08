@@ -55,6 +55,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PDomEvent.Type;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -176,8 +177,8 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
         }
 
         @Override
-        public void onKeyUp(final int keyCode) {
-            final PKeyCodes code = PKeyCodes.fromInt(keyCode);
+        public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+            final PKeyCodes code = PKeyCodes.fromInt(keyUpEvent.getKeyCode());
 
             if (code == null) {
                 currentSelected = -1;
