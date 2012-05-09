@@ -9,7 +9,7 @@ public class PKeyPressEvent extends PKeyEvent<PKeyPressHandler> {
 
     private final int keyCode;
 
-    public PKeyPressEvent(Object sourceComponent, int keyCode) {
+    public PKeyPressEvent(final Object sourceComponent, final int keyCode) {
         super(sourceComponent);
         this.keyCode = keyCode;
     }
@@ -20,8 +20,12 @@ public class PKeyPressEvent extends PKeyEvent<PKeyPressHandler> {
     }
 
     @Override
-    protected void dispatch(PKeyPressHandler handler) {
-        handler.onKeyPress(keyCode);
+    protected void dispatch(final PKeyPressHandler handler) {
+        handler.onKeyPress(this);
+    }
+
+    public int getKeyCode() {
+        return keyCode;
     }
 
 }

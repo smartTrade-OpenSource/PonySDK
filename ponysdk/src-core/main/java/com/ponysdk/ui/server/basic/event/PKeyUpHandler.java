@@ -27,5 +27,5 @@ import com.ponysdk.core.event.PEventHandler;
 
 public interface PKeyUpHandler extends PEventHandler {
 
-    void onKeyUp(int keyCode);
+    void onKeyUp(PKeyUpEvent keyUpEvent);
 }

@@ -7,7 +7,7 @@ public class PMouseOverEvent extends PMouseEvent<PMouseOverHandler> {
 
     public static final PDomEvent.Type<PMouseOverHandler> TYPE = new PDomEvent.Type<PMouseOverHandler>(DomHandlerType.MOUSE_OVER);
 
-    public PMouseOverEvent(Object sourceComponent) {
+    public PMouseOverEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
@@ -17,8 +17,8 @@ public class PMouseOverEvent extends PMouseEvent<PMouseOverHandler> {
     }
 
     @Override
-    protected void dispatch(PMouseOverHandler handler) {
-        handler.onMouseOver();
+    protected void dispatch(final PMouseOverHandler handler) {
+        handler.onMouseOver(this);
     }
 
 }

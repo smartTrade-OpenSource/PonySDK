@@ -121,7 +121,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        public void insertRowStyle(final int row) {
+        protected void insertRowStyle(final int row) {
             final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() >= row) {
@@ -132,7 +132,7 @@ public abstract class PHTMLTable extends PPanel {
             styleNames = temp;
         }
 
-        public void removeRowStyle(final int row) {
+        protected void removeRowStyle(final int row) {
             styleNames.remove(row);
             final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
@@ -187,7 +187,7 @@ public abstract class PHTMLTable extends PPanel {
 
         public void setWidth(final int column, final String width) {
             final Update update = new Update(ID);
-
+            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.WIDTH, width);
@@ -196,17 +196,17 @@ public abstract class PHTMLTable extends PPanel {
 
         public void addStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME);
+            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
+            update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
 
         public void removeStyleName(final int column, final String styleName) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME);
+            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
+            update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.STYLE_NAME, styleName);
             getPonySession().stackInstruction(update);
         }
     }
@@ -229,13 +229,13 @@ public abstract class PHTMLTable extends PPanel {
 
     public int getRowCount() {
         if (columnByRow.isEmpty()) return 0;
-        return columnByRow.lastKey().value;
+        return columnByRow.lastKey().value + 1;
     }
 
     public int getCellCount(final int row) {
         final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
         if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
-        return cellByColumn.lastKey();
+        return cellByColumn.lastKey() + 1;
     }
 
     public void clearCell(final int row, final int col) {

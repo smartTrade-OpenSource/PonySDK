@@ -35,6 +35,7 @@ import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
 public class JavascriptPageActivity extends SamplePageActivity {
@@ -69,16 +70,16 @@ public class JavascriptPageActivity extends SamplePageActivity {
         inputTextBox.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
-                if (PKeyCodes.ENTER.equals(keyCode)) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+                if (PKeyCodes.ENTER.equals(keyUpEvent.getKeyCode())) {
                     executeJS(inputTextBox.getText());
                     commandIndex = 0;
-                } else if (PKeyCodes.UP.equals(keyCode)) {
+                } else if (PKeyCodes.UP.equals(keyUpEvent.getKeyCode())) {
                     if (commandIndex < commands.size()) {
                         commandIndex++;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));
                     }
-                } else if (PKeyCodes.DOWN.equals(keyCode)) {
+                } else if (PKeyCodes.DOWN.equals(keyUpEvent.getKeyCode())) {
                     if (commandIndex > 1) {
                         commandIndex--;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));

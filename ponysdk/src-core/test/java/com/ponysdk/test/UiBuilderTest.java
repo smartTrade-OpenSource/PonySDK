@@ -26,6 +26,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +39,28 @@ import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PElement;
+import com.ponysdk.ui.server.basic.PFlexTable;
+import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.ui.server.basic.PFocusPanel;
+import com.ponysdk.ui.server.basic.PGrid;
+import com.ponysdk.ui.server.basic.PHTML;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRootPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
+import com.ponysdk.ui.server.basic.event.PFocusEvent;
+import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
+import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class UiBuilderTest {
 
@@ -567,7 +581,6 @@ public class UiBuilderTest {
 
     @Test
     public void testPElement() {
-
         // creation
         updateUI(new RequestHandler() {
 
@@ -600,7 +613,357 @@ public class UiBuilderTest {
 
         final List<WebElement> divElements = ul1.findElements(By.tagName("div"));
         Assert.assertEquals(1, divElements.size());
+    }
 
+    public void testPFlexTable() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlexTable flexTable1 = new PFlexTable();
+                flexTable1.ensureDebugId("flexTable1");
+                final PLabel cell11 = new PLabel("Cell_1_1");
+                cell11.ensureDebugId("cell11");
+                flexTable1.setWidget(0, 0, new PLabel("Cell_0_0"));
+                flexTable1.setWidget(0, 1, new PLabel("Cell_0_1"));
+                flexTable1.setWidget(1, 0, new PLabel("Cell_1_0"));
+                flexTable1.setWidget(1, 1, cell11);
+                flexTable1.setBorderWidth(1);
+                flexTable1.setCellPadding(2);
+                flexTable1.setCellSpacing(3);
+                PRootPanel.get().add(flexTable1);
+                register(flexTable1);
+                register(cell11);
+            }
+        });
+
+        WebElement flexTable1 = findElementById("flexTable1");
+        Assert.assertEquals(flexTable1.getAttribute("border"), "1");
+        Assert.assertEquals(flexTable1.getAttribute("cellPadding"), "2");
+        Assert.assertEquals(flexTable1.getAttribute("cellSpacing"), "3");
+
+        List<WebElement> rows = flexTable1.findElements(By.tagName("tr"));
+        Assert.assertEquals(rows.size(), 2);
+        List<WebElement> cells = flexTable1.findElements(By.tagName("td"));
+        Assert.assertEquals(cells.size(), 4);
+        Assert.assertEquals(cells.get(0).getText(), "Cell_0_0");
+
+        final PFlexTable pFlexTable1 = get("flexTable1");
+        Assert.assertEquals(2, pFlexTable1.getRowCount());
+        Assert.assertEquals(2, pFlexTable1.getCellCount(0));
+
+        // clear cell, insert new elements
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlexTable flexTable1 = get("flexTable1");
+                final PLabel cell11 = get("cell11");
+                flexTable1.remove(cell11);
+                flexTable1.insertRow(0);
+                flexTable1.setWidget(0, 0, new PLabel("Cell_2_0"));
+                flexTable1.setWidget(0, 1, new PLabel("Cell_2_1"));
+                flexTable1.setWidget(3, 0, new PLabel("Cell_3_0"));
+                flexTable1.setWidget(3, 1, new PLabel("Cell_3_1"));
+            }
+        });
+
+        flexTable1 = findElementById("flexTable1");
+        rows = flexTable1.findElements(By.tagName("tr"));
+        Assert.assertEquals(rows.size(), 4);
+
+        cells = flexTable1.findElements(By.tagName("td"));
+        Assert.assertEquals(cells.size(), 8);
+        Assert.assertEquals(cells.get(0).getText(), "Cell_2_0");
+        Assert.assertEquals(cells.get(1).getText(), "Cell_2_1");
+        Assert.assertEquals(cells.get(2).getText(), "Cell_0_0");
+        Assert.assertEquals(cells.get(3).getText(), "Cell_0_1");
+        Assert.assertEquals(cells.get(4).getText(), "Cell_1_0");
+        Assert.assertEquals(cells.get(5).getText(), "");
+        Assert.assertEquals(cells.get(6).getText(), "Cell_3_0");
+        Assert.assertEquals(cells.get(7).getText(), "Cell_3_1");
+
+        Assert.assertEquals(4, pFlexTable1.getRowCount());
+        Assert.assertEquals(2, pFlexTable1.getCellCount(0));
+
+        // remove row, add/remove row style, add/remove column style, add/remove cell style
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlexTable flexTable1 = get("flexTable1");
+                flexTable1.removeRow(2);
+
+                flexTable1.getRowFormatter().addStyleName(1, "row1");
+                flexTable1.getRowFormatter().addStyleName(2, "row2");
+                flexTable1.getRowFormatter().addStyleName(2, "row2bis");
+                flexTable1.getRowFormatter().addStyleName(2, "row2ter");
+                flexTable1.getRowFormatter().removeStyleName(2, "row2bis");
+
+                flexTable1.getColumnFormatter().addStyleName(0, "col0");
+                flexTable1.getColumnFormatter().addStyleName(1, "col1");
+                flexTable1.getColumnFormatter().addStyleName(1, "col1bis");
+                flexTable1.getColumnFormatter().addStyleName(1, "col1ter");
+                flexTable1.getColumnFormatter().removeStyleName(1, "col1bis");
+
+                flexTable1.getCellFormatter().addStyleName(1, 1, "cell11");
+                flexTable1.getCellFormatter().addStyleName(2, 0, "cell20");
+                flexTable1.getCellFormatter().addStyleName(2, 0, "cell20bis");
+                flexTable1.getCellFormatter().addStyleName(2, 0, "cell20ter");
+                flexTable1.getCellFormatter().removeStyleName(2, 0, "cell20bis");
+            }
+        });
+
+        flexTable1 = findElementById("flexTable1");
+        rows = flexTable1.findElements(By.tagName("tr"));
+        cells = flexTable1.findElements(By.tagName("td"));
+        final List<WebElement> cols = flexTable1.findElements(By.tagName("col"));
+
+        Assert.assertEquals(3, rows.size());
+        Assert.assertEquals(6, cells.size());
+        Assert.assertEquals(2, cols.size());
+        Assert.assertTrue(rows.get(1).getAttribute("class").contains("row1"));
+        Assert.assertTrue(rows.get(2).getAttribute("class").contains("row2"));
+        Assert.assertTrue(rows.get(2).getAttribute("class").contains("row2ter"));
+        Assert.assertTrue(!rows.get(2).getAttribute("class").contains("row2bis"));
+
+        Assert.assertTrue(cols.get(0).getAttribute("class").contains("col0"));
+        Assert.assertTrue(cols.get(1).getAttribute("class").contains("col1"));
+        Assert.assertTrue(cols.get(1).getAttribute("class").contains("col1ter"));
+        Assert.assertTrue(!cols.get(1).getAttribute("class").contains("col1bis"));
+
+        Assert.assertTrue(cells.get(3).getAttribute("class").contains("cell11"));
+        Assert.assertTrue(cells.get(4).getAttribute("class").contains("cell20"));
+        Assert.assertTrue(cells.get(4).getAttribute("class").contains("cell20ter"));
+        Assert.assertTrue(!cells.get(4).getAttribute("class").contains("cell20bis"));
+
+        final PLabel cell00 = (PLabel) pFlexTable1.getWidget(0, 0);
+        final PLabel cell31 = (PLabel) pFlexTable1.getWidget(2, 1);
+        Assert.assertEquals("Cell_2_0", cell00.getText());
+        Assert.assertEquals("Cell_3_1", cell31.getText());
+
+        // colspan / rowspan
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlexTable flexTable1 = get("flexTable1");
+
+                flexTable1.setWidget(3, 0, new PLabel("Cell_4_0"));
+                flexTable1.setWidget(4, 0, new PLabel("Cell_5_0"));
+                flexTable1.setWidget(4, 1, new PLabel("Cell_5_1"));
+                flexTable1.setWidget(5, 0, new PLabel("Cell_6_0"));
+
+                flexTable1.getFlexCellFormatter().setColSpan(3, 0, 2);
+                flexTable1.getFlexCellFormatter().setRowSpan(4, 1, 2);
+            }
+        });
+
+        flexTable1 = findElementById("flexTable1");
+        rows = flexTable1.findElements(By.tagName("tr"));
+        cells = flexTable1.findElements(By.tagName("td"));
+
+        Assert.assertEquals(6, rows.size());
+        Assert.assertEquals(10, cells.size());
+        Assert.assertEquals("2", cells.get(6).getAttribute("colSpan"));
+        Assert.assertEquals("2", cells.get(8).getAttribute("rowSpan"));
+
+    }
+
+    @Test
+    public void testPFlowPanel() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlowPanel flowPanel1 = new PFlowPanel();
+                flowPanel1.ensureDebugId("flowPanel1");
+                flowPanel1.add(new PHTML("text1"));
+                flowPanel1.add(new PHTML("text2"));
+                flowPanel1.add(new PHTML("text3"));
+                flowPanel1.add(new PHTML("text4"));
+                PRootPanel.get().add(flowPanel1);
+                register(flowPanel1);
+            }
+        });
+
+        WebElement flowPanel1 = findElementById("flowPanel1");
+        List<WebElement> divs = flowPanel1.findElements(By.tagName("div"));
+        Assert.assertEquals(4, divs.size());
+
+        final PFlowPanel pFlowPanel = get("flowPanel1");
+        Assert.assertEquals(4, pFlowPanel.getWidgetCount());
+
+        // remove
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFlowPanel flowPanel1 = get("flowPanel1");
+                flowPanel1.remove(2);
+            }
+        });
+
+        flowPanel1 = findElementById("flowPanel1");
+        divs = flowPanel1.findElements(By.tagName("div"));
+        Assert.assertEquals(3, divs.size());
+        Assert.assertEquals(3, pFlowPanel.getWidgetCount());
+    }
+
+    @Test
+    public void testPFocusPanel() {
+
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PFocusPanel focusPanel1 = new PFocusPanel();
+                focusPanel1.ensureDebugId("focusPanel1");
+                focusPanel1.setWidget(new PLabel("A focusable widget"));
+                focusPanel1.addMouseOverHandler(eventsListener);
+                focusPanel1.addFocusHandler(eventsListener);
+                focusPanel1.addKeyPressHandler(eventsListener);
+                focusPanel1.addKeyUpHandler(eventsListener);
+                focusPanel1.addBlurHandler(eventsListener);
+                PRootPanel.get().add(focusPanel1);
+                register(focusPanel1);
+            }
+        });
+
+        final WebElement focusPanel1 = findElementById("focusPanel1");
+
+        // Mouse over
+        final Actions actions = new Actions(webDriver);
+        actions.moveToElement(focusPanel1).build().perform();
+        final PMouseOverEvent e1 = eventsListener.poll();
+        Assert.assertNotNull(e1);
+
+        // Focus
+        actions.click().build().perform();
+        final PFocusEvent e2 = eventsListener.poll();
+        Assert.assertNotNull(e2);
+
+        // Key press/ Key up
+        actions.sendKeys("A").build().perform();
+        final PKeyPressEvent e3 = eventsListener.poll();
+        final PKeyUpEvent e4 = eventsListener.poll();
+        Assert.assertNotNull(e3);
+        Assert.assertEquals(65, e4.getKeyCode());
+
+        eventsListener.clear(); // TODO keyup received 2x, selenium issue ?
+
+        final WebElement element = findElementById("startingpoint");
+        element.click();
+        final PBlurEvent e5 = eventsListener.poll();
+        Assert.assertNotNull(e5);
+    }
+
+    @Test
+    public void testPGrid() {
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PGrid grid1 = new PGrid(3, 4);
+                grid1.ensureDebugId("grid1");
+                PRootPanel.get().add(grid1);
+                register(grid1);
+            }
+        });
+
+        final WebElement grid1 = findElementById("grid1");
+        final List<WebElement> rows = grid1.findElements(By.tagName("tr"));
+        Assert.assertEquals(3, rows.size());
+        final List<WebElement> cells = grid1.findElements(By.tagName("td"));
+        Assert.assertEquals(12, cells.size());
+    }
+
+    // TODO PHistory
+
+    @Test
+    public void testPHorizontalPanel() {
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PHorizontalPanel horizontal1 = new PHorizontalPanel();
+                horizontal1.ensureDebugId("horizontal1");
+                horizontal1.add(new PLabel("cell1"));
+                horizontal1.add(new PLabel("cell2"));
+                horizontal1.add(new PLabel("cell3"));
+                horizontal1.add(new PLabel("cell4"));
+                horizontal1.setBorderWidth(2);
+                horizontal1.setSpacing(3);
+                PRootPanel.get().add(horizontal1);
+                register(horizontal1);
+            }
+        });
+
+        WebElement grid1 = findElementById("horizontal1");
+        List<WebElement> rows = grid1.findElements(By.tagName("tr"));
+        Assert.assertEquals(1, rows.size());
+        List<WebElement> cells = grid1.findElements(By.tagName("td"));
+        Assert.assertEquals(4, cells.size());
+
+        Assert.assertEquals(grid1.getAttribute("border"), "2");
+        Assert.assertEquals(grid1.getAttribute("cellSpacing"), "3");
+
+        // update cell size/alignement
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PHorizontalPanel horizontal1 = get("horizontal1");
+                final PWidget cell1 = horizontal1.getWidget(1);
+                horizontal1.setCellHeight(cell1, "30px");
+                horizontal1.setCellWidth(cell1, "100px");
+                horizontal1.setCellHorizontalAlignment(cell1, PHorizontalAlignment.ALIGN_RIGHT);
+                horizontal1.setCellVerticalAlignment(cell1, PVerticalAlignment.ALIGN_BOTTOM);
+            }
+        });
+
+        grid1 = findElementById("horizontal1");
+        rows = grid1.findElements(By.tagName("tr"));
+        cells = rows.get(0).findElements(By.tagName("td"));
+
+        final WebElement cell1 = cells.get(1);
+        Assert.assertEquals("100px", cell1.getAttribute("width"));
+        Assert.assertEquals("30px", cell1.getAttribute("height"));
+        Assert.assertEquals("right", cell1.getAttribute("align"));
+        Assert.assertTrue(cell1.getAttribute("style").contains("vertical-align: bottom"));
+    }
+
+    @Test
+    public void testPHtml() {
+        // creation
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PHTML html1 = new PHTML();
+                html1.ensureDebugId("html1");
+                html1.setHTML("Pure <b>HTML</b>");
+                html1.setWordWrap(false);
+                PRootPanel.get().add(html1);
+                register(html1);
+            }
+        });
+
+        final WebElement html1 = findElementById("html1");
+        Assert.assertEquals("Pure HTML", html1.getText());
+        Assert.assertTrue(html1.getAttribute("style").contains("white-space: nowrap;"));
+        Assert.assertEquals(1, html1.findElements(By.tagName("b")).size());
+
+        final PHTML pHtml = get("html1");
+        Assert.assertEquals("Pure <b>HTML</b>", pHtml.getHTML());
+        Assert.assertEquals(false, pHtml.isWordWrap());
     }
 
     protected void register(final PWidget widget) {

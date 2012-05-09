@@ -63,7 +63,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         final PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(this, from);
                 eventBus.fireEvent(refreshListEvent);
             }
