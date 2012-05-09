@@ -23,10 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A standard push-button widget.
@@ -41,10 +39,6 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
  */
 public class PButton extends PButtonBase {
 
-    private String text;
-
-    private String html;
-
     public PButton() {
         setStyleName(PonySDKTheme.BUTTON_WHITE);
     }
@@ -57,30 +51,6 @@ public class PButton extends PButtonBase {
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.BUTTON;
-    }
-
-    @Override
-    public void setText(final String text) {
-        this.text = text;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
-    }
-
-    @Override
-    public String getHTML() {
-        return html;
-    }
-
-    @Override
-    public void setHTML(final String html) {
-        this.html = html;
-        setText(html);
-    }
-
-    @Override
-    public String getText() {
-        return text;
     }
 
 }

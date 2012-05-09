@@ -117,7 +117,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, PEventBusA
         formField.addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(ComplexHeaderCellRenderer.this, formField);
                 eventBus.fireEvent(refreshListEvent);
             }

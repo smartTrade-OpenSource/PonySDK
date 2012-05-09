@@ -23,9 +23,24 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.PEvent;
 
-public interface PKeyUpHandler extends PEventHandler {
+public class POpenEvent extends PEvent<POpenHandler> {
 
-    void onKeyUp(PKeyUpEvent keyUpEvent);
+    public static final Type<POpenHandler> TYPE = new Type<POpenHandler>();
+
+    public POpenEvent(final Object sourceComponent) {
+        super(sourceComponent);
+    }
+
+    @Override
+    public Type<POpenHandler> getAssociatedType() {
+        return TYPE;
+    }
+
+    @Override
+    protected void dispatch(final POpenHandler handler) {
+        handler.onOpen(this);
+    }
+
 }

@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
@@ -238,7 +239,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private void fireOnClose() {
         for (final PCloseHandler handler : listeners) {
-            handler.onClose();
+            handler.onClose(new PCloseEvent(this));
         }
     }
 

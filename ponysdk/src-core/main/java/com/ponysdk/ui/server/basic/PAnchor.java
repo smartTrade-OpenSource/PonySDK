@@ -75,7 +75,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         this.html = html;
         final Update update = new Update(getID());
-        update.put(PROPERTY.HTML, text);
+        update.put(PROPERTY.HTML, html);
         getPonySession().stackInstruction(update);
     }
 

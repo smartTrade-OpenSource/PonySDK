@@ -28,6 +28,7 @@ import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
 public abstract class AbstractLoginPageActivity extends AbstractActivity implements PClickHandler {
@@ -41,12 +42,12 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
     protected abstract void sendLogon(String login, String password);
 
     @Override
-    public void onClick(PClickEvent clickEvent) {
+    public void onClick(final PClickEvent clickEvent) {
         sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         this.world = world;
         world.setWidget(loginPageView);
     }
@@ -64,7 +65,7 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
         final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyUp(int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 loginPageView.clearMessages();
                 sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
             }

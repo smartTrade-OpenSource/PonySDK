@@ -27,5 +27,5 @@ import com.ponysdk.core.event.PEventHandler;
 
 public interface PMouseOverHandler extends PEventHandler {
 
-    void onMouseOver();
+    void onMouseOver(PMouseOverEvent mouseOverEvent);
 }

@@ -33,6 +33,7 @@ import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.rich.PClosableDialogBox;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
@@ -58,7 +59,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         layout = new PFlexTable();
 
         addLabel("Show a basic popup");
-        PButton anchor2 = addButton("Open");
+        final PButton anchor2 = addButton("Open");
         anchor2.addClickHandler(new PClickHandler() {
 
             @Override
@@ -85,7 +86,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         });
 
         addLabel("A draggable popup");
-        PButton anchor3 = addButton("Open");
+        final PButton anchor3 = addButton("Open");
         anchor3.addClickHandler(new PClickHandler() {
 
             @Override
@@ -101,12 +102,12 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         });
 
         addLabel("A confirm dialog listenening on the close event");
-        PButton anchor4 = addButton("Open");
+        final PButton anchor4 = addButton("Open");
         anchor4.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                POptionPane dialodBox = POptionPane.showConfirmDialog(new PActionHandler() {
+                final POptionPane dialodBox = POptionPane.showConfirmDialog(new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
@@ -117,8 +118,8 @@ public class DialogBoxPageActivity extends SamplePageActivity {
                 dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
 
                     @Override
-                    public void onClose() {
-                        DemoBusinessEvent event = new DemoBusinessEvent(this);
+                    public void onClose(final PCloseEvent closeEvent) {
+                        final DemoBusinessEvent event = new DemoBusinessEvent(this);
                         event.setBusinessMessage("Dialog box closed");
                         fireEvent(event);
                     }
@@ -127,7 +128,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         });
 
         addLabel("A confirm dialog listenening on the close event");
-        PButton anchor5 = addButton("Open");
+        final PButton anchor5 = addButton("Open");
         anchor5.addClickHandler(new PClickHandler() {
 
             @Override
@@ -137,7 +138,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
                         dialogBox.hide();
-                        DemoBusinessEvent event = new DemoBusinessEvent(this);
+                        final DemoBusinessEvent event = new DemoBusinessEvent(this);
                         event.setBusinessMessage("Option selected #" + option);
                         fireEvent(event);
                     }
@@ -146,7 +147,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         });
 
         addLabel("PConfirmDialogBox");
-        PButton anchor6 = addButton("Open");
+        final PButton anchor6 = addButton("Open");
         anchor6.addClickHandler(new PClickHandler() {
 
             @Override
@@ -159,13 +160,13 @@ public class DialogBoxPageActivity extends SamplePageActivity {
     }
 
     private PLabel addLabel(final String text) {
-        PLabel label = new PLabel(text);
+        final PLabel label = new PLabel(text);
         layout.setWidget(row, 0, label);
         return label;
     }
 
     private PButton addButton(final String text) {
-        PButton button = new PButton(text);
+        final PButton button = new PButton(text);
         layout.setWidget(row++, 1, button);
         return button;
     }

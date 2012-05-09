@@ -47,7 +47,7 @@ public class PTDateBox extends PTWidget<DateBox> {
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
 
-        if (HANDLER.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.get(HANDLER.KEY))) {
+        if (HANDLER.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
             final DateBox dateBox = cast();
             final TextBox textBox = dateBox.getTextBox();
             dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {

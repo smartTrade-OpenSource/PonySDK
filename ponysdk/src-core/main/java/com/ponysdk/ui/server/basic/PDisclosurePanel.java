@@ -34,7 +34,9 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
@@ -90,12 +92,12 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         if (HANDLER.CLOSE_HANDLER.equals(handler)) {
             this.isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
-                closeHandler.onClose();
+                closeHandler.onClose(new PCloseEvent(this));
             }
         } else if (HANDLER.OPEN_HANDLER.equals(handler)) {
             this.isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
-                openHandler.onOpen();
+                openHandler.onOpen(new POpenEvent(this));
             }
         } else {
             super.onEventInstruction(event);

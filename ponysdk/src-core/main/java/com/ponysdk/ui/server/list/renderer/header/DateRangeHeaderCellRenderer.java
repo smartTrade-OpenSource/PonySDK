@@ -15,6 +15,7 @@ import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
@@ -62,7 +63,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         final PKeyUpFilterHandler handler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 final RefreshListEvent refreshListEvent = new RefreshListEvent(this, from);
                 eventBus.fireEvent(refreshListEvent);
             }
@@ -144,7 +145,7 @@ public class DateRangeHeaderCellRenderer extends ComplexHeaderCellRenderer imple
         popupWidget.addCloseHandler(new PCloseHandler() {
 
             @Override
-            public void onClose() {
+            public void onClose(final PCloseEvent closeEvent) {
                 updateMainFormField();
             }
         });
