@@ -49,5 +49,4 @@ public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<
             super.addHandler(addHandler, uiService);
         }
     }
-
 }

@@ -25,7 +25,6 @@ package com.ponysdk.sample.client.page;
 
 import java.util.Arrays;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -40,6 +39,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
@@ -54,7 +54,7 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
         dockLayoutPanel.setSizeFull();
 
         final PTabLayoutPanel tabPanel = new PTabLayoutPanel();

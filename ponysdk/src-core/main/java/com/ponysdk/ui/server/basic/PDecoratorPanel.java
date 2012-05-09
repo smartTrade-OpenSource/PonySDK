@@ -23,12 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
  * <p>
- * A {@link SimplePanel} that wraps its contents in stylized boxes, which can be used to add rounded corners
+ * A {@link PSimplePanel} that wraps its contents in stylized boxes, which can be used to add rounded corners
  * to a {@link PWidget}.
  * </p>
  * <p>

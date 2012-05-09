@@ -25,8 +25,8 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDecoratedPopupPanel extends PTPopupPanel {
 

@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 /**
  * A standard single-line text box.
  * <p>
- * <img class='gallery' src='doc-files/PTextBox.png'/>
+ * <img class='gallery' src='/resources/images/pony.png'/>
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>

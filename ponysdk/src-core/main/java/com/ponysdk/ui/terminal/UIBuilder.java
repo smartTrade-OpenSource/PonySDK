@@ -173,7 +173,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     PTObject ptObject;
                     final boolean isAddon = instruction.containsKey("addOnSignature");  
                     if (isAddon) {
-                    	final String addOnSignature = instruction.getString("addOnSignature");
+                        final String addOnSignature = instruction.getString("addOnSignature");
                         final AddonFactory addonFactory = addonByKey.get(addOnSignature);
                         if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
 

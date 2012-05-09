@@ -40,8 +40,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.valueOf(create.getString(PROPERTY.UNIT)));
-        init(create, uiService, stackLayoutPanel);
+        init(create, uiService, new StackLayoutPanel(Unit.values()[create.getInt(PROPERTY.UNIT)]));
     }
 
     @Override

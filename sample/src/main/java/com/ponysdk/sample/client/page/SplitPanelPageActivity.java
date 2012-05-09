@@ -23,11 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
+import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
@@ -41,7 +41,7 @@ public class SplitPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PSplitLayoutPanel dockLayoutPanel = new PSplitLayoutPanel(Unit.PX);
+        final PSplitLayoutPanel dockLayoutPanel = new PSplitLayoutPanel(PUnit.PX);
 
         dockLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         dockLayoutPanel.addSouth(buildComponent("south", "#75ffdc"), 50);

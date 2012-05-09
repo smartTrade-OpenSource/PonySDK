@@ -25,9 +25,9 @@ package com.ponysdk.core.main;
 
 import java.io.IOException;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class Main {
     public void start() throws Exception {
 
         if (port != null) {
-            webServer = new Server(port);
+            webServer = new org.eclipse.jetty.server.Server(port);
         } else {
             webServer = new Server();
         }
@@ -88,18 +88,18 @@ public class Main {
         webapp.setParentLoaderPriority(true);
         webapp.setClassLoader(new WebAppClassLoader(Main.class.getClassLoader(), webapp));
 
-        webServer.addHandler(webapp);
+        webServer.setHandler(webapp);
     }
 
-    public void setPort(Integer port) {
+    public void setPort(final Integer port) {
         this.port = port;
     }
 
-    public void setApplicationContextName(String applicationContextName) {
+    public void setApplicationContextName(final String applicationContextName) {
         this.applicationContextName = applicationContextName;
     }
 
-    public void setWar(String war) {
+    public void setWar(final String war) {
         this.war = war;
     }
 }

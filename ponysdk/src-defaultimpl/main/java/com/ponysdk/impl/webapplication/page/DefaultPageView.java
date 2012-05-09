@@ -23,13 +23,13 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.terminal.PUnit;
 
 public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
@@ -51,7 +51,7 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
         title.setText(pageTitle);
         title.addStyleName(PonySDKTheme.PAGE_HEADER_CAPTION);
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
         dockLayoutPanel.setSizeFull();
         dockLayoutPanel.addNorth(header, 40);
         dockLayoutPanel.add(body);

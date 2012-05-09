@@ -23,8 +23,38 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
+    private String text;
+    private String html;
+
+    @Override
+    public void setText(final String text) {
+        this.text = text;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.TEXT, text);
+        getPonySession().stackInstruction(update);
+    }
+
+    @Override
+    public String getHTML() {
+        return html;
+    }
+
+    @Override
+    public void setHTML(final String html) {
+        this.html = html;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.HTML, html);
+        getPonySession().stackInstruction(update);
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
 }

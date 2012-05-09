@@ -29,8 +29,8 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
+import com.ponysdk.ui.server.basic.PVerticalPanel;
 
 public class MenuBarPageActivity extends SamplePageActivity {
 

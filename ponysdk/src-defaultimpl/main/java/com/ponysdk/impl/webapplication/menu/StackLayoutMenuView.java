@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PComplexPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
@@ -40,6 +39,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.PUnit;
 
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
@@ -89,7 +89,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private PAnchor selectedItem;
 
     public StackLayoutMenuView() {
-        layoutPanel = new PStackLayoutPanel(Unit.EM);
+        layoutPanel = new PStackLayoutPanel(PUnit.EM);
         setWidget(layoutPanel);
         setSizeFull();
         layoutPanel.setSizeFull();

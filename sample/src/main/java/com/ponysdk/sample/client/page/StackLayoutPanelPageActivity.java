@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PAnchor;
@@ -35,6 +34,7 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.PUnit;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
@@ -50,11 +50,11 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = new PVerticalPanel();
 
         panel.add(new PLabel("StackLayout: "));
 
-        final PStackLayoutPanel stackLayoutPanel = new PStackLayoutPanel(Unit.PX);
+        final PStackLayoutPanel stackLayoutPanel = new PStackLayoutPanel(PUnit.PX);
 
         stackLayoutPanel.setStyleProperty("border", "1px solid #CCC");
 
@@ -67,7 +67,7 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
-                String msg = "On selection : " + event.getSelectedItem();
+                final String msg = "On selection : " + event.getSelectedItem();
                 PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });

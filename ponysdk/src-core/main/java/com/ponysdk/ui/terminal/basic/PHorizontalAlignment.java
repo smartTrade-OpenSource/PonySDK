@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.basic;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 
+
 public enum PHorizontalAlignment {
     ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT;
 

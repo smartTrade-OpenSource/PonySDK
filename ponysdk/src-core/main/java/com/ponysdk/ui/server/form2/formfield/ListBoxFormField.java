@@ -17,6 +17,10 @@ public class ListBoxFormField<T> extends FormField<T> {
         this(new PListBox(), dataProvider);
     }
 
+    public ListBoxFormField(final PListBox listBox) {
+        this(listBox, null);
+    }
+
     public ListBoxFormField(final PListBox listBox, final DataConverter<String, T> dataProvider) {
         super(dataProvider);
         this.listBox = listBox;

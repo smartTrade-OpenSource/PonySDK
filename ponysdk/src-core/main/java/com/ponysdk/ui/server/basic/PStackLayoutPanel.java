@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Remove;
@@ -38,6 +37,7 @@ import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
@@ -69,10 +69,10 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
 
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
 
-    public PStackLayoutPanel(final Unit unit) {
+    public PStackLayoutPanel(final PUnit unit) {
         super();
         initWidget(new PLayoutPanel());
-        create.put(PROPERTY.UNIT, unit.toString());
+        create.put(PROPERTY.UNIT, unit.ordinal());
     }
 
     @Override

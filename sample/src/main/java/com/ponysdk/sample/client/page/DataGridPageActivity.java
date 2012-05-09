@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
@@ -71,6 +70,7 @@ import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.DataGridConfiguration;
 import com.ponysdk.ui.server.list2.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
+import com.ponysdk.ui.terminal.PUnit;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
 
@@ -99,7 +99,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         final PHorizontalPanel formContainer = new PHorizontalPanel();
         final PScrollPanel gridContainer = new PScrollPanel();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(Unit.PX);
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
         dockLayoutPanel.addNorth(formContainer, 100);
         dockLayoutPanel.add(gridContainer);
 

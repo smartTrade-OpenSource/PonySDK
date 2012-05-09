@@ -16,6 +16,7 @@ srcJasper = 'src-jasper/main/java';
 gwtOutputDirName = buildDir.name + '/gwt';
 warResources = 'src-core/main/resources/war';
 confResources = 'src-core/main/resources/conf';
+javadocResources = 'src-core/main/javadoc';
 
 sourceSets {
 	main {
@@ -42,13 +43,20 @@ configurations {
 	gwt
 	spring
 	sl4j
+	log4j
 	hibernate
 	jasper
 	mongodb
+	selenium
 	json_jackson
+    jetty
 	
 	compile {
-		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson
+		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson, jetty, log4j
+	}
+
+	testCompile {
+		extendsFrom selenium
 	}
 	
 	runtime {
@@ -65,11 +73,22 @@ dependencies {
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
 	spring 'org.springframework:spring-web:3.0.6.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
+	sl4j 'org.slf4j:log4j-over-slf4j:1.6.4'
 	sl4j 'ch.qos.logback:logback-classic:1.0.0'
+	sl4j 'org.slf4j:jcl-over-slf4j:1.6.4'
+	log4j 'log4j:log4j:1.2.16'
+	log4j 'commons-io:commons-io:20030203.000550'
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
+	selenium 'org.seleniumhq.selenium:selenium-java:2.21.0'
+	selenium 'junit:junit:4.10'  
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
+    jetty 'org.eclipse.jetty:jetty-server:8.1.3.v20120416'
+    jetty 'org.eclipse.jetty:jetty-servlet:8.1.3.v20120416'
+    jetty 'org.eclipse.jetty:jetty-webapp:8.1.3.v20120416'
+    jetty 'org.eclipse.jetty:jetty-servlets:8.1.3.v20120416'
+    jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
 
 manifest {
@@ -143,6 +162,18 @@ task gwtc(type: JavaExec) {
 	]
 }
 
+
+javadoc{
+    title = 'PonySDK javadoc'
+    excludes = ['com.ponysdk.ui.terminal']
+    doLast {
+        copy {
+            from javadocResources
+            into buildDir.name + '/docs/javadoc';
+        }
+    }
+}
+
 task jarSource(type: Jar){
 	baseName = 'ponysdk-src'
 	from sourceSets.main.allJava
@@ -166,6 +197,10 @@ task copyAllLibs << {
 		into 'libs/logging'
 	}
 	copy {
+	    from configurations.log4j
+	    into 'libs/logging'
+	}
+	copy {
 		from configurations.hibernate
 		into 'libs/hibernate'
 	}
@@ -178,8 +213,16 @@ task copyAllLibs << {
 		into 'libs/mongodb'
 	}
 	copy {
+		from configurations.selenium
+		into 'libs/tests'
+	}
+	copy {
 		from configurations.json_jackson
 		into 'libs/json_jackson'
+	}
+	copy {
+	    from configurations.jetty
+	    into 'libs/jetty'
 	}
 }
 

@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.basic;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
+
 public enum PVerticalAlignment {
     ALIGN_TOP, ALIGN_MIDDLE, ALIGN_BOTTOM;
 

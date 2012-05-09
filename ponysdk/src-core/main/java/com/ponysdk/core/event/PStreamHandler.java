@@ -26,6 +26,7 @@ package com.ponysdk.core.event;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 public interface PStreamHandler {
 
     void onStream(HttpServletRequest request, HttpServletResponse response);

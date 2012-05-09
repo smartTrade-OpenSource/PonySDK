@@ -23,9 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
@@ -52,7 +51,11 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
  */
 public class PDockLayoutPanel extends PComplexPanel {
 
-    public PDockLayoutPanel(final Unit unit) {
+    public enum Direction {
+        NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END
+    }
+
+    public PDockLayoutPanel(final PUnit unit) {
         super();
         create.put(PROPERTY.UNIT, unit.ordinal());
     }

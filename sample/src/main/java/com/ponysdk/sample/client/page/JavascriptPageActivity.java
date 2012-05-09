@@ -26,7 +26,6 @@ package com.ponysdk.sample.client.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PKeyCodes;
@@ -35,7 +34,9 @@ import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.ui.terminal.PUnit;
 
 public class JavascriptPageActivity extends SamplePageActivity {
 
@@ -59,7 +60,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         history = new PFlowPanel();
         scroll.setWidget(history);
 
-        final PDockLayoutPanel dock = new PDockLayoutPanel(Unit.PX);
+        final PDockLayoutPanel dock = new PDockLayoutPanel(PUnit.PX);
         dock.addSouth(inputTextBox, 30);
         dock.add(scroll);
 
@@ -69,16 +70,16 @@ public class JavascriptPageActivity extends SamplePageActivity {
         inputTextBox.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP) {
 
             @Override
-            public void onKeyUp(final int keyCode) {
-                if (PKeyCodes.ENTER.equals(keyCode)) {
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+                if (PKeyCodes.ENTER.equals(keyUpEvent.getKeyCode())) {
                     executeJS(inputTextBox.getText());
                     commandIndex = 0;
-                } else if (PKeyCodes.UP.equals(keyCode)) {
+                } else if (PKeyCodes.UP.equals(keyUpEvent.getKeyCode())) {
                     if (commandIndex < commands.size()) {
                         commandIndex++;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));
                     }
-                } else if (PKeyCodes.DOWN.equals(keyCode)) {
+                } else if (PKeyCodes.DOWN.equals(keyUpEvent.getKeyCode())) {
                     if (commandIndex > 1) {
                         commandIndex--;
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));

@@ -37,8 +37,6 @@ import com.ponysdk.ui.server.basic.PHistory;
 @SuppressWarnings("serial")
 public class PonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
 
-    private String entryPointClassName;
-
     @Override
     public void init() throws ServletException {
         super.init();
@@ -52,6 +50,7 @@ public class PonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
     protected EntryPoint initializePonySession(final PonySession ponySession) throws Exception {
 
         EntryPoint entryPoint = null;
+        final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
         try {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final Class<?> clazz = classLoader.loadClass(entryPointClassName);
