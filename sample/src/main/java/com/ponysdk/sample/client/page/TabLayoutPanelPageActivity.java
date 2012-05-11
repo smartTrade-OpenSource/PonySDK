@@ -35,6 +35,7 @@ import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PTabLayoutPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -63,8 +64,8 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
 
             @Override
-            public void onBeforeSelection(final Integer index) {
-                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + index);
+            public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
+                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + event.getSelectedItem());
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {

@@ -152,13 +152,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.get(index).label = text;
 
         final Update update = new Update(getID());
+        update.put(PROPERTY.ITEM_UPDATED);
         update.put(PROPERTY.INDEX, index);
         update.put(PROPERTY.ITEM_TEXT, text);
 
         getPonySession().stackInstruction(update);
     }
 
-    public void setValue(final int index, final String value) {
+    public void setValue(final int index, final Object value) {
         checkIndex(index);
 
         items.get(index).value = value;
