@@ -836,9 +836,9 @@ public class UiBuilderTest {
         });
 
         final WebElement focusPanel1 = findElementById("focusPanel1");
+        final Actions actions = new Actions(webDriver);
 
         // Mouse over
-        final Actions actions = new Actions(webDriver);
         actions.moveToElement(focusPanel1).build().perform();
         final PMouseOverEvent e1 = eventsListener.poll();
         Assert.assertNotNull(e1);

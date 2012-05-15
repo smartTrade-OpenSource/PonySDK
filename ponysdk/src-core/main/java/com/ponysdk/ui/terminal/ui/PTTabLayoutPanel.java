@@ -71,6 +71,8 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.INDEX, uiObject.getSelectedIndex());
                     uiService.triggerEvent(eventInstruction);
                 }

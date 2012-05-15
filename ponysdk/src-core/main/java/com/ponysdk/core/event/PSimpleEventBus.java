@@ -23,12 +23,11 @@
 
 package com.ponysdk.core.event;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,10 +40,10 @@ public class PSimpleEventBus implements PEventBus {
      */
     private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<Type<?>, Map<Object, Set<?>>>();
 
-    private final List<PBroadcastEventHandler> broadcastHandlerManager = new ArrayList<PBroadcastEventHandler>();
+    private final Set<PBroadcastEventHandler> broadcastHandlerManager = new HashSet<PBroadcastEventHandler>();
 
     @Override
-    public <H extends PEventHandler> PHandlerRegistration addHandler(Type<H> type, H handler) {
+    public <H extends PEventHandler> PHandlerRegistration addHandler(final Type<H> type, final H handler) {
         if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
         if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
 
@@ -61,31 +60,31 @@ public class PSimpleEventBus implements PEventBus {
     }
 
     @Override
-    public void fireEvent(PEvent<?> event) {
+    public void fireEvent(final PEvent<?> event) {
         if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         doFire(event, null);
         fireBroadcastEvent(event);
     }
 
     @Override
-    public void addHandler(PBroadcastEventHandler handler) {
+    public void addHandler(final PBroadcastEventHandler handler) {
         broadcastHandlerManager.add(handler);
     }
 
-    private void fireBroadcastEvent(PEvent<?> event) {
+    private void fireBroadcastEvent(final PEvent<?> event) {
         for (final PBroadcastEventHandler handler : broadcastHandlerManager) {
             handler.onEvent(event);
         }
     }
 
     @Override
-    public void fireEventFromSource(PEvent<?> event, Object source) {
+    public void fireEventFromSource(final PEvent<?> event, final Object source) {
         if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         if (source == null) { throw new NullPointerException("Cannot fire from a null source"); }
         doFire(event, source);
     }
 
-    protected <H extends PEventHandler> void doRemove(PEvent.Type<H> type, Object source, H handler) {
+    protected <H extends PEventHandler> void doRemove(final PEvent.Type<H> type, final Object source, final H handler) {
         doRemoveNow(type, source, handler);
     }
 
@@ -106,7 +105,7 @@ public class PSimpleEventBus implements PEventBus {
         };
     }
 
-    private <H extends PEventHandler> void doFire(PEvent<H> event, Object source) {
+    private <H extends PEventHandler> void doFire(final PEvent<H> event, final Object source) {
         if (source != null) {
             event.setSource(source);
         }
@@ -125,7 +124,7 @@ public class PSimpleEventBus implements PEventBus {
         }
     }
 
-    private <H> void doRemoveNow(PEvent.Type<H> type, Object source, H handler) {
+    private <H> void doRemoveNow(final PEvent.Type<H> type, final Object source, final H handler) {
         final Set<H> l = getHandlerSet(type, source);
 
         final boolean removed = l.remove(handler);
@@ -135,7 +134,7 @@ public class PSimpleEventBus implements PEventBus {
         }
     }
 
-    private <H> Set<H> ensureHandlerSet(PEvent.Type<H> type, Object source) {
+    private <H> Set<H> ensureHandlerSet(final PEvent.Type<H> type, final Object source) {
         Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<Object, Set<?>>();
@@ -153,7 +152,7 @@ public class PSimpleEventBus implements PEventBus {
         return handlers;
     }
 
-    private <H> Set<H> getDispatchSet(PEvent.Type<H> type, Object source) {
+    private <H> Set<H> getDispatchSet(final PEvent.Type<H> type, final Object source) {
         final Set<H> directHandlers = getHandlerSet(type, source);
         if (source == null) { return directHandlers; }
 
@@ -164,7 +163,7 @@ public class PSimpleEventBus implements PEventBus {
         return rtn;
     }
 
-    public <H> Set<H> getHandlerSet(PEvent.Type<H> type, Object source) {
+    public <H> Set<H> getHandlerSet(final PEvent.Type<H> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) { return Collections.emptySet(); }
 
@@ -176,7 +175,7 @@ public class PSimpleEventBus implements PEventBus {
         return handlers;
     }
 
-    private void prune(PEvent.Type<?> type, Object source) {
+    private void prune(final PEvent.Type<?> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
 
         final Set<?> pruned = sourceMap.remove(source);

@@ -44,12 +44,12 @@ public class FormFieldComponent extends PFlexTable implements FormFieldListener 
     }
 
     @Override
-    public void afterReset() {
+    public void afterReset(final FormField<?> formField) {
         errorLabel.setVisible(false);
     }
 
     @Override
-    public void afterValidation(final ValidationResult validationResult) {
+    public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
         if (validationResult.isValid()) {
             errorLabel.setVisible(false);
         } else {

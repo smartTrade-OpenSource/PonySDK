@@ -69,13 +69,13 @@ public abstract class FormField<T> implements IsPWidget {
 
     private void fireAfterReset() {
         for (final FormFieldListener listener : listeners) {
-            listener.afterReset();
+            listener.afterReset(this);
         }
     }
 
     private void fireAfterValidation(final ValidationResult result) {
         for (final FormFieldListener listener : listeners) {
-            listener.afterValidation(result);
+            listener.afterValidation(this, result);
         }
     }
 

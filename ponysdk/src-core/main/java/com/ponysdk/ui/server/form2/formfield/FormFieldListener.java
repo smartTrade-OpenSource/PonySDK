@@ -5,7 +5,7 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public interface FormFieldListener {
 
-    public void afterReset();
+    public void afterReset(FormField<?> formField);
 
-    public void afterValidation(ValidationResult validationResult);
+    public void afterValidation(FormField<?> formField, ValidationResult validationResult);
 }
