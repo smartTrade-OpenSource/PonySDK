@@ -56,6 +56,10 @@ public class PTTabPanel extends PTWidget<TabPanel> {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
+        
+        if (tabPanel.getWidgetCount() == 1) {
+            tabPanel.selectTab(0);
+        }
     }
 
     @Override

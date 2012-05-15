@@ -88,6 +88,10 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             final String item = update.getString(PROPERTY.ITEM_TEXT);
             final String value = update.getString(PROPERTY.VALUE);
             uiObject.insertItem(item, value, index);
+        } else if (update.containsKey(PROPERTY.ITEM_UPDATED)) {
+            final int index = update.getInt(PROPERTY.INDEX);
+            final String item = update.getString(PROPERTY.ITEM_TEXT);
+            uiObject.setItemText(index, item);
         } else if (update.containsKey(PROPERTY.ITEM_REMOVED)) {
             uiObject.removeItem(update.getInt(PROPERTY.INDEX));
         } else if (update.containsKey(PROPERTY.SELECTED)) {

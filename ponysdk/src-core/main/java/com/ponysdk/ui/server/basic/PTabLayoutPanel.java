@@ -26,7 +26,6 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +36,7 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
+import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
@@ -77,8 +77,6 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
 
     private boolean animationEnabled = false;
 
-    private final List<PWidget> children = new ArrayList<PWidget>();
-
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
 
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
@@ -86,7 +84,8 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     private Integer selectedItemIndex;
 
     public PTabLayoutPanel() {
-        addSelectionHandler(this);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
+        getPonySession().stackInstruction(addHandler);
     }
 
     @Override
@@ -106,7 +105,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         // Detach new child.
         widget.removeFromParent();
 
-        children.add(beforeIndex, widget);
+        getChildren().insert(widget, beforeIndex);
 
         // Adopt.
         adopt(widget);
@@ -121,7 +120,8 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         // Detach new child.
         widget.removeFromParent();
 
-        children.add(beforeIndex, widget);
+        getChildren().insert(widget, beforeIndex);
+
         // Adopt.
         adopt(widget);
 
@@ -145,18 +145,6 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
 
     public void add(final PWidget w, final PWidget tabWidget) {
         insert(w, tabWidget, getWidgetCount());
-    }
-
-    public PWidget getWidget(final int index) {
-        return children.get(index);
-    }
-
-    public int getWidgetCount() {
-        return children.size();
-    }
-
-    public int getWidgetIndex(final PWidget child) {
-        return children.indexOf(child);
     }
 
     public void selectTab(final int index) {
@@ -204,8 +192,6 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
     }
 
     @Override
@@ -231,7 +217,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
             }
         } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handlerKey)) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
-                handler.onBeforeSelection(eventInstruction.getInt(PROPERTY.INDEX));
+                handler.onBeforeSelection(new PBeforeSelectionEvent<Integer>(this, eventInstruction.getInt(PROPERTY.INDEX)));
             }
         } else {
             super.onEventInstruction(eventInstruction);

@@ -8,9 +8,14 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.event.PBusinessEvent;
 import com.ponysdk.core.event.PEvent;
+import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
+import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PBlurHandler;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
+import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
@@ -23,11 +28,13 @@ import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
+import com.ponysdk.ui.server.basic.event.PSelectionEvent;
+import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 @SuppressWarnings("rawtypes")
-public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpenHandler, PBlurHandler, PFocusHandler, PKeyPressHandler, PKeyUpHandler, PMouseOverHandler {
+public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpenHandler, PBlurHandler, PFocusHandler, PKeyPressHandler, PKeyUpHandler, PMouseOverHandler, PChangeHandler, PSelectionHandler, PBeforeSelectionHandler {
 
     private static Logger log = LoggerFactory.getLogger(PEventsListener.class);
 
@@ -94,6 +101,29 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
     @Override
     public void onBlur(final PBlurEvent event) {
         log.info("onBlur");
+        eventQueue.add(event);
+    }
+
+    @Override
+    public void onChange(final PChangeEvent event) {
+        log.info("onChange");
+        eventQueue.add(event);
+    }
+
+    public void stackCommandResult(final PBusinessEvent e) {
+        log.info("stackCommandResult");
+        eventQueue.add(e);
+    }
+
+    @Override
+    public void onSelection(final PSelectionEvent event) {
+        log.info("onSelection");
+        eventQueue.add(event);
+    }
+
+    @Override
+    public void onBeforeSelection(final PBeforeSelectionEvent event) {
+        log.info("onBeforeSelection");
         eventQueue.add(event);
     }
 
