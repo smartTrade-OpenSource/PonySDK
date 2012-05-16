@@ -253,6 +253,7 @@ public interface Dictionnary {
         public static final String CLEAR_INNER_TEXT = "010";
         public static final String HTMLTABLE_COLUMN_STYLE = "011";
         public static final String ITEM_UPDATED = "012";
+        public static final String PLACEHOLDER = "013";
         public static final String OBJECT_ID = "#";
         public static final String PARENT_ID = "##";
 

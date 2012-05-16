@@ -23,11 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
 import com.ponysdk.ui.server.basic.PTextArea;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class BasicTextBoxPageActivity extends SamplePageActivity {
 
@@ -41,19 +44,35 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
         final PVerticalPanel panel = new PVerticalPanel();
 
-        PTextBox textBox = new PTextBox();
-        PTextBox textBoxReadOnly = new PTextBox();
+        final PTextBox textBox = new PTextBox();
+        final PTextBox textBoxReadOnly = new PTextBox();
         textBoxReadOnly.setText("read only");
         textBoxReadOnly.setEnabled(false);
-        PTextBox passwordTextBox = new PPasswordTextBox();
-        PTextBox passwordTextBoxReadOnly = new PPasswordTextBox();
+        final PTextBox passwordTextBox = new PPasswordTextBox();
+        final PTextBox passwordTextBoxReadOnly = new PPasswordTextBox();
         passwordTextBoxReadOnly.setText("xxxxxxxxxxxx");
         passwordTextBoxReadOnly.setEnabled(false);
-        PTextArea textArea = new PTextArea();
+        final PTextArea textArea = new PTextArea();
 
         panel.add(new PLabel("Normal text box:"));
         panel.add(textBox);
         panel.add(textBoxReadOnly);
+
+        final PTextBox placeHolder = new PTextBox();
+        panel.add(new PLabel("Place holder : "));
+        panel.add(placeHolder);
+
+        final PButton button = new PButton("Set");
+        button.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                textBox.setPlaceHolder(placeHolder.getText());
+                textBoxReadOnly.setPlaceHolder(placeHolder.getText());
+            }
+        });
+        panel.add(button);
+
         panel.add(new PLabel("Password text box:"));
         panel.add(passwordTextBox);
         panel.add(passwordTextBoxReadOnly);
@@ -62,5 +81,4 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
         examplePanel.setWidget(panel);
     }
-
 }

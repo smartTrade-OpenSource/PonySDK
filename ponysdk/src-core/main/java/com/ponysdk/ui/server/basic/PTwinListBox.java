@@ -177,6 +177,7 @@ public class PTwinListBox<T> extends PHorizontalPanel implements HasPChangeHandl
         items.clear();
         hiddenValueByItems.clear();
         itemsByHiddenValue.clear();
+        selectValues.clear();
     }
 
     public void addItem(final String item) {

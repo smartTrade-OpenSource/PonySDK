@@ -60,6 +60,8 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.TEXT)) {
             uiObject.setText(update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.PLACEHOLDER)) {
+            uiObject.getElement().setAttribute("placeholder", update.getString(PROPERTY.PLACEHOLDER));
         } else {
             super.update(update, uiService);
         }

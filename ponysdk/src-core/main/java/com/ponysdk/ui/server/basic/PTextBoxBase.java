@@ -114,6 +114,12 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
         getPonySession().stackInstruction(update);
     }
 
+    public void setPlaceHolder(final String placeHolder) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.PLACEHOLDER, placeHolder);
+        getPonySession().stackInstruction(update);
+    }
+
     @Override
     public String getValue() {
         return getText();
