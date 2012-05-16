@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
@@ -165,6 +166,14 @@ public class PMenuBar extends PWidget {
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         getPonySession().stackInstruction(add);
         return itemSeparator;
+    }
+
+    public void clearItems() {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.CLEAR, true);
+        getPonySession().stackInstruction(update);
+        // clear
+        items.clear();
     }
 
     public boolean isVertical() {

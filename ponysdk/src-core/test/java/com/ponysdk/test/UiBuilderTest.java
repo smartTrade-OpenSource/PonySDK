@@ -1323,10 +1323,11 @@ public class UiBuilderTest {
 
                 PRootPanel.get().add(menuBar1);
                 register(menuBar1);
+                register(subMenuBar);
             }
         });
 
-        final WebElement menuBar = findElementById("menuBar1");
+        WebElement menuBar = findElementById("menuBar1");
 
         List<WebElement> elements = menuBar.findElements(By.tagName("td"));
         Assert.assertEquals(4, elements.size());
@@ -1348,13 +1349,35 @@ public class UiBuilderTest {
 
         elements.get(3).click();
 
-        final WebElement subMenuBar1 = findElementById("subMenuBar1");
+        WebElement subMenuBar1 = findElementById("subMenuBar1");
         elements = subMenuBar1.findElements(By.tagName("td"));
         Assert.assertEquals(3, elements.size());
 
         elements.get(2).click();
         e1 = eventsListener.poll();
         Assert.assertEquals("Click on SubItem3", e1.getBusinessMessage());
+
+        // clear
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PMenuBar subMenuBar = get("subMenuBar1");
+                subMenuBar.clearItems();
+                subMenuBar.addItem("SubItem4");
+            }
+        });
+
+        // open sub menubar
+        menuBar = findElementById("menuBar1");
+        elements = menuBar.findElements(By.tagName("td"));
+        elements.get(3).click();
+
+        // check clear / insert
+        subMenuBar1 = findElementById("subMenuBar1");
+        elements = subMenuBar1.findElements(By.tagName("td"));
+        Assert.assertEquals(1, elements.size());
+        Assert.assertEquals("SubItem4", elements.get(0).getText());
     }
 
     @Test
@@ -1552,6 +1575,7 @@ public class UiBuilderTest {
         Assert.assertEquals("Suggest 3", pSuggestBox1.getText());
         Assert.assertEquals("Suggest 3", pSuggestBox1.getTextBox().getText());
 
+        // set text
         updateUI(new RequestHandler() {
 
             @Override
@@ -1563,6 +1587,20 @@ public class UiBuilderTest {
 
         element = findElementById("suggestBox1");
         Assert.assertEquals("Custom text", element.getAttribute("value"));
+        Assert.assertEquals(true, element.isEnabled());
+
+        // disable
+        updateUI(new RequestHandler() {
+
+            @Override
+            public void onRequest() {
+                final PSuggestBox suggestBox1 = get("suggestBox1");
+                suggestBox1.getTextBox().setEnabled(false);
+            }
+        });
+
+        element = findElementById("suggestBox1");
+        Assert.assertEquals(false, element.isEnabled());
 
         // TODO test display / replacement
     }

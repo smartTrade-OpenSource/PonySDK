@@ -55,4 +55,12 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     }
 
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.CLEAR)) {
+            uiObject.clearItems();
+        } else {
+            super.update(update, uiService);
+        }
+    }
 }
