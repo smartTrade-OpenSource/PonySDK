@@ -26,11 +26,14 @@ package com.ponysdk.sample.client;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ponysdk.core.PonySession;
+import com.ponysdk.core.activity.ActivityManager;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.sample.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
@@ -45,37 +48,42 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     private ApplicationActivity applicationActivity;
 
     @Autowired
-    private LoginActivity loginActivity;
-
-    @Autowired
     private PlaceController placeController;
 
     @Autowired
     private PEventBus eventBus;
 
-    final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
+    @Autowired
+    private SampleActivityMapper mapper;
+
+    private void init() {
+        final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
+        PRootLayoutPanel.get().add(panel);
+
+        final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
+        activityManager.setDisplay(panel);
+    }
 
     @Override
     public void start(final PonySession session) {
-        panel.setSizeFull();
 
-        PRootLayoutPanel.get().add(panel);
+        init();
 
-        loginActivity.start(panel);
-
-        placeController.goTo(loginActivity, new LoginPlace(), panel);
+        placeController.goTo(new LoginPlace());
     }
 
     @Override
     public void restart(final PonySession session) {
+
+        init();
+
+        final String currentToken = session.getHistory().getToken();
         if (session.getApplicationAttribute(USER) == null) {
-            start(session);
+            placeController.goTo(new LoginPlace());
+        } else if (currentToken == null) {
+            placeController.goTo(new LoginPlace());
         } else {
-            panel.setSizeFull();
-            PRootLayoutPanel.get().add(panel);
-            final String currentToken = session.getHistory().getToken();
-            applicationActivity.start(panel);
-            PonySession.getCurrent().getHistory().newItem(currentToken);
+            placeController.goTo(new PagePlace(currentToken));
         }
     }
 

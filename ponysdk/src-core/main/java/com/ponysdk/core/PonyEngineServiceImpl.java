@@ -63,9 +63,8 @@ public class PonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
 
         final PEventBus rootEventBus = new PSimpleEventBus();
 
-        final PlaceController placeController = new PlaceController();
         final PHistory history = new PHistory();
-        placeController.setHistory(history);
+        final PlaceController placeController = new PlaceController(history);
 
         ponySession.setRootEventBus(rootEventBus);
         ponySession.setHistory(history);

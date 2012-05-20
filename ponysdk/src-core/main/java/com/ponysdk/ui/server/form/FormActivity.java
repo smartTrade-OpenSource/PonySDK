@@ -28,9 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
@@ -38,7 +36,7 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 
-public class FormActivity extends AbstractActivity implements Activity {
+public class FormActivity extends AbstractActivity {
 
     private final List<FormField> formFields = new ArrayList<FormField>();
 
@@ -97,10 +95,10 @@ public class FormActivity extends AbstractActivity implements Activity {
         world.setWidget(formView.asWidget());
     }
 
-    @Override
-    public void goTo(final Place newPlace, final PAcceptsOneWidget world) {
-        super.goTo(newPlace, world);
-        world.setWidget(formView.asWidget());
-    }
+    // @Override
+    // public void goTo(final Place newPlace, final PAcceptsOneWidget world) {
+    // super.goTo(newPlace, world);
+    // world.setWidget(formView.asWidget());
+    // }
 
 }

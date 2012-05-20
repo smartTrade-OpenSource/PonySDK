@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.list.paging;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
@@ -42,7 +42,7 @@ public class PagingActivity extends AbstractActivity implements PEventBusAware {
 
     private PEventBus eventBus;
 
-    public PagingActivity(PagingView pagingView) {
+    public PagingActivity(final PagingView pagingView) {
         this.pagingView = pagingView;
     }
 
@@ -52,7 +52,7 @@ public class PagingActivity extends AbstractActivity implements PEventBusAware {
         resetPosition();
     }
 
-    public void process(int fullSize) {
+    public void process(final int fullSize) {
         pagingView.clear();
         int pageCount = 0;
         final int rest = fullSize % pageSize;
@@ -109,17 +109,17 @@ public class PagingActivity extends AbstractActivity implements PEventBusAware {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         world.setWidget(pagingView);
     }
 
     @Override
-    public void setEventBus(PEventBus eventBus) {
+    public void setEventBus(final PEventBus eventBus) {
         this.eventBus = eventBus;
     }
 

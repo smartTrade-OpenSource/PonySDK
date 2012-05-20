@@ -86,7 +86,7 @@ public class FormPageActivity extends SamplePageActivity {
 
         final PSimplePanel formLayout = new PSimplePanel();
         layout.add(formLayout);
-        formActivity.goTo(null, formLayout);
+        formActivity.start(formLayout);
 
         final PButton validateButton = new PButton("Validate");
         validateButton.addClickHandler(new PClickHandler() {

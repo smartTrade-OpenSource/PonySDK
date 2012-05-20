@@ -47,10 +47,10 @@ public class CheckBoxPageActivity extends SamplePageActivity {
         panel.add(new PCheckBox("Wednesday"));
         panel.add(new PCheckBox("Thursday"));
         panel.add(new PCheckBox("Friday"));
-        PCheckBox saturday = new PCheckBox("Saturday");
+        final PCheckBox saturday = new PCheckBox("Saturday");
         saturday.setEnabled(false);
         panel.add(saturday);
-        PCheckBox sunday = new PCheckBox("Sunday");
+        final PCheckBox sunday = new PCheckBox("Sunday");
         sunday.setEnabled(false);
         panel.add(sunday);
 

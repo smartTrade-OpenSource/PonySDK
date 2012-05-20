@@ -31,8 +31,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.security.SecurityManager;
-
 public class DefaultPageProvider implements PageProvider {
 
     private final Logger log = LoggerFactory.getLogger(DefaultPageProvider.class);
@@ -60,11 +58,12 @@ public class DefaultPageProvider implements PageProvider {
     private void initPagePermissions() {
         allActivePageActivities = new LinkedHashMap<String, PageActivity>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
-            if (SecurityManager.checkPermission(entry.getValue().getPermission())) {
-                allActivePageActivities.put(entry.getKey(), entry.getValue());
-            } else {
-                log.info("Permission " + entry.getValue().getPermission() + " not found for the page activity  #" + entry.getKey());
-            }
+            // if (SecurityManager.checkPermission(entry.getValue().getPermission())) {
+            allActivePageActivities.put(entry.getKey(), entry.getValue());
+            // } else {
+            // log.info("Permission " + entry.getValue().getPermission() +
+            // " not found for the page activity  #" + entry.getKey());
+            // }
         }
     }
 

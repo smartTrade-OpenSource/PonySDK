@@ -71,10 +71,6 @@ public class PHistory {
         PonySession.getCurrent().stackInstruction(history);
     }
 
-    public void fireHistory() {
-
-    }
-
     public void fireHistoryChanged(final String token) {
         this.token = token;
         final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, token);

@@ -119,7 +119,7 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
         bodyLayout.add(textBox);
         bodyLayout.add(scheduleButton);
 
-        PScrollPanel scrollPanel = new PScrollPanel();
+        final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setSizeFull();
         scrollPanel.setWidget(bodyLayout);
 

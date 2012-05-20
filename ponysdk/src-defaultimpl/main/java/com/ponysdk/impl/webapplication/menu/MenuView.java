@@ -1,15 +1,13 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import java.util.Collection;
-
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 
-public interface MenuView extends IsPWidget, HasPSelectionHandlers<String> {
+public interface MenuView extends IsPWidget, HasPSelectionHandlers<MenuItem> {
 
-    void addItem(Collection<String> categories, String caption);
+    void addItem(MenuItem item);
 
-    void selectItem(Collection<String> categories, String caption);
+    void selectItem(MenuItem item);
 
 }

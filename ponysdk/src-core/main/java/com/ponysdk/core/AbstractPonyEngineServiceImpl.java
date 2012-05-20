@@ -42,6 +42,7 @@ import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * The server side implementation of the RPC service.
@@ -97,13 +98,19 @@ public abstract class AbstractPonyEngineServiceImpl extends HttpServlet {
             PonySession.setCurrent(ponySession);
 
             final EntryPoint entryPoint = initializePonySession(ponySession);
+
+            final String historyToken = data.getString(HISTORY.TOKEN);
+            if (historyToken != null && !historyToken.isEmpty()) ponySession.getHistory().newItem(historyToken);
+
+            final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIE);
+            System.err.println("history: " + historyToken);
+            System.err.println("cookies: " + cookies);
+
             if (isNewHttpSession) {
                 entryPoint.start(ponySession);
             } else {
                 entryPoint.restart(ponySession);
             }
-
-            ponySession.getHistory().fireHistoryChanged(data.getString(HISTORY.TOKEN));
 
             try {
                 ponySession.flushInstructions(response);

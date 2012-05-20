@@ -63,52 +63,52 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
         panel.add(new PLabel("Choose a section:"));
 
-        PAnchor checkBoxAnchor = new PAnchor("CheckBox");
+        final PAnchor checkBoxAnchor = new PAnchor("CheckBox");
         checkBoxAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("CheckBox", checkBoxPageActivity));
+                goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
             }
         });
         panel.add(checkBoxAnchor);
 
-        PAnchor radioButtonAnchor = new PAnchor("RadioButton");
+        final PAnchor radioButtonAnchor = new PAnchor("RadioButton");
         radioButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("RadioButton", radioButtonPageActivity));
+                goTo(buildPagePlace("RadioButton", radioButtonPageActivity));
             }
         });
         panel.add(radioButtonAnchor);
 
-        PAnchor basicButtonAnchor = new PAnchor("BasicButton");
+        final PAnchor basicButtonAnchor = new PAnchor("BasicButton");
         basicButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("BasicButton", basicButtonPageActivity));
+                goTo(buildPagePlace("BasicButton", basicButtonPageActivity));
             }
         });
         panel.add(basicButtonAnchor);
 
-        PAnchor customButtonAnchor = new PAnchor("CustomButton");
+        final PAnchor customButtonAnchor = new PAnchor("CustomButton");
         customButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("CustomButton", customButtonPageActivity));
+                goTo(buildPagePlace("CustomButton", customButtonPageActivity));
             }
         });
         panel.add(customButtonAnchor);
 
-        PAnchor fileUpload = new PAnchor("FileUpload");
+        final PAnchor fileUpload = new PAnchor("FileUpload");
         fileUpload.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("FileUpload", fileUploadPageActivity));
+                goTo(buildPagePlace("FileUpload", fileUploadPageActivity));
             }
         });
         panel.add(fileUpload);
@@ -117,7 +117,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
     }
 
     private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
-        return new PagePlace(pageActivity) {
+        return new PagePlace(pageActivity.getPageName()) {
 
             @Override
             public String getToken() {

@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ponysdk.core.place.Place;
-import com.ponysdk.core.security.Permission;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
@@ -27,11 +25,7 @@ public abstract class TabGroupPageActivity<T> extends PageActivity {
     private final PTabPanel tablPanel;
 
     public TabGroupPageActivity(final String pageName, final String pageCategory, final Map<String, T> tabsByName) {
-        this(pageName, pageCategory, tabsByName, Permission.ALLOWED);
-    }
-
-    public TabGroupPageActivity(final String pageName, final String pageCategory, final Map<String, T> tabsByName, final Permission permission) {
-        super(pageName, pageCategory, permission);
+        super(pageName, pageCategory);
 
         setPageView(new DefaultPageView());
 
@@ -120,11 +114,6 @@ public abstract class TabGroupPageActivity<T> extends PageActivity {
     protected abstract void onLeavingPage(T partition);
 
     protected abstract void addHandlers();
-
-    @Override
-    public void goToPage(final PagePlace place) {
-        place.getPageActivity().goToPage(place);
-    }
 
     protected PSimplePanel getBody(final T partition) {
         return (PSimplePanel) tablPanel.getWidget(indexesByTab.get(partition)).asWidget();
