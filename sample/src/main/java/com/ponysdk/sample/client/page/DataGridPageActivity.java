@@ -38,27 +38,26 @@ import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PMenuBar;
-import com.ponysdk.ui.server.basic.PMenuItem;
+import com.ponysdk.ui.server.basic.PFlexTable;
+import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.form.DefaultFormView;
-import com.ponysdk.ui.server.form.FormActivity;
-import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
-import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TextBoxBaseFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.validator.IntegerFieldValidator;
-import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.ui.server.form2.Form;
+import com.ponysdk.ui.server.form2.FormFieldComponent;
+import com.ponysdk.ui.server.form2.formfield.IntegerFieldValidator;
+import com.ponysdk.ui.server.form2.formfield.IntegerTextBoxFormField;
+import com.ponysdk.ui.server.form2.formfield.ListBoxFormField;
+import com.ponysdk.ui.server.form2.formfield.StringTextBoxFormField;
+import com.ponysdk.ui.server.form2.formfield.TextBoxFormField;
+import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.list.DefaultSimpleListView;
 import com.ponysdk.ui.server.list.ExportConfiguration;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
@@ -70,7 +69,6 @@ import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.DataGridConfiguration;
 import com.ponysdk.ui.server.list2.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
-import com.ponysdk.ui.terminal.PUnit;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
 
@@ -78,14 +76,14 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
     protected ApplicationView applicationView;
 
     private DataGridActivity<Pony> dataGrid;
-    private FormField nameSearchField;
-    private FormField ageSearchField;
+    private TextBoxFormField<String> nameSearchField;
+    private ListBoxFormField<Integer> ageSearchField;
 
-    private PSimplePanel createPonyActivityPanel;
-    private FormActivity createPonyActivity;
-    private FormField raceFormField;
-    private FormField nameFormField;
-    private FormField ageFormField;
+    private PFlexTable createPonyActivityPanel;
+    private Form createPony;
+    private TextBoxFormField<String> raceFormField;
+    private TextBoxFormField<String> nameFormField;
+    private TextBoxFormField<Integer> ageFormField;
 
     public DataGridPageActivity() {
         super("Data Grid", "Rich UI Components");
@@ -96,14 +94,25 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         super.onFirstShowPage();
 
-        final PHorizontalPanel formContainer = new PHorizontalPanel();
-        final PScrollPanel gridContainer = new PScrollPanel();
+        final PScrollPanel scroll = new PScrollPanel();
+        final PFlowPanel layout = new PFlowPanel();
+        final PFlexTable formContainer = new PFlexTable();
+        final PSimplePanel listContaner = new PSimplePanel();
+        layout.add(formContainer);
+        layout.add(listContaner);
+        scroll.setWidget(layout);
+        examplePanel.setWidget(scroll);
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
-        dockLayoutPanel.addNorth(formContainer, 100);
-        dockLayoutPanel.add(gridContainer);
+        // Search
+        final PListBox ageListBox = new PListBox();
+        for (int i = 0; i < 30; i++)
+            ageListBox.addItem(i + " year", i);
 
-        examplePanel.setWidget(dockLayoutPanel);
+        ageSearchField = new ListBoxFormField<Integer>(ageListBox);
+        nameSearchField = new StringTextBoxFormField();
+
+        formContainer.setWidget(0, 0, new FormFieldComponent("Age", ageSearchField));
+        formContainer.setWidget(0, 1, new FormFieldComponent("Name", nameSearchField));
 
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
@@ -115,18 +124,18 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         configuration.setColumnDescriptors(initListColumnDescriptors());
 
         dataGrid = new DataGridActivity<Pony>(configuration, new DefaultSimpleListView());
-        dataGrid.start(gridContainer);
+        dataGrid.start(listContaner);
 
-        final PMenuBar actionBar = new PMenuBar();
-        actionBar.setStyleName("pony-ActionToolbar");
-        final PMenuItem clearMenuItem = new PMenuItem("Clear", new PCommand() {
+        final PButton refresh = new PButton("Refresh");
+        refresh.addClickHandler(new PClickHandler() {
 
             @Override
-            public void execute() {
-                dataGrid.clear();
+            public void onClick(final PClickEvent event) {
+                final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
+                dataGrid.setRowData(0, result.getData());
             }
         });
-        actionBar.addItem(clearMenuItem);
+        formContainer.setWidget(1, 0, refresh);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
@@ -138,9 +147,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         });
         addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
-
-        // formContainer.add(actionBar);
-        // formContainer.add(addPonyButton);
+        formContainer.setWidget(1, 1, addPonyButton);
 
         // Build create pony form
         buildCreatePonyActivity();
@@ -160,20 +167,12 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
     private List<DataGridColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
 
-        final ListBoxFormFieldRenderer ageListBoxRenderer = new ListBoxFormFieldRenderer("Age");
-        for (int i = 0; i < 30; i++)
-            ageListBoxRenderer.addItem(i + " year", i);
-
-        ageSearchField = new FormField(ageListBoxRenderer);
-        nameSearchField = new FormField(new TextBoxBaseFormFieldRenderer("Name"));
-
         final List<DataGridColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<DataGridColumnDescriptor<Pony, ?>>();
 
         final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
         nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name"));
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
         nameColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
-
         listColumnDescriptors.add(nameColumnDescriptor);
 
         final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
@@ -220,8 +219,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
             @Override
             public boolean onOK(final PDialogBox p) {
-                if (createPonyActivity.isValid()) {
-                    final Pony pony = new Pony(null, nameFormField.getStringValue(), ageFormField.getIntegerValue(), raceFormField.getStringValue());
+                if (createPony.isValid()) {
+                    final Pony pony = new Pony(null, nameFormField.getValue(), ageFormField.getValue(), raceFormField.getValue());
                     final CreatePonyCommand command = new CreatePonyCommand(pony);
                     final Pony newPony = command.execute();
                     if (command.isSuccessfull()) {
@@ -240,21 +239,25 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
     private void buildCreatePonyActivity() {
 
-        createPonyActivityPanel = new PSimplePanel();
-        createPonyActivity = new FormActivity(new DefaultFormView("Create a Pony"));
-        nameFormField = new FormField(new TextBoxFormFieldRenderer("Name"));
-        ageFormField = new FormField(new TextBoxFormFieldRenderer("Age"));
-        raceFormField = new FormField(new TextBoxFormFieldRenderer("Race"));
+        createPony = new Form();
+        nameFormField = new StringTextBoxFormField();
+        ageFormField = new IntegerTextBoxFormField();
+        raceFormField = new StringTextBoxFormField();
 
-        nameFormField.addValidator(new NotEmptyFieldValidator());
-        raceFormField.addValidator(new NotEmptyFieldValidator());
-        ageFormField.addValidator(new NotEmptyFieldValidator());
-        ageFormField.addValidator(new IntegerFieldValidator());
+        nameFormField.setValidator(new NotEmptyFieldValidator());
+        raceFormField.setValidator(new NotEmptyFieldValidator());
+        ageFormField.setValidator(new NotEmptyFieldValidator());
+        ageFormField.setValidator(new IntegerFieldValidator());
 
-        createPonyActivity.addFormField(nameFormField);
-        createPonyActivity.addFormField(ageFormField);
-        createPonyActivity.addFormField(raceFormField);
+        createPony.addFormField(nameFormField);
+        createPony.addFormField(raceFormField);
+        createPony.addFormField(ageFormField);
 
-        createPonyActivity.start(createPonyActivityPanel);
+        createPonyActivityPanel = new PFlexTable();
+        createPonyActivityPanel.setWidget(0, 0, new PLabel("Add a pony"));
+        createPonyActivityPanel.getFlexCellFormatter().setColSpan(0, 0, 3);
+        createPonyActivityPanel.setWidget(1, 0, new FormFieldComponent("Name", nameFormField));
+        createPonyActivityPanel.setWidget(1, 1, new FormFieldComponent("Race", raceFormField));
+        createPonyActivityPanel.setWidget(1, 2, new FormFieldComponent("Age", ageFormField));
     }
 }

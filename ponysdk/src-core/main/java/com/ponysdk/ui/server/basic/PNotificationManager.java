@@ -37,7 +37,7 @@ public class PNotificationManager {
     public static void notify(final String message, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(new PLabel(message), 2500);
+                showTrayNotification(new PLabel(message));
                 break;
             case HUMANIZED:
                 showHumanizedNotification(new PLabel(message));
@@ -56,7 +56,7 @@ public class PNotificationManager {
     public static void notify(final IsPWidget content, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(content, 2500);
+                showTrayNotification(content);
                 break;
             case HUMANIZED:
                 showHumanizedNotification(content);
@@ -85,7 +85,7 @@ public class PNotificationManager {
     }
 
     public static void showTrayNotification(final String message) {
-        showTrayNotification(new PLabel(message), 2500);
+        showTrayNotification(new PLabel(message));
     }
 
     private static void showHumanizedNotification(final IsPWidget content) {
@@ -101,8 +101,8 @@ public class PNotificationManager {
             }
         }, PClickEvent.TYPE);
 
-        displayAtCenter(popupPanel);
-        addAutoCloseTimer(popupPanel, 1000);
+        displayAtCenter(popupPanel, "closing");
+        addAutoCloseTimer(popupPanel, 2500);
     }
 
     private static void showWarningNotification(final IsPWidget content) {
@@ -118,8 +118,8 @@ public class PNotificationManager {
             }
         }, PClickEvent.TYPE);
 
-        displayAtCenter(popupPanel);
-        addAutoCloseTimer(popupPanel, 2500);
+        displayAtCenter(popupPanel, "closing");
+        addAutoCloseTimer(popupPanel, 3500);
     }
 
     private static void showErrorNotification(final IsPWidget content) {
@@ -136,10 +136,10 @@ public class PNotificationManager {
             }
         }, PClickEvent.TYPE);
 
-        displayAtCenter(popupPanel);
+        displayAtCenter(popupPanel, null);
     }
 
-    private static void showTrayNotification(final IsPWidget content, final int delayBeforeClosing) {
+    private static void showTrayNotification(final IsPWidget content) {
         final PSimplePanel div2 = new PSimplePanel();
         div2.setWidget(content);
         div2.setWidth("200px");
@@ -150,26 +150,28 @@ public class PNotificationManager {
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_TRAY);
         popupPanel.setWidget(div2);
 
-        displayAtBottomRight(popupPanel);
-        addAutoCloseTimer(popupPanel, 2500);
+        displayAtBottomRight(popupPanel, "closing");
+        addAutoCloseTimer(popupPanel, 3500);
     }
 
-    private static void displayAtBottomRight(final PPopupPanel popupPanel) {
+    private static void displayAtBottomRight(final PPopupPanel popupPanel, final String closingAnimation) {
         popupPanel.setPopupPositionAndShow(new PPositionCallback() {
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                 popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
+                if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
             }
         });
     }
 
-    private static void displayAtCenter(final PPopupPanel popupPanel) {
+    private static void displayAtCenter(final PPopupPanel popupPanel, final String closingAnimation) {
         popupPanel.setPopupPositionAndShow(new PPositionCallback() {
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                 popupPanel.setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2);
+                if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
             }
         });
     }
@@ -179,7 +181,7 @@ public class PNotificationManager {
 
             @Override
             public void run() {
-                popupPanel.addStyleName("closing");
+                popupPanel.hide();
             }
         };
         timer.schedule(delayBeforeClosing);

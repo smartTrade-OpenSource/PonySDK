@@ -27,7 +27,6 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFloatablePanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
@@ -48,7 +47,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     private final PSimplePanel pagingLayout = new PSimplePanel();
 
-    private final PFloatablePanel positionPanel = new PFloatablePanel();
+    private final PSimplePanel positionPanel = new PSimplePanel();
 
     private final PSimplePanel topListLayout = new PSimplePanel();
 
@@ -170,12 +169,12 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void setFloatableToolBar(final PScrollPanel ancestorScrollPanel) {
-        positionPanel.setLinkedScrollPanel(ancestorScrollPanel);
+        // positionPanel.setLinkedScrollPanel(ancestorScrollPanel);
     }
 
     @Override
     public void updateView() {
-        positionPanel.correct();
+        // positionPanel.correct();
     }
 
     @Override

@@ -44,6 +44,7 @@ configurations {
 	spring
 	sl4j
 	log4j
+	commons
 	hibernate
 	jasper
 	mongodb
@@ -78,6 +79,7 @@ dependencies {
 	sl4j 'org.slf4j:jcl-over-slf4j:1.6.4'
 	log4j 'log4j:log4j:1.2.16'
 	log4j 'commons-io:commons-io:20030203.000550'
+	commons 'commons-beanutils:commons-beanutils:1.8.3'
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
@@ -223,6 +225,10 @@ task copyAllLibs << {
 	copy {
 	    from configurations.jetty
 	    into 'libs/jetty'
+	}
+	copy {
+	    from configurations.commons
+	    into 'libs/commons'
 	}
 }
 
