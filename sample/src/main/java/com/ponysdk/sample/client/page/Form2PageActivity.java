@@ -29,10 +29,13 @@ import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
+import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.form2.Form;
 import com.ponysdk.ui.server.form2.FormFieldComponent;
+import com.ponysdk.ui.server.form2.FormFieldComponent.CaptionOriantation;
 import com.ponysdk.ui.server.form2.formfield.CheckBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.DateBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.FormField;
@@ -96,15 +99,24 @@ public class Form2PageActivity extends SamplePageActivity {
         form.addFormField(field7);
         form.addFormField(field8);
 
+        final FormFieldComponent formFieldComponent1 = new FormFieldComponent("field1", field1);
+        final FormFieldComponent formFieldComponent2 = new FormFieldComponent("field2", field2);
+        final FormFieldComponent formFieldComponent3 = new FormFieldComponent("field3", field3);
+        final FormFieldComponent formFieldComponent4 = new FormFieldComponent("field4", field4);
+        final FormFieldComponent formFieldComponent5 = new FormFieldComponent("field5", field5);
+        final FormFieldComponent formFieldComponent6 = new FormFieldComponent("field6", field6);
+        final FormFieldComponent formFieldComponent7 = new FormFieldComponent("field7", field7);
+        final FormFieldComponent formFieldComponent8 = new FormFieldComponent("field8", field8);
+
         final PFlexTable formLayout = new PFlexTable();
-        formLayout.setWidget(0, 0, new FormFieldComponent("field1", field1));
-        formLayout.setWidget(0, 1, new FormFieldComponent("field2", field2));
-        formLayout.setWidget(1, 0, new FormFieldComponent("field3", field3));
-        formLayout.setWidget(1, 1, new FormFieldComponent("field4", field4));
-        formLayout.setWidget(2, 0, new FormFieldComponent("field5", field5));
-        formLayout.setWidget(2, 1, new FormFieldComponent("field6", field6));
-        formLayout.setWidget(3, 0, new FormFieldComponent("field7", field7));
-        formLayout.setWidget(3, 1, new FormFieldComponent("field8", field8));
+        formLayout.setWidget(0, 0, formFieldComponent1);
+        formLayout.setWidget(0, 1, formFieldComponent2);
+        formLayout.setWidget(1, 0, formFieldComponent3);
+        formLayout.setWidget(1, 1, formFieldComponent4);
+        formLayout.setWidget(2, 0, formFieldComponent5);
+        formLayout.setWidget(2, 1, formFieldComponent6);
+        formLayout.setWidget(3, 0, formFieldComponent7);
+        formLayout.setWidget(3, 1, formFieldComponent8);
 
         final PButton validateButton = new PButton("Validate");
         validateButton.addClickHandler(new PClickHandler() {
@@ -126,12 +138,35 @@ public class Form2PageActivity extends SamplePageActivity {
             }
         });
 
+        final PListBox captionOriantationList = new PListBox(true);
+        for (final CaptionOriantation captionOriantation : CaptionOriantation.values()) {
+            captionOriantationList.addItem(captionOriantation.name(), captionOriantation);
+        }
+        captionOriantationList.addChangeHandler(new PChangeHandler() {
+
+            @Override
+            public void onChange(final PChangeEvent event) {
+                final CaptionOriantation captionOriantation = (CaptionOriantation) captionOriantationList.getSelectedValue();
+
+                formFieldComponent1.setCaptionOriantation(captionOriantation);
+                formFieldComponent2.setCaptionOriantation(captionOriantation);
+                formFieldComponent3.setCaptionOriantation(captionOriantation);
+                formFieldComponent4.setCaptionOriantation(captionOriantation);
+                formFieldComponent5.setCaptionOriantation(captionOriantation);
+                formFieldComponent6.setCaptionOriantation(captionOriantation);
+                formFieldComponent7.setCaptionOriantation(captionOriantation);
+                formFieldComponent8.setCaptionOriantation(captionOriantation);
+            }
+        });
+
         panel.setWidget(0, 0, validateButton);
         panel.getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
         panel.setWidget(0, 1, resetButton);
         panel.getFlexCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
+        panel.setWidget(0, 2, captionOriantationList);
+        panel.getFlexCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_RIGHT);
         panel.setWidget(1, 0, formLayout);
-        panel.getFlexCellFormatter().setColSpan(1, 0, 2);
+        panel.getFlexCellFormatter().setColSpan(1, 0, 3);
 
         examplePanel.setWidget(panel);
     }
