@@ -106,6 +106,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             for (final String index : tokens) {
                 selectedItems.add(Integer.valueOf(index));
             }
+
             syncSelectedItems(selectedItems);
 
             onChange(new PChangeEvent(PListBox.this));
@@ -171,11 +172,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         getPonySession().stackInstruction(update);
     }
 
-    public void removeItem(final int index) {
+    public ListItem removeItem(final int index) {
         checkIndex(index);
 
-        items.remove(index);
+        final ListItem removedItem = items.remove(index);
         sendRemoveItemInstruction(index);
+        return removedItem;
     }
 
     public void removeItem(final String label) {
@@ -355,7 +357,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         getPonySession().stackInstruction(update);
     }
 
-    private class ListItem {
+    public class ListItem {
 
         protected String label;
 
