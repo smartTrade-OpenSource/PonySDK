@@ -58,12 +58,11 @@ public class DefaultPageProvider implements PageProvider {
     private void initPagePermissions() {
         allActivePageActivities = new LinkedHashMap<String, PageActivity>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
-            // if (SecurityManager.checkPermission(entry.getValue().getPermission())) {
-            allActivePageActivities.put(entry.getKey(), entry.getValue());
-            // } else {
-            // log.info("Permission " + entry.getValue().getPermission() +
-            // " not found for the page activity  #" + entry.getKey());
-            // }
+            if (com.ponysdk.core.security.SecurityManager.checkPermission(entry.getValue().getPermission())) {
+                allActivePageActivities.put(entry.getKey(), entry.getValue());
+            } else {
+                log.info("Permission " + entry.getValue().getPermission() + " not found for the page activity  #" + entry.getKey());
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.security.Permission;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -25,7 +26,11 @@ public abstract class TabGroupPageActivity<T> extends PageActivity {
     private final PTabPanel tablPanel;
 
     public TabGroupPageActivity(final String pageName, final String pageCategory, final Map<String, T> tabsByName) {
-        super(pageName, pageCategory);
+        this(pageName, pageCategory, tabsByName, Permission.ALLOWED);
+    }
+
+    public TabGroupPageActivity(final String pageName, final String pageCategory, final Map<String, T> tabsByName, final Permission permission) {
+        super(pageName, pageCategory, permission);
 
         setPageView(new DefaultPageView());
 

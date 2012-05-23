@@ -23,27 +23,13 @@
 
 package com.ponysdk.core.place;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
-public class PlaceController implements PValueChangeHandler<String>, PlaceChangeRequestHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(PlaceController.class);
-
-    private final PHistory history;
-
-    // private final Map<String, Place> placeContextByToken = new ConcurrentHashMap<String, Place>();
+public class PlaceController implements PlaceChangeRequestHandler {
 
     public PlaceController(final PHistory history, final PEventBus eventBus) {
-        this.history = history;
-        // this.history.addValueChangeHandler(this);
-
         eventBus.addHandler(PlaceChangeRequestEvent.TYPE, this);
     }
 
@@ -60,24 +46,7 @@ public class PlaceController implements PValueChangeHandler<String>, PlaceChange
      * @param world
      */
     public void goTo(final Place place) {
-        final String token = place.getToken();
-        // placeContextByToken.put(place.getToken(), place);
-
-        // history.newItem(token, false);
         PonySession.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
-    }
-
-    @Override
-    public void onValueChange(final PValueChangeEvent<String> event) {
-
-        // final Place place = placeContextByToken.get(event.getValue());
-        //
-        // if (place == null) {
-        // log.warn("No context found for this token #" + event.getValue());
-        // return;
-        // }
-        //
-        // PonySession.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
     }
 
 }

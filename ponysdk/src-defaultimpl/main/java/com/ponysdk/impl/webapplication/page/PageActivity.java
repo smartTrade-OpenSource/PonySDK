@@ -28,6 +28,7 @@ import java.util.Collections;
 
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.security.Permission;
 import com.ponysdk.ui.server.basic.IsPWidget;
 
 public abstract class PageActivity extends AbstractActivity implements InitializingActivity {
@@ -48,13 +49,24 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     protected abstract void onLeavingPage();
 
+    protected final Permission permission;
+
     public PageActivity(final String pageName, final String pageCategory) {
-        this(pageName, Collections.singleton(pageCategory));
+        this(pageName, Collections.singleton(pageCategory), Permission.ALLOWED);
+    }
+
+    public PageActivity(final String pageName, final String pageCategory, final Permission permission) {
+        this(pageName, Collections.singleton(pageCategory), permission);
     }
 
     public PageActivity(final String pageName, final Collection<String> pageCategories) {
+        this(pageName, pageCategories, Permission.ALLOWED);
+    }
+
+    public PageActivity(final String pageName, final Collection<String> pageCategories, final Permission permission) {
         this.pageName = pageName;
         this.pageCategories = pageCategories;
+        this.permission = permission;
     }
 
     @Override
@@ -76,6 +88,10 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     public String getPageName() {
         return pageName;
+    }
+
+    public Permission getPermission() {
+        return permission;
     }
 
     public Collection<String> getPageCategories() {

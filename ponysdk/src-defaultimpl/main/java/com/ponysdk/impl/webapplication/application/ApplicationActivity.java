@@ -55,6 +55,9 @@ public class ApplicationActivity implements Activity {
         if (place instanceof PagePlace) {
             final PagePlace pagePlace = (PagePlace) place;
             final PageActivity pageActivity = pageProvider.getPageActivity(pagePlace.getPageName());
+
+            if (!com.ponysdk.core.security.SecurityManager.checkPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
+
             pageActivity.start(applicationView.getBody(), place);
         }
 

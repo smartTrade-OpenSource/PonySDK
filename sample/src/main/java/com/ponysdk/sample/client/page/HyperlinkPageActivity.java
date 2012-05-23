@@ -23,9 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -34,21 +31,6 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class HyperlinkPageActivity extends SamplePageActivity {
-
-    @Autowired
-    private CheckBoxPageActivity checkBoxPageActivity;
-
-    @Autowired
-    private RadioButtonPageActivity radioButtonPageActivity;
-
-    @Autowired
-    private BasicButtonPageActivity basicButtonPageActivity;
-
-    @Autowired
-    private CustomButtonPageActivity customButtonPageActivity;
-
-    @Autowired
-    private FileUploadPageActivity fileUploadPageActivity;
 
     public HyperlinkPageActivity() {
         super("Hyperlink", "Widgets");
@@ -68,7 +50,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
+                goTo(new PagePlace("CheckBox"));
             }
         });
         panel.add(checkBoxAnchor);
@@ -78,7 +60,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goTo(buildPagePlace("RadioButton", radioButtonPageActivity));
+                goTo(new PagePlace("Radio Button"));
             }
         });
         panel.add(radioButtonAnchor);
@@ -88,7 +70,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goTo(buildPagePlace("BasicButton", basicButtonPageActivity));
+                goTo(new PagePlace("Basic Button"));
             }
         });
         panel.add(basicButtonAnchor);
@@ -98,7 +80,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goTo(buildPagePlace("CustomButton", customButtonPageActivity));
+                goTo(new PagePlace("Custom Button"));
             }
         });
         panel.add(customButtonAnchor);
@@ -108,21 +90,11 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goTo(buildPagePlace("FileUpload", fileUploadPageActivity));
+                goTo(new PagePlace("File Upload"));
             }
         });
         panel.add(fileUpload);
 
         examplePanel.setWidget(panel);
-    }
-
-    private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
-        return new PagePlace(pageActivity.getPageName()) {
-
-            @Override
-            public String getToken() {
-                return token;
-            }
-        };
     }
 }
