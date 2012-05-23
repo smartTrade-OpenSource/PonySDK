@@ -24,14 +24,19 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.ui.server.basic.PListBox.ListItem;
+import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
+import com.ponysdk.ui.server.basic.event.PChangeEvent;
+import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class PTwinListBox<T> extends PFlexTable {
+public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
     private boolean enabled = true;
 
@@ -50,6 +55,8 @@ public class PTwinListBox<T> extends PFlexTable {
     private PButton rightToLeftButton;
 
     private boolean multiButton;
+
+    private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
 
     public PTwinListBox() {
         this(null, null, false, false);
@@ -115,6 +122,9 @@ public class PTwinListBox<T> extends PFlexTable {
                         final ListItem listItem = rightRemovedItems.get(i);
                         leftListBox.addItem(listItem.label, listItem.value);
                     }
+
+                    fireChangeHandler();
+
                 }
             });
             setWidget(1, 1, switchButton);
@@ -160,6 +170,13 @@ public class PTwinListBox<T> extends PFlexTable {
         }
     }
 
+    protected void fireChangeHandler() {
+        final PChangeEvent event = new PChangeEvent(this);
+        for (final PChangeHandler handler : handlers) {
+            handler.onChange(event);
+        }
+    }
+
     @Override
     public void clear() {
         rightListBox.clear();
@@ -188,6 +205,20 @@ public class PTwinListBox<T> extends PFlexTable {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public void addChangeHandler(final PChangeHandler handler) {
+        handlers.add(handler);
+    }
+
+    public boolean removeChangeHandler(final PChangeHandler handler) {
+        return handlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PChangeHandler> getChangeHandlers() {
+        return Collections.unmodifiableCollection(handlers);
     }
 
 }

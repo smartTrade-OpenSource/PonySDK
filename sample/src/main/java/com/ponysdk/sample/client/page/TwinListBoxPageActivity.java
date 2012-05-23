@@ -70,6 +70,14 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
             }
         });
 
+        twinListBox.addChangeHandler(new PChangeHandler() {
+
+            @Override
+            public void onChange(final PChangeEvent event) {
+                PNotificationManager.showTrayNotification("Item changed");
+            }
+        });
+
         examplePanel.setWidget(twinListBox);
     }
 }
