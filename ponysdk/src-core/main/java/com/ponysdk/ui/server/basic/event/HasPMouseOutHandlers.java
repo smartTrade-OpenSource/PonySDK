@@ -21,8 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.basic.event;
 
-public enum DomHandlerType {
-    CLICK, MOUSE_OVER, KEY_PRESS, KEY_UP, MOUSE_OUT, MOUSE_DOWN, MOUSE_UP, FOCUS, BLUR, DRAG_ENTER, DRAG_END, CHANGE_HANDLER;
+import java.util.Collection;
+
+import com.ponysdk.core.event.PHandlerRegistration;
+
+public interface HasPMouseOutHandlers {
+
+    PHandlerRegistration addMouseOutHandler(PMouseOutHandler handler);
+
+    Collection<PMouseOutHandler> getMouseOutHandlers();
 }

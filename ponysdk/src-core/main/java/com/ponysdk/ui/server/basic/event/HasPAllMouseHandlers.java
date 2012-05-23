@@ -23,6 +23,6 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-public interface HasPAllMouseHandlers extends HasPMouseOverHandlers {
+public interface HasPAllMouseHandlers extends HasPMouseOverHandlers, HasPMouseOutHandlers, HasPMouseDownHandlers, HasPMouseUpHandlers {
 
 }

@@ -150,7 +150,7 @@ public class PreferenceForm extends PScrollPanel {
             panel.addDomHandler(new PMouseOutHandler() {
 
                 @Override
-                public void onMouseOut() {
+                public void onMouseOut(final PMouseOutEvent event) {
                     buttonPanel.setVisible(false);
                 }
             }, PMouseOutEvent.TYPE);

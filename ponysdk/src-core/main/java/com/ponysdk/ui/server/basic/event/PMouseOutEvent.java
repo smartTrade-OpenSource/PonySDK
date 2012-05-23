@@ -7,7 +7,7 @@ public class PMouseOutEvent extends PMouseEvent<PMouseOutHandler> {
 
     public static final PDomEvent.Type<PMouseOutHandler> TYPE = new PDomEvent.Type<PMouseOutHandler>(DomHandlerType.MOUSE_OUT);
 
-    public PMouseOutEvent(Object sourceComponent) {
+    public PMouseOutEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
@@ -17,7 +17,7 @@ public class PMouseOutEvent extends PMouseEvent<PMouseOutHandler> {
     }
 
     @Override
-    protected void dispatch(PMouseOutHandler handler) {
-        handler.onMouseOut();
+    protected void dispatch(final PMouseOutHandler handler) {
+        handler.onMouseOut(this);
     }
 }

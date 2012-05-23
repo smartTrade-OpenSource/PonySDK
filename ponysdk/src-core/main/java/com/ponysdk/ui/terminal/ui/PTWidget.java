@@ -35,10 +35,14 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -195,6 +199,26 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     }
 
                 }, MouseOutEvent.getType());
+                break;
+            case MOUSE_DOWN:
+                widget.addDomHandler(new MouseDownHandler() {
+
+                    @Override
+                    public void onMouseDown(final MouseDownEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+
+                }, MouseDownEvent.getType());
+                break;
+            case MOUSE_UP:
+                widget.addDomHandler(new MouseUpHandler() {
+
+                    @Override
+                    public void onMouseUp(final MouseUpEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+
+                }, MouseUpEvent.getType());
                 break;
             case KEY_PRESS:
                 widget.addDomHandler(new KeyPressHandler() {

@@ -5,5 +5,5 @@ import com.ponysdk.core.event.PEventHandler;
 
 public interface PMouseOutHandler extends PEventHandler {
 
-    void onMouseOut();
+    void onMouseOut(PMouseOutEvent mouseOutEvent);
 }
