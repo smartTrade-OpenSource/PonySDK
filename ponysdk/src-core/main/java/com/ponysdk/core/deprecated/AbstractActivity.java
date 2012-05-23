@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.activity;
+package com.ponysdk.core.deprecated;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.PBroadcastEventHandler;
@@ -30,57 +30,10 @@ import com.ponysdk.core.event.PEvent.Type;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.core.event.PHandlerRegistration;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.core.place.PlaceChangeRequestEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public abstract class AbstractActivity implements Activity {
 
-    protected boolean started = false;
-
-    protected PAcceptsOneWidget world;
-    protected IsPWidget view;
-
-    // protected final Permission permission;
-
-    public AbstractActivity() {
-        // this.permission = Permission.ALLOWED;
-    }
-
-    // public AbstractActivity(final Permission permission) {
-    // this.permission = permission;
-    // }
-
-    @Override
-    public void start(final PAcceptsOneWidget world, final Place place) {
-
-        // if (!SecurityManager.checkPermission(getPermission())) throw new
-        // RuntimeException("Missing permission #" + getPermission());
-
-        if (!started) {
-            this.world = world;
-            this.started = true;
-            this.view = buildView();
-        }
-
-        this.world.setWidget(view);
-
-        updateView(place);
-    }
-
-    protected abstract IsPWidget buildView();
-
-    protected abstract void updateView(Place place);
-
-    // @Override
-    // public Permission getPermission() {
-    // return permission;
-    // }
-
-    public void goTo(final Place place) {
-        PonySession.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
-    }
+    public AbstractActivity() {}
 
     public PEventBus getRootEventBus() {
         return PonySession.getRootEventBus();

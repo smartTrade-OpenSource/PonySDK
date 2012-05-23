@@ -49,7 +49,6 @@ import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Close;
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
@@ -86,8 +85,6 @@ public class PonySession {
     private EntryPoint entryPoint;
 
     private PHistory history;
-
-    private PlaceController placeController;
 
     private PEventBus rootEventBus;
 
@@ -202,10 +199,6 @@ public class PonySession {
         return history;
     }
 
-    public PlaceController getPlaceController() {
-        return placeController;
-    }
-
     private PEventBus getEventBus() {
         return rootEventBus;
     }
@@ -216,10 +209,6 @@ public class PonySession {
 
     public void setHistory(final PHistory history) {
         this.history = history;
-    }
-
-    public void setPlaceController(final PlaceController placeController) {
-        this.placeController = placeController;
     }
 
     public void setRootEventBus(final PEventBus eventBus) {

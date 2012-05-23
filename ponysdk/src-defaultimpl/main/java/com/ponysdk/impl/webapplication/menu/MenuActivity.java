@@ -23,55 +23,51 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
-import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
-import com.ponysdk.impl.webapplication.page.event.PageDisplayedEvent;
-import com.ponysdk.impl.webapplication.page.event.PageDisplayedEvent.PageDisplayHandler;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
-public class MenuActivity extends AbstractActivity implements PageDisplayHandler, InitializingActivity, PSelectionHandler<String> {
+public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity implements PSelectionHandler<MenuItem> {
 
     private MenuView menuView;
     private ApplicationActivity applicationActivity;
     private PageProvider pageProvider;
 
     @Override
-    public void onPageDisplayed(final PageDisplayedEvent event) {
-        if (event.getSource().equals(this)) return;
-
-        final PageActivity pageActivity = event.getPageActivity();
-        if (pageActivity.getPageName() != null) {
-            menuView.selectItem(pageActivity.getPageCategories(), pageActivity.getPageName());
-        }
-    }
-
-    @Override
-    public void start(final PAcceptsOneWidget world) {
-        world.setWidget(menuView);
+    public IsPWidget buildView() {
         for (final PageActivity pageActivity : pageProvider.getPageActivities()) {
-            menuView.addItem(pageActivity.getPageCategories(), pageActivity.getPageName());
+            menuView.addItem(new MenuItem(pageActivity.getPageName(), pageActivity.getPageCategories()));
+        }
+
+        return menuView;
+    }
+
+    @Override
+    public void updateView(final Place place) {
+        if (place instanceof PagePlace) {
+            final PageActivity pageActivity = pageProvider.getPageActivity(((PagePlace) place).getPageName());
+            if (pageActivity.getPageName() != null) {
+                menuView.selectItem(new MenuItem(pageActivity.getPageName(), pageActivity.getPageCategories()));
+            }
         }
     }
 
     @Override
-    public void onSelection(final PSelectionEvent<String> event) {
-        selectItem(event.getSelectedItem());
-    }
+    public void onSelection(final PSelectionEvent<MenuItem> event) {
 
-    public void selectItem(final String pageName) {
-        final PageActivity pageActivity = pageProvider.getPageActivity(pageName);
-        if (pageActivity != null) {
-            applicationActivity.goTo(pageActivity.getDefautHomePagePlace());
-        }
+        menuView.selectItem(event.getSelectedItem());
+
+        goTo(new PagePlace(event.getSelectedItem().getName()));
     }
 
     public void setMenuView(final MenuView menuView) {
         this.menuView = menuView;
+        this.menuView.addSelectionHandler(this);
     }
 
     public ApplicationActivity getApplicationActivity() {
@@ -92,12 +88,6 @@ public class MenuActivity extends AbstractActivity implements PageDisplayHandler
 
     public MenuView getMenuView() {
         return menuView;
-    }
-
-    @Override
-    public void afterContextInitialized() {
-        menuView.addSelectionHandler(this);
-        addHandler(PageDisplayedEvent.TYPE, this);
     }
 
 }

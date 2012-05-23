@@ -54,6 +54,7 @@ public interface Dictionnary {
     public interface HISTORY {
 
         public static final String TOKEN = "1";
+        public static final String FIRE_EVENTS = "2";
     }
 
     public interface HANDLER {

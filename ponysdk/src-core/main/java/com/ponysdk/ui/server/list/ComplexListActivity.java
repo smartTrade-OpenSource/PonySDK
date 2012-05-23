@@ -36,8 +36,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.command.Command;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.core.event.PSimpleEventBus;

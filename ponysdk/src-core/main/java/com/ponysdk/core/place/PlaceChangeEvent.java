@@ -21,10 +21,33 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.place;
+package com.ponysdk.core.place;
 
-import com.ponysdk.core.place.AbstractPlace;
+import com.ponysdk.core.event.PEvent;
 
-public class ApplicationPlace extends AbstractPlace {
+public class PlaceChangeEvent extends PEvent<PlaceChangeHandler> {
+
+    public static final Type<PlaceChangeHandler> TYPE = new Type<PlaceChangeHandler>();
+
+    private final Place newPlace;
+
+    public PlaceChangeEvent(final Object sourceComponent, final Place newPlace) {
+        super(sourceComponent);
+        this.newPlace = newPlace;
+    }
+
+    @Override
+    public Type<PlaceChangeHandler> getAssociatedType() {
+        return TYPE;
+    }
+
+    @Override
+    protected void dispatch(final PlaceChangeHandler handler) {
+        handler.onPlaceChange(this);
+    }
+
+    public Place getNewPlace() {
+        return newPlace;
+    }
 
 }

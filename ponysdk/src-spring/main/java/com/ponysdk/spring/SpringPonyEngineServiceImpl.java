@@ -32,7 +32,6 @@ import com.ponysdk.core.AbstractPonyEngineServiceImpl;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.ui.server.basic.PHistory;
 
@@ -48,12 +47,10 @@ public class SpringPonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
 
         final PEventBus rootEventBus = applicationContext.getBean(PEventBus.class);
         final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
-        final PlaceController placeController = applicationContext.getBean(PlaceController.class);
         final PHistory history = applicationContext.getBean(PHistory.class);
 
         ponySession.setRootEventBus(rootEventBus);
         ponySession.setHistory(history);
-        ponySession.setPlaceController(placeController);
         ponySession.setEntryPoint(entryPoint);
 
         // final PCookies cookies = new PCookies(cookiesByName);

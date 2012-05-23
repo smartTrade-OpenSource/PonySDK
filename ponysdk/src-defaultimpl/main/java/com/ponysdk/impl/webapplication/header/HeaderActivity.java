@@ -24,18 +24,22 @@
 package com.ponysdk.impl.webapplication.header;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.place.Place;
+import com.ponysdk.ui.server.basic.IsPWidget;
 
 public class HeaderActivity extends AbstractActivity {
 
     private HeaderView headerView;
 
     @Override
-    public void start(PAcceptsOneWidget world) {
-        world.setWidget(headerView);
+    public IsPWidget buildView() {
+        return headerView;
     }
 
-    public void setHeaderView(HeaderView headerView) {
+    @Override
+    public void updateView(final Place place) {}
+
+    public void setHeaderView(final HeaderView headerView) {
         this.headerView = headerView;
     }
 

@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.list.paging;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;

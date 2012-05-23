@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventBusAware;
 import com.ponysdk.impl.theme.PonySDKTheme;

@@ -27,11 +27,14 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
-    private final Map<String, PTreeItem> itemsByName = new LinkedHashMap<String, PTreeItem>();
+    private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<String, PTreeItem>();
+
+    private final Map<PTreeItem, MenuItem> menuItemByUIObject = new LinkedHashMap<PTreeItem, MenuItem>();
+    private final Map<MenuItem, PTreeItem> uiObjectByMenuItem = new LinkedHashMap<MenuItem, PTreeItem>();
 
     private final PTree tree;
 
-    private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
+    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<PSelectionHandler<MenuItem>>();
 
     public DefaultMenuView() {
         tree = new PTree();
@@ -42,8 +45,9 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                final PSelectionEvent<String> e = new PSelectionEvent<String>(this, event.getSelectedItem().getHtml());
-                for (final PSelectionHandler<String> handler : selectionHandlers) {
+                final MenuItem menuItem = menuItemByUIObject.get(event.getSelectedItem());
+                final PSelectionEvent<MenuItem> e = new PSelectionEvent<MenuItem>(this, menuItem);
+                for (final PSelectionHandler<MenuItem> handler : selectionHandlers) {
                     handler.onSelection(e);
                 }
             }
@@ -51,45 +55,43 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     }
 
     private PTreeItem createCategoryItemIfNeeded(final String category) {
-        PTreeItem categoryItem = itemsByName.get(category);
+        PTreeItem categoryItem = categoryByName.get(category);
         if (categoryItem == null) {
             categoryItem = tree.addItem(category);
-            itemsByName.put(category, categoryItem);
+            categoryByName.put(category, categoryItem);
         }
         return categoryItem;
     }
 
     @Override
-    public void addItem(final Collection<String> categories, final String caption) {
-        final PTreeItem categoryItem = createCategoryItemIfNeeded(categories.iterator().next());
-        if (caption != null) {
-            final PTreeItem captionItem = new PTreeItem(caption);
+    public void addItem(final MenuItem menuItem) {
+        final PTreeItem categoryItem = createCategoryItemIfNeeded(menuItem.getCategories().iterator().next());
+        if (menuItem.getName() != null) {
+            final PTreeItem captionItem = new PTreeItem(menuItem.getName());
             categoryItem.addItem(captionItem);
-            itemsByName.put(caption, captionItem);
+            menuItemByUIObject.put(captionItem, menuItem);
+            uiObjectByMenuItem.put(menuItem, captionItem);
         }
     }
 
     @Override
-    public void selectItem(final Collection<String> categories, final String caption) {
-        if (caption != null) {
-            tree.setSelectedItem(itemsByName.get(caption));
-        } else {
-            tree.setSelectedItem(itemsByName.get(categories.iterator().next()));
-        }
+    public void selectItem(final MenuItem menuItem) {
+        final PTreeItem treeItem = uiObjectByMenuItem.get(menuItem);
+        tree.setSelectedItem(treeItem);
     }
 
     @Override
-    public void addSelectionHandler(final PSelectionHandler<String> handler) {
+    public void addSelectionHandler(final PSelectionHandler<MenuItem> handler) {
         selectionHandlers.add(handler);
     }
 
     @Override
-    public void removeSelectionHandler(final PSelectionHandler<String> handler) {
+    public void removeSelectionHandler(final PSelectionHandler<MenuItem> handler) {
         selectionHandlers.remove(handler);
     }
 
     @Override
-    public Collection<PSelectionHandler<String>> getSelectionHandlers() {
+    public Collection<PSelectionHandler<MenuItem>> getSelectionHandlers() {
         return selectionHandlers;
     }
 

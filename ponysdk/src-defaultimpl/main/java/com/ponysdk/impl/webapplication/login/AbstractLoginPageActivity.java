@@ -24,6 +24,8 @@
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.place.Place;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -35,8 +37,6 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
 
     protected LoginPageView loginPageView;
 
-    protected PAcceptsOneWidget world;
-
     protected boolean remember;
 
     protected abstract void sendLogon(String login, String password);
@@ -47,10 +47,12 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
     }
 
     @Override
-    public void start(final PAcceptsOneWidget world) {
-        this.world = world;
-        world.setWidget(loginPageView);
+    public IsPWidget buildView() {
+        return loginPageView;
     }
+
+    @Override
+    public void updateView(final Place place) {}
 
     public LoginPageView getLoginPageView() {
         return loginPageView;

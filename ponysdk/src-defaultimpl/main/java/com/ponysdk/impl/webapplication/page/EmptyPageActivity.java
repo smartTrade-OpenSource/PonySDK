@@ -24,18 +24,22 @@
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.place.Place;
+import com.ponysdk.ui.server.basic.IsPWidget;
 
 public class EmptyPageActivity extends AbstractActivity {
 
     private final PageView pageView;
 
-    public EmptyPageActivity(PageView pageView) {
+    public EmptyPageActivity(final PageView pageView) {
         this.pageView = pageView;
     }
 
     @Override
-    public void start(PAcceptsOneWidget container) {
-        container.setWidget(pageView.getBody());
+    public IsPWidget buildView() {
+        return pageView.getBody();
     }
+
+    @Override
+    public void updateView(final Place place) {}
 }

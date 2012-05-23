@@ -16,6 +16,12 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		</property>
 	</bean>
 
+	<bean name="mapper" class="com.ponysdk.sample.client.activity.SampleActivityMapper" />
+	<bean name="historyMapper" class="com.ponysdk.impl.webapplication.page.ApplicationPlaceHistoryMapper">
+		<constructor-arg ref="eventBus" />
+		<property name="pageProvider" ref="pageProvider"/>
+	</bean>
+
 	<bean name="loginActivity" class="com.ponysdk.sample.client.LoginActivity" />
 
 	<bean name="headerView" class="com.ponysdk.impl.webapplication.header.DefaultHeaderView">
@@ -113,8 +119,5 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.JavascriptPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.LessPageActivity" />
-	<!-- <bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
-	<!-- <bean class="com.ponysdk.sample.client.page.CookiePageActivity" /> -->
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
-	<!-- bean class="com.ponysdk.sample.client.page.PositionContainerPageActivity" /-->
 </beans>

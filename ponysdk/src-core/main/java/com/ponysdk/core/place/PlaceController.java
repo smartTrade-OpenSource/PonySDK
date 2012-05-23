@@ -23,35 +23,19 @@
 
 package com.ponysdk.core.place;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.security.SecurityManager;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.PonySession;
+import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
-public class PlaceController implements PValueChangeHandler<String> {
+public class PlaceController implements PlaceChangeRequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(PlaceController.class);
+    public PlaceController(final PHistory history, final PEventBus eventBus) {
+        eventBus.addHandler(PlaceChangeRequestEvent.TYPE, this);
+    }
 
-    private PHistory history;
-
-    private final Map<String, PlaceContext> placeContextByToken = new ConcurrentHashMap<String, PlaceContext>();
-
-    /**
-     * GoTo Page without history
-     * 
-     * @param placeContext
-     */
-    public void registerPlaceContext(final PlaceContext placeContext) {
-        placeContextByToken.put(placeContext.getPlace().getToken(), placeContext);
-        placeContext.getActivity().goTo(placeContext.getPlace(), placeContext.getWorld());
+    @Override
+    public void onPlaceChange(final PlaceChangeRequestEvent event) {
+        goTo(event.getPlace());
     }
 
     /**
@@ -61,41 +45,8 @@ public class PlaceController implements PValueChangeHandler<String> {
      * @param place
      * @param world
      */
-    public void goTo(final Activity activity, final Place place, final PAcceptsOneWidget world) {
-
-        if (!SecurityManager.checkPermission(activity.getPermission())) throw new RuntimeException("Missing permission #" + activity.getPermission());
-
-        final PlaceContext context = new PlaceContext();
-        context.setPlace(place);
-        context.setActivity(activity);
-        context.setWorld(world);
-
-        final String token = place.getToken();
-
-        placeContextByToken.put(token, context);
-
-        history.newItem(token);
-    }
-
-    @Override
-    public void onValueChange(final PValueChangeEvent<String> event) {
-        final PlaceContext placeContext = placeContextByToken.get(event.getValue());
-
-        if (placeContext == null) {
-            log.warn("No context found for this token #" + event.getValue());
-            return;
-        }
-
-        placeContext.getActivity().goTo(placeContext.getPlace(), placeContext.getWorld());
-    }
-
-    public void setHistory(final PHistory history) {
-        this.history = history;
-        this.history.addValueChangeHandler(this);
-    }
-
-    public PlaceContext getPlaceContext(final String token) {
-        return placeContextByToken.get(token);
+    public void goTo(final Place place) {
+        PonySession.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
     }
 
 }

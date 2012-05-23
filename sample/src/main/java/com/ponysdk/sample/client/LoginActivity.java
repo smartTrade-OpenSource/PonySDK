@@ -23,19 +23,14 @@
 
 package com.ponysdk.sample.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.impl.webapplication.application.ApplicationActivity;
+import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
-import com.ponysdk.sample.client.page.CheckBoxPageActivity;
-import com.ponysdk.sample.client.place.ApplicationPlace;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -44,19 +39,10 @@ import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 
 public class LoginActivity extends AbstractActivity {
 
-    @Autowired
-    private ApplicationActivity applicationActivity;
-    @Autowired
-    private CheckBoxPageActivity checkBoxPageActivity;
-
     private DefaultLoginPageView loginPageView;
 
-    private PAcceptsOneWidget world;
-
     @Override
-    public void start(final PAcceptsOneWidget world) {
-        this.world = world;
-
+    protected IsPWidget buildView() {
         loginPageView = new DefaultLoginPageView("PonySDK Showcase");
 
         loginPageView.getLoginTextBox().setText("Guest");
@@ -70,7 +56,6 @@ public class LoginActivity extends AbstractActivity {
             }
 
         });
-        world.setWidget(loginPageView);
 
         loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
@@ -80,7 +65,11 @@ public class LoginActivity extends AbstractActivity {
             }
         }, PKeyPressEvent.TYPE);
 
+        return loginPageView;
     }
+
+    @Override
+    public void updateView(final Place place) {}
 
     private void doLogin() {
         final User user = new User();
@@ -95,19 +84,21 @@ public class LoginActivity extends AbstractActivity {
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
         fireEvent(loggedInEvent);
 
-        applicationActivity.goTo(new ApplicationPlace(), world);
+        goTo(new PagePlace("CheckBox"));
 
-        applicationActivity.goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
+        // applicationActivity.goTo(new ApplicationPlace(), world);
+        //
+        // applicationActivity.goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
     }
 
-    private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
-        return new PagePlace(pageActivity) {
-
-            @Override
-            public String getToken() {
-                return token;
-            }
-        };
-    }
+    // private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
+    // return new PagePlace(pageActivity) {
+    //
+    // @Override
+    // public String getToken() {
+    // return token;
+    // }
+    // };
+    // }
 
 }

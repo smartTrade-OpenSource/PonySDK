@@ -23,8 +23,13 @@
 
 package com.ponysdk.sample.client.place;
 
-import com.ponysdk.core.place.AbstractPlace;
+import com.ponysdk.core.place.Place;
 
-public class LoginPlace extends AbstractPlace {
+public class LoginPlace implements Place {
+
+    @Override
+    public String getToken() {
+        return getClass().getSimpleName();
+    }
 
 }

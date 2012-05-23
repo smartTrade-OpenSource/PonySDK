@@ -24,20 +24,22 @@
 package com.ponysdk.impl.webapplication.page.place;
 
 import com.ponysdk.core.place.AbstractPlace;
-import com.ponysdk.impl.webapplication.page.PageActivity;
 
-public abstract class PagePlace extends AbstractPlace {
+public class PagePlace extends AbstractPlace {
 
-    protected final PageActivity pageActivity;
+    private final String pageName;
 
-    public PagePlace(PageActivity activity) {
-        this.pageActivity = activity;
-    }
-
-    public PageActivity getPageActivity() {
-        return pageActivity;
+    public PagePlace(final String pageName) {
+        this.pageName = pageName;
     }
 
     @Override
-    public abstract String getToken();
+    public String getToken() {
+        return pageName;
+    }
+
+    public String getPageName() {
+        return pageName;
+    }
+
 }
