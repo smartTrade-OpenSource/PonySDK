@@ -75,6 +75,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.TreePageActivity" />
 	<bean class="com.ponysdk.sample.client.page.MenuBarPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.TwinListBoxPageActivity" />
 	
 	<!-- Text input pages -->
 	<bean class="com.ponysdk.sample.client.page.BasicTextBoxPageActivity" />
