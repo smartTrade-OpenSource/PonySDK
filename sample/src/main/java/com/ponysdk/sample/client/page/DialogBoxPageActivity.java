@@ -27,7 +27,6 @@ import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -91,13 +90,10 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PClosableDialogBox dialogBox = new PClosableDialogBox(true);
+                final PClosableDialogBox dialogBox = new PClosableDialogBox("Custom caption");
                 dialogBox.setDraggable(true);
-                dialogBox.setCaption(new PLabel("Custom caption"));
-                dialogBox.setClose(new PImage("images/close_16.png"));
                 dialogBox.setContent(new PLabel("Content of a popup"));
                 dialogBox.center();
-                dialogBox.show();
             }
         });
 
