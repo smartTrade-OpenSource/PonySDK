@@ -64,7 +64,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
         PRootLayoutPanel.get().add(panel);
 
-        final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
+        final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);
 
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(history, historyMapper, placeController, eventBus);
