@@ -12,7 +12,7 @@ import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class FormFieldComponent extends PFlexTable implements FormFieldListener {
 
-    public enum CaptionOriantation {
+    public enum CaptionOrientation {
         LEFT, TOP, RIGHT, BOTTOM
     }
 
@@ -23,10 +23,10 @@ public class FormFieldComponent extends PFlexTable implements FormFieldListener 
     private final FormField<?> formField;
 
     public FormFieldComponent(final String caption, final FormField<?> formField) {
-        this(caption, CaptionOriantation.TOP, formField);
+        this(caption, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final CaptionOriantation captionOriantation, final FormField<?> formField) {
+    public FormFieldComponent(final String caption, final CaptionOrientation captionOriantation, final FormField<?> formField) {
         addStyleName(PonySDKTheme.FORM_FORMFIELD_COMPONENT);
 
         this.formField = formField;
@@ -40,7 +40,7 @@ public class FormFieldComponent extends PFlexTable implements FormFieldListener 
         setCaptionOriantation(captionOriantation);
     }
 
-    public void setCaptionOriantation(final CaptionOriantation captionOriantation) {
+    public void setCaptionOriantation(final CaptionOrientation captionOriantation) {
         for (int i = getRowCount(); i > 0; i--) {
             removeRow(i - 1);
         }

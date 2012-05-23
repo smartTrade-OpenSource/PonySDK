@@ -35,7 +35,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.form2.Form;
 import com.ponysdk.ui.server.form2.FormFieldComponent;
-import com.ponysdk.ui.server.form2.FormFieldComponent.CaptionOriantation;
+import com.ponysdk.ui.server.form2.FormFieldComponent.CaptionOrientation;
 import com.ponysdk.ui.server.form2.formfield.CheckBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.DateBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.FormField;
@@ -139,14 +139,14 @@ public class Form2PageActivity extends SamplePageActivity {
         });
 
         final PListBox captionOriantationList = new PListBox(true);
-        for (final CaptionOriantation captionOriantation : CaptionOriantation.values()) {
+        for (final CaptionOrientation captionOriantation : CaptionOrientation.values()) {
             captionOriantationList.addItem(captionOriantation.name(), captionOriantation);
         }
         captionOriantationList.addChangeHandler(new PChangeHandler() {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                final CaptionOriantation captionOriantation = (CaptionOriantation) captionOriantationList.getSelectedValue();
+                final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
 
                 formFieldComponent1.setCaptionOriantation(captionOriantation);
                 formFieldComponent2.setCaptionOriantation(captionOriantation);

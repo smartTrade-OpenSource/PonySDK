@@ -33,8 +33,23 @@ public class CriterionField {
 
     private SortingType sortingType = SortingType.NONE;
 
-    public CriterionField(String key) {
+    public CriterionField(final String key) {
         this.pojoProperty = key;
+    }
+
+    public CriterionField setSortingType(final SortingType sortingType) {
+        this.sortingType = sortingType;
+        return this;
+    }
+
+    public CriterionField setComparator(final ComparatorType comparator) {
+        this.comparator = comparator;
+        return this;
+    }
+
+    public CriterionField setValue(final Object value) {
+        this.value = value;
+        return this;
     }
 
     public String getPojoProperty() {
@@ -45,33 +60,17 @@ public class CriterionField {
         return sortingType;
     }
 
-    public void setSortingType(SortingType sortingType) {
-        this.sortingType = sortingType;
-    }
-
     public ComparatorType getComparator() {
         return comparator;
-    }
-
-    public void setComparator(ComparatorType comparator) {
-        this.comparator = comparator;
     }
 
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
     @Override
     public String toString() {
         return "CriteriaField [pojoProperty=" + pojoProperty + ", value=" + value + ", comparator=" + comparator + ", sortingType=" + sortingType + "]";
-    }
-
-    public boolean isVisibleFilterInForm() {
-        return true;
     }
 
 }

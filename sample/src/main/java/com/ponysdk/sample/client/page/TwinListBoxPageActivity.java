@@ -61,13 +61,20 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
         rightListBox.addItem("Item7");
         rightListBox.addItem("Item8");
         rightListBox.addItem("Item9");
-        rightListBox.addItem("Item10");
         rightListBox.setVisibleItemCount(10);
         rightListBox.addChangeHandler(new PChangeHandler() {
 
             @Override
             public void onChange(final PChangeEvent event) {
                 PNotificationManager.showTrayNotification("Item selected : " + rightListBox.getSelectedItem());
+            }
+        });
+
+        twinListBox.addChangeHandler(new PChangeHandler() {
+
+            @Override
+            public void onChange(final PChangeEvent event) {
+                PNotificationManager.showTrayNotification("Item changed");
             }
         });
 
