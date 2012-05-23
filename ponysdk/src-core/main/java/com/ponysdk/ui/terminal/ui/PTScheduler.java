@@ -44,15 +44,26 @@ public class PTScheduler extends AbstractPTObject {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         final long commandID = update.getLong(PROPERTY.COMMAND_ID);
-        if (update.containsKey(PROPERTY.START)) {
-            final SchedulerCommand previousCmd = commandByIDs.get(commandID);
-            if (previousCmd != null) previousCmd.cancel();
-
-            final SchedulerCommand command = new SchedulerCommand(uiService, update.getObjectID(), commandID);
-            Scheduler.get().scheduleFixedDelay(command, update.getInt(PROPERTY.DELAY));
-            commandByIDs.put(commandID, command);
-        } else {
+        if (update.containsKey(PROPERTY.STOP)) {
+            // Stop the command
             commandByIDs.remove(commandID).cancel();
+        } else if (update.containsKey(PROPERTY.FIXDELAY)) {
+            // Fix-delay
+            // Wait for execution terminated before scheduling again
+            final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
+            if (previousCmd != null) previousCmd.cancel();
+            final int delay = update.getInt(PROPERTY.FIXDELAY);
+            final FixDelayCommand command = new FixDelayCommand(uiService, update.getObjectID(), commandID, delay);
+            Scheduler.get().scheduleFixedDelay(command, delay);
+            commandByIDs.put(commandID, command);
+        } else if (update.containsKey(PROPERTY.FIXRATE)) {
+            // Fix-rate
+            final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
+            if (previousCmd != null) previousCmd.cancel();
+            final int delay = update.getInt(PROPERTY.FIXRATE);
+            final FixRateCommand command = new FixRateCommand(uiService, update.getObjectID(), commandID, delay);
+            Scheduler.get().scheduleFixedDelay(command, delay);
+            commandByIDs.put(commandID, command);
         }
     }
 
@@ -64,17 +75,30 @@ public class PTScheduler extends AbstractPTObject {
         commandByIDs.clear();
     }
 
-    protected class SchedulerCommand implements RepeatingCommand {
+    protected abstract class SchedulerCommand implements RepeatingCommand {
 
-        private final UIService uiService;
-        private final long schedulerID;
-        private final long commandID;
-        private boolean cancelled = false;
+        protected final UIService uiService;
+        protected final long schedulerID;
+        protected final long commandID;
+        protected final int delay;
+        protected boolean cancelled = false;
 
-        public SchedulerCommand(final UIService uiService, final long schedulerID, final long commandID) {
+        public SchedulerCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
             this.uiService = uiService;
             this.schedulerID = schedulerID;
             this.commandID = commandID;
+            this.delay = delay;
+        }
+
+        public void cancel() {
+            cancelled = true;
+        }
+    }
+
+    protected class FixRateCommand extends SchedulerCommand {
+
+        public FixRateCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
+            super(uiService, schedulerID, commandID, delay);
         }
 
         @Override
@@ -87,14 +111,36 @@ public class PTScheduler extends AbstractPTObject {
             instruction.put(TYPE.KEY, TYPE.EVENT);
             instruction.put(HANDLER.KEY, HANDLER.SCHEDULER);
             instruction.put(PROPERTY.ID, commandID);
+            instruction.put(PROPERTY.FIXRATE, delay);
 
             uiService.triggerEvent(instruction);
 
             return true;
         }
 
-        public void cancel() {
-            cancelled = true;
+    }
+
+    protected class FixDelayCommand extends SchedulerCommand {
+
+        public FixDelayCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
+            super(uiService, schedulerID, commandID, delay);
+        }
+
+        @Override
+        public boolean execute() {
+
+            if (cancelled) return false;
+
+            final PTInstruction instruction = new PTInstruction();
+            instruction.setObjectID(schedulerID);
+            instruction.put(TYPE.KEY, TYPE.EVENT);
+            instruction.put(HANDLER.KEY, HANDLER.SCHEDULER);
+            instruction.put(PROPERTY.ID, commandID);
+            instruction.put(PROPERTY.FIXDELAY, delay);
+
+            uiService.triggerEvent(instruction);
+
+            return false;
         }
 
     }

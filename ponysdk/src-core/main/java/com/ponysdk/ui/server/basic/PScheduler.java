@@ -61,24 +61,53 @@ public abstract class PScheduler extends PObject {
         return scheduler;
     }
 
-    public void scheduleFixedDelay(final RepeatingCommand cmd, final int delayMs) {
+    public void scheduleFixedRate(final RepeatingCommand cmd, final int delayMs) {
         final Long existingCommandID = IDByCommand.get(cmd);
         if (existingCommandID != null) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.START, true);
-            update.put(PROPERTY.COMMAND_ID, existingCommandID);
-            update.put(PROPERTY.DELAY, delayMs);
-            PonySession.getCurrent().stackInstruction(update);
+            scheduleFixedRateCommand(existingCommandID, delayMs);
         } else {
             final long cmdID = PonySession.getCurrent().nextID();
-            final Update update = new Update(ID);
-            update.put(PROPERTY.START, true);
-            update.put(PROPERTY.COMMAND_ID, cmdID);
-            update.put(PROPERTY.DELAY, delayMs);
-            PonySession.getCurrent().stackInstruction(update);
+            scheduleFixedRateCommand(cmdID, delayMs);
             commandByID.put(cmdID, cmd);
             IDByCommand.put(cmd, cmdID);
         }
+    }
+
+    public void scheduleFixedDelay(final RepeatingCommand cmd, final int delayMs) {
+        final Long existingCommandID = IDByCommand.get(cmd);
+        if (existingCommandID != null) cancelScheduleCommand(existingCommandID);
+
+        final long cmdID = PonySession.getCurrent().nextID();
+        scheduleFixedDelayCommand(cmdID, delayMs);
+        commandByID.put(cmdID, cmd);
+        IDByCommand.put(cmd, cmdID);
+
+    }
+
+    private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.START, true);
+        update.put(PROPERTY.COMMAND_ID, cmdID);
+        update.put(PROPERTY.FIXRATE, delayMs);
+        PonySession.getCurrent().stackInstruction(update);
+    }
+
+    private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.START, true);
+        update.put(PROPERTY.COMMAND_ID, cmdID);
+        update.put(PROPERTY.FIXDELAY, delayMs);
+        PonySession.getCurrent().stackInstruction(update);
+    }
+
+    private void cancelScheduleCommand(final long cmdID) {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.STOP, true);
+        update.put(PROPERTY.COMMAND_ID, cmdID);
+        PonySession.getCurrent().stackInstruction(update);
+
+        final RepeatingCommand command = commandByID.remove(cmdID);
+        IDByCommand.remove(command);
     }
 
     @Override
@@ -86,15 +115,16 @@ public abstract class PScheduler extends PObject {
         if (instruction.getString(HANDLER.KEY).equals(HANDLER.SCHEDULER)) {
             final long cmdID = instruction.getLong(PROPERTY.ID);
             final RepeatingCommand command = commandByID.get(cmdID);
+            if (command == null) return;
+
             final boolean invokeAgain = command.execute();
             if (!invokeAgain) {
-                final Update update = new Update(ID);
-                update.put(PROPERTY.STOP, true);
-                update.put(PROPERTY.COMMAND_ID, cmdID);
-                PonySession.getCurrent().stackInstruction(update);
-
-                commandByID.remove(cmdID);
-                IDByCommand.remove(command);
+                cancelScheduleCommand(cmdID);
+            } else {
+                // Re-schedule in fixed delay mode
+                if (instruction.has(PROPERTY.FIXDELAY)) {
+                    scheduleFixedDelayCommand(cmdID, instruction.getInt(PROPERTY.FIXDELAY));
+                }
             }
         } else {
             super.onEventInstruction(instruction);

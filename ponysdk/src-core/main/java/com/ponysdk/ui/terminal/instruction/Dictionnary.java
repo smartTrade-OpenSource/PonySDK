@@ -145,7 +145,7 @@ public interface Dictionnary {
         public static final String SELECTED = "S";
         public static final String STREAM_REQUEST_ID = "T";
         public static final String REPEATING_DELAY = "U";
-        public static final String DELAY = "V";
+        public static final String FIXDELAY = "V";
         public static final String IMAGE_STREAM_URL = "W";
         public static final String MULTISELECT = "X";
         public static final String CELL_HORIZONTAL_ALIGNMENT = "Y";
@@ -254,6 +254,7 @@ public interface Dictionnary {
         public static final String HTMLTABLE_COLUMN_STYLE = "011";
         public static final String ITEM_UPDATED = "012";
         public static final String PLACEHOLDER = "013";
+        public static final String FIXRATE = "014";
         public static final String OBJECT_ID = "#";
         public static final String PARENT_ID = "##";
 

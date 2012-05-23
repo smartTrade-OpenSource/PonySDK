@@ -41,7 +41,8 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class TimerPageActivity extends SamplePageActivity {
 
-    protected long time = 0;
+    protected long time1 = 0;
+    protected long time2 = 0;
 
     protected PTimer timer;
 
@@ -79,6 +80,7 @@ public class TimerPageActivity extends SamplePageActivity {
 
         final PVerticalPanel panel = new PVerticalPanel();
         final PLabel label = new PLabel("0");
+        final PLabel labelFixed = new PLabel("0");
 
         textBox = new PTextBox("1000");
 
@@ -86,8 +88,8 @@ public class TimerPageActivity extends SamplePageActivity {
 
             @Override
             public void run() {
-                time++;
-                label.setText("" + time);
+                time1++;
+                label.setText("" + time1);
             }
         };
 
@@ -111,6 +113,18 @@ public class TimerPageActivity extends SamplePageActivity {
         panel.add(textBox);
         panel.add(scheduleRepeatingButton);
         panel.add(datePanel);
+
+        panel.add(new PLabel("Fixed delay timer:"));
+        panel.add(labelFixed);
+        PScheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+            @Override
+            public boolean execute() {
+                time2++;
+                labelFixed.setText("" + time2);
+                return enableDateTimer;
+            }
+        }, 1000);
 
         examplePanel.setWidget(panel);
     }
