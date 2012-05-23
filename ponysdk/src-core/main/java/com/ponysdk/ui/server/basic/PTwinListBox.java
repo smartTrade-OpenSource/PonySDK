@@ -26,16 +26,12 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.ui.server.basic.PListBox.ListItem;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class PTwinListBox<T> extends PFlowPanel {
-
-    private static final Logger log = LoggerFactory.getLogger(PTwinListBox.class);
+public class PTwinListBox<T> extends PFlexTable {
 
     private boolean enabled = true;
 
@@ -60,7 +56,7 @@ public class PTwinListBox<T> extends PFlowPanel {
     }
 
     public PTwinListBox(final String leftCaption, final String rightCaption) {
-        this(leftCaption, rightCaption, true, false);
+        this(leftCaption, rightCaption, false, false);
     }
 
     public PTwinListBox(final String leftCaption, final String rightCaption, final boolean containsEmptyItem) {
@@ -75,10 +71,21 @@ public class PTwinListBox<T> extends PFlowPanel {
     }
 
     private void init(final boolean containsEmptyItem) {
+        if (leftCaption != null) {
+            setWidget(0, 0, new PLabel(leftCaption));
+            getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_CENTER);
+        }
+
+        if (rightCaption != null) {
+            setWidget(0, 2, new PLabel(rightCaption));
+            getFlexCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_CENTER);
+        }
+
         leftListBox = new PListBox(containsEmptyItem, true);
         rightListBox = new PListBox(containsEmptyItem, true);
 
-        add(leftListBox);
+        setWidget(1, 0, leftListBox);
+        setWidget(1, 2, rightListBox);
 
         if (!multiButton) {
             switchButton = new PButton("<>");
@@ -110,7 +117,7 @@ public class PTwinListBox<T> extends PFlowPanel {
                     }
                 }
             });
-            add(switchButton);
+            setWidget(1, 1, switchButton);
         } else {
             final PFlowPanel buttonsPanel = new PFlowPanel();
             leftToRightButton = new PButton(">");
@@ -149,9 +156,8 @@ public class PTwinListBox<T> extends PFlowPanel {
                 }
             });
             buttonsPanel.add(rightToLeftButton);
-            add(buttonsPanel);
+            setWidget(1, 1, buttonsPanel);
         }
-        add(rightListBox);
     }
 
     @Override
@@ -173,8 +179,8 @@ public class PTwinListBox<T> extends PFlowPanel {
         rightListBox.setEnabled(enabled);
         leftListBox.setEnabled(enabled);
         if (multiButton) {
-            leftToRightButton.setEnabled(false);
-            rightToLeftButton.setEnabled(false);
+            leftToRightButton.setEnabled(enabled);
+            rightToLeftButton.setEnabled(enabled);
         } else {
             switchButton.setEnabled(enabled);
         }
@@ -183,73 +189,5 @@ public class PTwinListBox<T> extends PFlowPanel {
     public boolean isEnabled() {
         return enabled;
     }
-
-    // void refresh() {
-    // rightListBox.clear();
-    // leftListBox.clear();
-    // rightListBox.setSelectedIndex(-1);
-    // leftListBox.setSelectedIndex(-1);
-    // for (final String item : hiddenValueByItems.keySet()) {
-    // if (selectValues.contains(item)) {
-    // leftListBox.addItem(item);
-    // } else {
-    // rightListBox.addItem(item);
-    // }
-    // }
-    // }
-    //
-    // public void setSelectedItem(final String text, final boolean selected) {
-    //
-    // final Object selectedValue = hiddenValueByItems.get(text);
-    // if (selectedValue != null) {
-    // if (selected) {
-    // if (selectValues.contains(text)) {
-    // // log.warn(arg0);
-    // // throw new IllegalArgumentException("Item '" + text + "' already selected for listbox '"
-    // // + caption + "'");
-    // } else {
-    // selectValues.add(text);
-    // refresh();
-    // }
-    // } else {
-    // if (selectValues.contains(text)) {
-    // selectValues.remove(text);
-    // refresh();
-    // } else {
-    // // throw new IllegalArgumentException("Item '" + text +
-    // // "' already unselected for listbox '" + caption + "'");
-    // }
-    // }
-    // } else {
-    // // throw new IllegalArgumentException("unknow Item '" + text + "' for listbox '" + caption + "'");
-    // }
-    // }
-    //
-    // public void setSelectedItem(final String text) {
-    // setSelectedItem(text, true);
-    // }
-    //
-    // public void setSelectedValue(final Object value, final boolean selected) {
-    // final String item = itemsByHiddenValue.get(value);
-    // setSelectedItem(item, selected);
-    // }
-    //
-    // public void setSelectedValue(final Object value) {
-    // setSelectedValue(value, true);
-    // }
-    //
-    // public List<T> getValue() {
-    // final List<T> values = new ArrayList<T>();
-    // for (final String selectedItem : selectValues) {
-    // @SuppressWarnings("unchecked")
-    // final T t = (T) hiddenValueByItems.get(selectedItem);
-    // values.add(t);
-    // }
-    // return values;
-    // }
-    //
-    // public void setValue(final Object value) {
-    // setSelectedValue(value);
-    // }
 
 }

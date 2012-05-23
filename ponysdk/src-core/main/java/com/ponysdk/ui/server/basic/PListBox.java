@@ -175,6 +175,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public ListItem removeItem(final int index) {
         checkIndex(index);
 
+        if (selectedItems.contains(index)) {
+            selectedItems.remove(Integer.valueOf(index));
+        }
+
         final ListItem removedItem = items.remove(index);
         sendRemoveItemInstruction(index);
         return removedItem;
@@ -185,6 +189,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
             if (item.label.equals(label)) {
+                if (selectedItems.contains(currentIndex)) selectedItems.remove(Integer.valueOf(currentIndex));
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
             } else {
@@ -198,6 +203,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
             if (item.value.equals(value)) {
+                if (selectedItems.contains(currentIndex)) selectedItems.remove(Integer.valueOf(currentIndex));
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
             } else {
