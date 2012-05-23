@@ -171,9 +171,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     // log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                     PTObject ptObject;
-                    final boolean isAddon = instruction.containsKey("addOnSignature");  
+                    final boolean isAddon = instruction.containsKey("addOnSignature");
                     if (isAddon) {
-                    	final String addOnSignature = instruction.getString("addOnSignature");
+                        final String addOnSignature = instruction.getString("addOnSignature");
                         final AddonFactory addonFactory = addonByKey.get(addOnSignature);
                         if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
 
@@ -204,8 +204,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     if (HANDLER.STREAM_REQUEST_HANDLER.equals(handler)) {
                         new PTStreamResource().addHandler(instruction, this);
                     } else {
-                    final PTObject uiObject = objectByID.get(instruction.getObjectID());
-                    uiObject.addHandler(instruction, this);
+                        final PTObject uiObject = objectByID.get(instruction.getObjectID());
+                        uiObject.addHandler(instruction, this);
                     }
                 } else if (TYPE.REMOVE_HANDLER.equals(type)) {
                     // log.info("AddHandler: " + instruction.getType() + ", " + instruction.getObjectID() +
@@ -257,9 +257,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
 
                     if (oldToken != null && oldToken.equals(token)) {
-                        History.fireCurrentHistoryState();
+                        if (instruction.getBoolean(HISTORY.FIRE_EVENTS)) History.fireCurrentHistoryState();
                     } else {
-                        History.newItem(token, true);
+                        History.newItem(token, instruction.getBoolean(HISTORY.FIRE_EVENTS));
                     }
                 }
             }

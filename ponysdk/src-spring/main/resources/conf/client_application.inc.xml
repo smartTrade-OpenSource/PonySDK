@@ -10,6 +10,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
     <bean name="history" class="com.ponysdk.ui.server.basic.PHistory"/>
     <bean name="placeController" class="com.ponysdk.core.place.PlaceController">
     	<constructor-arg ref="history" />
+    	<constructor-arg ref="eventBus" />
     </bean>
     
 </beans>

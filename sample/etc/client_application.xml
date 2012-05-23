@@ -17,6 +17,10 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	</bean>
 
 	<bean name="mapper" class="com.ponysdk.sample.client.activity.SampleActivityMapper" />
+	<bean name="historyMapper" class="com.ponysdk.impl.webapplication.page.ApplicationPlaceHistoryMapper">
+		<constructor-arg ref="eventBus" />
+		<property name="pageProvider" ref="pageProvider"/>
+	</bean>
 
 	<bean name="loginActivity" class="com.ponysdk.sample.client.LoginActivity" />
 

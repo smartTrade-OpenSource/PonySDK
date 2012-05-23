@@ -31,6 +31,7 @@ import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.place.PlaceChangeRequestEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
@@ -78,7 +79,7 @@ public abstract class AbstractActivity implements Activity {
     // }
 
     public void goTo(final Place place) {
-        PonySession.getCurrent().getPlaceController().goTo(place);
+        PonySession.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
     }
 
     public PEventBus getRootEventBus() {

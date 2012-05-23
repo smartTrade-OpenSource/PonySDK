@@ -28,7 +28,6 @@ import javax.servlet.ServletException;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.event.PSimpleEventBus;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.ui.server.basic.PHistory;
 
 /**
@@ -64,11 +63,9 @@ public class PonyEngineServiceImpl extends AbstractPonyEngineServiceImpl {
         final PEventBus rootEventBus = new PSimpleEventBus();
 
         final PHistory history = new PHistory();
-        final PlaceController placeController = new PlaceController(history);
 
         ponySession.setRootEventBus(rootEventBus);
         ponySession.setHistory(history);
-        ponySession.setPlaceController(placeController);
         ponySession.setEntryPoint(entryPoint);
 
         // final PCookies cookies = new PCookies(data.getString(PROPERTY.COOKIE));

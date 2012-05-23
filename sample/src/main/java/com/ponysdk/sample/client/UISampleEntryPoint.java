@@ -30,13 +30,14 @@ import com.ponysdk.core.activity.ActivityManager;
 import com.ponysdk.core.event.PEventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
-import com.ponysdk.impl.webapplication.application.ApplicationActivity;
+import com.ponysdk.core.place.PlaceHistoryHandler;
+import com.ponysdk.core.place.PlaceHistoryMapper;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
+import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
@@ -45,46 +46,46 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     public static final String USER = "user";
 
     @Autowired
-    private ApplicationActivity applicationActivity;
-
-    @Autowired
     private PlaceController placeController;
 
     @Autowired
     private PEventBus eventBus;
 
     @Autowired
+    private PHistory history;
+
+    @Autowired
     private SampleActivityMapper mapper;
 
-    private void init() {
+    @Autowired
+    private PlaceHistoryMapper historyMapper;
+
+    private void start() {
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
         PRootLayoutPanel.get().add(panel);
 
         final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
         activityManager.setDisplay(panel);
+
+        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(history, historyMapper, placeController, eventBus);
+        historyHandler.setDefaultPlace(new LoginPlace());
+        historyHandler.handleCurrentHistory();
     }
 
     @Override
     public void start(final PonySession session) {
 
-        init();
+        if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
 
-        placeController.goTo(new LoginPlace());
+        start();
     }
 
     @Override
     public void restart(final PonySession session) {
 
-        init();
+        if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
 
-        final String currentToken = session.getHistory().getToken();
-        if (session.getApplicationAttribute(USER) == null) {
-            placeController.goTo(new LoginPlace());
-        } else if (currentToken == null) {
-            placeController.goTo(new LoginPlace());
-        } else {
-            placeController.goTo(new PagePlace(currentToken));
-        }
+        start();
     }
 
     @Override

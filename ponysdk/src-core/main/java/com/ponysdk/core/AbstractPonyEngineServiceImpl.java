@@ -100,7 +100,7 @@ public abstract class AbstractPonyEngineServiceImpl extends HttpServlet {
             final EntryPoint entryPoint = initializePonySession(ponySession);
 
             final String historyToken = data.getString(HISTORY.TOKEN);
-            if (historyToken != null && !historyToken.isEmpty()) ponySession.getHistory().newItem(historyToken);
+            if (historyToken != null && !historyToken.isEmpty()) ponySession.getHistory().newItem(historyToken, false);
 
             final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIE);
             System.err.println("history: " + historyToken);
