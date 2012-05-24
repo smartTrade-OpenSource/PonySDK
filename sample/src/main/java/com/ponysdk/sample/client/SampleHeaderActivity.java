@@ -100,7 +100,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                             dialogBox.hide();
                         }
                     }
-                }, "Really logout user " + userLogged.getName() + " ?", null, "Sign out", POptionType.YES_NO_OPTION);
+                }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
 
                 optionPane.getDialogBox().ensureDebugId("sign_out_dialog");
             }

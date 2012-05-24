@@ -29,7 +29,6 @@ import com.ponysdk.ui.server.basic.PComposite;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -45,29 +44,21 @@ public class POptionPane extends PComposite {
 
     public POptionPane(final PDialogBox dialogBox) {
         this.dialogBox = dialogBox;
-
-        // final PWidgetCollection children = PonySession.getCurrent().getRootLayoutPanel().getChildren();
-        // children.insert(this, children.size());
-        // PonySession.getCurrent().getRootLayoutPanel().adopt(this);
     }
 
     public static POptionPane showConfirmDialog(final PActionHandler handler, final String message) {
-        return showConfirmDialog(handler, message, null, "Message", POptionType.DEFAULT_OPTION);
+        return showConfirmDialog(handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel) {
-        return showConfirmDialog(handler, message, parentPanel, "Message", POptionType.YES_NO_CANCEL_OPTION);
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType) {
+        return showConfirmDialog(handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType) {
-        return showConfirmDialog(handler, message, parentPanel, title, optionType, PMessageType.QUESTION_MESSAGE);
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType) {
+        return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType, final PMessageType messageType) {
-        return showOptionDialog(handler, message, parentPanel, title, optionType, messageType, getOptions(optionType));
-    }
-
-    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final PPanel parentPanel, final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
+    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
