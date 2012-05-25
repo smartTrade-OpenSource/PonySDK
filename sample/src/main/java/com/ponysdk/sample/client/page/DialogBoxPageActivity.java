@@ -138,7 +138,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
                         event.setBusinessMessage("Option selected #" + option);
                         fireEvent(event);
                     }
-                }, "Your custom text", null, "Your title", POptionType.YES_NO_CANCEL_OPTION);
+                }, "Your custom text", "Your title", POptionType.YES_NO_CANCEL_OPTION);
             }
         });
 

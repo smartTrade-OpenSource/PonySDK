@@ -24,22 +24,27 @@
 package com.ponysdk.impl.webapplication.footer;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.place.Place;
+import com.ponysdk.ui.server.basic.IsPWidget;
 
 public class FooterActivity extends AbstractActivity {
 
     private FooterView footerView;
 
     @Override
-    public void start(PAcceptsOneWidget world) {
-        world.setWidget(footerView);
+    public IsPWidget buildView() {
+        return footerView;
     }
+
+    @Override
+    public void updateView(final Place place) {}
 
     public FooterView getFooterView() {
         return footerView;
     }
 
-    public void setFooterView(FooterView footerView) {
+    public void setFooterView(final FooterView footerView) {
         this.footerView = footerView;
     }
+
 }

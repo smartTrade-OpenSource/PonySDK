@@ -32,7 +32,6 @@ import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.command.ExportCommand;
-import com.ponysdk.core.place.Place;
 import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
@@ -92,15 +91,6 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
     public ComplexListPageActivity() {
         super("Complex List", "Rich UI Components");
     }
-
-    @Override
-    protected void onInitialization() {}
-
-    @Override
-    protected void onShowPage(final Place place) {}
-
-    @Override
-    protected void onLeavingPage() {}
 
     @Override
     protected void onFirstShowPage() {

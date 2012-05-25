@@ -29,25 +29,17 @@ import java.util.Collections;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.security.Permission;
-import com.ponysdk.impl.webapplication.application.ApplicationActivity;
-import com.ponysdk.impl.webapplication.page.event.PageDisplayedEvent;
-import com.ponysdk.impl.webapplication.page.place.EventPagePlace;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.IsPWidget;
 
 public abstract class PageActivity extends AbstractActivity implements InitializingActivity {
 
-    private ApplicationActivity applicationActivity;
-
-    private static PageActivity currentPage;
+    private PageActivity currentPage;
 
     protected final String pageName;
 
     protected final Collection<String> pageCategories;
 
     protected PageView pageView;
-
-    protected PagePlace homePlace;
 
     protected abstract void onInitialization();
 
@@ -57,61 +49,37 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     protected abstract void onLeavingPage();
 
+    protected final Permission permission;
+
     public PageActivity(final String pageName, final String pageCategory) {
         this(pageName, Collections.singleton(pageCategory), Permission.ALLOWED);
-    }
-
-    public PageActivity(final String pageName, final Collection<String> pageCategories) {
-        this(pageName, pageCategories, Permission.ALLOWED);
     }
 
     public PageActivity(final String pageName, final String pageCategory, final Permission permission) {
         this(pageName, Collections.singleton(pageCategory), permission);
     }
 
-    public PageActivity(final String pageName, final Collection<String> pageCategories, final Permission permission) {
-        super(permission);
+    public PageActivity(final String pageName, final Collection<String> pageCategories) {
+        this(pageName, pageCategories, Permission.ALLOWED);
+    }
 
+    public PageActivity(final String pageName, final Collection<String> pageCategories, final Permission permission) {
         this.pageName = pageName;
         this.pageCategories = pageCategories;
-
-        homePlace = new PagePlace(this) {
-
-            @Override
-            public String getToken() {
-                return pageName != null ? pageName : pageCategories.toString();
-            }
-        };
+        this.permission = permission;
     }
 
     @Override
-    public void start(final PAcceptsOneWidget world) {
+    protected IsPWidget buildView() {
         onFirstShowPage();
+
+        return pageView;
     }
 
     @Override
-    public void goTo(final Place place, final PAcceptsOneWidget world) {
-        if (currentPage != null) currentPage.onLeavingPage();
-
-        currentPage = this;
-
-        world.setWidget(pageView);
-
-        super.goTo(place, world);
+    public void updateView(final Place place) {
 
         onShowPage(place);
-
-        final PageDisplayedEvent pageDisplayedEvent = new PageDisplayedEvent(this, this);
-        fireEvent(pageDisplayedEvent);
-
-        if (place instanceof EventPagePlace) {
-            final EventPagePlace eventPagePlace = (EventPagePlace) place;
-            fireEvent(eventPagePlace.getEvent());
-        }
-    }
-
-    public void goToPage(final PagePlace place) {
-        applicationActivity.goTo(place);
     }
 
     protected boolean isShown() {
@@ -120,6 +88,10 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     public String getPageName() {
         return pageName;
+    }
+
+    public Permission getPermission() {
+        return permission;
     }
 
     public Collection<String> getPageCategories() {
@@ -132,14 +104,6 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     public void setPageView(final PageView pageView) {
         this.pageView = pageView;
-    }
-
-    public PagePlace getDefautHomePagePlace() {
-        return homePlace;
-    }
-
-    public void setApplicationActivity(final ApplicationActivity applicationActivity) {
-        this.applicationActivity = applicationActivity;
     }
 
     @Override

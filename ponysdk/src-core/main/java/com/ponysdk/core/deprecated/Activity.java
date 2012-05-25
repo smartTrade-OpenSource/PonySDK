@@ -21,19 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.place;
+package com.ponysdk.core.deprecated;
 
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
-public class HelloPlace extends PagePlace {
+public interface Activity {
 
-    public HelloPlace(PageActivity activity) {
-        super(activity);
-    }
+    void start(PAcceptsOneWidget world);
 
-    @Override
-    public String getToken() {
-        return getClass().getSimpleName();
-    }
 }

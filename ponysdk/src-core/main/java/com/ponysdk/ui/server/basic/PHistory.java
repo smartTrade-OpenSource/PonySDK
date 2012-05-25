@@ -30,6 +30,7 @@ import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.History;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
 
 /**
  * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented
@@ -66,13 +67,15 @@ public class PHistory {
     }
 
     public void newItem(final String token) {
-        this.token = token;
-        final History history = new History(token);
-        PonySession.getCurrent().stackInstruction(history);
+        newItem(token, true);
     }
 
-    public void fireHistory() {
+    public void newItem(final String token, final boolean fireEvents) {
+        this.token = token;
+        final History history = new History(token);
+        history.put(HISTORY.FIRE_EVENTS, fireEvents);
 
+        PonySession.getCurrent().stackInstruction(history);
     }
 
     public void fireHistoryChanged(final String token) {

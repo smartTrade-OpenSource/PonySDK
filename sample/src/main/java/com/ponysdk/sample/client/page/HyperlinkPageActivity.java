@@ -23,9 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -34,21 +31,6 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class HyperlinkPageActivity extends SamplePageActivity {
-
-    @Autowired
-    private CheckBoxPageActivity checkBoxPageActivity;
-
-    @Autowired
-    private RadioButtonPageActivity radioButtonPageActivity;
-
-    @Autowired
-    private BasicButtonPageActivity basicButtonPageActivity;
-
-    @Autowired
-    private CustomButtonPageActivity customButtonPageActivity;
-
-    @Autowired
-    private FileUploadPageActivity fileUploadPageActivity;
 
     public HyperlinkPageActivity() {
         super("Hyperlink", "Widgets");
@@ -63,66 +45,56 @@ public class HyperlinkPageActivity extends SamplePageActivity {
 
         panel.add(new PLabel("Choose a section:"));
 
-        PAnchor checkBoxAnchor = new PAnchor("CheckBox");
+        final PAnchor checkBoxAnchor = new PAnchor("CheckBox");
         checkBoxAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("CheckBox", checkBoxPageActivity));
+                goTo(new PagePlace("CheckBox"));
             }
         });
         panel.add(checkBoxAnchor);
 
-        PAnchor radioButtonAnchor = new PAnchor("RadioButton");
+        final PAnchor radioButtonAnchor = new PAnchor("RadioButton");
         radioButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("RadioButton", radioButtonPageActivity));
+                goTo(new PagePlace("Radio Button"));
             }
         });
         panel.add(radioButtonAnchor);
 
-        PAnchor basicButtonAnchor = new PAnchor("BasicButton");
+        final PAnchor basicButtonAnchor = new PAnchor("BasicButton");
         basicButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("BasicButton", basicButtonPageActivity));
+                goTo(new PagePlace("Basic Button"));
             }
         });
         panel.add(basicButtonAnchor);
 
-        PAnchor customButtonAnchor = new PAnchor("CustomButton");
+        final PAnchor customButtonAnchor = new PAnchor("CustomButton");
         customButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("CustomButton", customButtonPageActivity));
+                goTo(new PagePlace("Custom Button"));
             }
         });
         panel.add(customButtonAnchor);
 
-        PAnchor fileUpload = new PAnchor("FileUpload");
+        final PAnchor fileUpload = new PAnchor("FileUpload");
         fileUpload.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                goToPage(buildPagePlace("FileUpload", fileUploadPageActivity));
+                goTo(new PagePlace("File Upload"));
             }
         });
         panel.add(fileUpload);
 
         examplePanel.setWidget(panel);
-    }
-
-    private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
-        return new PagePlace(pageActivity) {
-
-            @Override
-            public String getToken() {
-                return token;
-            }
-        };
     }
 }

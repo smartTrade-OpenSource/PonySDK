@@ -21,41 +21,33 @@
  * the License.
  */
 
-package com.ponysdk.impl.webapplication.page.event;
+package com.ponysdk.core.place;
 
 import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PEventHandler;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.impl.webapplication.page.event.PageDisplayedEvent.PageDisplayHandler;
 
-public class PageDisplayedEvent extends PEvent<PageDisplayHandler> {
+public class PlaceChangeRequestEvent extends PEvent<PlaceChangeRequestHandler> {
 
-    public interface PageDisplayHandler extends PEventHandler {
+    public static final Type<PlaceChangeRequestHandler> TYPE = new Type<PlaceChangeRequestHandler>();
 
-        public void onPageDisplayed(PageDisplayedEvent event);
-    }
+    private final Place place;
 
-    public static final PEvent.Type<PageDisplayHandler> TYPE = new PEvent.Type<PageDisplayHandler>();
-
-    private final PageActivity page;
-
-    public PageDisplayedEvent(Object sourceComponent, PageActivity page) {
+    public PlaceChangeRequestEvent(final Object sourceComponent, final Place newPlace) {
         super(sourceComponent);
-        this.page = page;
+        this.place = newPlace;
     }
 
     @Override
-    protected void dispatch(PageDisplayHandler handler) {
-        handler.onPageDisplayed(this);
-    }
-
-    @Override
-    public PEvent.Type<PageDisplayHandler> getAssociatedType() {
+    public Type<PlaceChangeRequestHandler> getAssociatedType() {
         return TYPE;
     }
 
-    public PageActivity getPageActivity() {
-        return page;
+    @Override
+    protected void dispatch(final PlaceChangeRequestHandler handler) {
+        handler.onPlaceChange(this);
+    }
+
+    public Place getPlace() {
+        return place;
     }
 
 }

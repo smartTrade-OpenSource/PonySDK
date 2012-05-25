@@ -26,9 +26,10 @@ package com.ponysdk.sample.client;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
+import com.ponysdk.impl.webapplication.header.HeaderView;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -50,11 +51,11 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     private PPopupPanel popup;
 
     @Override
-    public void start(final PAcceptsOneWidget world) {
-        super.start(world);
-
+    public IsPWidget buildView() {
+        final HeaderView view = getHeaderView();
         final User user = PonySession.getCurrent().getApplicationAttribute(UISampleEntryPoint.USER);
-        getHeaderView().addActionWidget(createUserAccountMenu(user));
+        view.addActionWidget(createUserAccountMenu(user));
+        return view;
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {
@@ -99,7 +100,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                             dialogBox.hide();
                         }
                     }
-                }, "Really logout user " + userLogged.getName() + " ?", null, "Sign out", POptionType.YES_NO_OPTION);
+                }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
 
                 optionPane.getDialogBox().ensureDebugId("sign_out_dialog");
             }

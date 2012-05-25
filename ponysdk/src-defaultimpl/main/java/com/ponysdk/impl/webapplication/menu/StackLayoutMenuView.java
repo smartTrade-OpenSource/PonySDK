@@ -84,8 +84,8 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private final double paddingLeft = 16;// px
 
     private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<Node, PComplexPanel>();
-    private final List<PSelectionHandler<String>> selectionHandlers = new ArrayList<PSelectionHandler<String>>();
-    private final Map<String, PAnchor> anchorByName = new LinkedHashMap<String, PAnchor>();
+    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<PSelectionHandler<MenuItem>>();
+    private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<MenuItem, PAnchor>();
     private PAnchor selectedItem;
 
     public StackLayoutMenuView() {
@@ -96,9 +96,9 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     }
 
     @Override
-    public void addItem(final Collection<String> categories, final String caption) {
-        final Node categoryNode = createCategoriesItemIfNeeded(categories);
-        if (caption != null) addItem(categoryNode, caption);
+    public void addItem(final MenuItem menuItem) {
+        final Node categoryNode = createCategoriesItemIfNeeded(menuItem.getCategories());
+        if (menuItem.getName() != null) addItem(categoryNode, menuItem);
     }
 
     private Node createCategoriesItemIfNeeded(final Collection<String> categories) {
@@ -174,19 +174,19 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         category.setStyleProperty("paddingLeft", (categoryNode.level - 1) * paddingLeft + "px");
     }
 
-    private void addItem(final Node categoryNode, final String caption) {
-        final Node itemNode = new Node(categoryNode, caption);
+    private void addItem(final Node categoryNode, final MenuItem menuItem) {
+        final Node itemNode = new Node(categoryNode, menuItem.getName());
 
         final PComplexPanel categoryPanel = categoriesByNode.get(categoryNode);
-        final PAnchor item = new PAnchor(caption);
-        item.ensureDebugId("page_" + caption);
+        final PAnchor item = new PAnchor(menuItem.getName());
+        item.ensureDebugId("page_" + menuItem.getName());
         applyPadding(itemNode, item);
         item.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PSelectionEvent<String> event = new PSelectionEvent<String>(this, caption);
-                for (final PSelectionHandler<String> handler : selectionHandlers) {
+                final PSelectionEvent<MenuItem> event = new PSelectionEvent<MenuItem>(this, menuItem);
+                for (final PSelectionHandler<MenuItem> handler : selectionHandlers) {
                     handler.onSelection(event);
                 }
             }
@@ -196,7 +196,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         itemNode.ui = item;
 
         categoryPanel.add(item);
-        anchorByName.put(caption, item);
+        anchorByName.put(menuItem, item);
     }
 
     protected void expandNode(final Node categoryNode) {
@@ -214,48 +214,43 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     }
 
     @Override
-    public void selectItem(final Collection<String> categories, final String caption) {
+    public void selectItem(final MenuItem menuItem) {
 
-        if (caption != null) {
-            if (selectedItem != null) selectedItem.removeStyleName("selectedItem");
+        if (selectedItem != null) selectedItem.removeStyleName("selectedItem");
 
-            final PAnchor item = anchorByName.get(caption);
-            item.addStyleName("selectedItem");
-            selectedItem = item;
+        final PAnchor item = anchorByName.get(menuItem);
+        item.addStyleName("selectedItem");
+        selectedItem = item;
 
-            int i = 1;
-            Node current = null;
-            for (final String category : categories) {
-                if (i == 1) {
-                    current = root.getChild(category);
-                    final PComplexPanel categoryPanel = categoriesByNode.get(current);
-                    if (categoryPanel != null) layoutPanel.showWidget(categoryPanel);
-                } else {
-                    current = current.getChild(category);
-                    if (current != null) {
-                        if (!current.open) expandNode(current);
-                    }
+        int i = 1;
+        Node current = null;
+        for (final String category : menuItem.getCategories()) {
+            if (i == 1) {
+                current = root.getChild(category);
+                final PComplexPanel categoryPanel = categoriesByNode.get(current);
+                if (categoryPanel != null) layoutPanel.showWidget(categoryPanel);
+            } else {
+                current = current.getChild(category);
+                if (current != null) {
+                    if (!current.open) expandNode(current);
                 }
-                i++;
             }
-
-        } else {
-            // tree.setSelectedItem(anchorByName.get(category));
+            i++;
         }
     }
 
     @Override
-    public void addSelectionHandler(final PSelectionHandler<String> handler) {
+    public void addSelectionHandler(final PSelectionHandler<MenuItem> handler) {
         selectionHandlers.add(handler);
     }
 
     @Override
-    public void removeSelectionHandler(final PSelectionHandler<String> handler) {
+    public void removeSelectionHandler(final PSelectionHandler<MenuItem> handler) {
         selectionHandlers.remove(handler);
     }
 
     @Override
-    public Collection<PSelectionHandler<String>> getSelectionHandlers() {
+    public Collection<PSelectionHandler<MenuItem>> getSelectionHandlers() {
         return selectionHandlers;
     }
 

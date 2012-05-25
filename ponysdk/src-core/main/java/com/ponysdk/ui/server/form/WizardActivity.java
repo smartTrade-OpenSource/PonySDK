@@ -12,7 +12,7 @@ package com.ponysdk.ui.server.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.deprecated.AbstractActivity;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDialogBox;
@@ -58,13 +58,13 @@ public class WizardActivity extends AbstractActivity {
         public void onFinish(FormActivity currentFormActivity);
     }
 
-    public WizardActivity(String caption, List<FormActivity> formActivities, PDialogBox container) {
+    public WizardActivity(final String caption, final List<FormActivity> formActivities, final PDialogBox container) {
         this.formActivities = formActivities;
         this.container = container;
     }
 
     @Override
-    public void start(PAcceptsOneWidget world) {
+    public void start(final PAcceptsOneWidget world) {
         final PVerticalPanel verticalPanel = new PVerticalPanel();
         currentFormActivityPanel = new PSimplePanel();
         verticalPanel.add(currentFormActivityPanel);
@@ -74,7 +74,7 @@ public class WizardActivity extends AbstractActivity {
         next.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 if (currentFormActivity.isValid() && index != (formActivities.size() - 1)) {
                     currentFormActivityPanel.clear();
                     for (final WizardActivityHandler handler : wizardActivityHandlers) {
@@ -92,7 +92,7 @@ public class WizardActivity extends AbstractActivity {
         previous.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 if (index != 0) {
                     currentFormActivityPanel.clear();
                     for (final WizardActivityHandler handler : wizardActivityHandlers) {
@@ -111,7 +111,7 @@ public class WizardActivity extends AbstractActivity {
         finish.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 boolean valid = true;
                 for (final FormActivity activity : formActivities) {
                     if (!activity.isValid()) valid = false;
@@ -126,7 +126,7 @@ public class WizardActivity extends AbstractActivity {
         cancel.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent arg0) {
+            public void onClick(final PClickEvent arg0) {
                 container.hide();
             }
         });
@@ -150,12 +150,12 @@ public class WizardActivity extends AbstractActivity {
         return formActivities;
     }
 
-    public void addFormActivity(FormActivity formActivity) {
+    public void addFormActivity(final FormActivity formActivity) {
         this.formActivities.add(formActivity);
         update();
     }
 
-    public void addWizardActivityHandler(WizardActivityHandler handler) {
+    public void addWizardActivityHandler(final WizardActivityHandler handler) {
         wizardActivityHandlers.add(handler);
     }
 
