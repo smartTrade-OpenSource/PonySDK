@@ -124,4 +124,5 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<!-- <bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
 	<!-- <bean class="com.ponysdk.sample.client.page.CookiePageActivity" /> -->
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
+	
 </beans>
