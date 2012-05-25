@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.PHandlerRegistration;
 
-public interface HasPDragEnterHandlers extends HasPHandlers {
+public interface HasPDragOverHandlers extends HasPHandlers {
 
-    PHandlerRegistration addDragEnterHandler(PDragEnterHandler handler);
+    PHandlerRegistration addDragOverHandler(PDragOverHandler handler);
 }

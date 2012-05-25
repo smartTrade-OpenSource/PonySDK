@@ -61,6 +61,8 @@ public class PonyBootstrapServlet extends HttpServlet {
         super.init();
         applicationName = System.getProperty(PSystemProperty.APPLICATION_NAME);
 
+        stylesheets.add("css/ponysdk.less");
+
         final String styles = System.getProperty(PSystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             stylesheets.addAll(Arrays.asList(styles.trim().split(";")));
@@ -69,8 +71,6 @@ public class PonyBootstrapServlet extends HttpServlet {
         if (scripts != null && !scripts.isEmpty()) {
             javascripts.addAll(Arrays.asList(scripts.trim().split(";")));
         }
-
-        stylesheets.add("css/ponysdk.less");
     }
 
     @Override

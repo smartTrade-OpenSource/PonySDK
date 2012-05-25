@@ -69,4 +69,9 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
         return verticalAlignment;
     }
 
+    @Override
+    public void insert(final PWidget child, final int beforeIndex) {
+        super.insert(child, beforeIndex);
+    }
+
 }

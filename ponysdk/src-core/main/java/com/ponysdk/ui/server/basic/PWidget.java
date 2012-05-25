@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.PonySession;
 import com.ponysdk.core.event.PEvent;
 import com.ponysdk.core.event.PEventHandler;
 import com.ponysdk.core.event.PHandlerRegistration;
@@ -45,6 +46,12 @@ import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
+import com.ponysdk.ui.server.basic.event.PDragEndEvent;
+import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
+import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
+import com.ponysdk.ui.server.basic.event.PDragOverEvent;
+import com.ponysdk.ui.server.basic.event.PDragStartEvent;
+import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
@@ -68,8 +75,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private boolean visible = true;
 
-    private String title;
-
     protected Object data;
 
     private final Set<String> styleNames = new HashSet<String>();
@@ -78,13 +83,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final PSimpleEventBus domHandler = new PSimpleEventBus();
 
+    private String title;
     private String width;
-
     private String height;
-
     private String styleName;
-
     private String debugID;
+
+    private boolean draggable;
+    private boolean dropTarget;
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
@@ -262,6 +268,29 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
                 case MOUSE_UP:
                     fireEvent(new PMouseUpEvent(this));
+                    break;
+                case DRAG_START:
+                    fireEvent(new PDragStartEvent(this));
+                    break;
+                case DRAG_END:
+                    fireEvent(new PDragEndEvent(this));
+                    break;
+                case DRAG_ENTER:
+                    fireEvent(new PDragEnterEvent(this));
+                    break;
+                case DRAG_LEAVE:
+                    fireEvent(new PDragLeaveEvent(this));
+                    break;
+                case DRAG_OVER:
+                    fireEvent(new PDragOverEvent(this));
+                    break;
+                case DROP:
+                    final PDropEvent dropEvent = new PDropEvent(this);
+                    if (instruction.has(PROPERTY.DRAG_SRC)) {
+                        final PWidget source = PonySession.getCurrent().getObject(instruction.getLong(PROPERTY.DRAG_SRC));
+                        dropEvent.setDragSource(source);
+                    }
+                    fireEvent(dropEvent);
                     break;
                 default:
                     log.error("Dom Handler not implemented: " + domHandler);

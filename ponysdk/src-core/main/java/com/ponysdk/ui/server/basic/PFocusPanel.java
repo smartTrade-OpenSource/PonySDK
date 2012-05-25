@@ -39,6 +39,14 @@ import com.ponysdk.ui.server.basic.event.PDragEndEvent;
 import com.ponysdk.ui.server.basic.event.PDragEndHandler;
 import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
 import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
+import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
+import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
+import com.ponysdk.ui.server.basic.event.PDragOverEvent;
+import com.ponysdk.ui.server.basic.event.PDragOverHandler;
+import com.ponysdk.ui.server.basic.event.PDragStartEvent;
+import com.ponysdk.ui.server.basic.event.PDragStartHandler;
+import com.ponysdk.ui.server.basic.event.PDropEvent;
+import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
@@ -71,7 +79,7 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addDragEndHandler(final PDragEnterHandler handler) {
+    public PHandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
         return addDomHandler(handler, PDragEnterEvent.TYPE);
     }
 
@@ -153,6 +161,26 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     @Override
     public Collection<PMouseUpHandler> getMouseUpHandlers() {
         return getHandlerSet(PMouseUpEvent.TYPE, this);
+    }
+
+    @Override
+    public PHandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
+        return addDomHandler(handler, PDragStartEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
+        return addDomHandler(handler, PDragLeaveEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
+        return addDomHandler(handler, PDragOverEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDropHandler(final PDropHandler handler) {
+        return addDomHandler(handler, PDropEvent.TYPE);
     }
 
 }

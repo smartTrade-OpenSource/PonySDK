@@ -23,6 +23,6 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-public interface HasPAllDragAndDropHandlers extends HasPDragEndHandlers, HasPDragEnterHandlers {
+public interface HasPAllDragAndDropHandlers extends HasPDragEndHandlers, HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
 }

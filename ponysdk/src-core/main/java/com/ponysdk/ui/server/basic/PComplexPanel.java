@@ -41,7 +41,7 @@ public abstract class PComplexPanel extends PPanel {
         insert(child, getChildren().size());
     }
 
-    public void insert(final PWidget child, final int beforeIndex) {
+    protected void insert(final PWidget child, final int beforeIndex) {
         child.removeFromParent();
         getChildren().insert(child, beforeIndex);
         adopt(child);
@@ -59,6 +59,7 @@ public abstract class PComplexPanel extends PPanel {
 
         final Remove remove = new Remove(w.getID(), getID());
         getPonySession().stackInstruction(remove);
+
         return true;
     }
 

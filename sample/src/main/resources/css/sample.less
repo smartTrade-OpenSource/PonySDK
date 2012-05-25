@@ -29,6 +29,40 @@
 	padding: 10px;
 }
 
+
+
+
+/*[draggable] {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+}*/
+
+.ddbox {
+	height: 150px;
+	width: 150px;
+	float: left;
+	border: 1px solid @grayLight;
+	background-color: @grayLighter;
+	margin-right: 10px;
+	text-align: center;
+	cursor: move;
+	.border-radius(10px);
+	.box-shadow(0px, 0px, 5px, @black);
+	
+	.label {
+		color: @grayDark;
+		text-shadow: @black 0 1px;
+	}
+	
+	&.dragenter {
+		border: 2px dotted @header;
+	}
+}
+
+
+
 .pony-MultiSelectListBox-ShowSelectionPanelButton{
 	cursor: pointer;
 	position: absolute;

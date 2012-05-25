@@ -37,4 +37,10 @@ public class PFlowPanel extends PComplexPanel {
     protected WidgetType getWidgetType() {
         return WidgetType.FLOW_PANEL;
     }
+
+    @Override
+    public void insert(final PWidget child, final int beforeIndex) {
+        super.insert(child, beforeIndex);
+    }
+
 }

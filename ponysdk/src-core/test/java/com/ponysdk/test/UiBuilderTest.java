@@ -401,7 +401,7 @@ public class UiBuilderTest {
 
             @Override
             public void onRequest() {
-                final PComplexPanel complexPanel1 = get("complexPanel1");
+                final PVerticalPanel complexPanel1 = get("complexPanel1");
                 final PAnchor child2 = new PAnchor("child2");
                 child2.ensureDebugId("child2");
                 complexPanel1.insert(child2, 1);

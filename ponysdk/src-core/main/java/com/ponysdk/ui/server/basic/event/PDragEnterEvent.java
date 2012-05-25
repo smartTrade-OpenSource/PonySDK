@@ -3,7 +3,7 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.ui.terminal.DomHandlerType;
 
-public class PDragEnterEvent extends PMouseEvent<PDragEnterHandler> {
+public class PDragEnterEvent extends PDomEvent<PDragEnterHandler> {
 
     public static final PDomEvent.Type<PDragEnterHandler> TYPE = new PDomEvent.Type<PDragEnterHandler>(DomHandlerType.DRAG_ENTER);
 

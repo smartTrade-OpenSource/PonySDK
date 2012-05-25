@@ -27,9 +27,22 @@ import java.util.Collection;
 
 import com.ponysdk.core.event.PHandlerRegistration;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PDragEndEvent;
+import com.ponysdk.ui.server.basic.event.PDragEndHandler;
+import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
+import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
+import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
+import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
+import com.ponysdk.ui.server.basic.event.PDragOverEvent;
+import com.ponysdk.ui.server.basic.event.PDragOverHandler;
+import com.ponysdk.ui.server.basic.event.PDragStartEvent;
+import com.ponysdk.ui.server.basic.event.PDragStartHandler;
+import com.ponysdk.ui.server.basic.event.PDropEvent;
+import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
@@ -41,7 +54,7 @@ import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
  * <li>.gwt-Label { }</li>
  * </ul>
  */
-public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
+public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPAllDragAndDropHandlers {
 
     private String text;
 
@@ -78,6 +91,36 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers {
     @Override
     public Collection<PClickHandler> getClickHandlers() {
         return getHandlerSet(PClickEvent.TYPE, this);
+    }
+
+    @Override
+    public PHandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
+        return addDomHandler(handler, PDragEndEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
+        return addDomHandler(handler, PDragEnterEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
+        return addDomHandler(handler, PDragStartEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
+        return addDomHandler(handler, PDragLeaveEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
+        return addDomHandler(handler, PDragOverEvent.TYPE);
+    }
+
+    @Override
+    public PHandlerRegistration addDropHandler(final PDropHandler handler) {
+        return addDomHandler(handler, PDropEvent.TYPE);
     }
 
 }

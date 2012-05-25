@@ -25,6 +25,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
@@ -34,4 +35,13 @@ public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
         init(create, uiService, new FlowPanel());
     }
 
+    @Override
+    public void add(final PTInstruction add, final UIService uiService) {
+        if (add.containsKey(PROPERTY.INDEX)) {
+            final int beforeIndex = add.getInt(PROPERTY.INDEX);
+            uiObject.insert(asWidget(add.getObjectID(), uiService), beforeIndex);
+        } else {
+            super.add(add, uiService);
+        }
+    }
 }

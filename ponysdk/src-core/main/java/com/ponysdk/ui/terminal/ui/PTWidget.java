@@ -29,6 +29,18 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DragEndEvent;
+import com.google.gwt.event.dom.client.DragEndHandler;
+import com.google.gwt.event.dom.client.DragEnterEvent;
+import com.google.gwt.event.dom.client.DragEnterHandler;
+import com.google.gwt.event.dom.client.DragLeaveEvent;
+import com.google.gwt.event.dom.client.DragLeaveHandler;
+import com.google.gwt.event.dom.client.DragOverEvent;
+import com.google.gwt.event.dom.client.DragOverHandler;
+import com.google.gwt.event.dom.client.DragStartEvent;
+import com.google.gwt.event.dom.client.DragStartHandler;
+import com.google.gwt.event.dom.client.DropEvent;
+import com.google.gwt.event.dom.client.DropHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -45,6 +57,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
@@ -97,11 +110,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     // }
 
     protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
-        final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
-        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType); // TODO nciaravola must be a property
+        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(PROPERTY.CLIENT_X, event.getClientX());
         eventInstruction.put(PROPERTY.CLIENT_Y, event.getClientY());
         eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
@@ -112,21 +121,22 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     }
 
     protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
+        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+        uiService.triggerEvent(eventInstruction);
+    }
+
+    private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
         eventInstruction.put(TYPE.KEY, TYPE.EVENT);
         eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
         eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
-        uiService.triggerEvent(eventInstruction);
+        return eventInstruction;
     }
 
     protected void triggerOnKeyPress(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
 
-        final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
-        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
 
         if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
@@ -244,11 +254,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                             changeHandlerInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(PROPERTY.VALUE, textBox.getText());
 
-                            final PTInstruction eventInstruction = new PTInstruction();
-                            eventInstruction.setObjectID(addHandler.getObjectID());
-                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                            eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
-                            eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
@@ -274,11 +280,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction eventInstruction = new PTInstruction();
-                            eventInstruction.setObjectID(addHandler.getObjectID());
-                            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                            eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
-                            eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
                             if (eventInstruction.containsKey(PROPERTY.KEY_FILTER)) {
                                 final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
@@ -296,10 +298,70 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     }, KeyUpEvent.getType());
                 }
                 break;
+            case DRAG_START:
+                widget.getElement().setDraggable(Element.DRAGGABLE_TRUE);
+                widget.addBitlessDomHandler(new DragStartHandler() {
+
+                    @Override
+                    public void onDragStart(final DragStartEvent event) {
+                        event.setData("text", Long.toString(addHandler.getObjectID()));
+                        event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+                }, DragStartEvent.getType());
+                break;
+            case DRAG_END:
+                widget.addBitlessDomHandler(new DragEndHandler() {
+
+                    @Override
+                    public void onDragEnd(final DragEndEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+                }, DragEndEvent.getType());
+                break;
+            case DRAG_ENTER:
+                widget.addBitlessDomHandler(new DragEnterHandler() {
+
+                    @Override
+                    public void onDragEnter(final DragEnterEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+                }, DragEnterEvent.getType());
+                break;
+            case DRAG_LEAVE:
+                widget.addBitlessDomHandler(new DragLeaveHandler() {
+
+                    @Override
+                    public void onDragLeave(final DragLeaveEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+                }, DragLeaveEvent.getType());
+                break;
+            case DROP:
+                widget.addBitlessDomHandler(new DragOverHandler() {
+
+                    @Override
+                    public void onDragOver(final DragOverEvent event) {
+                        // required by GWT api
+                        // triggerDomEvent(addHandler, domHandlerType, uiService);
+                    }
+                }, DragOverEvent.getType());
+
+                widget.addBitlessDomHandler(new DropHandler() {
+
+                    @Override
+                    public void onDrop(final DropEvent event) {
+                        event.preventDefault();
+                        final String dragWidgetID = event.getData("text");
+                        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+                        if (dragWidgetID != null) eventInstruction.put(PROPERTY.DRAG_SRC, Long.parseLong(dragWidgetID));
+                        uiService.triggerEvent(eventInstruction);
+                    }
+                }, DropEvent.getType());
+                break;
             default:
                 log.info("Handler not supported #" + h);
                 break;
         }
     }
-
 }
