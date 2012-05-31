@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A rectangular grid that can contain text, html, or a child {@link PWidget} within its cells. It must be

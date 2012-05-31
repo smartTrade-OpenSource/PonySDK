@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public abstract class PKeyUpFilterHandler extends JSONObject implements PKeyUpHandler {
 

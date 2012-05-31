@@ -25,8 +25,8 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt; element, causing it to be

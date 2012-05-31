@@ -26,10 +26,10 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTCheckBox extends PTButtonBase<CheckBox> {
@@ -41,7 +41,7 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
+        if (HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
             addValueChangeHandler(addHandler, uiService);
         } else {
             super.addHandler(addHandler, uiService);
@@ -56,8 +56,8 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(addHandler.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
+                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
                 instruction.put(PROPERTY.VALUE, event.getValue());
                 uiService.triggerEvent(instruction);
             }

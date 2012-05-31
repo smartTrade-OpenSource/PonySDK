@@ -37,10 +37,10 @@ import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time, with a header for each child
@@ -140,7 +140,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.BEFORE_SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -157,7 +157,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 

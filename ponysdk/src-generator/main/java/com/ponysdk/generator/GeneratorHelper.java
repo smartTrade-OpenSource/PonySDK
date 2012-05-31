@@ -55,6 +55,10 @@ public class GeneratorHelper {
         return packageName + "." + ".factory." + entityName.toLowerCase();
     }
 
+    public static String getDirectoryFromPackage(final String packageName) {
+        return packageName.replaceAll("\\.", "/");
+    }
+
     // userService
     public static String getServletName(final String entityName) {
         return entityName.toLowerCase() + "Service";
@@ -262,6 +266,11 @@ public class GeneratorHelper {
         if (collectionType == CollectionType.LIST) return List.class.getCanonicalName() + "<" + className + ">";
         if (collectionType == CollectionType.SET) return Set.class.getCanonicalName() + "<" + className + ">";
         throw new Exception("Unknown collection type");
+    }
+
+    public static String toUpperUnderscore(final String in) {
+        final String under = in.replaceAll("(.)([A-Z])", "$1_$2");
+        return under.toUpperCase();
     }
 
 }

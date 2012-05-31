@@ -44,9 +44,9 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class CommunicationEntryPoint implements EntryPoint {
@@ -81,7 +81,7 @@ public class CommunicationEntryPoint implements EntryPoint {
 
             final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() + "p");
 
-            requestData.put(APPLICATION.KEY, APPLICATION.START);
+            requestData.put(APPLICATION.KEY, APPLICATION.KEY_.START);
             requestData.put(HISTORY.TOKEN, History.getToken());
             requestData.put(PROPERTY.COOKIE, cookies);
 

@@ -24,8 +24,8 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlexTable;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTFlexTable extends PTHTMLTable {

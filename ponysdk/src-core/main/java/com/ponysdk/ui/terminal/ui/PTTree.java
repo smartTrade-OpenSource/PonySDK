@@ -27,10 +27,10 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTree extends PTWidget<Tree> {
@@ -46,7 +46,7 @@ public class PTTree extends PTWidget<Tree> {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
 
-        if (HANDLER.SELECTION_HANDLER.equals(handler)) {
+        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handler)) {
             uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
@@ -55,8 +55,8 @@ public class PTTree extends PTWidget<Tree> {
 
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.EVENT, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY_.EVENT, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.WIDGET, ptObject.getObjectID());
                     uiService.triggerEvent(eventInstruction);
                 }

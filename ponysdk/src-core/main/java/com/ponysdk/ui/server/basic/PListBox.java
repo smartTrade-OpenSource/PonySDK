@@ -37,9 +37,9 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
@@ -85,7 +85,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             insertEmptyItem();
         }
 
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
 
         create.put(PROPERTY.MULTISELECT, isMultipleSelect);
@@ -98,7 +98,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).contains(HANDLER.CHANGE_HANDLER)) {
+        if (instruction.getString(HANDLER.KEY).contains(HANDLER.KEY_.CHANGE_HANDLER)) {
             final String data = instruction.getString(PROPERTY.VALUE);
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<Integer>();

@@ -28,10 +28,10 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTScheduler extends AbstractPTObject {
@@ -108,8 +108,8 @@ public class PTScheduler extends AbstractPTObject {
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(TYPE.KEY, TYPE.EVENT);
-            instruction.put(HANDLER.KEY, HANDLER.SCHEDULER);
+            instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+            instruction.put(HANDLER.KEY, HANDLER.KEY_.SCHEDULER);
             instruction.put(PROPERTY.ID, commandID);
             instruction.put(PROPERTY.FIXRATE, delay);
 
@@ -133,8 +133,8 @@ public class PTScheduler extends AbstractPTObject {
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(TYPE.KEY, TYPE.EVENT);
-            instruction.put(HANDLER.KEY, HANDLER.SCHEDULER);
+            instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+            instruction.put(HANDLER.KEY, HANDLER.KEY_.SCHEDULER);
             instruction.put(PROPERTY.ID, commandID);
             instruction.put(PROPERTY.FIXDELAY, delay);
 

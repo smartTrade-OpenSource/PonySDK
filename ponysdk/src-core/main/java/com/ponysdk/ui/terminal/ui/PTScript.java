@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTScript extends AbstractPTObject {
@@ -39,14 +39,14 @@ public class PTScript extends AbstractPTObject {
 
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(update.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
             eventInstruction.put(PROPERTY.RESULT, result == null ? "" : result.toString());
             uiService.triggerEvent(eventInstruction);
         } catch (final Throwable e) {
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(update.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
             eventInstruction.put(PROPERTY.ERROR_MSG, e.getMessage());
             uiService.triggerEvent(eventInstruction);

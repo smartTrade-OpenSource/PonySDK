@@ -37,8 +37,8 @@ import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of {@link PTreeItem TreeItems} that the
@@ -131,14 +131,14 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
-        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.SELECTION_HANDLER);
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
         getPonySession().stackInstruction(removeHandler);
     }
 
@@ -149,8 +149,8 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
 
     @Override
     public void onEventInstruction(final JSONObject event) throws JSONException {
-        if (HANDLER.SELECTION_HANDLER.equals(event.getString(HANDLER.KEY))) {
-            final PTreeItem treeItem = PonySession.getCurrent().getObject(event.getLong(HANDLER.SELECTION_HANDLER));
+        if (HANDLER.KEY_.SELECTION_HANDLER.equals(event.getString(HANDLER.KEY))) {
+            final PTreeItem treeItem = PonySession.getCurrent().getObject(event.getLong(HANDLER.KEY_.SELECTION_HANDLER));
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);

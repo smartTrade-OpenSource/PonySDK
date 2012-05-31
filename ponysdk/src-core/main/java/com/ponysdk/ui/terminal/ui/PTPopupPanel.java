@@ -36,11 +36,11 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.ponysdk.ui.terminal.Dictionnary;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
@@ -90,8 +90,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.EVENT);
-                instruction.put(HANDLER.KEY, Dictionnary.HANDLER.CLOSE_HANDLER);
+                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                instruction.put(HANDLER.KEY, Dictionnary.HANDLER.KEY_.CLOSE_HANDLER);
                 uiService.triggerEvent(instruction);
             }
         });
@@ -101,7 +101,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
 
-        if (HANDLER.POPUP_POSITION_CALLBACK.equals(handler)) {
+        if (HANDLER.KEY_.POPUP_POSITION_CALLBACK.equals(handler)) {
             final PopupPanel popupPanel = cast();
 
             popupPanel.setVisible(false);
@@ -109,8 +109,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(addHandler.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-            eventInstruction.put(HANDLER.KEY, HANDLER.POPUP_POSITION_CALLBACK);
+            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+            eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
             eventInstruction.put(PROPERTY.OFFSETWIDTH, popupPanel.getOffsetWidth());
             eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
             eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());

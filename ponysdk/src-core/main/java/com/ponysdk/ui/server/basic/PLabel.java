@@ -44,8 +44,8 @@ import com.ponysdk.ui.server.basic.event.PDragStartHandler;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;

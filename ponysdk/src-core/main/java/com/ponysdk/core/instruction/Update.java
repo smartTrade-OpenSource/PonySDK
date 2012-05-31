@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class Update extends Instruction {
 
     public Update(final long objectID) {
         super(objectID);
-        put(TYPE.KEY, TYPE.UPDATE);
+        put(TYPE.KEY, TYPE.KEY_.UPDATE);
     }
 
 }

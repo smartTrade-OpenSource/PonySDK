@@ -29,10 +29,10 @@ import java.util.Map;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTRadioButton extends PTCheckBox {
@@ -78,8 +78,8 @@ public class PTRadioButton extends PTCheckBox {
     protected void fireInstruction(final long objectID, final UIService uiService, final boolean value) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(objectID);
-        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
+        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
         eventInstruction.put(PROPERTY.VALUE, value);
         uiService.triggerEvent(eventInstruction);
     }

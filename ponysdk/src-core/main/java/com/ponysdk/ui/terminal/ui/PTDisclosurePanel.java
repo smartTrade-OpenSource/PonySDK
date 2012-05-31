@@ -28,10 +28,10 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
@@ -60,8 +60,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.CLOSE_HANDLER);
+                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
 
                 uiService.triggerEvent(instruction);
             }
@@ -73,8 +73,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.OPEN_HANDLER);
+                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                instruction.put(HANDLER.KEY, HANDLER.KEY_.OPEN_HANDLER);
 
                 uiService.triggerEvent(instruction);
             }

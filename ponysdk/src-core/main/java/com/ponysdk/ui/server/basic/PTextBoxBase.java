@@ -36,9 +36,9 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String>, PValueChangeHandler<String> {
 
@@ -53,13 +53,13 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     public PTextBoxBase(final String text) {
         super();
         setText(text);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.STRING_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
     @Override
     public void onEventInstruction(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.STRING_VALUE_CHANGE_HANDLER)) {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
             onValueChange(new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE)));
         } else {
             super.onEventInstruction(e);

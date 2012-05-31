@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.PStreamHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the default) or

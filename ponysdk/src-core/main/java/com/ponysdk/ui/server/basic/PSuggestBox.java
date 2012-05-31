@@ -39,9 +39,9 @@ import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of selections that
@@ -98,8 +98,8 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
             this.suggestOracle = new PMultiWordSuggestOracle();
         }
 
-        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_VALUE_CHANGE_HANDLER));
-        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.STRING_SELECTION_HANDLER));
+        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
+        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
 
         create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
     }
@@ -120,10 +120,10 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         if (event.has(HANDLER.KEY)) {
             handlerKey = event.getString(HANDLER.KEY);
         }
-        if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
+        if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
             final String text = event.getString(PROPERTY.TEXT);
             textBox.onValueChange(new PValueChangeEvent<String>(this, text));
-        } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handlerKey)) {
+        } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handlerKey)) {
             this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
             this.displayString = event.getString(PROPERTY.DISPLAY_STRING);
             this.textBox.setText(replacementString);

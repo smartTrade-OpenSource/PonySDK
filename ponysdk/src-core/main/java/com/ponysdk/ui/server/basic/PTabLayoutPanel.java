@@ -40,9 +40,9 @@ import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are
@@ -84,7 +84,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     private Integer selectedItemIndex;
 
     public PTabLayoutPanel() {
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -175,7 +175,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.BEFORE_SELECTION_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -211,11 +211,11 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
             handlerKey = eventInstruction.getString(HANDLER.KEY);
         }
 
-        if (HANDLER.SELECTION_HANDLER.equals(handlerKey)) {
+        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handlerKey)) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
                 handler.onSelection(new PSelectionEvent<Integer>(this, eventInstruction.getInt(PROPERTY.INDEX)));
             }
-        } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handlerKey)) {
+        } else if (HANDLER.KEY_.BEFORE_SELECTION_HANDLER.equals(handlerKey)) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
                 handler.onBeforeSelection(new PBeforeSelectionEvent<Integer>(this, eventInstruction.getInt(PROPERTY.INDEX)));
             }

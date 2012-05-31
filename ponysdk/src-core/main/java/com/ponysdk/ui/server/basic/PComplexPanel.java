@@ -27,7 +27,7 @@ import java.util.Iterator;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.

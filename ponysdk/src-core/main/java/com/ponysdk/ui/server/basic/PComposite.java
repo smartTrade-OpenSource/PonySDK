@@ -25,8 +25,8 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.Create;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A type of widget that can wrap another widget, hiding the wrapped widget's methods. When added to a panel,

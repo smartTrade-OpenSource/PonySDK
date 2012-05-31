@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.PStreamHandler;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 /**
  * The server side implementation of the RPC service.

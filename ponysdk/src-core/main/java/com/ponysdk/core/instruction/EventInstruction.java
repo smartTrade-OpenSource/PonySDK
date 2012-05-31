@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class EventInstruction extends Handler {
 
     public EventInstruction(final long objectID, final String handlerType) {
         super(objectID, handlerType);
-        put(TYPE.KEY, TYPE.EVENT);
+        put(TYPE.KEY, TYPE.KEY_.EVENT);
     }
 
 }

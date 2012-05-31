@@ -29,10 +29,10 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTTabPanel extends PTWidget<TabPanel> {
@@ -56,7 +56,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
-        
+
         if (tabPanel.getWidgetCount() == 1) {
             tabPanel.selectTab(0);
         }
@@ -65,28 +65,28 @@ public class PTTabPanel extends PTWidget<TabPanel> {
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
-        if (HANDLER.SELECTION_HANDLER.equals(handler)) {
+        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handler)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.INDEX, event.getSelectedItem());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-        } else if (HANDLER.BEFORE_SELECTION_HANDLER.equals(handler)) {
+        } else if (HANDLER.KEY_.BEFORE_SELECTION_HANDLER.equals(handler)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.INDEX, event.getItem());
                     uiService.triggerEvent(eventInstruction);
                 }

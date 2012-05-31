@@ -63,11 +63,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
@@ -143,7 +143,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 currentInstruction = instruction;
                 final String type = instruction.getString(TYPE.KEY);
 
-                if (TYPE.CLOSE.equals(type)) {
+                if (TYPE.KEY_.CLOSE.equals(type)) {
                     pendingClose = true;
                     triggerEvent(instruction);
 
@@ -156,7 +156,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     };
 
                     Scheduler.get().scheduleDeferred(command);
-                } else if (TYPE.CREATE.equals(type)) {
+                } else if (TYPE.KEY_.CREATE.equals(type)) {
                     // if (WidgetType.COOKIE.equals(instruction.getWidgetType())) {
                     // final String name = instruction.getString(PROPERTY.NAME);
                     // final String value = instruction.getString(PROPERTY.VALUE);
@@ -188,7 +188,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     objectByID.put(instruction.getObjectID(), ptObject);
                     // }
 
-                } else if (TYPE.ADD.equals(type)) {
+                } else if (TYPE.KEY_.ADD.equals(type)) {
 
                     // log.info("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " +
                     // add.getProterty());
@@ -196,25 +196,25 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final PTObject uiObject = objectByID.get(instruction.getParentID());
                     uiObject.add(instruction, this);
 
-                } else if (TYPE.ADD_HANDLER.equals(type)) {
+                } else if (TYPE.KEY_.ADD_HANDLER.equals(type)) {
 
                     // log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
                     // + addHandler.getProterty());
                     final String handler = instruction.getString(HANDLER.KEY);
-                    if (HANDLER.STREAM_REQUEST_HANDLER.equals(handler)) {
+                    if (HANDLER.KEY_.STREAM_REQUEST_HANDLER.equals(handler)) {
                         new PTStreamResource().addHandler(instruction, this);
                     } else {
                         final PTObject uiObject = objectByID.get(instruction.getObjectID());
                         uiObject.addHandler(instruction, this);
                     }
-                } else if (TYPE.REMOVE_HANDLER.equals(type)) {
+                } else if (TYPE.KEY_.REMOVE_HANDLER.equals(type)) {
                     // log.info("AddHandler: " + instruction.getType() + ", " + instruction.getObjectID() +
                     // ", " + instruction.getProterty());
 
                     final PTObject uiObject = objectByID.get(instruction.getObjectID());
                     uiObject.removeHandler(instruction, this);
 
-                } else if (TYPE.REMOVE.equals(type)) {
+                } else if (TYPE.KEY_.REMOVE.equals(type)) {
                     PTObject ptObject;
 
                     // if (PropertyKey.COOKIE.equals(instruction.getProterty().getKey())) { // TODO
@@ -229,7 +229,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
                     ptObject.remove(instruction, this);
                     // }
-                } else if (TYPE.GC.equals(type)) {
+                } else if (TYPE.KEY_.GC.equals(type)) {
                     // log.info("GC: " + remove.getObjectID());
 
                     final PTObject ptObject = objectByID.remove(instruction.getObjectID());
@@ -239,7 +239,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
 
                     ptObject.gc(instruction, this);
-                } else if (TYPE.UPDATE.equals(type)) {
+                } else if (TYPE.KEY_.UPDATE.equals(type)) {
 
                     // log.info("Update " + update.getMainProperty().getKey() + " / " +
                     // update.getMainProperty().getValue());
@@ -247,7 +247,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     final PTObject ptObject = objectByID.get(instruction.getObjectID());
                     ptObject.update(instruction, this);
 
-                } else if (TYPE.HISTORY.equals(type)) {
+                } else if (TYPE.KEY_.HISTORY.equals(type)) {
                     final String oldToken = History.getToken();
 
                     String token = null;
@@ -451,7 +451,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(TYPE.KEY, TYPE.HISTORY);
+            eventInstruction.put(TYPE.KEY, TYPE.KEY_.HISTORY);
             eventInstruction.put(HISTORY.TOKEN, event.getValue());
             stackEvent(eventInstruction);
         }

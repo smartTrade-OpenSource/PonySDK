@@ -26,8 +26,8 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires {@link PClickEvent}s when the radio button is

@@ -116,11 +116,11 @@ jar {
     }
 }
 
-task cleanGenerate << {
-	new File(srcGenerated).deleteDir();
+task cleanGenerate(type: Delete) {
+	delete srcGenerated
 }
 
-task generate {
+task generateDatamodel {
 	description = 'Model generation'
 	srcFile = file('src-core/main/resources/spec/project_schema.xsd')
 	destDir = file(srcGenerated)
@@ -137,6 +137,33 @@ task generate {
 			}
 		}
 	}
+}
+
+task compileDatamodel(type: Compile) {
+	classpath = configurations.xjc
+	source = file(srcGenerated)
+	destinationDir = file("$buildDir/classes/main")
+}
+
+task compileGenerator(type: Compile) {
+	classpath = files("$buildDir/output/classes/main") + configurations.gwt + configurations.sl4j
+	source = srcGenerator
+	destinationDir = file("$buildDir/classes/main")
+}
+
+task generateDictionnary(type: JavaExec) {
+	description = 'Dictionnary generation'
+	main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
+	classpath { 
+		[
+			file("$buildDir/classes/main"),
+			configurations.sl4j,
+			configurations.gwt
+		]
+	}
+	args = [
+		'verbose=false'
+	]
 }
 
 task gwtc(type: JavaExec) {
@@ -162,6 +189,17 @@ task gwtc(type: JavaExec) {
 		workers,
 		'com.ponysdk.ui.PonyTerminal'
 	]
+}
+
+task generate {
+	inputs.file files('src-core/main/resources/spec')
+	outputs.dir file(srcGenerated)
+	doLast {
+		tasks.generateDatamodel.execute()
+		tasks.compileDatamodel.execute()
+		tasks.compileGenerator.execute()
+		tasks.generateDictionnary.execute()
+	}
 }
 
 

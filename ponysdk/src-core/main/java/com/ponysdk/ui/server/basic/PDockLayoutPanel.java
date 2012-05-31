@@ -24,9 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up

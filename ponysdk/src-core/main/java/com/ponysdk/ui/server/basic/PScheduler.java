@@ -31,9 +31,9 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * This class provides low-level task scheduling primitives.
@@ -112,7 +112,7 @@ public abstract class PScheduler extends PObject {
 
     @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.SCHEDULER)) {
+        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.SCHEDULER)) {
             final long cmdID = instruction.getLong(PROPERTY.ID);
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null) return;

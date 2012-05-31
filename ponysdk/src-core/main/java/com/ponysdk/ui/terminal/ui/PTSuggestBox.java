@@ -31,10 +31,10 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
@@ -63,28 +63,28 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
         final String handler = addHandler.getString(HANDLER.KEY);
 
-        if (HANDLER.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
+        if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(PROPERTY.TEXT, event.getValue());
                     uiService.triggerEvent(eventInstruction);
                 }
             });
-        } else if (HANDLER.STRING_SELECTION_HANDLER.equals(handler)) {
+        } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handler)) {
             uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.STRING_SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
                     eventInstruction.put(PROPERTY.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
                     uiService.triggerEvent(eventInstruction);

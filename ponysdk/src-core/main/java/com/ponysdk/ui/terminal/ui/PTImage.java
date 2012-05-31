@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTImage extends PTWidget<Image> {
@@ -50,7 +50,7 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.containsKey(HANDLER.EMBEDED_STREAM_REQUEST_HANDLER)) {
+        if (addHandler.containsKey(HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER)) {
             cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getString(PROPERTY.STREAM_REQUEST_ID));
         } else {
             super.addHandler(addHandler, uiService);

@@ -39,9 +39,9 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PDatePicker extends PComposite implements HasPValue<Date> {
 
@@ -82,7 +82,7 @@ public class PDatePicker extends PComposite implements HasPValue<Date> {
 
     @Override
     public void onEventInstruction(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.DATE_VALUE_CHANGE_HANDLER)) {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER)) {
             final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
             if (data != null) {

@@ -30,9 +30,9 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand} when they are clicked, or
@@ -126,7 +126,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.COMMAND);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.COMMAND);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -136,7 +136,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
         if (event.has(HANDLER.KEY)) {
             handlerKey = event.getString(HANDLER.KEY);
         }
-        if (HANDLER.COMMAND.equals(handlerKey)) {
+        if (HANDLER.KEY_.COMMAND.equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onEventInstruction(event);

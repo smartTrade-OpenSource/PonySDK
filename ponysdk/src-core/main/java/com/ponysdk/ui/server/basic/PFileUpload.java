@@ -39,9 +39,9 @@ import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
@@ -61,7 +61,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     private boolean enabled = true;
 
     public PFileUpload() {
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -74,13 +74,13 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
         final String handler = instruction.getString(HANDLER.KEY);
 
-        if (HANDLER.CHANGE_HANDLER.equals(handler)) {
+        if (HANDLER.KEY_.CHANGE_HANDLER.equals(handler)) {
             final String fileName = instruction.getString(PROPERTY.FILE_NAME);
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (HANDLER.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
+        } else if (HANDLER.KEY_.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
             onSubmitComplete();
         } else {
             super.onEventInstruction(instruction);

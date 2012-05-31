@@ -31,10 +31,10 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDateBox extends PTWidget<DateBox> {
@@ -47,7 +47,7 @@ public class PTDateBox extends PTWidget<DateBox> {
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
 
-        if (HANDLER.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
+        if (HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
             final DateBox dateBox = cast();
             final TextBox textBox = dateBox.getTextBox();
             dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
@@ -74,8 +74,8 @@ public class PTDateBox extends PTWidget<DateBox> {
     protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(addHandler.getObjectID());
-        instruction.put(TYPE.KEY, TYPE.EVENT);
-        instruction.put(HANDLER.KEY, HANDLER.DATE_VALUE_CHANGE_HANDLER);
+        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        instruction.put(HANDLER.KEY, HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
         instruction.put(PROPERTY.VALUE, dateBox.getTextBox().getText());
 
         uiService.triggerEvent(instruction);

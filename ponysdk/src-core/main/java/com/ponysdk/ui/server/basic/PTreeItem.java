@@ -7,8 +7,8 @@ import java.util.List;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id in order

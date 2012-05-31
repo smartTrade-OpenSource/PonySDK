@@ -24,9 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.floatablepanel.PCFloatablePanelAddon;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PFloatablePanel extends PSimplePanel implements PAddOn {
 

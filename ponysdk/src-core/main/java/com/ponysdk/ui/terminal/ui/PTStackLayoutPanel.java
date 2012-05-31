@@ -30,10 +30,10 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
@@ -58,7 +58,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handlerType = addHandler.getString(HANDLER.KEY);
 
-        if (handlerType.equals(HANDLER.SELECTION_HANDLER)) {
+        if (handlerType.equals(HANDLER.KEY_.SELECTION_HANDLER)) {
             final StackLayoutPanel stackLayoutPanel = uiObject;
             stackLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
@@ -66,8 +66,8 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getSelectedItem());
                     uiService.triggerEvent(eventInstruction);
                 }
@@ -75,15 +75,15 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
             return;
         }
 
-        if (handlerType.equals(HANDLER.BEFORE_SELECTION_HANDLER)) {
+        if (handlerType.equals(HANDLER.KEY_.BEFORE_SELECTION_HANDLER)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getItem());
                     uiService.triggerEvent(eventInstruction);
                 }

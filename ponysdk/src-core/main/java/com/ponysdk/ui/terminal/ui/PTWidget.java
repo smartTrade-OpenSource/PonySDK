@@ -60,11 +60,11 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTWidget<W extends Widget> extends PTUIObject<W> {
@@ -75,7 +75,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handlerType = addHandler.getString(HANDLER.KEY);
 
-        if (handlerType.equals(HANDLER.DOM_HANDLER)) {
+        if (handlerType.equals(HANDLER.KEY_.DOM_HANDLER)) {
             final int domHandlerType = addHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
             final Widget w = asWidget(addHandler.getObjectID(), uiService);
             addDomHandler(addHandler, w, domHandlerType, uiService);
@@ -86,7 +86,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     @Override
     public void removeHandler(final PTInstruction removeHandler, final UIService uiService) {
-        if (removeHandler.containsKey(HANDLER.DOM_HANDLER)) {
+        if (removeHandler.containsKey(HANDLER.KEY_.DOM_HANDLER)) {
             // final int domHandlerType = removeHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
             // final Widget w = asWidget(removeHandler.getObjectID(), uiService);
             // final HandlerRegistration handlerRegistration;
@@ -128,8 +128,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.DOM_HANDLER);
+        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.DOM_HANDLER);
         eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
         return eventInstruction;
     }
@@ -250,8 +250,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction();
                             changeHandlerInstruction.setObjectID(addHandler.getObjectID());
-                            changeHandlerInstruction.put(TYPE.KEY, TYPE.EVENT);
-                            changeHandlerInstruction.put(HANDLER.KEY, HANDLER.STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                            changeHandlerInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(PROPERTY.VALUE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);

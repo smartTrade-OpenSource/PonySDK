@@ -30,7 +30,7 @@ import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.History;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 
 /**
  * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented

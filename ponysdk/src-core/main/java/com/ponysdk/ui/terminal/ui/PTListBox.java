@@ -26,10 +26,10 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTListBox extends PTFocusWidget<ListBox> {
@@ -41,7 +41,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.CHANGE_HANDLER)) {
+        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.KEY_.CHANGE_HANDLER)) {
             uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
@@ -50,8 +50,8 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                     if (selectedIndex == -1) {
                         final PTInstruction eventInstruction = new PTInstruction();
                         eventInstruction.setObjectID(addHandler.getObjectID());
-                        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                        eventInstruction.put(HANDLER.KEY, HANDLER.CHANGE_HANDLER);
+                        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
                         eventInstruction.put(PROPERTY.VALUE, "-1");
                         uiService.triggerEvent(eventInstruction);
                     } else {
@@ -65,8 +65,8 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                         }
                         final PTInstruction eventInstruction = new PTInstruction();
                         eventInstruction.setObjectID(addHandler.getObjectID());
-                        eventInstruction.put(TYPE.KEY, TYPE.EVENT);
-                        eventInstruction.put(HANDLER.KEY, HANDLER.CHANGE_HANDLER);
+                        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
                         eventInstruction.put(PROPERTY.VALUE, selectedIndexes);
                         uiService.triggerEvent(eventInstruction);
                     }

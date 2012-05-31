@@ -38,9 +38,9 @@ import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A widget that consists of a header and a content panel that discloses the content when a user clicks on the
@@ -89,12 +89,12 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     public void onEventInstruction(final JSONObject event) throws JSONException {
         final String handler = event.getString(HANDLER.KEY);
 
-        if (HANDLER.CLOSE_HANDLER.equals(handler)) {
+        if (HANDLER.KEY_.CLOSE_HANDLER.equals(handler)) {
             this.isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
                 closeHandler.onClose(new PCloseEvent(this));
             }
-        } else if (HANDLER.OPEN_HANDLER.equals(handler)) {
+        } else if (HANDLER.KEY_.OPEN_HANDLER.equals(handler)) {
             this.isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
                 openHandler.onOpen(new POpenEvent(this));

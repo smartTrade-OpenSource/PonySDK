@@ -35,9 +35,9 @@ import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
@@ -64,7 +64,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     public PCheckBox(final String text) {
         setText(text);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
     }
 
@@ -111,7 +111,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void onEventInstruction(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.BOOLEAN_VALUE_CHANGE_HANDLER)) {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER)) {
             onValueChange(new PValueChangeEvent<Boolean>(this, e.getBoolean(PROPERTY.VALUE)));
         } else {
             super.onEventInstruction(e);

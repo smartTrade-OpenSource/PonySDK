@@ -59,9 +59,9 @@ import com.ponysdk.ui.server.basic.event.PMouseDownEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseUpEvent;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.DomHandlerType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds support for receiving events from
@@ -202,7 +202,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public <H extends PEventHandler> PHandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
-        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.DOM_HANDLER);
+        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
         if (handler instanceof JSONObject) {
             removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
         }
@@ -213,7 +213,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @SuppressWarnings("unchecked")
     public <H extends PEventHandler> PHandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.DOM_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
         addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
         if (handler instanceof JSONObject) {
             try {
@@ -232,7 +232,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.DOM_HANDLER)) {
+        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.DOM_HANDLER)) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(PROPERTY.DOM_HANDLER_TYPE)];
             switch (domHandler) {
                 case KEY_PRESS:

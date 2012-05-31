@@ -54,12 +54,12 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PTimer;
+import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
 
 public class PonySession {
 
@@ -108,12 +108,12 @@ public class PonySession {
 
     public void fireInstruction(final JSONObject instruction) throws PonySessionException, JSONException {
         if (instruction.has(TYPE.KEY)) {
-            if (instruction.get(TYPE.KEY).equals(TYPE.CLOSE)) {
+            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
                 PonySession.getCurrent().invalidate();
                 return;
             }
 
-            if (instruction.get(TYPE.KEY).equals(TYPE.HISTORY)) {
+            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.HISTORY)) {
                 if (history != null) {
                     history.fireHistoryChanged(instruction.getString(HISTORY.TOKEN));
                 }
@@ -136,7 +136,7 @@ public class PonySession {
             return;
         }
         if (instruction.has(TYPE.KEY)) {
-            if (instruction.get(TYPE.KEY).equals(TYPE.EVENT)) {
+            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.EVENT)) {
                 object.onEventInstruction(instruction);
             }
         }
@@ -180,7 +180,7 @@ public class PonySession {
     }
 
     public void stackStreamRequest(final PStreamHandler streamListener) {
-        final AddHandler addHandler = new AddHandler(0, HANDLER.STREAM_REQUEST_HANDLER);
+        final AddHandler addHandler = new AddHandler(0, HANDLER.KEY_.STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
         stackInstruction(addHandler);
@@ -188,7 +188,7 @@ public class PonySession {
     }
 
     public void stackEmbededStreamRequest(final PStreamHandler streamListener, final long objectID) {
-        final AddHandler addHandler = new AddHandler(objectID, HANDLER.EMBEDED_STREAM_REQUEST_HANDLER);
+        final AddHandler addHandler = new AddHandler(objectID, HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER);
         final long streamRequestID = PonySession.getCurrent().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
         stackInstruction(addHandler);

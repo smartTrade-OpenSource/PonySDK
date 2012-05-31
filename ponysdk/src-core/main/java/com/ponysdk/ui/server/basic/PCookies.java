@@ -31,8 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.ponysdk.core.PonySession;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 public class PCookies {
 

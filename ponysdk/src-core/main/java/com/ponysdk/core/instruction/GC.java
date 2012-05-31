@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class GC extends Instruction {
 
     public GC(final long objectID, final long parentID) {
         super(objectID, parentID);
-        put(TYPE.KEY, TYPE.GC);
+        put(TYPE.KEY, TYPE.KEY_.GC);
     }
 }

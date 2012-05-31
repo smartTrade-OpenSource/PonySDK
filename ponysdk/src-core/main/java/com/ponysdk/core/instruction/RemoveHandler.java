@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class RemoveHandler extends Handler {
 
     public RemoveHandler(final long objectID, final String type) {
         super(objectID, type);
-        put(TYPE.KEY, TYPE.REMOVE_HANDLER);
+        put(TYPE.KEY, TYPE.KEY_.REMOVE_HANDLER);
     }
 
 }

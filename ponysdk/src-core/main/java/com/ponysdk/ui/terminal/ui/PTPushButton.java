@@ -24,8 +24,8 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.PushButton;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTPushButton extends PTCustomButton<PushButton> {

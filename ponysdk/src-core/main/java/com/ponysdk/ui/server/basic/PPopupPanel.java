@@ -34,9 +34,9 @@ import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
@@ -213,7 +213,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         this.positionCallback = callback;
         this.showing = true;
 
-        final AddHandler handler = new AddHandler(ID, HANDLER.POPUP_POSITION_CALLBACK);
+        final AddHandler handler = new AddHandler(ID, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
         getPonySession().stackInstruction(handler);
     }
 
@@ -223,13 +223,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.POPUP_POSITION_CALLBACK)) {
+        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.POPUP_POSITION_CALLBACK)) {
             final Integer windowWidth = instruction.getInt(PROPERTY.OFFSETWIDTH);
             final Integer windowHeight = instruction.getInt(PROPERTY.OFFSETHEIGHT);
             final Integer clientWith = instruction.getInt(PROPERTY.CLIENT_WIDTH);
             final Integer clientHeight = instruction.getInt(PROPERTY.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
-        } else if (HANDLER.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
+        } else if (HANDLER.KEY_.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
             this.showing = false;
             fireOnClose();
         } else {

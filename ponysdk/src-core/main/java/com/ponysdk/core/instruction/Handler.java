@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 
 public abstract class Handler extends Instruction {
 

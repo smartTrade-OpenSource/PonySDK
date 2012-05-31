@@ -29,8 +29,8 @@ import java.util.List;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can either fire

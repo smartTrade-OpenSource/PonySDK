@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.instruction;
 
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.WIDGETTYPE;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.WIDGETTYPE;
 
 public class Create extends Instruction {
 
     public Create(final long objectID, final WidgetType widgetType) {
         super(objectID);
-        put(TYPE.KEY, TYPE.CREATE);
+        put(TYPE.KEY, TYPE.KEY_.CREATE);
         put(WIDGETTYPE.KEY, widgetType.ordinal());
     }
 

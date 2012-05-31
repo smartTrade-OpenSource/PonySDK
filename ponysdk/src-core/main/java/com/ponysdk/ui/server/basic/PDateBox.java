@@ -40,9 +40,9 @@ import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.instruction.Dictionnary.PROPERTY;
 
 /**
  * A text box that shows a {@link PDatePicker} when the user focuses on it. <h3>CSS Style Rules</h3>
@@ -69,7 +69,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final SimpleDateFormat dateFormat) {
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.DATE_VALUE_CHANGE_HANDLER);
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
         getPonySession().stackInstruction(addHandler);
 
         setDateFormat(dateFormat);
@@ -82,7 +82,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onEventInstruction(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.DATE_VALUE_CHANGE_HANDLER)) {
+        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER)) {
             final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
             if (data != null && !data.isEmpty()) {

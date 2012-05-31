@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.instruction.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class Remove extends Instruction {
 
@@ -31,6 +31,6 @@ public class Remove extends Instruction {
 
     public Remove(final long objectID, final long parentID) {
         super(objectID, parentID);
-        put(TYPE.KEY, TYPE.REMOVE);
+        put(TYPE.KEY, TYPE.KEY_.REMOVE);
     }
 }
