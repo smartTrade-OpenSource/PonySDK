@@ -81,6 +81,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> styleProperties = new HashMap<String, String>();
 
+    private final Map<String, String> elementProperties = new HashMap<String, String>();
+
     private final PSimpleEventBus domHandler = new PSimpleEventBus();
 
     private String title;
@@ -131,6 +133,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
+        getPonySession().stackInstruction(update);
+    }
+
+    public void setProperty(final String name, final String value) {
+        elementProperties.put(name, value);
+        final Update update = new Update(ID);
+        update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
+        update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
         getPonySession().stackInstruction(update);
     }
 
