@@ -83,6 +83,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final SimpleEventBus domHandler = new SimpleEventBus();
 
+    private final Map<String, String> elementProperties = new HashMap<String, String>();
+
     private String title;
     private String width;
     private String height;
@@ -128,6 +130,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
+        getUIContext().stackInstruction(update);
+    }
+
+    public void setProperty(final String name, final String value) {
+        elementProperties.put(name, value);
+        final Update update = new Update(ID);
+        update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
+        update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
         getUIContext().stackInstruction(update);
     }
 
