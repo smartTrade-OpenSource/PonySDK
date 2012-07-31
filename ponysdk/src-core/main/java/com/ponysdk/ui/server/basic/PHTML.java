@@ -71,7 +71,7 @@ public class PHTML extends PLabel implements PHasHTML {
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public boolean isWordWrap() {
@@ -82,7 +82,7 @@ public class PHTML extends PLabel implements PHasHTML {
         this.wordWrap = wordWrap;
         final Update update = new Update(getID());
         update.put(PROPERTY.WORD_WRAP, wordWrap);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
 }

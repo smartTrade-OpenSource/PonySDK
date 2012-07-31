@@ -70,7 +70,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public Formatter getFormatter() {
@@ -95,127 +95,127 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         void createLink(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.CREATE_LINK, html);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void insertHorizontalRule() {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HORIZONTAL_RULE);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void insertHTML(final String html) {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HTML, html);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void insertImage(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.IMAGE, url);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void insertOrderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.ORDERED);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void insertUnorderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.UNORDERED);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void setBackColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.BACK_COLOR, color);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void setFontName(final String name) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_NAME, name);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void setFontSize(final String fontSize) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_SIZE, fontSize);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void setForeColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_COLOR, color);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void setJustification(final Justification justification) {
             final Update update = new Update(getID());
             update.put(PROPERTY.JUSTIFICATION, justification.name());
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void toggleBold() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_BOLD);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void toggleItalic() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_ITALIC);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void toggleSubscript() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_SUBSCRIPT);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void toggleUnderline() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_UNDERLINE);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void leftIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.LEFT_INDENT);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void redo() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REDO);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void removeFormat() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_FORMAT);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void removeLink() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_LINK);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void rightIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_RIGHT_INDENT);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         void selectAll() {
             final Update update = new Update(getID());
             update.put(PROPERTY.SELECT_ALL);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 

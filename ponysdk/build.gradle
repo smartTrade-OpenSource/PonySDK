@@ -67,8 +67,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.4.0'
-	gwt 'com.google.gwt:gwt-dev:2.4.0'
+	gwt 'com.google.gwt:gwt-user:2.5.0-rc1'
+	gwt 'com.google.gwt:gwt-dev:2.5.0-rc1'
+	gwt 'com.google.gwt:gwt-codeserver:2.5.0-rc1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
@@ -91,6 +92,7 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-webapp:8.1.3.v20120416'
     jetty 'org.eclipse.jetty:jetty-servlets:8.1.3.v20120416'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
+    jetty 'org.eclipse.jetty:jetty-websocket:8.1.3.v20120416'
 }
 
 manifest {
@@ -116,7 +118,7 @@ jar {
     }
 }
 
-task cleanGenerate(type: Delete) {
+task cleanGenerated(type: Delete) {
 	delete srcGenerated
 }
 
@@ -220,6 +222,9 @@ task jarSource(type: Jar){
 	from(srcCore) {
 		include '**/*.xml'
 	}
+	from(srcGenerated) {
+		include '**/*.xml'
+	}
 }
 
 task copyAllLibs << {
@@ -270,7 +275,7 @@ task copyAllLibs << {
 	}
 }
 
-clean.dependsOn(cleanGenerate)
+clean.dependsOn(cleanGenerated)
 compileJava.dependsOn(generate)
 jar.dependsOn(gwtc)
 assemble.dependsOn(copyAllLibs)

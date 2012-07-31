@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 
-public class ShowCustomColumnDescriptorFormEvent extends PSystemEvent<ShowCustomColumnDescriptorFormHandler> {
+public class ShowCustomColumnDescriptorFormEvent extends SystemEvent<ShowCustomColumnDescriptorFormHandler> {
 
     public static final Type<ShowCustomColumnDescriptorFormHandler> TYPE = new Type<ShowCustomColumnDescriptorFormHandler>();
 

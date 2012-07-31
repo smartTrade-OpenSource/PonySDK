@@ -29,7 +29,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -59,10 +59,10 @@ public abstract class PScript extends PObject {
     }
 
     public static PScript get() {
-        PScript script = PonySession.getCurrent().getAttribute(SCRIPT_KEY);
+        PScript script = UIContext.get().getAttribute(SCRIPT_KEY);
         if (script == null) {
             script = new PScript() {};
-            PonySession.getCurrent().setAttribute(SCRIPT_KEY, script);
+            UIContext.get().setAttribute(SCRIPT_KEY, script);
         }
         return script;
     }
@@ -71,7 +71,7 @@ public abstract class PScript extends PObject {
         final Update update = new Update(ID);
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, (executionID++));
-        PonySession.getCurrent().stackInstruction(update);
+        UIContext.get().stackInstruction(update);
     }
 
     public void execute(final String js, final ExecutionCallback callback) {
@@ -81,7 +81,7 @@ public abstract class PScript extends PObject {
         final Update update = new Update(ID);
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, id);
-        PonySession.getCurrent().stackInstruction(update);
+        UIContext.get().stackInstruction(update);
     }
 
     @Override

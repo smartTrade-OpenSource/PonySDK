@@ -68,7 +68,7 @@ public class PTScheduler extends AbstractPTObject {
     }
 
     @Override
-    public void gc(final PTInstruction gc, final UIService uiService) {
+    public void gc(final UIService uiService) {
         for (final SchedulerCommand command : commandByIDs.values()) {
             command.cancel();
         }

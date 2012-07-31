@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 
-public class RowInsertedEvent extends PSystemEvent<RowInsertedHandler> {
+public class RowInsertedEvent extends SystemEvent<RowInsertedHandler> {
 
     public static final Type<RowInsertedHandler> TYPE = new Type<RowInsertedHandler>();
 

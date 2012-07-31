@@ -23,12 +23,12 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
 
-public class AuthenticationFailedEvent extends PBusinessEvent<AuthenticationFailedHandler> {
+public class AuthenticationFailedEvent extends BusinessEvent<AuthenticationFailedHandler> {
 
-    public static final PEvent.Type<AuthenticationFailedHandler> TYPE = new PEvent.Type<AuthenticationFailedHandler>();
+    public static final Event.Type<AuthenticationFailedHandler> TYPE = new Event.Type<AuthenticationFailedHandler>();
 
     public AuthenticationFailedEvent(Object sourceComponent) {
         super(sourceComponent);
@@ -40,7 +40,7 @@ public class AuthenticationFailedEvent extends PBusinessEvent<AuthenticationFail
     }
 
     @Override
-    public PEvent.Type<AuthenticationFailedHandler> getAssociatedType() {
+    public Event.Type<AuthenticationFailedHandler> getAssociatedType() {
         return TYPE;
     }
 

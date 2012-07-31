@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.Event;
 
-public class POpenEvent extends PEvent<POpenHandler> {
+public class POpenEvent extends Event<POpenHandler> {
 
     public static final Type<POpenHandler> TYPE = new Type<POpenHandler>();
 

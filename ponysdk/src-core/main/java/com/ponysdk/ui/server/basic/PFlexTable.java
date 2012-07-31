@@ -60,7 +60,7 @@ public class PFlexTable extends PHTMLTable {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.SET_COL_SPAN, colSpan);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
@@ -69,7 +69,7 @@ public class PFlexTable extends PHTMLTable {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.SET_ROW_SPAN, rowSpan);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 }

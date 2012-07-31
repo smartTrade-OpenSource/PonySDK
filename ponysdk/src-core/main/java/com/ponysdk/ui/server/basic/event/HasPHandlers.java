@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.Event;
 
 public interface HasPHandlers {
 
-    void fireEvent(PEvent<?> event);
+    void fireEvent(Event<?> event);
 }

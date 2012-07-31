@@ -43,14 +43,14 @@ public class PFloatablePanel extends PSimplePanel implements PAddOn {
         this.linkedScrollPanel = linkedScrollPanel;
         final Update update = new Update(getID());
         update.put(PROPERTY.REFERENCE_SCROLL_PANEL, linkedScrollPanel.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void correct() {
         if (linkedScrollPanel == null) return;
         final Update update = new Update(getID());
         update.put(PROPERTY.CORRECT_DIMENSION, linkedScrollPanel.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override

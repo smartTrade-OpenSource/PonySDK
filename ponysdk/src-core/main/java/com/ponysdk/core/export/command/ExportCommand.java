@@ -26,10 +26,10 @@ package com.ponysdk.core.export.command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.command.Command;
-import com.ponysdk.core.event.PBusinessEvent.Level;
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.BusinessEvent.Level;
+import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.event.DataExportedEvent;
@@ -38,15 +38,15 @@ public class ExportCommand<T> implements Command<String> {
 
     protected final ExportContext<T> exportContext;
 
-    private final PEventBus eventBus;
+    private final EventBus eventBus;
 
     private final static Logger log = LoggerFactory.getLogger(ExportCommand.class);
 
     public ExportCommand(final ExportContext<T> exportContext) {
-        this(exportContext, PonySession.getRootEventBus());
+        this(exportContext, UIContext.getRootEventBus());
     }
 
-    public ExportCommand(final ExportContext<T> exportContext, final PEventBus eventBus) {
+    public ExportCommand(final ExportContext<T> exportContext, final EventBus eventBus) {
         this.exportContext = exportContext;
         this.eventBus = eventBus;
     }

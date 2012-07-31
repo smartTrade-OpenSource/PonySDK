@@ -54,7 +54,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
         super();
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -111,13 +111,13 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     public void setSize(final int maxCharacterLength) {
         final Update update = new Update(getID());
         update.put(PROPERTY.SIZE, maxCharacterLength + "");
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setPlaceHolder(final String placeHolder) {
         final Update update = new Update(getID());
         update.put(PROPERTY.PLACEHOLDER, placeHolder);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override

@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.form2.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 import com.ponysdk.ui.server.form.FormActivity;
 
-public class SubmitFormEvent extends PSystemEvent<SubmitFormHandler> {
+public class SubmitFormEvent extends SystemEvent<SubmitFormHandler> {
 
     public static final Type<SubmitFormHandler> TYPE = new Type<SubmitFormHandler>();
 

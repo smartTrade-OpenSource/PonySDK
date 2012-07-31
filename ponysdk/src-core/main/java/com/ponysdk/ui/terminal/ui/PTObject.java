@@ -40,7 +40,7 @@ public interface PTObject {
 
     public void removeHandler(final PTInstruction addHandler, final UIService uiService);
 
-    public void gc(final PTInstruction gc, final UIService uiService);
+    public void gc(final UIService uiService);
 
     public Long getObjectID();
 }

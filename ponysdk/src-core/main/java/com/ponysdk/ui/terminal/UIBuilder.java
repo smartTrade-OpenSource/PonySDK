@@ -38,14 +38,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -91,9 +84,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private boolean updateMode;
     private boolean pendingClose;
 
+    private final RequestBuilder requestBuilder;
+
     public static long sessionID;
 
-    public UIBuilder(final long ID) {
+    public UIBuilder(final long ID, final RequestBuilder requestBuilder) {
+        this.requestBuilder = requestBuilder;
         UIBuilder.sessionID = ID;
         History.addValueChangeHandler(this);
 
@@ -115,7 +111,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         communicationErrorMessagePanel.setStyleName("pony-notification");
         communicationErrorMessagePanel.addStyleName("error");
 
-        RootPanel.get().add(loadingMessageBox);
+        // RootPanel.get().add(loadingMessageBox);
 
         loadingMessageBox.setStyleName("pony-LoadingMessageBox");
         loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
@@ -129,16 +125,39 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             w.setSize("0px", "0px");
             w.setVisible(false);
         }
-
     }
 
+    public void onCommunicationError(final Throwable exception) {
+        if (loadingMessageBox == null) {
+            // log.log(Level.SEVERE, "Error ", exception);
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException codeException = (StatusCodeException) exception;
+                if (codeException.getStatusCode() == 0) return;
+            }
+            Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
+        } else {
+            if (pendingClose) return;
+            // log.log(Level.SEVERE, "fireInstruction failed", exception);
+
+            if (exception instanceof PonySessionException) {
+                reload();
+                return;
+            }
+            numberOfrequestInProgress--;
+            showCommunicationErrorMessage(exception);
+            hideLoadingMessageBox();
+        }
+    }
+
+    @Override
     public void update(final List<PTInstruction> instructions) {
+        hideLoadingMessageBox();
+
         updateMode = true;
         PTInstruction currentInstruction = null;
         try {
 
-            log.info("UPDATING UI with " + instructions.size() + " instructions");
-
+            // log.info("UPDATING UI with " + instructions.size() + " instructions");
             for (final PTInstruction instruction : instructions) {
                 currentInstruction = instruction;
                 final String type = instruction.getString(TYPE.KEY);
@@ -189,7 +208,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     // }
 
                 } else if (TYPE.KEY_.ADD.equals(type)) {
-
                     // log.info("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " +
                     // add.getProterty());
 
@@ -197,7 +215,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     uiObject.add(instruction, this);
 
                 } else if (TYPE.KEY_.ADD_HANDLER.equals(type)) {
-
                     // log.info("AddHandler: " + addHandler.getType() + ", " + addHandler.getObjectID() + ", "
                     // + addHandler.getProterty());
                     final String handler = instruction.getString(HANDLER.KEY);
@@ -231,19 +248,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     // }
                 } else if (TYPE.KEY_.GC.equals(type)) {
                     // log.info("GC: " + remove.getObjectID());
-
-                    final PTObject ptObject = objectByID.remove(instruction.getObjectID());
-                    final UIObject uiObject = widgetIDByObjectID.remove(instruction.getObjectID());
-                    if (uiObject != null) {
-                        objectIDByWidget.remove(uiObject);
-                    }
-
-                    ptObject.gc(instruction, this);
+                    final PTObject unRegisterObject = unRegisterObject(instruction.getObjectID());
+                    unRegisterObject.gc(this);
                 } else if (TYPE.KEY_.UPDATE.equals(type)) {
-
                     // log.info("Update " + update.getMainProperty().getKey() + " / " +
                     // update.getMainProperty().getValue());
-
                     final PTObject ptObject = objectByID.get(instruction.getObjectID());
                     ptObject.update(instruction, this);
 
@@ -264,12 +273,23 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 }
             }
         } catch (final Throwable e) {
-            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage());
+            Window.alert("Coucouc PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage());
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
+
             flushEvents();
             updateMode = false;
         }
+    }
+
+    @Override
+    public PTObject unRegisterObject(final Long objectId) {
+        final PTObject ptObject = objectByID.remove(objectId);
+        final UIObject uiObject = widgetIDByObjectID.remove(objectId);
+        if (uiObject != null) {
+            objectIDByWidget.remove(uiObject);
+        }
+        return ptObject;
     }
 
     //
@@ -287,6 +307,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     public void flushEvents() {
         if (stackedInstructions.isEmpty()) return;
         fireEvents(stackedInstructions);
+        stackedInstructions.clear();
     }
 
     private void fireEvents(final List<PTInstruction> instructions) {
@@ -294,75 +315,79 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
         if (timer == null) timer = scheduleLoadingMessageBox();
 
-        try {
+        // try {
 
-            final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() + "p");
+        // final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() +
+        // "p");
 
-            final PTInstruction requestData = new PTInstruction();
-            requestData.put(APPLICATION.VIEW_ID, sessionID);
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(APPLICATION.VIEW_ID, sessionID);
 
-            final JSONArray jsonArray = new JSONArray();
+        final JSONArray jsonArray = new JSONArray();
 
-            for (int i = 0; i < instructions.size(); i++) {
-                jsonArray.set(i, instructions.get(i));
-            }
-
-            requestData.put(APPLICATION.INSTRUCTIONS, jsonArray);
-
-            builder.sendRequest(requestData.toString(), new RequestCallback() {
-
-                @Override
-                public void onError(final Request request, final Throwable exception) {
-                    if (pendingClose) return;
-                    log.log(Level.SEVERE, "fireInstruction failed", exception);
-
-                    if (exception instanceof PonySessionException) {
-                        reload();
-                        return;
-                    }
-                    numberOfrequestInProgress--;
-                    instructions.clear();
-                    showCommunicationErrorMessage(exception);
-                    hideLoadingMessageBox();
-                }
-
-                @Override
-                public void onResponseReceived(final Request request, final Response response) {
-                    try {
-                        numberOfrequestInProgress--;
-                        instructions.clear();
-                        if (200 == response.getStatusCode()) {
-
-                            final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-
-                            if (response.getText() == null || response.getText().isEmpty()) return;
-
-                            GWT.log(response.getText());
-
-                            final JSONObject object = JSONParser.parseLenient(response.getText()).isObject();
-
-                            final JSONArray jsonArray = object.get(APPLICATION.INSTRUCTIONS).isArray();
-
-                            for (int i = 0; i < jsonArray.size(); i++) {
-                                instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
-                            }
-
-                            update(instructions);
-                        } else {
-                            showCommunicationErrorMessage(new Exception("Couldn't retrieve JSON (" + response.getStatusText() + ")"));
-                        }
-
-                    } finally {
-                        hideLoadingMessageBox();
-                    }
-                }
-            });
-        } catch (final RequestException e) {
-            numberOfrequestInProgress--;
-            instructions.clear();
-            showCommunicationErrorMessage(e);
-            hideLoadingMessageBox();
+        for (int i = 0; i < instructions.size(); i++) {
+            jsonArray.set(i, instructions.get(i));
         }
+
+        requestData.put(APPLICATION.INSTRUCTIONS, jsonArray);
+
+        requestBuilder.send(requestData.toString());
+
+        // builder.sendRequest(requestData.toString(), new RequestCallback() {
+        //
+        // @Override
+        // public void onError(final Request request, final Throwable exception) {
+        // if (pendingClose) return;
+        // log.log(Level.SEVERE, "fireInstruction failed", exception);
+        //
+        // if (exception instanceof PonySessionException) {
+        // reload();
+        // return;
+        // }
+        // numberOfrequestInProgress--;
+        // instructions.clear();
+        // showCommunicationErrorMessage(exception);
+        // hideLoadingMessageBox();
+        // }
+        //
+        // @Override
+        // public void onResponseReceived(final Request request, final Response response) {
+        // try {
+        // numberOfrequestInProgress--;
+        // instructions.clear();
+        // if (200 == response.getStatusCode()) {
+        //
+        // final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        //
+        // if (response.getText() == null || response.getText().isEmpty()) return;
+        //
+        // GWT.log(response.getText());
+        //
+        // final JSONObject object = JSONParser.parseLenient(response.getText()).isObject();
+        //
+        // final JSONArray jsonArray = object.get(APPLICATION.INSTRUCTIONS).isArray();
+        //
+        // for (int i = 0; i < jsonArray.size(); i++) {
+        // instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+        // }
+        //
+        // update(instructions);
+        // } else {
+        // showCommunicationErrorMessage(new Exception("Couldn't retrieve JSON (" + response.getStatusText() +
+        // ")"));
+        // }
+        //
+        // } finally {
+        // hideLoadingMessageBox();
+        // }
+        // }
+        // });
+        // } catch (final RequestException e) {
+        // numberOfrequestInProgress--;
+        // instructions.clear();
+        // showCommunicationErrorMessage(e);
+        // hideLoadingMessageBox();
+        // }
 
     }
 
@@ -439,8 +464,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         });
     }
 
-    protected void hideLoadingMessageBox() {
-        if (numberOfrequestInProgress < 1) {
+    public void hideLoadingMessageBox() {
+        if (numberOfrequestInProgress < 1 && timer != null) {
             timer.cancel();
             timer = null;
             loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
@@ -476,4 +501,5 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     private native void reload() /*-{$wnd.location.reload();}-*/;
+
 }

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface RowDeletedHandler extends PEventHandler {
+public interface RowDeletedHandler extends EventHandler {
 
     public void onRowDeleted(RowDeletedEvent event);
 }

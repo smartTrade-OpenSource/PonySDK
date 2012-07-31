@@ -51,7 +51,7 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
         this.horizontalAlignment = horizontalAlignment;
         final Update update = new Update(getID());
         update.put(PROPERTY.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
         this.verticalAlignment = verticalAlignment;
         final Update update = new Update(getID());
         update.put(PROPERTY.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

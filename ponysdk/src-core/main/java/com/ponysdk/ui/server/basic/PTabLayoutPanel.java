@@ -85,7 +85,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
 
     public PTabLayoutPanel() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         final Add addWidget = new Add(widget.getID(), getID());
         addWidget.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         addWidget.put(PROPERTY.TAB_WIDGET, tabWidget.getID());
-        getPonySession().stackInstruction(addWidget);
+        getUIContext().stackInstruction(addWidget);
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
@@ -128,7 +128,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         final Add addWidget = new Add(widget.getID(), getID());
         addWidget.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         addWidget.put(PROPERTY.TAB_TEXT, tabText);
-        getPonySession().stackInstruction(addWidget);
+        getUIContext().stackInstruction(addWidget);
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -151,7 +151,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         this.selectedItemIndex = index;
         final Update update = new Update(ID);
         update.put(PROPERTY.SELECTED_INDEX, index);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -169,14 +169,14 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
         update.put(PROPERTY.ANIMATION, animationEnabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override

@@ -85,6 +85,7 @@
                 <xs:element ref="dao" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="crudmethod" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="method" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="pushmethod" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -128,6 +129,15 @@
                 <xs:element ref="return" minOccurs="1" maxOccurs="1" />
             </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="pushmethod">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="name" use="required" type="xs:string" />
+            <xs:attribute name="type" use="required" type="xs:string" />
         </xs:complexType>
     </xs:element>
 

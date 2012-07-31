@@ -65,7 +65,7 @@ public class PRadioButton extends PCheckBox {
         this.name = name;
         final Update update = new Update(getID());
         update.put(PROPERTY.NAME, name);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public String getName() {

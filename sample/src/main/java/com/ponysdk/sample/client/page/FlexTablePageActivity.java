@@ -23,11 +23,17 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 
 public class FlexTablePageActivity extends SamplePageActivity {
+
+    private PLabel[][] labels;
 
     public FlexTablePageActivity() {
         super("Flex Table", "Table");
@@ -42,13 +48,43 @@ public class FlexTablePageActivity extends SamplePageActivity {
         table.setCellSpacing(0);
         table.setSizeFull();
 
+        labels = new PLabel[100][10];
+
         for (int r = 0; r < 100; r++) {
             for (int c = 0; c < 10; c++) {
-                table.setWidget(r, c, new PLabel(r + "_" + c));
+                final PLabel pLabel = new PLabel(r + "_" + c);
+                labels[r][c] = pLabel;
+                pLabel.setWidth("40px");
+                table.setWidget(r, c, pLabel);
             }
         }
 
-        PScrollPanel scrollPanel = new PScrollPanel();
+        final PPusher pusher = PPusher.get();
+
+        final Timer timer3 = new Timer();
+
+        timer3.scheduleAtFixedRate(new TimerTask() {
+
+            @Override
+            public void run() {
+                pusher.begin();
+                try {
+                    for (int r = 0; r < 100; r++) {
+                        for (int c = 0; c < 10; c++) {
+                            final int d = (int) (Math.random() * 255);
+                            final int d2 = (int) (Math.random() * 255);
+                            final int d3 = (int) (Math.random() * 255);
+                            labels[r][c].setText(d + "");
+                            labels[r][c].setStyleProperty("backgroundColor", "rgb(" + d + "," + d2 + "," + d3 + ")");
+                        }
+                    }
+                } finally {
+                    pusher.end();
+                }
+            }
+        }, 0, 100);
+
+        final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setWidget(table);
         scrollPanel.setSizeFull();
 

@@ -12,7 +12,7 @@ public class PMouseDownEvent extends PMouseEvent<PMouseDownHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.PEvent.Type<PMouseDownHandler> getAssociatedType() {
+    public com.ponysdk.core.event.Event.Type<PMouseDownHandler> getAssociatedType() {
         return TYPE;
     }
 

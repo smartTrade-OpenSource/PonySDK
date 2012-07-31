@@ -19,17 +19,19 @@ repositories {
 
 configurations {
 	java2html
+	highcharts
 	compile {
-		extendsFrom java2html
+		extendsFrom java2html, highcharts
 	}
 	runtime {
-		extendsFrom java2html
+		extendsFrom java2html, highcharts
 	}
 }
 
 dependencies {
 	java2html 'de.java2html:java2html:1.0'
 	compile project(':ponysdk')
+	compile fileTree (dir: 'libs', includes: ['*.jar']) 
 	runtime project(':ponysdk')
 }
 
@@ -42,10 +44,15 @@ sourceSets {
 	}
 }
 
-
+task cleanGenerated(type: Delete){
+  delete srcGenerated
+}
 
 task cleanDebug(type: Delete) {
   delete 'war/ponyterminal', 'war/WEB-INF/deploy'
+}
+
+task generate{
 }
 
 task generateSkeleton(type: JavaExec) {
@@ -91,6 +98,10 @@ task copyAllLibs << {
 		from configurations.java2html
 		into 'libs/java2html'
 	}
+	copy {
+		from configurations.highcharts
+		into 'libs/highcharts'
+	}
 }
 
 task createWrapper(type: Wrapper) {
@@ -109,6 +120,7 @@ task createPackage << {
 	
 	copy {
 		from configurations.java2html
+		from configurations.highcharts
 		from project(':ponysdk').configurations.sl4j
 		from project(':ponysdk').configurations.spring
 		from project(':ponysdk').configurations.gwt
@@ -150,7 +162,8 @@ jar {
 	}
 }
 
-compileJava.dependsOn(generateSkeleton)
-compileJava.dependsOn(generateProxyBuilder)
 assemble.dependsOn(copyAllLibs)
-
+generate.dependsOn(generateSkeleton)
+generate.dependsOn(generateProxyBuilder)
+compileJava.dependsOn(generate)
+generate.dependsOn(cleanGenerated)

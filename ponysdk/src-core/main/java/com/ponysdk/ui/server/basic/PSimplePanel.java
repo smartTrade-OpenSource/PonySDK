@@ -68,7 +68,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         } finally {
             // Physical detach.
             final Remove remove = new Remove(w.getID(), getID());
-            getPonySession().stackInstruction(remove);
+            getUIContext().stackInstruction(remove);
 
             // Logical detach.
             widget = null;
@@ -98,7 +98,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w != null) {
             // Physical attach.
             final Add add = new Add(w.getID(), getID());
-            getPonySession().stackInstruction(add);
+            getUIContext().stackInstruction(add);
 
             adopt(w);
         }

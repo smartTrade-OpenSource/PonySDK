@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.export.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface DataExportedHandler extends PEventHandler {
+public interface DataExportedHandler extends EventHandler {
 
     public void onDataExported(DataExportedEvent event);
 }

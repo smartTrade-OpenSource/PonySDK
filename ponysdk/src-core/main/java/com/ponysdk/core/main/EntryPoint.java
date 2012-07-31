@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.main;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 
 public interface EntryPoint {
 
@@ -32,7 +32,7 @@ public interface EntryPoint {
      * 
      * @param session
      */
-    public void start(PonySession session);
+    public void start(UIContext session);
 
     /**
      * The HTTP session already exists, and a new PonySession has been created. <h4>Cases :</h4>
@@ -43,6 +43,6 @@ public interface EntryPoint {
      * 
      * @param session
      */
-    public void restart(PonySession session);
+    public void restart(UIContext session);
 
 }

@@ -103,7 +103,7 @@ public abstract class PHTMLTable extends PPanel {
                 update.put(PROPERTY.ROW, row);
                 update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
-                getPonySession().stackInstruction(update);
+                getUIContext().stackInstruction(update);
             }
         }
 
@@ -117,7 +117,7 @@ public abstract class PHTMLTable extends PPanel {
                 update.put(PROPERTY.ROW, row);
                 update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                getPonySession().stackInstruction(update);
+                getUIContext().stackInstruction(update);
             }
         }
 
@@ -152,7 +152,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
@@ -161,7 +161,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
@@ -170,7 +170,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, align.ordinal());
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
@@ -179,7 +179,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -191,7 +191,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.WIDTH, width);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void addStyleName(final int column, final String styleName) {
@@ -199,7 +199,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         public void removeStyleName(final int column, final String styleName) {
@@ -207,7 +207,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -339,7 +339,7 @@ public abstract class PHTMLTable extends PPanel {
             // Physical detach.
             if (physicalDetach) {
                 final Remove remove = new Remove(widget.getID(), getID());
-                getPonySession().stackInstruction(remove);
+                getUIContext().stackInstruction(remove);
             }
 
             // Logical detach.
@@ -381,7 +381,7 @@ public abstract class PHTMLTable extends PPanel {
             final Add add = new Add(widget.getID(), getID());
             add.put(PROPERTY.ROW, row);
             add.put(PROPERTY.CELL, column);
-            getPonySession().stackInstruction(add);
+            getUIContext().stackInstruction(add);
             adopt(widget);
         }
     }

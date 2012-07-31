@@ -129,7 +129,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         if (w != null) {
             // Physical attach.
             final Add add = new Add(w.getID(), getID());
-            getPonySession().stackInstruction(add);
+            getUIContext().stackInstruction(add);
 
             adopt(w);
         }
@@ -182,7 +182,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
             this.isOpen = isOpen;
             final Update update = new Update(getID());
             update.put(PROPERTY.OPEN, isOpen);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 

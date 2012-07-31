@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 import com.ponysdk.core.query.ComparatorType;
 
-public class ComparatorTypeChangeEvent extends PSystemEvent<ComparatorTypeChangeHandler> {
+public class ComparatorTypeChangeEvent extends SystemEvent<ComparatorTypeChangeHandler> {
 
     public static final Type<ComparatorTypeChangeHandler> TYPE = new Type<ComparatorTypeChangeHandler>();
 

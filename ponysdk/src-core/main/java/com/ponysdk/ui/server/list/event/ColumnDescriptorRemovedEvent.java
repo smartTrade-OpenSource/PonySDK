@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 
-public class ColumnDescriptorRemovedEvent extends PSystemEvent<ColumnDescriptorRemovedHandler> {
+public class ColumnDescriptorRemovedEvent extends SystemEvent<ColumnDescriptorRemovedHandler> {
 
     public static final Type<ColumnDescriptorRemovedHandler> TYPE = new Type<ColumnDescriptorRemovedHandler>();
 

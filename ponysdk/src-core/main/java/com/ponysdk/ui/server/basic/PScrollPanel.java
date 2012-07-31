@@ -40,7 +40,7 @@ public class PScrollPanel extends PSimplePanel {
     public void setHorizontalScrollPosition(final int position) {
         final Update update = new Update(ID);
         update.put(PROPERTY.HORIZONTAL_SCROLL_POSITION, position);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void scrollToBottom() {
@@ -62,6 +62,6 @@ public class PScrollPanel extends PSimplePanel {
     private void scrollTo(final int type) {
         final Update update = new Update(ID);
         update.put(PROPERTY.SCROLL_TO, type);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 }

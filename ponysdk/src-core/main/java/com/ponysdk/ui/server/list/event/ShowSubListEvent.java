@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 
-public class ShowSubListEvent<T> extends PSystemEvent<ShowSubListHandler<T>> {
+public class ShowSubListEvent<T> extends SystemEvent<ShowSubListHandler<T>> {
 
     public static final Type<ShowSubListHandler<?>> TYPE = new Type<ShowSubListHandler<?>>();
 

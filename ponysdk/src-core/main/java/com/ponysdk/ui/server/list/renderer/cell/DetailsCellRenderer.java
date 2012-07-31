@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.list.renderer.cell;
 
-import com.ponysdk.core.event.PEventBus;
-import com.ponysdk.core.event.PEventBusAware;
+import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.EventBusAware;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
@@ -37,12 +37,12 @@ import com.ponysdk.ui.server.list.event.RowInsertedEvent;
 import com.ponysdk.ui.server.list.event.RowInsertedHandler;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 
-public class DetailsCellRenderer<D, V> implements CellRenderer<D, V>, PEventBusAware {
+public class DetailsCellRenderer<D, V> implements CellRenderer<D, V>, EventBusAware {
 
-    private PEventBus eventBus;
+    private EventBus eventBus;
 
     @Override
-    public void setEventBus(PEventBus eventBus) {
+    public void setEventBus(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 

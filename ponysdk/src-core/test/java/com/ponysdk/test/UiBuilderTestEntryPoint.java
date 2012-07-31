@@ -1,7 +1,7 @@
 
 package com.ponysdk.test;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PRootPanel;
@@ -33,16 +33,16 @@ public class UiBuilderTestEntryPoint implements EntryPoint {
     }
 
     @Override
-    public void start(final PonySession session) {
+    public void start(final UIContext session) {
         doStart(session);
     }
 
     @Override
-    public void restart(final PonySession session) {
+    public void restart(final UIContext session) {
         doStart(session);
     }
 
-    private void doStart(final PonySession session) {
+    private void doStart(final UIContext session) {
         final PAnchor test = new PAnchor("Go to next test");
         test.ensureDebugId("startingpoint");
         test.addClickHandler(nextTestClickHandler);

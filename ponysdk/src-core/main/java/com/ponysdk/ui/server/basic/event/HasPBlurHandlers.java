@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 
 public interface HasPBlurHandlers extends HasPHandlers {
 
-    PHandlerRegistration addBlurHandler(PBlurHandler handler);
+    HandlerRegistration addBlurHandler(PBlurHandler handler);
 }

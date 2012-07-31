@@ -15,7 +15,7 @@ public class PDropEvent extends PDomEvent<PDropHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.PEvent.Type<PDropHandler> getAssociatedType() {
+    public com.ponysdk.core.event.Event.Type<PDropHandler> getAssociatedType() {
         return TYPE;
     }
 

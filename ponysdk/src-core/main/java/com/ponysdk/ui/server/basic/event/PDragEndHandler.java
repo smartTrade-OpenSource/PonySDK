@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PDragEndHandler extends PEventHandler {
+public interface PDragEndHandler extends EventHandler {
 
     void onDragEnd(PDragEndEvent event);
 }

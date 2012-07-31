@@ -98,8 +98,8 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
             this.suggestOracle = new PMultiWordSuggestOracle();
         }
 
-        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
-        getPonySession().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
+        getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
+        getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
 
         create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
     }
@@ -159,7 +159,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         this.limit = limit;
         final Update update = new Update(getID());
         update.put(PROPERTY.LIMIT, limit);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setText(final String text) {
@@ -236,7 +236,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         public void add(final String suggestion) {
             final Update update = new Update(getID());
             update.put(PROPERTY.SUGGESTION, suggestion);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
 
         @Override

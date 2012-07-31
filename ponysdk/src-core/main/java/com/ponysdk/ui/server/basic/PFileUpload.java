@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.PStreamHandler;
+import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
@@ -52,7 +52,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     private final List<PSubmitCompleteHandler> submitCompleteHandlers = new ArrayList<PSubmitCompleteHandler>();
 
-    private PStreamHandler streamHandler;
+    private StreamHandler streamHandler;
 
     private String name;
 
@@ -62,7 +62,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public PFileUpload() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         this.name = name;
         final Update update = new Update(getID());
         update.put(PROPERTY.NAME, this.name);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void submit() {
@@ -108,7 +108,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         return name;
     }
 
-    public void addStreamHandler(final PStreamHandler streamHandler) {
+    public void addStreamHandler(final StreamHandler streamHandler) {
         this.streamHandler = streamHandler;
     }
 
@@ -120,7 +120,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, this.enabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public String getFileName() {

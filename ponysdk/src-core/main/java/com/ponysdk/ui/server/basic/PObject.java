@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -47,17 +47,17 @@ public abstract class PObject {
 
     protected void init(final WidgetType widgetType) {
         if (widgetType == null) { return; }
-        ID = PonySession.getCurrent().nextID();
+        ID = UIContext.get().nextID();
         create = new Create(ID, widgetType);
         if (this instanceof PAddOn) {
             create.setAddOnSignature(((PAddOn) this).getSignature());
         }
-        PonySession.getCurrent().stackInstruction(create);
+        UIContext.get().stackInstruction(create);
         registerObject();
     }
 
     protected void registerObject() {
-        PonySession.getCurrent().registerObject(this);
+        UIContext.get().registerObject(this);
     }
 
     public long getID() {
@@ -68,8 +68,8 @@ public abstract class PObject {
         // override
     }
 
-    public PonySession getPonySession() {
-        return PonySession.getCurrent();
+    public UIContext getUIContext() {
+        return UIContext.get();
     }
 
     @Override

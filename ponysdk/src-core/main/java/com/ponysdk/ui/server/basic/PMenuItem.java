@@ -95,7 +95,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -108,26 +108,26 @@ public class PMenuItem extends PWidget implements PHasHTML {
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, enabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
         final Add add = new Add(subMenu.getID(), getID());
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
     }
 
     public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.COMMAND);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override

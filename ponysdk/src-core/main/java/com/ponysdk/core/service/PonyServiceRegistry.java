@@ -15,13 +15,13 @@ public class PonyServiceRegistry {
 
     private static Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<Class<?>, PonyService>();
 
-    public static void registerPonyService(PonyService service) {
+    public static void registerPonyService(final PonyService service) {
 
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        final Set<Class<?>> classes = new HashSet<Class<?>>();
 
         getGeneralizations(service.getClass(), classes);
 
-        for (Class<?> clazz : classes) {
+        for (final Class<?> clazz : classes) {
             if (PonyService.class.isAssignableFrom(clazz)) {
                 registeredServices.put(clazz, service);
                 log.info("Registering impl " + service + " for service : " + clazz);
@@ -29,22 +29,22 @@ public class PonyServiceRegistry {
         }
     }
 
-    public static void getGeneralizations(Class<?> classObject, Set<Class<?>> generalizations) {
+    public static void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
 
-        Class<?> superClass = classObject.getSuperclass();
+        final Class<?> superClass = classObject.getSuperclass();
 
         if (superClass != null) getGeneralizations(superClass, generalizations);
 
-        for (Class<?> clazz : classObject.getInterfaces()) {
+        for (final Class<?> clazz : classObject.getInterfaces()) {
             generalizations.add(classObject);
             getGeneralizations(clazz, generalizations);
         }
     }
 
-    public static <T extends PonyService> T getPonyService(final Class<T> clazz) throws Exception {
+    public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
         @SuppressWarnings("unchecked")
-        T ponyService = (T) registeredServices.get(clazz);
-        if (ponyService == null) throw new Exception("Service not registered for the class #" + clazz.getCanonicalName());
+        final T ponyService = (T) registeredServices.get(clazz);
+        if (ponyService == null) throw new RuntimeException("Service not registered for the class #" + clazz.getCanonicalName());
         return ponyService;
     }
 }

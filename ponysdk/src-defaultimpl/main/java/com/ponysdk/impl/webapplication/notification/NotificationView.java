@@ -23,12 +23,12 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.event.PBusinessEvent;
+import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public interface NotificationView extends IsPWidget, PAcceptsOneWidget {
 
-    void addEvent(PBusinessEvent<?> event);
+    void addEvent(BusinessEvent<?> event);
 
 }

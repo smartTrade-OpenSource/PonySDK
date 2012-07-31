@@ -4,7 +4,7 @@ package com.ponysdk.core.place;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.EventBus;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -19,7 +19,7 @@ public class PlaceHistoryHandler {
 
     private Place defaultPlace;
 
-    public PlaceHistoryHandler(final PHistory history, final PlaceHistoryMapper mapper, final PlaceController placeController, final PEventBus eventBus) {
+    public PlaceHistoryHandler(final PHistory history, final PlaceHistoryMapper mapper, final PlaceController placeController, final EventBus eventBus) {
         this.history = history;
         this.mapper = mapper;
         this.placeController = placeController;

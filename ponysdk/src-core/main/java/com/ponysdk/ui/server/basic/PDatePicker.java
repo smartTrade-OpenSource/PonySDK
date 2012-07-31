@@ -103,7 +103,7 @@ public class PDatePicker extends PComposite implements HasPValue<Date> {
         this.date = date;
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : null);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     protected void foreOnValueChange(final PValueChangeEvent<Date> event) {

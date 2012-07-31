@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface UserLoggedInHandler extends PEventHandler {
+public interface UserLoggedInHandler extends EventHandler {
 
     public void onUserLoggedIn(UserLoggedInEvent event);
 }

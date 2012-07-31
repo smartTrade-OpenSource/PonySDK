@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PreferenceChangedHandler extends PEventHandler {
+public interface PreferenceChangedHandler extends EventHandler {
 
     public void onPreferenceChanged(PreferenceChangedEvent event);
 }

@@ -25,9 +25,9 @@ package com.ponysdk.sample.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.ActivityManager;
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.core.place.PlaceHistoryHandler;
@@ -38,6 +38,7 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
 import com.ponysdk.ui.server.basic.PHistory;
+import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
@@ -49,7 +50,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     private PlaceController placeController;
 
     @Autowired
-    private PEventBus eventBus;
+    private EventBus eventBus;
 
     @Autowired
     private PHistory history;
@@ -64,6 +65,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
         PRootLayoutPanel.get().add(panel);
 
+        PPusher.initialize();
+
         final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);
 
@@ -73,24 +76,20 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
     }
 
     @Override
-    public void start(final PonySession session) {
-
-        if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
-
+    public void start(final UIContext uiContext) {
+        if (uiContext.getApplicationAttribute(USER) == null) uiContext.getHistory().newItem("", false);
         start();
     }
 
     @Override
-    public void restart(final PonySession session) {
-
+    public void restart(final UIContext session) {
         if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
-
         start();
     }
 
     @Override
     public void onUserLoggedOut(final UserLoggedOutEvent event) {
-        PonySession.getCurrent().close();
+        UIContext.get().close();
     }
 
     @Override

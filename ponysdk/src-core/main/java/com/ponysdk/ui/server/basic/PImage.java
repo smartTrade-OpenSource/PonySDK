@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.PStreamHandler;
+import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -116,7 +116,7 @@ public class PImage extends PFocusWidget {
 
         final Update update = new Update(getID());
         update.put(PROPERTY.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -132,10 +132,10 @@ public class PImage extends PFocusWidget {
         this.url = url;
         final Update update = new Update(getID());
         update.put(PROPERTY.IMAGE_URL, url);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
-    public void setStream(final PStreamHandler streamListener) {
+    public void setStream(final StreamHandler streamListener) {
         final StreamResource streamResource = new StreamResource();
         streamResource.embed(streamListener, this);
     }

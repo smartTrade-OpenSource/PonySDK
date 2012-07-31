@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PCheckBox;
@@ -68,7 +68,7 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
                 final String msg = "On selection : " + event.getSelectedItem();
-                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });
 

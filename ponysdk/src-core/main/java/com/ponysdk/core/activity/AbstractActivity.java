@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.activity;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.core.event.PBroadcastEventHandler;
-import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PEvent.Type;
-import com.ponysdk.core.event.PEventBus;
-import com.ponysdk.core.event.PEventHandler;
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.event.BroadcastEventHandler;
+import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.Event.Type;
+import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.place.PlaceChangeRequestEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -79,36 +79,36 @@ public abstract class AbstractActivity implements Activity {
     // }
 
     public void goTo(final Place place) {
-        PonySession.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
+        UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
     }
 
-    public PEventBus getRootEventBus() {
-        return PonySession.getRootEventBus();
+    public EventBus getRootEventBus() {
+        return UIContext.getRootEventBus();
     }
 
-    public <H extends PEventHandler> PHandlerRegistration addHandler(final Type<H> type, final H handler) {
-        return PonySession.addHandler(type, handler);
+    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+        return UIContext.addHandler(type, handler);
     }
 
-    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
-        return PonySession.addHandlerToSource(type, source, handler);
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+        return UIContext.addHandlerToSource(type, source, handler);
     }
 
     @SuppressWarnings("unchecked")
-    public <H extends PEventHandler> PHandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
         return addHandlerToSource(type, source, (H) this);
     }
 
-    public void fireEvent(final PEvent<?> event) {
-        PonySession.fireEvent(event);
+    public void fireEvent(final Event<?> event) {
+        UIContext.fireEvent(event);
     }
 
-    public void fireEventFromSource(final PEvent<?> event, final Object source) {
-        PonySession.fireEventFromSource(event, source);
+    public void fireEventFromSource(final Event<?> event, final Object source) {
+        UIContext.fireEventFromSource(event, source);
     }
 
-    public void addHandler(final PBroadcastEventHandler handler) {
-        PonySession.addHandler(handler);
+    public void addHandler(final BroadcastEventHandler handler) {
+        UIContext.addHandler(handler);
     }
 
 }

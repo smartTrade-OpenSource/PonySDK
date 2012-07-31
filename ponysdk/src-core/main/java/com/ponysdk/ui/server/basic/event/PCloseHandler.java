@@ -1,9 +1,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PCloseHandler extends PEventHandler {
+public interface PCloseHandler extends EventHandler {
 
     void onClose(PCloseEvent closeEvent);
 }

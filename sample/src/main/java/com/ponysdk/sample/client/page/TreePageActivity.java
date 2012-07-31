@@ -25,7 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import java.util.List;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
@@ -64,7 +64,7 @@ public class TreePageActivity extends SamplePageActivity {
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
                 String msg = "Selected item : name = " + event.getSelectedItem();
-                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });
 

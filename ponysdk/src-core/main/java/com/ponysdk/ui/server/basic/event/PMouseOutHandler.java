@@ -1,9 +1,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PMouseOutHandler extends PEventHandler {
+public interface PMouseOutHandler extends EventHandler {
 
     void onMouseOut(PMouseOutEvent mouseOutEvent);
 }

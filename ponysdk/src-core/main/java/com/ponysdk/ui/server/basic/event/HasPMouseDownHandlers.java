@@ -25,11 +25,11 @@ package com.ponysdk.ui.server.basic.event;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 
 public interface HasPMouseDownHandlers {
 
-    PHandlerRegistration addMouseDownHandler(PMouseDownHandler handler);
+    HandlerRegistration addMouseDownHandler(PMouseDownHandler handler);
 
     Collection<PMouseDownHandler> getMouseDownHandlers();
 }

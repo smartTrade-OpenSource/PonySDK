@@ -29,7 +29,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -53,10 +53,10 @@ public abstract class PScheduler extends PObject {
     }
 
     public static PScheduler get() {
-        PScheduler scheduler = PonySession.getCurrent().getAttribute(SCHEDULER_KEY);
+        PScheduler scheduler = UIContext.get().getAttribute(SCHEDULER_KEY);
         if (scheduler == null) {
             scheduler = new PScheduler() {};
-            PonySession.getCurrent().setAttribute(SCHEDULER_KEY, scheduler);
+            UIContext.get().setAttribute(SCHEDULER_KEY, scheduler);
         }
         return scheduler;
     }
@@ -66,7 +66,7 @@ public abstract class PScheduler extends PObject {
         if (existingCommandID != null) {
             scheduleFixedRateCommand(existingCommandID, delayMs);
         } else {
-            final long cmdID = PonySession.getCurrent().nextID();
+            final long cmdID = UIContext.get().nextID();
             scheduleFixedRateCommand(cmdID, delayMs);
             commandByID.put(cmdID, cmd);
             IDByCommand.put(cmd, cmdID);
@@ -77,7 +77,7 @@ public abstract class PScheduler extends PObject {
         final Long existingCommandID = IDByCommand.get(cmd);
         if (existingCommandID != null) cancelScheduleCommand(existingCommandID);
 
-        final long cmdID = PonySession.getCurrent().nextID();
+        final long cmdID = UIContext.get().nextID();
         scheduleFixedDelayCommand(cmdID, delayMs);
         commandByID.put(cmdID, cmd);
         IDByCommand.put(cmd, cmdID);
@@ -89,7 +89,7 @@ public abstract class PScheduler extends PObject {
         update.put(PROPERTY.START, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
         update.put(PROPERTY.FIXRATE, delayMs);
-        PonySession.getCurrent().stackInstruction(update);
+        UIContext.get().stackInstruction(update);
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
@@ -97,14 +97,14 @@ public abstract class PScheduler extends PObject {
         update.put(PROPERTY.START, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
         update.put(PROPERTY.FIXDELAY, delayMs);
-        PonySession.getCurrent().stackInstruction(update);
+        UIContext.get().stackInstruction(update);
     }
 
     private void cancelScheduleCommand(final long cmdID) {
         final Update update = new Update(ID);
         update.put(PROPERTY.STOP, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
-        PonySession.getCurrent().stackInstruction(update);
+        UIContext.get().stackInstruction(update);
 
         final RepeatingCommand command = commandByID.remove(cmdID);
         IDByCommand.remove(command);

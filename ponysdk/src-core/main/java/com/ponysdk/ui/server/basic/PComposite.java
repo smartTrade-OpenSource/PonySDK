@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -50,11 +50,11 @@ public abstract class PComposite extends PWidget {
 
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
-        ID = PonySession.getCurrent().nextID();
+        ID = UIContext.get().nextID();
         create = new Create(ID, getWidgetType());
 
-        PonySession.getCurrent().stackInstruction(create);
-        PonySession.getCurrent().registerObject(this);
+        UIContext.get().stackInstruction(create);
+        UIContext.get().registerObject(this);
 
         child.removeFromParent();
         this.widget = child;
@@ -62,7 +62,7 @@ public abstract class PComposite extends PWidget {
 
         create.put(PROPERTY.WIDGET, child.getID());
 
-        getPonySession().stackInstruction(create);
+        getUIContext().stackInstruction(create);
     }
 
 }

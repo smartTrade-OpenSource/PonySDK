@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PBlurHandler extends PEventHandler {
+public interface PBlurHandler extends EventHandler {
 
     void onBlur(PBlurEvent event);
 }

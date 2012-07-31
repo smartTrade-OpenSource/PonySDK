@@ -23,13 +23,13 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.ui.terminal.DomHandlerType;
 
-public abstract class PDomEvent<T extends PEventHandler> extends PEvent<T> {
+public abstract class PDomEvent<T extends EventHandler> extends Event<T> {
 
-    public static class Type<H extends PEventHandler> extends PEvent.Type<H> {
+    public static class Type<H extends EventHandler> extends Event.Type<H> {
 
         private final DomHandlerType domHandlerType;
 

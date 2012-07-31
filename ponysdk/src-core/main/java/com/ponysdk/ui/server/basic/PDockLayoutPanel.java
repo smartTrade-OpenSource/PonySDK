@@ -106,7 +106,7 @@ public class PDockLayoutPanel extends PComplexPanel {
         add.put(PROPERTY.DIRECTION, direction.ordinal());
         add.put(PROPERTY.SIZE, size);
 
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
     }
 
 }

@@ -76,5 +76,6 @@ public enum WidgetType {
     ATTACHED_POPUP_PABEL,
     FOCUS_PANEL,
     DATEPICKER,
-    SCRIPT;
+    SCRIPT,
+    PUSHER;
 }

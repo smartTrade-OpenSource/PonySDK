@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.paging.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PagingSelectionChangeHandler extends PEventHandler {
+public interface PagingSelectionChangeHandler extends EventHandler {
 
     public void onPageChange(PagingSelectionChangeEvent event);
 }

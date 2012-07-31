@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -51,7 +51,7 @@ public class PCookies {
     public String removeCookie(final String name) {
         final Remove remove = new Remove();
         remove.put(PROPERTY.COOKIE, name);
-        PonySession.getCurrent().stackInstruction(remove);
+        UIContext.get().stackInstruction(remove);
         return cachedCookies.remove(name);
     }
 
@@ -63,7 +63,7 @@ public class PCookies {
         try {
             cachedCookies.put(name, value);
 
-            final long ID = PonySession.getCurrent().nextID();
+            final long ID = UIContext.get().nextID();
             final Create create = new Create(ID, WidgetType.COOKIE);
             create.put(PROPERTY.NAME, name);
             create.put(PROPERTY.VALUE, value);
@@ -71,7 +71,7 @@ public class PCookies {
                 create.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
             }
 
-            PonySession.getCurrent().stackInstruction(create);
+            UIContext.get().stackInstruction(create);
         } catch (final Exception e) {
             throw new RuntimeException("encoding failure", e);
         }

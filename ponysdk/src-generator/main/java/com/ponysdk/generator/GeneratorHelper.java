@@ -105,8 +105,8 @@ public class GeneratorHelper {
 
     // Business event extend
     public static String getBusinessEventExtends(final Event event) {
-        if (event.isBusiness()) return "com.ponysdk.core.event.PBusinessEvent <" + getHandlerClassName(event) + ">";
-        else return "com.ponysdk.core.event.PSystemEvent<" + getHandlerClassName(event) + ">";
+        if (event.isBusiness()) return "com.ponysdk.core.event.BusinessEvent <" + getHandlerClassName(event) + ">";
+        else return "com.ponysdk.core.event.SystemEvent<" + getHandlerClassName(event) + ">";
     }
 
     // UserService
@@ -223,9 +223,9 @@ public class GeneratorHelper {
         return entity.getUi().getField();
     }
 
-    public static String getParameterToString(final Method method) throws Exception {
+    public static String getParameterToString(final List<Parameter> params) throws Exception {
         String parameters = "";
-        final Iterator<Parameter> it = method.getParameter().iterator();
+        final Iterator<Parameter> it = params.iterator();
         while (it.hasNext()) {
             final Parameter param = it.next();
             parameters += getClassName(param) + " " + param.getName();
@@ -234,9 +234,9 @@ public class GeneratorHelper {
         return parameters;
     }
 
-    public static String getParameterNamesToString(final Method serviceMethod) {
+    public static String getParameterNamesToString(final List<Parameter> params) {
         String parameters = "";
-        final Iterator<Parameter> it = serviceMethod.getParameter().iterator();
+        final Iterator<Parameter> it = params.iterator();
         while (it.hasNext()) {
             final Parameter param = it.next();
             parameters += param.getName();

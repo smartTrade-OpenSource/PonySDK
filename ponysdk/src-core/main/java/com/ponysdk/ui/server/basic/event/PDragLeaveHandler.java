@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PDragLeaveHandler extends PEventHandler {
+public interface PDragLeaveHandler extends EventHandler {
 
     void onDragLeave(PDragLeaveEvent event);
 }

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface SortColumnHandler extends PEventHandler {
+public interface SortColumnHandler extends EventHandler {
 
     public void onColumnSort(SortColumnEvent event);
 }

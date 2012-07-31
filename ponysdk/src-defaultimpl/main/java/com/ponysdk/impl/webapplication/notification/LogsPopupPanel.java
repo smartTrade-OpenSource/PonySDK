@@ -23,13 +23,13 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.event.PBusinessEvent;
+import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
 
 public class LogsPopupPanel {
 
-    public void addEvent(final PBusinessEvent<?> event) {
+    public void addEvent(final BusinessEvent<?> event) {
         switch (event.getLevel()) {
             case INFO:
                 PNotificationManager.notify(event.getBusinessMessage(), Notification.HUMANIZED);

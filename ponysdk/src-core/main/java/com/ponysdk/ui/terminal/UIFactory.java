@@ -56,6 +56,7 @@ import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
+import com.ponysdk.ui.terminal.ui.PTPusher;
 import com.ponysdk.ui.terminal.ui.PTRadioButton;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea;
 import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
@@ -129,6 +130,7 @@ public class UIFactory {
         if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratorPanel(); }
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
         if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
+        if (WidgetType.PUSHER.equals(widgetType)) { return new PTPusher(); }
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

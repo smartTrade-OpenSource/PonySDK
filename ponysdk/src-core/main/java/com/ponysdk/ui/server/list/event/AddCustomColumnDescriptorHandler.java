@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface AddCustomColumnDescriptorHandler extends PEventHandler {
+public interface AddCustomColumnDescriptorHandler extends EventHandler {
 
     public void onAddCustomColumnDescriptor(AddCustomColumnDescriptorEvent event);
 }

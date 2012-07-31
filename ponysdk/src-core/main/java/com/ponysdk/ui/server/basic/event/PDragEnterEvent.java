@@ -12,7 +12,7 @@ public class PDragEnterEvent extends PDomEvent<PDragEnterHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.PEvent.Type<PDragEnterHandler> getAssociatedType() {
+    public com.ponysdk.core.event.Event.Type<PDragEnterHandler> getAssociatedType() {
         return TYPE;
     }
 

@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PButton;
@@ -96,6 +97,9 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
         panel.add(new PLabel("Select the button style : "));
         panel.add(styleListBox);
+
+        final PLabel label = new PLabel(UIContext.get().getSession().getUserAgent().toString());
+        panel.add(label);
 
         return panel;
     }

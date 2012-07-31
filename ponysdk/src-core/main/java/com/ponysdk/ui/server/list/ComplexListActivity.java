@@ -38,9 +38,9 @@ import java.util.TreeMap;
 
 import com.ponysdk.core.command.Command;
 import com.ponysdk.core.deprecated.AbstractActivity;
-import com.ponysdk.core.event.PEventBus;
-import com.ponysdk.core.event.PEventBusAware;
-import com.ponysdk.core.event.PSimpleEventBus;
+import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.EventBusAware;
+import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.query.CriterionField;
@@ -159,9 +159,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     protected boolean rowSelectorAction;
 
-    private final PEventBus localEventBus;
+    private final EventBus localEventBus;
 
-    private PEventBus eventBus; // use to forward ShowSubListEvent
+    private EventBus eventBus; // use to forward ShowSubListEvent
 
     private PMenuItem refreshButton;
 
@@ -185,7 +185,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this(complexListConfiguration, complexListView, null);
     }
 
-    public ComplexListActivity(final ComplexListConfiguration<D> complexListConfiguration, final ComplexListView complexListView, final PEventBus eventBus) {
+    public ComplexListActivity(final ComplexListConfiguration<D> complexListConfiguration, final ComplexListView complexListView, final EventBus eventBus) {
         this.eventBus = eventBus;
         this.complexListConfiguration = complexListConfiguration;
         this.listColumnDescriptors = complexListConfiguration.getColumnDescriptors();
@@ -203,7 +203,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
         this.complexListView = complexListView;
 
-        this.localEventBus = new PSimpleEventBus();
+        this.localEventBus = new SimpleEventBus();
         this.localEventBus.addHandler(PagingSelectionChangeEvent.TYPE, this);
         this.localEventBus.addHandler(SortColumnEvent.TYPE, this);
         this.localEventBus.addHandler(RefreshListEvent.TYPE, this);
@@ -215,11 +215,11 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.localEventBus.addHandler(ComparatorTypeChangeEvent.TYPE, this);
 
         for (final ListColumnDescriptor<D, ?> columnDescriptor : listColumnDescriptors) {
-            if (columnDescriptor.getHeaderCellRenderer() instanceof PEventBusAware) {
-                ((PEventBusAware) columnDescriptor.getHeaderCellRenderer()).setEventBus(localEventBus);
+            if (columnDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
+                ((EventBusAware) columnDescriptor.getHeaderCellRenderer()).setEventBus(localEventBus);
             }
-            if (columnDescriptor.getCellRenderer() instanceof PEventBusAware) {
-                ((PEventBusAware) columnDescriptor.getCellRenderer()).setEventBus(localEventBus);
+            if (columnDescriptor.getCellRenderer() instanceof EventBusAware) {
+                ((EventBusAware) columnDescriptor.getCellRenderer()).setEventBus(localEventBus);
             }
         }
 

@@ -26,32 +26,31 @@ package com.ponysdk.ui.terminal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
-    private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+    // private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+
+    protected WebSocketClient socketClient;
+
+    protected RequestBuilder requestBuilder;
+
+    protected UIBuilder uiBuilder;
 
     @Override
     public void onModuleLoad() {
@@ -59,8 +58,8 @@ public class CommunicationEntryPoint implements EntryPoint {
 
             @Override
             public void onUncaughtException(final Throwable e) {
-                Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
-                log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
+                // Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
+                // log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
             }
         });
 
@@ -79,48 +78,52 @@ public class CommunicationEntryPoint implements EntryPoint {
                 }
             }
 
-            final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() + "p");
-
             requestData.put(APPLICATION.KEY, APPLICATION.KEY_.START);
             requestData.put(HISTORY.TOKEN, History.getToken());
             requestData.put(PROPERTY.COOKIE, cookies);
 
-            builder.sendRequest(requestData.toString(), new RequestCallback() {
+            final RequestCallback requestCallback = new RequestCallback() {
 
                 @Override
-                public void onError(final Request request, final Throwable exception) {
-                    log.log(Level.SEVERE, "Error ", exception);
-                    if (exception instanceof StatusCodeException) {
-                        final StatusCodeException codeException = (StatusCodeException) exception;
-                        if (codeException.getStatusCode() == 0) return;
-
-                    }
-                    Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
-                }
-
-                @Override
-                public void onResponseReceived(final Request request, final Response response) {
-                    if (200 == response.getStatusCode()) {
-
+                public void onDataReceived(final JSONObject data) {
+                    try {
                         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
 
-                        final JSONObject object = JSONParser.parseLenient(response.getText()).isObject();
+                        if (data.containsKey(APPLICATION.VIEW_ID)) {
+                            final long viewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
+                            final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
 
-                        final long viewID = (long) object.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
-                        final JSONArray jsonArray = object.get(APPLICATION.INSTRUCTIONS).isArray();
+                            for (int i = 0; i < jsonArray.size(); i++) {
+                                instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+                            }
 
-                        for (int i = 0; i < jsonArray.size(); i++) {
-                            instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+                            uiBuilder = new UIBuilder(viewID, requestBuilder);
+                            uiBuilder.init();
+                            uiBuilder.update(instructions);
+                            uiBuilder.hideLoadingMessageBox();
+                        } else {
+                            final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
+
+                            for (int i = 0; i < jsonArray.size(); i++) {
+                                instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+                            }
+
+                            uiBuilder.update(instructions);
+                            uiBuilder.hideLoadingMessageBox();
                         }
-
-                        final UIBuilder uiBuilder = new UIBuilder(viewID);
-                        uiBuilder.init();
-                        uiBuilder.update(instructions);
-                    } else {
-                        Window.alert("Couldn't retrieve JSON (" + response.getStatusText() + ")");
+                    } catch (final RuntimeException exception) {
+                        Window.alert("Loading application has failed #" + exception);
                     }
                 }
-            });
+
+                @Override
+                public void onError(final Throwable exception) {
+                    uiBuilder.onCommunicationError(exception);
+                }
+            };
+
+            requestBuilder = new HttpRequestBuilder(requestCallback);
+            requestBuilder.send(requestData.toString());
 
         } catch (final Exception e) {
             Window.alert("Loading application has failed #" + e);

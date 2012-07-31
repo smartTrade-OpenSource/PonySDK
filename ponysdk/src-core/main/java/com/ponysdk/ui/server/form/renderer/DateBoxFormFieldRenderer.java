@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import com.ponysdk.core.event.PEventHandler;
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.ui.server.basic.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PDateBox;
@@ -146,9 +146,9 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         keyPressHandlers.add(handler);
-        return new PHandlerRegistration() {
+        return new HandlerRegistration() {
 
             @Override
             public void removeHandler() {
@@ -203,7 +203,7 @@ public class DateBoxFormFieldRenderer implements FormFieldRenderer, PValueChange
     }
 
     @Override
-    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PDateBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

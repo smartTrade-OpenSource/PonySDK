@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.PStreamHandler;
+import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 
@@ -48,7 +48,7 @@ public class XMLExporter<T> implements Exporter<T> {
     public static <T> void exportXMLString(final String fileName, final String content) throws Exception {
         // Set MIME type to binary data to prevent opening of PDF in browser window
         final StreamResource streamResource = new StreamResource();
-        streamResource.open(new PStreamHandler() {
+        streamResource.open(new StreamHandler() {
 
             @Override
             public void onStream(HttpServletRequest req, HttpServletResponse response) {

@@ -65,7 +65,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public PCheckBox(final String text) {
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         this.value = value;
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, value);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override

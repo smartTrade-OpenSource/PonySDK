@@ -70,7 +70,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     public PDateBox(final SimpleDateFormat dateFormat) {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
 
         setDateFormat(dateFormat);
     }
@@ -127,7 +127,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
         final Update update = new Update(getID());
         update.put(PROPERTY.DATE_FORMAT_PATTERN, dateFormat.toPattern());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public SimpleDateFormat getDateFormat() {
@@ -149,7 +149,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         this.date = date;
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : null);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
 }

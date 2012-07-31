@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -41,7 +41,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     private PRootLayoutPanel() {}
 
     public static PRootLayoutPanel get() {
-        final PonySession session = PonySession.getCurrent();
+        final UIContext session = UIContext.get();
         PRootLayoutPanel root = session.getAttribute(ROOT);
         if (root == null) {
             root = new PRootLayoutPanel();

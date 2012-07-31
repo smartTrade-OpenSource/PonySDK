@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface PBeforeSelectionHandler<I> extends PEventHandler {
+public interface PBeforeSelectionHandler<I> extends EventHandler {
 
     void onBeforeSelection(PBeforeSelectionEvent<I> event);
 }

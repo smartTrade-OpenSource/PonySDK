@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.list.renderer.header;
 
-import com.ponysdk.core.event.PEventBus;
-import com.ponysdk.core.event.PEventBusAware;
+import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.EventBusAware;
 import com.ponysdk.core.query.ComparatorType;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -42,11 +42,11 @@ import com.ponysdk.ui.server.form.FormField.ResetHandler;
 import com.ponysdk.ui.server.list.event.ComparatorTypeChangeEvent;
 import com.ponysdk.ui.server.list.event.RefreshListEvent;
 
-public class ComplexHeaderCellRenderer implements HeaderCellRenderer, PEventBusAware {
+public class ComplexHeaderCellRenderer implements HeaderCellRenderer, EventBusAware {
 
     protected final PFlexTable container;
 
-    protected PEventBus eventBus;
+    protected EventBus eventBus;
 
     protected FormField formField;
 
@@ -142,7 +142,7 @@ public class ComplexHeaderCellRenderer implements HeaderCellRenderer, PEventBusA
     }
 
     @Override
-    public void setEventBus(final PEventBus eventBus) {
+    public void setEventBus(final EventBus eventBus) {
         this.eventBus = eventBus;
         this.sortableHeader.setEventBus(eventBus);
     }

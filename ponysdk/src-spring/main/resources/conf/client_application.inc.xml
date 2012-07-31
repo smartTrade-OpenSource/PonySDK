@@ -6,7 +6,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
     <context:annotation-config/>
     
-    <bean name="eventBus" class="com.ponysdk.core.event.PSimpleEventBus" />
+    <bean name="eventBus" class="com.ponysdk.core.event.SimpleEventBus" />
     <bean name="history" class="com.ponysdk.ui.server.basic.PHistory"/>
     <bean name="placeController" class="com.ponysdk.core.place.PlaceController">
     	<constructor-arg ref="history" />

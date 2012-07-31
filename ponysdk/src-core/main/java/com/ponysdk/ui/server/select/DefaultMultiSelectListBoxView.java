@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PAttachedPopupPanel;
@@ -147,7 +147,7 @@ public class DefaultMultiSelectListBoxView extends PFlowPanel implements PMultiS
     }
 
     @Override
-    public PHandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         return cursor.addKeyUpHandler(handler);
     }
 
@@ -157,12 +157,12 @@ public class DefaultMultiSelectListBoxView extends PFlowPanel implements PMultiS
     }
 
     @Override
-    public PHandlerRegistration addFocusHandler(final PFocusHandler handler) {
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
         return cursor.addFocusHandler(handler);
     }
 
     @Override
-    public PHandlerRegistration addBlurHandler(final PBlurHandler handler) {
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
         return cursor.addBlurHandler(handler);
     }
 }

@@ -38,6 +38,7 @@ public class ServiceGenerator extends BaseGenerator {
     public void generate() throws Exception {
         generateCRUDMethos();
         generateCommands();
+        generatePushCommands();
         generateService();
         generateCRUDEvents();
         generateEvents();
@@ -89,7 +90,7 @@ public class ServiceGenerator extends BaseGenerator {
 
                     classWriter.addNewLine();
                     classWriter.addLine("@Override");
-                    classWriter.addLine("public " + resultClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method) + ") throws Exception {");
+                    classWriter.addLine("public " + resultClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method.getParameter()) + ") throws Exception {");
                     if (!"void".equals(resultClass)) {
                         classWriter.addLine("   return null;");
                     }
@@ -107,7 +108,7 @@ public class ServiceGenerator extends BaseGenerator {
 
                 // Create
                 classWriter.addLine("@Override");
-                classWriter.addLine("public " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + createMethod.getName() + " (" + GeneratorHelper.getParameterToString(createMethod) + ")  throws Exception {");
+                classWriter.addLine("public " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + createMethod.getName() + " (" + GeneratorHelper.getParameterToString(createMethod.getParameter()) + ")  throws Exception {");
                 classWriter.addLine("   " + domainDAOParameter + ".beginTransaction();");
                 classWriter.addLine("   try {");
                 classWriter.addLine("       " + domainDAOParameter + ".save(" + domainParameter + ");");
@@ -122,7 +123,7 @@ public class ServiceGenerator extends BaseGenerator {
 
                 // Read
                 classWriter.addLine("@Override");
-                classWriter.addLine("public " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + readMethod.getName() + " (" + GeneratorHelper.getParameterToString(readMethod) + ")  throws Exception {");
+                classWriter.addLine("public " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + readMethod.getName() + " (" + GeneratorHelper.getParameterToString(readMethod.getParameter()) + ")  throws Exception {");
                 classWriter.addLine("   " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + domainParameter + " = null;");
                 classWriter.addLine("   " + domainDAOParameter + ".beginTransaction();");
                 classWriter.addLine("   try {");
@@ -138,7 +139,7 @@ public class ServiceGenerator extends BaseGenerator {
 
                 // Update
                 classWriter.addLine("@Override");
-                classWriter.addLine("public " + GeneratorHelper.getClassName(updateMethod.getReturn()) + " " + updateMethod.getName() + " (" + GeneratorHelper.getParameterToString(updateMethod) + ")  throws Exception {");
+                classWriter.addLine("public " + GeneratorHelper.getClassName(updateMethod.getReturn()) + " " + updateMethod.getName() + " (" + GeneratorHelper.getParameterToString(updateMethod.getParameter()) + ")  throws Exception {");
                 classWriter.addLine("   " + domainDAOParameter + ".beginTransaction();");
                 classWriter.addLine("   try {");
                 classWriter.addLine("       " + domainDAOParameter + ".saveOrUpdate(" + domainParameter + ");");
@@ -153,7 +154,7 @@ public class ServiceGenerator extends BaseGenerator {
 
                 // Delete
                 classWriter.addLine("@Override");
-                classWriter.addLine("public " + GeneratorHelper.getClassName(deleteMethod.getReturn()) + " " + deleteMethod.getName() + " (" + GeneratorHelper.getParameterToString(deleteMethod) + ")  throws Exception {");
+                classWriter.addLine("public " + GeneratorHelper.getClassName(deleteMethod.getReturn()) + " " + deleteMethod.getName() + " (" + GeneratorHelper.getParameterToString(deleteMethod.getParameter()) + ")  throws Exception {");
                 classWriter.addLine("   " + domainDAOParameter + ".beginTransaction();");
                 classWriter.addLine("   try {");
                 classWriter.addLine("       " + GeneratorHelper.getClassName(createMethod.getReturn()) + " " + domainParameter + " = " + domainDAOParameter + ".findById(" + domainParameterID + ");");
@@ -199,8 +200,16 @@ public class ServiceGenerator extends BaseGenerator {
         if (domain.getService() != null) {
             for (final Method method : domain.getService().getMethod()) {
                 final String returnClass = GeneratorHelper.getClassName(method.getReturn());
+                classWriter.addLine("public " + returnClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method.getParameter()) + ") throws Exception;");
+            }
 
-                classWriter.addLine("public " + returnClass + " " + method.getName() + "(" + GeneratorHelper.getParameterToString(method) + ") throws Exception;");
+            for (final Pushmethod method : domain.getService().getPushmethod()) {
+                if (method.getParameter().isEmpty()) {
+                    classWriter.addLine("public com.ponysdk.core.event.HandlerRegistration " + method.getName() + "Registration(com.ponysdk.core.command.PushListener<" + method.getType() + "> listener);");
+                } else {
+                    classWriter.addLine("public com.ponysdk.core.event.HandlerRegistration " + method.getName() + "Registration(" + GeneratorHelper.getParameterToString(method.getParameter()) + ", com.ponysdk.core.command.PushListener<"
+                            + method.getType() + "> listener);");
+                }
             }
 
             final Dao dao = domain.getService().getDao();
@@ -397,6 +406,16 @@ public class ServiceGenerator extends BaseGenerator {
      * Services : commands
      */
 
+    private void generatePushCommands() throws Exception {
+        if (domain.getService() != null) {
+            for (final Pushmethod method : domain.getService().getPushmethod()) {
+                final ClassWriter classWriter = generatePushCommandX(method, method.getType());
+                classWriter.addExtend("com.ponysdk.core.command.AbstractPushCommand<" + method.getType() + ">");
+                classWriter.generateContentAndStore();
+            }
+        }
+    }
+
     private void generateCommands() throws Exception {
         if (domain.getService() != null) {
             for (final Method method : domain.getService().getMethod()) {
@@ -414,6 +433,45 @@ public class ServiceGenerator extends BaseGenerator {
         }
     }
 
+    private ClassWriter generatePushCommandX(final Pushmethod method, final String type) throws Exception {
+        final String className = method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1) + "Command";
+        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
+
+        final Parameter pushListener = new Parameter();
+        pushListener.setName("listener");
+        pushListener.setClazz("com.ponysdk.core.command.PushListener<" + type + ">");
+
+        final List<Parameter> parameters = method.getParameter();
+
+        final List<Parameter> clonedParameters = new ArrayList<Parameter>(parameters);
+        clonedParameters.add(pushListener);
+
+        final Constructor constructor = new Constructor();
+        constructor.setConstructorParameters(clonedParameters);
+        constructor.setSuperConstructorParameters(Arrays.asList(pushListener));
+
+        classWriter.addConstructor(constructor);
+
+        for (final Parameter param : parameters) {
+            classWriter.addClassMembers(param);
+        }
+        classWriter.addConstants("private static " + GeneratorHelper.getServiceFullClassName(domain) + " service;");
+
+        final StringBuilder template = new StringBuilder();
+        template.append("@Override\n");
+        template.append("public com.ponysdk.core.event.HandlerRegistration execute(){\n");
+        template.append("   if (service == null) {\n");
+        template.append("       service = com.ponysdk.core.service.PonyServiceRegistry.getPonyService(" + GeneratorHelper.getServiceFullClassName(domain) + ".class);");
+        template.append("   }\n");
+        if (method.getParameter().isEmpty()) template.append("   return service.%1$sRegistration(this);\n");
+        else template.append("   return service.%1$sRegistration(%2$s,this);\n");
+        template.append("}\n");
+
+        classWriter.addMethod(template.toString(), method.getName(), GeneratorHelper.getParameterNamesToString(method.getParameter()));
+
+        return classWriter;
+    }
+
     private ClassWriter generateCommandX(final Method method, final String resultClass) throws Exception {
         final String className = method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1) + "Command";
 
@@ -422,7 +480,7 @@ public class ServiceGenerator extends BaseGenerator {
         final Constructor constructor = new Constructor();
         final Parameter eventBusParameter = new Parameter();
         eventBusParameter.setName("eventBus");
-        eventBusParameter.setClazz("com.ponysdk.core.event.PEventBus");
+        eventBusParameter.setClazz("com.ponysdk.core.event.EventBus");
 
         final List<Parameter> parameters = method.getParameter();
         final List<Parameter> clonedParameters = new ArrayList<Parameter>();
@@ -467,7 +525,7 @@ public class ServiceGenerator extends BaseGenerator {
         }
         template.append("}\n");
 
-        classWriter.addMethod(template.toString(), method.getName(), GeneratorHelper.getParameterNamesToString(method));
+        classWriter.addMethod(template.toString(), method.getName(), GeneratorHelper.getParameterNamesToString(method.getParameter()));
 
         return classWriter;
     }
@@ -517,7 +575,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addExtend(GeneratorHelper.getBusinessEventExtends(event));
 
         // Constant
-        classWriter.addConstants("public static final com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event) + "> TYPE = new com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event)
+        classWriter.addConstants("public static final com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event) + "> TYPE = new com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event)
                 + ">();");
 
         // Build constructor
@@ -541,7 +599,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addNewLine();
 
         classWriter.addLine("@Override");
-        classWriter.addLine("public com.ponysdk.core.event.PEvent.Type<" + GeneratorHelper.getHandlerClassName(event) + "> getAssociatedType() {");
+        classWriter.addLine("public com.ponysdk.core.event.Event.Type<" + GeneratorHelper.getHandlerClassName(event) + "> getAssociatedType() {");
         classWriter.addLine("   return TYPE;");
         classWriter.addLine("}");
 
@@ -554,7 +612,7 @@ public class ServiceGenerator extends BaseGenerator {
         final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getHandlerClassName(event));
 
         classWriter.setInterface(true);
-        classWriter.addExtend("com.ponysdk.core.event.PEventHandler");
+        classWriter.addExtend("com.ponysdk.core.event.EventHandler");
 
         // Build event method
         classWriter.addLine("public void on" + event.getName() + "(" + GeneratorHelper.getEventClassName(event) + " event);");

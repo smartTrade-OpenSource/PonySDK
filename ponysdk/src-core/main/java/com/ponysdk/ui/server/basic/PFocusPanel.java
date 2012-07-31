@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPAllFocusHandlers;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
@@ -74,22 +74,22 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
+    public HandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
         return addDomHandler(handler, PDragEndEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
+    public HandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
         return addDomHandler(handler, PDragEnterEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
@@ -104,7 +104,7 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addClickHandler(final PClickHandler handler) {
+    public HandlerRegistration addClickHandler(final PClickHandler handler) {
         return addDomHandler(handler, PClickEvent.TYPE);
     }
 
@@ -114,7 +114,7 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
@@ -124,17 +124,17 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addFocusHandler(final PFocusHandler handler) {
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
         return addDomHandler(handler, PFocusEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addBlurHandler(final PBlurHandler handler) {
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
         return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addMouseOutHandler(final PMouseOutHandler handler) {
+    public HandlerRegistration addMouseOutHandler(final PMouseOutHandler handler) {
         return addDomHandler(handler, PMouseOutEvent.TYPE);
     }
 
@@ -144,7 +144,7 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addMouseDownHandler(final PMouseDownHandler handler) {
+    public HandlerRegistration addMouseDownHandler(final PMouseDownHandler handler) {
         return addDomHandler(handler, PMouseDownEvent.TYPE);
     }
 
@@ -154,7 +154,7 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addMouseUpHandler(final PMouseUpHandler handler) {
+    public HandlerRegistration addMouseUpHandler(final PMouseUpHandler handler) {
         return addDomHandler(handler, PMouseUpEvent.TYPE);
     }
 
@@ -164,22 +164,22 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
-    public PHandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
+    public HandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
         return addDomHandler(handler, PDragStartEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
+    public HandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
         return addDomHandler(handler, PDragLeaveEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
+    public HandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
         return addDomHandler(handler, PDragOverEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addDropHandler(final PDropHandler handler) {
+    public HandlerRegistration addDropHandler(final PDropHandler handler) {
         return addDomHandler(handler, PDropEvent.TYPE);
     }
 

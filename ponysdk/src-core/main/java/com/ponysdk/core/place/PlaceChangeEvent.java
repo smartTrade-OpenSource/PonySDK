@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.place;
 
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.Event;
 
-public class PlaceChangeEvent extends PEvent<PlaceChangeHandler> {
+public class PlaceChangeEvent extends Event<PlaceChangeHandler> {
 
     public static final Type<PlaceChangeHandler> TYPE = new Type<PlaceChangeHandler>();
 

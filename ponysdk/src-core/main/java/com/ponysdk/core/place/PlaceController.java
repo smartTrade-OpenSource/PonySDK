@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.place;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.event.EventBus;
 import com.ponysdk.ui.server.basic.PHistory;
 
 public class PlaceController implements PlaceChangeRequestHandler {
 
-    public PlaceController(final PHistory history, final PEventBus eventBus) {
+    public PlaceController(final PHistory history, final EventBus eventBus) {
         eventBus.addHandler(PlaceChangeRequestEvent.TYPE, this);
     }
 
@@ -46,7 +46,7 @@ public class PlaceController implements PlaceChangeRequestHandler {
      * @param world
      */
     public void goTo(final Place place) {
-        PonySession.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
+        UIContext.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
     }
 
 }

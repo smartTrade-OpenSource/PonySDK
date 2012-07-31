@@ -7,6 +7,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public class PTInstruction extends JSONObject {
@@ -15,6 +16,17 @@ public class PTInstruction extends JSONObject {
 
     public PTInstruction(final JavaScriptObject javaScriptObject) {
         super(javaScriptObject);
+    }
+
+    @Override
+    public JSONValue get(final String key) {
+        try {
+            if (key == null) Window.alert("null key");
+            return super.get(key);
+        } catch (final Exception exception) {
+            Window.alert("get failed " + exception.getMessage());
+            return null;
+        }
     }
 
     public Long getObjectID() {

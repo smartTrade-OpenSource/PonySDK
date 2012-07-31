@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface ShowSubListHandler<T> extends PEventHandler {
+public interface ShowSubListHandler<T> extends EventHandler {
 
     public void onShowSubList(ShowSubListEvent<T> event);
 }

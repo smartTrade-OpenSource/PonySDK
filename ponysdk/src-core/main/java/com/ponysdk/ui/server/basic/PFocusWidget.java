@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
@@ -70,27 +70,27 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
-    public PHandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addFocusHandler(final PFocusHandler handler) {
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
         return addDomHandler(handler, PFocusEvent.TYPE);
     }
 
     @Override
-    public PHandlerRegistration addBlurHandler(final PBlurHandler handler) {
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
         return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
@@ -108,21 +108,21 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, enabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         this.enabledOnRequest = enabledOnRequest;
         final Update update = new Update(ID);
         update.put(PROPERTY.ENABLED_ON_REQUEST, enabledOnRequest);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         this.showLoadingOnRequest = showLoadingOnRequest;
         final Update update = new Update(ID);
         update.put(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public boolean isEnabled() {
@@ -138,11 +138,11 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         this.focused = focused;
         final Update update = new Update(getID());
         update.put(PROPERTY.FOCUSED, focused);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
-    public PHandlerRegistration addClickHandler(final PClickHandler handler) {
+    public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PClickHandler clickHandler = new PClickHandler() {
 
@@ -151,7 +151,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
                     handler.onClick(event);
                     final Update update = new Update(ID);
                     update.put(PROPERTY.END_OF_PROCESSING, true);
-                    getPonySession().stackInstruction(update);
+                    getUIContext().stackInstruction(update);
                 }
             };
 

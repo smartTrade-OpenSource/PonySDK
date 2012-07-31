@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.ui.server.basic.HasPValueChangeHandlers;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PCheckBox;
@@ -130,7 +130,7 @@ public class CheckBoxFormFieldRenderer implements FormFieldRenderer, PValueChang
     }
 
     @Override
-    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final FormFieldComponent<PCheckBox> field : fields) {
             field.getInput().addDomHandler(handler, type);
         }

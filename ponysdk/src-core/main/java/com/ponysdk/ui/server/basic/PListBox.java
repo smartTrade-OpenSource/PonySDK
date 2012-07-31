@@ -86,7 +86,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         }
 
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
 
         create.put(PROPERTY.MULTISELECT, isMultipleSelect);
     }
@@ -139,7 +139,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         update.put(PROPERTY.ITEM_INSERTED);
         update.put(PROPERTY.INDEX, 0);
         update.put(PROPERTY.ITEM_TEXT, "");
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void insertItem(final String label, final Object value, int index) {
@@ -158,7 +158,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (containsEmptyItem) update.put(PROPERTY.INDEX, index + 1);
         else update.put(PROPERTY.INDEX, index);
         update.put(PROPERTY.ITEM_TEXT, label);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setItemText(final int index, final String text) {
@@ -172,7 +172,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         else update.put(PROPERTY.INDEX, index);
         update.put(PROPERTY.ITEM_TEXT, text);
 
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setValue(final int index, final Object value) {
@@ -226,7 +226,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         update.put(PROPERTY.ITEM_REMOVED);
         if (containsEmptyItem) update.put(PROPERTY.INDEX, index + 1);
         else update.put(PROPERTY.INDEX, index);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public Object getValue(final int index) {
@@ -240,7 +240,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         selectedItems.clear();
         final Update update = new Update(getID());
         update.put(PROPERTY.CLEAR, true);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
 
         if (containsEmptyItem) insertEmptyItem();
     }
@@ -256,7 +256,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         update.put(PROPERTY.SELECTED, selected);
         if (containsEmptyItem) update.put(PROPERTY.SELECTED_INDEX, index + 1);
         else update.put(PROPERTY.SELECTED_INDEX, index);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setSelectedIndex(final int index) {
@@ -358,7 +358,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final Update update = new Update(getID());
         if (containsEmptyItem) update.put(PROPERTY.VISIBLE_ITEM_COUNT, visibleItemCount + 1);
         else update.put(PROPERTY.VISIBLE_ITEM_COUNT, visibleItemCount);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public int getVisibleItemCount() {
@@ -369,7 +369,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         this.isMultipleSelect = isMultipleSelect;
         final Update update = new Update(getID());
         update.put(PROPERTY.MULTISELECT, isMultipleSelect);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public class ListItem {

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.Event;
 
-public class PCloseEvent extends PEvent<PCloseHandler> {
+public class PCloseEvent extends Event<PCloseHandler> {
 
     public static final Type<PCloseHandler> TYPE = new Type<PCloseHandler>();
 

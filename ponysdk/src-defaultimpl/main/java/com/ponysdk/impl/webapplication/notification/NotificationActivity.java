@@ -23,14 +23,14 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.event.PBroadcastEventHandler;
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.BroadcastEventHandler;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class NotificationActivity extends com.ponysdk.core.activity.AbstractActivity implements PBroadcastEventHandler, InitializingActivity {
+public class NotificationActivity extends com.ponysdk.core.activity.AbstractActivity implements BroadcastEventHandler, InitializingActivity {
 
     private NotificationView notificationView;
 
@@ -48,9 +48,9 @@ public class NotificationActivity extends com.ponysdk.core.activity.AbstractActi
     }
 
     @Override
-    public void onEvent(final PEvent<?> event) {
-        if (event instanceof PBusinessEvent<?>) {
-            final PBusinessEvent<?> businessEvent = (PBusinessEvent<?>) event;
+    public void onEvent(final Event<?> event) {
+        if (event instanceof BusinessEvent<?>) {
+            final BusinessEvent<?> businessEvent = (BusinessEvent<?>) event;
             notificationView.addEvent(businessEvent);
         }
     }

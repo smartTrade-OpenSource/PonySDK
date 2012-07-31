@@ -23,19 +23,19 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.sample.client.event.DemoBusinessEvent.DemoBusinessEventHandler;
 
-public class DemoBusinessEvent extends PBusinessEvent<DemoBusinessEventHandler> {
+public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
 
-    public interface DemoBusinessEventHandler extends PEventHandler {
+    public interface DemoBusinessEventHandler extends EventHandler {
 
         void onEvent(DemoBusinessEvent event);
     }
 
-    public static final PEvent.Type<DemoBusinessEventHandler> TYPE = new PEvent.Type<DemoBusinessEventHandler>();
+    public static final Event.Type<DemoBusinessEventHandler> TYPE = new Event.Type<DemoBusinessEventHandler>();
 
     public DemoBusinessEvent(Object sourceComponent) {
         super(sourceComponent);
@@ -47,7 +47,7 @@ public class DemoBusinessEvent extends PBusinessEvent<DemoBusinessEventHandler> 
     }
 
     @Override
-    public com.ponysdk.core.event.PEvent.Type<DemoBusinessEventHandler> getAssociatedType() {
+    public com.ponysdk.core.event.Event.Type<DemoBusinessEventHandler> getAssociatedType() {
         return TYPE;
     }
 

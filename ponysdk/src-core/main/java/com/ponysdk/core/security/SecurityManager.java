@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.security;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 
 public class SecurityManager {
 
     public static boolean checkPermission(final Permission permission) {
         if (Permission.ALLOWED.equals(permission)) return true;
-        return PonySession.getCurrent().hasPermission(permission.getKey());
+        return UIContext.get().hasPermission(permission.getKey());
     }
 }

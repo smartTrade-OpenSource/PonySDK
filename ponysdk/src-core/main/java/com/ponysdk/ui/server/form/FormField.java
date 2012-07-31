@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
 import com.ponysdk.ui.server.form.renderer.FormFieldRenderer;
@@ -148,7 +148,7 @@ public class FormField {
         return formFieldRenderer;
     }
 
-    public <H extends PEventHandler> void addDomHandler(final H handler, final PDomEvent.Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         formFieldRenderer.addDomHandler(handler, type);
     }
 

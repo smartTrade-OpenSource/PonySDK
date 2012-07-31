@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.list2;
 
-import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.list.SimpleListView;
 
@@ -31,9 +30,6 @@ public class DataGridActivity<D> extends SimpleListActivity<D> {
 
     private final SimpleListView view;
     private final DataGridConfiguration<D> configuration;
-
-    private final SortingType currentSortingType = SortingType.NONE;
-    private String currentSortingPojoPropertyKey;
 
     public DataGridActivity(final DataGridConfiguration<D> configuration, final SimpleListView view) {
 

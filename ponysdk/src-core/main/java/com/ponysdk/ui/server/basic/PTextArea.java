@@ -67,7 +67,7 @@ public class PTextArea extends PTextBoxBase {
         this.visibleLines = visibleLines;
         final Update update = new Update(getID());
         update.put(PROPERTY.VISIBLE_LINES, visibleLines);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public int getCharacterWidth() {
@@ -78,7 +78,7 @@ public class PTextArea extends PTextBoxBase {
         this.characterWidth = characterWidth;
         final Update update = new Update(getID());
         update.put(PROPERTY.CHARACTER_WIDTH, characterWidth);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
 }

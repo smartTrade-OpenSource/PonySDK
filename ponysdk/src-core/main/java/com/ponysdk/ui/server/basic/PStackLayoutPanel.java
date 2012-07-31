@@ -88,7 +88,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.HTML, header);
         add.put(PROPERTY.SIZE, headerSize);
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         children.remove(child);
 
         final Remove remove = new Remove(child.getID(), getID());
-        getPonySession().stackInstruction(remove);
+        getUIContext().stackInstruction(remove);
         return true;
     }
 
@@ -141,7 +141,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void showWidget(final PWidget widget) {
         final Update update = new Update(getID());
         update.put(PROPERTY.OPEN, widget.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
 }

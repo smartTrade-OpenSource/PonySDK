@@ -37,7 +37,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         this.text = text;
         final Update update = new Update(ID);
         update.put(PROPERTY.TEXT, text);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -50,7 +50,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         this.html = html;
         final Update update = new Update(ID);
         update.put(PROPERTY.HTML, html);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override

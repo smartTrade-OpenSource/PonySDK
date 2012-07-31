@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
@@ -38,7 +38,7 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
 
     private static Logger log = LoggerFactory.getLogger(PEventsListener.class);
 
-    private final BlockingQueue<PEvent<?>> eventQueue = new ArrayBlockingQueue<PEvent<?>>(1000);
+    private final BlockingQueue<Event<?>> eventQueue = new ArrayBlockingQueue<Event<?>>(1000);
 
     @Override
     public void onValueChange(final PValueChangeEvent event) {
@@ -47,8 +47,8 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends PEvent<?>> T poll() {
-        PEvent<?> event2 = null;
+    public <T extends Event<?>> T poll() {
+        Event<?> event2 = null;
         try {
             event2 = eventQueue.poll(2000, TimeUnit.MILLISECONDS);
             if (event2 == null) throw new RuntimeException("No event received");
@@ -110,7 +110,7 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
         eventQueue.add(event);
     }
 
-    public void stackCommandResult(final PBusinessEvent e) {
+    public void stackCommandResult(final BusinessEvent e) {
         log.info("stackCommandResult");
         eventQueue.add(e);
     }

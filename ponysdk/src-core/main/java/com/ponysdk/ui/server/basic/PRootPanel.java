@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -35,7 +35,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * The panel to which all other widgets must ultimately be added. RootPanels are never created directly.
  * Rather, they are accessed via {@link PRootPanel#get()} .
  * <p>
- * Most applications will add widgets to the default root panel in their {@link EntryPoint#start(PonySession)}
+ * Most applications will add widgets to the default root panel in their {@link EntryPoint#start(UIContext)}
  * methods.
  * </p>
  */
@@ -67,7 +67,7 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     private static Map<String, PRootPanel> ensureChilds() {
-        final PonySession session = PonySession.getCurrent();
+        final UIContext session = UIContext.get();
         Map<String, PRootPanel> rootByIDs = session.getAttribute(ROOTID);
         if (rootByIDs == null) {
             rootByIDs = new HashMap<String, PRootPanel>();

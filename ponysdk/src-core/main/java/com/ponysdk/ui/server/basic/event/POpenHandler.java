@@ -1,9 +1,9 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface POpenHandler extends PEventHandler {
+public interface POpenHandler extends EventHandler {
 
     void onOpen(POpenEvent openEvent);
 }

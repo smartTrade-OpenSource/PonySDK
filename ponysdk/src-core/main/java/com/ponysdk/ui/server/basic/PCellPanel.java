@@ -46,42 +46,42 @@ public abstract class PCellPanel extends PComplexPanel {
         this.borderWidth = width;
         final Update update = new Update(getID());
         update.put(PROPERTY.BORDER_WIDTH, width);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setSpacing(final int spacing) {
         this.spacing = spacing;
         final Update update = new Update(getID());
         update.put(PROPERTY.SPACING, spacing);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
         update.put(PROPERTY.CELL, widget.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
         update.put(PROPERTY.CELL, widget.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_HEIGHT, height);
         update.put(PROPERTY.CELL, widget.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_WIDTH, width);
         update.put(PROPERTY.CELL, widget.getID());
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public int getBorderWidth() {

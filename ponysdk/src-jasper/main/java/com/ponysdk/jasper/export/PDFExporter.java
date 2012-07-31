@@ -27,7 +27,7 @@ import ar.com.fdvs.dj.domain.constants.Page;
 import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.PStreamHandler;
+import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 
@@ -89,7 +89,7 @@ public class PDFExporter<T> implements Exporter<T> {
 
         // Set MIME type to binary data to prevent opening of PDF in browser window
         final StreamResource streamResource = new StreamResource();
-        streamResource.open(new PStreamHandler() {
+        streamResource.open(new StreamHandler() {
 
             @Override
             public void onStream(HttpServletRequest req, HttpServletResponse response) {

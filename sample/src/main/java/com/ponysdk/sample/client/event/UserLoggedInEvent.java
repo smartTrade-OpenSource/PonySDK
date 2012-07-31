@@ -23,13 +23,13 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
 import com.ponysdk.sample.client.datamodel.User;
 
-public class UserLoggedInEvent extends PBusinessEvent<UserLoggedInHandler> {
+public class UserLoggedInEvent extends BusinessEvent<UserLoggedInHandler> {
 
-    public static final PEvent.Type<UserLoggedInHandler> TYPE = new PEvent.Type<UserLoggedInHandler>();
+    public static final Event.Type<UserLoggedInHandler> TYPE = new Event.Type<UserLoggedInHandler>();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class UserLoggedInEvent extends PBusinessEvent<UserLoggedInHandler> {
     }
 
     @Override
-    public PEvent.Type<UserLoggedInHandler> getAssociatedType() {
+    public Event.Type<UserLoggedInHandler> getAssociatedType() {
         return TYPE;
     }
 

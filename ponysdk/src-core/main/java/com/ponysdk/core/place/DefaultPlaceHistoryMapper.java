@@ -4,13 +4,13 @@ package com.ponysdk.core.place;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.EventBus;
 
 public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
 
     protected final Map<String, Place> placeContextByToken = new ConcurrentHashMap<String, Place>();
 
-    public DefaultPlaceHistoryMapper(final PEventBus eventBus) {
+    public DefaultPlaceHistoryMapper(final EventBus eventBus) {
         eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeHandler() {
 
             @Override

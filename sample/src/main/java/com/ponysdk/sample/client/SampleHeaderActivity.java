@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
 import com.ponysdk.impl.webapplication.header.HeaderView;
@@ -53,7 +53,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     @Override
     public IsPWidget buildView() {
         final HeaderView view = getHeaderView();
-        final User user = PonySession.getCurrent().getApplicationAttribute(UISampleEntryPoint.USER);
+        final User user = UIContext.get().getApplicationAttribute(UISampleEntryPoint.USER);
         view.addActionWidget(createUserAccountMenu(user));
         return view;
     }

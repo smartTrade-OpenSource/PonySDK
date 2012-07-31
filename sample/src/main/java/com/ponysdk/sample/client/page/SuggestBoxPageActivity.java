@@ -25,7 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import java.util.List;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.sample.client.datamodel.Pony;
@@ -65,7 +65,7 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
             @Override
             public void onSelection(final PSelectionEvent<PSuggestion> event) {
                 final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
-                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });
 
@@ -96,7 +96,7 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
                 if (item.equals(0)) {
                     suggestBox.setText("Friesian horse");
                 } else if (item.equals(1)) {
-                    PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
+                    UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
                 } else if (item.equals(2)) {
                     suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
                 }

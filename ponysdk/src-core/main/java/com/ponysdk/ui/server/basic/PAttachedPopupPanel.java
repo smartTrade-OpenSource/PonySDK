@@ -42,7 +42,7 @@ public class PAttachedPopupPanel extends PPopupPanel {
     public void repaint() {
         final Update update = new Update(ID);
         update.put(PROPERTY.REPAINT, "");
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
 }

@@ -25,9 +25,9 @@ package com.ponysdk.ui.server.list.event;
 
 import java.util.List;
 
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.SystemEvent;
 
-public class MoveColumnDescriptorEvent extends PSystemEvent<MoveColumnDescriptorHandler> {
+public class MoveColumnDescriptorEvent extends SystemEvent<MoveColumnDescriptorHandler> {
 
     public static final Type<MoveColumnDescriptorHandler> TYPE = new Type<MoveColumnDescriptorHandler>();
 

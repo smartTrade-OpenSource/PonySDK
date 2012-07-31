@@ -148,7 +148,7 @@ public class PMenuBar extends PWidget {
         items.add(beforeIndex, item);
         final Add add = new Add(item.getID(), getID());
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
         return item;
     }
 
@@ -164,14 +164,14 @@ public class PMenuBar extends PWidget {
         items.add(beforeIndex, itemSeparator);
         final Add add = new Add(itemSeparator.getID(), getID());
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
         return itemSeparator;
     }
 
     public void clearItems() {
         final Update update = new Update(getID());
         update.put(PROPERTY.CLEAR, true);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
         // clear
         items.clear();
     }

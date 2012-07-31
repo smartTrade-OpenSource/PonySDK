@@ -25,6 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
@@ -43,6 +44,7 @@ public class TimerPageActivity extends SamplePageActivity {
 
     protected long time1 = 0;
     protected long time2 = 0;
+    protected AtomicLong time3 = new AtomicLong();
 
     protected PTimer timer;
 
@@ -126,7 +128,11 @@ public class TimerPageActivity extends SamplePageActivity {
             }
         }, 1000);
 
+        final PLabel labelFixed2 = new PLabel("0");
+        panel.add(labelFixed2);
+
         examplePanel.setWidget(panel);
+
     }
 
     @Override

@@ -63,14 +63,14 @@ public class PTreeItem extends PObject {
         if (tree != null) {
             tree.orphan(widget);
             final Remove remove = new Remove(widget.getID(), tree.getID());
-            widget.getPonySession().stackInstruction(remove);
+            widget.getUIContext().stackInstruction(remove);
         }
 
         if (tree != null) {
             tree.adopt(widget, this);
             final Add add = new Add(widget.getID(), getID());
             add.put(PROPERTY.WIDGET, true);
-            widget.getPonySession().stackInstruction(add);
+            widget.getUIContext().stackInstruction(add);
         }
     }
 
@@ -91,7 +91,7 @@ public class PTreeItem extends PObject {
         this.html = html;
         final Update update = new Update(ID);
         update.put(PROPERTY.TEXT, html);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     final void setTree(final PTree tree) {
@@ -99,7 +99,7 @@ public class PTreeItem extends PObject {
         if (isRoot) {
             final Add add = new Add(tree.getID(), getID());
             add.put(PROPERTY.ROOT, true);
-            getPonySession().stackInstruction(add);
+            getUIContext().stackInstruction(add);
         }
         setWidget();
     }
@@ -117,7 +117,7 @@ public class PTreeItem extends PObject {
         item.setTree(tree);
         final Add add = new Add(item.getID(), getID());
         add.put(PROPERTY.INDEX, beforeIndex);
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
         return item;
     }
 
@@ -131,7 +131,7 @@ public class PTreeItem extends PObject {
 
     public boolean removeItem(final PTreeItem item) {
         final Remove add = new Remove(tree.getID(), getID());
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
         return children.remove(item);
     }
 
@@ -139,7 +139,7 @@ public class PTreeItem extends PObject {
         this.selected = selected;
         final Update update = new Update(ID);
         update.put(PROPERTY.SELECTED, selected);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public boolean isSelected() {
@@ -150,7 +150,7 @@ public class PTreeItem extends PObject {
         this.open = open;
         final Update update = new Update(ID);
         update.put(PROPERTY.STATE, open);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public boolean getState() {

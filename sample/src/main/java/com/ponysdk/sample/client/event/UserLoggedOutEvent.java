@@ -23,13 +23,13 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PSystemEvent;
+import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.SystemEvent;
 import com.ponysdk.sample.client.datamodel.User;
 
-public class UserLoggedOutEvent extends PSystemEvent<UserLoggedOutHandler> {
+public class UserLoggedOutEvent extends SystemEvent<UserLoggedOutHandler> {
 
-    public static final PEvent.Type<UserLoggedOutHandler> TYPE = new PEvent.Type<UserLoggedOutHandler>();
+    public static final Event.Type<UserLoggedOutHandler> TYPE = new Event.Type<UserLoggedOutHandler>();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class UserLoggedOutEvent extends PSystemEvent<UserLoggedOutHandler> {
     }
 
     @Override
-    public PEvent.Type<UserLoggedOutHandler> getAssociatedType() {
+    public Event.Type<UserLoggedOutHandler> getAssociatedType() {
         return TYPE;
     }
 

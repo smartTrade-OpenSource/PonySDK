@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.event;
 
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.EventHandler;
 
-public interface ColumnDescriptorRemovedHandler extends PEventHandler {
+public interface ColumnDescriptorRemovedHandler extends EventHandler {
 
     public void onColumnRemoved(ColumnDescriptorRemovedEvent event);
 }

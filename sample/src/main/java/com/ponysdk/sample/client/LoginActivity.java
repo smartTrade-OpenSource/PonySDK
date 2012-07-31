@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
@@ -78,27 +78,12 @@ public class LoginActivity extends AbstractActivity {
         user.setName(loginPageView.getLogin());
         user.setPassword(loginPageView.getPassword());
 
-        PonySession.getCurrent().setApplicationAttribute(UISampleEntryPoint.USER, user);
+        UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
         fireEvent(loggedInEvent);
 
         goTo(new PagePlace("CheckBox"));
-
-        // applicationActivity.goTo(new ApplicationPlace(), world);
-        //
-        // applicationActivity.goTo(buildPagePlace("CheckBox", checkBoxPageActivity));
     }
-
-    // private PagePlace buildPagePlace(final String token, final PageActivity pageActivity) {
-    // return new PagePlace(pageActivity) {
-    //
-    // @Override
-    // public String getToken() {
-    // return token;
-    // }
-    // };
-    // }
-
 }

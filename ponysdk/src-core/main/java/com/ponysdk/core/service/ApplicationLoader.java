@@ -33,44 +33,38 @@ import javax.servlet.http.HttpSessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.PSystemProperty;
-import com.ponysdk.core.PonyApplicationSession;
+import com.ponysdk.core.Application;
+import com.ponysdk.core.SystemProperty;
+import com.ponysdk.core.session.SessionManager;
 import com.ponysdk.core.tools.BannerPrinter;
-import com.ponysdk.spring.SpringContextLoader;
 
 public class ApplicationLoader implements ServletContextListener, HttpSessionListener {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 
-    private final SpringContextLoader contextLoader;
+    private final SessionManager sessionManager = new SessionManager();
 
     private String applicationName;
     private String applicationDescription;
 
-    public ApplicationLoader() {
-        contextLoader = new SpringContextLoader();
-    }
-
     @Override
     public void contextInitialized(final ServletContextEvent event) {
-        applicationName = System.getProperty(PSystemProperty.APPLICATION_NAME);
-        applicationDescription = System.getProperty(PSystemProperty.APPLICATION_DESCRIPTION);
+        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
+        applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION);
+
+        event.getServletContext().setAttribute("SESSION_MANAGER", sessionManager);
 
         printLicence();
-
-        contextLoader.initWebApplicationContext(event.getServletContext());
     }
 
     @Override
     public void contextDestroyed(final ServletContextEvent event) {
-        if (contextLoader != null) {
-            contextLoader.closeWebApplicationContext(event.getServletContext());
-        }
         printDestroyedBanner();
     }
 
     @Override
     public void sessionCreated(final HttpSessionEvent arg0) {
+        System.err.println("Session created (global Loader) " + arg0.getSession().getId());
         if (log.isDebugEnabled()) {
             log.debug("Session created #" + arg0.getSession().getId());
         }
@@ -78,8 +72,10 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
     @Override
     public void sessionDestroyed(final HttpSessionEvent arg0) {
-        final PonyApplicationSession applicationSession = (PonyApplicationSession) arg0.getSession().getAttribute(PonyApplicationSession.class.getCanonicalName());
-        applicationSession.fireSessionDestroyed(arg0);
+        System.err.println("Session destroyed (global Loader) " + arg0.getSession().getId());
+
+        final Application applicationSession = (Application) arg0.getSession().getAttribute(Application.class.getCanonicalName());
+        applicationSession.fireSessionDestroyed();
     }
 
     private void printDestroyedBanner() {

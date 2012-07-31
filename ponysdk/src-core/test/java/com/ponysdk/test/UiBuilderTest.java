@@ -37,8 +37,8 @@ import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEventHandler;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.test.UiBuilderTestEntryPoint.RequestHandler;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
@@ -88,7 +88,7 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class UiBuilderTest {
 
     @SuppressWarnings("rawtypes")
-    private class PTestEvent extends PBusinessEvent {
+    private class PTestEvent extends BusinessEvent {
 
         public PTestEvent(final Object sourceComponent, final String msg) {
             super(sourceComponent);
@@ -101,7 +101,7 @@ public class UiBuilderTest {
         }
 
         @Override
-        protected void dispatch(final PEventHandler handler) {}
+        protected void dispatch(final EventHandler handler) {}
 
     }
 

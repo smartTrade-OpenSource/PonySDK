@@ -25,11 +25,11 @@ package com.ponysdk.ui.server.basic.event;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 
 public interface HasPClickHandlers {
 
-    PHandlerRegistration addClickHandler(PClickHandler handler);
+    HandlerRegistration addClickHandler(PClickHandler handler);
 
     Collection<PClickHandler> getClickHandlers();
 }

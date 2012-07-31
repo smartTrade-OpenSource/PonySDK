@@ -48,7 +48,7 @@ public abstract class PComplexPanel extends PPanel {
 
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.INDEX, beforeIndex);
-        getPonySession().stackInstruction(add);
+        getUIContext().stackInstruction(add);
     }
 
     @Override
@@ -58,7 +58,7 @@ public abstract class PComplexPanel extends PPanel {
         getChildren().remove(w);
 
         final Remove remove = new Remove(w.getID(), getID());
-        getPonySession().stackInstruction(remove);
+        getUIContext().stackInstruction(remove);
 
         return true;
     }

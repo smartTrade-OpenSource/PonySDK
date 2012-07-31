@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.event.PEventHandler;
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.query.CriterionField;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.query.memory.FilteringTools;
@@ -505,13 +505,13 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public PHandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         for (final PTextBoxBase field : fields) {
             field.addKeyPressHandler(handler);
         }
         keypPressHandlers.add(handler);
 
-        return new PHandlerRegistration() {
+        return new HandlerRegistration() {
 
             @Override
             public void removeHandler() {
@@ -562,7 +562,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     @Override
-    public <H extends PEventHandler> void addDomHandler(final H handler, final Type<H> type) {
+    public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         for (final PTextBoxBase field : fields) {
             field.addDomHandler(handler, type);
         }

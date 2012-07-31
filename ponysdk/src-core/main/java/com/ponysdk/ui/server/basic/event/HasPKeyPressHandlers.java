@@ -25,11 +25,11 @@ package com.ponysdk.ui.server.basic.event;
 
 import java.util.Collection;
 
-import com.ponysdk.core.event.PHandlerRegistration;
+import com.ponysdk.core.event.HandlerRegistration;
 
 public interface HasPKeyPressHandlers {
 
-    PHandlerRegistration addKeyPressHandler(PKeyPressHandler handler);
+    HandlerRegistration addKeyPressHandler(PKeyPressHandler handler);
 
     Collection<PKeyPressHandler> getKeyPressHandlers();
 }

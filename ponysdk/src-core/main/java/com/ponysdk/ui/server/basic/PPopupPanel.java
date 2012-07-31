@@ -124,21 +124,21 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void setModal(final boolean modal) {
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_MODAL, modal);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_GLASS_ENABLED, glassEnabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
             final Update update = new Update(ID);
             update.put(PROPERTY.POPUP_DRAGGABLE, true);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -147,7 +147,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
         update.put(PROPERTY.ANIMATION, animationEnabled);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void center() {
@@ -156,7 +156,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_CENTER, center);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void show() {
@@ -164,7 +164,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             this.showing = true;
             final Update update = new Update(ID);
             update.put(PROPERTY.POPUP_SHOW, showing);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -173,7 +173,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             this.showing = false;
             final Update update = new Update(ID);
             update.put(PROPERTY.POPUP_HIDE, showing);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -181,7 +181,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         this.glassStyleName = glassStyleName;
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_GLASS_STYLE_NAME, glassStyleName);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -206,7 +206,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         update.put(PROPERTY.POPUP_POSITION_LEFT, leftPosition);
         update.put(PROPERTY.POPUP_POSITION_TOP, topPosition);
 
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setPopupPositionAndShow(final PPositionCallback callback) {
@@ -214,7 +214,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         this.showing = true;
 
         final AddHandler handler = new AddHandler(ID, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
-        getPonySession().stackInstruction(handler);
+        getUIContext().stackInstruction(handler);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {

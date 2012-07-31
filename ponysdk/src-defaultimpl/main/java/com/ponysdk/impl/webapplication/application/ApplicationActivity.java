@@ -47,10 +47,21 @@ public class ApplicationActivity implements Activity {
 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
-        menuActivity.start(applicationView.getMenu(), place);
-        headerActivity.start(applicationView.getHeader(), place);
-        footerActivity.start(applicationView.getFooter(), place);
-        notificationActivity.start(applicationView.getLogs(), place);
+        if (applicationView.getMenu() != null) {
+            menuActivity.start(applicationView.getMenu(), place);
+        }
+
+        if (applicationView.getHeader() != null) {
+            headerActivity.start(applicationView.getHeader(), place);
+        }
+
+        if (applicationView.getFooter() != null) {
+            footerActivity.start(applicationView.getFooter(), place);
+        }
+
+        if (applicationView.getLogs() != null) {
+            notificationActivity.start(applicationView.getLogs(), place);
+        }
 
         if (place instanceof PagePlace) {
             final PagePlace pagePlace = (PagePlace) place;

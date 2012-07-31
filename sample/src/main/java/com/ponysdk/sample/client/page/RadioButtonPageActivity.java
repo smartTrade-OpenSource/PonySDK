@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRadioButton;
@@ -76,7 +76,7 @@ public class RadioButtonPageActivity extends SamplePageActivity {
             public void onValueChange(final PValueChangeEvent<Boolean> event) {
                 PRadioButton radioButton = (PRadioButton) event.getSource();
                 String msg = "Value changed : name = " + radioButton.getName() + " caption = " + radioButton.getText() + " value = " + radioButton.getValue();
-                PonySession.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         };
 

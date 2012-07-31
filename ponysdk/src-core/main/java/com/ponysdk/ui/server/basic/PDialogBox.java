@@ -80,7 +80,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
         this.caption = caption;
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_CAPTION, caption);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public String getCaption() {

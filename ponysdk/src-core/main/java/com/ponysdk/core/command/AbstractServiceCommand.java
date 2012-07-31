@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.PonySession;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.command.event.ServiceFailedEvent;
-import com.ponysdk.core.event.PEventBus;
+import com.ponysdk.core.event.EventBus;
 
 public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Command<T> {
 
@@ -40,17 +40,17 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
 
     private final Set<AsyncCallback<T>> callbacks = new HashSet<AsyncCallback<T>>();
 
-    private final PEventBus eventBus;
+    private final EventBus eventBus;
 
     private Throwable caught;
 
-    private long executionTime = 0;
+    protected long executionTime = 0;
 
     public AbstractServiceCommand() {
-        this(PonySession.getRootEventBus());
+        this(UIContext.getRootEventBus());
     }
 
-    public AbstractServiceCommand(final PEventBus eventBus) {
+    public AbstractServiceCommand(final EventBus eventBus) {
         this.eventBus = eventBus;
     }
 

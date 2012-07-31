@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.export.event;
 
-import com.ponysdk.core.event.PBusinessEvent;
-import com.ponysdk.core.event.PEvent;
+import com.ponysdk.core.event.BusinessEvent;
+import com.ponysdk.core.event.Event;
 import com.ponysdk.core.export.Exporter;
 
-public class DataExportedEvent extends PBusinessEvent<DataExportedHandler> {
+public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
 
-    public static final PEvent.Type<DataExportedHandler> TYPE = new PEvent.Type<DataExportedHandler>();
+    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<DataExportedHandler>();
 
     private final Exporter<?> exporter;
 
@@ -44,7 +44,7 @@ public class DataExportedEvent extends PBusinessEvent<DataExportedHandler> {
     }
 
     @Override
-    public PEvent.Type<DataExportedHandler> getAssociatedType() {
+    public Event.Type<DataExportedHandler> getAssociatedType() {
         return TYPE;
     }
 
