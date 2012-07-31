@@ -34,11 +34,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.PonySession;
-import com.ponysdk.core.event.PEvent;
-import com.ponysdk.core.event.PEventHandler;
-import com.ponysdk.core.event.PHandlerRegistration;
-import com.ponysdk.core.event.PSimpleEventBus;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
@@ -81,16 +81,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> styleProperties = new HashMap<String, String>();
 
-    private final PSimpleEventBus domHandler = new PSimpleEventBus();
+    private final SimpleEventBus domHandler = new SimpleEventBus();
 
     private String title;
     private String width;
     private String height;
     private String styleName;
     private String debugID;
-
-    private boolean draggable;
-    private boolean dropTarget;
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
@@ -99,13 +96,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
     protected void stackUpdate(final String key, final int value) {
         final Update update = new Update(getID());
         update.put(key, value);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     protected void stackUpdate(final String key, final String value) {
         final Update update = new Update(getID());
         update.put(key, value);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setWidth(final String width) {
@@ -131,21 +128,21 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setStyleName(final String styleName) {
         this.styleName = styleName;
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_NAME, styleName);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void addStyleName(final String styleName) {
         if (styleNames.add(styleName)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.ADD_STYLE_NAME, styleName);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -153,7 +150,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (styleNames.remove(styleName)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.REMOVE_STYLE_NAME, styleName);
-            getPonySession().stackInstruction(update);
+            getUIContext().stackInstruction(update);
         }
     }
 
@@ -161,7 +158,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.debugID = debugID;
         final Update update = new Update(ID);
         update.put(PROPERTY.ENSURE_DEBUG_ID, debugID);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     @Override
@@ -178,14 +175,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.visible = visible;
         final Update update = new Update(ID);
         update.put(PROPERTY.WIDGET_VISIBLE, visible);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setTitle(final String title) {
         this.title = title;
         final Update update = new Update(ID);
         update.put(PROPERTY.WIDGET_TITLE, title);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public String getTitle() {
@@ -200,19 +197,19 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.data = data;
     }
 
-    public <H extends PEventHandler> PHandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
         if (handler instanceof JSONObject) {
             removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
         }
-        getPonySession().stackInstruction(removeHandler);
+        getUIContext().stackInstruction(removeHandler);
         return handlerRegistration;
     }
 
     @SuppressWarnings("unchecked")
-    public <H extends PEventHandler> PHandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final PHandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
         addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
         if (handler instanceof JSONObject) {
@@ -226,7 +223,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 log.error("Failed to copy value", e);
             }
         }
-        getPonySession().stackInstruction(addHandler);
+        getUIContext().stackInstruction(addHandler);
         return handlerRegistration;
     }
 
@@ -287,7 +284,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
                     if (instruction.has(PROPERTY.DRAG_SRC)) {
-                        final PWidget source = PonySession.getCurrent().getObject(instruction.getLong(PROPERTY.DRAG_SRC));
+                        final PWidget source = UIContext.get().getObject(instruction.getLong(PROPERTY.DRAG_SRC));
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -299,11 +296,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    protected <H extends PEventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
+    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
         return domHandler.getHandlerSet(type, null);
     }
 
-    public void fireEvent(final PEvent<?> event) {
+    public void fireEvent(final Event<?> event) {
         domHandler.fireEvent(event);
     }
 
