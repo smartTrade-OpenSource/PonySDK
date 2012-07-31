@@ -26,6 +26,8 @@ package com.ponysdk.ui.terminal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -44,7 +46,7 @@ import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
-    // private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+    private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
 
     protected WebSocketClient socketClient;
 
@@ -58,8 +60,8 @@ public class CommunicationEntryPoint implements EntryPoint {
 
             @Override
             public void onUncaughtException(final Throwable e) {
-                // Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
-                // log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
+                log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
+                Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
             }
         });
 
