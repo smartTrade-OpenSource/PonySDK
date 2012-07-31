@@ -37,7 +37,6 @@ public class PElement extends PComplexPanel {
 
     public PElement(final String tagName) {
         super();
-
         this.tagName = tagName;
         this.create.put(PROPERTY.TAG, tagName);
     }
@@ -56,7 +55,7 @@ public class PElement extends PComplexPanel {
 
         final Update update = new Update(ID);
         update.put(PROPERTY.INNER_HTML, innerTxt);
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public void setInnerText(final String innerTxt) {
@@ -69,7 +68,7 @@ public class PElement extends PComplexPanel {
             update.put(PROPERTY.INNER_TEXT, innerTxt);
         }
 
-        getPonySession().stackInstruction(update);
+        getUIContext().stackInstruction(update);
     }
 
     public String getInnerTxt() {
