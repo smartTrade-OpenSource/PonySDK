@@ -2,21 +2,20 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-srcCore = 'src-core/main/java';
-srcDefaultimpl = 'src-defaultimpl/main/java';
-srcGenerator = 'src-generator/main/java';
-srcGenerated = 'src-generated/main/java';
-srcJetty = 'src-jetty/main/java';
-srcSpring = 'src-spring/main/java';
-srcPersistency = 'src-persistency/main/java';
-srcHibernate = 'src-hibernate/main/java';
-srcMongoDB = 'src-mongodb/main/java';
-srcJasper = 'src-jasper/main/java';
-
-gwtOutputDirName = buildDir.name + '/gwt';
-warResources = 'src-core/main/resources/war';
-confResources = 'src-core/main/resources/conf';
-javadocResources = 'src-core/main/javadoc';
+project.ext.srcCore = 'src-core/main/java';
+project.ext.srcDefaultimpl = 'src-defaultimpl/main/java';
+project.ext.srcGenerator = 'src-generator/main/java';
+project.ext.srcGenerated = 'src-generated/main/java';
+project.ext.srcJetty = 'src-jetty/main/java';
+project.ext.srcSpring = 'src-spring/main/java';
+project.ext.srcPersistency = 'src-persistency/main/java';
+project.ext.srcHibernate = 'src-hibernate/main/java';
+project.ext.srcMongoDB = 'src-mongodb/main/java';
+project.ext.srcJasper = 'src-jasper/main/java';
+project.ext.gwtOutputDirName = buildDir.name + '/gwt';
+project.ext.warResources = 'src-core/main/resources/war';
+project.ext.confResources = 'src-core/main/resources/conf';
+project.ext.javadocResources = 'src-core/main/javadoc';
 
 sourceSets {
 	main {
@@ -87,24 +86,19 @@ dependencies {
 	selenium 'org.seleniumhq.selenium:selenium-java:2.21.0'
 	selenium 'junit:junit:4.10'  
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
-    jetty 'org.eclipse.jetty:jetty-server:8.1.3.v20120416'
-    jetty 'org.eclipse.jetty:jetty-servlet:8.1.3.v20120416'
-    jetty 'org.eclipse.jetty:jetty-webapp:8.1.3.v20120416'
-    jetty 'org.eclipse.jetty:jetty-servlets:8.1.3.v20120416'
+    jetty 'org.eclipse.jetty:jetty-server:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-servlet:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-webapp:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-servlets:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
-    jetty 'org.eclipse.jetty:jetty-websocket:8.1.3.v20120416'
 }
-
 manifest {
 	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
 }
 
 jar {
 	baseName = 'ponysdk'
-	doLast {
-		tasks.jarSource.execute()
-	}
-    
     from sourceSets.main.output
     from gwtOutputDirName
     from warResources
@@ -124,10 +118,8 @@ task cleanGenerated(type: Delete) {
 
 task generateDatamodel {
 	description = 'Model generation'
-	srcFile = file('src-core/main/resources/spec/project_schema.xsd')
-	destDir = file(srcGenerated)
-	inputs.file srcFile
-	outputs.dir destDir
+	inputs.file file('src-core/main/resources/spec/project_schema.xsd')
+	outputs.dir file(srcGenerated)
 	doLast {
 		file(srcGenerated).mkdirs();
 		ant {
@@ -148,7 +140,7 @@ task compileDatamodel(type: Compile) {
 }
 
 task compileGenerator(type: Compile) {
-	classpath = files("$buildDir/output/classes/main") + configurations.gwt + configurations.sl4j
+	classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
 	source = srcGenerator
 	destinationDir = file("$buildDir/classes/main")
 }
@@ -173,8 +165,7 @@ task gwtc(type: JavaExec) {
 	main = 'com.google.gwt.dev.Compiler'
 	maxHeapSize = '512M'
 	workingDir = buildDir
-	workers = Runtime.getRuntime().availableProcessors()
-	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
+	project.ext.workers = Runtime.getRuntime().availableProcessors()
 	inputs.dir file('src-core/main/java/com/ponysdk/ui/terminal')
 	outputs.dir file(gwtOutputDirName)
 	classpath {
@@ -196,16 +187,10 @@ task gwtc(type: JavaExec) {
 task generate {
 	inputs.file files('src-core/main/resources/spec')
 	outputs.dir file(srcGenerated)
-	doLast {
-		tasks.generateDatamodel.execute()
-		tasks.compileDatamodel.execute()
-		tasks.compileGenerator.execute()
-		tasks.generateDictionnary.execute()
-	}
 }
 
 
-javadoc{
+/**javadoc{
     title = 'PonySDK javadoc'
     excludes = ['com.ponysdk.ui.terminal']
     doLast {
@@ -214,10 +199,12 @@ javadoc{
             into buildDir.name + '/docs/javadoc';
         }
     }
-}
+}**/
 
-task jarSource(type: Jar){
-	baseName = 'ponysdk-src'
+
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn:classes) {
+    baseName = 'ponysdk-src'
 	from sourceSets.main.allJava
 	from(srcCore) {
 		include '**/*.xml'
@@ -226,6 +213,29 @@ task jarSource(type: Jar){
 		include '**/*.xml'
 	}
 }
+ 
+task javadocJar(type: Jar, dependsOn:javadoc) {
+     classifier = 'javadoc'
+     from javadoc.destinationDir
+     /**
+     title = 'PonySDK javadoc'
+    excludes = ['com.ponysdk.ui.terminal']
+    doLast {
+        copy {
+            from javadocResources
+            into buildDir.name + '/docs/javadoc';
+        }
+    }
+     **/
+}
+ 
+// add javadoc/source jar tasks as artifacts
+artifacts {
+     archives sourcesJar
+     archives javadocJar
+}
+
+
 
 task copyAllLibs << {
 	println 'Copying all libs'
@@ -274,6 +284,11 @@ task copyAllLibs << {
 	    into 'libs/commons'
 	}
 }
+
+generate.dependsOn(generateDictionnary)
+generateDictionnary.dependsOn(compileGenerator)
+compileGenerator.dependsOn(compileDatamodel)
+compileDatamodel.dependsOn(generateDatamodel)
 
 clean.dependsOn(cleanGenerated)
 compileJava.dependsOn(generate)

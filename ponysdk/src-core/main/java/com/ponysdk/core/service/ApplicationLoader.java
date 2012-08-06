@@ -64,7 +64,6 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
     @Override
     public void sessionCreated(final HttpSessionEvent arg0) {
-        System.err.println("Session created (global Loader) " + arg0.getSession().getId());
         if (log.isDebugEnabled()) {
             log.debug("Session created #" + arg0.getSession().getId());
         }
@@ -72,8 +71,6 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
     @Override
     public void sessionDestroyed(final HttpSessionEvent arg0) {
-        System.err.println("Session destroyed (global Loader) " + arg0.getSession().getId());
-
         final Application applicationSession = (Application) arg0.getSession().getAttribute(Application.class.getCanonicalName());
         applicationSession.fireSessionDestroyed();
     }

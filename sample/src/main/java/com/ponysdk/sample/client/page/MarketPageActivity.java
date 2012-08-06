@@ -43,6 +43,8 @@ public class MarketPageActivity extends PageActivity {
     @Override
     protected void onFirstShowPage() {
 
+        PPusher.initialize();
+
         final FindCurrenciesCommand currenciesCommand = new FindCurrenciesCommand();
 
         for (final MarketData md : currenciesCommand.execute()) {

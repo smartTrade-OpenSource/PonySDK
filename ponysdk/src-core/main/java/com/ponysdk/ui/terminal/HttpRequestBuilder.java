@@ -28,6 +28,7 @@ public class HttpRequestBuilder extends RequestBuilder {
 
                 @Override
                 public void onResponseReceived(final Request request, final Response response) {
+                    if (response.getText() == null || response.getText().isEmpty()) return;
                     callback.onDataReceived(JSONParser.parseLenient(response.getText()).isObject());
                 }
 

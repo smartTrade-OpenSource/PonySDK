@@ -2,13 +2,10 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-srcSample = 'src/main/java'
-srcGenerated = 'src-generated/main/java'
-
-ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
-
-//warOutputDirName = buildDir.name + '/war';
-packageOutputDirName = buildDir.name + '/package';
+project.ext.srcSample = 'src/main/java'
+project.ext.srcGenerated = 'src-generated/main/java'
+project.ext.ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
+project.ext.packageOutputDirName = buildDir.name + '/package';
 
 repositories {
     mavenCentral()
@@ -58,7 +55,6 @@ task generate{
 task generateSkeleton(type: JavaExec) {
 	description = 'Generate skeletons'
 	main = 'com.ponysdk.generator.Generator'
-	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
 	inputs.dir file('spec')
 	outputs.dir file(srcGenerated)
 	classpath {
@@ -76,7 +72,6 @@ task generateSkeleton(type: JavaExec) {
 task generateProxyBuilder(type: JavaExec) {
 	description = 'Generate spring proxybuilder'
 	main = 'com.ponysdk.spring.ProxyBuilderGenerator'
-	outputs.upToDateSpec = new org.gradle.api.specs.AndSpec() // GRADLE-1483
 	inputs.dir file('spec')
 	outputs.dir file(srcGenerated)
 	classpath {
@@ -105,7 +100,7 @@ task copyAllLibs << {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '1.0-milestone-6'
+    gradleVersion = '1.1'
 }
 
 task createPackage << {
