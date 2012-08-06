@@ -25,11 +25,21 @@ package com.ponysdk.core.main;
 
 import java.io.IOException;
 
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.service.ApplicationLoader;
+import com.ponysdk.core.servlet.BootstrapServlet;
+import com.ponysdk.core.servlet.StreamServiceServlet;
+import com.ponysdk.core.servlet.WebSocketServlet;
+import com.ponysdk.spring.service.SpringApplicationLoader;
+import com.ponysdk.spring.servlet.SpringHttpServlet;
 
 public class Main {
 
@@ -63,17 +73,38 @@ public class Main {
 
     public void start() throws Exception {
 
+        Handler handler;
+        if (war == null || war.isEmpty()) {
+            handler = loadServletContext();
+        } else {
+            handler = loadWar();
+        }
+
         if (port != null) {
-            webServer = new org.eclipse.jetty.server.Server(port);
+            webServer = new Server(port);
         } else {
             webServer = new Server();
         }
-
-        addWebApplication();
+        webServer.setHandler(handler);
         webServer.start();
     }
 
-    private void addWebApplication() throws IOException {
+    private ServletContextHandler loadServletContext() {
+        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/" + applicationContextName);
+        context.addServlet(new ServletHolder(new SpringHttpServlet()), "/ponyterminal/p");
+        context.addServlet(new ServletHolder(new StreamServiceServlet()), "/ponyterminal/stream");
+        context.addServlet(new ServletHolder(new WebSocketServlet()), "/ws/*");
+        context.addServlet(new ServletHolder(new BootstrapServlet()), "/*");
+
+        final ApplicationLoader applicationLoader = new SpringApplicationLoader();
+        context.addEventListener(applicationLoader);
+        context.getSessionHandler().addEventListener(applicationLoader);
+        return context;
+    }
+
+    public Handler loadWar() throws IOException {
+
         final WebAppContext webapp = new WebAppContext();
         if (applicationContextName != null) {
             webapp.setContextPath("/" + applicationContextName);
@@ -83,12 +114,11 @@ public class Main {
         }
 
         webapp.setWar(war);
-
         webapp.setExtractWAR(true);
         webapp.setParentLoaderPriority(true);
         webapp.setClassLoader(new WebAppClassLoader(Main.class.getClassLoader(), webapp));
 
-        webServer.setHandler(webapp);
+        return webapp;
     }
 
     public void setPort(final Integer port) {

@@ -7,7 +7,7 @@ import com.ponysdk.core.service.ApplicationLoader;
 
 public class SpringApplicationLoader extends ApplicationLoader {
 
-    private final SpringContextLoader contextLoader = new SpringContextLoader();;
+    private final SpringContextLoader contextLoader = new SpringContextLoader();
 
     @Override
     public void contextInitialized(final ServletContextEvent event) {

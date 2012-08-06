@@ -7,7 +7,6 @@ srcGenerated = 'src-generated/main/java'
 
 ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
 
-//warOutputDirName = buildDir.name + '/war';
 packageOutputDirName = buildDir.name + '/package';
 
 repositories {

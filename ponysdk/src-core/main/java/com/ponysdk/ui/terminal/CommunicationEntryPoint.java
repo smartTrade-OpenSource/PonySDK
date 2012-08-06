@@ -42,16 +42,12 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
-import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
     private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
 
-    protected WebSocketClient socketClient;
-
     protected RequestBuilder requestBuilder;
-
     protected UIBuilder uiBuilder;
 
     @Override

@@ -3,42 +3,40 @@
     PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
+
 	<listener>
-		<listener-class>com.ponysdk.core.service.ApplicationLoader</listener-class>
+		<listener-class>com.ponysdk.spring.service.SpringApplicationLoader</listener-class>
 	</listener>
 
-	<!-- Servlets -->
 	<servlet>
-		<servlet-name>PonyEngineServlet</servlet-name>
-		<servlet-class>com.ponysdk.spring.SpringPonyEngineServiceImpl</servlet-class>
+		<servlet-name>PonyWebSocketServlet</servlet-name>
+		<servlet-class>com.ponysdk.core.servlet.WebSocketServlet</servlet-class>
 		<load-on-startup>0</load-on-startup>
 	</servlet>
-
 	<servlet>
-		<servlet-name>StreamServiceServlet</servlet-name>
-		<servlet-class>com.ponysdk.core.StreamServiceServlet</servlet-class>
+		<servlet-name>PonyHttpServlet</servlet-name>
+		<servlet-class>com.ponysdk.spring.servlet.SpringHttpServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>PonyBootstrapServlet</servlet-name>
-		<servlet-class>com.ponysdk.core.PonyBootstrapServlet</servlet-class>
+		<servlet-class>com.ponysdk.core.servlet.BootstrapServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>PonyEngineServlet</servlet-name>
+		<servlet-name>PonyHttpServlet</servlet-name>
 		<url-pattern>/ponyterminal/p</url-pattern>
 	</servlet-mapping>
-
 	<servlet-mapping>
-		<servlet-name>StreamServiceServlet</servlet-name>
-		<url-pattern>/ponyterminal/stream</url-pattern>
+		<servlet-name>PonyWebSocketServlet</servlet-name>
+		<url-pattern>/ws/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>PonyBootstrapServlet</servlet-name>
-		<url-pattern>/</url-pattern>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
-	
+
 </web-app>

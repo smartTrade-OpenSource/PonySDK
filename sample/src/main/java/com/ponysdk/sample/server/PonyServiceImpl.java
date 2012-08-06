@@ -74,7 +74,7 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
                     listener.onMessage(price);
                 }
             }
-        }, 1000, 100);
+        }, 1000, 10);
     }
 
     @Override

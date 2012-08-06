@@ -1,9 +1,6 @@
 
 package com.ponysdk.core.servlet;
 
-import java.io.IOException;
-import java.io.Reader;
-
 import javax.servlet.ServletException;
 
 import org.json.JSONArray;
@@ -26,11 +23,11 @@ public abstract class AbstractApplicationManager {
 
     public void process(final Request request, final Response response) throws Exception {
 
-        final Reader reader = request.getReader();
-        final String readFully = readFully(reader);
-        System.err.println(readFully);
+        // final Reader reader = request.getReader();
+        // final String readFully = readFully(reader);
+        // System.err.println(readFully);
 
-        final JSONObject data = new JSONObject(new JSONTokener(readFully));
+        final JSONObject data = new JSONObject(new JSONTokener(request.getReader()));
         if (data.has(APPLICATION.KEY)) {
             startApplication(data, request, response);
         } else {
@@ -38,17 +35,17 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    public static String readFully(final Reader reader) throws IOException {
-        final char[] arr = new char[8 * 1024];
-        final StringBuffer buf = new StringBuffer();
-        int numChars;
-
-        while ((numChars = reader.read(arr, 0, arr.length)) > 0) {
-            buf.append(arr, 0, numChars);
-        }
-
-        return buf.toString();
-    }
+    // public static String readFully(final Reader reader) throws IOException {
+    // final char[] arr = new char[8 * 1024];
+    // final StringBuffer buf = new StringBuffer();
+    // int numChars;
+    //
+    // while ((numChars = reader.read(arr, 0, arr.length)) > 0) {
+    // buf.append(arr, 0, numChars);
+    // }
+    //
+    // return buf.toString();
+    // }
 
     public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
         final JSONObject jsonObject = new JSONObject();

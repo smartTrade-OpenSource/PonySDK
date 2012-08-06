@@ -38,7 +38,6 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.place.LoginPlace;
 import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
@@ -65,7 +64,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, Ini
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
         PRootLayoutPanel.get().add(panel);
 
-        PPusher.initialize();
+        // PPusher.initialize();
 
         final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);

@@ -27,30 +27,32 @@ public class WebSocketClient {
                                               }-*/;
 
     public native void connect(String server) /*-{
+                                              
                                               var that = this;
                                               if (!$wnd.WebSocket) {
-                                              alert("WebSocket connections not supported by this browser");
-                                              return;
+                                                  alert("WebSocket connections not supported by this browser");
+                                                  return;
                                               }
-                                              that._ws=new $wnd.WebSocket(server);
+
+                                              that._ws = new $wnd.WebSocket(server);
 
                                               that._ws.onopen = function() {
-                                              if(!that._ws) {
-                                              return;
-                                              }
-                                              that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onopen()();
+                                                  if(!that._ws) {
+                                                      return;
+                                                  }
+                                                  that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onopen()();
                                               };
 
-
                                               that._ws.onmessage = function(response) {
-                                              if (response.data) {
-                                              that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( response.data );
-                                              }
+                                                  if (response.data) {
+                                                      that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( response.data );
+                                                  }
                                               };
 
                                               that._ws.onclose = function(m) {
-                                              that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onclose()();
+                                                  that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onclose()();
                                               };
+                                              
                                               }-*/;
 
     public native void send(String message) /*-{
