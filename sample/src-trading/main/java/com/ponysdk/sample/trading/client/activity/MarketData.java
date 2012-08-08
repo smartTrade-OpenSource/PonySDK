@@ -1,5 +1,5 @@
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.sample.trading.client.activity;
 
 public class MarketData {
 

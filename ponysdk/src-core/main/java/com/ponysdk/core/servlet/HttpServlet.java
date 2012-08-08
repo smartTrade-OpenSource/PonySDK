@@ -37,12 +37,13 @@ import com.ponysdk.ui.server.basic.PHistory;
 @SuppressWarnings("serial")
 public class HttpServlet extends AbstractHttpServlet {
 
+    private String entryPointClassName;
+
     @Override
     public void init() throws ServletException {
         super.init();
 
-        final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
-
+        if (entryPointClassName == null || entryPointClassName.isEmpty()) entryPointClassName = getServletConfig().getInitParameter("entryPoint");
         if (entryPointClassName == null || entryPointClassName.isEmpty()) throw new ServletException("The entry point must be defined in your web.xml.");
     }
 
@@ -53,7 +54,7 @@ public class HttpServlet extends AbstractHttpServlet {
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) throws ServletException {
                 EntryPoint entryPoint = null;
-                final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
+                // final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
                 try {
                     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                     final Class<?> clazz = classLoader.loadClass(entryPointClassName);
@@ -79,4 +80,7 @@ public class HttpServlet extends AbstractHttpServlet {
         };
     }
 
+    public void setEntryPointClassName(final String entryPointClassName) {
+        this.entryPointClassName = entryPointClassName;
+    }
 }

@@ -16,12 +16,11 @@ repositories {
 
 configurations {
 	java2html
-	highcharts
 	compile {
-		extendsFrom java2html, highcharts
+		extendsFrom java2html
 	}
 	runtime {
-		extendsFrom java2html, highcharts
+		extendsFrom java2html
 	}
 }
 
@@ -46,7 +45,7 @@ task cleanGenerated(type: Delete){
 }
 
 task cleanDebug(type: Delete) {
-  delete 'war/ponyterminal', 'war/WEB-INF/deploy'
+  delete 'debug'
 }
 
 task generate{
@@ -55,7 +54,7 @@ task generate{
 task generateSkeleton(type: JavaExec) {
 	description = 'Generate skeletons'
 	main = 'com.ponysdk.generator.Generator'
-	inputs.dir file('spec')
+	inputs.dir file('src/main/resources/spec')
 	outputs.dir file(srcGenerated)
 	classpath {
 		[
@@ -64,7 +63,7 @@ task generateSkeleton(type: JavaExec) {
 		]
 	}
 	args = [
-		'spec',
+		'src/main/resources/spec',
 		srcGenerated
 		]
 }
@@ -72,7 +71,7 @@ task generateSkeleton(type: JavaExec) {
 task generateProxyBuilder(type: JavaExec) {
 	description = 'Generate spring proxybuilder'
 	main = 'com.ponysdk.spring.ProxyBuilderGenerator'
-	inputs.dir file('spec')
+	inputs.dir file('src/main/resources/spec')
 	outputs.dir file(srcGenerated)
 	classpath {
 		[
@@ -82,7 +81,24 @@ task generateProxyBuilder(type: JavaExec) {
 		]
 	}
 	args = [
-		'spec',
+		'src/main/resources/spec',
+		srcGenerated
+		]
+}
+
+task generateSkeleton2(type: JavaExec) {
+	description = 'Generate skeletons trading sample'
+	main = 'com.ponysdk.generator.Generator'
+	inputs.dir file('src-trading/main/resources/spec')
+	outputs.dir file(srcGenerated)
+	classpath {
+		[
+			project(':ponysdk').sourceSets.main.output,
+			project(':ponysdk').configurations.sl4j
+		]
+	}
+	args = [
+		'src-trading/main/resources/spec',
 		srcGenerated
 		]
 }
@@ -92,10 +108,6 @@ task copyAllLibs << {
 	copy {
 		from configurations.java2html
 		into 'libs/java2html'
-	}
-	copy {
-		from configurations.highcharts
-		into 'libs/highcharts'
 	}
 }
 
@@ -115,7 +127,6 @@ task createPackage << {
 	
 	copy {
 		from configurations.java2html
-		from configurations.highcharts
 		from project(':ponysdk').configurations.sl4j
 		from project(':ponysdk').configurations.spring
 		from project(':ponysdk').configurations.gwt
@@ -159,6 +170,7 @@ jar {
 
 assemble.dependsOn(copyAllLibs)
 generate.dependsOn(generateSkeleton)
+generate.dependsOn(generateSkeleton2)
 generate.dependsOn(generateProxyBuilder)
 compileJava.dependsOn(generate)
 generate.dependsOn(cleanGenerated)

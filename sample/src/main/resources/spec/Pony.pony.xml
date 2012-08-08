@@ -21,12 +21,6 @@
 				<parameter name="id" class="java.lang.Long" />
 				<return class="java.lang.Void" />
 			</method>
-			<pushmethod name="price" type="com.ponysdk.sample.client.page.MarketData">
-				<parameter name="currency" class="java.lang.String" />
-			</pushmethod>
-			<method name="findCurrencies">
-				<return class="java.util.List&lt;com.ponysdk.sample.client.page.MarketData&gt;" />
-			</method>
 		</service>
 		<crudevent>
 			<parameter name="pony" class="com.ponysdk.sample.client.datamodel.Pony" />

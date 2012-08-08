@@ -1,12 +1,12 @@
 
-package com.ponysdk.sample.client.page;
+package com.ponysdk.sample.trading.client.activity;
 
 import com.ponysdk.core.command.PushListener;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.sample.command.pony.FindCurrenciesCommand;
-import com.ponysdk.sample.command.pony.PriceCommand;
+import com.ponysdk.sample.trading.command.trading.FindCurrenciesCommand;
+import com.ponysdk.sample.trading.command.trading.PriceCommand;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PFlowPanel;
@@ -24,6 +24,8 @@ import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
 import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
 import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
 import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
+import com.ponysdk.ui.server.basic.event.PDragStartEvent;
+import com.ponysdk.ui.server.basic.event.PDragStartHandler;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 
@@ -42,8 +44,6 @@ public class MarketPageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
-
-        PPusher.initialize();
 
         final FindCurrenciesCommand currenciesCommand = new FindCurrenciesCommand();
 
@@ -144,6 +144,12 @@ public class MarketPageActivity extends PageActivity {
         box.add(sellDirection);
         box.add(spread);
 
+        box.addDomHandler(new PDragStartHandler() {
+
+            @Override
+            public void onDragStart(final PDragStartEvent event) {}
+        }, PDragStartEvent.TYPE);
+
         box.addDomHandler(new PDropHandler() {
 
             @Override
@@ -166,7 +172,6 @@ public class MarketPageActivity extends PageActivity {
                     box.addStyleName("dragenter");
                     if (currentDrag != null) currentDrag.removeStyleName("dragenter");
                     currentDrag = box;
-
                 }
             }
         }, PDragEnterEvent.TYPE);

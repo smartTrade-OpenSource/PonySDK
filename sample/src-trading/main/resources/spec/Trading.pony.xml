@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://pony-sdk.googlecode.com/files/project_schema-1.2.xsd">
+	<domain name="Trading" package="com.ponysdk.sample.trading">
+		<service>
+			<pushmethod name="price" type="com.ponysdk.sample.trading.client.activity.MarketData">
+				<parameter name="currency" class="java.lang.String" />
+			</pushmethod>
+			<method name="findCurrencies">
+				<return class="java.util.List&lt;com.ponysdk.sample.trading.client.activity.MarketData&gt;" />
+			</method>
+		</service>
+	</domain>
+</root>

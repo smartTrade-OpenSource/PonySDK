@@ -25,6 +25,10 @@ package com.ponysdk.core.main;
 
 import java.io.IOException;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpSessionListener;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -34,7 +38,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.service.ApplicationLoader;
 import com.ponysdk.core.servlet.BootstrapServlet;
 import com.ponysdk.core.servlet.StreamServiceServlet;
 import com.ponysdk.core.servlet.WebSocketServlet;
@@ -43,15 +46,23 @@ import com.ponysdk.spring.servlet.SpringHttpServlet;
 
 public class Main {
 
+    public static final String MAPPING_TERMINAL = "/ponyterminal/p";
+    public static final String MAPPING_BOOTSTRAP = "/*";
+    public static final String MAPPING_WS = "/ws/*";
+    public static final String MAPPING_STREAM = "/ponyterminal/stream";
+
     protected static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private Server webServer;
 
     private Integer port;
-
     private String war;
-
     private String applicationContextName;
+
+    private Servlet httpServlet;
+    private Servlet bootstrapServlet;
+    private ServletContextListener servletContextListener;
+    private HttpSessionListener httpSessionListener;
 
     public static void main(final String[] args) throws Exception {
         final Main main = new Main();
@@ -90,16 +101,26 @@ public class Main {
     }
 
     private ServletContextHandler loadServletContext() {
+
+        // set default value
+        if (httpServlet == null) httpServlet = new SpringHttpServlet();
+        if (bootstrapServlet == null) bootstrapServlet = new BootstrapServlet();
+        if (httpSessionListener == null && servletContextListener == null) {
+            final SpringApplicationLoader applicationLoader = new SpringApplicationLoader();
+            httpSessionListener = applicationLoader;
+            servletContextListener = applicationLoader;
+        }
+
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + applicationContextName);
-        context.addServlet(new ServletHolder(new SpringHttpServlet()), "/ponyterminal/p");
-        context.addServlet(new ServletHolder(new StreamServiceServlet()), "/ponyterminal/stream");
-        context.addServlet(new ServletHolder(new WebSocketServlet()), "/ws/*");
-        context.addServlet(new ServletHolder(new BootstrapServlet()), "/*");
+        context.addServlet(new ServletHolder(new StreamServiceServlet()), MAPPING_STREAM);
+        context.addServlet(new ServletHolder(new WebSocketServlet()), MAPPING_WS);
+        context.addServlet(new ServletHolder(bootstrapServlet), MAPPING_BOOTSTRAP);
+        context.addServlet(new ServletHolder(httpServlet), MAPPING_TERMINAL);
 
-        final ApplicationLoader applicationLoader = new SpringApplicationLoader();
-        context.addEventListener(applicationLoader);
-        context.getSessionHandler().addEventListener(applicationLoader);
+        context.addEventListener(servletContextListener);
+        context.getSessionHandler().addEventListener(httpSessionListener);
+
         return context;
     }
 
@@ -131,5 +152,21 @@ public class Main {
 
     public void setWar(final String war) {
         this.war = war;
+    }
+
+    public void setHttpServlet(final Servlet httpServlet) {
+        this.httpServlet = httpServlet;
+    }
+
+    public void setServletContextListener(final ServletContextListener servletContextListener) {
+        this.servletContextListener = servletContextListener;
+    }
+
+    public void setHttpSessionListener(final HttpSessionListener httpSessionListener) {
+        this.httpSessionListener = httpSessionListener;
+    }
+
+    public void setBootstrapServlet(final Servlet bootstrapServlet) {
+        this.bootstrapServlet = bootstrapServlet;
     }
 }

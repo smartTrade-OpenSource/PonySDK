@@ -58,6 +58,8 @@ public class BootstrapServlet extends HttpServlet {
     private final List<String> stylesheets = new ArrayList<String>();
     private final List<String> javascripts = new ArrayList<String>();
 
+    public BootstrapServlet() {}
+
     @Override
     public void init() throws ServletException {
         super.init();
@@ -196,5 +198,13 @@ public class BootstrapServlet extends HttpServlet {
 
         indexPage = builder.toString().getBytes();
         return indexPage;
+    }
+
+    public void addStylesheet(final String stylesheetPath) {
+        stylesheets.add(stylesheetPath);
+    }
+
+    public void addJavascript(final String javascriptPath) {
+        javascripts.add(javascriptPath);
     }
 }
