@@ -4,6 +4,7 @@ sourceCompatibility = 1.6
 
 project.ext.srcSample = 'src/main/java'
 project.ext.srcGenerated = 'src-generated/main/java'
+project.ext.srcTrading = 'src-trading/main/java'
 project.ext.ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
 project.ext.packageOutputDirName = buildDir.name + '/package';
 
@@ -36,6 +37,7 @@ sourceSets {
 		java {
 			srcDir srcSample
 			srcDir srcGenerated
+			srcDir srcTrading
 		}
 	}
 }
@@ -117,7 +119,7 @@ task createWrapper(type: Wrapper) {
 
 task createPackage << {
 
-	ponysdkWarResourcesPath = ponysdkPath + '/' + project(':ponysdk').warResources
+	project.ext.ponysdkWarResourcesPath = ponysdkPath + '/' + project(':ponysdk').warResources
 
 	println 'Building war'
 	println 'ponysdk path: ' + ponysdkPath
