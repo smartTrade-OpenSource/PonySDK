@@ -46,48 +46,42 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        try {
-            if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
-                uiObject.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
-            } else if (update.containsKey(PROPERTY.SPACING)) {
-                uiObject.setSpacing(update.getInt(PROPERTY.SPACING));
-            } else if (update.containsKey(PROPERTY.HORIZONTAL_ALIGNMENT)) {
-                final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.HORIZONTAL_ALIGNMENT)];
-                switch (horizontalAlignment) {
-                    case ALIGN_LEFT:
-                        uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-                        break;
-                    case ALIGN_CENTER:
-                        uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-                        break;
-                    case ALIGN_RIGHT:
-                        uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-                        break;
-                    default:
-                        break;
-                }
-            } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
-                final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.VERTICAL_ALIGNMENT)];
-                switch (verticalAlignment) {
-                    case ALIGN_TOP:
-                        uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-                        break;
-                    case ALIGN_MIDDLE:
-                        uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-                        break;
-                    case ALIGN_BOTTOM:
-                        uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                super.update(update, uiService);
+        if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
+            uiObject.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
+        } else if (update.containsKey(PROPERTY.SPACING)) {
+            uiObject.setSpacing(update.getInt(PROPERTY.SPACING));
+        } else if (update.containsKey(PROPERTY.HORIZONTAL_ALIGNMENT)) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.HORIZONTAL_ALIGNMENT)];
+            switch (horizontalAlignment) {
+                case ALIGN_LEFT:
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+                    break;
+                case ALIGN_CENTER:
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+                    break;
+                case ALIGN_RIGHT:
+                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+                    break;
+                default:
+                    break;
             }
-        } catch (final Exception e) {
-            int i;
-            i = 3;
+        } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.VERTICAL_ALIGNMENT)];
+            switch (verticalAlignment) {
+                case ALIGN_TOP:
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+                    break;
+                case ALIGN_MIDDLE:
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+                    break;
+                case ALIGN_BOTTOM:
+                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            super.update(update, uiService);
         }
     }
-
 }

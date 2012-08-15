@@ -7,9 +7,6 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.command.PushListener;
 import com.ponysdk.core.command.PushListenerMap;
 import com.ponysdk.core.event.HandlerRegistration;
@@ -17,8 +14,6 @@ import com.ponysdk.sample.trading.client.activity.MarketData;
 import com.ponysdk.sample.trading.service.trading.TradingService;
 
 public class TradingServiceImpl implements TradingService {
-
-    private static Logger log = LoggerFactory.getLogger(TradingServiceImpl.class);
 
     private final PushListenerMap<String, MarketData> listenerMap = new PushListenerMap<String, MarketData>();
 
