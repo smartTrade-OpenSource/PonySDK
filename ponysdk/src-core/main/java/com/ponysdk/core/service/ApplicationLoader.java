@@ -76,13 +76,21 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     }
 
     private void printDestroyedBanner() {
-        final int columnCount = applicationName.length() + 30;
+        String title;
+
+        if (applicationName == null) {
+            title = "Pony Application - Context Destroyed";
+        } else {
+            title = applicationName + " - Context Destroyed";
+        }
+
+        final int columnCount = title.length() + 5;
 
         final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
         bannerPrinter.appendNewEmptyLine(2);
         bannerPrinter.appendLineSeparator();
         bannerPrinter.appendNewLine(2);
-        bannerPrinter.appendCenteredLine(applicationName + " - Context Destroyed");
+        bannerPrinter.appendCenteredLine(title);
         bannerPrinter.appendNewLine(2);
         bannerPrinter.appendLineSeparator();
 

@@ -35,7 +35,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean name="menuActivity" class="com.ponysdk.impl.webapplication.menu.MenuActivity">
 		<property name="menuView" ref="menuView" />
 		<property name="pageProvider" ref="pageProvider" />
-		<property name="applicationActivity" ref="applicationActivity" />
 	</bean>
 
 	<bean name="footerView" class="com.ponysdk.impl.webapplication.footer.DefaultFooterView">

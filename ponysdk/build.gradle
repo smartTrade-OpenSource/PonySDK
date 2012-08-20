@@ -62,6 +62,7 @@ configurations {
 	runtime {
 		extendsFrom spring, sl4j, hibernate, mongodb, json_jackson
 	}
+    
 }
 
 dependencies {
@@ -83,8 +84,8 @@ dependencies {
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
-	selenium 'org.seleniumhq.selenium:selenium-java:2.21.0'
-	selenium 'junit:junit:4.10'  
+	selenium 'org.seleniumhq.selenium:selenium-java:2.25.0'
+	selenium 'junit:junit:4.10'
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
     jetty 'org.eclipse.jetty:jetty-server:8.1.4.v20120524'
     jetty 'org.eclipse.jetty:jetty-servlet:8.1.4.v20120524'

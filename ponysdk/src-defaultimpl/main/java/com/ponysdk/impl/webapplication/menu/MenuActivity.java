@@ -24,7 +24,6 @@
 package com.ponysdk.impl.webapplication.menu;
 
 import com.ponysdk.core.place.Place;
-import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
@@ -35,7 +34,6 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity implements PSelectionHandler<MenuItem> {
 
     private MenuView menuView;
-    private ApplicationActivity applicationActivity;
     private PageProvider pageProvider;
 
     @Override
@@ -50,7 +48,11 @@ public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity imp
     @Override
     public void updateView(final Place place) {
         if (place instanceof PagePlace) {
-            final PageActivity pageActivity = pageProvider.getPageActivity(((PagePlace) place).getPageName());
+            final String pageName = ((PagePlace) place).getPageName();
+            final PageActivity pageActivity = pageProvider.getPageActivity(pageName);
+
+            if (pageActivity == null) throw new RuntimeException("The page hasn't been loaded : " + pageName);
+
             if (pageActivity.getPageName() != null) {
                 menuView.selectItem(new MenuItem(pageActivity.getPageName(), pageActivity.getPageCategories()));
             }
@@ -70,24 +72,12 @@ public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity imp
         this.menuView.addSelectionHandler(this);
     }
 
-    public ApplicationActivity getApplicationActivity() {
-        return applicationActivity;
-    }
-
-    public void setApplicationActivity(final ApplicationActivity applicationActivity) {
-        this.applicationActivity = applicationActivity;
-    }
-
-    public PageProvider getPageProvider() {
-        return pageProvider;
+    public MenuView getMenuView() {
+        return menuView;
     }
 
     public void setPageProvider(final PageProvider pageProvider) {
         this.pageProvider = pageProvider;
-    }
-
-    public MenuView getMenuView() {
-        return menuView;
     }
 
 }

@@ -1,9 +1,6 @@
 
 package com.ponysdk.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,7 +8,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +27,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
@@ -148,13 +143,10 @@ public class UiBuilderTest {
         webServer.addHandler(webapp);
         webServer.start();
 
-        final Properties testProperties = loadProperties();
-
         try {
-            webDriver = buildWebDriver(testProperties);
+            webDriver = buildWebDriver();
             webDriver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
             webDriver.manage().deleteAllCookies();
-
             webDriver.navigate().to("http://localhost:5000/test");
         } catch (final Throwable e) {
             log.error("", e);
@@ -162,31 +154,9 @@ public class UiBuilderTest {
         }
     }
 
-    private static Properties loadProperties() {
-        final Properties testProperties = new Properties();
-        try {
-            final String homeDirectory = System.getProperty("user.home");
-            final File propsFile = new File(homeDirectory, "ponysdk-test.properties");
-            final InputStream is = new FileInputStream(propsFile);
-            testProperties.load(is);
-
-            // webdriver.firefox.bin=C:/Program Files (x86)/Mozilla Firefox 9/firefox.exe
-            // webdriver.chrome.driver=C:/Program Files (x86)/Google//Chrome/Application/chrome.exe
-            System.getProperties().putAll(testProperties);
-
-        } catch (final Throwable e) {
-            log.info("Failed to load properties from #user.home/ponysdk-test.properties");
-        }
-        return testProperties;
-    }
-
-    private static WebDriver buildWebDriver(final Properties testProperties) {
-
+    private static WebDriver buildWebDriver() {
         // webDriver = new ChromeDriver();
-
-        final FirefoxProfile profile = new FirefoxProfile();
-        profile.setEnableNativeEvents(false);
-        final WebDriver driver = new FirefoxDriver(profile);
+        final FirefoxDriver driver = new FirefoxDriver();
         return driver;
     }
 
