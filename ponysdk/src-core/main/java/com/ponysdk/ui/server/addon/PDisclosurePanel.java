@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.server.addon;
 
 import java.util.Iterator;
@@ -36,10 +37,13 @@ import com.ponysdk.ui.terminal.PropertyKey;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.addon.disclosurepanel.PCDisclosurePanelAddon;
 import com.ponysdk.ui.terminal.instruction.Add;
+import com.ponysdk.ui.terminal.instruction.Update;
 
 public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn {
 
     private PWidget content;
+
+    private boolean isOpened;
 
     public PDisclosurePanel(String headerText, PImage openImage, PImage closeImage) {
         super();
@@ -87,11 +91,6 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
             throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
         }
     }
-    
-    @Override
-    public void add(IsPWidget w) {
-        add(w.asWidget());
-    }
 
     @Override
     public void clear() {
@@ -109,9 +108,7 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
 
     public void setWidget(PWidget w) {
         // Validate
-        if (w == content) {
-            return;
-        }
+        if (w == content) { return; }
 
         // Detach new child.
         if (w != null) {
@@ -135,6 +132,11 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
         }
     }
 
+    @Override
+    public void add(IsPWidget w) {
+        add(w.asWidget());
+    }
+
     private final void adopt(PWidget child) {
         assert (child.getParent() == null);
         child.setParent(this);
@@ -143,6 +145,13 @@ public class PDisclosurePanel extends PComposite implements HasPWidgets, PAddOn 
     @Override
     public String getSignature() {
         return PCDisclosurePanelAddon.SIGNATURE;
+    }
+
+    public void setOpen(boolean isOpened) {
+        this.isOpened = isOpened;
+        final Update update = new Update(getID());
+        update.getMainProperty().setProperty(PropertyKey.OPEN, isOpened);
+        getPonySession().stackInstruction(update);
     }
 
 }

@@ -877,7 +877,8 @@ table .pony-PFlexTable{
  background: -webkit-gradient(linear, left top, left bottom, from(#575757), to(#888));
  background: -moz-linear-gradient(top,  #575757,  #888);
 }
-.pony-PButton .gray[disabled] {
+
+.gray[disabled] {
   color:#CCC;
  background: #e9e9e9;
  background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#3084a3));
@@ -905,7 +906,7 @@ table .pony-PFlexTable{
  
 .white[disabled] {
   color:#CCC;
- background: red;
+ background: #ededed;
  background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
  background: -moz-linear-gradient(top,  #ededed,  #fff);
  cursor:auto;
@@ -969,11 +970,11 @@ table .pony-PFlexTable{
 	background: -moz-linear-gradient(top,  #0078a5,  #00adee);
 }
 
-.pony-PButton .blue[disabled] {
- 	color:#CCC;
+.blue[disabled] {
+ 	color:#b7dcff;
 	background: #3da5cc;
-	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#3084a3));
-	background: -moz-linear-gradient(top,  #00adee,  #3084a3);
+	background: -webkit-gradient(linear, left top, left bottom, from(#3084a3), to(#00adee));
+	background: -moz-linear-gradient(top,  #3084a3, #00adee);
 	cursor:auto;
 }
  

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -32,7 +33,9 @@ import com.ponysdk.ui.server.basic.PSimplePanel;
 public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
     private final PHorizontalPanel header = new PHorizontalPanel();
+
     private final PSimplePanel body;
+
     private final PLabel title = new PLabel();
 
     public DefaultPageView() {
@@ -48,7 +51,7 @@ public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
 
         final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel();
         dockLayoutPanel.setSizeFull();
-        dockLayoutPanel.addNorth(header, 5);
+        dockLayoutPanel.addNorth(header, 30);
         dockLayoutPanel.add(body);
 
         setWidget(dockLayoutPanel);

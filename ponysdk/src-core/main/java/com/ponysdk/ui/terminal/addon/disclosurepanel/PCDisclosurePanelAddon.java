@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.ui.terminal.addon.disclosurepanel;
 
 import com.google.gwt.user.client.ui.Image;
@@ -71,7 +72,16 @@ public final class PCDisclosurePanelAddon extends PTWidget implements Addon {
 
     @Override
     public void update(Update update, UIService uiService) {
-        // nothing
+        final Property mainProperty = update.getMainProperty();
+
+        for (final Property property : mainProperty.getChildProperties().values()) {
+            final PropertyKey propertyKey = property.getKey();
+            if (PropertyKey.OPEN.equals(propertyKey)) {
+                disclosurePanel.setOpen(property.getBooleanValue());
+                return;
+            }
+        }
+        super.update(update, uiService);
     }
 
     @Override

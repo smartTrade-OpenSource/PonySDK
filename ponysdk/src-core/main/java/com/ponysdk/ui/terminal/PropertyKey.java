@@ -293,6 +293,8 @@ public enum PropertyKey {
 
     SELECT_ALL,
 
-    INSERT_HTML;
+    INSERT_HTML,
+
+    OPEN;
 
 }

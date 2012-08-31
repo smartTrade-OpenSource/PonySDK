@@ -8,7 +8,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +15,7 @@ import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
+import com.ponysdk.core.export.util.PropertyUtil;
 import com.ponysdk.core.export.xml.XMLExporter;
 
 public class CSVExporter<T> implements Exporter<T> {
@@ -24,7 +24,7 @@ public class CSVExporter<T> implements Exporter<T> {
 
     private static final String NAME = "CSV";
 
-    private static final char DELIMITER = ',';
+    private static final char DELIMITER = ';';
 
     private static final char LF = '\n';
 
@@ -54,7 +54,7 @@ public class CSVExporter<T> implements Exporter<T> {
         buffer.append(LF);
         for (final T row : records) {
             for (final ExportableField exportableField : exportableFields) {
-                buffer.append(PropertyUtils.getProperty(row, exportableField.getKey()));
+                buffer.append(PropertyUtil.getProperty(row, exportableField.getKey()));
                 buffer.append(DELIMITER);
             }
             buffer.append(LF);
@@ -66,8 +66,8 @@ public class CSVExporter<T> implements Exporter<T> {
             @Override
             public void onStream(HttpServletRequest req, HttpServletResponse response) {
                 response.reset();
-                response.setContentType("application/vnd.ms-excel");
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
                 PrintWriter printer;
                 try {
                     printer = response.getWriter();

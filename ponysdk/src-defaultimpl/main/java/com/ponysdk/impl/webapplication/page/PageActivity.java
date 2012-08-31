@@ -36,7 +36,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     private ApplicationActivity applicationActivity;
 
-    private static PageActivity currentPage;
+    private PageActivity currentPage;
 
     protected final String pageName;
 

@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.ArrayList;
@@ -31,18 +32,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.query.Query;
+import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.hibernate.query.OrderingCriteria;
 import com.ponysdk.hibernate.query.PaginatingCriteria;
 
 public class PonyCriteria<T> {
+
     private static final Logger log = LoggerFactory.getLogger(PonyCriteria.class);
 
     private final Class<?> clazz;
+
     private final Session session;
+
     private String propertyKey;
+
     private final Query query;
+
     private final List<Criterion> criterions = new ArrayList<Criterion>();
 
     private SortingType sortingType;
@@ -95,7 +102,9 @@ public class PonyCriteria<T> {
 
         final int count = criteria.count();
 
-        criteria.setMaxResults(query.getPageSize()).setFirstResult(query.getPageNum() * query.getPageSize());
+        if (!QueryMode.FULL_RESULT.equals(query.getQueryMode())) {
+            criteria.setMaxResults(query.getPageSize()).setFirstResult(query.getPageNum() * query.getPageSize());
+        }
 
         final Result<List<T>> result = new Result<List<T>>();
         result.setData(criteria.list());

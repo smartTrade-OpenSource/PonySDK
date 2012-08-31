@@ -71,6 +71,7 @@ public class PonySession {
 
     private final PWeakHashMap objectByID = new PWeakHashMap();
 
+    // to do a weak reference ?
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
     private final List<Instruction> pendingInstructions = new ArrayList<Instruction>();
