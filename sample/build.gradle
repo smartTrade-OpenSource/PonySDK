@@ -11,7 +11,7 @@ project.ext.packageOutputDirName = buildDir.name + '/package';
 repositories {
     mavenCentral()
     maven {
-    	url "https://github.com/mbarbier/ponysdk-mvn-repo/raw/master/ext"
+    	url "https://github.com/PonySDK/Maven/raw/master/ext"
 	}
 }
 
