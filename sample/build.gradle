@@ -13,3 +13,7 @@ dependencies {
 task cleanDebug(type: Delete) {
   delete 'war/ponyterminal', 'war/WEB-INF/deploy'
 }
+
+task createWrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-6'
+}
