@@ -48,7 +48,7 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panelTop.add(new PRadioButton("color", "blue"));
         panelTop.add(new PRadioButton("color", "red"));
 
-        PRadioButton yellow = new PRadioButton("color", "yellow");
+        final PRadioButton yellow = new PRadioButton("color", "yellow");
         yellow.setEnabled(false);
         panelTop.add(yellow);
         panelTop.add(new PRadioButton("color", "green"));
@@ -70,12 +70,12 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         final PRadioButton waterPolo = new PRadioButton("sport", "Water Polo");
         panelBottom.add(waterPolo);
 
-        PValueChangeHandler<Boolean> valueChangeHandler = new PValueChangeHandler<Boolean>() {
+        final PValueChangeHandler<Boolean> valueChangeHandler = new PValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(final PValueChangeEvent<Boolean> event) {
-                PRadioButton radioButton = (PRadioButton) event.getSource();
-                String msg = "Value changed : name = " + radioButton.getName() + " caption = " + radioButton.getText() + " value = " + radioButton.getValue();
+                final PRadioButton radioButton = (PRadioButton) event.getSource();
+                final String msg = "Value changed : name = " + radioButton.getName() + " caption = " + radioButton.getText() + " value = " + radioButton.getValue();
                 UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         };

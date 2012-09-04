@@ -8,7 +8,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
+import com.ponysdk.core.export.util.PropertyUtil;
 
 public class XMLExporter<T> implements Exporter<T> {
 
@@ -78,7 +78,7 @@ public class XMLExporter<T> implements Exporter<T> {
                 String normalizedCaption = exportableField.getCaption().replace(" ", "").replace(".", "_").replace("/", "Per");
                 normalizedCaption = StringEscapeUtils.escapeXml(normalizedCaption);
                 s.append("<" + normalizedCaption + ">");
-                s.append(StringEscapeUtils.escapeXml(String.valueOf(PropertyUtils.getProperty(pojo, exportableField.getKey()))));
+                s.append(StringEscapeUtils.escapeXml(String.valueOf(PropertyUtil.getProperty(pojo, exportableField.getKey()))));
                 s.append("</" + normalizedCaption + ">");
             }
             s.append("</" + rootName + ">");
