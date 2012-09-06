@@ -124,9 +124,6 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         complexListActivity.registerSearchCriteria(new CriterionField("name"), nameSearchField);
         complexListActivity.registerSearchCriteria(new CriterionField("age"), ageSearchField);
 
-        complexListActivity.getForm().addFormField(nameSearchField);
-        complexListActivity.getForm().addFormField(ageSearchField);
-
         complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
 
             @Override
@@ -148,6 +145,9 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         });
 
         complexListActivity.start(scrolPanel);
+
+        complexListActivity.getForm().addFormField(nameSearchField);
+        complexListActivity.getForm().addFormField(ageSearchField);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
