@@ -143,6 +143,12 @@ public interface PonySDKTheme {
 
     String NOTIFICATION_TRAY = "tray";
 
+    String LOG_CONSOLE = "pony-LogConsolePanel";
+
+    String LOG_CONSOLE_ACTIONS = "pony-LogConsolePanel-ActionPanel";
+
+    String LOG_CONSOLE_LOGS = "pony-LogConsolePanel-LogsPanel";
+
     String CLOSABLE_DIALOGBOX = "pony-closable-dialog-box";
 
     String CLOSABLE_DIALOGBOX_HEADER = "header";
