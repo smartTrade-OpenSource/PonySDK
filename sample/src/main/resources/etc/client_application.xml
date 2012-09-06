@@ -44,9 +44,18 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="footerView" ref="footerView" />
 	</bean>
 
-	<bean name="notificationActivity" class="com.ponysdk.impl.webapplication.notification.NotificationActivity">
-		<property name="notificationView">
-			<bean class="com.ponysdk.impl.webapplication.notification.DefaultNotificationView" />
+	<bean name="notificationActivity"
+		class="com.ponysdk.impl.webapplication.notification.NotificationActivity">
+		<property name="notificationView" ref="notificationView"/>
+	</bean>
+
+	<bean name="notificationView"
+		class="com.ponysdk.impl.webapplication.notification.DefaultNotificationView">
+		<property name="notificationTypeRenderer">
+			<bean class="com.ponysdk.impl.webapplication.notification.renderer.PLabelRenderer" />
+		</property>
+		<property name="logTypeRenderer">
+			<bean class="com.ponysdk.impl.webapplication.notification.renderer.PHTMLRenderer" />
 		</property>
 	</bean>
 
