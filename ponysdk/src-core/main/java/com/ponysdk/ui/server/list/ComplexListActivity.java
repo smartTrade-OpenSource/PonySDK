@@ -188,6 +188,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public ComplexListActivity(final ComplexListConfiguration<D> complexListConfiguration, final ComplexListView complexListView, final EventBus eventBus) {
         this.eventBus = eventBus;
         this.complexListConfiguration = complexListConfiguration;
+        complexListConfiguration.setComplexListActivity(this);
         this.listColumnDescriptors = complexListConfiguration.getColumnDescriptors();
         for (final ListColumnDescriptor<D, ?> descriptor : listColumnDescriptors) {
             descriptorsByCaption.put(descriptor.getCaption(), descriptor);
@@ -213,23 +214,15 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         this.localEventBus.addHandler(MoveColumnDescriptorEvent.TYPE, this);
         this.localEventBus.addHandler(RemoveColumnDescriptorEvent.TYPE, this);
         this.localEventBus.addHandler(ComparatorTypeChangeEvent.TYPE, this);
+        this.simpleListActivity = new SimpleListActivity<D>(complexListConfiguration.getTableName(), complexListView, listColumnDescriptors, localEventBus);
+    }
 
-        for (final ListColumnDescriptor<D, ?> columnDescriptor : listColumnDescriptors) {
-            if (columnDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
-                ((EventBusAware) columnDescriptor.getHeaderCellRenderer()).setEventBus(localEventBus);
-            }
-            if (columnDescriptor.getCellRenderer() instanceof EventBusAware) {
-                ((EventBusAware) columnDescriptor.getCellRenderer()).setEventBus(localEventBus);
-            }
+    private void initEventBus(final ListColumnDescriptor<D, ?> columnDescriptor) {
+        if (columnDescriptor.getHeaderCellRenderer() instanceof EventBusAware) {
+            ((EventBusAware) columnDescriptor.getHeaderCellRenderer()).setEventBus(localEventBus);
         }
-
-        buildSearchForm();
-        buildActions();
-        buildPaging();
-        buildPreferences();
-
-        if (debugID != null) {
-            ensureDebugId(debugID);
+        if (columnDescriptor.getCellRenderer() instanceof EventBusAware) {
+            ((EventBusAware) columnDescriptor.getCellRenderer()).setEventBus(localEventBus);
         }
     }
 
@@ -339,8 +332,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
             @Override
             public IsPWidget render() {
-                // PHorizontalPanel horizontalPanel = new PHorizontalPanel();
-
                 mainCheckBox = new PCheckBox();
                 mainCheckBox.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_MAINCHECKBOX);
                 mainCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
@@ -352,24 +343,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
                 });
 
-                // PMenuBar menuBar = new PMenuBar();
-                // menuBar.addStyleName(PonySDKTheme.MENUBAR_LIGHT);
-                // final PMenuBar menuBarAction = new PMenuBar(true);
-                // menuBarAction.addItem("All", new PCommand() {
-                //
-                // @Override
-                // public void execute() {
-                // // TODO Auto-generated method stub
-                // }
-                // });
-                //
-                // final PMenuItem item = menuBar.addItem("", menuBarAction);
-                //
-                // horizontalPanel.add(mainCheckBox);
-                // horizontalPanel.add(menuBar);
-
                 return mainCheckBox;
-
             }
 
             @Override
@@ -532,8 +506,8 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             actionBar.addSeparator();
             final PMenuBar exportListMenuBar = new PMenuBar(true);
 
-            for (final Exporter<?> exportType : complexListConfiguration.getExportConfiguration().getExporters()) {
-                final PMenuItem item = new PMenuItem(exportType.name(), new PCommand() {
+            for (final Exporter exporter : complexListConfiguration.getExportConfiguration().getExporters()) {
+                final PMenuItem item = new PMenuItem(exporter.name(), new PCommand() {
 
                     @Override
                     public void execute() {
@@ -548,7 +522,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
                         final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
-                        final Command<String> command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
+                        exportContext.setExporter(exporter);
+
+                        final Command command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
                         command.execute();
                     }
                 });
@@ -593,14 +569,14 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     public void addDescriptor(final ListColumnDescriptor<D, ?> customDescriptor) {
-        listColumnDescriptors.add(customDescriptor);
-        descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
+        addDescriptor(listColumnDescriptors.size(), customDescriptor);
     }
 
     public void addDescriptor(final int index, final ListColumnDescriptor<D, ?> customDescriptor) {
         if (index > listColumnDescriptors.size() || index < 0) { throw new RuntimeException("Cannot add column#" + customDescriptor.getCaption() + " index out of bound"); }
         listColumnDescriptors.add(index, customDescriptor);
         descriptorsByCaption.put(customDescriptor.getCaption(), customDescriptor);
+        initEventBus(customDescriptor);
     }
 
     public void insertSubList(final int row, final List<D> datas) {
@@ -614,9 +590,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             if (c.getRow() > row) {
                 c.setRow(c.getRow() + datas.size());
             }
-            map.put(c.getRow(), c);
         }
-        rowSelectors = map;
     }
 
     public void removeSubList(final int fatherRow) {
@@ -701,7 +675,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         // }
 
         final Query query = createQuery(page);
-        final Command<Result<List<D>>> command = commandFactory.newFindCommand(ComplexListActivity.this, query);
+        final Command command = commandFactory.newFindCommand(ComplexListActivity.this, query);
         if (command == null) { throw new IllegalStateException("FindCommand of the complex list can't be null"); }
         command.execute();
         complexListView.updateView();
@@ -888,8 +862,18 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     @Override
     public void start(final PAcceptsOneWidget world) {
-        this.simpleListActivity = new SimpleListActivity<D>(complexListConfiguration.getTableName(), complexListView, listColumnDescriptors, localEventBus);
+        for (final ListColumnDescriptor<D, ?> columnDescriptor : listColumnDescriptors) {
+            initEventBus(columnDescriptor);
+        }
+        buildSearchForm();
+        buildActions();
+        buildPaging();
+        buildPreferences();
         world.setWidget(complexListView);
+
+        if (debugID != null) {
+            ensureDebugId(debugID);
+        }
     }
 
     private void buildPreferences() {
@@ -960,6 +944,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         if (resetButton != null) {
             resetButton.ensureDebugId(debugID + "[reset]");
         }
+        if (mainCheckBox != null) {
+            mainCheckBox.ensureDebugId(debugID + "[checkAll]");
+        }
 
         if (simpleListActivity != null) {
             simpleListActivity.ensureDebugId(debugID);
@@ -1008,6 +995,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         if (findResult != null) {
             simpleListActivity.rebuild(listColumnDescriptors, findResult.getData());
         } else simpleListActivity.rebuild(listColumnDescriptors, null);
+    }
+
+    public void repaint() {
+        rebuildSimpleList();
     }
 
     @Override

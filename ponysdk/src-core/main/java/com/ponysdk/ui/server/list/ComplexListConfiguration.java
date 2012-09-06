@@ -47,11 +47,13 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
 
     private boolean showPreferences;
 
+    private ComplexListActivity<T> complexListActivity;
+
     public boolean isSearchFormMustBeValid() {
         return searchFormMustBeValid;
     }
 
-    public void setSearchFormMustBeValid(boolean searchFormMustBeValid) {
+    public void setSearchFormMustBeValid(final boolean searchFormMustBeValid) {
         this.searchFormMustBeValid = searchFormMustBeValid;
     }
 
@@ -59,7 +61,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
 
@@ -67,7 +69,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return formEnabled;
     }
 
-    public void setEnableForm(boolean enableForm) {
+    public void setEnableForm(final boolean enableForm) {
         this.formEnabled = enableForm;
     }
 
@@ -75,7 +77,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return formLayout;
     }
 
-    public void setFormLayout(PPanel formLayout) {
+    public void setFormLayout(final PPanel formLayout) {
         this.formLayout = formLayout;
     }
 
@@ -83,7 +85,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return exportConfiguration;
     }
 
-    public void setExportConfiguration(ExportConfiguration exportConfiguration) {
+    public void setExportConfiguration(final ExportConfiguration exportConfiguration) {
         this.exportConfiguration = exportConfiguration;
     }
 
@@ -91,7 +93,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return selectionColumnEnabled;
     }
 
-    public void setSelectionColumnEnabled(boolean isSelectionColumnEnabled) {
+    public void setSelectionColumnEnabled(final boolean isSelectionColumnEnabled) {
         this.selectionColumnEnabled = isSelectionColumnEnabled;
     }
 
@@ -99,11 +101,11 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return showSubListColumnEnabled;
     }
 
-    public void setShowSubListColumnEnabled(boolean showSubListColumnEnabled) {
+    public void setShowSubListColumnEnabled(final boolean showSubListColumnEnabled) {
         this.showSubListColumnEnabled = showSubListColumnEnabled;
     }
 
-    public void setCustomColumnEnabled(boolean customColumnEnabled, Class<T> clas) {
+    public void setCustomColumnEnabled(final boolean customColumnEnabled, final Class<T> clas) {
         this.customColumnEnabled = customColumnEnabled;
         this.clas = clas;
     }
@@ -112,7 +114,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return customColumnEnabled;
     }
 
-    public void setClas(Class<T> clas) {
+    public void setClas(final Class<T> clas) {
         this.clas = clas;
     }
 
@@ -120,12 +122,26 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         return clas;
     }
 
-    public void setShowPreferences(boolean showPreferences) {
+    public void setShowPreferences(final boolean showPreferences) {
         this.showPreferences = showPreferences;
     }
 
     public boolean isShowPreferences() {
         return showPreferences;
+    }
+
+    public ComplexListActivity<T> getComplexListActivity() {
+        return complexListActivity;
+    }
+
+    public void setComplexListActivity(final ComplexListActivity<T> complexListActivity) {
+        this.complexListActivity = complexListActivity;
+    }
+
+    @Override
+    public void addColumnDescriptor(final ListColumnDescriptor<T, ?> listColumnDescriptor) {
+        if (this.complexListActivity != null) complexListActivity.addDescriptor(listColumnDescriptor);
+        else super.addColumnDescriptor(listColumnDescriptor);
     }
 
 }

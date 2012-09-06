@@ -287,10 +287,42 @@ public class UIContext {
         return this.ponyApplication.removeSessionListener(sessionListener);
     }
 
+    /**
+     * Binds an object to this session, using the name specified. If an object of the same name is already
+     * bound to the session, the object is replaced.
+     * <p>
+     * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
+     * 
+     * @param name
+     *            the name to which the object is bound; cannot be null
+     * @param value
+     *            the object to be bound
+     */
     public void setAttribute(final String name, final Object value) {
-        ponySessionAttributes.put(name, value);
+        if (value == null) removeAttribute(name);
+        else ponySessionAttributes.put(name, value);
     }
 
+    /**
+     * Removes the object bound with the specified name from this session. If the session does not have an
+     * object bound with the specified name, this method does nothing.
+     * 
+     * @param name
+     *            the name of the object to remove from this session
+     */
+
+    public Object removeAttribute(final String name) {
+        return ponySessionAttributes.remove(name);
+    }
+
+    /**
+     * Returns the object bound with the specified name in this session, or <code>null</code> if no object is
+     * bound under the name.
+     * 
+     * @param name
+     *            a string specifying the name of the object
+     * @return the object with the specified name
+     */
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) ponySessionAttributes.get(name);
