@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,31 @@
  * the License.
  */
 
-package com.ponysdk.hibernate.query.decorator;
+package com.ponysdk.ui.server.dataprovider;
 
-import com.ponysdk.core.query.Criterion;
 
-public class DefaultCriteriaDecorator extends AbstractCriteriaDecorator<Object> {
+public class Pager<T> {
 
-    @Override
-    protected Object getObjectValue(Criterion criterionField) {
-        return criterionField.getValue();
+    private final int pageSize = 20;
+    private final int currentPage = 0;
+
+    private final PagerView view;
+
+    // private static final int PAGING_WINDOW = 5;
+
+    public Pager(final PagerView view) {
+        this.view = view;
     }
 
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void addListener(final PagerListener listener) {
+        view.addPagerListener(listener);
+    }
 }

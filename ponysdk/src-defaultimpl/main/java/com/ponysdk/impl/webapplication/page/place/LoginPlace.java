@@ -21,15 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.hibernate.query.decorator;
+package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.query.Criterion;
+import com.ponysdk.core.place.Place;
 
-public class DefaultCriteriaDecorator extends AbstractCriteriaDecorator<Object> {
+public class LoginPlace implements Place {
 
     @Override
-    protected Object getObjectValue(Criterion criterionField) {
-        return criterionField.getValue();
+    public String getToken() {
+        return getClass().getSimpleName();
     }
 
 }

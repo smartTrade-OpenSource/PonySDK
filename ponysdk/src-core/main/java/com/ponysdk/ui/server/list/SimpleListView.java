@@ -55,4 +55,6 @@ public interface SimpleListView extends IsPWidget {
 
     void removeCellStyle(int row, int column, String styleName);
 
+    void clear(int from);
+
 }

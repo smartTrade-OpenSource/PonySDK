@@ -54,6 +54,7 @@ public interface PonySDKTheme {
 
     String COMPLEXLIST_HEADERCELLRENDERER_MAINCHECKBOX = "pony-ComplexList-HeaderCellRenderer-MainCheckBox";
 
+    String COMPLEXLIST_COLUMNHEADER_COMPLEX = "pony-ComplexList-ColumnHeader";
     String COMPLEXLIST_HEADERCELLRENDERER_COMPLEX = "pony-ComplexList-ComplexHeader";
     String COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE = "sortable";
     String COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE_NONE = "none";

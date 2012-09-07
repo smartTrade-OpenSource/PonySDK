@@ -38,7 +38,7 @@ public class Query {
 
     private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola avoid to breaking existing queries
 
-    private final List<CriterionField> criteria = new ArrayList<CriterionField>();
+    private final List<Criterion> criteria = new ArrayList<Criterion>();
 
     // private final Map<String, CriterionField> criteria = new HashMap<String, CriterionField>();
 
@@ -54,33 +54,37 @@ public class Query {
         return pageNum;
     }
 
-    public void addCriterion(CriterionField criteriField) {
-        criteria.add(criteriField);
+    public void addCriterion(final Criterion criterion) {
+        this.criteria.add(criterion);
     }
 
-    public List<CriterionField> getCriteria() {
-        return criteria;
+    public void addCriteria(final List<Criterion> criteria) {
+        this.criteria.addAll(criteria);
     }
 
-    public void setCriteria(List<CriterionField> criteria) {
-        for (CriterionField criterionField : criteria) {
+    public List<Criterion> getCriteria() {
+        return this.criteria;
+    }
+
+    public void setCriteria(final List<Criterion> criteria) {
+        for (final Criterion criterionField : criteria) {
             addCriterion(criterionField);
         }
     }
 
-    public CriterionField getCriterion(String pojoProperty) {
+    public Criterion getCriterion(final String pojoProperty) {
         // temp return a list
-        for (CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             if (criterion.getPojoProperty().equals(pojoProperty)) return criterion;
         }
         return null;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
 
-    public void setPageNum(int pageNum) {
+    public void setPageNum(final int pageNum) {
         this.pageNum = pageNum;
     }
 
@@ -88,7 +92,7 @@ public class Query {
         return queryMode;
     }
 
-    public void setQueryMode(QueryMode queryMode) {
+    public void setQueryMode(final QueryMode queryMode) {
         this.queryMode = queryMode;
     }
 }

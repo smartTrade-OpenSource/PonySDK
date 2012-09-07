@@ -13,7 +13,7 @@ public interface HasPData<T> {
 
     Iterable<T> getVisibleItems();
 
-    void setRowData(int start, List<T> values);
+    void setData(List<T> values);
 
     void setSelectionModel(PSelectionModel<T> selectionModel);
 

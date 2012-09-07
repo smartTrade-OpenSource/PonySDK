@@ -33,7 +33,7 @@ import java.util.Map;
 
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -456,7 +456,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     }
 
     protected List<String> filter(final String filter) {
-        final CriterionField criterionField = new CriterionField("");
+        final Criterion criterionField = new Criterion("");
         criterionField.setValue("%" + filter + "%");
         criterionField.setSortingType(SortingType.ASCENDING);
         List<String> filtered = FilteringTools.filterStringCollection(new ArrayList<String>(hiddenValueByItems.keySet()), Arrays.asList(criterionField));

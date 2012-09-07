@@ -26,7 +26,7 @@ package com.ponysdk.core.datamodel;
 import java.io.Serializable;
 import java.util.List;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 
 public class ExportableData<T> implements Serializable {
 
@@ -34,7 +34,7 @@ public class ExportableData<T> implements Serializable {
 
     private T data;
 
-    private List<CriterionField> criterian;
+    private List<Criterion> criterian;
 
     private String dateFormat;
 
@@ -66,11 +66,11 @@ public class ExportableData<T> implements Serializable {
         this.timezone = timezone;
     }
 
-    public List<CriterionField> getCriterian() {
+    public List<Criterion> getCriterian() {
         return criterian;
     }
 
-    public void setCriterian(List<CriterionField> criterian) {
+    public void setCriterian(List<Criterion> criterian) {
         this.criterian = criterian;
     }
 

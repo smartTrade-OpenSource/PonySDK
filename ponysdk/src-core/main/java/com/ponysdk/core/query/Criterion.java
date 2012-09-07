@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.query;
 
-public class CriterionField {
+public class Criterion {
 
     private final String pojoProperty;
 
@@ -33,21 +33,21 @@ public class CriterionField {
 
     private SortingType sortingType = SortingType.NONE;
 
-    public CriterionField(final String key) {
+    public Criterion(final String key) {
         this.pojoProperty = key;
     }
 
-    public CriterionField setSortingType(final SortingType sortingType) {
+    public Criterion setSortingType(final SortingType sortingType) {
         this.sortingType = sortingType;
         return this;
     }
 
-    public CriterionField setComparator(final ComparatorType comparator) {
+    public Criterion setComparator(final ComparatorType comparator) {
         this.comparator = comparator;
         return this;
     }
 
-    public CriterionField setValue(final Object value) {
+    public Criterion setValue(final Object value) {
         this.value = value;
         return this;
     }

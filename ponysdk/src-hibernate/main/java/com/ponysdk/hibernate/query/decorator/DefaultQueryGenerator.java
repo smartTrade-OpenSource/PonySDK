@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.core.query.ComparatorType;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.SortingType;
@@ -59,9 +59,9 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
 
     @Override
     public OrderingCriteria generate(final Query query) {
-        final List<CriterionField> fields = query.getCriteria();
+        final List<Criterion> fields = query.getCriteria();
         if (fields != null) {
-            for (final CriterionField criterion : fields) {
+            for (final Criterion criterion : fields) {
                 final CriteriaContext context = new CriteriaContext();
                 context.setCriterion(criterion);
                 context.setSTCriteria(criteria);
