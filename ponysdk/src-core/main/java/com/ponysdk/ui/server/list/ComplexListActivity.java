@@ -43,7 +43,7 @@ import com.ponysdk.core.event.EventBusAware;
 import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.Exporter;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
@@ -131,9 +131,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     private static SimpleDateFormat formater = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 
-    private final Map<CriterionField, FormField> formFieldsByCriterionFields = new HashMap<CriterionField, FormField>();
+    private final Map<Criterion, FormField> formFieldsByCriterionFields = new HashMap<Criterion, FormField>();
 
-    private final Map<String, CriterionField> criterionByPojoProperty = new HashMap<String, CriterionField>();
+    private final Map<String, Criterion> criterionByPojoProperty = new HashMap<String, Criterion>();
 
     private PagingActivity pagingActivity;
 
@@ -683,19 +683,19 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     }
 
     protected Query createQuery(final int page) {
-        final List<CriterionField> criteria = new ArrayList<CriterionField>();
-        for (final Entry<CriterionField, FormField> entry : formFieldsByCriterionFields.entrySet()) {
+        final List<Criterion> criteria = new ArrayList<Criterion>();
+        for (final Entry<Criterion, FormField> entry : formFieldsByCriterionFields.entrySet()) {
             final FormField formField = entry.getValue();
 
             if (formField.getValue() != null) {
-                final CriterionField criterionField = entry.getKey();
+                final Criterion criterionField = entry.getKey();
                 criterionField.setValue(formField.getValue());
                 criteria.add(criterionField);
             }
         }
 
         if (currentSortingPojoPropertyKey != null) {
-            final CriterionField criterionField = new CriterionField(currentSortingPojoPropertyKey);
+            final Criterion criterionField = new Criterion(currentSortingPojoPropertyKey);
             criterionField.setSortingType(currentSortingType);
             criteria.add(criterionField);
         }
@@ -719,7 +719,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         }
     }
 
-    public void registerSearchCriteria(final CriterionField criterionField, final FormField formField) {
+    public void registerSearchCriteria(final Criterion criterionField, final FormField formField) {
         formFieldsByCriterionFields.put(criterionField, formField);
         criterionByPojoProperty.put(criterionField.getPojoProperty(), criterionField);
     }
@@ -733,7 +733,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     @Override
     public void onComparatorTypeChange(final ComparatorTypeChangeEvent event) {
-        final CriterionField criterionField = criterionByPojoProperty.get(event.getPojoPropertyKey());
+        final Criterion criterionField = criterionByPojoProperty.get(event.getPojoPropertyKey());
         if (criterionField != null) {
             criterionField.setComparator(event.getComparatorType());
         }
@@ -1095,7 +1095,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
         columnDescriptor.setCustom(true);
         columnDescriptor.setValueProvider(new BeanValueProvider<D, Object>(fieldPath));
         addDescriptor(columnDescriptor);
-        registerSearchCriteria(new CriterionField(fieldPath), formField);
+        registerSearchCriteria(new Criterion(fieldPath), formField);
         final ColumnDescriptorFieldHolder descriptorHolder = new ColumnDescriptorFieldHolder(caption, fieldPath, fieldType, complexListConfiguration.getTableName());
         customDescriptorHolderByCaption.put(caption, descriptorHolder);
         rebuildSimpleList();

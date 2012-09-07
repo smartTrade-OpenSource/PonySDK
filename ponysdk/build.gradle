@@ -13,8 +13,9 @@ project.ext.srcHibernate = 'src-hibernate/main/java';
 project.ext.srcMongoDB = 'src-mongodb/main/java';
 project.ext.srcJasper = 'src-jasper/main/java';
 project.ext.gwtOutputDirName = buildDir.name + '/gwt';
+project.ext.buildInfoOutputDirName = buildDir.name + '/buildinfo';
 project.ext.warResources = 'src-core/main/resources/war';
-project.ext.confResources = 'src-core/main/resources/conf';
+project.ext.confResources = 'src-spring/main/resources/conf';
 project.ext.javadocResources = 'src-core/main/javadoc';
 
 sourceSets {
@@ -94,6 +95,7 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
+
 manifest {
 	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
 }
@@ -106,6 +108,7 @@ jar {
     
     metaInf {
         from 'src-core/main/resources/META-INF'
+        from buildInfoOutputDirName
     }
     
     into('conf') {

@@ -32,7 +32,7 @@ import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.command.ExportCommand;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
@@ -121,8 +121,8 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
         complexListActivity = new ComplexListActivity<Pony>(complexListConfiguration, complexListView, getRootEventBus());
 
-        complexListActivity.registerSearchCriteria(new CriterionField("name"), nameSearchField);
-        complexListActivity.registerSearchCriteria(new CriterionField("age"), ageSearchField);
+        complexListActivity.registerSearchCriteria(new Criterion("name"), nameSearchField);
+        complexListActivity.registerSearchCriteria(new Criterion("age"), ageSearchField);
 
         complexListActivity.setCommandFactory(new ComplexListCommandFactory<Pony>() {
 

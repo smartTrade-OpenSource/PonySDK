@@ -1,11 +1,11 @@
 
 package com.ponysdk.hibernate.query;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 
 public class CriteriaContext {
 
-    private CriterionField criterion;
+    private Criterion criterion;
 
     private OrderingCriteria STCriteria;
 
@@ -17,11 +17,11 @@ public class CriteriaContext {
         this.STCriteria = STCriteria;
     }
 
-    public CriterionField getCriterion() {
+    public Criterion getCriterion() {
         return criterion;
     }
 
-    public void setCriterion(CriterionField criterion) {
+    public void setCriterion(Criterion criterion) {
         this.criterion = criterion;
     }
 

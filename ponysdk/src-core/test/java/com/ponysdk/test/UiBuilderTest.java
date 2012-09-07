@@ -1,6 +1,9 @@
 
 package com.ponysdk.test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -143,8 +147,10 @@ public class UiBuilderTest {
         webServer.addHandler(webapp);
         webServer.start();
 
+        final Properties testProperties = loadProperties();
+
         try {
-            webDriver = buildWebDriver();
+            webDriver = buildWebDriver(testProperties);
             webDriver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
             webDriver.manage().deleteAllCookies();
             webDriver.navigate().to("http://localhost:5000/test");
@@ -154,9 +160,27 @@ public class UiBuilderTest {
         }
     }
 
-    private static WebDriver buildWebDriver() {
-        // webDriver = new ChromeDriver();
-        final FirefoxDriver driver = new FirefoxDriver();
+    private static Properties loadProperties() {
+        final Properties testProperties = new Properties();
+        try {
+            final String homeDirectory = System.getProperty("user.home");
+            final File propsFile = new File(homeDirectory, "ponysdk-test.properties");
+            final InputStream is = new FileInputStream(propsFile);
+            testProperties.load(is);
+
+            // webdriver.firefox.bin=C:/Program Files (x86)/Mozilla Firefox 9/firefox.exe
+            // webdriver.chrome.driver=C:/Program Files (x86)/Google//Chrome/Application/chrome.exe
+            System.getProperties().putAll(testProperties);
+
+        } catch (final Throwable e) {
+            log.info("Failed to load properties from #user.home/ponysdk-test.properties");
+        }
+        return testProperties;
+    }
+
+    private static WebDriver buildWebDriver(final Properties testProperties) {
+        final WebDriver driver = new FirefoxDriver();
+        // final WebDriver driver = new ChromeDriver();
         return driver;
     }
 

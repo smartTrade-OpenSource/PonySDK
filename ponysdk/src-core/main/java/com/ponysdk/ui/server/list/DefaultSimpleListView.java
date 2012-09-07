@@ -41,8 +41,13 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void clearList() {
+        clear(0);
+    }
+
+    @Override
+    public void clear(final int from) {
         final int rowCount = getRowCount();
-        for (int i = rowCount; i > 0; i--) {
+        for (int i = rowCount; i >= from; i--) {
             removeRow(i);
         }
     }

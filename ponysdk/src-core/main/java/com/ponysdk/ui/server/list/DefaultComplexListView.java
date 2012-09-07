@@ -108,6 +108,11 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
+    public void clear(final int i) {
+        simpleListView.clear(i);
+    }
+
+    @Override
     public void insertRow(final int row) {
         simpleListView.insertRow(row);
     }

@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.hibernate.query.decorator;
+package com.ponysdk.ui.server.dataprovider;
+
+import java.util.List;
 
 import com.ponysdk.core.query.Criterion;
 
-public class DefaultCriteriaDecorator extends AbstractCriteriaDecorator<Object> {
+public interface Criteriable {
 
-    @Override
-    protected Object getObjectValue(Criterion criterionField) {
-        return criterionField.getValue();
-    }
+    public List<Criterion> getCriteria();
 
+    public void setCriteria(List<Criterion> criteria);
 }

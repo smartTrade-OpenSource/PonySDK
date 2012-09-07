@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,29 @@
  * the License.
  */
 
-package com.ponysdk.hibernate.query.decorator;
+package com.ponysdk.ui.server.dataprovider;
 
-import com.ponysdk.core.query.Criterion;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DefaultCriteriaDecorator extends AbstractCriteriaDecorator<Object> {
+import com.ponysdk.core.query.Query;
 
-    @Override
-    protected Object getObjectValue(Criterion criterionField) {
-        return criterionField.getValue();
+public class QueryBuilder<T> {
+
+    private final List<Criteriable> queryConditions = new ArrayList<Criteriable>();
+
+    public QueryBuilder() {}
+
+    public void registerCriteriable(final Criteriable criteriable) {
+        queryConditions.add(criteriable);
+    }
+
+    public Query build() {
+        final Query query = new Query();
+        for (final Criteriable criteriable : queryConditions) {
+            query.addCriteria(criteriable.getCriteria());
+        }
+        return query;
     }
 
 }

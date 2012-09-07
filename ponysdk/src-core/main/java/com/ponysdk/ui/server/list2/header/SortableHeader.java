@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.list2.header;
 
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventBusAware;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -41,10 +41,10 @@ public class SortableHeader implements HeaderCellRenderer, SortColumnHandler, Ev
     private EventBus eventBus;
 
     private final HeaderCellRenderer renderer;
-    private final CriterionField criterionField;
+    private final Criterion criterionField;
     private PWidget widget;
 
-    public SortableHeader(final HeaderCellRenderer renderer, final CriterionField criterionField) {
+    public SortableHeader(final HeaderCellRenderer renderer, final Criterion criterionField) {
         this.renderer = renderer;
         this.criterionField = criterionField;
     }
