@@ -32,11 +32,14 @@ import com.ponysdk.core.command.Command;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.command.ExportCommand;
+import com.ponysdk.core.export.csv.CSVExporter;
+import com.ponysdk.core.export.xml.XMLExporter;
 import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.application.ApplicationView;
+import com.ponysdk.jasper.export.PDFExporter;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonyChildsCommand;
@@ -56,7 +59,6 @@ import com.ponysdk.ui.server.form.FormField;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
 import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TextBoxBaseFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.validator.IntegerFieldValidator;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
@@ -69,7 +71,7 @@ import com.ponysdk.ui.server.list.ExportConfiguration;
 import com.ponysdk.ui.server.list.ListColumnDescriptor;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
-import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.ui.server.list.renderer.header.ComplexHeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
@@ -81,6 +83,8 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
     private ComplexListActivity<Pony> complexListActivity;
     private FormField nameSearchField;
     private FormField ageSearchField;
+    private FormField raceSearchFormField;
+    private ListBoxFormFieldRenderer raceSearchFormFieldRenderer;
 
     private PSimplePanel createPonyActivityPanel;
     private FormActivity createPonyActivity;
@@ -132,6 +136,9 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
                     @Override
                     protected void doAfterSuccess(final Result<List<Pony>> result) {
+                        for (final Pony pony : result.getData()) {
+                            if (!raceSearchFormFieldRenderer.hasItem(pony.getRace())) raceSearchFormFieldRenderer.addItem(pony.getRace());
+                        }
                         complexListActivity.setData(result);
                     }
                 };
@@ -146,8 +153,8 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
         complexListActivity.start(scrolPanel);
 
-        complexListActivity.getForm().addFormField(nameSearchField);
-        complexListActivity.getForm().addFormField(ageSearchField);
+        // complexListActivity.getForm().addFormField(nameSearchField);
+        // complexListActivity.getForm().addFormField(ageSearchField);
 
         final PButton addPonyButton = new PButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
@@ -170,6 +177,9 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
 
     private ExportConfiguration initExportConfiguration() {
         final ExportConfiguration exportConfiguration = new ExportConfiguration();
+        exportConfiguration.addExporter(new CSVExporter<Pony>("pony"));
+        exportConfiguration.addExporter(new PDFExporter<Pony>("Pony export", "users"));
+        exportConfiguration.addExporter(new XMLExporter<Pony>("root", "pony"));
         exportConfiguration.addExportableField(new ExportableField("name", "Name"));
         exportConfiguration.addExportableField(new ExportableField("age", "Age"));
         exportConfiguration.addExportableField(new ExportableField("race", "type"));
@@ -182,24 +192,31 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         for (int i = 0; i < 30; i++)
             ageListBoxRenderer.addItem(i + " year", i);
 
-        ageSearchField = new FormField(ageListBoxRenderer);
-        nameSearchField = new FormField(new TextBoxBaseFormFieldRenderer("Name"));
+        // ageSearchField = new FormField(ageListBoxRenderer);
+        // nameSearchField = new FormField(new TextBoxBaseFormFieldRenderer("Name"));
+        ageSearchField = new FormField();
+        nameSearchField = new FormField();
+
+        raceSearchFormFieldRenderer = new ListBoxFormFieldRenderer();
+        raceSearchFormField = new FormField(raceSearchFormFieldRenderer);
 
         final List<ListColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<ListColumnDescriptor<Pony, ?>>();
 
         final ListColumnDescriptor<Pony, String> nameColumnDescriptor = new ListColumnDescriptor<Pony, String>();
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name", "name"));
+        // nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name", "name"));
+        nameColumnDescriptor.setHeaderCellRenderer(new ComplexHeaderCellRenderer("Un tres grans nom ak ka ka", nameSearchField, "name"));
         listColumnDescriptors.add(nameColumnDescriptor);
 
         final ListColumnDescriptor<Pony, String> ageColumnDescriptor = new ListColumnDescriptor<Pony, String>("Age");
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
-        ageColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Age", "age"));
+        // ageColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Age", "age"));
+        ageColumnDescriptor.setHeaderCellRenderer(new ComplexHeaderCellRenderer("Age", ageSearchField, "age"));
         listColumnDescriptors.add(ageColumnDescriptor);
 
         final ListColumnDescriptor<Pony, String> raceColumnDescriptor = new ListColumnDescriptor<Pony, String>("Race");
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
-        raceColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
+        raceColumnDescriptor.setHeaderCellRenderer(new ComplexHeaderCellRenderer("Race", raceSearchFormField, "race"));
         listColumnDescriptors.add(raceColumnDescriptor);
 
         return listColumnDescriptors;

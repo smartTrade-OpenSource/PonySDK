@@ -50,6 +50,7 @@ public class PGrid extends PHTMLTable {
     public PGrid() {
         // TODO nciaravola must be moved terminal side
         addStyleName("pony-PGrid");
+        setCellFormatter(new PCellFormatter());
     }
 
     @Override

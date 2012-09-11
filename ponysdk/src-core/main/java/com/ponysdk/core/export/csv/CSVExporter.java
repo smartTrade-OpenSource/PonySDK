@@ -30,7 +30,7 @@ public class CSVExporter<T> implements Exporter<T> {
 
     private final String fileName;
 
-    public CSVExporter(String fileName) {
+    public CSVExporter(final String fileName) {
         this.fileName = fileName;
     }
 
@@ -40,7 +40,7 @@ public class CSVExporter<T> implements Exporter<T> {
     }
 
     @Override
-    public String export(List<ExportableField> exportableFields, List<T> records) throws Exception {
+    public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
         final StringBuffer buffer = new StringBuffer();
         final Iterator<ExportableField> iter = exportableFields.iterator();
 
@@ -54,7 +54,7 @@ public class CSVExporter<T> implements Exporter<T> {
         buffer.append(LF);
         for (final T row : records) {
             for (final ExportableField exportableField : exportableFields) {
-                buffer.append(PropertyUtil.getProperty(row, exportableField.getKey()));
+                buffer.append(getDisplayValue(row, exportableField));
                 buffer.append(DELIMITER);
             }
             buffer.append(LF);
@@ -64,7 +64,7 @@ public class CSVExporter<T> implements Exporter<T> {
         streamResource.open(new StreamHandler() {
 
             @Override
-            public void onStream(HttpServletRequest req, HttpServletResponse response) {
+            public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
                 response.reset();
                 response.setContentType("text/csv");
                 response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
@@ -81,5 +81,9 @@ public class CSVExporter<T> implements Exporter<T> {
         });
 
         return records.size() + " row(s) exported in " + fileName;
+    }
+
+    protected String getDisplayValue(final T row, final ExportableField exportableField) throws Exception {
+        return PropertyUtil.getProperty(row, exportableField.getKey());
     }
 }

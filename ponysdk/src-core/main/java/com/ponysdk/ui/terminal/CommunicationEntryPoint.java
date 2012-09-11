@@ -70,15 +70,18 @@ public class CommunicationEntryPoint implements EntryPoint {
             // load all cookies at startup
             final Collection<String> cookieNames = Cookies.getCookieNames();
             if (cookieNames != null) {
-                final int i = 0;
+                int i = 0;
                 for (final String cookie : cookieNames) {
-                    cookies.set(i, new JSONString(Cookies.getCookie(cookie)));
+                    final JSONObject jsoObject = new JSONObject();
+                    jsoObject.put(PROPERTY.KEY, new JSONString(cookie));
+                    jsoObject.put(PROPERTY.VALUE, new JSONString(Cookies.getCookie(cookie)));
+                    cookies.set(i++, jsoObject);
                 }
             }
 
             requestData.put(APPLICATION.KEY, APPLICATION.KEY_.START);
             requestData.put(HISTORY.TOKEN, History.getToken());
-            requestData.put(PROPERTY.COOKIE, cookies);
+            requestData.put(PROPERTY.COOKIES, cookies);
 
             final RequestCallback requestCallback = new RequestCallback() {
 

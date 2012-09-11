@@ -18,10 +18,14 @@
 		<servlet-class>com.ponysdk.spring.servlet.SpringHttpServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
 	<servlet>
 		<servlet-name>PonyBootstrapServlet</servlet-name>
 		<servlet-class>com.ponysdk.core.servlet.BootstrapServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>StreamServiceServlet</servlet-name>
+		<servlet-class>com.ponysdk.core.servlet.StreamServiceServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
@@ -33,10 +37,13 @@
 		<servlet-name>PonyWebSocketServlet</servlet-name>
 		<url-pattern>/ws/*</url-pattern>
 	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>PonyBootstrapServlet</servlet-name>
 		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>StreamServiceServlet</servlet-name>
+		<url-pattern>/ponyterminal/stream</url-pattern>
 	</servlet-mapping>
 
 </web-app>
