@@ -21,15 +21,27 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.place;
+package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.activity.Activity;
+import com.ponysdk.core.place.AbstractPlace;
 
-public class LoginPlace implements Place {
+public class ActivityPlace extends AbstractPlace implements HasActivity {
+
+    private final Activity activity;
+
+    public ActivityPlace(final Activity activity) {
+        this.activity = activity;
+    }
 
     @Override
     public String getToken() {
-        return getClass().getSimpleName();
+        return activity.getClass().getSimpleName();
+    }
+
+    @Override
+    public Activity getActivity() {
+        return activity;
     }
 
 }

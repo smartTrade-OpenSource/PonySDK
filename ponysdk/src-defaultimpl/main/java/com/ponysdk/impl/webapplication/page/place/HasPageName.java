@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -23,24 +23,8 @@
 
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.place.AbstractPlace;
+public interface HasPageName {
 
-public class PagePlace extends AbstractPlace implements HasPageName {
-
-    private final String pageName;
-
-    public PagePlace(final String pageName) {
-        this.pageName = pageName;
-    }
-
-    @Override
-    public String getToken() {
-        return pageName;
-    }
-
-    @Override
-    public String getPageName() {
-        return pageName;
-    }
+    public String getPageName();
 
 }

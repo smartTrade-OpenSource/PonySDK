@@ -131,7 +131,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
 
     private void reset() {
         subListSizeByFather.clear();
-        listView.clearList();
+        listView.clear(1);
         data = null;
     }
 
