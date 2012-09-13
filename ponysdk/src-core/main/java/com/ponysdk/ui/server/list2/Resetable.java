@@ -21,15 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.dataprovider;
+package com.ponysdk.ui.server.list2;
 
-import java.util.List;
+public interface Resetable {
 
-import com.ponysdk.core.query.Criterion;
+    void reset();
 
-public interface Criteriable {
-
-    public List<Criterion> getCriteria();
-
-    public void setCriteria(List<Criterion> criteria);
 }
