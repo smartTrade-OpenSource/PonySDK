@@ -1,0 +1,25 @@
+body {
+	font-family: 'Myriad Pro', Helvetica, Arial, sans-serif;
+}
+
+h1, h2{text-align:center;}
+
+h1{
+	font-weight:bold;
+	font-size:50px;
+	margin-top:40px;
+	margin-bottom:10px;
+	font-family: 'Myriad Pro', Helvetica, Arial, sans-serif;
+	}
+h2{
+	font-size:18px;
+	font-weight:normal;
+	color:#828282;
+	font-family: 'Myriad Pro', Helvetica, Arial, sans-serif;
+	}
+	
+hr.dotted {border-style:dashed;}
+
+.right{text-align:right;}
+
+.answer{margin-left:20px;}
