@@ -30,6 +30,8 @@
 	
 	"property": {
 		"root": [],
+		"key": [],
+		"value": [],
 		"width": [],
 		"widgetWidth": [],
 		"widgetHeight": [],
@@ -40,7 +42,6 @@
 		"itemInserted": [],
 		"itemRemoved": [],
 		"itemText": [],
-		"value": [],
 		"index": [],
 		"borderWidth": [],
 		"spacing": [],
@@ -126,6 +127,7 @@
 		"sourceAbsoluteTop": [],
 		"sourceOffsetHeight": [],
 		"sourceOffsetWidth": [],
+		"cookies": [],
 		"cookie": [],
 		"cookieExpire": [],
 		"referenceScrollPanel": [],

@@ -28,7 +28,7 @@ public class XMLExporter<T> implements Exporter<T> {
 
     protected final String rootName;
 
-    public XMLExporter(String rootName, String fileName) {
+    public XMLExporter(final String rootName, final String fileName) {
         this.rootName = rootName;
         this.fileName = fileName;
     }
@@ -39,19 +39,19 @@ public class XMLExporter<T> implements Exporter<T> {
     }
 
     @Override
-    public String export(List<ExportableField> exportableFields, List<T> records) throws Exception {
+    public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
         final String xml = convert(exportableFields, records, rootName).toString();
         exportXMLString(fileName, xml);
         return records.size() + " row(s) exported in " + fileName;
     }
 
-    public static <T> void exportXMLString(final String fileName, final String content) throws Exception {
+    public void exportXMLString(final String fileName, final String content) throws Exception {
         // Set MIME type to binary data to prevent opening of PDF in browser window
         final StreamResource streamResource = new StreamResource();
         streamResource.open(new StreamHandler() {
 
             @Override
-            public void onStream(HttpServletRequest req, HttpServletResponse response) {
+            public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
                 response.reset();
                 response.setContentType("application/xml");
                 response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -68,7 +68,7 @@ public class XMLExporter<T> implements Exporter<T> {
         });
     }
 
-    public static <T> StringBuilder convert(List<ExportableField> exportableFields, List<T> pojos, String rootName) throws Exception {
+    public StringBuilder convert(final List<ExportableField> exportableFields, final List<T> pojos, String rootName) throws Exception {
         rootName = StringEscapeUtils.escapeXml(rootName);
         final StringBuilder s = new StringBuilder();
         s.append("<" + rootName + "s>");
@@ -78,7 +78,7 @@ public class XMLExporter<T> implements Exporter<T> {
                 String normalizedCaption = exportableField.getCaption().replace(" ", "").replace(".", "_").replace("/", "Per");
                 normalizedCaption = StringEscapeUtils.escapeXml(normalizedCaption);
                 s.append("<" + normalizedCaption + ">");
-                s.append(StringEscapeUtils.escapeXml(String.valueOf(PropertyUtil.getProperty(pojo, exportableField.getKey()))));
+                s.append(StringEscapeUtils.escapeXml(getDisplayValue(pojo, exportableField)));
                 s.append("</" + normalizedCaption + ">");
             }
             s.append("</" + rootName + ">");
@@ -86,6 +86,10 @@ public class XMLExporter<T> implements Exporter<T> {
         }
         s.append("</" + rootName + "s>");
         return s;
+    }
+
+    protected String getDisplayValue(final T pojo, final ExportableField exportableField) throws Exception {
+        return PropertyUtil.getProperty(pojo, exportableField.getKey());
     }
 
 }

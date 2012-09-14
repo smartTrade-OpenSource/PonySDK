@@ -41,12 +41,19 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
     private final Map<String, CriteriaDecorator> criteriaDecoratorByPojoPropertyKey = new HashMap<String, CriteriaDecorator>();
 
     private CriteriaDecorator sortCriteriaDecorator;
-
     private final OrderingCriteria criteria;
+    private String defaultSortingProperty;
+    private SortingType sortingType;
 
     public DefaultQueryGenerator(final OrderingCriteria criteria) {
-        this.sortCriteriaDecorator = new DefaultSortCriteriaDecorator();
+        this(criteria, null, SortingType.NONE);
+    }
+
+    public DefaultQueryGenerator(final OrderingCriteria criteria, final String defaultSortingProperty, final SortingType sortingType) {
+        this.defaultSortingProperty = defaultSortingProperty;
+        this.sortingType = sortingType;
         this.criteria = criteria;
+        this.sortCriteriaDecorator = new DefaultSortCriteriaDecorator();
     }
 
     public void putDecorator(final String pojoPropertyKey, final CriteriaDecorator criteriaDecorator) {
@@ -59,6 +66,7 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
 
     @Override
     public OrderingCriteria generate(final Query query) {
+        String ordering = null;
         final List<Criterion> fields = query.getCriteria();
         if (fields != null) {
             for (final Criterion criterion : fields) {
@@ -75,7 +83,20 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
                 }
                 if (criterion.getSortingType() != SortingType.NONE) {
                     sortCriteriaDecorator.render(context);
+                    ordering = criterion.getPojoProperty();
                 }
+            }
+        }
+
+        // sort forced on the default property
+        if (ordering == null || !ordering.equals(defaultSortingProperty)) {
+            if (defaultSortingProperty != null) {
+                final Criterion field = new Criterion(defaultSortingProperty);
+                field.setSortingType(sortingType);
+                final CriteriaContext context = new CriteriaContext();
+                context.setCriterion(field);
+                context.setSTCriteria(criteria);
+                sortCriteriaDecorator.render(context);
             }
         }
 

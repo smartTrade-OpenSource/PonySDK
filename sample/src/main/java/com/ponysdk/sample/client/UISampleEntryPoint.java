@@ -23,67 +23,28 @@
 
 package com.ponysdk.sample.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.activity.ActivityManager;
-import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.place.PlaceController;
-import com.ponysdk.core.place.PlaceHistoryHandler;
-import com.ponysdk.core.place.PlaceHistoryMapper;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.sample.client.activity.SampleActivityMapper;
+import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.sample.client.place.LoginPlace;
-import com.ponysdk.ui.server.basic.PHistory;
-import com.ponysdk.ui.server.basic.PRootLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
+import com.ponysdk.spring.client.SpringEntryPoint;
 
-public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
+public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
 
     public static final String USER = "user";
-
-    @Autowired
-    private PlaceController placeController;
-
-    @Autowired
-    private EventBus eventBus;
-
-    @Autowired
-    private PHistory history;
-
-    @Autowired
-    private SampleActivityMapper mapper;
-
-    @Autowired
-    private PlaceHistoryMapper historyMapper;
-
-    private void start() {
-        final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
-        PRootLayoutPanel.get().add(panel);
-
-        // PPusher.initialize();
-
-        final ActivityManager activityManager = new ActivityManager(mapper);
-        activityManager.setDisplay(panel);
-
-        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(history, historyMapper, placeController, eventBus);
-        historyHandler.setDefaultPlace(new LoginPlace());
-        historyHandler.handleCurrentHistory();
-    }
 
     @Override
     public void start(final UIContext uiContext) {
         if (uiContext.getApplicationAttribute(USER) == null) uiContext.getHistory().newItem("", false);
-        start();
+        start(new LoginPlace());
     }
 
     @Override
     public void restart(final UIContext session) {
         if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
-        start();
+        start(new LoginPlace());
     }
 
     @Override

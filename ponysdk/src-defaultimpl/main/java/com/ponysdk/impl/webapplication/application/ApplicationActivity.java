@@ -31,7 +31,8 @@ import com.ponysdk.impl.webapplication.menu.MenuActivity;
 import com.ponysdk.impl.webapplication.notification.NotificationActivity;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.impl.webapplication.page.place.HasActivity;
+import com.ponysdk.impl.webapplication.page.place.HasPageName;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class ApplicationActivity implements Activity {
@@ -63,13 +64,18 @@ public class ApplicationActivity implements Activity {
             notificationActivity.start(applicationView.getLogs(), place);
         }
 
-        if (place instanceof PagePlace) {
-            final PagePlace pagePlace = (PagePlace) place;
+        if (place instanceof HasPageName) {
+            final HasPageName pagePlace = (HasPageName) place;
             final PageActivity pageActivity = pageProvider.getPageActivity(pagePlace.getPageName());
 
             if (!com.ponysdk.core.security.SecurityManager.checkPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
 
             pageActivity.start(applicationView.getBody(), place);
+        }
+
+        if (place instanceof HasActivity) {
+            final HasActivity activityPlace = (HasActivity) place;
+            activityPlace.getActivity().start(applicationView.getBody(), place);
         }
 
         world.setWidget(applicationView.asWidget());

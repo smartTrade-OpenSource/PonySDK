@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -69,9 +70,14 @@ public abstract class AbstractApplicationManager {
             final String historyToken = data.getString(HISTORY.TOKEN);
             if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
 
-            final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIE);
-            System.err.println("history: " + historyToken);
-            System.err.println("cookies: " + cookies);
+            final PCookies pCookies = new PCookies();
+            final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIES);
+            for (int i = 0; i < cookies.length(); i++) {
+                final JSONObject jsoObject = cookies.getJSONObject(i);
+                final String name = jsoObject.getString(PROPERTY.KEY);
+                final String value = jsoObject.getString(PROPERTY.VALUE);
+                pCookies.cacheCookie(name, value);
+            }
 
             if (isNewHttpSession) {
                 entryPoint.start(uiContext);

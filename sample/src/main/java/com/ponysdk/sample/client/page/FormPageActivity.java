@@ -99,6 +99,16 @@ public class FormPageActivity extends SamplePageActivity {
         });
         layout.add(validateButton);
 
+        final PButton resetButton = new PButton("Reset");
+        resetButton.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent clickEvent) {
+                formActivity.reset();
+            }
+        });
+        layout.add(resetButton);
+
         examplePanel.setWidget(layout);
     }
 

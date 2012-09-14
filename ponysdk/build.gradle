@@ -30,6 +30,7 @@ sourceSets {
 			srcDir srcPersistency
 			srcDir srcHibernate
 			srcDir srcMongoDB
+			srcDir srcJasper
 		}
 	}
 }

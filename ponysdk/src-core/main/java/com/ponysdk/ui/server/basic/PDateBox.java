@@ -148,7 +148,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     public void setValue(final Date date) {
         this.date = date;
         final Update update = new Update(getID());
-        update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : null);
+        update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : "");
         getUIContext().stackInstruction(update);
     }
 
