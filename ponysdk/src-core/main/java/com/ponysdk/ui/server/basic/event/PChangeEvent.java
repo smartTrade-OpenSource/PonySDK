@@ -25,21 +25,22 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.ui.terminal.DomHandlerType;
 
-public class PChangeEvent extends PDomEvent<PChangeHandler> {
+public class PChangeEvent<T> extends PDomEvent<PChangeHandler<T>> {
 
-    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<PChangeHandler>(DomHandlerType.CHANGE_HANDLER);
+    public static final PDomEvent.Type<PChangeHandler<?>> TYPE = new PDomEvent.Type<PChangeHandler<?>>(DomHandlerType.CHANGE_HANDLER);
 
     public PChangeEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public PDomEvent.Type<PChangeHandler> getAssociatedType() {
-        return TYPE;
+    public PDomEvent.Type<PChangeHandler<T>> getAssociatedType() {
+        return (Type) TYPE;
     }
 
     @Override
-    protected void dispatch(final PChangeHandler handler) {
+    protected void dispatch(final PChangeHandler<T> handler) {
         handler.onChange(this);
     }
 

@@ -23,9 +23,7 @@
 
 package com.ponysdk.ui.terminal;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,6 +78,7 @@ public class CommunicationEntryPoint implements EntryPoint {
             }
 
             requestData.put(APPLICATION.KEY, APPLICATION.KEY_.START);
+            requestData.put(APPLICATION.SEQ_NUM, 0);
             requestData.put(HISTORY.TOKEN, History.getToken());
             requestData.put(PROPERTY.COOKIES, cookies);
 
@@ -88,28 +87,14 @@ public class CommunicationEntryPoint implements EntryPoint {
                 @Override
                 public void onDataReceived(final JSONObject data) {
                     try {
-                        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-
                         if (data.containsKey(APPLICATION.VIEW_ID)) {
                             final long viewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
-                            final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
-
-                            for (int i = 0; i < jsonArray.size(); i++) {
-                                instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
-                            }
-
                             uiBuilder = new UIBuilder(viewID, requestBuilder);
                             uiBuilder.init();
-                            uiBuilder.update(instructions);
+                            uiBuilder.update(data);
                             uiBuilder.hideLoadingMessageBox();
                         } else {
-                            final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
-
-                            for (int i = 0; i < jsonArray.size(); i++) {
-                                instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
-                            }
-
-                            uiBuilder.update(instructions);
+                            uiBuilder.update(data);
                             uiBuilder.hideLoadingMessageBox();
                         }
                     } catch (final RuntimeException exception) {
@@ -121,6 +106,7 @@ public class CommunicationEntryPoint implements EntryPoint {
                 public void onError(final Throwable exception) {
                     uiBuilder.onCommunicationError(exception);
                 }
+
             };
 
             requestBuilder = new HttpRequestBuilder(requestCallback);

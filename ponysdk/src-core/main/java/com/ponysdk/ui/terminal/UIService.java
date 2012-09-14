@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.terminal;
 
-import java.util.List;
-
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
@@ -45,6 +44,6 @@ public interface UIService {
 
     public PTObject unRegisterObject(Long ID);
 
-    public void update(final List<PTInstruction> instructions);
+    public void update(JSONObject data);
 
 }

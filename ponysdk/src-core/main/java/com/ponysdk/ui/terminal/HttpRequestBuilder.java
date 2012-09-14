@@ -28,6 +28,13 @@ public class HttpRequestBuilder extends RequestBuilder {
 
                 @Override
                 public void onResponseReceived(final Request request, final Response response) {
+
+                    if (response.getStatusCode() != 200) {
+                        // onError(request, new StatusCodeException(response.getStatusCode(),
+                        // response.getStatusText()));
+                        return;
+                    }
+
                     if (response.getText() == null || response.getText().isEmpty()) return;
                     callback.onDataReceived(JSONParser.parseLenient(response.getText()).isObject());
                 }

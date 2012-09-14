@@ -13,7 +13,10 @@ public class HttpSession implements Session {
 
     public HttpSession(final HttpServletRequest httpRequest) {
         this.httpSession = httpRequest.getSession();
-        this.userAgent = UserAgent.parseUserAgentString((String) httpSession.getAttribute("User-Agent"));
+
+        final String userAgentString = (String) httpSession.getAttribute("User-Agent");
+        if (userAgentString != null) this.userAgent = UserAgent.parseUserAgentString(userAgentString);
+        else this.userAgent = null;
     }
 
     @Override

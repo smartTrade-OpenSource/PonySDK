@@ -24,6 +24,7 @@
 package com.ponysdk.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,10 @@ public class UIContext {
     private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>();
 
     private final ReentrantLock lock = new ReentrantLock();
+
+    private long lastReceived = -1;
+    private long nextSent = 0;
+    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
     public UIContext(final Application ponyApplication) {
         this.ponyApplication = ponyApplication;
@@ -335,5 +340,38 @@ public class UIContext {
     @SuppressWarnings("unchecked")
     public <T> T getApplicationAttribute(final String name) {
         return (T) this.ponyApplication.getAttribute(name);
+    }
+
+    public boolean updateIncomingSeqNum(final long receivedSeqNum) {
+        final long previous = lastReceived;
+        if ((previous + 1) != receivedSeqNum) {
+            log.error("Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+            return false;
+        }
+        lastReceived = receivedSeqNum;
+        return true;
+    }
+
+    public long getAndIncrementNextSentSeqNum() {
+        final long n = nextSent;
+        nextSent++;
+        return n;
+    }
+
+    public void stackIncomingMessage(final Long receivedSeqNum, final JSONObject data) {
+        incomingMessageQueue.put(receivedSeqNum, data);
+    }
+
+    public List<JSONObject> expungeIncomingMessageQueue(final Long receivedSeqNum) {
+        if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
+
+        final List<JSONObject> datas = new ArrayList<JSONObject>();
+        long expected = receivedSeqNum + 1;
+        while (incomingMessageQueue.containsKey(expected)) {
+            datas.add(incomingMessageQueue.remove(expected));
+            lastReceived = expected;
+            expected++;
+        }
+        return datas;
     }
 }

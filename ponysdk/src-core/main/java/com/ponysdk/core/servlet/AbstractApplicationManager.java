@@ -1,9 +1,12 @@
 
 package com.ponysdk.core.servlet;
 
+import java.util.List;
+
 import javax.servlet.ServletException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -65,6 +68,9 @@ public abstract class AbstractApplicationManager {
             jsonObject.put(APPLICATION.VIEW_ID, applicationSession.registerUIContext(uiContext));
             UIContext.setCurrent(uiContext);
 
+            final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+            uiContext.updateIncomingSeqNum(receivedSeqNum);
+
             final EntryPoint entryPoint = initializePonySession(uiContext);
 
             final String historyToken = data.getString(HISTORY.TOKEN);
@@ -86,6 +92,7 @@ public abstract class AbstractApplicationManager {
             }
 
             try {
+                jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
                 uiContext.flushInstructions(jsonObject);
                 response.write(jsonObject.toString());
                 response.flush();
@@ -99,7 +106,6 @@ public abstract class AbstractApplicationManager {
         final JSONObject jsonObject = new JSONObject();
 
         final long key = data.getLong(APPLICATION.VIEW_ID);
-
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
 
@@ -111,16 +117,24 @@ public abstract class AbstractApplicationManager {
 
         uiContext.acquire();
         try {
-            UIContext.setCurrent(uiContext);
-            if (data.has(APPLICATION.INSTRUCTIONS)) {
-                final JSONArray instructions = data.getJSONArray(APPLICATION.INSTRUCTIONS);
-                for (int i = 0; i < instructions.length(); i++) {
-                    uiContext.fireInstruction(instructions.getJSONObject(i));
-                }
+            final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+            if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
+                uiContext.stackIncomingMessage(receivedSeqNum, data);
+                log.info("Stacking incoming message #" + receivedSeqNum);
+                return;
             }
+
+            UIContext.setCurrent(uiContext);
+            final List<JSONObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+            for (final JSONObject jsoObject : datas) {
+                process(uiContext, jsoObject);
+            }
+
+            process(uiContext, data);
 
             try {
                 if (uiContext.flushInstructions(jsonObject)) {
+                    jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
                     response.write(jsonObject.toString());
                     response.flush();
                 }
@@ -130,6 +144,15 @@ public abstract class AbstractApplicationManager {
         } finally {
             UIContext.remove();
             uiContext.release();
+        }
+    }
+
+    private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException, PonySessionException {
+        if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
+            final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
+            for (int i = 0; i < instructions.length(); i++) {
+                uiContext.fireInstruction(instructions.getJSONObject(i));
+            }
         }
     }
 
