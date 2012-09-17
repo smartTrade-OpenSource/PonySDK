@@ -21,29 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.dataprovider;
+package com.ponysdk.ui.server.list2;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.ponysdk.core.query.SortingType;
 
-import com.ponysdk.core.query.Query;
+public interface Sortable {
 
-public class QueryBuilder<T> {
-
-    private final List<Criteriable> queryConditions = new ArrayList<Criteriable>();
-
-    public QueryBuilder() {}
-
-    public void registerCriteriable(final Criteriable criteriable) {
-        queryConditions.add(criteriable);
-    }
-
-    public Query build() {
-        final Query query = new Query();
-        for (final Criteriable criteriable : queryConditions) {
-            query.addCriteria(criteriable.getCriteria());
-        }
-        return query;
-    }
+    void sort(SortingType sortingType);
 
 }

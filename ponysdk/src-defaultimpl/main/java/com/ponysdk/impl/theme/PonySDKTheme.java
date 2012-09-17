@@ -90,6 +90,9 @@ public interface PonySDKTheme {
 
     String PAGE_HEADER_CAPTION = "pony-Page-Header-Caption";
 
+    String PAGE_NAVIGATION = "pony-Page-Navigation";
+    String PAGE_NAVIGATION_ITEM_SELECTED = "pony-Page-Navigation-selectedItem";
+
     String MENUBAR = "pony-MenuBar";
 
     String MENUBAR_LIGHT = "pony-MenuBar-Light";

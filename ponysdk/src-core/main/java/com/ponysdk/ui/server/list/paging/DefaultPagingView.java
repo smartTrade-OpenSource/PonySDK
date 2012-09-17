@@ -70,17 +70,17 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void addSeparator(String text) {
+    public void addSeparator(final String text) {
         add(new PLabel(text));
     }
 
     @Override
-    public void addPageIndex(int pageIndex, final PCommand command) {
+    public void addPageIndex(final int pageIndex, final PCommand command) {
         final PButton button = new PButton(String.valueOf(pageIndex + 1));
         button.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 command.execute();
             }
         });
@@ -89,7 +89,7 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void setSelectedPage(int pageIndex) {
+    public void setSelectedPage(final int pageIndex) {
         final PWidget item = items.get(pageIndex).asWidget();
         item.setStyleName("selected");
         if (selectedItem != null) selectedItem.asWidget().setStyleName("unselected");
@@ -97,12 +97,12 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void setStart(boolean enabled, final PCommand command) {
+    public void setStart(final boolean enabled, final PCommand command) {
         startButton.setEnabled(enabled);
         startButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 command.execute();
             }
         });
@@ -110,12 +110,12 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void setEnd(boolean enabled, final PCommand command) {
+    public void setEnd(final boolean enabled, final PCommand command) {
         endButton.setEnabled(enabled);
         endButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 command.execute();
             }
         });
@@ -123,12 +123,12 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void setNext(boolean enabled, final PCommand command) {
+    public void setNext(final boolean enabled, final PCommand command) {
         nextButton.setEnabled(enabled);
         nextButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 command.execute();
             }
         });
@@ -136,12 +136,12 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void setPrevious(boolean enabled, final PCommand command) {
+    public void setPrevious(final boolean enabled, final PCommand command) {
         previousButton.setEnabled(enabled);
         previousButton.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onClick(PClickEvent event) {
+            public void onClick(final PClickEvent event) {
                 command.execute();
             }
         });
@@ -155,7 +155,7 @@ public class DefaultPagingView extends PHorizontalPanel implements PagingView {
     }
 
     @Override
-    public void showPagingBar(boolean show) {
+    public void showPagingBar(final boolean show) {
         setVisible(show);
     }
 }
