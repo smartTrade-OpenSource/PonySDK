@@ -21,31 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.dataprovider;
+package com.ponysdk.ui.server.list2;
 
+import java.util.List;
 
-public class Pager<T> {
+import com.ponysdk.core.query.Criterion;
 
-    private final int pageSize = 20;
-    private final int currentPage = 0;
+public interface HasCriteria {
 
-    private final PagerView view;
+    List<Criterion> getCriteria();
 
-    // private static final int PAGING_WINDOW = 5;
-
-    public Pager(final PagerView view) {
-        this.view = view;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void addListener(final PagerListener listener) {
-        view.addPagerListener(listener);
-    }
 }

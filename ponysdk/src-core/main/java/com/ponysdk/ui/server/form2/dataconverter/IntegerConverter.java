@@ -1,7 +1,6 @@
 
 package com.ponysdk.ui.server.form2.dataconverter;
 
-
 public class IntegerConverter implements DataConverter<String, Integer> {
 
     @Override
@@ -11,7 +10,7 @@ public class IntegerConverter implements DataConverter<String, Integer> {
 
     @Override
     public Integer to(final String t) {
-        return Integer.getInteger(t);
+        return Integer.parseInt(t);
     }
 
 }
