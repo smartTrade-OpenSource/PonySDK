@@ -4,6 +4,7 @@
 			"start"
 		],
 		"viewId": [],
+		"seqNum": [],
 		"instructions": []
 	},
 	
@@ -30,6 +31,8 @@
 	
 	"property": {
 		"root": [],
+		"key": [],
+		"value": [],
 		"width": [],
 		"widgetWidth": [],
 		"widgetHeight": [],
@@ -40,7 +43,6 @@
 		"itemInserted": [],
 		"itemRemoved": [],
 		"itemText": [],
-		"value": [],
 		"index": [],
 		"borderWidth": [],
 		"spacing": [],
@@ -60,6 +62,7 @@
 		"elementPropertyKey":[],
 		"elementPropertyValue":[],
 		"styleName": [],
+		"stylePrimaryName": [],
 		"addStyleName": [],
 		"removeStyleName": [],
 		"imageUrl": [],
@@ -126,6 +129,7 @@
 		"sourceAbsoluteTop": [],
 		"sourceOffsetHeight": [],
 		"sourceOffsetWidth": [],
+		"cookies": [],
 		"cookie": [],
 		"cookieExpire": [],
 		"referenceScrollPanel": [],
