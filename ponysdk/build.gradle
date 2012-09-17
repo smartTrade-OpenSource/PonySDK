@@ -13,8 +13,9 @@ project.ext.srcHibernate = 'src-hibernate/main/java';
 project.ext.srcMongoDB = 'src-mongodb/main/java';
 project.ext.srcJasper = 'src-jasper/main/java';
 project.ext.gwtOutputDirName = buildDir.name + '/gwt';
+project.ext.buildInfoOutputDirName = buildDir.name + '/buildinfo';
 project.ext.warResources = 'src-core/main/resources/war';
-project.ext.confResources = 'src-core/main/resources/conf';
+project.ext.confResources = 'src-spring/main/resources/conf';
 project.ext.javadocResources = 'src-core/main/javadoc';
 
 sourceSets {
@@ -29,12 +30,16 @@ sourceSets {
 			srcDir srcPersistency
 			srcDir srcHibernate
 			srcDir srcMongoDB
+			srcDir srcJasper
 		}
 	}
 }
 
 repositories {
 	mavenCentral()
+    maven {
+        url "https://github.com/PonySDK/Maven/raw/master/ext"
+    }
 }
 
 configurations {
@@ -72,6 +77,8 @@ dependencies {
 	gwt 'com.google.gwt:gwt-codeserver:2.5.0-rc1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
+    gwt 'com.watopi:gwtchosen:1.0.2'
+    gwt 'com.googlecode.gwtquery:gwtquery:1.2.0'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
 	spring 'org.springframework:spring-web:3.0.6.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
@@ -94,6 +101,7 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
+
 manifest {
 	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
 }
@@ -106,7 +114,14 @@ jar {
     
     metaInf {
         from 'src-core/main/resources/META-INF'
+        from buildInfoOutputDirName
     }
+    
+    /** waiting fix : https://github.com/jDramaix/gwtchosen/issues/2 **/
+    copy{
+        from gwtOutputDirName + '/ponyterminal/chosen-sprite.png'
+        into gwtOutputDirName
+    }    
     
     into('conf') {
         from confResources
