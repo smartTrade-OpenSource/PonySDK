@@ -57,8 +57,8 @@ public class SpringContextLoader {
             context.setConfigLocations(StringUtils.tokenizeToStringArray(configFiles, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
             context.refresh();
             servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
-        } catch (final Exception exception) {
-
+        } catch (final Exception e) {
+            log.error("Failure during Spring context initialisation", e);
         }
 
     }
