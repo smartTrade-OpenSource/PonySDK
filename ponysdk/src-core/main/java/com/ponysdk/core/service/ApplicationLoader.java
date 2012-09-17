@@ -72,7 +72,11 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     @Override
     public void sessionDestroyed(final HttpSessionEvent arg0) {
         final Application applicationSession = (Application) arg0.getSession().getAttribute(Application.class.getCanonicalName());
-        applicationSession.fireSessionDestroyed();
+        if (applicationSession == null) {
+            log.warn("No Application in session. Unable to notify SessionListener.");
+        } else {
+            applicationSession.fireSessionDestroyed();
+        }
     }
 
     private void printDestroyedBanner() {

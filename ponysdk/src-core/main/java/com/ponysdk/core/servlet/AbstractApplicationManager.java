@@ -76,7 +76,7 @@ public abstract class AbstractApplicationManager {
             final String historyToken = data.getString(HISTORY.TOKEN);
             if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
 
-            final PCookies pCookies = new PCookies();
+            final PCookies pCookies = uiContext.getCookies();
             final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIES);
             for (int i = 0; i < cookies.length(); i++) {
                 final JSONObject jsoObject = cookies.getJSONObject(i);

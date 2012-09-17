@@ -28,14 +28,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Create;
-import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.WidgetType;
 
 public class PCookies {
 
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<String, String>();
+    private final long objectID = 0; // reserved
 
     public PCookies() {}
 
@@ -48,9 +47,12 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
-        final Remove remove = new Remove();
-        remove.put(PROPERTY.COOKIE, name);
-        UIContext.get().stackInstruction(remove);
+
+        final Update update = new Update(objectID);
+        update.put(PROPERTY.REMOVE, Boolean.TRUE);
+        update.put(PROPERTY.NAME, name);
+        UIContext.get().stackInstruction(update);
+
         return cachedCookies.remove(name);
     }
 
@@ -59,21 +61,16 @@ public class PCookies {
     }
 
     public void setCookie(final String name, final String value, final Date expires) {
-        try {
-            cachedCookies.put(name, value);
+        cachedCookies.put(name, value);
 
-            final long ID = UIContext.get().nextID();
-            final Create create = new Create(ID, WidgetType.COOKIE);
-            create.put(PROPERTY.NAME, name);
-            create.put(PROPERTY.VALUE, value);
-            if (expires != null) {
-                create.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
-            }
-
-            UIContext.get().stackInstruction(create);
-        } catch (final Exception e) {
-            throw new RuntimeException("encoding failure", e);
+        final Update update = new Update(objectID);
+        update.put(PROPERTY.ADD, Boolean.TRUE);
+        update.put(PROPERTY.NAME, name);
+        update.put(PROPERTY.VALUE, value);
+        if (expires != null) {
+            update.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
         }
+        UIContext.get().stackInstruction(update);
     }
 
 }

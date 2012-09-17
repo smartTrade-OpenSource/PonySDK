@@ -86,7 +86,7 @@ public class UIContext {
 
     private EventBus rootEventBus;
 
-    private PCookies cookies;
+    private final PCookies cookies = new PCookies();
 
     private final Application ponyApplication;
 
@@ -225,10 +225,6 @@ public class UIContext {
 
     public void setRootEventBus(final EventBus eventBus) {
         this.rootEventBus = eventBus;
-    }
-
-    public void setCookies(final PCookies cookies) {
-        this.cookies = cookies;
     }
 
     public static UIContext get() {

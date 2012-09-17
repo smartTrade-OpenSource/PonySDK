@@ -63,6 +63,7 @@ import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.exception.PonySessionException;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
@@ -122,6 +123,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         loadingMessageBox.setStyleName("pony-LoadingMessageBox");
         loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
         loadingMessageBox.getElement().setInnerText("Loading ...");
+
+        final PTCookies cookies = new PTCookies();
+        cookies.create(null, null);
+        objectByID.put(0l, cookies);
 
         // hide loading component
         final Widget w = RootPanel.get("loading");
@@ -211,18 +216,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                     Scheduler.get().scheduleDeferred(command);
                 } else if (TYPE.KEY_.CREATE.equals(type)) {
-                    // if (WidgetType.COOKIE.equals(instruction.getWidgetType())) {
-                    // final String name = instruction.getString(PROPERTY.NAME);
-                    // final String value = instruction.getString(PROPERTY.VALUE);
-                    //
-                    // if (instruction.containsKey(PROPERTY.COOKIE_EXPIRE)) {
-                    // final Date date = new Date(instruction.getLong(PROPERTY.COOKIE_EXPIRE));
-                    // Cookies.setCookie(name, value, date);
-                    // } else {
-                    // Cookies.setCookie(name, value);
-                    // }
-                    // } else {
-
                     // log.info("Create: " + create.getObjectID() + ", " + create.getWidgetType().name());
                     PTObject ptObject;
                     final boolean isAddon = instruction.containsKey("addOnSignature");
@@ -240,7 +233,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
 
                     objectByID.put(instruction.getObjectID(), ptObject);
-                    // }
 
                 } else if (TYPE.KEY_.ADD.equals(type)) {
                     // log.info("Add: " + add.getObjectID() + ", " + add.getParentID() + ", " +
@@ -268,19 +260,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
                 } else if (TYPE.KEY_.REMOVE.equals(type)) {
                     PTObject ptObject;
-
-                    // if (PropertyKey.COOKIE.equals(instruction.getProterty().getKey())) { // TODO
-                    // // nciaravola
-                    // // merge with
-                    // // PTCookie ?
-                    // Cookies.removeCookie(instruction.getProterty().getValue());
-                    // } else {
                     if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
                     else {
                         ptObject = objectByID.get(instruction.getParentID());
                     }
                     ptObject.remove(instruction, this);
-                    // }
                 } else if (TYPE.KEY_.GC.equals(type)) {
                     // log.info("GC: " + remove.getObjectID());
                     final PTObject unRegisterObject = unRegisterObject(instruction.getObjectID());

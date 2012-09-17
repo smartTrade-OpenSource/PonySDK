@@ -128,6 +128,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.BreadCrumbsPageActivity" />
 
 	<!-- Timer pages -->
+	<bean class="com.ponysdk.sample.client.page.CookiesPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.JavascriptPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.LessPageActivity" />
