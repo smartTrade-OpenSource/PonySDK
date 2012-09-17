@@ -23,15 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PRadioButton;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
-public class RadioButtonPageActivity extends SamplePageActivity {
+public class RadioButtonPageActivity extends SamplePageActivity implements PValueChangeHandler<Boolean> {
 
     public RadioButtonPageActivity() {
         super("Radio Button", "Widgets");
@@ -45,47 +44,30 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panelTop.setSpacing(10);
 
         panelTop.add(new PLabel("Select your favorite color:"));
-        panelTop.add(new PRadioButton("color", "blue"));
-        panelTop.add(new PRadioButton("color", "red"));
 
-        final PRadioButton yellow = new PRadioButton("color", "yellow");
+        panelTop.add(newPRadioButton("color", "blue"));
+        panelTop.add(newPRadioButton("color", "red"));
+
+        final PRadioButton yellow = newPRadioButton("color", "yellow");
         yellow.setEnabled(false);
         panelTop.add(yellow);
-        panelTop.add(new PRadioButton("color", "green"));
+
+        panelTop.add(newPRadioButton("color", "green"));
 
         final PVerticalPanel panelBottom = new PVerticalPanel();
         panelBottom.setSpacing(10);
 
         panelBottom.add(new PLabel("Select your favorite sport:"));
-        final PRadioButton baseBall = new PRadioButton("sport", "Baseball");
-        panelBottom.add(baseBall);
-        final PRadioButton basketBall = new PRadioButton("sport", "Basketball");
-        panelBottom.add(basketBall);
-        final PRadioButton footBall = new PRadioButton("sport", "Football");
-        panelBottom.add(footBall);
-        final PRadioButton hockey = new PRadioButton("sport", "Hockey");
-        panelBottom.add(hockey);
-        final PRadioButton soccer = new PRadioButton("sport", "Soccer");
-        panelBottom.add(soccer);
-        final PRadioButton waterPolo = new PRadioButton("sport", "Water Polo");
-        panelBottom.add(waterPolo);
-
-        final PValueChangeHandler<Boolean> valueChangeHandler = new PValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<Boolean> event) {
-                final PRadioButton radioButton = (PRadioButton) event.getSource();
-                final String msg = "Value changed : name = " + radioButton.getName() + " caption = " + radioButton.getText() + " value = " + radioButton.getValue();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
-        };
-
-        baseBall.addValueChangeHandler(valueChangeHandler);
-        basketBall.addValueChangeHandler(valueChangeHandler);
-        footBall.addValueChangeHandler(valueChangeHandler);
-        hockey.addValueChangeHandler(valueChangeHandler);
-        soccer.addValueChangeHandler(valueChangeHandler);
-        waterPolo.addValueChangeHandler(valueChangeHandler);
+        panelBottom.add(newPRadioButton("sport", "Polo"));
+        panelBottom.add(newPRadioButton("sport", "Rodeo"));
+        panelBottom.add(newPRadioButton("sport", "Horse racing"));
+        panelBottom.add(newPRadioButton("sport", "Dressage"));
+        panelBottom.add(newPRadioButton("sport", "Endurance riding"));
+        panelBottom.add(newPRadioButton("sport", "Eventing"));
+        panelBottom.add(newPRadioButton("sport", "Reining"));
+        panelBottom.add(newPRadioButton("sport", "Show jumping"));
+        panelBottom.add(newPRadioButton("sport", "Tent pegging"));
+        panelBottom.add(newPRadioButton("sport", "Vaulting"));
 
         panelTop.add(panelBottom);
 
@@ -94,5 +76,17 @@ public class RadioButtonPageActivity extends SamplePageActivity {
         panel.add(panelBottom);
 
         examplePanel.setWidget(panel);
+    }
+
+    private PRadioButton newPRadioButton(final String name, final String label) {
+        final PRadioButton radioButton = new PRadioButton(name, label);
+        radioButton.addValueChangeHandler(this);
+        return radioButton;
+    }
+
+    @Override
+    public void onValueChange(final PValueChangeEvent<Boolean> event) {
+        final PRadioButton radioButton = (PRadioButton) event.getSource();
+        PNotificationManager.showTrayNotification("Name = " + radioButton.getName() + " Text = " + radioButton.getText() + " Value = " + radioButton.getValue());
     }
 }
