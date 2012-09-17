@@ -31,7 +31,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Order;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.hibernate.query.CriteriaContext;
 
@@ -39,7 +39,7 @@ public class DefaultSortCriteriaDecorator implements CriteriaDecorator {
 
     @Override
     public void render(CriteriaContext context) {
-        final CriterionField field = context.getCriterion();
+        final Criterion field = context.getCriterion();
 
         if (field.getSortingType() == SortingType.NONE) return;
 

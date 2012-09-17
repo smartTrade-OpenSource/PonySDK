@@ -26,6 +26,7 @@ package com.ponysdk.impl.webapplication.menu;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
+import com.ponysdk.impl.webapplication.page.place.HasPageName;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -47,8 +48,8 @@ public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity imp
 
     @Override
     public void updateView(final Place place) {
-        if (place instanceof PagePlace) {
-            final String pageName = ((PagePlace) place).getPageName();
+        if (place instanceof HasPageName) {
+            final String pageName = ((HasPageName) place).getPageName();
             final PageActivity pageActivity = pageProvider.getPageActivity(pageName);
 
             if (pageActivity == null) throw new RuntimeException("The page hasn't been loaded : " + pageName);

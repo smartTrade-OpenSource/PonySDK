@@ -1215,6 +1215,7 @@ td.datePickerMonth {
 			padding-top: 4px;
 			padding-left:2px;
 			padding-right : 2px;
+			white-space: nowrap;
 		}
 		
 		.sortable {
@@ -1222,9 +1223,23 @@ td.datePickerMonth {
 			padding-left: 20px;
 			.box-sizing(border-box); 
 		}
+
+	}
+
+	.toto {
+		.box-sizing(border-box); 
 	}
 	
-	.gwt-TextBox{
+	input, select {
+		display:block;
+		width:100%;
+		padding-left:0;
+		padding-right:0;
+		margin-left: 0;
+		margin-right: 0;
+	}
+	
+	.gwt-TextBox, .gwt-DateBox {
 		height:9px;
 		font-size:9px;
 		margin-right: 1px;
@@ -1232,7 +1247,7 @@ td.datePickerMonth {
 	}
 	
 	.gwt-ListBox{
-		height:20px;
+		height:22px;
 		font-size:9px;
 	}
 	

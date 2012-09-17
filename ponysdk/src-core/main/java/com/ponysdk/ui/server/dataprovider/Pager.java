@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,26 +21,31 @@
  * the License.
  */
 
-package com.ponysdk.impl.webapplication.page.place;
+package com.ponysdk.ui.server.dataprovider;
 
-import com.ponysdk.core.place.AbstractPlace;
 
-public class PagePlace extends AbstractPlace implements HasPageName {
+public class Pager<T> {
 
-    private final String pageName;
+    private final int pageSize = 20;
+    private final int currentPage = 0;
 
-    public PagePlace(final String pageName) {
-        this.pageName = pageName;
+    private final PagerView view;
+
+    // private static final int PAGING_WINDOW = 5;
+
+    public Pager(final PagerView view) {
+        this.view = view;
     }
 
-    @Override
-    public String getToken() {
-        return pageName;
+    public int getCurrentPage() {
+        return currentPage;
     }
 
-    @Override
-    public String getPageName() {
-        return pageName;
+    public int getPageSize() {
+        return pageSize;
     }
 
+    public void addListener(final PagerListener listener) {
+        view.addPagerListener(listener);
+    }
 }

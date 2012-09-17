@@ -24,15 +24,15 @@
 package com.ponysdk.ui.server.form.renderer;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PGrid;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PImage;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
 public class FormFieldComponent<W extends PWidget> implements IsPWidget {
 
-    private final PVerticalPanel mainLayout;
+    private final PGrid mainLayout;
 
     private final PHorizontalPanel headerLayout;
 
@@ -45,7 +45,12 @@ public class FormFieldComponent<W extends PWidget> implements IsPWidget {
     private final PImage errorImage = new PImage("images/error.png");
 
     public FormFieldComponent(final W w) {
-        mainLayout = new PVerticalPanel();
+        mainLayout = new PGrid(2, 1);
+        mainLayout.setWidth("100%");
+        mainLayout.setCellPadding(0);
+        mainLayout.setCellSpacing(0);
+        mainLayout.getColumnFormatter().setWidth(0, "100%");
+
         headerLayout = new PHorizontalPanel();
         errorImage.setStyleProperty("color", "red");
         requiredLabel.setVisible(false);
@@ -54,10 +59,10 @@ public class FormFieldComponent<W extends PWidget> implements IsPWidget {
         headerLayout.add(requiredLabel);
         headerLayout.add(captionLabel);
         headerLayout.add(errorImage);
-        mainLayout.add(headerLayout);
-        mainLayout.add(w);
-        this.input = w;
+        mainLayout.setWidget(0, 0, headerLayout);
+        mainLayout.setWidget(1, 0, w);
 
+        this.input = w;
     }
 
     public void setCaption(final String caption) {

@@ -66,6 +66,9 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     }
 
     protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+
+        resp.setContentType("application/json; charset=utf-8");
+
         Session session = sessionManager.getSession(req.getSession().getId());
 
         if (session == null) {

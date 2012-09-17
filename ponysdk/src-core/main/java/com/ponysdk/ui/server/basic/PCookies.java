@@ -25,7 +25,6 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.UIContext;
@@ -38,10 +37,10 @@ public class PCookies {
 
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<String, String>();
 
-    public PCookies(final Map<String, String> cookies) throws Exception {
-        for (final Entry<String, String> entry : cookies.entrySet()) {
-            cachedCookies.put(entry.getKey(), entry.getValue());
-        }
+    public PCookies() {}
+
+    public void cacheCookie(final String name, final String value) {
+        cachedCookies.put(name, value);
     }
 
     public String getCookie(final String name) {

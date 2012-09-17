@@ -41,7 +41,7 @@ public class PDFExporter<T> implements Exporter<T> {
 
     protected final String title;
 
-    public PDFExporter(String title, String fileName) {
+    public PDFExporter(final String title, final String fileName) {
         this.fileName = fileName;
         this.title = title;
     }
@@ -52,7 +52,7 @@ public class PDFExporter<T> implements Exporter<T> {
     }
 
     @Override
-    public String export(List<ExportableField> exportableFields, List<T> records) throws Exception {
+    public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
         // Dynamic report
         final FastReportBuilder drb = new FastReportBuilder();
 
@@ -92,7 +92,7 @@ public class PDFExporter<T> implements Exporter<T> {
         streamResource.open(new StreamHandler() {
 
             @Override
-            public void onStream(HttpServletRequest req, HttpServletResponse response) {
+            public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
                 response.reset();
                 response.setContentType("application/pdf");
                 response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -108,7 +108,6 @@ public class PDFExporter<T> implements Exporter<T> {
         });
         return "";
     }
-
     // private static <T> void exportPDF(final String fileName, String jasperReport, List<T> records) throws
     // Exception {
     // final JRDataSource dsource = new JRBeanCollectionDataSource(records);

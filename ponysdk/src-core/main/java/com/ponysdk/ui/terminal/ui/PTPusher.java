@@ -23,12 +23,9 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
@@ -65,17 +62,8 @@ public class PTPusher extends AbstractPTObject {
 
             @Override
             public void message(final String message) {
-                final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-
                 final JSONObject data = JSONParser.parseLenient(message).isObject();
-
-                final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
-
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
-                }
-
-                uiService.update(instructions);
+                uiService.update(data);
             }
 
             @Override

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mkdir -p ../ponysdk/build/buildinfo
+git rev-parse HEAD > ../ponysdk/build/buildinfo/git.info

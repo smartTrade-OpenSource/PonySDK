@@ -41,13 +41,13 @@ public class DynamicExportDataSource implements JRDataSource {
 
     private Object currentItem;
 
-    public DynamicExportDataSource(Collection<?> collection) {
+    public DynamicExportDataSource(final Collection<?> collection) {
         super();
         this.list = collection;
         this.iterator = collection.iterator();
     }
 
-    public DynamicExportDataSource(Map<?, ?> map) {
+    public DynamicExportDataSource(final Map<?, ?> map) {
         super();
         this.list = map.values();
         this.iterator = this.list.iterator();
@@ -65,9 +65,9 @@ public class DynamicExportDataSource implements JRDataSource {
     }
 
     @Override
-    public Object getFieldValue(JRField field) throws JRException {
+    public Object getFieldValue(final JRField field) throws JRException {
         try {
-            return PropertyUtils.getProperty(currentItem, field.getName());
+            return PropertyUtils.getProperty(currentItem, field.getName()).toString();
         } catch (final Exception e) {
             throw new JRException("Cannot extract field value # " + field.getName(), e);
         }

@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +41,18 @@ import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.dataprovider.CriteriableField;
+import com.ponysdk.ui.server.dataprovider.Pager;
+import com.ponysdk.ui.server.dataprovider.QueryBuilder;
+import com.ponysdk.ui.server.dataprovider.RemoteDataProvider;
 import com.ponysdk.ui.server.form.event.SubmitFormEvent;
 import com.ponysdk.ui.server.form.event.SubmitFormHandler;
 import com.ponysdk.ui.server.form2.Form;
@@ -66,8 +71,8 @@ import com.ponysdk.ui.server.list.renderer.cell.StringCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
-import com.ponysdk.ui.server.list2.DataGridConfiguration;
 import com.ponysdk.ui.server.list2.header.StringHeaderCellRenderer;
+import com.ponysdk.ui.server.list2.paging.DefaultPagerView;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
@@ -85,6 +90,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
     private TextBoxFormField<String> nameFormField;
     private TextBoxFormField<Integer> ageFormField;
 
+    private long count = 1000;
+
     public DataGridPageActivity() {
         super("Data Grid", "Rich UI Components");
     }
@@ -97,9 +104,11 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         final PScrollPanel scroll = new PScrollPanel();
         final PFlowPanel layout = new PFlowPanel();
         final PFlexTable formContainer = new PFlexTable();
-        final PSimplePanel listContaner = new PSimplePanel();
+        final PSimplePanel listContainer = new PSimplePanel();
+        final PHorizontalPanel testContainer = new PHorizontalPanel();
+        layout.add(testContainer);
         layout.add(formContainer);
-        layout.add(listContaner);
+        layout.add(listContainer);
         scroll.setWidget(layout);
         examplePanel.setWidget(scroll);
 
@@ -118,21 +127,49 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         addHandler(SubmitFormEvent.TYPE, this);
         addHandler(ShowSubListEvent.TYPE, this);
 
-        final DataGridConfiguration<Pony> configuration = new DataGridConfiguration<Pony>();
-        configuration.setShowSubListEnabled(true);
-        configuration.setSelectionEnabled(true);
-        configuration.setColumnDescriptors(initListColumnDescriptors());
+        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name"));
+        nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
+        nameColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
 
-        dataGrid = new DataGridActivity<Pony>(configuration, new DefaultSimpleListView());
-        dataGrid.start(listContaner);
+        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
+        final StringHeaderCellRenderer ageHeaderCellRender = new StringHeaderCellRenderer("Age");
+        ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
+        ageColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+
+        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
+        final StringHeaderCellRenderer raceHeaderCellRender = new StringHeaderCellRenderer("Race");
+        raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
+        raceColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+
+        dataGrid = new DataGridActivity<Pony>(new DefaultSimpleListView());
+        dataGrid.addDataGridColumnDescriptor(nameColumnDescriptor);
+        dataGrid.addDataGridColumnDescriptor(ageColumnDescriptor);
+        dataGrid.addDataGridColumnDescriptor(raceColumnDescriptor);
+
+        final QueryBuilder<Pony> queryBuilder = new QueryBuilder<Pony>();
+        queryBuilder.registerCriteriable(new CriteriableField(ageSearchField, "age"));
+        queryBuilder.registerCriteriable(new CriteriableField(nameSearchField, "name"));
+
+        final Pager<Pony> pager = new Pager<Pony>(new DefaultPagerView());
+
+        final RemoteDataProvider<Pony> dataProvider = new RemoteDataProvider<Pony>(queryBuilder, pager, dataGrid) {
+
+            @Override
+            protected List<Pony> getData(final Query query) {
+                final Result<List<Pony>> result = new FindPonysCommand(query).execute();
+                return result.getData();
+            }
+        };
 
         final PButton refresh = new PButton("Refresh");
         refresh.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
-                dataGrid.setRowData(0, result.getData());
+                dataProvider.onPageChange(0);
             }
         });
         formContainer.setWidget(1, 0, refresh);
@@ -153,8 +190,32 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         buildCreatePonyActivity();
 
         //
-        final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
-        dataGrid.setRowData(0, result.getData());
+        listContainer.setWidget(dataGrid);
+
+        final PTextBox rowIndex = new PTextBox();
+        final PButton addRow = new PButton("Add");
+        addRow.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                final int index = Integer.parseInt(rowIndex.getValue());
+                dataGrid.insertData(index, new Pony(count++, "Pony 1", index, "Race"));
+            }
+        });
+
+        final PButton removeRow = new PButton("Remove");
+        removeRow.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                final int index = Integer.parseInt(rowIndex.getValue());
+                dataGrid.remove(index);
+            }
+        });
+
+        testContainer.add(rowIndex);
+        testContainer.add(addRow);
+        testContainer.add(removeRow);
     }
 
     private ExportConfiguration initExportConfiguration() {
@@ -163,33 +224,6 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         exportConfiguration.addExportableField(new ExportableField("age", "Age"));
         exportConfiguration.addExportableField(new ExportableField("race", "type"));
         return exportConfiguration;
-    }
-
-    private List<DataGridColumnDescriptor<Pony, ?>> initListColumnDescriptors() {
-
-        final List<DataGridColumnDescriptor<Pony, ?>> listColumnDescriptors = new ArrayList<DataGridColumnDescriptor<Pony, ?>>();
-
-        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
-        nameColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Name"));
-        nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
-        listColumnDescriptors.add(nameColumnDescriptor);
-
-        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
-        ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
-        final StringHeaderCellRenderer ageHeaderCellRender = new StringHeaderCellRenderer("Age");
-        ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
-        ageColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
-        listColumnDescriptors.add(ageColumnDescriptor);
-
-        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
-        raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
-        final StringHeaderCellRenderer raceHeaderCellRender = new StringHeaderCellRenderer("Race");
-        raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
-        raceColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
-        listColumnDescriptors.add(raceColumnDescriptor);
-
-        return listColumnDescriptors;
     }
 
     @Override

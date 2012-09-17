@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,26 +21,29 @@
  * the License.
  */
 
-package com.ponysdk.impl.webapplication.page.place;
+package com.ponysdk.ui.server.dataprovider;
 
-import com.ponysdk.core.place.AbstractPlace;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PagePlace extends AbstractPlace implements HasPageName {
+import com.ponysdk.core.query.Query;
 
-    private final String pageName;
+public class QueryBuilder<T> {
 
-    public PagePlace(final String pageName) {
-        this.pageName = pageName;
+    private final List<Criteriable> queryConditions = new ArrayList<Criteriable>();
+
+    public QueryBuilder() {}
+
+    public void registerCriteriable(final Criteriable criteriable) {
+        queryConditions.add(criteriable);
     }
 
-    @Override
-    public String getToken() {
-        return pageName;
-    }
-
-    @Override
-    public String getPageName() {
-        return pageName;
+    public Query build() {
+        final Query query = new Query();
+        for (final Criteriable criteriable : queryConditions) {
+            query.addCriteria(criteriable.getCriteria());
+        }
+        return query;
     }
 
 }

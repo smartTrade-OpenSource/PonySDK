@@ -21,29 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.impl.webapplication.page.place;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.ui.UIObject;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
-import com.ponysdk.ui.terminal.ui.PTObject;
+import com.ponysdk.core.place.Place;
 
-public interface UIService {
+public class LoginPlace implements Place {
 
-    public void flushEvents();
-
-    public void stackEvent(PTInstruction instruction);
-
-    public void triggerEvent(PTInstruction instruction);
-
-    public PTObject getPTObject(Long ID);
-
-    public PTObject getPTObject(UIObject uiObject);
-
-    public void registerUIObject(Long ID, UIObject uiObject);
-
-    public PTObject unRegisterObject(Long ID);
-
-    public void update(JSONObject data);
+    @Override
+    public String getToken() {
+        return getClass().getSimpleName();
+    }
 
 }

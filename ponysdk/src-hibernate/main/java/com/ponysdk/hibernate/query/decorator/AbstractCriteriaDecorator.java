@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.query.ComparatorType;
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.hibernate.query.CriteriaContext;
 
 public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator {
@@ -44,7 +44,7 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
 
     @Override
     public void render(CriteriaContext context) {
-        final CriterionField field = context.getCriterion();
+        final Criterion field = context.getCriterion();
         Criteria criteria = context.getSTCriteria();
 
         if (field.getValue() == null && field.getComparator() != ComparatorType.IS_NULL && field.getComparator() != ComparatorType.IS_NOT_NULL) { return; }
@@ -124,5 +124,5 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
 
     }
 
-    protected abstract T getObjectValue(CriterionField criterionField);
+    protected abstract T getObjectValue(Criterion criterionField);
 }

@@ -39,6 +39,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -76,6 +77,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<Long, UIObject>();
     private final List<PTInstruction> stackedInstructions = new ArrayList<PTInstruction>();
 
+    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
+
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
@@ -85,6 +88,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private boolean pendingClose;
 
     private final RequestBuilder requestBuilder;
+
+    private long lastReceived = -1;
+    private long nextSent = 1;
 
     public static long sessionID;
 
@@ -150,8 +156,34 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public void update(final List<PTInstruction> instructions) {
+    public void update(final JSONObject data) {
+
+        long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
+        if ((lastReceived + 1) != receivedSeqNum) {
+            incomingMessageQueue.put(receivedSeqNum, data);
+            return;
+        }
+
         hideLoadingMessageBox();
+
+        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+        }
+
+        if (!incomingMessageQueue.isEmpty()) {
+            long expected = receivedSeqNum + 1;
+            while (incomingMessageQueue.containsKey(expected)) {
+                final JSONObject jsonObject = incomingMessageQueue.remove(expected);
+                final JSONArray jsonArray2 = jsonObject.get(APPLICATION.INSTRUCTIONS).isArray();
+                for (int i = 0; i < jsonArray2.size(); i++) {
+                    instructions.add(new PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject()));
+                }
+                expected++;
+                receivedSeqNum = expected;
+            }
+        }
 
         updateMode = true;
         PTInstruction currentInstruction = null;
@@ -275,13 +307,24 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     }
                 }
             }
+
+            updateIncomingSeqNum(receivedSeqNum);
+
         } catch (final Throwable e) {
-            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage());
+            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived);
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvents();
             updateMode = false;
         }
+    }
+
+    protected void updateIncomingSeqNum(final long receivedSeqNum) {
+        final long previous = lastReceived;
+        if ((previous + 1) != receivedSeqNum) {
+            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+        }
+        lastReceived = receivedSeqNum;
     }
 
     @Override
@@ -332,6 +375,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         }
 
         requestData.put(APPLICATION.INSTRUCTIONS, jsonArray);
+        requestData.put(APPLICATION.SEQ_NUM, nextSent++);
 
         requestBuilder.send(requestData.toString());
 

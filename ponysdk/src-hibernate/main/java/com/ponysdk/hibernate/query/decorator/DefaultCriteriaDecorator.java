@@ -23,12 +23,12 @@
 
 package com.ponysdk.hibernate.query.decorator;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 
 public class DefaultCriteriaDecorator extends AbstractCriteriaDecorator<Object> {
 
     @Override
-    protected Object getObjectValue(CriterionField criterionField) {
+    protected Object getObjectValue(Criterion criterionField) {
         return criterionField.getValue();
     }
 

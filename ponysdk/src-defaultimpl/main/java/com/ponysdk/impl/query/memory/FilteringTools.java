@@ -39,7 +39,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.Result;
@@ -317,39 +317,39 @@ public final class FilteringTools {
         return datas;
     }
 
-    public static <T> List<T> filter(List<T> datas, List<CriterionField> criteria) {
+    public static <T> List<T> filter(List<T> datas, List<Criterion> criteria) {
         if (criteria == null) return datas;
 
-        for (final CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             datas = filter(datas, criterion.getPojoProperty(), criterion.getValue());
         }
         return datas;
     }
 
-    public static List<String> filterStringCollection(List<String> datas, List<CriterionField> criteria) {
+    public static List<String> filterStringCollection(List<String> datas, List<Criterion> criteria) {
         if (criteria == null) return datas;
 
-        for (final CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             datas = filter(datas, (String) criterion.getValue());
         }
         return datas;
     }
 
     // TODO nciaravola must be a criterion into SmartCC Criteria
-    public static <T> List<T> filterByDisjunction(List<T> datas, List<CriterionField> criteria) {
+    public static <T> List<T> filterByDisjunction(List<T> datas, List<Criterion> criteria) {
         if (criteria == null || criteria.isEmpty()) return datas;
 
         final List<T> result = new ArrayList<T>();
-        for (final CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             result.addAll(filter(datas, criterion.getPojoProperty(), criterion.getValue()));
         }
         return result;
     }
 
-    public static <T> List<T> sort(List<T> datas, List<CriterionField> criteria) {
+    public static <T> List<T> sort(List<T> datas, List<Criterion> criteria) {
         if (criteria == null) return datas;
 
-        for (final CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
             if (sortingType != null && sortingType != SortingType.NONE) {
                 final Comparator<T> comparator = new Comparator<T>() {
@@ -377,10 +377,10 @@ public final class FilteringTools {
         return datas;
     }
 
-    public static List<String> sortStringCollection(List<String> datas, List<CriterionField> criteria) {
+    public static List<String> sortStringCollection(List<String> datas, List<Criterion> criteria) {
         if (criteria == null) return datas;
 
-        for (final CriterionField criterion : criteria) {
+        for (final Criterion criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
             if (sortingType != null && sortingType != SortingType.NONE) {
                 final Comparator<String> comparator = new Comparator<String>() {

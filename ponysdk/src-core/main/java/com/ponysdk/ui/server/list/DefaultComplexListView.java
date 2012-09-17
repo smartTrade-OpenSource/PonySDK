@@ -104,7 +104,12 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void clearList() {
-        simpleListView.clearList();
+        simpleListView.clear(1);
+    }
+
+    @Override
+    public void clear(final int i) {
+        simpleListView.clear(i);
     }
 
     @Override

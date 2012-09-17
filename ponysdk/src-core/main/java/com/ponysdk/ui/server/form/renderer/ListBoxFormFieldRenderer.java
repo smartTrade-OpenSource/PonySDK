@@ -143,6 +143,10 @@ public class ListBoxFormFieldRenderer implements FormFieldRenderer, HasPChangeHa
         value = null;
     }
 
+    public boolean hasItem(final String item) {
+        return items.contains(item);
+    }
+
     public void addItem(final String item) {
         for (final FormFieldComponent<PListBox> field : fields) {
             field.getInput().addItem(item);

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.list.valueprovider;
 
-import com.ponysdk.core.query.CriterionField;
+import com.ponysdk.core.query.Criterion;
 
 public interface CriterionProvider {
 
-    public CriterionField getCriterion();
+    public Criterion getCriterion();
 }
