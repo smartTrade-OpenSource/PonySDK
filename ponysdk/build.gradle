@@ -37,6 +37,9 @@ sourceSets {
 
 repositories {
 	mavenCentral()
+    maven {
+        url "https://github.com/PonySDK/Maven/raw/master/ext"
+    }
 }
 
 configurations {
@@ -74,6 +77,8 @@ dependencies {
 	gwt 'com.google.gwt:gwt-codeserver:2.5.0-rc1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
+    gwt 'com.watopi:gwtchosen:1.0.2'
+    gwt 'com.googlecode.gwtquery:gwtquery:1.2.0'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
 	spring 'org.springframework:spring-web:3.0.6.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
@@ -111,6 +116,12 @@ jar {
         from 'src-core/main/resources/META-INF'
         from buildInfoOutputDirName
     }
+    
+    /** waiting fix : https://github.com/jDramaix/gwtchosen/issues/2 **/
+    copy{
+        from gwtOutputDirName + '/ponyterminal/chosen-sprite.png'
+        into gwtOutputDirName
+    }    
     
     into('conf') {
         from confResources

@@ -65,8 +65,6 @@ public class BootstrapServlet extends HttpServlet {
         super.init();
         applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
 
-        stylesheets.add("css/ponysdk.less");
-
         final String styles = System.getProperty(SystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             stylesheets.addAll(Arrays.asList(styles.trim().split(";")));
@@ -92,6 +90,7 @@ public class BootstrapServlet extends HttpServlet {
             final String contextPath = request.getContextPath();
             final String requestURI = request.getRequestURI();
             final String extraPathInfo = requestURI.replaceFirst(contextPath, "");
+
             if (extraPathInfo == null || extraPathInfo.isEmpty() || extraPathInfo.equals("/")) {
                 log.info("Loading initial webpage ...");
                 response.setContentType("text/html");

@@ -62,6 +62,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     protected void addFillColumn() {
         final PSimplePanel widget = new PSimplePanel();
+        view.removeCellStyle(0, colCount - 1, PonySDKTheme.FILL_COLUMN);
         view.addWidget(widget, colCount, 0);
         view.addCellStyle(0, colCount, PonySDKTheme.FILL_COLUMN);
         view.addHeaderStyle(PonySDKTheme.COMPLEXLIST_COLUMNHEADER_COMPLEX);

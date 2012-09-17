@@ -57,6 +57,8 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.getElement().getStyle().setProperty(FONT_SIZE, update.getString(PROPERTY.WIDGET_FONT_SIZE));
         } else if (update.containsKey(PROPERTY.STYLE_NAME)) {
             uiObject.setStyleName(update.getString(PROPERTY.STYLE_NAME));
+        } else if (update.containsKey(PROPERTY.STYLE_PRIMARY_NAME)) {
+            uiObject.setStylePrimaryName(update.getString(PROPERTY.STYLE_PRIMARY_NAME));
         } else if (update.containsKey(PROPERTY.ADD_STYLE_NAME)) {
             uiObject.addStyleName(update.getString(PROPERTY.ADD_STYLE_NAME));
         } else if (update.containsKey(PROPERTY.REMOVE_STYLE_NAME)) {

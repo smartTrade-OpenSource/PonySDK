@@ -74,7 +74,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.ELEMENT_PROPERTY_KEY)) {
-            uiObject.getElement().setPropertyString(update.getString(PROPERTY.ELEMENT_PROPERTY_KEY), update.getString(update.getString(PROPERTY.ELEMENT_PROPERTY_VALUE)));
+            uiObject.getElement().setPropertyString(update.getString(PROPERTY.ELEMENT_PROPERTY_KEY), update.getString(PROPERTY.ELEMENT_PROPERTY_VALUE));
         } else {
             super.update(update, uiService);
         }

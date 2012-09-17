@@ -89,6 +89,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String width;
     private String height;
     private String styleName;
+    private String stylePrimaryName;
     private String debugID;
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
@@ -145,6 +146,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.styleName = styleName;
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_NAME, styleName);
+        getUIContext().stackInstruction(update);
+    }
+
+    public void setStylePrimaryName(final String styleName) {
+        this.stylePrimaryName = styleName;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.STYLE_PRIMARY_NAME, styleName);
         getUIContext().stackInstruction(update);
     }
 
@@ -338,6 +346,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public String getDebugID() {
         return debugID;
+    }
+
+    public String getStylePrimaryName() {
+        return stylePrimaryName;
     }
 
 }
