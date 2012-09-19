@@ -53,6 +53,8 @@ public class ActivityManager implements PlaceChangeHandler {
     @Override
     public void onPlaceChange(final PlaceChangeEvent event) {
         final Activity activity = mapper.getActivity(event.getNewPlace());
+        if (activity == null) throw new IllegalArgumentException("No activity defined for the place #" + event.getNewPlace().getToken());
+
         activity.start(world, event.getNewPlace());
     }
 

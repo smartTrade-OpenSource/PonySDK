@@ -24,15 +24,19 @@
 package com.ponysdk.core.main;
 
 import java.io.IOException;
+import java.util.EnumSet;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.GzipFilter;
 import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -117,6 +121,9 @@ public class Main {
         context.addServlet(new ServletHolder(new WebSocketServlet()), MAPPING_WS);
         context.addServlet(new ServletHolder(bootstrapServlet), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(httpServlet), MAPPING_TERMINAL);
+
+        final FilterHolder filterHolder = new FilterHolder(GzipFilter.class);
+        context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 
         context.addEventListener(servletContextListener);
         context.getSessionHandler().addEventListener(httpSessionListener);

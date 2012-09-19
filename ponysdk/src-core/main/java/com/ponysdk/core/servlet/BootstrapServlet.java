@@ -181,7 +181,9 @@ public class BootstrapServlet extends HttpServlet {
         for (final String script : javascripts) {
             builder.append("    <script type=\"text/javascript\" src=\"" + script + "\"></script>");
         }
-        builder.append("    <script src=\"script/less.js\" type=\"text/javascript\"></script>");
+
+        // builder.append("    <script src=\"script/less.js\" type=\"text/javascript\"></script>");
+
         builder.append("</head>");
         builder.append("<body>");
         builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");

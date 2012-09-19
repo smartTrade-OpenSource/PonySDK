@@ -55,5 +55,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.core.main.Main"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="port=8081 contextName=sample"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server -Dpony.application.name=&quot;Sample&quot; -Dpony.application.stylesheets=&quot;css/sample.less&quot;&#13;&#10;-Dpony.application.javascripts=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js;http://code.highcharts.com/stock/highstock.js;http://code.highcharts.com/stock/modules/exporting.js&quot;"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server -Dpony.application.name=&quot;Sample&quot; -Dpony.application.stylesheets=&quot;css/ponysdk.css&quot;"/>
 </launchConfiguration>
