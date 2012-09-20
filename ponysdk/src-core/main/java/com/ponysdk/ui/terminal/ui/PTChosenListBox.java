@@ -27,29 +27,29 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.OptGroupElement;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.watopi.chosen.client.event.ChosenChangeEvent;
+import com.watopi.chosen.client.event.ChosenChangeEvent.ChosenChangeHandler;
+import com.watopi.chosen.client.gwt.ChosenListBox;
 
-public class PTListBox extends PTFocusWidget<ListBox> {
+public class PTChosenListBox extends PTFocusWidget<ChosenListBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new ListBox(create.getBoolean(PROPERTY.MULTISELECT)));
+        init(create, uiService, new ChosenListBox(create.getBoolean(PROPERTY.MULTISELECT)));
     }
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         if (addHandler.getString(HANDLER.KEY).equals(HANDLER.KEY_.CHANGE_HANDLER)) {
-            uiObject.addChangeHandler(new ChangeHandler() {
+            uiObject.addChosenChangeHandler(new ChosenChangeHandler() {
 
                 @Override
-                public void onChange(final ChangeEvent event) {
+                public void onChange(final ChosenChangeEvent event) {
                     final int selectedIndex = uiObject.getSelectedIndex();
                     if (selectedIndex == -1) {
                         final PTInstruction eventInstruction = new PTInstruction();
@@ -135,9 +135,12 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             uiObject.setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
         } else if (update.containsKey(PROPERTY.MULTISELECT)) {
             uiObject.setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
+        } else if (update.containsKey(PROPERTY.PLACEHOLDER)) {
+            uiObject.setPlaceholderText(update.getString(PROPERTY.MULTISELECT));
         } else {
             super.update(update, uiService);
         }
 
     }
+
 }

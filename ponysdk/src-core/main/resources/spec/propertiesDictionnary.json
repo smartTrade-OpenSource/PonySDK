@@ -44,6 +44,8 @@
 		"itemRemoved": [],
 		"itemText": [],
 		"index": [],
+		"itemAdd": [],
+		"itemGroup": [],
 		"borderWidth": [],
 		"spacing": [],
 		"cellSpacing": [],

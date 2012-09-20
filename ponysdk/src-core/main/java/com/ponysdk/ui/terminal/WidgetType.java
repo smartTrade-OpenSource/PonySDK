@@ -46,6 +46,7 @@ public enum WidgetType {
     TEXTBOX,
     PASSWORD_TEXTBOX,
     LISTBOX,
+    CHOSEN_LISTBOX,
     IMAGE,
     ANCHOR,
     CHECKBOX,

@@ -31,6 +31,7 @@ public class PTInstruction extends JSONObject {
 
     public Long getObjectID() {
         final JSONValue jsonValue = get(PROPERTY.OBJECT_ID);
+        final int i;
         return (long) jsonValue.isNumber().doubleValue();
     }
 

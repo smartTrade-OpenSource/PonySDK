@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -120,6 +121,24 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         } else {
             super.onEventInstruction(instruction);
         }
+    }
+
+    public void addItemsInGroup(final String group, final String... items) {
+        addItemsInGroup(group, Arrays.asList(items));
+    }
+
+    public void addItemsInGroup(final String group, final List<String> items) {
+        final ListItem groupItem = new ListGroupItem(group);
+        this.items.add(groupItem);
+        for (final String i : items) {
+            this.items.add(new ListItem(i, i));
+        }
+        final Update update = new Update(getID());
+        update.put(PROPERTY.ITEM_ADD);
+        final String s = items.toString();
+        update.put(PROPERTY.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", ""));
+        update.put(PROPERTY.ITEM_GROUP, group);
+        getUIContext().stackInstruction(update);
     }
 
     public void addItem(final String item) {
@@ -384,6 +403,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             this.value = value;
         }
 
+    }
+
+    public class ListGroupItem extends ListItem {
+
+        public ListGroupItem(final String group) {
+            super(group, null);
+        }
     }
 
 }
