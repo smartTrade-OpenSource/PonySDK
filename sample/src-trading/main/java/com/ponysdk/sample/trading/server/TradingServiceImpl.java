@@ -2,20 +2,21 @@
 package com.ponysdk.sample.trading.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.ponysdk.core.command.PushListener;
-import com.ponysdk.core.command.PushListenerMap;
-import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.Application;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.servlet.SessionManager;
 import com.ponysdk.sample.trading.client.activity.MarketData;
 import com.ponysdk.sample.trading.service.trading.TradingService;
+import com.ponysdk.ui.server.basic.PPusher;
+import com.ponysdk.ui.server.basic.PPusher.PusherState;
 
 public class TradingServiceImpl implements TradingService {
-
-    private final PushListenerMap<String, MarketData> listenerMap = new PushListenerMap<String, MarketData>();
 
     private final List<MarketData> marketDatas = new ArrayList<MarketData>();
 
@@ -45,19 +46,18 @@ public class TradingServiceImpl implements TradingService {
             public void run() {
                 final MarketData market = marketDatas.get(rdm.nextInt(marketDatas.size()));
                 final MarketData price = new MarketData(market.getCurrency(), (int) (Math.random() * 99), (int) (Math.random() * 99));
-                final List<PushListener<MarketData>> currencyListener = listenerMap.get(market.getCurrency());
-                if (currencyListener == null) return;
 
-                for (final PushListener<MarketData> listener : currencyListener) {
-                    listener.onMessage(price);
+                for (final Application application : SessionManager.get().getApplications()) {
+                    final Collection<UIContext> uiContexts = application.getUIContexts();
+                    for (final UIContext uiContext : uiContexts) {
+                        final PPusher pusher = uiContext.getPusher();
+                        if (pusher != null) {
+                            if (pusher.getPusherState() == PusherState.STARTED) pusher.pushToClient(price);
+                        }
+                    }
                 }
             }
-        }, 1000, 10);
-    }
-
-    @Override
-    public HandlerRegistration priceRegistration(final String currency, final PushListener<MarketData> listener) {
-        return listenerMap.register(currency, listener);
+        }, 1000, 200);
     }
 
     @Override

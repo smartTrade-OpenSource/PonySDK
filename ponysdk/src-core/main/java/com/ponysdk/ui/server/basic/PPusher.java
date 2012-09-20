@@ -29,19 +29,28 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
+import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.WidgetType;
 
 public class PPusher extends PObject implements ConnectionListener {
 
-    private static final String PUSHER = "com.ponysdk.ui.server.basic.PPusher";
+    private static final Logger log = LoggerFactory.getLogger(PPusher.class);
+
+    public static final String PUSHER = "com.ponysdk.ui.server.basic.PPusher";
 
     private WebSocket websocket;
     private UIContext uiContext;
+
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
+
+    private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<DataListener>();
 
     private PusherState pusherState = PusherState.STOPPED;
 
@@ -93,7 +102,8 @@ public class PPusher extends PObject implements ConnectionListener {
 
     public void flush() throws IOException, JSONException {
         final JSONObject jsonObject = new JSONObject();
-        uiContext.flushInstructions(jsonObject);
+        if (!uiContext.flushInstructions(jsonObject)) return;
+        jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
         websocket.send(jsonObject.toString());
     }
 
@@ -103,6 +113,26 @@ public class PPusher extends PObject implements ConnectionListener {
 
     public void addConnectionListener(final ConnectionListener listener) {
         connectionListeners.add(listener);
+    }
+
+    public void addDataListener(final DataListener listener) {
+        listenerCollection.register(listener);
+    }
+
+    public void pushToClient(final Object data) {
+        begin();
+        try {
+            if (listenerCollection.isEmpty()) return;
+
+            for (final DataListener listener : listenerCollection) {
+                listener.onData(data);
+            }
+            PPusher.get().flush();
+        } catch (final Exception exception) {
+            log.error("Cannot push data", exception);
+        } finally {
+            PPusher.get().end();
+        }
     }
 
     @Override

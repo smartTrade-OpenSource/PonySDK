@@ -33,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.session.SessionManager;
-
 /**
  * The server side implementation of the RPC service.
  */
@@ -43,15 +41,12 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpServlet.class);
 
-    protected SessionManager sessionManager;
-
     protected AbstractApplicationManager applicationManager;
 
     @Override
     public void init() throws ServletException {
         super.init();
 
-        sessionManager = (SessionManager) getServletContext().getAttribute("SESSION_MANAGER");
         applicationManager = createApplicationManager();
     }
 
@@ -69,13 +64,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 
         resp.setContentType("application/json; charset=utf-8");
 
-        Session session = sessionManager.getSession(req.getSession().getId());
-
-        if (session == null) {
-            session = new HttpSession(req);
-            sessionManager.registerSession(session);
-        }
-
+        final Session session = SessionManager.get().getSession(req.getSession().getId());
         try {
             applicationManager.process(new HttpRequest(session, req), new HttpResponse(resp));
         } catch (final Throwable e) {

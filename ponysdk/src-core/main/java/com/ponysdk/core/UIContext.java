@@ -49,10 +49,10 @@ import com.ponysdk.core.instruction.Close;
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.Session;
-import com.ponysdk.core.servlet.SessionListener;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
+import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -163,6 +163,10 @@ public class UIContext {
 
     public long nextID() {
         return objectCounter++;
+    }
+
+    public PPusher getPusher() {
+        return getAttribute(PPusher.PUSHER);
     }
 
     public long nextStreamRequestID() {
@@ -278,14 +282,6 @@ public class UIContext {
 
     public void setPermissions(final Map<String, Permission> permissions) {
         this.permissions = permissions;
-    }
-
-    public void addSessionListener(final SessionListener sessionListener) {
-        this.ponyApplication.addSessionListener(sessionListener);
-    }
-
-    public boolean removeSessionListener(final SessionListener sessionListener) {
-        return this.ponyApplication.removeSessionListener(sessionListener);
     }
 
     /**

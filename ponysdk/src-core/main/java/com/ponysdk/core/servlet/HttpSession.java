@@ -1,8 +1,6 @@
 
 package com.ponysdk.core.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.ponysdk.core.useragent.UserAgent;
 
 public class HttpSession implements Session {
@@ -11,8 +9,8 @@ public class HttpSession implements Session {
 
     private final UserAgent userAgent;
 
-    public HttpSession(final HttpServletRequest httpRequest) {
-        this.httpSession = httpRequest.getSession();
+    public HttpSession(final javax.servlet.http.HttpSession httpSession) {
+        this.httpSession = httpSession;
 
         final String userAgentString = (String) httpSession.getAttribute("User-Agent");
         if (userAgentString != null) this.userAgent = UserAgent.parseUserAgentString(userAgentString);

@@ -7,11 +7,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.event.HandlerRegistration;
 
-public class PushListenerCollection<T> implements Iterable<PushListener<T>> {
+public class PushListenerCollection<T> implements Iterable<PusherListener<T>> {
 
-    private final Collection<PushListener<T>> listeners = new CopyOnWriteArrayList<PushListener<T>>();
+    private final Collection<PusherListener<T>> listeners = new CopyOnWriteArrayList<PusherListener<T>>();
 
-    public HandlerRegistration register(final PushListener<T> listener) {
+    public HandlerRegistration register(final PusherListener<T> listener) {
         listeners.add(listener);
         return new HandlerRegistration() {
 
@@ -23,7 +23,7 @@ public class PushListenerCollection<T> implements Iterable<PushListener<T>> {
     }
 
     @Override
-    public Iterator<PushListener<T>> iterator() {
+    public Iterator<PusherListener<T>> iterator() {
         return listeners.iterator();
     }
 
