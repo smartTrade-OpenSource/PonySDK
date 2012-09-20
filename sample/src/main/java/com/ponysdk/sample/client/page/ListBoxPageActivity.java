@@ -24,9 +24,9 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PChosenListBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
@@ -45,12 +45,12 @@ public class ListBoxPageActivity extends SamplePageActivity {
 
         final PFlexTable table = new PFlexTable();
 
-        final PListBox listBoxCategory = new PListBox();
+        final PChosenListBox listBoxCategory = new PChosenListBox();
         listBoxCategory.addItem("Sports");
         listBoxCategory.addItem("Pony");
 
-        final PListBox listBoxApplied = new PListBox();
-        listBoxApplied.setVisibleItemCount(10);
+        final PChosenListBox listBoxApplied = new PChosenListBox();
+        listBoxApplied.setVisibleItemCount(20);
 
         listBoxApplied.addChangeHandler(new PChangeHandler() {
 
@@ -95,15 +95,12 @@ public class ListBoxPageActivity extends SamplePageActivity {
         examplePanel.setWidget(table);
     }
 
-    protected void fillSports(final PListBox listBoxApplied) {
-        listBoxApplied.addItem("Baseball");
-        listBoxApplied.addItem("Basketball");
-        listBoxApplied.addItem("Football");
-        listBoxApplied.addItem("Hockey");
-        listBoxApplied.addItem("Water Polo");
+    protected void fillSports(final PChosenListBox listBoxApplied) {
+        listBoxApplied.addItemsInGroup("sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
+        listBoxApplied.addItemsInGroup("test", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
     }
 
-    protected void fillPony(final PListBox listBoxApplied) {
+    protected void fillPony(final PChosenListBox listBoxApplied) {
         listBoxApplied.addItem("Altai horseBengin");
         listBoxApplied.addItem("American Warmblood");
         listBoxApplied.addItem("Falabella");

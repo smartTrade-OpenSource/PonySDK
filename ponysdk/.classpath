@@ -42,5 +42,6 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-firefox-driver-2.25.0.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-chrome-driver-2.25.0.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-servlets-8.1.4.v20120524.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwtchosen-1.0.2.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

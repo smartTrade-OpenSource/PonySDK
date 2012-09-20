@@ -34,5 +34,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-noserver com.ponysdk.ui.PonyTerminal -startupUrl http://localhost:8081/sample -war debug"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13;-Xms512m &#13;-Xmx512m"/>
 </launchConfiguration>
