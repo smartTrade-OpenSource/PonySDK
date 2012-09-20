@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="libs/mongodb/mongo-java-driver-2.7.3.jar"/>
 	<classpathentry kind="lib" path="libs/tests/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev-2.5.0-rc1.jar" sourcepath="C:/Users/mbarbier/.m2/repository/com/google/gwt/gwt-dev/2.5.0-rc1/gwt-dev-2.5.0-rc1-sources.jar"/>
-	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.5.0-rc1.jar" sourcepath="/Users/nciaravola/.m2/repository/com/google/gwt/gwt-user/2.5.0-rc1/gwt-user-2.5.0-rc1-sources.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.5.0-rc1.jar" sourcepath="C:/Users/mbarbier/.gradle/caches/artifacts-4/com.google.gwt/gwt-user/c12498cf18507aa6433a94eb7d3e77d5/jars"/>
 	<classpathentry kind="lib" path="libs/jetty/javax.servlet-3.0.0.v201112011016.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-io-8.1.4.v20120524.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-server-8.1.4.v20120524.jar"/>

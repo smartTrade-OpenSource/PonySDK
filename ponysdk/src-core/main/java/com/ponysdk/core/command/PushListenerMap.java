@@ -9,14 +9,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.event.HandlerRegistration;
 
-public class PushListenerMap<K, V> implements Iterable<PushListener<V>> {
+public class PushListenerMap<K, V> implements Iterable<PusherListener<V>> {
 
-    private final ConcurrentHashMap<K, List<PushListener<V>>> listeners = new ConcurrentHashMap<K, List<PushListener<V>>>();
+    private final ConcurrentHashMap<K, List<PusherListener<V>>> listeners = new ConcurrentHashMap<K, List<PusherListener<V>>>();
 
-    public HandlerRegistration register(final K key, final PushListener<V> listener) {
+    public HandlerRegistration register(final K key, final PusherListener<V> listener) {
 
-        List<PushListener<V>> nlist = new CopyOnWriteArrayList<PushListener<V>>();
-        final List<PushListener<V>> l = listeners.putIfAbsent(key, nlist);
+        List<PusherListener<V>> nlist = new CopyOnWriteArrayList<PusherListener<V>>();
+        final List<PusherListener<V>> l = listeners.putIfAbsent(key, nlist);
         if (l != null) {
             nlist = l;
         }
@@ -32,15 +32,15 @@ public class PushListenerMap<K, V> implements Iterable<PushListener<V>> {
     }
 
     @Override
-    public Iterator<PushListener<V>> iterator() {
-        final List<PushListener<V>> snapshot = new ArrayList<PushListener<V>>();
-        for (final List<PushListener<V>> l : listeners.values()) {
+    public Iterator<PusherListener<V>> iterator() {
+        final List<PusherListener<V>> snapshot = new ArrayList<PusherListener<V>>();
+        for (final List<PusherListener<V>> l : listeners.values()) {
             snapshot.addAll(l);
         }
         return snapshot.iterator();
     }
 
-    public List<PushListener<V>> get(final K key) {
+    public List<PusherListener<V>> get(final K key) {
         return listeners.get(key);
     }
 

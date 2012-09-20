@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.service;
+package com.ponysdk.core.servlet;
 
 import java.util.Calendar;
 
@@ -33,16 +33,12 @@ import javax.servlet.http.HttpSessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Application;
 import com.ponysdk.core.SystemProperty;
-import com.ponysdk.core.session.SessionManager;
 import com.ponysdk.core.tools.BannerPrinter;
 
 public class ApplicationLoader implements ServletContextListener, HttpSessionListener {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
-
-    private final SessionManager sessionManager = new SessionManager();
 
     private String applicationName;
     private String applicationDescription;
@@ -51,8 +47,6 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     public void contextInitialized(final ServletContextEvent event) {
         applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
         applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION);
-
-        event.getServletContext().setAttribute("SESSION_MANAGER", sessionManager);
 
         printLicence();
     }
@@ -63,20 +57,21 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
     }
 
     @Override
-    public void sessionCreated(final HttpSessionEvent arg0) {
+    public void sessionCreated(final HttpSessionEvent httpSessionEvent) {
         if (log.isDebugEnabled()) {
-            log.debug("Session created #" + arg0.getSession().getId());
+            log.debug("Session created #" + httpSessionEvent.getSession().getId());
         }
+
+        SessionManager.get().registerSession(new HttpSession(httpSessionEvent.getSession()));
     }
 
     @Override
-    public void sessionDestroyed(final HttpSessionEvent arg0) {
-        final Application applicationSession = (Application) arg0.getSession().getAttribute(Application.class.getCanonicalName());
-        if (applicationSession == null) {
-            log.warn("No Application in session. Unable to notify SessionListener.");
-        } else {
-            applicationSession.fireSessionDestroyed();
+    public void sessionDestroyed(final HttpSessionEvent httpSessionEvent) {
+        if (log.isDebugEnabled()) {
+            log.debug("Session Destroyed #" + httpSessionEvent.getSession().getId());
         }
+
+        SessionManager.get().unregisterSession(httpSessionEvent.getSession().getId());
     }
 
     private void printDestroyedBanner() {
