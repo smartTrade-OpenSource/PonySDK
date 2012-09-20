@@ -3,7 +3,7 @@ package com.ponysdk.spring.service;
 
 import javax.servlet.ServletContextEvent;
 
-import com.ponysdk.core.service.ApplicationLoader;
+import com.ponysdk.core.servlet.ApplicationLoader;
 
 public class SpringApplicationLoader extends ApplicationLoader {
 

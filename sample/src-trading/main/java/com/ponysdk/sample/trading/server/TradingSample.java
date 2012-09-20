@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.main.Main;
-import com.ponysdk.core.service.ApplicationLoader;
 import com.ponysdk.core.service.PonyServiceRegistry;
+import com.ponysdk.core.servlet.ApplicationLoader;
 import com.ponysdk.core.servlet.BootstrapServlet;
 import com.ponysdk.core.servlet.HttpServlet;
 
@@ -25,9 +25,8 @@ public class TradingSample {
             httpServlet.setEntryPointClassName("com.ponysdk.sample.trading.client.TradingSampleEntryPoint");
             final BootstrapServlet bootstrapServlet = new BootstrapServlet();
             bootstrapServlet.addStylesheet("css/sample.less");
-            bootstrapServlet.addJavascript("http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js");
-            bootstrapServlet.addJavascript("http://code.highcharts.com/stock/highstock.js");
-            bootstrapServlet.addJavascript("http://code.highcharts.com/stock/modules/exporting.js");
+            bootstrapServlet.addStylesheet("css/ponysdk.less");
+            bootstrapServlet.addJavascript("script/less.js");
 
             final Main main = new Main();
             main.setApplicationContextName("trading");

@@ -1,12 +1,10 @@
 
 package com.ponysdk.sample.trading.client.activity;
 
-import com.ponysdk.core.command.PushListener;
 import com.ponysdk.core.place.Place;
-import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.trading.command.trading.FindCurrenciesCommand;
-import com.ponysdk.sample.trading.command.trading.PriceCommand;
+import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PFlowPanel;
@@ -14,7 +12,6 @@ import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PPusher.PusherState;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -186,63 +183,65 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDragLeaveEvent.TYPE);
 
-        final PriceCommand priceCommand = new PriceCommand(currency, new PushListener<MarketData>() {
+        PPusher.get().addDataListener(new DataListener() {
 
             private int lastBuy;
             private int lastSell;
 
             @Override
-            public void onMessage(final MarketData msg) {
-                final int spreadValue = Math.abs(msg.sell - msg.buy);
+            public void onData(final Object data) {
+                if (data instanceof MarketData) {
+                    final MarketData msg = (MarketData) data;
+                    final int spreadValue = Math.abs(msg.sell - msg.buy);
 
-                if (lastBuy < msg.buy) {
-                    buyDirection.removeStyleName("down");
-                    buyDirection.addStyleName("up");
-                } else {
-                    buyDirection.removeStyleName("up");
-                    buyDirection.addStyleName("down");
+                    if (lastBuy < msg.buy) {
+                        buyDirection.removeStyleName("down");
+                        buyDirection.addStyleName("up");
+                    } else {
+                        buyDirection.removeStyleName("up");
+                        buyDirection.addStyleName("down");
+                    }
+                    if (lastSell < msg.sell) {
+                        sellDirection.removeStyleName("down");
+                        sellDirection.addStyleName("up");
+                    } else {
+                        sellDirection.removeStyleName("up");
+                        sellDirection.addStyleName("down");
+                    }
+
+                    lastBuy = msg.buy;
+                    lastSell = msg.sell;
+                    buyPipNumStrong.setInnerText(lastBuy + "");
+                    sellPipNumStrong.setInnerText(lastSell + "");
+                    spread.setText(spreadValue + "");
                 }
-                if (lastSell < msg.sell) {
-                    sellDirection.removeStyleName("down");
-                    sellDirection.addStyleName("up");
-                } else {
-                    sellDirection.removeStyleName("up");
-                    sellDirection.addStyleName("down");
-                }
-
-                lastBuy = msg.buy;
-                lastSell = msg.sell;
-                buyPipNumStrong.setInnerText(lastBuy + "");
-                sellPipNumStrong.setInnerText(lastSell + "");
-                spread.setText(spreadValue + "");
-            }
-
-        });
-
-        PPusher.get().addConnectionListener(new ConnectionListener() {
-
-            @Override
-            public void onOpen() {
-                priceCommand.execute();
-            }
-
-            @Override
-            public void onClose() {
-                // if (registration != null) registration.removeHandler();
             }
         });
 
-        // HandlerRegistration registration = null;
-        if (PPusher.get().getPusherState() == PusherState.STARTED) priceCommand.execute();
-        //
-        // close.addClickHandler(new PClickHandler() {
+        // PPusher.get().addConnectionListener(new ConnectionListener() {
         //
         // @Override
-        // public void onClick(final PClickEvent event) {
-        // box.removeFromParent();
-        // registration.removeHandler();
+        // public void onOpen() {
+        // priceCommand.execute();
+        // }
+        //
+        // @Override
+        // public void onClose() {
+        // // if (registration != null) registration.removeHandler();
         // }
         // });
+        //
+        // // HandlerRegistration registration = null;
+        // if (PPusher.get().getPusherState() == PusherState.STARTED) priceCommand.execute();
+        // //
+        // // close.addClickHandler(new PClickHandler() {
+        // //
+        // // @Override
+        // // public void onClick(final PClickEvent event) {
+        // // box.removeFromParent();
+        // // registration.removeHandler();
+        // // }
+        // // });
 
         return box;
     }

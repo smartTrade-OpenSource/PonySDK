@@ -23,7 +23,11 @@
 
 package com.ponysdk.core.command;
 
-public interface PushListener<T> {
+import com.ponysdk.core.socket.ConnectionListener;
 
-    void onMessage(T msg);
+public interface PusherListener<T> {
+
+    public void addConnectionLister(ConnectionListener connectionListener);
+
+    public void onMessage(T msg);
 }

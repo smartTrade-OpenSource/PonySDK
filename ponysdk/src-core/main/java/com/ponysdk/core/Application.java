@@ -23,22 +23,18 @@
 
 package com.ponysdk.core;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.ponysdk.core.servlet.Session;
-import com.ponysdk.core.servlet.SessionListener;
 
 public class Application {
 
     private final Session session;
 
     private final Map<Long, UIContext> ponySessions = new ConcurrentHashMap<Long, UIContext>();
-
-    private final Set<SessionListener> sessionListeners = new HashSet<SessionListener>();
 
     private static final AtomicLong ponySessionIDcount = new AtomicLong();
 
@@ -56,28 +52,12 @@ public class Application {
         return ponySessions.get(key);
     }
 
+    public Collection<UIContext> getUIContexts() {
+        return ponySessions.values();
+    }
+
     public Session getSession() {
         return session;
-    }
-
-    public void fireSessionCreated() {
-        for (final SessionListener listener : sessionListeners) {
-            listener.sessionCreated(session);
-        }
-    }
-
-    public void fireSessionDestroyed() {
-        for (final SessionListener listener : sessionListeners) {
-            listener.sessionDestroyed(session);
-        }
-    }
-
-    public void addSessionListener(final SessionListener sessionListener) {
-        sessionListeners.add(sessionListener);
-    }
-
-    public boolean removeSessionListener(final SessionListener sessionListener) {
-        return sessionListeners.remove(sessionListeners);
     }
 
     public void setAttribute(final String name, final Object value) {
