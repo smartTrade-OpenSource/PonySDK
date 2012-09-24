@@ -321,11 +321,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         return ptObject;
     }
 
-    //
-    // private void updateTimer(final Timer object, final Property mainProperty) {
-    // object.scheduleRepeating(mainProperty.getIntValue());
-    // }
-
     @Override
     public void stackEvent(final PTInstruction instruction) {
         if (!updateMode) triggerEvent(instruction);
@@ -344,11 +339,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
         if (timer == null) timer = scheduleLoadingMessageBox();
 
-        // try {
-
-        // final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, GWT.getModuleBaseURL() +
-        // "p");
-
         final PTInstruction requestData = new PTInstruction();
         requestData.put(APPLICATION.VIEW_ID, sessionID);
 
@@ -362,63 +352,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         requestData.put(APPLICATION.SEQ_NUM, nextSent++);
 
         requestBuilder.send(requestData.toString());
-
-        // builder.sendRequest(requestData.toString(), new RequestCallback() {
-        //
-        // @Override
-        // public void onError(final Request request, final Throwable exception) {
-        // if (pendingClose) return;
-        // log.log(Level.SEVERE, "fireInstruction failed", exception);
-        //
-        // if (exception instanceof PonySessionException) {
-        // reload();
-        // return;
-        // }
-        // numberOfrequestInProgress--;
-        // instructions.clear();
-        // showCommunicationErrorMessage(exception);
-        // hideLoadingMessageBox();
-        // }
-        //
-        // @Override
-        // public void onResponseReceived(final Request request, final Response response) {
-        // try {
-        // numberOfrequestInProgress--;
-        // instructions.clear();
-        // if (200 == response.getStatusCode()) {
-        //
-        // final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-        //
-        // if (response.getText() == null || response.getText().isEmpty()) return;
-        //
-        // GWT.log(response.getText());
-        //
-        // final JSONObject object = JSONParser.parseLenient(response.getText()).isObject();
-        //
-        // final JSONArray jsonArray = object.get(APPLICATION.INSTRUCTIONS).isArray();
-        //
-        // for (int i = 0; i < jsonArray.size(); i++) {
-        // instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
-        // }
-        //
-        // update(instructions);
-        // } else {
-        // showCommunicationErrorMessage(new Exception("Couldn't retrieve JSON (" + response.getStatusText() +
-        // ")"));
-        // }
-        //
-        // } finally {
-        // hideLoadingMessageBox();
-        // }
-        // }
-        // });
-        // } catch (final RequestException e) {
-        // numberOfrequestInProgress--;
-        // instructions.clear();
-        // showCommunicationErrorMessage(e);
-        // hideLoadingMessageBox();
-        // }
-
     }
 
     @Override

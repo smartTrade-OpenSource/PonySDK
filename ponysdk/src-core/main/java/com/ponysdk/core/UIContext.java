@@ -88,7 +88,7 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final Application ponyApplication;
+    private final Application application;
 
     private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>();
 
@@ -99,7 +99,7 @@ public class UIContext {
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
     public UIContext(final Application ponyApplication) {
-        this.ponyApplication = ponyApplication;
+        this.application = ponyApplication;
     }
 
     public void stackInstruction(final Instruction instruction) {
@@ -188,7 +188,7 @@ public class UIContext {
     }
 
     public Session getSession() {
-        return ponyApplication.getSession();
+        return application.getSession();
     }
 
     public StreamHandler removeStreamListener(final Long streamID) {
@@ -268,7 +268,7 @@ public class UIContext {
     }
 
     void invalidate() {
-        ponyApplication.getSession().invalidate();
+        application.getSession().invalidate();
     }
 
     public void close() {
@@ -326,12 +326,16 @@ public class UIContext {
     }
 
     public void setApplicationAttribute(final String name, final Object value) {
-        this.ponyApplication.setAttribute(name, value);
+        this.application.setAttribute(name, value);
+    }
+
+    public Application getApplication() {
+        return application;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getApplicationAttribute(final String name) {
-        return (T) this.ponyApplication.getAttribute(name);
+        return (T) this.application.getAttribute(name);
     }
 
     public boolean updateIncomingSeqNum(final long receivedSeqNum) {

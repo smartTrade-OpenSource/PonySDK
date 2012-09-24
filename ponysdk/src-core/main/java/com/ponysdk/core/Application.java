@@ -32,11 +32,11 @@ import com.ponysdk.core.servlet.Session;
 
 public class Application {
 
+    private static final AtomicLong ponySessionIDcount = new AtomicLong();
+
     private final Session session;
 
-    private final Map<Long, UIContext> ponySessions = new ConcurrentHashMap<Long, UIContext>();
-
-    private static final AtomicLong ponySessionIDcount = new AtomicLong();
+    private final Map<Long, UIContext> uiContexts = new ConcurrentHashMap<Long, UIContext>();
 
     public Application(final Session session) {
         this.session = session;
@@ -44,16 +44,16 @@ public class Application {
 
     public long registerUIContext(final UIContext ponySession) {
         final long id = ponySessionIDcount.incrementAndGet();
-        ponySessions.put(id, ponySession);
+        uiContexts.put(id, ponySession);
         return id;
     }
 
     public UIContext getUIContext(final long key) {
-        return ponySessions.get(key);
+        return uiContexts.get(key);
     }
 
     public Collection<UIContext> getUIContexts() {
-        return ponySessions.values();
+        return uiContexts.values();
     }
 
     public Session getSession() {
