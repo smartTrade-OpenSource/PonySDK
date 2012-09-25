@@ -177,7 +177,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         // Build create pony form
         buildCreatePonyActivity();
 
-        //
+        dataProvider.onPageChange(0);
+
         listContainer.setWidget(dataGrid);
 
     }
