@@ -26,4 +26,9 @@ public class SocketRequest implements Request {
         return request.getReader();
     }
 
+    @Override
+    public String getHeader(final String header) {
+        return request.getHeader(header);
+    }
+
 }

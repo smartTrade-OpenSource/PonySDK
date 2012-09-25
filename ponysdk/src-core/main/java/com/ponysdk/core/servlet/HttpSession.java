@@ -7,14 +7,10 @@ public class HttpSession implements Session {
 
     private final javax.servlet.http.HttpSession httpSession;
 
-    private final UserAgent userAgent;
+    private UserAgent userAgent;
 
     public HttpSession(final javax.servlet.http.HttpSession httpSession) {
         this.httpSession = httpSession;
-
-        final String userAgentString = (String) httpSession.getAttribute("User-Agent");
-        if (userAgentString != null) this.userAgent = UserAgent.parseUserAgentString(userAgentString);
-        else this.userAgent = null;
     }
 
     @Override
@@ -38,6 +34,12 @@ public class HttpSession implements Session {
     }
 
     @Override
+    public void setUserAgent(final String attribute) {
+        if (attribute != null) this.userAgent = UserAgent.parseUserAgentString(attribute);
+        else this.userAgent = null;
+    }
+
+    @Override
     public UserAgent getUserAgent() {
         return userAgent;
     }
@@ -51,4 +53,5 @@ public class HttpSession implements Session {
     public boolean isValid() {
         return true;
     }
+
 }

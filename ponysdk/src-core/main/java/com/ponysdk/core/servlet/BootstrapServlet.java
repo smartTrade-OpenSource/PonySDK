@@ -109,10 +109,6 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     private void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
-        if (request.getSession().getAttribute("User-Agent") == null) {
-            request.getSession().setAttribute("User-Agent", request.getHeader("User-Agent"));
-        }
-
         // Try to load from webapp context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
         String type;

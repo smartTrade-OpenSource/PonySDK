@@ -30,10 +30,10 @@ import com.ponysdk.ui.server.list2.header.HeaderCellRenderer;
 
 public class DataGridColumnDescriptor<D, V> {
 
-    private HeaderCellRenderer headerCellRenderer;
-    private CellRenderer<D, V> cellRenderer;
-    private CellRenderer<D, V> subCellRenderer;
-    private ValueProvider<D, V> valueProvider;
+    protected HeaderCellRenderer headerCellRenderer;
+    protected CellRenderer<D, V> cellRenderer;
+    protected CellRenderer<D, V> subCellRenderer;
+    protected ValueProvider<D, V> valueProvider;
 
     public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
         this.headerCellRenderer = headerCellRender;

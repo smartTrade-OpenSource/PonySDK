@@ -56,6 +56,7 @@ public abstract class AbstractApplicationManager {
         if (applicationSession == null) {
             log.info("Creating a new application ... Session ID #" + session.getId());
             applicationSession = new Application(session);
+            session.setUserAgent(request.getHeader("User-Agent"));
             session.setAttribute(Application.class.getCanonicalName(), applicationSession);
             isNewHttpSession = true;
         } else {

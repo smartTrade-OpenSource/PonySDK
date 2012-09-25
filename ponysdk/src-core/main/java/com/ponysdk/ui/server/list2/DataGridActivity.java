@@ -36,13 +36,13 @@ import com.ponysdk.ui.server.list.SimpleListView;
 
 public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
-    private final SimpleListView view;
+    protected final SimpleListView view;
     private PSelectionModel<D> setSelectionModel;
-    private final List<DataGridColumnDescriptor<D, ?>> columnDescriptors = new ArrayList<DataGridColumnDescriptor<D, ?>>();
+    protected final List<DataGridColumnDescriptor<D, ?>> columnDescriptors = new ArrayList<DataGridColumnDescriptor<D, ?>>();
     private Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
 
     private int colCount = 0;
-    private final List<D> rows = new ArrayList<D>();
+    protected final List<D> rows = new ArrayList<D>();
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
@@ -72,7 +72,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         int col = 0;
 
         for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
-            view.addWidget(field.renderCell(row, data), col++, row);
+            final IsPWidget renderCell = field.renderCell(row, data);
+            view.addWidget(renderCell, col++, row);
         }
         view.addWidget(new PSimplePanel(), col, row);
         view.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
