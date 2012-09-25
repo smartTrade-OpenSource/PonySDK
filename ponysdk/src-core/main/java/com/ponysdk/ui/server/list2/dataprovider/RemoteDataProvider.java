@@ -14,7 +14,7 @@ import com.ponysdk.ui.server.list2.Sortable;
 import com.ponysdk.ui.server.list2.paging.Pager;
 import com.ponysdk.ui.server.list2.paging.PagerListener;
 
-public abstract class RemoteHasPDataProvider<T> implements PagerListener, FilterListener {
+public abstract class RemoteDataProvider<T> implements PagerListener, FilterListener {
 
     private final Pager<T> pager;
     private final HasPData<T> hasData;
@@ -23,7 +23,7 @@ public abstract class RemoteHasPDataProvider<T> implements PagerListener, Filter
     private final List<Resetable> resatableList = new ArrayList<Resetable>();
     private final List<HasCriteria> hasCriteriaList = new ArrayList<HasCriteria>();
 
-    public RemoteHasPDataProvider(final Pager<T> pager, final HasPData<T> hasData) {
+    public RemoteDataProvider(final Pager<T> pager, final HasPData<T> hasData) {
         this.pager = pager;
         this.hasData = hasData;
         this.pager.addListener(this);
