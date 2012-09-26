@@ -172,7 +172,7 @@ public class SimpleEventBus implements EventBus {
         final Set<H> handlers = (Set<H>) sourceMap.get(source);
         if (handlers == null) { return Collections.emptySet(); }
 
-        return handlers;
+        return new HashSet<H>(handlers);
     }
 
     private void prune(final Event.Type<?> type, final Object source) {

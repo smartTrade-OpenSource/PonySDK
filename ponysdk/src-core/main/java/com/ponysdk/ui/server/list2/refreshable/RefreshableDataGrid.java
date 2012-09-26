@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.list.SimpleListView;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
@@ -75,6 +77,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 map.put(d, cell);
                 view.addWidget(cell.w, cell.col, cell.row);
             }
+            view.addWidget(new PSimplePanel(), col, row);
+            view.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
+
         } else {
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;

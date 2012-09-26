@@ -48,6 +48,10 @@ public class Application {
         return id;
     }
 
+    public void unregisterUIContext(final Long reloadedViewID) {
+        uiContexts.remove(reloadedViewID);
+    }
+
     public UIContext getUIContext(final long key) {
         return uiContexts.get(key);
     }
