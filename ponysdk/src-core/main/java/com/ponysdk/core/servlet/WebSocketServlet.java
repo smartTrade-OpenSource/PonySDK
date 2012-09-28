@@ -34,13 +34,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
         UIContext.setCurrent(uiContext);
 
-        final JettyWebSocket jettyWebSocket = new JettyWebSocket();
+        final JettyWebSocket jettyWebSocket = new JettyWebSocket(uiContext);
 
-        UIContext.get().acquire();
+        uiContext.acquire();
         try {
             PPusher.get().initialize(jettyWebSocket);
         } finally {
-            UIContext.get().release();
+            uiContext.release();
         }
 
         return jettyWebSocket;
@@ -48,8 +48,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
     private class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
+        private final UIContext uiContext;
         private Connection connection;
         private ConnectionListener connectionListener;
+
+        public JettyWebSocket(final UIContext uiContext) {
+            this.uiContext = uiContext;
+        }
 
         @Override
         public void onOpen(final Connection connection) {
@@ -71,7 +76,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         @Override
         public void onClose(final int arg0, final String arg1) {
             log.info("Connection lost from: " + connection.toString());
-            connectionListener.onClose();
+            uiContext.acquire();
+            try {
+                UIContext.setCurrent(uiContext);
+                connectionListener.onClose();
+            } finally {
+                uiContext.release();
+            }
         }
 
         @Override
