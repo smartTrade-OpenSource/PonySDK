@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.list2;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
-import com.ponysdk.ui.server.list2.header.HeaderCellRenderer;
+import com.ponysdk.ui.server.list2.renderer.header.HeaderCellRenderer;
 
 public class DataGridColumnDescriptor<D, V> {
 

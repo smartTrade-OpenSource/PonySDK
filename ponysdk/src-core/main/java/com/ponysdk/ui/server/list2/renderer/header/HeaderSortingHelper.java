@@ -1,5 +1,5 @@
 
-package com.ponysdk.ui.server.list2.header;
+package com.ponysdk.ui.server.list2.renderer.header;
 
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.impl.theme.PonySDKTheme;

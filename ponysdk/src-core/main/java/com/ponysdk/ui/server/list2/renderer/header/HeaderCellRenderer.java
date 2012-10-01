@@ -21,21 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.header;
+package com.ponysdk.ui.server.list2.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
 
-public class StringHeaderCellRenderer implements HeaderCellRenderer {
+public interface HeaderCellRenderer {
 
-    private final PLabel caption;
+    public IsPWidget render();
 
-    public StringHeaderCellRenderer(final String caption) {
-        this.caption = new PLabel(caption);
-    }
-
-    @Override
-    public IsPWidget render() {
-        return caption;
-    }
 }

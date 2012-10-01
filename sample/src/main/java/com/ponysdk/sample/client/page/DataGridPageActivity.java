@@ -66,9 +66,9 @@ import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.dataprovider.RemoteHasPDataProvider;
-import com.ponysdk.ui.server.list2.header.ComplexHeaderCellRenderer;
 import com.ponysdk.ui.server.list2.paging.DefaultPagerView;
 import com.ponysdk.ui.server.list2.paging.Pager;
+import com.ponysdk.ui.server.list2.renderer.header.ComplexHeaderCellRenderer;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {

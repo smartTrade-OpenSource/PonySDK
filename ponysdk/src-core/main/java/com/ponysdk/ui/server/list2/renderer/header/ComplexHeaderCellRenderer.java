@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.header;
+package com.ponysdk.ui.server.list2.renderer.header;
 
 import java.util.Arrays;
 import java.util.List;

@@ -21,41 +21,39 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.header;
+package com.ponysdk.ui.server.list2.renderer.header;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.ponysdk.core.query.Criterion;
+import com.ponysdk.core.query.SortingType;
+import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PGrid;
-import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
-import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
-import com.ponysdk.ui.server.form2.formfield.FormField;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
 import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
-public class FilterableHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria {
+public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer, HasCriteria, Sortable {
 
-    private final PGrid headerGrid = new PGrid(2, 1);
     private final PLabel title;
-    private final FormField<?> formField;
     private final String key;
+
+    private SortingType sortingType = SortingType.NONE;
 
     private FilterListener filterListener;
 
-    public FilterableHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
-        this(caption, formField, key, null);
+    public SortableHeaderCellRenderer(final String caption, final String key) {
+        this(caption, key, null);
     }
 
-    public FilterableHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
+    public SortableHeaderCellRenderer(final String caption, final String key, final FilterListener filterListener) {
         this.title = new PLabel(caption);
-        this.formField = formField;
         this.key = key;
         this.filterListener = filterListener;
 
@@ -63,16 +61,20 @@ public class FilterableHeaderCellRenderer implements Queriable, HeaderCellRender
     }
 
     private void builGUI() {
-        headerGrid.setWidget(0, 0, title);
-        headerGrid.setWidget(1, 0, formField.asWidget());
-        formField.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
+        title.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
+        title.addClickHandler(new PClickHandler() {
 
             @Override
-            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                filterListener.onFilterChange();
-            }
-        }, PKeyUpEvent.TYPE);
+            public void onClick(final PClickEvent event) {
+                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
+                final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
+                sort(nextSortingType);
+                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
 
+                filterListener.onSort(SortableHeaderCellRenderer.this);
+
+            }
+        });
     }
 
     public void setFilterListener(final FilterListener filterListener) {
@@ -81,26 +83,28 @@ public class FilterableHeaderCellRenderer implements Queriable, HeaderCellRender
 
     @Override
     public IsPWidget render() {
-        return headerGrid;
+        return title;
     }
 
     @Override
     public List<Criterion> getCriteria() {
 
         final Criterion criterion = new Criterion(key);
-        criterion.setValue(formField.getValue());
+        criterion.setSortingType(sortingType);
 
         return Arrays.asList(criterion);
     }
 
     @Override
-    public void reset() {
-        formField.reset();
+    public void sort(final SortingType newSortingType) {
+        title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
+        this.sortingType = newSortingType;
+        title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
     }
 
     @Override
     public Sortable asSortable() {
-        return null;
+        return this;
     }
 
     @Override
@@ -110,7 +114,7 @@ public class FilterableHeaderCellRenderer implements Queriable, HeaderCellRender
 
     @Override
     public Resetable asResetable() {
-        return this;
+        return null;
     }
 
 }
