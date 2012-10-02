@@ -58,7 +58,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     @Override
     public void remove(final D data) {
-        throw new RuntimeException("Use remove(key, data)");
+        throw new RuntimeException("Use removeByKey(key)");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -96,7 +96,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         }
     }
 
-    public void remove(final K key, final D data) {
+    public void removeByKey(final K key) {
         final D removed = valueByKey.remove(key);
         if (removed != null) {
             cells.remove(key);

@@ -24,7 +24,9 @@
 package com.ponysdk.core;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -50,6 +52,19 @@ public class Application {
 
     public void unregisterUIContext(final Long reloadedViewID) {
         uiContexts.remove(reloadedViewID);
+    }
+
+    public boolean unregisterUIContext(final UIContext uiContext) {
+        boolean removed = false;
+        final Iterator<Entry<Long, UIContext>> iterator = uiContexts.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Entry<Long, UIContext> entry = iterator.next();
+            if (entry.getValue().equals(uiContext)) {
+                iterator.remove();
+                removed = true;
+            }
+        }
+        return removed;
     }
 
     public UIContext getUIContext(final long key) {
