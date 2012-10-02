@@ -141,7 +141,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
             @Override
             public IsPWidget render(final int row, final Pony data, final Boolean value) {
-                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<>();
+                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<Pony>();
                 selectorCheckBox.setData(data);
                 selectorCheckBox.addSelectableListener(selector);
                 selector.registerSelectable(selectorCheckBox);
