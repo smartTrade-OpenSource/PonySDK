@@ -75,7 +75,8 @@ import com.ponysdk.ui.server.list2.header.ComplexHeaderCellRenderer;
 import com.ponysdk.ui.server.list2.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.list2.paging.DefaultPagerView;
 import com.ponysdk.ui.server.list2.paging.Pager;
-import com.ponysdk.ui.server.list2.selector.DefaultSelectorView;
+import com.ponysdk.ui.server.list2.selector.DefaultActionSelectorView;
+import com.ponysdk.ui.server.list2.selector.DefaultSelectorInfoView;
 import com.ponysdk.ui.server.list2.selector.Selector;
 import com.ponysdk.ui.server.list2.selector.SelectorCheckBox;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
@@ -117,15 +118,17 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         final Pager<Pony> pager = new Pager<Pony>(new DefaultPagerView());
         dataGrid = new DataGridActivity<Pony>(new DefaultSimpleListView());
-        final Selector<Pony> selector = new Selector<Pony>(new DefaultSelectorView());
+        final Selector<Pony> selector = new Selector<Pony>(new DefaultActionSelectorView(), new DefaultSelectorInfoView());
 
         final RemoteDataProvider<Pony> dataProvider = new RemoteDataProvider<Pony>(pager, dataGrid) {
 
             @Override
             protected List<Pony> getData(final Query query) {
                 final Result<List<Pony>> result = new FindPonysCommand(query).execute();
-                pager.process(result.getFullSize());
+                final int fullSize = result.getFullSize();
+                pager.process(fullSize);
                 selector.reset();
+                selector.setFullSize(fullSize);
                 return result.getData();
             }
 
@@ -140,6 +143,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             public IsPWidget render(final int row, final Pony data, final Boolean value) {
                 final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<>();
                 selectorCheckBox.setData(data);
+                selectorCheckBox.addSelectableListener(selector);
                 selector.registerSelectable(selectorCheckBox);
 
                 selectorCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
@@ -147,8 +151,10 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                     @Override
                     public void onValueChange(final PValueChangeEvent<Boolean> event) {
                         if (event.getValue()) {
+                            selectorCheckBox.onCheck();
                             dataGrid.selectRow(row);
                         } else {
+                            selectorCheckBox.onUncheck();
                             dataGrid.unSelectRow(row);
                         }
                     }
@@ -189,7 +195,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         dataProvider.registerHasCriteria(nameHeaderCellRender);
         dataProvider.registerHasCriteria(raceHeaderCellRender);
 
-        formContainer.setWidget(0, 0, selector.asWidget());
+        formContainer.setWidget(0, 0, selector.getActionView());
 
         final PButton refresh = new PButton("Refresh");
         refresh.addClickHandler(new PClickHandler() {
@@ -214,6 +220,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         formContainer.setWidget(0, 2, addPonyButton);
 
         formContainer.setWidget(0, 3, pager.asWidget());
+        formContainer.setWidget(0, 4, selector.getInfoView());
 
         // Build create pony form
         buildCreatePonyActivity();

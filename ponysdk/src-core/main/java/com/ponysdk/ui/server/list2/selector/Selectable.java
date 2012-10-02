@@ -9,4 +9,6 @@ public interface Selectable<T> {
 
     T getSelectedData();
 
+    void addSelectableListener(SelectableListener selectableListener);
+
 }

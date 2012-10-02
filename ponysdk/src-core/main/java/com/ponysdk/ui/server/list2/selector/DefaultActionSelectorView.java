@@ -10,13 +10,13 @@ import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PWidget;
 
-public class DefaultSelectorView extends PMenuBar implements SelectorView {
+public class DefaultActionSelectorView extends PMenuBar implements SelectorActionView {
 
-    private final List<SelectorViewListener> selectorViewListeners = new ArrayList<SelectorViewListener>();
+    private final List<SelectorActionViewListener> selectorViewListeners = new ArrayList<SelectorActionViewListener>();
     private final PMenuItem selectAllMenuItem;
     private final PMenuItem selectNoneMenuItem;
 
-    public DefaultSelectorView() {
+    public DefaultActionSelectorView() {
         addStyleName(PonySDKTheme.MENUBAR_LIGHT);
         final PMenuBar menuBarAction = new PMenuBar(true);
         addItem("", menuBarAction);
@@ -31,7 +31,7 @@ public class DefaultSelectorView extends PMenuBar implements SelectorView {
     }
 
     @Override
-    public void addSelectorViewListener(final SelectorViewListener selectorListener) {
+    public void addSelectorActionViewListener(final SelectorActionViewListener selectorListener) {
         selectorViewListeners.add(selectorListener);
     }
 
@@ -45,8 +45,8 @@ public class DefaultSelectorView extends PMenuBar implements SelectorView {
 
             @Override
             public void execute() {
-                for (final SelectorViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onSelectAll();
+                for (final SelectorActionViewListener selectorListener : selectorViewListeners) {
+                    selectorListener.onSelectAllVisible();
                 }
             }
         };
@@ -57,8 +57,8 @@ public class DefaultSelectorView extends PMenuBar implements SelectorView {
 
             @Override
             public void execute() {
-                for (final SelectorViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onUnselectAll();
+                for (final SelectorActionViewListener selectorListener : selectorViewListeners) {
+                    selectorListener.onUnselectAllVisible();
                 }
             }
         };

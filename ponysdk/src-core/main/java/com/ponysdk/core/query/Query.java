@@ -36,7 +36,7 @@ public class Query {
 
     private int pageNum = 0;
 
-    private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola avoid to breaking existing queries
+    private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola to avoid breaking existing queries
 
     private final List<Criterion> criteria = new ArrayList<Criterion>();
 

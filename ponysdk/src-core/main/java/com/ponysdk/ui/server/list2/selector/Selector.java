@@ -4,18 +4,36 @@ package com.ponysdk.ui.server.list2.selector;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.list.SelectionMode;
 import com.ponysdk.ui.server.list2.Resetable;
 
-public class Selector<T> implements IsPWidget, SelectorViewListener, Resetable {
+public class Selector<T> implements SelectorActionViewListener, SelectorInfoViewListener, SelectableListener, Resetable {
 
-    private final SelectorView selectorView;
+    private final SelectorActionView selectorActionView;
+    private final SelectorInfoView selectorInfoView;
     private final List<Selectable<T>> selectableList = new ArrayList<Selectable<T>>();
 
-    public Selector(final SelectorView selectorView) {
-        this.selectorView = selectorView;
-        selectorView.addSelectorViewListener(this);
+    private int pageSize = 20;
+    private int numberOfSelectedItems = 0;
+    private int fullSize = 0;
+
+    SelectionMode selectionMode = SelectionMode.NONE;
+
+    public Selector(final SelectorActionView selectorActionView, final SelectorInfoView selectorInfoView) {
+        this.selectorActionView = selectorActionView;
+        this.selectorInfoView = selectorInfoView;
+
+        selectorActionView.addSelectorActionViewListener(this);
+        selectorInfoView.addSelectorInfoViewListener(this);
+    }
+
+    public Selector(final SelectorActionView selectorActionView, final SelectorInfoView selectorInfoView, final int pageSize) {
+        this.selectorActionView = selectorActionView;
+        this.selectorInfoView = selectorInfoView;
+        this.pageSize = pageSize;
+
+        selectorActionView.addSelectorActionViewListener(this);
     }
 
     public void registerSelectable(final Selectable<T> selectable) {
@@ -33,28 +51,81 @@ public class Selector<T> implements IsPWidget, SelectorViewListener, Resetable {
         return selectedData;
     }
 
-    @Override
-    public PWidget asWidget() {
-        return selectorView.asWidget();
+    public PWidget getActionView() {
+        return selectorActionView.asWidget();
+    }
+
+    public PWidget getInfoView() {
+        return selectorInfoView.asWidget();
     }
 
     @Override
-    public void onSelectAll() {
+    public void onSelectAllVisible() {
         for (final Selectable<T> selectable : selectableList) {
             selectable.select();
         }
+        numberOfSelectedItems = selectableList.size();
+        checkNumberOfSelectedItems();
+
     }
 
     @Override
-    public void onUnselectAll() {
+    public void onUnselectAllVisible() {
         for (final Selectable<T> selectable : selectableList) {
             selectable.unselect();
         }
+        numberOfSelectedItems = 0;
+        selectionMode = SelectionMode.NONE;
+    }
+
+    @Override
+    public void onFullSelection() {
+        selectionMode = SelectionMode.FULL;
+        numberOfSelectedItems = fullSize;
+        selectorInfoView.showClearSelectionOption(numberOfSelectedItems);
+    }
+
+    @Override
+    public void onClearFullSelection() {
+        selectorInfoView.hide();
+        onUnselectAllVisible();
+    }
+
+    @Override
+    public void onSelect() {
+        numberOfSelectedItems++;
+        selectionMode = SelectionMode.PARTIAL;
+        checkNumberOfSelectedItems();
+    }
+
+    private void checkNumberOfSelectedItems() {
+        if (numberOfSelectedItems == pageSize && pageSize != 0) {
+            selectorInfoView.showSelectAllOption(numberOfSelectedItems, fullSize);
+        } else if (numberOfSelectedItems == fullSize) {
+            selectorInfoView.showAllSelected(numberOfSelectedItems);
+            selectionMode = SelectionMode.FULL;
+        } else if (numberOfSelectedItems == 0) {
+            selectionMode = SelectionMode.NONE;
+        }
+    }
+
+    @Override
+    public void onUnselect() {
+        numberOfSelectedItems--;
+        selectorInfoView.hide();
+        checkNumberOfSelectedItems();
     }
 
     @Override
     public void reset() {
         selectableList.clear();
+        numberOfSelectedItems = 0;
+        selectionMode = SelectionMode.NONE;
+        selectorInfoView.hide();
+    }
+
+    public void setFullSize(final int fullSize) {
+        this.fullSize = fullSize;
     }
 
 }
