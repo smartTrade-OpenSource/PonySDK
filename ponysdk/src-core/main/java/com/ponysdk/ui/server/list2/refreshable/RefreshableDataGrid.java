@@ -36,6 +36,7 @@ import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     private final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();
+    private final Map<K, D> valueByKey = new HashMap<K, D>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
         super(listView);
@@ -55,6 +56,11 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         throw new RuntimeException("Use setData(key, data)");
     }
 
+    @Override
+    public void remove(final D data) {
+        throw new RuntimeException("Use remove(key, data)");
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setData(final K key, final D data) {
         Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
@@ -64,6 +70,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
             final int row = getVisibleItemCount() + 1;
             rows.add(data);
+            valueByKey.put(key, data);
+
             int col = 0;
 
             for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
@@ -85,6 +93,14 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
                 d.getCellRenderer().update(data, d.getValueProvider().getValue(data), map.get(d));
             }
+        }
+    }
+
+    public void remove(final K key, final D data) {
+        final D removed = valueByKey.remove(key);
+        if (removed != null) {
+            cells.remove(key);
+            super.remove(removed);
         }
     }
 
