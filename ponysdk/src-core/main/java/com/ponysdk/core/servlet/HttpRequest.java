@@ -54,4 +54,9 @@ public class HttpRequest implements Request {
         }
         return buf.toString();
     }
+
+    @Override
+    public String getHeader(final String header) {
+        return request.getHeader(header);
+    }
 }

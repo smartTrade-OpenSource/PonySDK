@@ -51,21 +51,26 @@ public abstract class AbstractApplicationManager {
 
         final Session session = request.getSession();
 
+        Long reloadedViewID = null;
         boolean isNewHttpSession = false;
         Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
         if (applicationSession == null) {
             log.info("Creating a new application ... Session ID #" + session.getId());
             applicationSession = new Application(session);
+            session.setUserAgent(request.getHeader("User-Agent"));
             session.setAttribute(Application.class.getCanonicalName(), applicationSession);
             isNewHttpSession = true;
         } else {
-            log.info("Reloading application ... Session ID #" + session.getId());
+            if (data.has(APPLICATION.VIEW_ID)) reloadedViewID = data.getLong(APPLICATION.VIEW_ID);
+            log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
         }
 
         synchronized (applicationSession) {
-            final UIContext uiContext = new UIContext(applicationSession);
+            if (reloadedViewID != null) applicationSession.unregisterUIContext(reloadedViewID);
 
+            final UIContext uiContext = new UIContext(applicationSession);
             jsonObject.put(APPLICATION.VIEW_ID, applicationSession.registerUIContext(uiContext));
+
             UIContext.setCurrent(uiContext);
 
             final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);

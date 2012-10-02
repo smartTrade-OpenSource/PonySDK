@@ -21,26 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic.event;
+package com.ponysdk.ui.server.list2.renderer.header;
 
-import com.ponysdk.ui.terminal.DomHandlerType;
+import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class PChangeEvent extends PDomEvent<PChangeHandler> {
+public interface HeaderCellRenderer {
 
-    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<PChangeHandler>(DomHandlerType.CHANGE_HANDLER);
-
-    public PChangeEvent(final Object sourceComponent) {
-        super(sourceComponent);
-    }
-
-    @Override
-    public PDomEvent.Type<PChangeHandler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(final PChangeHandler handler) {
-        handler.onChange(this);
-    }
+    public IsPWidget render();
 
 }

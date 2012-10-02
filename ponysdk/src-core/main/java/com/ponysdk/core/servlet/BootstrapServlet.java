@@ -109,10 +109,6 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     private void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
-        if (request.getSession().getAttribute("User-Agent") == null) {
-            request.getSession().setAttribute("User-Agent", request.getHeader("User-Agent"));
-        }
-
         // Try to load from webapp context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
         String type;
@@ -169,6 +165,8 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("<html>");
         builder.append("<head>");
         builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
+        builder.append("    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">");
+        builder.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">");
         builder.append("    <title>" + applicationName + "</title>");
         builder.append("    <script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
 

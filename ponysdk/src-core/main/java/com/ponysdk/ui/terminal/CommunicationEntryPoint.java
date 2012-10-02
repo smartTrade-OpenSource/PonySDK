@@ -33,6 +33,7 @@ import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -61,6 +62,13 @@ public class CommunicationEntryPoint implements EntryPoint {
 
         try {
 
+            Long viewID = null;
+            final Storage storage = Storage.getSessionStorageIfSupported();
+            if (storage != null) {
+                final String v = storage.getItem(APPLICATION.VIEW_ID);
+                if (v != null) viewID = Long.parseLong(v);
+            }
+
             final PTInstruction requestData = new PTInstruction();
 
             final JSONArray cookies = new JSONArray();
@@ -82,6 +90,8 @@ public class CommunicationEntryPoint implements EntryPoint {
             requestData.put(HISTORY.TOKEN, History.getToken());
             requestData.put(PROPERTY.COOKIES, cookies);
 
+            if (viewID != null) requestData.put(APPLICATION.VIEW_ID, viewID);
+
             final RequestCallback requestCallback = new RequestCallback() {
 
                 @Override
@@ -89,6 +99,9 @@ public class CommunicationEntryPoint implements EntryPoint {
                     try {
                         if (data.containsKey(APPLICATION.VIEW_ID)) {
                             final long viewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
+
+                            if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(viewID));
+
                             uiBuilder = new UIBuilder(viewID, requestBuilder);
                             uiBuilder.init();
                             uiBuilder.update(data);

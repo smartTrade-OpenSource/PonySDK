@@ -49,6 +49,9 @@ public class PTRadioButton extends PTCheckBox {
 
         if (update.containsKey(PROPERTY.NAME)) {
             cast().setName(update.getString(PROPERTY.NAME));
+        } else if (cast().getName() != null && update.containsKey(PROPERTY.VALUE) && update.getBoolean(PROPERTY.VALUE)) {
+            cast().setValue(true);
+            lastSelectedRadioButtonByGroup.put(cast().getName(), this);
         } else {
             super.update(update, uiService);
         }

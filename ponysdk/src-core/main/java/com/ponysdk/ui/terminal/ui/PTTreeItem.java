@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
@@ -42,7 +43,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         this.isRoot = create.getBoolean(PROPERTY.ROOT);
 
         if (create.containsKey(PROPERTY.TEXT)) {
-            init(create, uiService, new TreeItem(create.getString(PROPERTY.TEXT)));
+            init(create, uiService, new TreeItem(SafeHtmlUtils.fromString(create.getString(PROPERTY.TEXT))));
         } else {
             init(create, uiService, new TreeItem());
         }
@@ -71,7 +72,6 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
         if (update.containsKey(PROPERTY.SELECTED)) {
             uiObject.setSelected(update.getBoolean(PROPERTY.SELECTED));
         } else if (update.containsKey(PROPERTY.STATE)) {

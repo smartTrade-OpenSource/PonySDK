@@ -1,9 +1,6 @@
 
 package com.ponysdk.sample.trading.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.ActivityManager;
 import com.ponysdk.core.event.EventBus;
@@ -19,8 +16,6 @@ import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
 public class TradingSampleEntryPoint implements EntryPoint {
-
-    private static Logger log = LoggerFactory.getLogger(TradingSampleEntryPoint.class);
 
     public static final String USER = "user";
 

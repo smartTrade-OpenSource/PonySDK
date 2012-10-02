@@ -21,26 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic.event;
+package com.ponysdk.ui.server.list2.refreshable;
 
-import com.ponysdk.ui.terminal.DomHandlerType;
+import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
 
-public class PChangeEvent extends PDomEvent<PChangeHandler> {
-
-    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<PChangeHandler>(DomHandlerType.CHANGE_HANDLER);
-
-    public PChangeEvent(final Object sourceComponent) {
-        super(sourceComponent);
-    }
+public interface RefreshableCellRenderer<D, V, W extends IsPWidget> extends CellRenderer<D, V> {
 
     @Override
-    public PDomEvent.Type<PChangeHandler> getAssociatedType() {
-        return TYPE;
-    }
+    public W render(int row, D data, V value);
 
-    @Override
-    protected void dispatch(final PChangeHandler handler) {
-        handler.onChange(this);
-    }
+    public void update(final D data, V value, Cell<D, W> previous);
 
 }

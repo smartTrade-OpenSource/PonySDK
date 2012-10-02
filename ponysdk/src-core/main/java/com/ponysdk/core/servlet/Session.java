@@ -18,4 +18,6 @@ public interface Session {
     public SessionType getSessionType();
 
     public boolean isValid();
+
+    public void setUserAgent(String attribute);
 }

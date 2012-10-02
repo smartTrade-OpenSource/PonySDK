@@ -506,7 +506,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             actionBar.addSeparator();
             final PMenuBar exportListMenuBar = new PMenuBar(true);
 
-            for (final Exporter exporter : complexListConfiguration.getExportConfiguration().getExporters()) {
+            for (final Exporter<?> exporter : complexListConfiguration.getExportConfiguration().getExporters()) {
                 final PMenuItem item = new PMenuItem(exporter.name(), new PCommand() {
 
                     @Override
@@ -521,10 +521,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                         if (SelectionMode.FULL.equals(selectionMode)) {
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
-                        final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
+                        final ExportContext exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
                         exportContext.setExporter(exporter);
 
-                        final Command command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
+                        final Command<String> command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);
                         command.execute();
                     }
                 });
@@ -582,7 +582,6 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
     public void insertSubList(final int row, final List<D> datas) {
         simpleListActivity.insertSubList(row, datas);
 
-        final Map<Integer, PRowCheckBox> map = new HashMap<Integer, PRowCheckBox>();
         for (final PRowCheckBox c : rowSelectors.values()) {
             if (c.getRow() == row) {
                 c.setDatasize(datas.size());
@@ -669,13 +668,8 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             if (!searchFormActivity.isValid()) { return; }
         }
 
-        // if (complexListConfiguration.isSelectionColumnEnabled()) {
-        // mainCheckBox.setValue(false);
-        // triggerMainCheckBoxValueChange(false);
-        // }
-
         final Query query = createQuery(page);
-        final Command command = commandFactory.newFindCommand(ComplexListActivity.this, query);
+        final Command<Result<List<D>>> command = commandFactory.newFindCommand(ComplexListActivity.this, query);
         if (command == null) { throw new IllegalStateException("FindCommand of the complex list can't be null"); }
         command.execute();
         complexListView.updateView();

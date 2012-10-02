@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -63,7 +64,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handler = addHandler.getString(HANDLER.KEY);
         if (HANDLER.KEY_.COMMAND.equals(handler)) {
-            uiObject.setCommand(new Command() {
+            uiObject.setScheduledCommand(new ScheduledCommand() {
 
                 @Override
                 public void execute() {
@@ -77,7 +78,5 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
         } else {
             super.addHandler(addHandler, uiService);
         }
-
     }
-
 }

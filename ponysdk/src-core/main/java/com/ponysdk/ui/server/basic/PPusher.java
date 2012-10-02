@@ -120,6 +120,12 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     public void pushToClient(final Object data) {
+
+        if (pusherState != PusherState.STARTED) {
+            if (log.isDebugEnabled()) log.debug("Pusher not started. Skipping message #" + data);
+            return;
+        }
+
         begin();
         try {
             if (listenerCollection.isEmpty()) return;

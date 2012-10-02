@@ -23,24 +23,37 @@
 
 package com.ponysdk.core.event;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.event.Event.Type;
+import com.ponysdk.core.exception.UmbrellaException;
 
 public class SimpleEventBus implements EventBus {
 
-    /**
-     * Map of event type to map of event source to list of their handlers.
-     */
+    private static final Logger log = LoggerFactory.getLogger(SimpleEventBus.class);
+
     private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<Type<?>, Map<Object, Set<?>>>();
 
     private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<BroadcastEventHandler>();
+
+    private boolean firing = false;
+
+    private final Queue<Event<?>> eventQueue = new LinkedList<Event<?>>();
+
+    private final List<HandlerContext> pendingHandlerRegistration = new ArrayList<SimpleEventBus.HandlerContext>();
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
@@ -85,16 +98,41 @@ public class SimpleEventBus implements EventBus {
     }
 
     protected <H extends EventHandler> void doRemove(final Event.Type<H> type, final Object source, final H handler) {
-        doRemoveNow(type, source, handler);
+        if (!firing) {
+            doRemoveNow(type, source, handler);
+        } else {
+            defferedRemove(type, source, handler);
+        }
     }
 
-    private <H extends EventHandler> HandlerRegistration doAdd(final Event.Type<H> type, final Object source, final H handler) {
-        return doAddNow(type, source, handler);
+    private void doRemoveNow(final Type type, final Object source, final EventHandler handler) {
+        final Set<EventHandler> l = getHandlerSet(type, source);
+
+        final boolean removed = l.remove(handler);
+        assert removed : "redundant remove call";
+        if (removed && l.isEmpty()) {
+            prune(type, source);
+        }
     }
 
-    private <H extends EventHandler> HandlerRegistration doAddNow(final Event.Type<H> type, final Object source, final H handler) {
-        final Set<H> l = ensureHandlerSet(type, source);
-        l.add(handler);
+    private <H extends EventHandler> void defferedRemove(final Event.Type<H> type, final Object source, final H handler) {
+        final HandlerContext context = new HandlerContext();
+        context.type = type;
+        context.source = source;
+        context.handler = handler;
+        context.add = false;
+
+        final boolean removed = pendingHandlerRegistration.remove(context);
+
+        if (!removed) pendingHandlerRegistration.add(context);
+    }
+
+    private <H extends EventHandler> HandlerRegistration doAdd(final Type<H> type, final Object source, final H handler) {
+        if (!firing) {
+            doAddNow(type, source, handler);
+        } else {
+            defferedAdd(type, source, handler);
+        }
 
         return new HandlerRegistration() {
 
@@ -105,36 +143,66 @@ public class SimpleEventBus implements EventBus {
         };
     }
 
-    private <H extends EventHandler> void doFire(final Event<H> event, final Object source) {
-        if (source != null) {
-            event.setSource(source);
-        }
+    private <H extends EventHandler> void defferedAdd(final Type<H> type, final Object source, final H handler) {
+        final HandlerContext context = new HandlerContext();
+        context.type = type;
+        context.source = source;
+        context.handler = handler;
+        context.add = true;
 
-        final Set<H> handlers = getDispatchSet(event.getAssociatedType(), source);
+        pendingHandlerRegistration.add(context);
+    }
 
-        final Iterator<H> it = handlers.iterator();
-        while (it.hasNext()) {
-            final H handler = it.next();
+    private void doAddNow(final Type type, final Object source, final EventHandler handler) {
+        ensureHandlerSet(type, source).add(handler);
+    }
 
-            try {
-                event.dispatch(handler);
-            } catch (final Throwable e) {
-                throw new RuntimeException(e);
+    private void doFire(final Event event, final Object source) {
+        if (source != null) event.setSource(source);
+
+        eventQueue.add(event);
+
+        if (firing) return;
+
+        firing = true;
+        Set<Throwable> causes = null;
+
+        try {
+
+            Event e;
+
+            while ((e = eventQueue.poll()) != null) {
+
+                final Set handlers = getDispatchSet(e.getAssociatedType(), e.getSource());
+
+                final Iterator<? extends EventHandler> it = handlers.iterator();
+                while (it.hasNext()) {
+                    try {
+                        e.dispatch(it.next());
+                    } catch (final Throwable t) {
+                        log.error("Cannot process fired event #" + e.getAssociatedType(), t);
+                        if (causes == null) {
+                            causes = new HashSet<Throwable>();
+                        }
+                        causes.add(t);
+                    }
+                }
             }
+
+            for (final HandlerContext context : pendingHandlerRegistration) {
+                if (context.add) doAddNow(context.type, context.source, context.handler);
+                else doRemoveNow(context.type, context.source, context.handler);
+            }
+
+            pendingHandlerRegistration.clear();
+
+            if (causes != null) throw new UmbrellaException(causes);
+        } finally {
+            firing = false;
         }
     }
 
-    private <H> void doRemoveNow(final Event.Type<H> type, final Object source, final H handler) {
-        final Set<H> l = getHandlerSet(type, source);
-
-        final boolean removed = l.remove(handler);
-        assert removed : "redundant remove call";
-        if (removed && l.isEmpty()) {
-            prune(type, source);
-        }
-    }
-
-    private <H> Set<H> ensureHandlerSet(final Event.Type<H> type, final Object source) {
+    private <H> Set<H> ensureHandlerSet(final Type<H> type, final Object source) {
         Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<Object, Set<?>>();
@@ -152,7 +220,7 @@ public class SimpleEventBus implements EventBus {
         return handlers;
     }
 
-    private <H> Set<H> getDispatchSet(final Event.Type<H> type, final Object source) {
+    private <H> Set<H> getDispatchSet(final Type type, final Object source) {
         final Set<H> directHandlers = getHandlerSet(type, source);
         if (source == null) { return directHandlers; }
 
@@ -163,7 +231,7 @@ public class SimpleEventBus implements EventBus {
         return rtn;
     }
 
-    public <H> Set<H> getHandlerSet(final Event.Type<H> type, final Object source) {
+    public <H> Set<H> getHandlerSet(final Type<H> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) { return Collections.emptySet(); }
 
@@ -172,10 +240,10 @@ public class SimpleEventBus implements EventBus {
         final Set<H> handlers = (Set<H>) sourceMap.get(source);
         if (handlers == null) { return Collections.emptySet(); }
 
-        return handlers;
+        return new HashSet<H>(handlers);
     }
 
-    private void prune(final Event.Type<?> type, final Object source) {
+    private void prune(final Type<?> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
 
         final Set<?> pruned = sourceMap.remove(source);
@@ -187,4 +255,49 @@ public class SimpleEventBus implements EventBus {
             map.remove(type);
         }
     }
+
+    class HandlerContext {
+
+        boolean add;
+
+        Type type;
+        Object source;
+        EventHandler handler;
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result + ((handler == null) ? 0 : handler.hashCode());
+            result = prime * result + ((source == null) ? 0 : source.hashCode());
+            result = prime * result + ((type == null) ? 0 : type.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            final HandlerContext other = (HandlerContext) obj;
+            if (!getOuterType().equals(other.getOuterType())) return false;
+            if (handler == null) {
+                if (other.handler != null) return false;
+            } else if (!handler.equals(other.handler)) return false;
+            if (source == null) {
+                if (other.source != null) return false;
+            } else if (!source.equals(other.source)) return false;
+            if (type == null) {
+                if (other.type != null) return false;
+            } else if (!type.equals(other.type)) return false;
+            return true;
+        }
+
+        private SimpleEventBus getOuterType() {
+            return SimpleEventBus.this;
+        }
+
+    }
+
 }

@@ -7,20 +7,20 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ListenerCollection<T> implements Collection<T> {
+public class ListenerCollection<C> implements Collection<C> {
 
-    private final Set<T> listeners = Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>());
+    private final Set<C> listeners = Collections.newSetFromMap(new ConcurrentHashMap<C, Boolean>());
 
-    public void register(final T listener) {
+    public void register(final C listener) {
         listeners.add(listener);
     }
 
-    public boolean unregister(final T listener) {
+    public boolean unregister(final C listener) {
         return listeners.remove(listener);
     }
 
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<C> iterator() {
         return listeners.iterator();
     }
 
@@ -50,7 +50,7 @@ public class ListenerCollection<T> implements Collection<T> {
     }
 
     @Override
-    public boolean add(final T e) {
+    public boolean add(final C e) {
         return listeners.add(e);
     }
 
@@ -65,7 +65,7 @@ public class ListenerCollection<T> implements Collection<T> {
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> c) {
+    public boolean addAll(final Collection<? extends C> c) {
         return listeners.addAll(c);
     }
 

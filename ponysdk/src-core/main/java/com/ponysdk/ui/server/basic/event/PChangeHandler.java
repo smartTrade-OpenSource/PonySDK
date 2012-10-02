@@ -25,8 +25,8 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.EventHandler;
 
-public interface PChangeHandler<T> extends EventHandler {
+public interface PChangeHandler extends EventHandler {
 
-    void onChange(PChangeEvent<T> event);
+    void onChange(PChangeEvent event);
 
 }
