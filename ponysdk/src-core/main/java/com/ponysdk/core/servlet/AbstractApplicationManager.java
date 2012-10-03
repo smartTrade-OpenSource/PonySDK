@@ -130,12 +130,13 @@ public abstract class AbstractApplicationManager {
             }
 
             UIContext.setCurrent(uiContext);
+
+            process(uiContext, data);
+
             final List<JSONObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
             for (final JSONObject jsoObject : datas) {
                 process(uiContext, jsoObject);
             }
-
-            process(uiContext, data);
 
             try {
                 if (uiContext.flushInstructions(jsonObject)) {

@@ -239,6 +239,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     // add.getProterty());
 
                     final PTObject uiObject = objectByID.get(instruction.getParentID());
+                    if (uiObject == null) {
+                        log.info("Cannot add object to an garbaged parent object #" + instruction.getObjectID());
+                        continue;
+                    }
                     uiObject.add(instruction, this);
 
                 } else if (TYPE.KEY_.ADD_HANDLER.equals(type)) {
@@ -264,17 +268,28 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                     else {
                         ptObject = objectByID.get(instruction.getParentID());
                     }
+                    if (ptObject == null) {
+                        log.info("Cannot remove an garbaged object #" + instruction.getObjectID());
+                        continue;
+                    }
                     ptObject.remove(instruction, this);
                 } else if (TYPE.KEY_.GC.equals(type)) {
                     // log.info("GC: " + remove.getObjectID());
                     final PTObject unRegisterObject = unRegisterObject(instruction.getObjectID());
+                    if (unRegisterObject == null) {
+                        log.info("Cannot GC an garbaged object #" + instruction.getObjectID());
+                        continue;
+                    }
                     unRegisterObject.gc(this);
                 } else if (TYPE.KEY_.UPDATE.equals(type)) {
                     // log.info("Update " + update.getMainProperty().getKey() + " / " +
                     // update.getMainProperty().getValue());
                     final PTObject ptObject = objectByID.get(instruction.getObjectID());
+                    if (ptObject == null) {
+                        log.info("Cannot update an garbaged object #" + instruction.getObjectID());
+                        continue;
+                    }
                     ptObject.update(instruction, this);
-
                 } else if (TYPE.KEY_.HISTORY.equals(type)) {
                     final String oldToken = History.getToken();
 
