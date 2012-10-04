@@ -122,6 +122,8 @@ public abstract class AbstractApplicationManager {
 
         uiContext.acquire();
         try {
+            printClientErrorMessage(data);
+
             final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
             if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
                 uiContext.stackIncomingMessage(receivedSeqNum, data);
@@ -150,6 +152,21 @@ public abstract class AbstractApplicationManager {
         } finally {
             UIContext.remove();
             uiContext.release();
+        }
+    }
+
+    private void printClientErrorMessage(final JSONObject data) {
+        try {
+            final JSONArray errors = data.getJSONArray(APPLICATION.ERRORS);
+            for (int i = 0; i < errors.length(); i++) {
+                final JSONObject jsoObject = errors.getJSONObject(i);
+                // TODO temp
+                final String message = jsoObject.getString("message");
+                final String details = jsoObject.getString("details");
+                log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
+            }
+        } catch (final Exception e) {
+            log.error("Failed to display errors", e);
         }
     }
 
