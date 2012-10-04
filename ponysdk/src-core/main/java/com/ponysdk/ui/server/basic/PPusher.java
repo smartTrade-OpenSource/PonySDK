@@ -25,7 +25,10 @@ package com.ponysdk.ui.server.basic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,10 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 public class PPusher extends PObject implements ConnectionListener {
@@ -46,35 +51,44 @@ public class PPusher extends PObject implements ConnectionListener {
     public static final String PUSHER = "com.ponysdk.ui.server.basic.PPusher";
 
     private WebSocket websocket;
-    private UIContext uiContext;
+    private final UIContext uiContext;
 
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
-
     private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<DataListener>();
 
+    private final Set<Instruction> updates = new HashSet<Instruction>();
+
+    private boolean polling = false;
     private PusherState pusherState = PusherState.STOPPED;
 
     public enum PusherState {
         STOPPED, INITIALIZING, STARTED
     }
 
-    private PPusher() {
+    private PPusher(final int pollingDelay) {
         super();
+
+        create.put(PROPERTY.FIXDELAY, pollingDelay);
+
         pusherState = PusherState.INITIALIZING;
+        uiContext = UIContext.get();
     }
 
     public void initialize(final WebSocket websocket) {
         this.websocket = websocket;
         this.websocket.addConnectionListener(this);
-        this.uiContext = UIContext.get();
+    }
+
+    public static PPusher initialize(final int pollingDelay) {
+        if (UIContext.get() == null) throw new RuntimeException("It's not possible to instanciate a pusher in a new Thread.");
+        if (UIContext.get().getAttribute(PUSHER) != null) return get();
+        final PPusher pusher = new PPusher(pollingDelay);
+        UIContext.get().setAttribute(PUSHER, pusher);
+        return pusher;
     }
 
     public static PPusher initialize() {
-        if (UIContext.get() == null) throw new RuntimeException("It's not possible to instanciate a pusher in a new Thread.");
-        if (UIContext.get().getAttribute(PUSHER) != null) return get();
-        final PPusher pusher = new PPusher();
-        UIContext.get().setAttribute(PUSHER, pusher);
-        return pusher;
+        return initialize(1000);
     }
 
     public static PPusher get() {
@@ -101,10 +115,32 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     public void flush() throws IOException, JSONException {
+        if (polling) {
+            final Collection<Instruction> instructions = uiContext.clearPendingInstructions();
+            updates.addAll(instructions);
+            return;
+        }
+
         final JSONObject jsonObject = new JSONObject();
         if (!uiContext.flushInstructions(jsonObject)) return;
+
         jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
         websocket.send(jsonObject.toString());
+    }
+
+    @Override
+    public void onEventInstruction(final JSONObject event) throws JSONException {
+        System.err.println("pusher event!");
+        if (event.has(PROPERTY.ERROR_MSG)) {
+            log.warn("Failed to open websocket connection. Falling back to polling.");
+            pusherState = PusherState.STARTED;
+            polling = true;
+        } else if (event.has(PROPERTY.POLL)) {
+            for (final Instruction instruction : updates) {
+                getUIContext().stackInstruction(instruction);
+            }
+            updates.clear();
+        }
     }
 
     public PusherState getPusherState() {

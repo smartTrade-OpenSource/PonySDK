@@ -26,6 +26,8 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
@@ -51,6 +53,23 @@ public class PTPusher extends AbstractPTObject {
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ERROR_MSG, "WebSocket not supported");
             uiService.triggerEvent(eventInstruction);
+
+            final int delay = 1000;
+            if (create.containsKey(PROPERTY.FIXDELAY)) create.getInt(PROPERTY.FIXDELAY);
+
+            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+                @Override
+                public boolean execute() {
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(create.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(PROPERTY.POLL, true);
+                    uiService.triggerEvent(eventInstruction);
+                    return true;
+                }
+            }, delay);
+
             return;
         }
 
@@ -81,5 +100,4 @@ public class PTPusher extends AbstractPTObject {
         log.info("Connecting to: " + wsServerURL);
         socketClient.connect(wsServerURL);
     }
-
 }

@@ -24,6 +24,7 @@
 package com.ponysdk.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +152,12 @@ public class UIContext {
         data.put(APPLICATION.INSTRUCTIONS, pendingInstructions);
         pendingInstructions.clear();
         return true;
+    }
+
+    public Collection<Instruction> clearPendingInstructions() {
+        final List<Instruction> removed = new ArrayList<Instruction>(pendingInstructions);
+        pendingInstructions.clear();
+        return removed;
     }
 
     public void acquire() {

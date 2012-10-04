@@ -34,7 +34,14 @@
 		"root": [],
 		"key": [],
 		"value": [],
+		"objectId": [],
+		"add": [],
+		"remove": [],
+		"parentId": [],
+		"poll": [],
 		"width": [],
+		"fixrate": [],
+		"dragSrc": [],
 		"widgetWidth": [],
 		"widgetHeight": [],
 		"styleProperty": [],
@@ -202,13 +209,7 @@
 		"clearInnerText": [],
 		"htmltableColumnStyle": [],
 		"itemUpdated": [],
-		"placeholder": [],
-		"fixrate": [],
-		"dragSrc": [],
-		"objectId": [],
-		"add": [],
-		"remove": [],
-		"parentId": []
+		"placeholder": []
 	}
 	
 }
