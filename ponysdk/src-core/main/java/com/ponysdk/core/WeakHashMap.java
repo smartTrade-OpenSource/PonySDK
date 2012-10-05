@@ -121,7 +121,6 @@ public class WeakHashMap implements Map<Long, PObject> {
 
         while ((reference = queue.poll()) != null) {
             final Long objectID = objectIDByReferences.remove(reference);
-            System.err.println("GC of objectID : " + objectID);
             final Long parentObjectID = parentObjectIDByReferences.remove(reference);
             referenceByObjectID.remove(objectID);
 
