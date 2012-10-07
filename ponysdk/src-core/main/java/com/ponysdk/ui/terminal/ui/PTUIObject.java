@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
@@ -71,6 +72,8 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setTitle(update.getString(PROPERTY.WIDGET_TITLE));
         } else if (update.containsKey(PROPERTY.STYLE_KEY)) {
             uiObject.getElement().getStyle().setProperty(update.getString(PROPERTY.STYLE_KEY), update.getString(PROPERTY.STYLE_VALUE));
+        } else if (update.containsKey(PROPERTY.BIND)) {
+            bind(update.getString(PROPERTY.BIND), objectID.toString(), uiObject.getElement());
         }
     }
 
@@ -78,4 +81,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast(); }
         throw new IllegalStateException("This object is not an UIObject");
     }
+
+    private native void bind(String functionName, String objectID, Element element) /*-{
+                                                                                    var self = this;
+                                                                                    $wnd[functionName](objectID, element);
+                                                                                    }-*/;
+
 }

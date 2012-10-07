@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -40,6 +41,7 @@ import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class CommunicationEntryPoint implements EntryPoint {
@@ -59,6 +61,8 @@ public class CommunicationEntryPoint implements EntryPoint {
                 Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
             }
         });
+
+        exportTriggerEvent();
 
         try {
 
@@ -129,4 +133,19 @@ public class CommunicationEntryPoint implements EntryPoint {
             Window.alert("Loading application has failed #" + e);
         }
     }
+
+    public void triggerEvent(final String objectID, final JavaScriptObject jsObject) {
+        final PTInstruction instruction = new PTInstruction();
+        instruction.setObjectID(Long.parseLong(objectID));
+        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        instruction.put(PROPERTY.NATIVE, jsObject);
+        uiBuilder.triggerEvent(instruction);
+    }
+
+    public native void exportTriggerEvent() /*-{
+                                                 var that = this;
+                                                 $wnd.triggerEvent = function(id, element) {
+                                                 $entry(that.@com.ponysdk.ui.terminal.CommunicationEntryPoint::triggerEvent(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(id, element));
+                                                 }
+                                                 }-*/;
 }

@@ -26,9 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +54,7 @@ public class PPusher extends PObject implements ConnectionListener {
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<DataListener>();
 
-    private final Set<Instruction> updates = new HashSet<Instruction>();
+    private final List<Instruction> updates = new ArrayList<Instruction>();
 
     private boolean polling = false;
     private PusherState pusherState = PusherState.STOPPED;
@@ -130,7 +128,6 @@ public class PPusher extends PObject implements ConnectionListener {
 
     @Override
     public void onEventInstruction(final JSONObject event) throws JSONException {
-        System.err.println("pusher event!");
         if (event.has(PROPERTY.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             pusherState = PusherState.STARTED;

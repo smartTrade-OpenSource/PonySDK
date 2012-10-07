@@ -83,4 +83,8 @@ public class PTInstruction extends JSONObject {
         put(key, new JSONNumber(value));
     }
 
+    public void put(final String key, final JavaScriptObject value) {
+        put(key, new JSONObject(value));
+    }
+
 }

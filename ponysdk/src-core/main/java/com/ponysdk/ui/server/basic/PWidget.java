@@ -247,7 +247,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @Override
     public void onEventInstruction(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.DOM_HANDLER)) {
+        if (instruction.has(HANDLER.KEY) && instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.DOM_HANDLER)) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(PROPERTY.DOM_HANDLER_TYPE)];
             switch (domHandler) {
                 case KEY_PRESS:
@@ -311,6 +311,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     log.error("Dom Handler not implemented: " + domHandler);
                     break;
             }
+        } else {
+            super.onEventInstruction(instruction);
         }
     }
 
