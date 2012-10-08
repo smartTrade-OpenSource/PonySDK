@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.query.Query;
+import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.HasPData;
@@ -42,6 +43,12 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
         return getData(query);
     }
 
+    public List<T> getFullData() {
+        final Query query = buildQuery();
+        query.setQueryMode(QueryMode.FULL_RESULT);
+        return getFullData(query);
+    }
+
     @Override
     public void onPageChange(final int page) {
         pager.setCurrentPage(page);
@@ -72,5 +79,7 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
     }
 
     protected abstract List<T> getData(Query query);
+
+    protected abstract List<T> getFullData(Query query);
 
 }

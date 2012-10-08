@@ -18,7 +18,7 @@ public class Selector<T> implements SelectorActionViewListener, SelectorInfoView
     private int numberOfSelectedItems = 0;
     private int fullSize = 0;
 
-    SelectionMode selectionMode = SelectionMode.NONE;
+    private SelectionMode selectionMode = SelectionMode.NONE;
 
     public Selector(final SelectorActionView selectorActionView, final SelectorInfoView selectorInfoView) {
         this.selectorActionView = selectorActionView;
@@ -99,11 +99,10 @@ public class Selector<T> implements SelectorActionViewListener, SelectorInfoView
     }
 
     private void checkNumberOfSelectedItems() {
-        if (numberOfSelectedItems == pageSize && pageSize != 0) {
+        if (numberOfSelectedItems == pageSize && pageSize != 0 && pageSize != fullSize) {
             selectorInfoView.showSelectAllOption(numberOfSelectedItems, fullSize);
         } else if (numberOfSelectedItems == fullSize) {
             selectorInfoView.showAllSelected(numberOfSelectedItems);
-            selectionMode = SelectionMode.FULL;
         } else if (numberOfSelectedItems == 0) {
             selectionMode = SelectionMode.NONE;
         }
@@ -126,6 +125,10 @@ public class Selector<T> implements SelectorActionViewListener, SelectorInfoView
 
     public void setFullSize(final int fullSize) {
         this.fullSize = fullSize;
+    }
+
+    public SelectionMode getSelectionMode() {
+        return selectionMode;
     }
 
 }
