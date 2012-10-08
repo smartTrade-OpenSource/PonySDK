@@ -2,6 +2,8 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
+project.ext.version = 0.5;
+
 project.ext.srcCore = 'src-core/main/java';
 project.ext.srcDefaultimpl = 'src-defaultimpl/main/java';
 project.ext.srcGenerator = 'src-generator/main/java';
@@ -102,9 +104,16 @@ dependencies {
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
 
+
 manifest {
+	def cmd = "git rev-parse HEAD"
+    def proc = cmd.execute()
+    ext.revision = proc.text.trim()
+    ext.timestamp = (int)(new Date().getTime()/1000)
 	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
+    attributes("Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version,"Revision": ext.revision, "Date": ext.timestamp)
 }
+
 
 jar {
 	baseName = 'ponysdk'
@@ -116,7 +125,7 @@ jar {
         from 'src-core/main/resources/META-INF'
         from buildInfoOutputDirName
     }
-    
+
     /** waiting fix : https://github.com/jDramaix/gwtchosen/issues/2 **/
     copy{
         from gwtOutputDirName + '/ponyterminal/chosen-sprite.png'
