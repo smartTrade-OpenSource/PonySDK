@@ -29,6 +29,44 @@
 	padding: 10px;
 }
 
+.touch {
+	.pony-PButton {
+		&:hover {
+			color: yellow;
+		}
+		&:active{
+			color: orange;
+		}
+	}
+}
+
+.pony-LoginPage {
+
+	.pony-PButton {
+	
+		.notouch &:hover {
+			color: red;
+			cursor: pointer;
+		}
+	
+		&.touchstart {
+			color: purple;
+		}
+	}
+
+}
+
+.pony-LoginPage-Logo {
+
+	.notouch &:hover {
+		color: red;
+		cursor: pointer;
+	}
+	
+	.touchstart {
+		color: purple;
+	}
+}
 
 
 

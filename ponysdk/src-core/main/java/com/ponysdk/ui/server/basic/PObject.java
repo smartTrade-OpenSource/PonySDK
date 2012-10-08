@@ -28,6 +28,11 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.ui.server.basic.event.PNativeEvent;
+import com.ponysdk.ui.server.basic.event.PNativeHandler;
+import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -38,6 +43,8 @@ public abstract class PObject {
     protected long ID;
 
     protected Create create;
+
+    private ListenerCollection<PNativeHandler> nativeHandlers;
 
     PObject() {
         init(getWidgetType());
@@ -64,8 +71,27 @@ public abstract class PObject {
         return ID;
     }
 
+    public void bindTerminalFunction(final String functionName) {
+        final Update update = new Update(getID());
+        update.put(Dictionnary.PROPERTY.BIND, functionName);
+        getUIContext().stackInstruction(update);
+    }
+
+    public void addNativeHandler(final PNativeHandler handler) {
+        if (nativeHandlers == null) nativeHandlers = new ListenerCollection<PNativeHandler>();
+
+        nativeHandlers.register(handler);
+    }
+
     public void onEventInstruction(final JSONObject event) throws JSONException {
-        // override
+        if (event.has(Dictionnary.PROPERTY.NATIVE)) {
+            final JSONObject jsonObject = event.getJSONObject(Dictionnary.PROPERTY.NATIVE);
+            if (nativeHandlers != null) {
+                for (final PNativeHandler handler : nativeHandlers) {
+                    handler.onNativeEvent(new PNativeEvent(this, jsonObject));
+                }
+            }
+        }
     }
 
     public UIContext getUIContext() {

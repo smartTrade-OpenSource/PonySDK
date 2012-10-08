@@ -56,5 +56,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.core.main.Main"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="port=8081 contextName=sample"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13;-Xms512m &#13;-Xmx512m&#13;&#10;-Dpony.application.name=&quot;Sample&quot;&#13;&#10;-Dpony.application.javascripts=&quot;script/less.js&quot;&#13;&#10;-Dpony.application.stylesheets=&quot;css/sample.less&quot;"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13;-Xms512m &#13;-Xmx512m&#13;&#10;-Dpony.application.name=&quot;Sample&quot;&#13;&#10;-Dpony.application.javascripts=&quot;script/less.js;script/fast-button.js&quot;&#13;&#10;-Dpony.application.stylesheets=&quot;css/sample.less&quot;"/>
 </launchConfiguration>

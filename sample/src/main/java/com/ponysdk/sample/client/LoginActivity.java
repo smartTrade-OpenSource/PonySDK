@@ -32,10 +32,10 @@ import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.ui.server.basic.event.PNativeEvent;
+import com.ponysdk.ui.server.basic.event.PNativeHandler;
 
 public class LoginActivity extends AbstractActivity {
 
@@ -48,14 +48,14 @@ public class LoginActivity extends AbstractActivity {
         loginPageView.getLoginTextBox().setText("Guest");
         loginPageView.getPasswordTextBox().setText("Guest");
 
-        loginPageView.addLoginClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                doLogin();
-            }
-
-        });
+        // loginPageView.addLoginClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent clickEvent) {
+        // doLogin();
+        // }
+        //
+        // });
 
         loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
@@ -65,6 +65,16 @@ public class LoginActivity extends AbstractActivity {
             }
         }, PKeyPressEvent.TYPE);
 
+        loginPageView.getLoginButton().bindTerminalFunction("applyFastButton");
+        loginPageView.getLoginButton().addNativeHandler(new PNativeHandler() {
+
+            @Override
+            public void onNativeEvent(final PNativeEvent event) {
+                System.err.println("Native event: " + event.getJsonObject());
+                doLogin();
+            }
+        });
+
         return loginPageView;
     }
 
@@ -72,6 +82,7 @@ public class LoginActivity extends AbstractActivity {
     public void updateView(final Place place) {}
 
     private void doLogin() {
+
         final User user = new User();
         user.setID(0);
         user.setLogin(loginPageView.getLogin());

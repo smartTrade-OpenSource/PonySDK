@@ -40,6 +40,8 @@
 		"parentId": [],
 		"poll": [],
 		"width": [],
+		"bind": [],
+		"native": [],
 		"fixrate": [],
 		"dragSrc": [],
 		"widgetWidth": [],
