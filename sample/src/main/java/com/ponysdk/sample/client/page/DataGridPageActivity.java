@@ -132,6 +132,11 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                 return result.getData();
             }
 
+            @Override
+            protected List<Pony> getFullData(final Query query) {
+                return new FindPonysCommand(query).execute().getData();
+            }
+
         };
 
         final DataGridColumnDescriptor<Pony, Boolean> selectColumnDescriptor = new DataGridColumnDescriptor<Pony, Boolean>();
