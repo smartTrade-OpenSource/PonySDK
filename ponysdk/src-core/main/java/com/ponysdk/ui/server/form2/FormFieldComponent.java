@@ -8,19 +8,19 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.form2.formfield.FormField;
 import com.ponysdk.ui.server.form2.formfield.FormFieldListener;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
+import com.ponysdk.ui.server.list2.Resetable;
+import com.ponysdk.ui.server.list2.Validable;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class FormFieldComponent extends PFlexTable implements FormFieldListener {
+public class FormFieldComponent extends PFlexTable implements FormFieldListener, Validable, Resetable {
 
     public enum CaptionOrientation {
         LEFT, TOP, RIGHT, BOTTOM
     }
 
-    private final PLabel captionLabel = new PLabel();
-
-    private final PHTML errorLabel = new PHTML();
-
-    private final FormField<?> formField;
+    protected final PLabel captionLabel = new PLabel();
+    protected final PHTML errorLabel = new PHTML();
+    protected final FormField<?> formField;
 
     public FormFieldComponent(final String caption, final FormField<?> formField) {
         this(caption, CaptionOrientation.TOP, formField);
@@ -28,6 +28,9 @@ public class FormFieldComponent extends PFlexTable implements FormFieldListener 
 
     public FormFieldComponent(final String caption, final CaptionOrientation captionOriantation, final FormField<?> formField) {
         addStyleName(PonySDKTheme.FORM_FORMFIELD_COMPONENT);
+
+        setCellPadding(0);
+        setCellSpacing(0);
 
         this.formField = formField;
         this.captionLabel.setVisible(false);
@@ -107,5 +110,15 @@ public class FormFieldComponent extends PFlexTable implements FormFieldListener 
             errorLabel.setHTML("<a class=\"htooltip\">invalid field<span>" + validationResult.getErrorMessage() + "<img src=\"images/error_16.png\"/></span></a>");
             errorLabel.setVisible(true);
         }
+    }
+
+    @Override
+    public ValidationResult isValid() {
+        return formField.isValid();
+    }
+
+    @Override
+    public void reset() {
+        formField.reset();
     }
 }

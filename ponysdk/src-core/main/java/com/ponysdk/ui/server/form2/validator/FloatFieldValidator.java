@@ -21,8 +21,24 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list;
+package com.ponysdk.ui.server.form2.validator;
 
-public enum SelectionMode {
-    NONE, PARTIAL, PAGE, FULL
+public class FloatFieldValidator implements FieldValidator {
+
+    private static final String ERROR_MESSAGE = "Not a float";
+
+    private static ValidationResult isAFloat(final String value) {
+        try {
+            Float.parseFloat(value);
+            return ValidationResult.newOKValidationResult();
+        } catch (final Exception e) {
+            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        }
+    }
+
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isAFloat(value);
+    }
 }

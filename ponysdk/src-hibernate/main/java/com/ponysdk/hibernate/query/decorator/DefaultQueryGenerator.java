@@ -72,7 +72,7 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
             for (final Criterion criterion : fields) {
                 final CriteriaContext context = new CriteriaContext();
                 context.setCriterion(criterion);
-                context.setSTCriteria(criteria);
+                context.setOrderingCriteria(criteria);
 
                 if (criterion.getValue() != null || criterion.getComparator() == ComparatorType.IS_NULL || criterion.getComparator() == ComparatorType.IS_NOT_NULL) {
                     CriteriaDecorator criteriaDecorator = criteriaDecoratorByPojoPropertyKey.get(criterion.getPojoProperty());
@@ -95,7 +95,7 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
                 field.setSortingType(sortingType);
                 final CriteriaContext context = new CriteriaContext();
                 context.setCriterion(field);
-                context.setSTCriteria(criteria);
+                context.setOrderingCriteria(criteria);
                 sortCriteriaDecorator.render(context);
             }
         }

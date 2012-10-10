@@ -37,6 +37,7 @@ import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
+import com.ponysdk.ui.server.list2.Validable;
 import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
 public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer, HasCriteria, Sortable {
@@ -114,6 +115,11 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
     @Override
     public Resetable asResetable() {
+        return null;
+    }
+
+    @Override
+    public Validable asValidable() {
         return null;
     }
 

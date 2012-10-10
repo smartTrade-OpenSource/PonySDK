@@ -12,17 +12,19 @@ import com.ponysdk.ui.server.list2.HasPData;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
+import com.ponysdk.ui.server.list2.Validable;
 import com.ponysdk.ui.server.list2.paging.Pager;
 import com.ponysdk.ui.server.list2.paging.PagerListener;
 
 public abstract class RemoteDataProvider<T> implements PagerListener, FilterListener {
 
-    private final Pager<T> pager;
-    private final HasPData<T> hasData;
+    protected final Pager<T> pager;
+    protected final HasPData<T> hasData;
 
-    private final List<Sortable> sortableList = new ArrayList<Sortable>();
-    private final List<Resetable> resatableList = new ArrayList<Resetable>();
-    private final List<HasCriteria> hasCriteriaList = new ArrayList<HasCriteria>();
+    protected final List<Sortable> sortableList = new ArrayList<Sortable>();
+    protected final List<Resetable> resatableList = new ArrayList<Resetable>();
+    protected final List<HasCriteria> hasCriteriaList = new ArrayList<HasCriteria>();
+    protected final List<Validable> validableList = new ArrayList<Validable>();
 
     public RemoteDataProvider(final Pager<T> pager, final HasPData<T> hasData) {
         this.pager = pager;
@@ -34,6 +36,7 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
         if (queriable.asSortable() != null) sortableList.add(queriable.asSortable());
         if (queriable.asResetable() != null) resatableList.add(queriable.asResetable());
         if (queriable.asHasCriteria() != null) hasCriteriaList.add(queriable.asHasCriteria());
+        if (queriable.asValidable() != null) validableList.add(queriable.asValidable());
     }
 
     public List<T> getData() {
@@ -57,6 +60,10 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
 
     @Override
     public void onFilterChange() {
+
+        if (!isValid()) return;
+
+        pager.setCurrentPage(0);
         hasData.setData(getData());
     }
 
@@ -68,6 +75,20 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
             }
         }
         hasData.setData(getData());
+    }
+
+    public boolean isValid() {
+        boolean valid = true;
+        for (final Validable validable : validableList) {
+            valid = valid & validable.isValid().isValid();
+        }
+        return valid;
+    }
+
+    public void reset() {
+        for (final Resetable resetable : resatableList) {
+            resetable.reset();
+        }
     }
 
     private Query buildQuery() {

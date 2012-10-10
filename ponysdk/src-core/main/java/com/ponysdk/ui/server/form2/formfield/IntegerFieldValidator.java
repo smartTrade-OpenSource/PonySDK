@@ -30,13 +30,18 @@ public class IntegerFieldValidator implements FieldValidator {
 
     private static final String ERROR_MESSAGE = "Not an integer";
 
-    @Override
-    public ValidationResult isValid(final String value) {
+    public ValidationResult isAInteger(final String value) {
         try {
             Integer.parseInt(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
             return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
         }
+    }
+
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isAInteger(value);
     }
 }

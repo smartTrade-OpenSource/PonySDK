@@ -1,18 +1,17 @@
 
 package com.ponysdk.ui.server.list2.selector;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.list.SelectionMode;
 
-public class DefaultActionSelectorView extends PMenuBar implements SelectorActionView {
+public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 
-    private final List<SelectorActionViewListener> selectorViewListeners = new ArrayList<SelectorActionViewListener>();
+    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<SelectorViewListener>();
     private final PMenuItem selectAllMenuItem;
     private final PMenuItem selectNoneMenuItem;
 
@@ -31,11 +30,6 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorActio
     }
 
     @Override
-    public void addSelectorActionViewListener(final SelectorActionViewListener selectorListener) {
-        selectorViewListeners.add(selectorListener);
-    }
-
-    @Override
     public PWidget asWidget() {
         return this;
     }
@@ -45,8 +39,8 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorActio
 
             @Override
             public void execute() {
-                for (final SelectorActionViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onSelectAllVisible();
+                for (final SelectorViewListener selectorListener : selectorViewListeners) {
+                    selectorListener.onSelectionChange(SelectionMode.PAGE);
                 }
             }
         };
@@ -57,11 +51,21 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorActio
 
             @Override
             public void execute() {
-                for (final SelectorActionViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onUnselectAllVisible();
+                for (final SelectorViewListener selectorListener : selectorViewListeners) {
+                    selectorListener.onSelectionChange(SelectionMode.NONE);
                 }
             }
         };
+    }
+
+    @Override
+    public void addSelectorViewListener(final SelectorViewListener selectorViewListener) {
+        selectorViewListeners.register(selectorViewListener);
+    }
+
+    @Override
+    public void update(final SelectionMode selectionMode, final int numberOfSelectedItems, final int fullSize, final int pageSize) {
+        // Nothing
     }
 
 }

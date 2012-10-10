@@ -13,4 +13,11 @@ public class StringTextBoxFormField extends TextBoxFormField<String> {
     public StringTextBoxFormField(final PTextBox textBox) {
         super(textBox, IdentityConverter.STRING);
     }
+
+    @Override
+    public String getValue() {
+        final String v = super.getValue();
+        if (v == null || v.isEmpty()) return null;
+        return v;
+    }
 }

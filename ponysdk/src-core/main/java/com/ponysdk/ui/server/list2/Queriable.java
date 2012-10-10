@@ -8,4 +8,6 @@ public interface Queriable {
     public HasCriteria asHasCriteria();
 
     public Resetable asResetable();
+
+    public Validable asValidable();
 }

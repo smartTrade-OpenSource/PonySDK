@@ -172,6 +172,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
+    public boolean hasStyleName(final String styleName) {
+        return styleNames.contains(styleName);
+    }
+
     public void ensureDebugId(final String debugID) {
         this.debugID = debugID;
         final Update update = new Update(ID);
