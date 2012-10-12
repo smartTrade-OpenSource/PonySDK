@@ -7,22 +7,22 @@ public class CriteriaContext {
 
     private Criterion criterion;
 
-    private OrderingCriteria STCriteria;
-
-    public OrderingCriteria getSTCriteria() {
-        return STCriteria;
-    }
-
-    public void setSTCriteria(OrderingCriteria STCriteria) {
-        this.STCriteria = STCriteria;
-    }
+    private OrderingCriteria orderingCriteria;
 
     public Criterion getCriterion() {
         return criterion;
     }
 
-    public void setCriterion(Criterion criterion) {
+    public void setCriterion(final Criterion criterion) {
         this.criterion = criterion;
+    }
+
+    public OrderingCriteria getOrderingCriteria() {
+        return orderingCriteria;
+    }
+
+    public void setOrderingCriteria(final OrderingCriteria orderingCriteria) {
+        this.orderingCriteria = orderingCriteria;
     }
 
 }

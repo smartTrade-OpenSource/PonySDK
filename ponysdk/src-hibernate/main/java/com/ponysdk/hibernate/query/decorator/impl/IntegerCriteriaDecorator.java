@@ -21,21 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.renderer.header;
+package com.ponysdk.hibernate.query.decorator.impl;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.core.query.Criterion;
+import com.ponysdk.hibernate.query.decorator.AbstractCriteriaDecorator;
 
-public class StringHeaderCellRenderer implements HeaderCellRenderer {
-
-    private final PLabel caption;
-
-    public StringHeaderCellRenderer(final String caption) {
-        this.caption = new PLabel(caption);
-    }
+public class IntegerCriteriaDecorator extends AbstractCriteriaDecorator<Integer> {
 
     @Override
-    public IsPWidget render() {
-        return caption;
+    protected Integer getObjectValue(final Criterion criterionField) {
+        return Integer.parseInt((String) criterionField.getValue());
     }
+
 }

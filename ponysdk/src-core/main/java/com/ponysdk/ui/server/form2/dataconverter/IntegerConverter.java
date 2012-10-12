@@ -10,6 +10,7 @@ public class IntegerConverter implements DataConverter<String, Integer> {
 
     @Override
     public Integer to(final String t) {
+        if (t == null || t.isEmpty()) return null;
         return Integer.parseInt(t);
     }
 

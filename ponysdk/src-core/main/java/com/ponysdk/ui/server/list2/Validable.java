@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,21 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.renderer.header;
+package com.ponysdk.ui.server.list2;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
-public class StringHeaderCellRenderer implements HeaderCellRenderer {
+public interface Validable {
 
-    private final PLabel caption;
+    ValidationResult isValid();
 
-    public StringHeaderCellRenderer(final String caption) {
-        this.caption = new PLabel(caption);
-    }
-
-    @Override
-    public IsPWidget render() {
-        return caption;
-    }
 }

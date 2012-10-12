@@ -24,5 +24,5 @@
 package com.ponysdk.ui.server.list;
 
 public enum SelectionMode {
-    NONE, PARTIAL, FULL
+    NONE, PARTIAL, PAGE, FULL
 }

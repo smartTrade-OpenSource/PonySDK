@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.list2.renderer.header;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.core.query.Criterion;
@@ -38,13 +39,16 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form2.formfield.FormField;
+import com.ponysdk.ui.server.form2.formfield.FormFieldListener;
+import com.ponysdk.ui.server.form2.validator.ValidationResult;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
+import com.ponysdk.ui.server.list2.Validable;
 import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
-public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable {
+public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener {
 
     private final PGrid headerGrid = new PGrid(2, 1);
     private final PLabel title;
@@ -54,10 +58,6 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     private SortingType sortingType = SortingType.NONE;
 
     private FilterListener filterListener;
-
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
-        this(caption, formField, key, null);
-    }
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
         this.title = new PLabel(caption);
@@ -70,6 +70,12 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     private void builGUI() {
         headerGrid.setWidget(0, 0, title);
+
+        headerGrid.setSizeFull();
+        headerGrid.setCellPadding(0);
+        headerGrid.setCellSpacing(0);
+        headerGrid.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX);
+
         title.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
         title.addClickHandler(new PClickHandler() {
 
@@ -93,6 +99,7 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
             }
         }, PKeyUpEvent.TYPE);
 
+        formField.addFormFieldListener(this);
     }
 
     public void setFilterListener(final FilterListener filterListener) {
@@ -107,11 +114,20 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     @Override
     public List<Criterion> getCriteria() {
 
-        final Criterion criterion = new Criterion(key);
-        criterion.setValue(formField.getValue());
-        criterion.setSortingType(sortingType);
+        if (formField.getValue() != null) {
+            final Criterion criterion = new Criterion(key);
+            criterion.setValue(formField.getValue());
+            criterion.setSortingType(sortingType);
+            return Arrays.asList(criterion);
+        }
 
-        return Arrays.asList(criterion);
+        if (sortingType != SortingType.NONE) {
+            final Criterion criterion = new Criterion(key);
+            criterion.setSortingType(sortingType);
+            return Arrays.asList(criterion);
+        }
+
+        return Collections.emptyList();
     }
 
     @Override
@@ -122,7 +138,7 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     @Override
     public void sort(final SortingType newSortingType) {
         title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
-        this.sortingType = newSortingType;
+        sortingType = newSortingType;
         title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
     }
 
@@ -139,6 +155,27 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     @Override
     public Resetable asResetable() {
         return this;
+    }
+
+    @Override
+    public Validable asValidable() {
+        return this;
+    }
+
+    @Override
+    public ValidationResult isValid() {
+        return formField.isValid();
+    }
+
+    @Override
+    public void afterReset(final FormField<?> formField) {
+        formField.asWidget().removeStyleName("validation-error");
+    }
+
+    @Override
+    public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
+        if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error")) formField.asWidget().addStyleName("validation-error");
+        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error")) formField.asWidget().removeStyleName("validation-error");
     }
 
 }

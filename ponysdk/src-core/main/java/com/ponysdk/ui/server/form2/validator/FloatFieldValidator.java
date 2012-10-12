@@ -21,16 +21,24 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.refreshable;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
+public class FloatFieldValidator implements FieldValidator {
 
-public interface RefreshableCellRenderer<V, W extends IsPWidget> extends CellRenderer<V> {
+    private static final String ERROR_MESSAGE = "Not a float";
+
+    private static ValidationResult isAFloat(final String value) {
+        try {
+            Float.parseFloat(value);
+            return ValidationResult.newOKValidationResult();
+        } catch (final Exception e) {
+            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        }
+    }
 
     @Override
-    public W render(final int row, final V value);
-
-    public void update(final V value, Cell<V, W> previous);
-
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isAFloat(value);
+    }
 }

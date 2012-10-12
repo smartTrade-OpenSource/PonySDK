@@ -43,9 +43,9 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
     private static Logger log = LoggerFactory.getLogger(AbstractCriteriaDecorator.class);
 
     @Override
-    public void render(CriteriaContext context) {
+    public void render(final CriteriaContext context) {
         final Criterion field = context.getCriterion();
-        Criteria criteria = context.getSTCriteria();
+        Criteria criteria = context.getOrderingCriteria();
 
         if (field.getValue() == null && field.getComparator() != ComparatorType.IS_NULL && field.getComparator() != ComparatorType.IS_NOT_NULL) { return; }
 

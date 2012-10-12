@@ -291,17 +291,20 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
-                            if (eventInstruction.containsKey(PROPERTY.KEY_FILTER)) {
+
+                            if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
                                 final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
                                         uiService.sendDataToServer(eventInstruction);
+                                        uiService.flushEvents();
                                         break;
                                     }
                                 }
                             } else {
                                 uiService.sendDataToServer(eventInstruction);
+                                uiService.flushEvents();
                             }
                         }
                     }, KeyUpEvent.getType());

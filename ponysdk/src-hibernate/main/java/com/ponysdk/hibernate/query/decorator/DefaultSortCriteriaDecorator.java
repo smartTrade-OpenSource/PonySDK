@@ -38,12 +38,12 @@ import com.ponysdk.hibernate.query.CriteriaContext;
 public class DefaultSortCriteriaDecorator implements CriteriaDecorator {
 
     @Override
-    public void render(CriteriaContext context) {
+    public void render(final CriteriaContext context) {
         final Criterion field = context.getCriterion();
 
         if (field.getSortingType() == SortingType.NONE) return;
 
-        Criteria criteria = context.getSTCriteria();
+        Criteria criteria = context.getOrderingCriteria();
 
         final List<String> propertyNamePath = Arrays.asList(field.getPojoProperty().split(REGEX_SPLIT));
         final Iterator<String> iter = propertyNamePath.iterator();
@@ -63,7 +63,7 @@ public class DefaultSortCriteriaDecorator implements CriteriaDecorator {
                 associationPath = new String(key);
             }
         }
-        criteria = context.getSTCriteria();
+        criteria = context.getOrderingCriteria();
         if (field.getSortingType() == SortingType.ASCENDING) {
             criteria.addOrder(Order.asc(associationPath));
         } else if (field.getSortingType() == SortingType.DESCENDING) {

@@ -30,8 +30,10 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.form2.dataconverter.DataConverter;
 import com.ponysdk.ui.server.form2.validator.FieldValidator;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
+import com.ponysdk.ui.server.list2.Resetable;
+import com.ponysdk.ui.server.list2.Validable;
 
-public abstract class FormField<T> implements IsPWidget {
+public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
 
     private final Set<FormFieldListener> listeners = new HashSet<FormFieldListener>();
 
@@ -43,6 +45,7 @@ public abstract class FormField<T> implements IsPWidget {
         this.dataProvider = dataProvider;
     }
 
+    @Override
     public ValidationResult isValid() {
         ValidationResult result;
 
@@ -62,6 +65,7 @@ public abstract class FormField<T> implements IsPWidget {
         listeners.add(listener);
     }
 
+    @Override
     public void reset() {
         reset0();
         fireAfterReset();
