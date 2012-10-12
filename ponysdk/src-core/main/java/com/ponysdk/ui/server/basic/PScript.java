@@ -85,7 +85,7 @@ public abstract class PScript extends PObject {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(PROPERTY.ERROR_MSG)) {
             final ExecutionCallback callback = callbacksByID.remove(instruction.getLong(PROPERTY.ID));
             if (callback != null) callback.onFailure(instruction.getString(PROPERTY.ERROR_MSG));
@@ -93,7 +93,7 @@ public abstract class PScript extends PObject {
             final ExecutionCallback callback = callbacksByID.remove(instruction.getLong(PROPERTY.ID));
             if (callback != null) callback.onSuccess(instruction.getString(PROPERTY.RESULT));
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

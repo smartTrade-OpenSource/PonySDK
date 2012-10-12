@@ -113,7 +113,7 @@ public class PTScheduler extends AbstractPTObject {
             instruction.put(PROPERTY.ID, commandID);
             instruction.put(PROPERTY.FIXRATE, delay);
 
-            uiService.triggerEvent(instruction);
+            uiService.sendDataToServer(instruction);
 
             return true;
         }
@@ -138,7 +138,7 @@ public class PTScheduler extends AbstractPTObject {
             instruction.put(PROPERTY.ID, commandID);
             instruction.put(PROPERTY.FIXDELAY, delay);
 
-            uiService.triggerEvent(instruction);
+            uiService.sendDataToServer(instruction);
 
             return false;
         }

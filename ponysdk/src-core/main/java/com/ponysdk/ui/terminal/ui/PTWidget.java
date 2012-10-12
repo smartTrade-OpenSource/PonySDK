@@ -126,12 +126,12 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
         eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
-        uiService.triggerEvent(eventInstruction);
+        uiService.sendDataToServer(eventInstruction);
     }
 
     protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        uiService.triggerEvent(eventInstruction);
+        uiService.sendDataToServer(eventInstruction);
     }
 
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
@@ -153,7 +153,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             for (int i = 0; i < jsonArray.size(); i++) {
                 final JSONNumber keyCode = jsonArray.get(i).isNumber();
                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                     break;
                 }
             }
@@ -161,7 +161,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             // final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(),
             // addHandler.getType());
             // eventInstruction.setMainProperty(main);
-            uiService.triggerEvent(eventInstruction);
+            uiService.sendDataToServer(eventInstruction);
         }
     }
 
@@ -271,15 +271,15 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.stackEvent(changeHandlerInstruction);
-                                        uiService.stackEvent(eventInstruction);
+                                        uiService.stackInstrution(changeHandlerInstruction);
+                                        uiService.stackInstrution(eventInstruction);
                                         uiService.flushEvents();
                                         break;
                                     }
                                 }
                             } else {
-                                uiService.stackEvent(changeHandlerInstruction);
-                                uiService.stackEvent(eventInstruction);
+                                uiService.stackInstrution(changeHandlerInstruction);
+                                uiService.stackInstrution(eventInstruction);
                                 uiService.flushEvents();
                             }
                         }
@@ -296,12 +296,12 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.triggerEvent(eventInstruction);
+                                        uiService.sendDataToServer(eventInstruction);
                                         break;
                                     }
                                 }
                             } else {
-                                uiService.triggerEvent(eventInstruction);
+                                uiService.sendDataToServer(eventInstruction);
                             }
                         }
                     }, KeyUpEvent.getType());
@@ -364,7 +364,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         final String dragWidgetID = event.getData("text");
                         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
                         if (dragWidgetID != null) eventInstruction.put(PROPERTY.DRAG_SRC, Long.parseLong(dragWidgetID));
-                        uiService.triggerEvent(eventInstruction);
+                        uiService.sendDataToServer(eventInstruction);
                     }
                 }, DropEvent.getType());
                 break;

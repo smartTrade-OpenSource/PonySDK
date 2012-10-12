@@ -84,7 +84,7 @@ public class PTRadioButton extends PTCheckBox {
         eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
         eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
         eventInstruction.put(PROPERTY.VALUE, value);
-        uiService.triggerEvent(eventInstruction);
+        uiService.sendDataToServer(eventInstruction);
     }
 
     @Override

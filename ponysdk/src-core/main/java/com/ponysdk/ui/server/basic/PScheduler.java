@@ -111,7 +111,7 @@ public abstract class PScheduler extends PObject {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.SCHEDULER)) {
             final long cmdID = instruction.getLong(PROPERTY.ID);
             final RepeatingCommand command = commandByID.get(cmdID);
@@ -127,7 +127,7 @@ public abstract class PScheduler extends PObject {
                 }
             }
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

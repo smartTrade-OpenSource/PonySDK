@@ -42,14 +42,14 @@ public class PTScript extends AbstractPTObject {
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
             eventInstruction.put(PROPERTY.RESULT, result == null ? "" : result.toString());
-            uiService.triggerEvent(eventInstruction);
+            uiService.sendDataToServer(eventInstruction);
         } catch (final Throwable e) {
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(update.getObjectID());
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
             eventInstruction.put(PROPERTY.ERROR_MSG, e.getMessage());
-            uiService.triggerEvent(eventInstruction);
+            uiService.sendDataToServer(eventInstruction);
         }
     }
 

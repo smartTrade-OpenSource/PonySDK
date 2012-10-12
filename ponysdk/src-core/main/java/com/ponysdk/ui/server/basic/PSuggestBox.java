@@ -115,7 +115,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     @Override
-    public void onEventInstruction(final JSONObject event) throws JSONException {
+    public void onClientData(final JSONObject event) throws JSONException {
         String handlerKey = null;
         if (event.has(HANDLER.KEY)) {
             handlerKey = event.getString(HANDLER.KEY);
@@ -130,7 +130,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
         } else {
-            super.onEventInstruction(event);
+            super.onClientData(event);
         }
     }
 

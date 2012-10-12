@@ -205,7 +205,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     }
 
     @Override
-    public void onEventInstruction(final JSONObject eventInstruction) throws JSONException {
+    public void onClientData(final JSONObject eventInstruction) throws JSONException {
         String handlerKey = null;
         if (eventInstruction.has(HANDLER.KEY)) {
             handlerKey = eventInstruction.getString(HANDLER.KEY);
@@ -220,7 +220,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
                 handler.onBeforeSelection(new PBeforeSelectionEvent<Integer>(this, eventInstruction.getInt(PROPERTY.INDEX)));
             }
         } else {
-            super.onEventInstruction(eventInstruction);
+            super.onClientData(eventInstruction);
         }
     }
 

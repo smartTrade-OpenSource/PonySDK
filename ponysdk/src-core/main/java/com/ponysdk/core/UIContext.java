@@ -111,7 +111,7 @@ public class UIContext {
         pendingInstructions.add(instruction);
     }
 
-    public void fireInstruction(final JSONObject instruction) throws PonySessionException, JSONException {
+    void fireClientData(final JSONObject instruction) throws PonySessionException, JSONException {
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
                 UIContext.get().invalidate();
@@ -142,7 +142,7 @@ public class UIContext {
         }
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.EVENT)) {
-                object.onEventInstruction(instruction);
+                object.onClientData(instruction);
             }
         }
     }

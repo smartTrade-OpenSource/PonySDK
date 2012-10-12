@@ -61,14 +61,14 @@ import com.ponysdk.ui.server.list.DefaultSimpleListView;
 import com.ponysdk.ui.server.list.ExportConfiguration;
 import com.ponysdk.ui.server.list.event.ShowSubListEvent;
 import com.ponysdk.ui.server.list.event.ShowSubListHandler;
-import com.ponysdk.ui.server.list.renderer.cell.StringCellRenderer;
-import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.dataprovider.RemoteHasPDataProvider;
 import com.ponysdk.ui.server.list2.paging.DefaultPagerView;
 import com.ponysdk.ui.server.list2.paging.Pager;
+import com.ponysdk.ui.server.list2.renderer.cell.LabelCellRenderer;
 import com.ponysdk.ui.server.list2.renderer.header.ComplexHeaderCellRenderer;
+import com.ponysdk.ui.server.list2.valueprovider.BeanValueProvider;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler, ShowSubListHandler<Pony> {
@@ -124,7 +124,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         final ComplexHeaderCellRenderer nameHeaderCellRender = new ComplexHeaderCellRenderer("Name", new StringTextBoxFormField(), "name", dataProvider);
         nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRender);
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+        nameColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
 
         final PListBox ageListBox = new PListBox(true);
         for (int i = 0; i < 30; i++)
@@ -134,13 +134,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
         final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age", new ListBoxFormField<Integer>(ageListBox), "age", dataProvider);
         ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
-        ageColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+        ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
 
         final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
         final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(), "race", dataProvider);
         raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
-        raceColumnDescriptor.setCellRenderer(new StringCellRenderer<Pony, String>());
+        raceColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
 
         dataGrid.addDataGridColumnDescriptor(nameColumnDescriptor);
         dataGrid.addDataGridColumnDescriptor(ageColumnDescriptor);

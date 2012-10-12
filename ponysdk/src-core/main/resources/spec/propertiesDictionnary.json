@@ -6,7 +6,8 @@
 		"viewId": [],
 		"seqNum": [],
 		"errors": [],
-		"instructions": []
+		"instructions": [],
+		"scripts": []
 	},
 	
 	"type": {

@@ -81,7 +81,7 @@ public class PDatePicker extends PComposite implements HasPValue<Date> {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject e) throws JSONException {
+    public void onClientData(final JSONObject e) throws JSONException {
         if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER)) {
             final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
@@ -94,7 +94,7 @@ public class PDatePicker extends PComposite implements HasPValue<Date> {
             }
             fireEvent(new PValueChangeEvent<Date>(this, date));
         } else {
-            super.onEventInstruction(e);
+            super.onClientData(e);
         }
     }
 

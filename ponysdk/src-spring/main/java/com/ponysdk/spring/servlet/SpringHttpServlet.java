@@ -28,10 +28,10 @@ import java.util.Map;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.servlet.AbstractApplicationManager;
 import com.ponysdk.core.servlet.AbstractHttpServlet;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.ui.server.basic.PHistory;

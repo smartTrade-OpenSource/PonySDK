@@ -52,7 +52,7 @@ public class PTPusher extends AbstractPTObject {
             eventInstruction.setObjectID(create.getObjectID());
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
             eventInstruction.put(PROPERTY.ERROR_MSG, "WebSocket not supported");
-            uiService.triggerEvent(eventInstruction);
+            uiService.sendDataToServer(eventInstruction);
 
             final int delay = 1000;
             if (create.containsKey(PROPERTY.FIXDELAY)) create.getInt(PROPERTY.FIXDELAY);
@@ -65,7 +65,7 @@ public class PTPusher extends AbstractPTObject {
                     eventInstruction.setObjectID(create.getObjectID());
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(PROPERTY.POLL, true);
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                     return true;
                 }
             }, delay);

@@ -58,7 +58,7 @@ public class PTTree extends PTWidget<Tree> {
                     eventInstruction.put(TYPE.KEY_.EVENT, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.WIDGET, ptObject.getObjectID());
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                 }
             });
         } else {

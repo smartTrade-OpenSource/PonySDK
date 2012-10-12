@@ -42,7 +42,7 @@ public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addHandler.getObjectID());
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                 }
             });
         } else {

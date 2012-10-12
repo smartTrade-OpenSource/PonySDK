@@ -86,7 +86,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject event) throws JSONException {
+    public void onClientData(final JSONObject event) throws JSONException {
         final String handler = event.getString(HANDLER.KEY);
 
         if (HANDLER.KEY_.CLOSE_HANDLER.equals(handler)) {
@@ -100,7 +100,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
                 openHandler.onOpen(new POpenEvent(this));
             }
         } else {
-            super.onEventInstruction(event);
+            super.onClientData(event);
         }
     }
 

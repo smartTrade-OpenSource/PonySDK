@@ -246,7 +246,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(HANDLER.KEY) && instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.DOM_HANDLER)) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(PROPERTY.DOM_HANDLER_TYPE)];
             switch (domHandler) {
@@ -312,7 +312,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
             }
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

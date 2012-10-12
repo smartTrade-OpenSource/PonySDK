@@ -1,7 +1,11 @@
 
-package com.ponysdk.core.servlet;
+package com.ponysdk.core;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -12,9 +16,12 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Application;
-import com.ponysdk.core.UIContext;
+import com.ponysdk.core.addon.Addon;
+import com.ponysdk.core.addon.ScriptInjector;
 import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.core.servlet.Request;
+import com.ponysdk.core.servlet.Response;
+import com.ponysdk.core.servlet.Session;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
@@ -25,6 +32,28 @@ public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
+    private final ServiceLoader<Addon> addonServiceLoader = ServiceLoader.load(Addon.class);
+    private final ServiceLoader<ScriptInjector> scriptInjectorServiceLoader = ServiceLoader.load(ScriptInjector.class);
+
+    private final Set<String> scripts = new HashSet<String>();
+
+    public AbstractApplicationManager() {
+        final Iterator<Addon> addons = addonServiceLoader.iterator();
+        while (addons.hasNext()) {
+            final Addon addon = addons.next();
+            log.info("Addon loaded : " + addon.getName());
+        }
+        final Iterator<ScriptInjector> scriptInjectors = scriptInjectorServiceLoader.iterator();
+        while (scriptInjectors.hasNext()) {
+            final ScriptInjector scriptInjector = scriptInjectors.next();
+            scripts.addAll(scriptInjector.getScripts());
+        }
+
+        for (final String script : scripts) {
+            log.info("Injected script : " + script);
+        }
+    }
+
     public void process(final Request request, final Response response) throws Exception {
         final JSONObject data = new JSONObject(new JSONTokener(request.getReader()));
         if (data.has(APPLICATION.KEY)) {
@@ -33,18 +62,6 @@ public abstract class AbstractApplicationManager {
             fireInstructions(data, request, response);
         }
     }
-
-    // public static String readFully(final Reader reader) throws IOException {
-    // final char[] arr = new char[8 * 1024];
-    // final StringBuffer buf = new StringBuffer();
-    // int numChars;
-    //
-    // while ((numChars = reader.read(arr, 0, arr.length)) > 0) {
-    // buf.append(arr, 0, numChars);
-    // }
-    //
-    // return buf.toString();
-    // }
 
     public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
         final JSONObject jsonObject = new JSONObject();
@@ -98,6 +115,9 @@ public abstract class AbstractApplicationManager {
 
             try {
                 jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
+
+                if (!scripts.isEmpty()) jsonObject.put(APPLICATION.SCRIPTS, scripts);
+
                 uiContext.flushInstructions(jsonObject);
                 response.write(jsonObject.toString());
                 response.flush();
@@ -174,7 +194,7 @@ public abstract class AbstractApplicationManager {
         if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
             final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
             for (int i = 0; i < instructions.length(); i++) {
-                uiContext.fireInstruction(instructions.getJSONObject(i));
+                uiContext.fireClientData(instructions.getJSONObject(i));
             }
         }
     }

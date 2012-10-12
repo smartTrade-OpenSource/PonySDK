@@ -27,10 +27,12 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -44,12 +46,17 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class CommunicationEntryPoint implements EntryPoint {
+public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Exception> {
 
     private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
 
     protected RequestBuilder requestBuilder;
     protected UIBuilder uiBuilder;
+
+    protected long applicationViewID;
+    protected int scriptToLoad = 0;
+
+    protected JSONObject data;
 
     @Override
     public void onModuleLoad() {
@@ -102,14 +109,23 @@ public class CommunicationEntryPoint implements EntryPoint {
                 public void onDataReceived(final JSONObject data) {
                     try {
                         if (data.containsKey(APPLICATION.VIEW_ID)) {
-                            final long viewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
+                            CommunicationEntryPoint.this.data = data;
+                            applicationViewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
 
-                            if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(viewID));
+                            if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(applicationViewID));
 
-                            uiBuilder = new UIBuilder(viewID, requestBuilder);
-                            uiBuilder.init();
-                            uiBuilder.update(data);
-                            uiBuilder.hideLoadingMessageBox();
+                            if (data.containsKey(APPLICATION.SCRIPTS)) {
+                                final JSONArray scripts = data.get(APPLICATION.SCRIPTS).isArray();
+
+                                scriptToLoad = scripts.size();
+
+                                for (int i = 0; i < scripts.size(); i++) {
+                                    final String script = scripts.get(i).isString().stringValue();
+                                    ScriptInjector.fromUrl(GWT.getHostPageBaseURL() + script).setCallback(CommunicationEntryPoint.this).inject();
+                                }
+                            } else {
+                                initUIBuilder();
+                            }
                         } else {
                             uiBuilder.update(data);
                             uiBuilder.hideLoadingMessageBox();
@@ -134,18 +150,38 @@ public class CommunicationEntryPoint implements EntryPoint {
         }
     }
 
-    public void triggerEvent(final String objectID, final JavaScriptObject jsObject) {
+    protected void initUIBuilder() {
+        uiBuilder = new UIBuilder(applicationViewID, requestBuilder);
+        uiBuilder.init();
+        uiBuilder.update(data);
+        uiBuilder.hideLoadingMessageBox();
+    }
+
+    public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(Long.parseLong(objectID));
         instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
         instruction.put(PROPERTY.NATIVE, jsObject);
-        uiBuilder.triggerEvent(instruction);
+        uiBuilder.sendDataToServer(instruction);
     }
 
     public native void exportTriggerEvent() /*-{
                                                  var that = this;
-                                                 $wnd.triggerEvent = function(id, element) {
-                                                 $entry(that.@com.ponysdk.ui.terminal.CommunicationEntryPoint::triggerEvent(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(id, element));
+                                                 $wnd.sendDataToServer = function(id, element) {
+                                                 $entry(that.@com.ponysdk.ui.terminal.CommunicationEntryPoint::sendDataToServer(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(id, element));
                                                  }
                                                  }-*/;
+
+    public static native void reload() /*-{$wnd.location.reload();}-*/;
+
+    @Override
+    public void onFailure(final Exception reason) {
+        Window.alert("Cannot load native script : " + reason.getMessage());
+    }
+
+    @Override
+    public void onSuccess(final Void result) {
+        scriptToLoad--;
+        if (scriptToLoad == 0) initUIBuilder();
+    }
 }

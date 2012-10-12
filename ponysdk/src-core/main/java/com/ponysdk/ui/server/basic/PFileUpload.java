@@ -71,7 +71,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         final String handler = instruction.getString(HANDLER.KEY);
 
         if (HANDLER.KEY_.CHANGE_HANDLER.equals(handler)) {
@@ -83,7 +83,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         } else if (HANDLER.KEY_.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
             onSubmitComplete();
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

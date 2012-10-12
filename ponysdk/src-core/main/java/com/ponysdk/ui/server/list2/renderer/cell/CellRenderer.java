@@ -21,16 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.refreshable;
+package com.ponysdk.ui.server.list2.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
 
-public interface RefreshableCellRenderer<V, W extends IsPWidget> extends CellRenderer<V> {
+public interface CellRenderer<V> {
 
-    @Override
-    public W render(final int row, final V value);
-
-    public void update(final V value, Cell<V, W> previous);
+    public IsPWidget render(final int row, V value);
 
 }

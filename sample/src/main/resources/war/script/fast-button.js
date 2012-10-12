@@ -101,6 +101,6 @@ function applyFastButton(id, object) {
 	
 	new google.ui.FastButton(object, function(event) {
 		console.log('click/touch: ' + id + ' ' + event);
-		triggerEvent(id, { type: this.type, startX: this.startX, startY: this.startY});
+		sendDataToServer(id, { type: this.type, startX: this.startX, startY: this.startY});
 	});
 }

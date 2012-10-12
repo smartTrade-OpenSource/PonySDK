@@ -222,7 +222,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.POPUP_POSITION_CALLBACK)) {
             final Integer windowWidth = instruction.getInt(PROPERTY.OFFSETWIDTH);
             final Integer windowHeight = instruction.getInt(PROPERTY.OFFSETHEIGHT);
@@ -233,7 +233,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             this.showing = false;
             fireOnClose();
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

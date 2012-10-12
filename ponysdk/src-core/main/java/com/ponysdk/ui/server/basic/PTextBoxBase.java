@@ -58,11 +58,11 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     @Override
-    public void onEventInstruction(final JSONObject e) throws JSONException {
+    public void onClientData(final JSONObject e) throws JSONException {
         if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
             onValueChange(new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE)));
         } else {
-            super.onEventInstruction(e);
+            super.onClientData(e);
         }
     }
 

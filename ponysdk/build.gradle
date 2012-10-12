@@ -5,6 +5,7 @@ sourceCompatibility = 1.6
 project.ext.version = 0.5;
 
 project.ext.srcCore = 'src-core/main/java';
+project.ext.srcTerminal = 'src-core/main/java/com/ponysdk/ui/terminal';
 project.ext.srcDefaultimpl = 'src-defaultimpl/main/java';
 project.ext.srcGenerator = 'src-generator/main/java';
 project.ext.srcGenerated = 'src-generated/main/java';
@@ -191,8 +192,7 @@ task gwtc(type: JavaExec) {
 	maxHeapSize = '512M'
 	workingDir = buildDir
 	project.ext.workers = Runtime.getRuntime().availableProcessors()
-	inputs.dir file('src-core/main/java/com/ponysdk/ui/terminal')
-	outputs.dir file(gwtOutputDirName)
+	inputs.dir file(srcTerminal)
 	classpath {
 		[
 			sourceSets.main.java.srcDirs,

@@ -78,7 +78,7 @@ public class PTDateBox extends PTWidget<DateBox> {
         instruction.put(HANDLER.KEY, HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
         instruction.put(PROPERTY.VALUE, dateBox.getTextBox().getText());
 
-        uiService.triggerEvent(instruction);
+        uiService.sendDataToServer(instruction);
     }
 
     @Override

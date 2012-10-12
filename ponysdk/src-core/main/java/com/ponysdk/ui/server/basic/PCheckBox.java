@@ -110,11 +110,11 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    public void onEventInstruction(final JSONObject e) throws JSONException {
+    public void onClientData(final JSONObject e) throws JSONException {
         if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER)) {
             onValueChange(new PValueChangeEvent<Boolean>(this, e.getBoolean(PROPERTY.VALUE)));
         } else {
-            super.onEventInstruction(e);
+            super.onClientData(e);
         }
     }
 }

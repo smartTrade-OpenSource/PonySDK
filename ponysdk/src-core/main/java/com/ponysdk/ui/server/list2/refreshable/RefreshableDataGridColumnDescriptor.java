@@ -24,17 +24,17 @@
 package com.ponysdk.ui.server.list2.refreshable;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
+import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
 
 public class RefreshableDataGridColumnDescriptor<D, V, W extends IsPWidget> extends DataGridColumnDescriptor<D, V> {
 
     @Override
-    public void setCellRenderer(final CellRenderer<D, V> cellRenderer) {
+    public void setCellRenderer(final CellRenderer<V> cellRenderer) {
         throw new IllegalArgumentException("use RefreshableCellRenderer instead of CellRenderer");
     }
 
-    public void setCellRenderer(final RefreshableCellRenderer<D, V, W> cellRenderer) {
+    public void setCellRenderer(final RefreshableCellRenderer<V, W> cellRenderer) {
         super.setCellRenderer(cellRenderer);
     }
 
@@ -46,8 +46,8 @@ public class RefreshableDataGridColumnDescriptor<D, V, W extends IsPWidget> exte
 
     @SuppressWarnings("unchecked")
     @Override
-    public RefreshableCellRenderer<D, V, W> getCellRenderer() {
-        return (RefreshableCellRenderer<D, V, W>) cellRenderer;
+    public RefreshableCellRenderer<V, W> getCellRenderer() {
+        return (RefreshableCellRenderer<V, W>) cellRenderer;
     }
 
 }

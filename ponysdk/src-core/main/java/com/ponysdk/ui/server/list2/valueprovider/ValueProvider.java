@@ -21,16 +21,9 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list2.refreshable;
+package com.ponysdk.ui.server.list2.valueprovider;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
+public interface ValueProvider<D, V> {
 
-public interface RefreshableCellRenderer<V, W extends IsPWidget> extends CellRenderer<V> {
-
-    @Override
-    public W render(final int row, final V value);
-
-    public void update(final V value, Cell<V, W> previous);
-
+    public V getValue(D data);
 }

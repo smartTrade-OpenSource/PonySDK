@@ -81,7 +81,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 cell.data = data;
                 cell.row = row;
                 cell.value = d.getValueProvider().getValue(data);
-                cell.w = d.getCellRenderer().render(row, data, cell.value);
+                cell.w = d.getCellRenderer().render(row, cell.value);
                 map.put(d, cell);
                 view.addWidget(cell.w, cell.col, cell.row);
             }
@@ -91,7 +91,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         } else {
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
-                d.getCellRenderer().update(data, d.getValueProvider().getValue(data), map.get(d));
+                d.getCellRenderer().update(d.getValueProvider().getValue(data), map.get(d));
             }
         }
     }

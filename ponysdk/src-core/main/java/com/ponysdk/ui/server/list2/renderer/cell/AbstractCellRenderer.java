@@ -21,29 +21,27 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.list2.renderer.cell;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.ui.UIObject;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
-import com.ponysdk.ui.terminal.ui.PTObject;
+import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PLabel;
 
-public interface UIService {
+public abstract class AbstractCellRenderer<V> implements CellRenderer<V> {
 
-    public void flushEvents();
+    private static String DASH = "-";
 
-    public void stackInstrution(PTInstruction instruction);
+    protected String nullDisplay = DASH;
 
-    public void sendDataToServer(PTInstruction instruction);
+    @Override
+    public final IsPWidget render(final int row, final V value) {
+        if (value == null) return new PLabel(nullDisplay);
+        return render0(row, value);
+    }
 
-    public PTObject getPTObject(Long ID);
+    public abstract IsPWidget render0(int row, V value);
 
-    public PTObject getPTObject(UIObject uiObject);
-
-    public void registerUIObject(Long ID, UIObject uiObject);
-
-    public PTObject unRegisterObject(Long ID);
-
-    public void update(JSONObject data);
+    public void setNullDisplay(final String nullDisPlay) {
+        this.nullDisplay = nullDisPlay;
+    }
 
 }

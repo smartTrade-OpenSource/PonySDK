@@ -98,7 +98,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    public void onEventInstruction(final JSONObject instruction) throws JSONException {
+    public void onClientData(final JSONObject instruction) throws JSONException {
         if (instruction.getString(HANDLER.KEY).contains(HANDLER.KEY_.CHANGE_HANDLER)) {
             final String data = instruction.getString(PROPERTY.VALUE);
             final String[] tokens = data.split(COMMA);
@@ -119,7 +119,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
             onChange(new PChangeEvent(PListBox.this));
         } else {
-            super.onEventInstruction(instruction);
+            super.onClientData(instruction);
         }
     }
 

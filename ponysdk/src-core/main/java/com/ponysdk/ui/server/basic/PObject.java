@@ -83,7 +83,7 @@ public abstract class PObject {
         nativeHandlers.register(handler);
     }
 
-    public void onEventInstruction(final JSONObject event) throws JSONException {
+    public void onClientData(final JSONObject event) throws JSONException {
         if (event.has(Dictionnary.PROPERTY.NATIVE)) {
             final JSONObject jsonObject = event.getJSONObject(Dictionnary.PROPERTY.NATIVE);
             if (nativeHandlers != null) {

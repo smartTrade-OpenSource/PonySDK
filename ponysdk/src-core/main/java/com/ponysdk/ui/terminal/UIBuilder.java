@@ -153,7 +153,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             // log.log(Level.SEVERE, "fireInstruction failed", exception);
 
             if (exception instanceof PonySessionException) {
-                reload();
+                CommunicationEntryPoint.reload();
                 return;
             }
             numberOfrequestInProgress--;
@@ -227,13 +227,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
 
         if (TYPE.KEY_.CLOSE.equals(type)) {
             pendingClose = true;
-            triggerEvent(instruction);
+            sendDataToServer(instruction);
 
             final ScheduledCommand command = new ScheduledCommand() {
 
                 @Override
                 public void execute() {
-                    reload();
+                    CommunicationEntryPoint.reload();
                 }
             };
 
@@ -338,19 +338,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public void stackEvent(final PTInstruction instruction) {
-        if (!updateMode) triggerEvent(instruction);
+    public void stackInstrution(final PTInstruction instruction) {
+        if (!updateMode) sendDataToServer(instruction);
         else stackedInstructions.add(instruction);
     }
 
     @Override
     public void flushEvents() {
         if (stackedInstructions.isEmpty()) return;
-        fireEvents(stackedInstructions);
+        sendDataToServer(stackedInstructions);
         stackedInstructions.clear();
     }
 
-    private void fireEvents(final List<PTInstruction> instructions) {
+    private void sendDataToServer(final List<PTInstruction> instructions) {
         numberOfrequestInProgress++;
 
         if (timer == null) timer = scheduleLoadingMessageBox();
@@ -380,10 +380,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     @Override
-    public void triggerEvent(final PTInstruction instruction) {
+    public void sendDataToServer(final PTInstruction instruction) {
         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
         instructions.add(instruction);
-        fireEvents(instructions);
+        sendDataToServer(instructions);
     }
 
     private Timer scheduleLoadingMessageBox() {
@@ -419,7 +419,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             @Override
             public void onClick(final ClickEvent event) {
                 History.newItem("");
-                reload();
+                CommunicationEntryPoint.reload();
             }
         });
 
@@ -466,7 +466,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.HISTORY);
             eventInstruction.put(HISTORY.TOKEN, event.getValue());
-            stackEvent(eventInstruction);
+            stackInstrution(eventInstruction);
         }
     }
 
@@ -487,7 +487,4 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
     }
-
-    private native void reload() /*-{$wnd.location.reload();}-*/;
-
 }

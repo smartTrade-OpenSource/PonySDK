@@ -72,7 +72,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
                     eventInstruction.setObjectID(addHandler.getObjectID());
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.COMMAND);
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                 }
             });
         } else {

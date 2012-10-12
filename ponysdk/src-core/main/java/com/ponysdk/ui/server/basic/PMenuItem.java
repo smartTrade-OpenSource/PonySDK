@@ -131,7 +131,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     @Override
-    public void onEventInstruction(final JSONObject event) throws JSONException {
+    public void onClientData(final JSONObject event) throws JSONException {
         String handlerKey = null;
         if (event.has(HANDLER.KEY)) {
             handlerKey = event.getString(HANDLER.KEY);
@@ -139,7 +139,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
         if (HANDLER.KEY_.COMMAND.equals(handlerKey)) {
             cmd.execute();
         } else {
-            super.onEventInstruction(event);
+            super.onClientData(event);
         }
     }
 

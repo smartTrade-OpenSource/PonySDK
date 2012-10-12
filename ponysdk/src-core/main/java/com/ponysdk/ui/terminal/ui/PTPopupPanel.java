@@ -92,7 +92,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 instruction.setObjectID(create.getObjectID());
                 instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                 instruction.put(HANDLER.KEY, Dictionnary.HANDLER.KEY_.CLOSE_HANDLER);
-                uiService.triggerEvent(instruction);
+                uiService.sendDataToServer(instruction);
             }
         });
     }
@@ -115,7 +115,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
             eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
             eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
-            uiService.triggerEvent(eventInstruction);
+            uiService.sendDataToServer(eventInstruction);
             return;
         }
 

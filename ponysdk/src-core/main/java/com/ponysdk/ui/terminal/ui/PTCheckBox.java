@@ -59,7 +59,7 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
                 instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                 instruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
                 instruction.put(PROPERTY.VALUE, event.getValue());
-                uiService.triggerEvent(instruction);
+                uiService.sendDataToServer(instruction);
             }
         });
     }

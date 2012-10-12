@@ -69,7 +69,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getSelectedItem());
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                 }
             });
             return;
@@ -85,7 +85,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getItem());
-                    uiService.triggerEvent(eventInstruction);
+                    uiService.sendDataToServer(eventInstruction);
                 }
             });
             return;

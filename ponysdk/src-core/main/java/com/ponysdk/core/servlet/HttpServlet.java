@@ -25,6 +25,7 @@ package com.ponysdk.core.servlet;
 
 import javax.servlet.ServletException;
 
+import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.SimpleEventBus;
