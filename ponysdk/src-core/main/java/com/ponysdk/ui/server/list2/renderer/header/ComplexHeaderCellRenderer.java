@@ -24,11 +24,13 @@
 package com.ponysdk.ui.server.list2.renderer.header;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
+import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PGrid;
@@ -41,14 +43,15 @@ import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form2.formfield.FormField;
 import com.ponysdk.ui.server.form2.formfield.FormFieldListener;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
+import com.ponysdk.ui.server.list2.FilterListener;
 import com.ponysdk.ui.server.list2.HasCriteria;
+import com.ponysdk.ui.server.list2.HasFilterListeners;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
 import com.ponysdk.ui.server.list2.Validable;
-import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
-public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener {
+public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
     private final PGrid headerGrid = new PGrid(2, 1);
     private final PLabel title;
@@ -57,13 +60,18 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     private SortingType sortingType = SortingType.NONE;
 
-    private FilterListener filterListener;
+    private final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<FilterListener>();
+
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
+        this(caption, formField, key, null);
+    }
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
         this.title = new PLabel(caption);
         this.formField = formField;
         this.key = key;
-        this.filterListener = filterListener;
+
+        if (filterListener != null) this.filterListeners.add(filterListener);
 
         builGUI();
     }
@@ -86,7 +94,9 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
                 sort(nextSortingType);
                 title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
 
-                filterListener.onSort(ComplexHeaderCellRenderer.this);
+                for (final FilterListener filterListener : filterListeners) {
+                    filterListener.onSort(ComplexHeaderCellRenderer.this);
+                }
             }
         });
 
@@ -95,15 +105,13 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                filterListener.onFilterChange();
+                for (final FilterListener filterListener : filterListeners) {
+                    filterListener.onFilterChange();
+                }
             }
         }, PKeyUpEvent.TYPE);
 
         formField.addFormFieldListener(this);
-    }
-
-    public void setFilterListener(final FilterListener filterListener) {
-        this.filterListener = filterListener;
     }
 
     @Override
@@ -176,6 +184,16 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
         if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error")) formField.asWidget().addStyleName("validation-error");
         else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error")) formField.asWidget().removeStyleName("validation-error");
+    }
+
+    @Override
+    public void addFilterListener(final FilterListener listener) {
+        filterListeners.register(listener);
+    }
+
+    @Override
+    public Collection<FilterListener> getFilterListener() {
+        return filterListeners;
     }
 
 }

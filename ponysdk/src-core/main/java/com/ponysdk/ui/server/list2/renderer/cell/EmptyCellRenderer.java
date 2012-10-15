@@ -21,29 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list.renderer.cell;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+package com.ponysdk.ui.server.list2.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
+public class EmptyCellRenderer<V> implements CellRenderer<V> {
 
-    private final DateFormat dateFormat;
-
-    public DateCellRenderer(final DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public DateCellRenderer(final String format) {
-        this.dateFormat = new SimpleDateFormat(format);
-    }
+    private static final String EMPTY_VALUE = "";
 
     @Override
-    public IsPWidget render0(final int rowCount, final T data, final Date value) {
-        return new PLabel(dateFormat.format(value));
+    public IsPWidget render(final int row, final V value) {
+        return new PLabel(EMPTY_VALUE);
     }
+
 }
