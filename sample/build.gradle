@@ -170,6 +170,8 @@ jar {
 	}
 }
 
+
+
 assemble.dependsOn(copyAllLibs)
 generate.dependsOn(generateSkeleton)
 generate.dependsOn(generateSkeleton2)
