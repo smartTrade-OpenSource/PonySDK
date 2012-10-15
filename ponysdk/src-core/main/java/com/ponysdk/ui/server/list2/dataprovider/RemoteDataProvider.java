@@ -7,6 +7,7 @@ import java.util.List;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Query.QueryMode;
 import com.ponysdk.core.query.SortingType;
+import com.ponysdk.ui.server.list2.FilterListener;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.HasPData;
 import com.ponysdk.ui.server.list2.Queriable;
@@ -91,7 +92,7 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
         }
     }
 
-    private Query buildQuery() {
+    public Query buildQuery() {
         final Query query = new Query();
         for (final HasCriteria criteriable : hasCriteriaList) {
             query.addCriteria(criteriable.getCriteria());

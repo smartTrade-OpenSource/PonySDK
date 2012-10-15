@@ -1,6 +1,9 @@
 
 package com.ponysdk.ui.server.form2.formfield;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form2.dataconverter.DataConverter;
@@ -19,6 +22,13 @@ public class ListBoxFormField<T> extends FormField<T> {
 
     public ListBoxFormField(final PListBox listBox) {
         this(listBox, null);
+    }
+
+    public ListBoxFormField(final Map<String, T> datas) {
+        this(new PListBox(), null);
+        for (final Entry<String, T> entry : datas.entrySet()) {
+            listBox.addItem(entry.getKey(), entry.getValue());
+        }
     }
 
     public ListBoxFormField(final PListBox listBox, final DataConverter<String, T> dataProvider) {

@@ -12,6 +12,5 @@
 	<classpathentry kind="lib" path="libs/java2html/java2html-1.0.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/gwt/json-20090211.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/gwt/gwt-user-2.5.0-rc1.jar"/>
-	<classpathentry kind="lib" path="libs/highstock.jar" sourcepath="/addon/highstock"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
