@@ -50,6 +50,11 @@ public class PElement extends PComplexPanel {
         return tagName;
     }
 
+    @Override
+    public void insert(final PWidget child, final int beforeIndex) {
+        super.insert(child, beforeIndex);
+    }
+
     public void setInnerHTML(final String innerHTML) {
         this.innerTxt = innerHTML;
 

@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -36,6 +37,11 @@ class MyWidget extends ComplexPanel {
     @Override
     public void add(final Widget w) {
         super.add(w, getElement());
+    }
+
+    @Override
+    public void insert(final Widget child, final Element container, final int beforeIndex, final boolean domInsert) {
+        super.insert(child, container, beforeIndex, domInsert);
     }
 
 }

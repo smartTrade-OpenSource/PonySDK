@@ -21,29 +21,19 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list.renderer.cell;
+package com.ponysdk.ui.server.list2.valueprovider;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+public class BooleanValueProvider<D> implements ValueProvider<D, Boolean> {
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
+    private final boolean value;
 
-public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
-
-    private final DateFormat dateFormat;
-
-    public DateCellRenderer(final DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public DateCellRenderer(final String format) {
-        this.dateFormat = new SimpleDateFormat(format);
+    public BooleanValueProvider(final boolean value) {
+        this.value = value;
     }
 
     @Override
-    public IsPWidget render0(final int rowCount, final T data, final Date value) {
-        return new PLabel(dateFormat.format(value));
+    public Boolean getValue(final D data) {
+        return value;
     }
+
 }

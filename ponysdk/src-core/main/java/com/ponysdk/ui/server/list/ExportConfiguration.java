@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class ExportConfiguration {
 
     private final Map<String, ExportableField> exportFields = new LinkedHashMap<String, ExportableField>();
 
-    public void addExporter(Exporter<?> exporter) {
+    public void addExporter(final Exporter<?> exporter) {
         exporters.add(exporter);
     }
 
@@ -45,11 +46,17 @@ public class ExportConfiguration {
         return exporters;
     }
 
-    public void addExportableField(ExportableField exportableField) {
+    public void addExportableField(final ExportableField exportableField) {
         exportFields.put(exportableField.getKey(), exportableField);
     }
 
-    public void removeExportableField(ExportableField exportableField) {
+    public void addExportableFields(final Collection<ExportableField> exportableField) {
+        for (final ExportableField ef : exportableField) {
+            exportFields.put(ef.getKey(), ef);
+        }
+    }
+
+    public void removeExportableField(final ExportableField exportableField) {
         exportFields.remove(exportableField.getKey());
     }
 

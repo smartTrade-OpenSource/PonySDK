@@ -35,6 +35,16 @@ public class PTElement extends PTComplexPanel<MyWidget> {
     }
 
     @Override
+    public void add(final PTInstruction add, final UIService uiService) {
+        if (add.containsKey(PROPERTY.INDEX)) {
+            final int beforeIndex = add.getInt(PROPERTY.INDEX);
+            uiObject.insert(asWidget(add.getObjectID(), uiService), uiObject.getElement(), beforeIndex, true);
+        } else {
+            super.add(add, uiService);
+        }
+    }
+
+    @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.INNER_HTML)) {
             uiObject.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));

@@ -17,6 +17,10 @@ public class DateBoxFormField extends FormField<Date> {
         this(new PDateBox(), new DateConverter());
     }
 
+    public DateBoxFormField(final String dateFormat) {
+        this(new PDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)));
+    }
+
     public DateBoxFormField(final SimpleDateFormat dateFormat) {
         this(new PDateBox(dateFormat), new DateConverter(dateFormat));
     }

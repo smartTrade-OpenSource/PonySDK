@@ -33,12 +33,12 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.list2.FilterListener;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
 import com.ponysdk.ui.server.list2.Validable;
-import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
 public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer, HasCriteria, Sortable {
 

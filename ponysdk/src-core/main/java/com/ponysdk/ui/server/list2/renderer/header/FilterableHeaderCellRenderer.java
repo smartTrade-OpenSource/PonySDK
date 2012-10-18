@@ -35,12 +35,12 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form2.formfield.FormField;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
+import com.ponysdk.ui.server.list2.FilterListener;
 import com.ponysdk.ui.server.list2.HasCriteria;
 import com.ponysdk.ui.server.list2.Queriable;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Sortable;
 import com.ponysdk.ui.server.list2.Validable;
-import com.ponysdk.ui.server.list2.dataprovider.FilterListener;
 
 public class FilterableHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Validable {
 
