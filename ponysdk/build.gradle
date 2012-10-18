@@ -21,6 +21,7 @@ project.ext.warResources = 'src-core/main/resources/war';
 project.ext.confResources = 'src-spring/main/resources/conf';
 project.ext.javadocResources = 'src-core/main/javadoc';
 
+
 sourceSets {
 	main {
 		java {
@@ -145,7 +146,7 @@ task cleanGenerated(type: Delete) {
 task generateDatamodel {
 	description = 'Model generation'
 	inputs.file file('src-core/main/resources/spec/project_schema.xsd')
-	outputs.dir file(srcGenerated)
+	outputs.dir file('src-generated/main/java/com/ponysdk/generator')
 	doLast {
 		file(srcGenerated).mkdirs();
 		ant {
@@ -159,19 +160,23 @@ task generateDatamodel {
 	}
 }
 
-task compileDatamodel(type: Compile) {
+task compileDatamodel(type: Compile, dependsOn: generateDatamodel) {
 	classpath = configurations.xjc
 	source = file(srcGenerated)
 	destinationDir = file("$buildDir/classes/main")
+	inputs.file file('src-generated/main/java/com/ponysdk/generator')
+	outputs.dir file("$buildDir/classes/main/com/ponysdk/generator")
 }
 
-task compileGenerator(type: Compile) {
+task compileGenerator(type: Compile, dependsOn: compileDatamodel) {
 	classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
 	source = srcGenerator
 	destinationDir = file("$buildDir/classes/main")
+	inputs.file file(srcGenerator)
+	outputs.dir file("$buildDir/classes/main/com/ponysdk/generator")
 }
 
-task generateDictionnary(type: JavaExec) {
+task generateDictionnary(type: JavaExec, dependsOn: compileGenerator) {
 	description = 'Dictionnary generation'
 	main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
 	classpath { 
@@ -184,10 +189,27 @@ task generateDictionnary(type: JavaExec) {
 	args = [
 		'verbose=false'
 	]
+	inputs.file file('src-core/main/resources/spec/propertiesDictionnary.json')
+	outputs.dir file('src-generated/main/java/com/ponysdk/ui')
 }
 
 
+task generate(dependsOn: generateDictionnary) {
+	doLast {
+		println 'generation done'
+	}
+}
 
+
+task compileTerminal << {
+	result = System.getProperty('nogwtc', 'false')
+	println('nogwtc ? ' + result)
+	if(result == 'true') {
+		println('[WARN] terminal compilation disabled');
+	} else {
+		tasks.gwtc.execute();
+	}
+}
 
 task gwtc(type: JavaExec) {
 	description = 'GWT compile'
@@ -212,13 +234,6 @@ task gwtc(type: JavaExec) {
 		'com.ponysdk.ui.PonyTerminal'
 	]
 }
-
-
-task generate {
-	inputs.file files('src-core/main/resources/spec')
-	outputs.dir file(srcGenerated)
-}
-
 
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn:classes) {
@@ -312,12 +327,7 @@ task sendTo(type: Copy) {
 	into file(outputdir)
 }
 
-generate.dependsOn(generateDictionnary)
-generateDictionnary.dependsOn(compileGenerator)
-compileGenerator.dependsOn(compileDatamodel)
-compileDatamodel.dependsOn(generateDatamodel)
-
 clean.dependsOn(cleanGenerated)
 compileJava.dependsOn(generate)
-jar.dependsOn(gwtc)
+jar.dependsOn(compileTerminal)
 assemble.dependsOn(copyAllLibs)

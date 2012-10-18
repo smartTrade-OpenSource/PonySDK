@@ -50,7 +50,7 @@ task cleanDebug(type: Delete) {
   delete 'debug'
 }
 
-task generate{
+task generateServices{
 }
 
 task generateSkeleton(type: JavaExec) {
@@ -171,8 +171,8 @@ jar {
 }
 
 assemble.dependsOn(copyAllLibs)
-generate.dependsOn(generateSkeleton)
-generate.dependsOn(generateSkeleton2)
-generate.dependsOn(generateProxyBuilder)
-compileJava.dependsOn(generate)
-generate.dependsOn(cleanGenerated)
+generateServices.dependsOn(generateSkeleton)
+generateServices.dependsOn(generateSkeleton2)
+generateServices.dependsOn(generateProxyBuilder)
+compileJava.dependsOn(generateServices)
+generateServices.dependsOn(cleanGenerated)
