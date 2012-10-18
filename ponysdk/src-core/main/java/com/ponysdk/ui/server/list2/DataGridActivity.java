@@ -52,11 +52,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
-
-        // this.view.setColumns(columnDescriptors.size());
-
         view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0);
-
         addFillColumn();
     }
 
@@ -92,7 +88,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             view.addWidget(new PSimplePanel(), col, subRow++);
         }
         updateSubListOnRowInserted(row, datas.size());
-        // eventBus.fireEvent(new RowInsertedEvent(this, row, datas.size()));
     }
 
     public void removeSubList(final int fatherRow) {
@@ -101,7 +96,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             for (int i = 1; i <= subListSize; i++) {
                 view.removeRow(fatherRow + 1);
             }
-            // eventBus.fireEvent(new RowDeletedEvent(this, fatherRow, subListSize));
             updateSubListOnRowDeleted(fatherRow, subListSize);
         }
     }

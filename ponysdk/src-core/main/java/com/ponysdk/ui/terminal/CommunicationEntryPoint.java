@@ -32,7 +32,6 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -54,7 +53,7 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
     protected UIBuilder uiBuilder;
 
     protected long applicationViewID;
-    protected int scriptToLoad = 0;
+    // protected int scriptToLoad = 0;
 
     protected JSONObject data;
 
@@ -114,18 +113,19 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
 
                             if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(applicationViewID));
 
-                            if (data.containsKey(APPLICATION.SCRIPTS)) {
-                                final JSONArray scripts = data.get(APPLICATION.SCRIPTS).isArray();
-
-                                scriptToLoad = scripts.size();
-
-                                for (int i = 0; i < scripts.size(); i++) {
-                                    final String script = scripts.get(i).isString().stringValue();
-                                    ScriptInjector.fromUrl(GWT.getHostPageBaseURL() + script).setCallback(CommunicationEntryPoint.this).inject();
-                                }
-                            } else {
-                                initUIBuilder();
-                            }
+                            // if (data.containsKey(APPLICATION.SCRIPTS)) {
+                            // final JSONArray scripts = data.get(APPLICATION.SCRIPTS).isArray();
+                            //
+                            // scriptToLoad = scripts.size();
+                            //
+                            // for (int i = 0; i < scripts.size(); i++) {
+                            // final String script = scripts.get(i).isString().stringValue();
+                            // ScriptInjector.fromUrl(GWT.getHostPageBaseURL() +
+                            // script).setCallback(CommunicationEntryPoint.this).inject();
+                            // }
+                            // } else {
+                            initUIBuilder();
+                            // }
                         } else {
                             uiBuilder.update(data);
                             uiBuilder.hideLoadingMessageBox();
@@ -181,7 +181,7 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
 
     @Override
     public void onSuccess(final Void result) {
-        scriptToLoad--;
-        if (scriptToLoad == 0) initUIBuilder();
+        // scriptToLoad--;
+        // if (scriptToLoad == 0) initUIBuilder();
     }
 }
