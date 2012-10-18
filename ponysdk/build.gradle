@@ -186,6 +186,9 @@ task generateDictionnary(type: JavaExec) {
 	]
 }
 
+
+
+
 task gwtc(type: JavaExec) {
 	description = 'GWT compile'
 	main = 'com.google.gwt.dev.Compiler'
@@ -210,22 +213,11 @@ task gwtc(type: JavaExec) {
 	]
 }
 
+
 task generate {
 	inputs.file files('src-core/main/resources/spec')
 	outputs.dir file(srcGenerated)
 }
-
-
-/**javadoc{
-    title = 'PonySDK javadoc'
-    excludes = ['com.ponysdk.ui.terminal']
-    doLast {
-        copy {
-            from javadocResources
-            into buildDir.name + '/docs/javadoc';
-        }
-    }
-}**/
 
 
 // custom tasks for creating source/javadoc jars
@@ -239,7 +231,8 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 		include '**/*.xml'
 	}
 }
- 
+
+
 task javadocJar(type: Jar, dependsOn:javadoc) {
      classifier = 'javadoc'
      from javadoc.destinationDir
@@ -309,6 +302,14 @@ task copyAllLibs << {
 	    from configurations.commons
 	    into 'libs/commons'
 	}
+}
+
+task sendTo(type: Copy) {
+	outputdir = System.getProperty("jar.destination", ".");
+	println('copying jars to: ' + outputdir)
+	
+	from file("$buildDir/libs")
+	into file(outputdir)
 }
 
 generate.dependsOn(generateDictionnary)
