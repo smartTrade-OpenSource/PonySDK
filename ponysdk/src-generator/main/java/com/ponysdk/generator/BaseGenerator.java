@@ -31,10 +31,6 @@ public class BaseGenerator {
 
     protected Domain domain;
 
-    protected final Map<String, FormFieldProperties> editFormFieldByID = new HashMap<String, FormFieldProperties>();
-
-    protected final Map<String, FormFieldProperties> searchFormFieldByID = new HashMap<String, FormFieldProperties>();
-
     protected final Map<String, CriteriaFieldProperties> criteriaFieldByID = new HashMap<String, CriteriaFieldProperties>();
 
     protected final Map<String, ExportFieldProperties> exportFieldByID = new HashMap<String, ExportFieldProperties>();
@@ -43,14 +39,14 @@ public class BaseGenerator {
 
     public BaseGenerator() {}
 
-    public BaseGenerator(Domain domain) {
+    public BaseGenerator(final Domain domain) {
         this.domain = domain;
         loadDescription();
     }
 
     private void loadDescription() {
         if (domain.getUi() == null) return;
-        final List<Field> fields = domain.getUi().getField();
+        final List<Field> fields = domain.getUi().getFields();
         for (final Field field : fields) {
             if (field.getListFieldProperties() != null) {
                 listFieldByID.put(field.getId(), field.getListFieldProperties());
@@ -60,12 +56,6 @@ public class BaseGenerator {
             }
             if (field.getExportFieldProperties() != null) {
                 exportFieldByID.put(field.getId(), field.getExportFieldProperties());
-            }
-            if (field.getSearchFormProperties() != null) {
-                searchFormFieldByID.put(field.getId(), field.getSearchFormProperties());
-            }
-            if (field.getEditFormProperties() != null) {
-                editFormFieldByID.put(field.getId(), field.getEditFormProperties());
             }
         }
     }
