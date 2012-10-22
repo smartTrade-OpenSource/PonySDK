@@ -47,6 +47,10 @@ public class GeneratorHelper {
         return domain.getPackage() + ".event." + domain.getName().toLowerCase();
     }
 
+    public static String getUiPackage(final Domain domain) {
+        return domain.getPackage() + ".ui." + domain.getName().toLowerCase();
+    }
+
     public static String getDAOPackage(final Domain domain) {
         return domain.getPackage() + ".dao." + domain.getName().toLowerCase();
     }
@@ -72,6 +76,11 @@ public class GeneratorHelper {
     // Event
     public static String getEventClassName(final Event event) {
         return event.getName() + "Event";
+    }
+
+    // ListDescriptor
+    public static String getListDescriptorClassName(final Domain domain) {
+        return domain.getName() + "ListDescriptor";
     }
 
     // Handler
@@ -220,7 +229,7 @@ public class GeneratorHelper {
     }
 
     public static List<Field> getAllFields(final Domain entity) {
-        return entity.getUi().getField();
+        return entity.getUi().getFields();
     }
 
     public static String getParameterToString(final List<Parameter> params) throws Exception {

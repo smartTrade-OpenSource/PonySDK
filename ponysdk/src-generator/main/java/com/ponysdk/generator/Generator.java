@@ -32,7 +32,7 @@ import javax.xml.bind.Unmarshaller;
 
 public class Generator {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             final Generator generator = new Generator();
             if (args.length == 2) {
@@ -46,7 +46,7 @@ public class Generator {
         }
     }
 
-    private void generateAll(String directories, String srcGeneratedDirectory) throws Exception {
+    private void generateAll(final String directories, final String srcGeneratedDirectory) throws Exception {
 
         final JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -69,8 +69,11 @@ public class Generator {
                 }
                 serviceGenerator.generate();
 
-                // uiFactoryGenerator = new UIFactoryGenerator(entity);
-                // uiFactoryGenerator.generate();
+                final UiGenerator uiGenerator = new UiGenerator(root.getDomain());
+                if (srcGeneratedDirectory != null) {
+                    uiGenerator.setSrcGeneratedDirectory(srcGeneratedDirectory);
+                }
+                uiGenerator.generate();
             }
         }
     }
