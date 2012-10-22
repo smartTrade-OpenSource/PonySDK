@@ -198,4 +198,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         return columnDescriptors;
     }
 
+    public SimpleListView getListView() {
+        return view;
+    }
+
 }

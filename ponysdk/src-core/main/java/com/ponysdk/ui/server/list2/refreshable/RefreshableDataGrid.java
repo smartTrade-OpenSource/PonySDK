@@ -104,6 +104,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         }
     }
 
+    public int getRow(final K key) {
+        return cells.get(key).entrySet().iterator().next().getValue().row;
+    }
+
     @Override
     public void clear() {
         super.clear();
