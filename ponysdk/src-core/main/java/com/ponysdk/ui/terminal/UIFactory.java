@@ -45,6 +45,7 @@ import com.ponysdk.ui.terminal.ui.PTFlowPanel;
 import com.ponysdk.ui.terminal.ui.PTFocusPanel;
 import com.ponysdk.ui.terminal.ui.PTGrid;
 import com.ponysdk.ui.terminal.ui.PTHTML;
+import com.ponysdk.ui.terminal.ui.PTHeaderPanel;
 import com.ponysdk.ui.terminal.ui.PTHorizontalPanel;
 import com.ponysdk.ui.terminal.ui.PTImage;
 import com.ponysdk.ui.terminal.ui.PTLabel;
@@ -133,6 +134,8 @@ public class UIFactory {
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
         if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
         if (WidgetType.PUSHER.equals(widgetType)) { return new PTPusher(); }
+        if (WidgetType.HEADER_PANEL.equals(widgetType)) { return new PTHeaderPanel(); }
+
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

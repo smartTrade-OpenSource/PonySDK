@@ -112,8 +112,14 @@ public class UiGenerator extends BaseGenerator {
 
         classWriter.addNewLine();
         for (final Field field : domain.getUi().getFields()) {
-            classWriter.addLine("fieldDescriptorByID.put(FIELD_" + field.getId().toUpperCase() + ", new FieldDescriptor(\"" + field.getId() + "\",\"" + field.getKey() + "\"," + field.getType() + ".class,\"" + getListCaption(field)
-                    + "\",\"" + getCriteriaKey(field) + "\",\"" + getExportCaption(field) + "\"));");
+            String listCaption = getListCaption(field);
+            String criteriaKey = getCriteriaKey(field);
+            String exportCaption = getExportCaption(field);
+            if (listCaption != null) listCaption = "\"" + listCaption + "\"";
+            if (criteriaKey != null) criteriaKey = "\"" + criteriaKey + "\"";
+            if (exportCaption != null) exportCaption = "\"" + exportCaption + "\"";
+            classWriter.addLine("fieldDescriptorByID.put(FIELD_" + field.getId().toUpperCase() + ", new FieldDescriptor(\"" + field.getId() + "\",\"" + field.getKey() + "\"," + field.getType() + ".class," + listCaption + "," + criteriaKey
+                    + "," + exportCaption + "));");
         }
 
         // public FieldDescriptor(final String iD, final String key, final Class<?> type, final String
