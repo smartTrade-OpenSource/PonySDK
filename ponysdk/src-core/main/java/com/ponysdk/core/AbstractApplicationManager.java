@@ -1,11 +1,9 @@
 
 package com.ponysdk.core;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -35,23 +33,27 @@ public abstract class AbstractApplicationManager {
     private final ServiceLoader<Addon> addonServiceLoader = ServiceLoader.load(Addon.class);
     private final ServiceLoader<ScriptInjector> scriptInjectorServiceLoader = ServiceLoader.load(ScriptInjector.class);
 
-    private final Set<String> scripts = new HashSet<String>();
+    // private final Set<String> scripts = new HashSet<String>();
 
     public AbstractApplicationManager() {
         final Iterator<Addon> addons = addonServiceLoader.iterator();
         while (addons.hasNext()) {
             final Addon addon = addons.next();
-            log.info("Addon loaded : " + addon.getName());
+            log.info("Addon detected : " + addon.getName());
         }
         final Iterator<ScriptInjector> scriptInjectors = scriptInjectorServiceLoader.iterator();
         while (scriptInjectors.hasNext()) {
             final ScriptInjector scriptInjector = scriptInjectors.next();
-            scripts.addAll(scriptInjector.getScripts());
+            log.info("Script dependencies for Addon #" + scriptInjector.getAddon().getName());
+            for (final String script : scriptInjector.getScripts()) {
+                log.info(script);
+            }
+            // scripts.addAll(scriptInjector.getScripts());
         }
-
-        for (final String script : scripts) {
-            log.info("Injected script : " + script);
-        }
+        //
+        // for (final String script : scripts) {
+        // log.info("Injected script : " + script);
+        // }
     }
 
     public void process(final Request request, final Response response) throws Exception {
@@ -116,7 +118,7 @@ public abstract class AbstractApplicationManager {
             try {
                 jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
 
-                if (!scripts.isEmpty()) jsonObject.put(APPLICATION.SCRIPTS, scripts);
+                // if (!scripts.isEmpty()) jsonObject.put(APPLICATION.SCRIPTS, scripts);
 
                 uiContext.flushInstructions(jsonObject);
                 response.write(jsonObject.toString());

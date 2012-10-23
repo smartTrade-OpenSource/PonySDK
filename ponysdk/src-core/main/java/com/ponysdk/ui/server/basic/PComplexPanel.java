@@ -55,12 +55,13 @@ public abstract class PComplexPanel extends PPanel {
     public boolean remove(final PWidget w) {
         if (w.getParent() != this) return false;
         orphan(w);
-        getChildren().remove(w);
-
-        final Remove remove = new Remove(w.getID(), getID());
-        getUIContext().stackInstruction(remove);
-
-        return true;
+        if (getChildren().remove(w)) {
+            final Remove remove = new Remove(w.getID(), getID());
+            getUIContext().stackInstruction(remove);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean remove(final int index) {

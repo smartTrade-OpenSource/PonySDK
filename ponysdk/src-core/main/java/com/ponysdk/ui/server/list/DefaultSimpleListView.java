@@ -73,6 +73,11 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     }
 
     @Override
+    public void removeRowStyle(final int row, final String styleName) {
+        getRowFormatter().removeStyleName(row, styleName);
+    }
+
+    @Override
     public void addHeaderStyle(final String styleName) {
         getRowFormatter().addStyleName(0, styleName);
     }

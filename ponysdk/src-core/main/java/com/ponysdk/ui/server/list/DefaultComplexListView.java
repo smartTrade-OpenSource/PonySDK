@@ -173,6 +173,11 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
+    public void removeRowStyle(final int row, final String styleName) {
+        simpleListView.removeRowStyle(row, styleName);
+    }
+
+    @Override
     public void setFloatableToolBar(final PScrollPanel ancestorScrollPanel) {
         // positionPanel.setLinkedScrollPanel(ancestorScrollPanel);
     }

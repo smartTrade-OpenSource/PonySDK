@@ -336,14 +336,14 @@ public abstract class PHTMLTable extends PPanel {
         try {
             orphan(widget);
         } finally {
-            // Physical detach.
-            if (physicalDetach) {
-                final Remove remove = new Remove(widget.getID(), getID());
-                getUIContext().stackInstruction(remove);
-            }
-
             // Logical detach.
-            removeWidgetFromMap(widget);
+            if (removeWidgetFromMap(widget) != null) {
+                // Physical detach.
+                if (physicalDetach) {
+                    final Remove remove = new Remove(widget.getID(), getID());
+                    getUIContext().stackInstruction(remove);
+                }
+            }
         }
         return true;
     }
@@ -394,6 +394,7 @@ public abstract class PHTMLTable extends PPanel {
 
     private PWidget removeWidgetFromMap(final PWidget widget) {
         final Cell cell = cellByWidget.remove(widget);
+        if (cell == null) return null; // already removed
         final Row row = new Row(cell.row);
         final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
         if (cellByColumn != null) {

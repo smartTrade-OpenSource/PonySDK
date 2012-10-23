@@ -60,7 +60,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     public boolean remove(final PWidget w) {
         // Validate.
-        if (widget != w) { return false; }
+        if (widget == null || widget != w) { return false; }
 
         // Orphan.
         try {

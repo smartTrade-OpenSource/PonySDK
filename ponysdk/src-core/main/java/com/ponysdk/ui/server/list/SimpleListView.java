@@ -43,6 +43,8 @@ public interface SimpleListView extends IsPWidget {
 
     void addRowStyle(int row, String styleName);
 
+    void removeRowStyle(int row, String styleName);
+
     void addColumnStyle(int column, String styleName);
 
     void removeColumnStyle(int column, String styleName);

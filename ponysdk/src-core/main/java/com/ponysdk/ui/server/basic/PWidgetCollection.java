@@ -137,11 +137,11 @@ public class PWidgetCollection implements Iterable<PWidget> {
         array[size] = null;
     }
 
-    public void remove(final PWidget w) {
+    public boolean remove(final PWidget w) {
         final int index = indexOf(w);
-        if (index == -1) { throw new NoSuchElementException(); }
-
+        if (index == -1) return false;
         remove(index);
+        return true;
     }
 
     public int size() {

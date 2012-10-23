@@ -53,9 +53,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
-
         view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0);
-
         addFillColumn();
     }
 
@@ -198,6 +196,10 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public List<DataGridColumnDescriptor<D, ?>> getColumnDescriptors() {
         return columnDescriptors;
+    }
+
+    public SimpleListView getListView() {
+        return view;
     }
 
 }
