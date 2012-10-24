@@ -79,6 +79,7 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     @Override
     public void setText(String text) {
         if (text == null) text = "";
+        if (text.equals(this.text)) return;
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
