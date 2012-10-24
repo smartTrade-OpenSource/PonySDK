@@ -78,5 +78,6 @@ public enum WidgetType {
     FOCUS_PANEL,
     DATEPICKER,
     SCRIPT,
-    PUSHER;
+    PUSHER,
+    HEADER_PANEL;
 }
