@@ -23,23 +23,21 @@
 
 package com.ponysdk.ui.terminal.exception;
 
-public class PonySessionException extends Exception {
+public class ServerException extends Exception {
 
     private static final long serialVersionUID = -2064816487726122645L;
 
-    public PonySessionException() {
-        super();
-    }
+    public static int INVALID_SESSION = 600;
 
-    public PonySessionException(String cause) {
+    private final int code;
+
+    public ServerException(final int code, final String cause) {
         super(cause);
+        this.code = code;
     }
 
-    public PonySessionException(Throwable arg0) {
-        super(arg0);
+    public int getCode() {
+        return code;
     }
 
-    public PonySessionException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
-    }
 }

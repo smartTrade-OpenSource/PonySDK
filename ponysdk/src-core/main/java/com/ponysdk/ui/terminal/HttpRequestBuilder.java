@@ -10,6 +10,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 
 public class HttpRequestBuilder extends RequestBuilder {
 
@@ -30,8 +31,7 @@ public class HttpRequestBuilder extends RequestBuilder {
                 public void onResponseReceived(final Request request, final Response response) {
 
                     if (response.getStatusCode() != 200) {
-                        // onError(request, new StatusCodeException(response.getStatusCode(),
-                        // response.getStatusText()));
+                        onError(request, new StatusCodeException(response.getStatusCode(), response.getStatusText()));
                         return;
                     }
 

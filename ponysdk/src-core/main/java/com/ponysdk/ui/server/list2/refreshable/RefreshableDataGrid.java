@@ -91,8 +91,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         } else {
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
-                d.getCellRenderer().update(d.getValueProvider().getValue(data), map.get(d));
+                final Object value = d.getValueProvider().getValue(data);
+                d.getCellRenderer().update(value, map.get(d));
                 map.get(d).data = data;
+                map.get(d).value = value;
             }
         }
     }

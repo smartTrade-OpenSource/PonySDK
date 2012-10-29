@@ -185,8 +185,17 @@ public class PPusher extends PObject implements ConnectionListener {
     @Override
     public void onOpen() {
         pusherState = PusherState.STARTED;
-        for (final ConnectionListener listener : connectionListeners) {
-            listener.onOpen();
+
+        begin();
+        try {
+            for (final ConnectionListener listener : connectionListeners) {
+                listener.onOpen();
+            }
+            PPusher.get().flush();
+        } catch (final Exception exception) {
+            log.error("Cannot push data", exception);
+        } finally {
+            PPusher.get().end();
         }
     }
 

@@ -44,7 +44,6 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
@@ -62,7 +61,7 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
-import com.ponysdk.ui.terminal.exception.PonySessionException;
+import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
@@ -141,6 +140,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     public void onCommunicationError(final Throwable exception) {
+
         if (loadingMessageBox == null) {
             // log.log(Level.SEVERE, "Error ", exception);
             if (exception instanceof StatusCodeException) {
@@ -148,17 +148,18 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 if (codeException.getStatusCode() == 0) return;
             }
             Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
-        } else {
-            if (pendingClose) return;
-            // log.log(Level.SEVERE, "fireInstruction failed", exception);
+            return;
+        }
 
-            if (exception instanceof PonySessionException) {
-                CommunicationEntryPoint.reload();
-                return;
-            }
+        if (pendingClose) return;
+
+        if (exception instanceof StatusCodeException) {
             numberOfrequestInProgress--;
-            showCommunicationErrorMessage(exception);
+            final StatusCodeException statusCodeException = (StatusCodeException) exception;
+            showCommunicationErrorMessage(statusCodeException);
             hideLoadingMessageBox();
+        } else {
+            Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
         }
     }
 
@@ -398,30 +399,31 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         return timer;
     }
 
-    private void showCommunicationErrorMessage(final Throwable caught) {
+    private void showCommunicationErrorMessage(final StatusCodeException caught) {
 
         final VerticalPanel content = new VerticalPanel();
-        if (caught instanceof StatusCodeException) {
-            final StatusCodeException exception = (StatusCodeException) caught;
-            content.add(new HTML("Server connection failed <br/>Code : " + exception.getStatusCode() + "<br/>" + "cause : " + exception.getMessage()));
-        } else if (caught instanceof InvocationException) {
-            content.add(new HTML("Exception durring server invocation : " + caught.getMessage()));
-        } else {
-            content.add(new HTML("Failure : " + caught == null ? "" : caught.getMessage()));
-        }
-
         final HorizontalPanel actionPanel = new HorizontalPanel();
         actionPanel.setSize("100%", "100%");
 
-        final Anchor reloadAnchor = new Anchor("reload");
-        reloadAnchor.addClickHandler(new ClickHandler() {
+        if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
+            content.add(new HTML("Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
-            @Override
-            public void onClick(final ClickEvent event) {
-                History.newItem("");
-                CommunicationEntryPoint.reload();
-            }
-        });
+            final Anchor reloadAnchor = new Anchor("reload");
+            reloadAnchor.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(final ClickEvent event) {
+                    History.newItem("");
+                    CommunicationEntryPoint.reload();
+                }
+            });
+
+            actionPanel.add(reloadAnchor);
+            actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
+            actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
+        } else {
+            content.add(new HTML("An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+        }
 
         final Anchor closeAnchor = new Anchor("close");
         closeAnchor.addClickHandler(new ClickHandler() {
@@ -431,13 +433,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 communicationErrorMessagePanel.hide();
             }
         });
-
-        actionPanel.add(reloadAnchor);
         actionPanel.add(closeAnchor);
-
-        actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
         actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
-        actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
 
         content.add(actionPanel);

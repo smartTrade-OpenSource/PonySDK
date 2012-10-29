@@ -122,6 +122,8 @@ public class Main {
         context.addServlet(new ServletHolder(bootstrapServlet), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(httpServlet), MAPPING_TERMINAL);
 
+        // context.getSessionHandler().getSessionManager().setMaxInactiveInterval(30);
+
         final FilterHolder filterHolder = new FilterHolder(GzipFilter.class);
         context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 

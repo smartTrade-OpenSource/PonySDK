@@ -33,8 +33,6 @@ import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
 
 public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
 
@@ -53,21 +51,22 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
 
     private void script() {
 
-        final StringBuilder builder = new StringBuilder();
-        builder.append("less.watch();");
-
-        PScript.get().execute(builder.toString());
-
-        PScript.get().execute("if ('ontouchstart' in document) { document.documentElement.className +=' touch ' ; } else { document.documentElement.className +=' notouch ' ; } ", new ExecutionCallback() {
-
-            @Override
-            public void onSuccess(final String msg) {
-                log.info("Touch support ? " + msg);
-            }
-
-            @Override
-            public void onFailure(final String msg) {}
-        });
+        // final StringBuilder builder = new StringBuilder();
+        // builder.append("less.watch();");
+        //
+        // PScript.get().execute(builder.toString());
+        //
+        // PScript.get().execute("if ('ontouchstart' in document) { document.documentElement.className +=' touch ' ; } else { document.documentElement.className +=' notouch ' ; } ",
+        // new ExecutionCallback() {
+        //
+        // @Override
+        // public void onSuccess(final String msg) {
+        // log.info("Touch support ? " + msg);
+        // }
+        //
+        // @Override
+        // public void onFailure(final String msg) {}
+        // });
     }
 
     @Override

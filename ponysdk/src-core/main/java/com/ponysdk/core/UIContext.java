@@ -60,7 +60,6 @@ import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
-import com.ponysdk.ui.terminal.exception.PonySessionException;
 
 public class UIContext {
 
@@ -111,7 +110,7 @@ public class UIContext {
         pendingInstructions.add(instruction);
     }
 
-    void fireClientData(final JSONObject instruction) throws PonySessionException, JSONException {
+    void fireClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
                 UIContext.get().invalidate();

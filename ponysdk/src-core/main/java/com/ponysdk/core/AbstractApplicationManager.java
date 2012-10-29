@@ -24,7 +24,7 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.exception.PonySessionException;
+import com.ponysdk.ui.terminal.exception.ServerException;
 
 public abstract class AbstractApplicationManager {
 
@@ -136,11 +136,11 @@ public abstract class AbstractApplicationManager {
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
 
-        if (applicationSession == null) { throw new PonySessionException("Invalid session, please reload your application"); }
+        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
 
         final UIContext uiContext = applicationSession.getUIContext(key);
 
-        if (uiContext == null) { throw new PonySessionException("Invalid session, please reload your application"); }
+        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
 
         uiContext.acquire();
         try {
@@ -192,7 +192,7 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException, PonySessionException {
+    private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
         if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
             final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
             for (int i = 0; i < instructions.length(); i++) {

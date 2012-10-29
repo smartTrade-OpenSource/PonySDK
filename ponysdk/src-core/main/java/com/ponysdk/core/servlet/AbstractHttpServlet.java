@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.ui.terminal.exception.ServerException;
 
 /**
  * The server side implementation of the RPC service.
@@ -69,9 +70,12 @@ public abstract class AbstractHttpServlet extends HttpServlet {
         final Session session = SessionManager.get().getSession(req.getSession().getId());
         try {
             applicationManager.process(new HttpRequest(session, req), new HttpResponse(resp));
-        } catch (final Throwable e) {
-            resp.sendError(501, e.getMessage());
+        } catch (final ServerException e) {
             log.error("Failed to process request", e);
+            resp.sendError(e.getCode(), e.getMessage());
+        } catch (final Throwable e) {
+            log.error("Failed to process request", e);
+            resp.sendError(501, e.getMessage());
         }
     }
 

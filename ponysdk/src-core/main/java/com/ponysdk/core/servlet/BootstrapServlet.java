@@ -53,7 +53,7 @@ public class BootstrapServlet extends HttpServlet {
 
     private static byte[] indexPage;
 
-    private String applicationName;
+    private String applicationName = "";
 
     private final List<String> stylesheets = new ArrayList<String>();
     private final List<String> javascripts = new ArrayList<String>();
@@ -63,7 +63,7 @@ public class BootstrapServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
+        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME, applicationName);
 
         final String styles = System.getProperty(SystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
@@ -205,5 +205,9 @@ public class BootstrapServlet extends HttpServlet {
 
     public void addJavascript(final String javascriptPath) {
         javascripts.add(javascriptPath);
+    }
+
+    public void setApplicationName(final String applicationName) {
+        this.applicationName = applicationName;
     }
 }
