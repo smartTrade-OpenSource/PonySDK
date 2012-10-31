@@ -162,6 +162,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         rows.addAll(data);
 
         view.clear(1);
+        subListSizeByFather.clear();
 
         int rowIndex = 1;
         for (final D t : data) {

@@ -27,5 +27,5 @@ import com.ponysdk.core.event.EventHandler;
 
 public interface PlaceChangeRequestHandler extends EventHandler {
 
-    void onPlaceChange(PlaceChangeRequestEvent event);
+    void onPlaceChangeRequest(PlaceChangeRequestEvent event);
 }

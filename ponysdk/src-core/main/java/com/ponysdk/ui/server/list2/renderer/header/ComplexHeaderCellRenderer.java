@@ -53,14 +53,14 @@ import com.ponysdk.ui.server.list2.Validable;
 
 public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
-    private final PGrid headerGrid = new PGrid(2, 1);
-    private final PLabel title;
-    private final FormField<?> formField;
-    private final String key;
+    protected final PGrid headerGrid = new PGrid(2, 1);
+    protected final PLabel title;
+    protected final FormField<?> formField;
+    protected final String key;
 
-    private SortingType sortingType = SortingType.NONE;
+    protected SortingType sortingType = SortingType.NONE;
 
-    private final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<FilterListener>();
+    protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<FilterListener>();
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
         this(caption, formField, key, null);

@@ -34,7 +34,7 @@ public class PlaceController implements PlaceChangeRequestHandler {
     }
 
     @Override
-    public void onPlaceChange(final PlaceChangeRequestEvent event) {
+    public void onPlaceChangeRequest(final PlaceChangeRequestEvent event) {
         goTo(event.getPlace());
     }
 

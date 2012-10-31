@@ -107,7 +107,7 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     }
 
     @Override
-    public final void afterContextInitialized() {
+    public void afterContextInitialized() {
         if (this.pageView == null) {
             this.pageView = new DefaultScrollablePageView();
             this.pageView.setPageTitle(pageName);

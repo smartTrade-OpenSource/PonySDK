@@ -23,31 +23,12 @@
 
 package com.ponysdk.core.place;
 
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.UIContext;
 
-public class PlaceChangeRequestEvent extends Event<PlaceChangeRequestHandler> {
+public class PlaceChangeRequest {
 
-    public static final Type<PlaceChangeRequestHandler> TYPE = new Type<PlaceChangeRequestHandler>();
-
-    private final Place place;
-
-    public PlaceChangeRequestEvent(final Object sourceComponent, final Place newPlace) {
-        super(sourceComponent);
-        this.place = newPlace;
-    }
-
-    @Override
-    public Type<PlaceChangeRequestHandler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(final PlaceChangeRequestHandler handler) {
-        handler.onPlaceChangeRequest(this);
-    }
-
-    public Place getPlace() {
-        return place;
+    public static void fire(final Object source, final Place newPlace) {
+        UIContext.fireEvent(new PlaceChangeEvent(source, newPlace));
     }
 
 }

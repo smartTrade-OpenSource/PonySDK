@@ -28,7 +28,7 @@ import com.ponysdk.ui.server.basic.PWidget;
 
 public class Pager<T> implements IsPWidget {
 
-    private final int pageSize = 20;
+    private final int pageSize;
     private int currentPage = 0;
 
     private final PagerView view;
@@ -36,8 +36,12 @@ public class Pager<T> implements IsPWidget {
     private static final int PAGING_WINDOW = 5;
 
     public Pager(final PagerView view) {
-        this.view = view;
+        this(view, 20);
+    }
 
+    public Pager(final PagerView view, final int pageSize) {
+        this.view = view;
+        this.pageSize = pageSize;
     }
 
     public int getCurrentPage() {
