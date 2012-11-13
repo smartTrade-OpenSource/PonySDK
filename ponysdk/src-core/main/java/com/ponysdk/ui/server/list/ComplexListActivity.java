@@ -506,7 +506,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
             actionBar.addSeparator();
             final PMenuBar exportListMenuBar = new PMenuBar(true);
 
-            for (final Exporter<?> exporter : complexListConfiguration.getExportConfiguration().getExporters()) {
+            for (final Exporter<D> exporter : complexListConfiguration.getExportConfiguration().getExporters()) {
                 final PMenuItem item = new PMenuItem(exporter.name(), new PCommand() {
 
                     @Override

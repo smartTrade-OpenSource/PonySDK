@@ -12,7 +12,6 @@
 	<xs:element name="domain">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="ui" minOccurs="0" maxOccurs="1" />
 				<xs:element ref="service" minOccurs="0" maxOccurs="1" />
 				<xs:element ref="crudevent" minOccurs="0" maxOccurs="1" />
 				<xs:element ref="event" minOccurs="0" maxOccurs="unbounded" />
@@ -20,61 +19,6 @@
 			<xs:attribute name="name" use="required" type="xs:string" />
 			<xs:attribute name="package" use="required" type="xs:string" />
 			<xs:attribute name="description" use="optional" type="xs:string" />
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="ui">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="listProperties" minOccurs="0" maxOccurs="1" />
-				<xs:element ref="field" minOccurs="0" maxOccurs="unbounded">
-					<xs:annotation>
-						<xs:appinfo>
-							<jaxb:property name="fields" />
-						</xs:appinfo>
-					</xs:annotation>
-				</xs:element>
-			</xs:sequence>
-			<xs:attribute name="type" use="required" type="xs:string" />
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="listProperties">
-		<xs:complexType>
-			<xs:attribute name="caption" use="optional" type="xs:string" />
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="field">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="listFieldProperties" minOccurs="0" maxOccurs="1" />
-				<xs:element ref="criteriaFieldProperties" minOccurs="0" maxOccurs="1" />
-				<xs:element ref="exportFieldProperties" minOccurs="0" maxOccurs="1" />
-			</xs:sequence>
-			<xs:attribute name="id" use="required" type="xs:string" />
-			<xs:attribute name="key" use="required" type="xs:string" />
-			<xs:attribute name="caption" use="required" type="xs:string" />
-			<xs:attribute name="type" use="required" type="xs:string" />
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="listFieldProperties">
-		<xs:complexType>
-			<xs:attribute name="caption" use="optional" type="xs:string" />
-			<xs:attribute name="visible" use="optional" type="xs:boolean" default="true" />
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="criteriaFieldProperties">
-		<xs:complexType>
-			<xs:attribute name="key" use="optional" type="xs:string" />
-			<xs:attribute name="queriable" use="optional" type="xs:boolean" default="true" />
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="exportFieldProperties">
-		<xs:complexType>
-			<xs:attribute name="caption" use="optional" type="xs:string" />
-			<xs:attribute name="exportable" use="optional" type="xs:boolean" default="true" />
 		</xs:complexType>
 	</xs:element>
 

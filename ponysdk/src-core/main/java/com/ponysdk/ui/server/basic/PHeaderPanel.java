@@ -29,6 +29,7 @@ import java.util.List;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -42,6 +43,12 @@ public class PHeaderPanel extends PPanel {
     private PWidget header;
     private PWidget content;
     private PWidget footer;
+
+    public void resize() {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.RESIZE, true);
+        getUIContext().stackInstruction(update);
+    }
 
     @Override
     protected WidgetType getWidgetType() {

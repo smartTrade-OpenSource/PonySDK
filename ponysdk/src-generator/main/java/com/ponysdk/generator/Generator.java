@@ -53,8 +53,12 @@ public class Generator {
 
         final List<Root> definitions = new ArrayList<Root>();
 
+        System.out.println("generating ...");
+
         final String[] split = directories.split(",");
         for (final String d : split) {
+
+            System.out.println("directory: " + d);
 
             final List<File> files = read(new File(d));
             for (final File file : files) {
@@ -69,11 +73,11 @@ public class Generator {
                 }
                 serviceGenerator.generate();
 
-                final UiGenerator uiGenerator = new UiGenerator(root.getDomain());
-                if (srcGeneratedDirectory != null) {
-                    uiGenerator.setSrcGeneratedDirectory(srcGeneratedDirectory);
-                }
-                uiGenerator.generate();
+                // final UiGenerator uiGenerator = new UiGenerator(root.getDomain());
+                // if (srcGeneratedDirectory != null) {
+                // uiGenerator.setSrcGeneratedDirectory(srcGeneratedDirectory);
+                // }
+                // uiGenerator.generate();
             }
         }
     }

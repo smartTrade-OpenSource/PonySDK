@@ -33,7 +33,7 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
 
     private PPanel formLayout;
 
-    private ExportConfiguration exportConfiguration;
+    private ExportConfiguration<T> exportConfiguration;
 
     private boolean selectionColumnEnabled;
 
@@ -81,11 +81,11 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         this.formLayout = formLayout;
     }
 
-    public ExportConfiguration getExportConfiguration() {
+    public ExportConfiguration<T> getExportConfiguration() {
         return exportConfiguration;
     }
 
-    public void setExportConfiguration(final ExportConfiguration exportConfiguration) {
+    public void setExportConfiguration(final ExportConfiguration<T> exportConfiguration) {
         this.exportConfiguration = exportConfiguration;
     }
 

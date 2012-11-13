@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Dictionnary;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
@@ -46,6 +47,15 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
             else cast().setContentWidget(w);
         } else {
             uiObject.add(asWidget(add.getObjectID(), uiService));
+        }
+    }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.RESIZE)) {
+            uiObject.onResize();
+        } else {
+            super.update(update, uiService);
         }
     }
 

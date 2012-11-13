@@ -21,17 +21,24 @@
  * the License.
  */
 
-package com.ponysdk.generator;
+package com.ponysdk.ui.server.form2.validator;
 
+public class LongFieldValidator implements FieldValidator {
 
-public class BaseGenerator {
+    private static final String ERROR_MESSAGE = "Not a long";
 
-    protected Domain domain;
-
-    public BaseGenerator() {}
-
-    public BaseGenerator(final Domain domain) {
-        this.domain = domain;
+    private static ValidationResult isALong(final String value) {
+        try {
+            Long.parseLong(value);
+            return ValidationResult.newOKValidationResult();
+        } catch (final Exception e) {
+            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        }
     }
 
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isALong(value);
+    }
 }

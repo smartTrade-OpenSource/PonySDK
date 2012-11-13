@@ -32,17 +32,17 @@ import java.util.Map;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 
-public class ExportConfiguration {
+public class ExportConfiguration<D> {
 
-    private final List<Exporter<?>> exporters = new ArrayList<Exporter<?>>();
+    private final List<Exporter<D>> exporters = new ArrayList<Exporter<D>>();
 
     private final Map<String, ExportableField> exportFields = new LinkedHashMap<String, ExportableField>();
 
-    public void addExporter(final Exporter<?> exporter) {
+    public void addExporter(final Exporter<D> exporter) {
         exporters.add(exporter);
     }
 
-    public List<Exporter<?>> getExporters() {
+    public List<Exporter<D>> getExporters() {
         return exporters;
     }
 

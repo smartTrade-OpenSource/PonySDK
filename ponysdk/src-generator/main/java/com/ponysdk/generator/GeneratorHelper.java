@@ -228,10 +228,6 @@ public class GeneratorHelper {
         return result;
     }
 
-    public static List<Field> getAllFields(final Domain entity) {
-        return entity.getUi().getFields();
-    }
-
     public static String getParameterToString(final List<Parameter> params) throws Exception {
         String parameters = "";
         final Iterator<Parameter> it = params.iterator();

@@ -18,6 +18,7 @@ project.ext.srcJasper = 'src-jasper/main/java';
 project.ext.gwtOutputDirName = buildDir.name + '/gwt';
 project.ext.buildInfoOutputDirName = buildDir.name + '/buildinfo';
 project.ext.warResources = 'src-core/main/resources/war';
+project.ext.specResources = 'src-core/main/resources/spec';
 project.ext.confResources = 'src-spring/main/resources/conf';
 project.ext.javadocResources = 'src-core/main/javadoc';
 
@@ -244,6 +245,9 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 	}
 	from(srcGenerated) {
 		include '**/*.xml'
+	}
+	from(specResources) {
+		into 'spec'
 	}
 }
 
