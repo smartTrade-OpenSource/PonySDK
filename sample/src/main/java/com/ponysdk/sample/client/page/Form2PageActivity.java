@@ -26,6 +26,8 @@ package com.ponysdk.sample.client.page;
 import java.util.Date;
 
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
+import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
@@ -46,6 +48,7 @@ import com.ponysdk.ui.server.form2.validator.DoubleFieldValidator;
 import com.ponysdk.ui.server.form2.validator.EmailFieldValidator;
 import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.form2.validator.UncheckedFieldValidator;
+import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class Form2PageActivity extends SamplePageActivity {
@@ -168,6 +171,21 @@ public class Form2PageActivity extends SamplePageActivity {
         panel.setWidget(1, 0, formLayout);
         panel.getFlexCellFormatter().setColSpan(1, 0, 3);
 
-        examplePanel.setWidget(panel);
+        final PDialogBox popup = PConfirmDialog.show("Create user", panel, new PConfirmDialogHandler() {
+
+            @Override
+            public boolean onOK(final PDialogBox dialogBox) {
+                final boolean isValid = form.isValid();
+                PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
+                return false;
+            }
+
+            @Override
+            public void onCancel() {}
+        });
+
+        popup.center();
+
+        // examplePanel.setWidget(panel);
     }
 }
