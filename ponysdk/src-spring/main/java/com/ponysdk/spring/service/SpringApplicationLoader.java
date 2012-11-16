@@ -24,28 +24,24 @@ public class SpringApplicationLoader extends ApplicationLoader {
     private String serverConfiguration;
 
     public SpringApplicationLoader() {
-        serverConfiguration = System.getProperty(SystemProperty.CONTEXT_CONFIG_LOCATION);
+        serverConfiguration = System.getProperty(SystemProperty.CONTEXT_CONFIG_LOCATION, serverConfiguration);
     }
 
     @Override
     public void contextInitialized(final ServletContextEvent event) {
         super.contextInitialized(event);
 
-        String configFiles = "";
-
         if (serverConfiguration != null) {
             serverConfiguration = "classpath:" + serverConfiguration;
         } else {
             serverConfiguration = "classpath:server_application.xml";
         }
-        configFiles = "classpath:conf/server_application.inc.xml, " + serverConfiguration;
-
         try {
             final ServletContext servletContext = event.getServletContext();
 
             context = new XmlWebApplicationContext();
             context.setServletContext(servletContext);
-            context.setConfigLocations(StringUtils.tokenizeToStringArray(configFiles, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
+            context.setConfigLocations(StringUtils.tokenizeToStringArray(serverConfiguration, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
             context.refresh();
 
             servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
