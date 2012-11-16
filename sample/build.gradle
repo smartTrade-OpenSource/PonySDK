@@ -106,15 +106,11 @@ task generateSkeleton2(type: JavaExec) {
 }
 
 task copyAllLibs << {
-	println 'Copying all libs'
-	copy {
-		from configurations.java2html
-		into 'libs/java2html'
-	}
+	project(':ponysdk').copyLib(configurations.java2html, 'libs/java2html');
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '1.1'
+    gradleVersion = '1.2'
 }
 
 task createPackage << {
@@ -124,7 +120,6 @@ task createPackage << {
 	println 'Building war'
 	println 'ponysdk path: ' + ponysdkPath
 	println 'ponysdk war path: ' + ponysdkWarResourcesPath
-	
 	
 	
 	copy {

@@ -161,7 +161,7 @@ task generateDatamodel {
 	}
 }
 
-task compileDatamodel(type: Compile, dependsOn: generateDatamodel) {
+task compileDatamodel(type: JavaCompile, dependsOn: generateDatamodel) {
 	classpath = configurations.xjc
 	source = file(srcGenerated)
 	destinationDir = file("$buildDir/classes/main")
@@ -169,7 +169,7 @@ task compileDatamodel(type: Compile, dependsOn: generateDatamodel) {
 	outputs.dir file("$buildDir/classes/main/com/ponysdk/generator")
 }
 
-task compileGenerator(type: Compile, dependsOn: compileDatamodel) {
+task compileGenerator(type: JavaCompile, dependsOn: compileDatamodel) {
 	classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
 	source = srcGenerator
 	destinationDir = file("$buildDir/classes/main")
@@ -274,52 +274,27 @@ artifacts {
 }
 
 
+def copyLib(configurations, dest) { 
+	println 'copying libs to #' + dest
+	copy {
+		from configurations
+		into dest
+		rename '(.*)-(.*).jar', '$1.jar'
+	}
+}
+
 task copyAllLibs << {
-	println 'Copying all libs'
-	copy {
-		from configurations.gwt
-		into 'libs/gwt'
-	}
-	copy {
-		from configurations.spring
-		into 'libs/spring'
-	}
-	copy {
-		from configurations.sl4j
-		into 'libs/logging'
-	}
-	copy {
-	    from configurations.log4j
-	    into 'libs/logging'
-	}
-	copy {
-		from configurations.hibernate
-		into 'libs/hibernate'
-	}
-	copy {
-		from configurations.jasper
-		into 'libs/jasper'
-	}
-	copy {
-		from configurations.mongodb
-		into 'libs/mongodb'
-	}
-	copy {
-		from configurations.selenium
-		into 'libs/tests'
-	}
-	copy {
-		from configurations.json_jackson
-		into 'libs/json_jackson'
-	}
-	copy {
-	    from configurations.jetty
-	    into 'libs/jetty'
-	}
-	copy {
-	    from configurations.commons
-	    into 'libs/commons'
-	}
+	copyLib(configurations.gwt, 'libs/gwt');
+	copyLib(configurations.spring, 'libs/spring');
+	copyLib(configurations.sl4j, 'libs/logging');
+	copyLib(configurations.log4j, 'libs/logging');
+	copyLib(configurations.hibernate, 'libs/hibernate');
+	copyLib(configurations.jasper, 'libs/jasper');
+	copyLib(configurations.mongodb, 'libs/mongodb');
+	copyLib(configurations.selenium, 'libs/tests');
+	copyLib(configurations.json_jackson, 'libs/json_jackson');
+	copyLib(configurations.jetty, 'libs/jetty');
+	copyLib(configurations.commons, 'libs/commons');
 }
 
 task sendTo(type: Copy) {
