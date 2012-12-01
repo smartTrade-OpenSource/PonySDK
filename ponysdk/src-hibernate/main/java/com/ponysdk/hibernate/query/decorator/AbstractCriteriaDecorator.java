@@ -24,6 +24,7 @@
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
 
     private static Logger log = LoggerFactory.getLogger(AbstractCriteriaDecorator.class);
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void render(final CriteriaContext context) {
         final Criterion field = context.getCriterion();
@@ -104,6 +106,15 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
                 break;
             case IS_NOT_NULL:
                 criteria.add(Restrictions.isNotNull(associationPath));
+                break;
+            case IN:
+                if (value instanceof Collection) {
+                    criteria.add(Restrictions.in(associationPath, (Collection) value));
+                } else if (value instanceof Object[]) {
+                    criteria.add(Restrictions.in(associationPath, (Object[]) value));
+                } else {
+                    log.warn("Type not allowed for IN clause: " + value.getClass() + ", value: " + value);
+                }
                 break;
 
             default:
