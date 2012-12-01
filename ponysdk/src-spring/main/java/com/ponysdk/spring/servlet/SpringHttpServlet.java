@@ -24,6 +24,9 @@ package com.ponysdk.spring.servlet;
  * the License.
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -42,13 +45,19 @@ import com.ponysdk.ui.server.basic.PHistory;
 @SuppressWarnings("serial")
 public class SpringHttpServlet extends AbstractHttpServlet {
 
+    private final List<String> clientConfigurations = new ArrayList<String>();
+
+    public SpringHttpServlet() {}
+
     @Override
     protected AbstractApplicationManager createApplicationManager() {
         return new AbstractApplicationManager() {
 
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) {
-                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { "conf/client_application.inc.xml", "client_application.xml" });
+                if (clientConfigurations.isEmpty()) clientConfigurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
+
+                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(clientConfigurations.toArray(new String[0]));
 
                 final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
                 final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
@@ -56,9 +65,6 @@ public class SpringHttpServlet extends AbstractHttpServlet {
 
                 ponySession.setRootEventBus(rootEventBus);
                 ponySession.setHistory(history);
-
-                // final PCookies cookies = new PCookies(cookiesByName);
-                // ponySession.setCookies(cookies);
 
                 final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
                 if (initializingPages != null && !initializingPages.isEmpty()) {
@@ -70,5 +76,9 @@ public class SpringHttpServlet extends AbstractHttpServlet {
                 return entryPoint;
             }
         };
+    }
+
+    public void addClientConfiguration(final String conf) {
+        clientConfigurations.add(conf);
     }
 }

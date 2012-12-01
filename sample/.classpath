@@ -5,12 +5,12 @@
 	<classpathentry kind="src" path="src-trading/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ponysdk"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/logging/slf4j-api-1.6.4.jar"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-beans-3.0.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-context-3.0.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-core-3.0.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="libs/java2html/java2html-1.0.jar"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/gwt/json-20090211.jar"/>
-	<classpathentry kind="lib" path="/ponysdk/libs/gwt/gwt-user-2.5.0-rc1.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/gwt/json.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/logging/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-beans.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-context.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-core.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/jetty/javax.servlet.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/java2html/java2html.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
