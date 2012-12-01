@@ -31,4 +31,9 @@ public class SecurityManager {
         if (Permission.ALLOWED.equals(permission)) return true;
         return UIContext.get().hasPermission(permission.getKey());
     }
+
+    public static boolean checkPermission(final String permissionKey) {
+        if (Permission.ALLOWED.getKey().equals(permissionKey)) return true;
+        return UIContext.get().hasPermission(permissionKey);
+    }
 }
