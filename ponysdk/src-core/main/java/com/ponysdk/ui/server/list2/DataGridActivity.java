@@ -120,11 +120,11 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     }
 
     public void selectRow(final int row) {
-        view.selectRow(row);
+        view.selectRow(getRowIndex(row));
     }
 
     public void unSelectRow(final int row) {
-        view.unSelectRow(row);
+        view.unSelectRow(getRowIndex(row));
     }
 
     @Override
@@ -203,4 +203,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         return view;
     }
 
+    protected int getRowIndex(final int row) {
+        return row + computeTotalSubRows(row);
+    }
 }
