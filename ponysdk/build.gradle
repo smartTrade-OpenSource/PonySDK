@@ -77,9 +77,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.5.0-rc1'
-	gwt 'com.google.gwt:gwt-dev:2.5.0-rc1'
-	gwt 'com.google.gwt:gwt-codeserver:2.5.0-rc1'
+	gwt 'com.google.gwt:gwt-user:2.5.0'
+	gwt 'com.google.gwt:gwt-dev:2.5.0'
+	gwt 'com.google.gwt:gwt-codeserver:2.5.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
     gwt 'com.watopi:gwtchosen:1.0.2'
@@ -108,16 +108,6 @@ dependencies {
 }
 
 
-manifest {
-	def cmd = "git rev-parse HEAD"
-    def proc = cmd.execute()
-    ext.revision = proc.text.trim()
-    ext.timestamp = (int)(new Date().getTime()/1000)
-	attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0", "Implementation-Title": "PonySDK", "Package-Version": "1",	"Implementation-Version": "1.0", "Implementation-Vendor": "PonySDK")
-    attributes("Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version,"Revision": ext.revision, "Date": ext.timestamp)
-}
-
-
 jar {
 	baseName = 'ponysdk'
     from sourceSets.main.output
@@ -138,7 +128,27 @@ jar {
     into('conf') {
         from confResources
     }
+    
+    manifest {
+		def cmd = "git rev-parse HEAD"
+	    def proc = cmd.execute()
+	    ext.revision = proc.text.trim()
+	    ext.timestamp = (int)(new Date().getTime()/1000)
+		attributes("Manifest-Version": "1.0")
+		attributes("License-Title": "Apache License 2.0")
+		attributes("Implementation-Vendor": "PonySDK")
+	    attributes("Implementation-Title": "PonySDK")
+	    attributes("Implementation-Version": project.ext.version)
+	    attributes("Revision": ext.revision)
+	    attributes("Date": ext.timestamp + " / " + new Date().toGMTString())
+	}
 }
+
+
+javadoc {
+	failOnError false
+}
+
 
 task cleanGenerated(type: Delete) {
 	delete srcGenerated
@@ -249,8 +259,12 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 	from(specResources) {
 		into 'spec'
 	}
+	
+    manifest {
+		attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0")
+		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version)
+	}
 }
-
 
 task javadocJar(type: Jar, dependsOn:javadoc) {
      classifier = 'javadoc'
@@ -265,6 +279,11 @@ task javadocJar(type: Jar, dependsOn:javadoc) {
         }
     }
      **/
+    
+	manifest {
+		attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0")
+		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version)
+	}
 }
  
 // add javadoc/source jar tasks as artifacts
