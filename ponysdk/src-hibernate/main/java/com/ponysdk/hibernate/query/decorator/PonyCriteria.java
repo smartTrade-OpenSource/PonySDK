@@ -24,7 +24,10 @@
 package com.ponysdk.hibernate.query.decorator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -48,9 +51,14 @@ public class PonyCriteria<T> {
     private final Query query;
 
     private final List<Criterion> criterions = new ArrayList<Criterion>();
+    private final Map<String, CriteriaDecorator> decoratorsByPojoPropertyName = new HashMap<String, CriteriaDecorator>();
 
     public PonyCriteria(final Session session, final Class<T> clazz, final Query query) {
         this(session, clazz, query, null);
+    }
+
+    public void addCriteriaDecorator(final String pojoPropertyName, final CriteriaDecorator criteriaDecorator) {
+        decoratorsByPojoPropertyName.put(pojoPropertyName, criteriaDecorator);
     }
 
     public PonyCriteria(final Session session, final Class<T> clazz, final Query query, final String propertyKey) {
@@ -81,6 +89,12 @@ public class PonyCriteria<T> {
     public Result<List<T>> list() {
 
         final DefaultQueryGenerator<T> queryGenerator = new DefaultQueryGenerator<T>(new PaginatingCriteria<T>(session, clazz));
+
+        if (!decoratorsByPojoPropertyName.isEmpty()) {
+            for (final Entry<String, CriteriaDecorator> entry : decoratorsByPojoPropertyName.entrySet()) {
+                queryGenerator.putDecorator(entry.getKey(), entry.getValue());
+            }
+        }
 
         final OrderingCriteria criteria = queryGenerator.generate(query);
 
