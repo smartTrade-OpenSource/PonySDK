@@ -112,7 +112,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public D getData(final K key) {
-        return cells.get(key).entrySet().iterator().next().getValue().data;
+        final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        if (map == null) return null;
+        return map.entrySet().iterator().next().getValue().data;
     }
 
     @Override
