@@ -12,9 +12,7 @@
 	<classpathentry kind="src" path="src-mongodb/main/java"/>
 	<classpathentry kind="src" path="src-core/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="libs/gwt/gwt-user-2.5.0.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/json.jar"/>
-	<classpathentry kind="lib" path="libs/gwt/gwt-dev-2.5.0.jar"/>
 	<classpathentry kind="lib" path="libs/logging/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="libs/tests/junit.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-core.jar"/>
@@ -42,5 +40,7 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-firefox-driver.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-remote-driver.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-support.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

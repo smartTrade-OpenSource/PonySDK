@@ -63,7 +63,6 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     private final Set<String> selectValues = new HashSet<String>();
 
     private PListBox selected;
-
     private PListBox unselected;
 
     private PButton switchButton;
@@ -285,6 +284,14 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
     public <H extends EventHandler> void addDomHandler(final H handler, final Type<H> type) {
         selected.addDomHandler(handler, type);
         unselected.addDomHandler(handler, type);
+    }
+
+    public PListBox getSelected() {
+        return selected;
+    }
+
+    public PListBox getUnselected() {
+        return unselected;
     }
 
 }

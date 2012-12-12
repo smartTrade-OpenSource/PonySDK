@@ -39,6 +39,7 @@ import com.ponysdk.ui.server.form.renderer.FormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.TextAreaFormFieldRenderer;
 import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
+import com.ponysdk.ui.server.form.renderer.TwinListBoxFormFieldRenderer;
 import com.ponysdk.ui.server.form.validator.DoubleFieldValidator;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
 
@@ -83,6 +84,19 @@ public class FormPageActivity extends SamplePageActivity {
         final FormFieldRenderer field5Renderer = new TextAreaFormFieldRenderer("field5");
         final FormField field5 = new FormField(field5Renderer);
         formActivity.addFormField(field5);
+
+        final TwinListBoxFormFieldRenderer<String> field6Renderer = new TwinListBoxFormFieldRenderer<String>("field6");
+        final FormField field6 = new FormField(field6Renderer);
+        formActivity.addFormField(field6);
+
+        field6Renderer.addItem("Choice 1");
+        field6Renderer.addItem("Choice 2");
+        field6Renderer.addItem("Choice 3");
+        field6Renderer.addItem("Choice 4");
+        field6Renderer.addItem("Choice 5");
+        field6Renderer.addItem("Choice 6");
+        field6Renderer.setSelectedItem("Choice 2");
+        field6Renderer.setSelectedItem("Choice 3");
 
         final PSimplePanel formLayout = new PSimplePanel();
         layout.add(formLayout);
