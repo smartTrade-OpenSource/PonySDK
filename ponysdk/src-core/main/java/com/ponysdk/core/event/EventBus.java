@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.event;
 
+import java.util.Set;
+
 import com.ponysdk.core.event.Event.Type;
 
 public interface EventBus {
@@ -36,4 +38,6 @@ public interface EventBus {
     public void fireEventFromSource(Event<?> event, Object source);
 
     public void addHandler(BroadcastEventHandler handler);
+
+    public <H extends EventHandler> Set<H> getHandlerSet(final Type<H> type, final Object source);
 }

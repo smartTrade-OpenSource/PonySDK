@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.Event;
+import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
@@ -81,7 +82,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> styleProperties = new HashMap<String, String>();
 
-    private final SimpleEventBus domHandler = new SimpleEventBus();
+    private EventBus domHandler;
 
     private final Map<String, String> elementProperties = new HashMap<String, String>();
 
@@ -220,7 +221,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
+        final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
         final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
         if (handler instanceof JSONObject) {
             removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
@@ -231,21 +232,24 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @SuppressWarnings("unchecked")
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final HandlerRegistration handlerRegistration = domHandler.addHandler(type, handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
-        addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
-        if (handler instanceof JSONObject) {
-            try {
-                final JSONObject jso = (JSONObject) handler;
-                for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
-                    final String key = iterator.next();
-                    addHandler.put(key, jso.get(key));
+        final Set<H> handlerSet = ensureDomHandler().getHandlerSet(type, this);
+        final HandlerRegistration handlerRegistration = ensureDomHandler().addHandlerToSource(type, this, handler);
+        if (handlerSet.isEmpty()) {
+            final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
+            addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
+            if (handler instanceof JSONObject) {
+                try {
+                    final JSONObject jso = (JSONObject) handler;
+                    for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
+                        final String key = iterator.next();
+                        addHandler.put(key, jso.get(key));
+                    }
+                } catch (final JSONException e) {
+                    log.error("Failed to copy value", e);
                 }
-            } catch (final JSONException e) {
-                log.error("Failed to copy value", e);
             }
+            getUIContext().stackInstruction(addHandler);
         }
-        getUIContext().stackInstruction(addHandler);
         return handlerRegistration;
     }
 
@@ -320,12 +324,17 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
+    private EventBus ensureDomHandler() {
+        if (domHandler == null) domHandler = new SimpleEventBus();
+        return domHandler;
+    }
+
     protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
-        return domHandler.getHandlerSet(type, null);
+        return ensureDomHandler().getHandlerSet(type, null);
     }
 
     public void fireEvent(final Event<?> event) {
-        domHandler.fireEvent(event);
+        ensureDomHandler().fireEvent(event);
     }
 
     public void removeFromParent() {
@@ -358,4 +367,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return stylePrimaryName;
     }
 
+    public void setDomHandler(final EventBus domHandler) {
+        this.domHandler = domHandler;
+    }
 }

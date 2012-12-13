@@ -220,7 +220,7 @@ public class SimpleEventBus implements EventBus {
         return handlers;
     }
 
-    private <H> Set<H> getDispatchSet(final Type type, final Object source) {
+    private <H extends EventHandler> Set<H> getDispatchSet(final Type<H> type, final Object source) {
         final Set<H> directHandlers = getHandlerSet(type, source);
         if (source == null) { return directHandlers; }
 
@@ -231,7 +231,7 @@ public class SimpleEventBus implements EventBus {
         return rtn;
     }
 
-    public <H> Set<H> getHandlerSet(final Type<H> type, final Object source) {
+    public <H extends EventHandler> Set<H> getHandlerSet(final Type<H> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
         if (sourceMap == null) { return Collections.emptySet(); }
 
