@@ -46,6 +46,8 @@ public class ApplicationActivity implements Activity {
 
     private PageProvider pageProvider;
 
+    private PageActivity currentPageActivity;
+
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
         if (applicationView.getMenu() != null) {
@@ -69,6 +71,12 @@ public class ApplicationActivity implements Activity {
             final PageActivity pageActivity = pageProvider.getPageActivity(pagePlace.getPageName());
 
             if (!com.ponysdk.core.security.SecurityManager.checkPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
+
+            if (currentPageActivity != null) {
+                currentPageActivity.leave();
+            }
+
+            currentPageActivity = pageActivity;
 
             pageActivity.start(applicationView.getBody(), place);
         }

@@ -33,8 +33,6 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 
 public abstract class PageActivity extends AbstractActivity implements InitializingActivity {
 
-    private PageActivity currentPage;
-
     protected final String pageName;
 
     protected final Collection<String> pageCategories;
@@ -50,6 +48,8 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
     protected abstract void onLeavingPage();
 
     protected final Permission permission;
+
+    private boolean shown = false;
 
     public PageActivity(final String pageName, final String pageCategory) {
         this(pageName, Collections.singleton(pageCategory), Permission.ALLOWED);
@@ -78,12 +78,17 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     @Override
     public void updateView(final Place place) {
-
         onShowPage(place);
+        shown = true;
+    }
+
+    public void leave() {
+        onLeavingPage();
+        shown = false;
     }
 
     protected boolean isShown() {
-        return equals(currentPage);
+        return shown;
     }
 
     public String getPageName() {
