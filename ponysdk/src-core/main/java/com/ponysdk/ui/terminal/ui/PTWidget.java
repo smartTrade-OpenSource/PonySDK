@@ -72,15 +72,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.ELEMENT_PROPERTY_KEY)) {
-            uiObject.getElement().setPropertyString(update.getString(PROPERTY.ELEMENT_PROPERTY_KEY), update.getString(PROPERTY.ELEMENT_PROPERTY_VALUE));
-        } else {
-            super.update(update, uiService);
-        }
-    }
-
-    @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         final String handlerType = addHandler.getString(HANDLER.KEY);
 

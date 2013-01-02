@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -34,6 +36,8 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     private static final String FONT_SIZE = "fontSize";
 
     protected T uiObject;
+
+    private Object nativeObject;
 
     protected void init(final PTInstruction create, final UIService uiService, final T uiObject) {
         if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
@@ -56,6 +60,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setHeight(update.getString(PROPERTY.WIDGET_HEIGHT));
         } else if (update.containsKey(PROPERTY.WIDGET_FONT_SIZE)) {
             uiObject.getElement().getStyle().setProperty(FONT_SIZE, update.getString(PROPERTY.WIDGET_FONT_SIZE));
+        } else if (update.containsKey(PROPERTY.ELEMENT_PROPERTY_KEY)) {
+            uiObject.getElement().setPropertyString(update.getString(PROPERTY.ELEMENT_PROPERTY_KEY), update.getString(PROPERTY.ELEMENT_PROPERTY_VALUE));
+        } else if (update.containsKey(PROPERTY.ELEMENT_ATTRIBUTE_KEY)) {
+            uiObject.getElement().setAttribute(update.getString(PROPERTY.ELEMENT_ATTRIBUTE_KEY), update.getString(PROPERTY.ELEMENT_ATTRIBUTE_VALUE));
         } else if (update.containsKey(PROPERTY.STYLE_NAME)) {
             uiObject.setStyleName(update.getString(PROPERTY.STYLE_NAME));
         } else if (update.containsKey(PROPERTY.STYLE_PRIMARY_NAME)) {
@@ -73,7 +81,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (update.containsKey(PROPERTY.STYLE_KEY)) {
             uiObject.getElement().getStyle().setProperty(update.getString(PROPERTY.STYLE_KEY), update.getString(PROPERTY.STYLE_VALUE));
         } else if (update.containsKey(PROPERTY.BIND)) {
-            bind(update.getString(PROPERTY.BIND), objectID.toString(), uiObject.getElement());
+            nativeObject = bind(update.getString(PROPERTY.BIND), objectID.toString(), uiObject.getElement());
+        } else if (update.containsKey(PROPERTY.NATIVE)) {
+            final JSONObject object = update.getObject(PROPERTY.NATIVE);
+            sendToNative(objectID.toString(), nativeObject, object.getJavaScriptObject());
         }
     }
 
@@ -82,9 +93,14 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         throw new IllegalStateException("This object is not an UIObject");
     }
 
-    private native void bind(String functionName, String objectID, Element element) /*-{
-                                                                                    var self = this;
-                                                                                    $wnd[functionName](objectID, element);
-                                                                                    }-*/;
+    private native Object bind(String functionName, String objectID, Element element) /*-{
+                                                                                      var self = this;
+                                                                                      var o = $wnd[functionName](objectID, element);
+                                                                                      return o;
+                                                                                      }-*/;
+
+    private native void sendToNative(String objectID, Object nativeObject, JavaScriptObject data) /*-{
+                                                                                                  nativeObject.update(data);
+                                                                                                  }-*/;
 
 }

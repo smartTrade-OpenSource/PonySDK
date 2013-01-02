@@ -95,12 +95,21 @@ document.addEventListener('click', google.clickbuster.onClick, true);
 google.clickbuster.coordinates = [];
 
 
+
 // PonySDK binding
+
+// update method (server to native)
+google.ui.FastButton.prototype.update = function(data) {
+	console.log('Updating native object: ' + data);
+};
+
+// native object factory
 function applyFastButton(id, object) {
-	console.log("applyFastButton: " + id + ", on: " + object);
+	console.log('Building fast button: ' + id + ', on: ' + object);
 	
-	new google.ui.FastButton(object, function(event) {
+	return new google.ui.FastButton(object, function(event) {
 		console.log('click/touch: ' + id + ' ' + event);
+		// sending data (native to server) 
 		sendDataToServer(id, { type: this.type, startX: this.startX, startY: this.startY});
 	});
 }

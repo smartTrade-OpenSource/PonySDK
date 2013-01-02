@@ -41,8 +41,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 public abstract class PObject {
 
     protected long ID;
-
     protected Create create;
+
+    private String nativeBindingFunction;
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
@@ -71,9 +72,23 @@ public abstract class PObject {
         return ID;
     }
 
-    public void bindTerminalFunction(final String functionName) {
+	public void bindTerminalFunction(final String functionName) {
+
+        if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+
         final Update update = new Update(getID());
         update.put(Dictionnary.PROPERTY.BIND, functionName);
+        getUIContext().stackInstruction(update);
+
+        nativeBindingFunction = functionName;
+    }
+
+    public void sendToNative(final JSONObject data) {
+
+        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
+
+        final Update update = new Update(getID());
+        update.put(Dictionnary.PROPERTY.NATIVE, data);
         getUIContext().stackInstruction(update);
     }
 

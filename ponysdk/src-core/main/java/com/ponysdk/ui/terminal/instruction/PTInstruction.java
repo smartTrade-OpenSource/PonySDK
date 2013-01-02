@@ -47,6 +47,10 @@ public class PTInstruction extends JSONObject {
         }
     }
 
+    public JSONObject getObject(final String key) {
+        return get(key).isObject();
+    }
+
     public int getInt(final String key) {
         return (int) get(key).isNumber().doubleValue();
     }
