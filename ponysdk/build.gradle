@@ -2,7 +2,8 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-project.ext.version = 0.6;
+project.ext.coreversion = 0.6;
+project.ext.version = 1.0;
 
 project.ext.srcCore = 'src-core/main/java';
 project.ext.srcTerminal = 'src-core/main/java/com/ponysdk/ui/terminal';
@@ -139,6 +140,7 @@ jar {
 		attributes("Implementation-Vendor": "PonySDK")
 	    attributes("Implementation-Title": "PonySDK")
 	    attributes("Implementation-Version": project.ext.version)
+	    attributes("Implementation-Core-Version": project.ext.coreversion)
 	    attributes("Revision": ext.revision)
 	    attributes("Date": ext.timestamp + " / " + new Date().toGMTString())
 	}
