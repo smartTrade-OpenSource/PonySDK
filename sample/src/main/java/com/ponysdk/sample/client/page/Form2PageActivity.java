@@ -25,12 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import java.util.Date;
 
+import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
-import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
+import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -48,10 +48,11 @@ import com.ponysdk.ui.server.form2.validator.DoubleFieldValidator;
 import com.ponysdk.ui.server.form2.validator.EmailFieldValidator;
 import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.form2.validator.UncheckedFieldValidator;
-import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class Form2PageActivity extends SamplePageActivity {
+
+    private PPopupPanel popupPanel;
 
     public Form2PageActivity() {
         super("Form 2", "Rich UI Components");
@@ -151,14 +152,14 @@ public class Form2PageActivity extends SamplePageActivity {
             public void onChange(final PChangeEvent event) {
                 final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
 
-                formFieldComponent1.setCaptionOriantation(captionOriantation);
-                formFieldComponent2.setCaptionOriantation(captionOriantation);
-                formFieldComponent3.setCaptionOriantation(captionOriantation);
-                formFieldComponent4.setCaptionOriantation(captionOriantation);
-                formFieldComponent5.setCaptionOriantation(captionOriantation);
-                formFieldComponent6.setCaptionOriantation(captionOriantation);
-                formFieldComponent7.setCaptionOriantation(captionOriantation);
-                formFieldComponent8.setCaptionOriantation(captionOriantation);
+                formFieldComponent1.setCaptionOrientation(captionOriantation);
+                formFieldComponent2.setCaptionOrientation(captionOriantation);
+                formFieldComponent3.setCaptionOrientation(captionOriantation);
+                formFieldComponent4.setCaptionOrientation(captionOriantation);
+                formFieldComponent5.setCaptionOrientation(captionOriantation);
+                formFieldComponent6.setCaptionOrientation(captionOriantation);
+                formFieldComponent7.setCaptionOrientation(captionOriantation);
+                formFieldComponent8.setCaptionOrientation(captionOriantation);
             }
         });
 
@@ -171,21 +172,43 @@ public class Form2PageActivity extends SamplePageActivity {
         panel.setWidget(1, 0, formLayout);
         panel.getFlexCellFormatter().setColSpan(1, 0, 3);
 
-        final PDialogBox popup = PConfirmDialog.show("Create user", panel, new PConfirmDialogHandler() {
+        popupPanel = new PPopupPanel();
+        final PButton ok = new PButton("OK");
+        ok.addClickHandler(new PClickHandler() {
 
             @Override
-            public boolean onOK(final PDialogBox dialogBox) {
+            public void onClick(final PClickEvent event) {
                 final boolean isValid = form.isValid();
+                if (isValid) popupPanel.hide();
                 PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
-                return false;
             }
-
-            @Override
-            public void onCancel() {}
         });
 
-        popup.center();
+        final PButton close = new PButton("Close");
+        close.addClickHandler(new PClickHandler() {
 
-        // examplePanel.setWidget(panel);
+            @Override
+            public void onClick(final PClickEvent event) {
+                popupPanel.hide();
+            }
+        });
+
+        panel.setWidget(2, 0, ok);
+        panel.setWidget(2, 2, close);
+
+        popupPanel.setWidget(panel);
+        popupPanel.center();
+    }
+
+    @Override
+    protected void onShowPage(final Place place) {
+        super.onShowPage(place);
+        popupPanel.center();
+    }
+
+    @Override
+    protected void onLeavingPage() {
+        super.onLeavingPage();
+        popupPanel.hide();
     }
 }
