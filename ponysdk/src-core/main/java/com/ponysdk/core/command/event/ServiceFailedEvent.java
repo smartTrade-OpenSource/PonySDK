@@ -32,17 +32,17 @@ public class ServiceFailedEvent extends BusinessEvent<ServiceFailedHandler> {
 
     private final Throwable throwable;
 
-    public ServiceFailedEvent(Object sourceComponent, Throwable throwable) {
+    public ServiceFailedEvent(final Object sourceComponent, final Throwable throwable) {
         super(sourceComponent);
         setLevel(Level.ERROR);
         this.throwable = throwable;
         if (throwable != null) {
-            setBusinessMessage(throwable.toString());
+            setBusinessMessage(throwable.getMessage());
         }
     }
 
     @Override
-    protected void dispatch(ServiceFailedHandler handler) {
+    protected void dispatch(final ServiceFailedHandler handler) {
         handler.onServiceFailed(this);
     }
 
