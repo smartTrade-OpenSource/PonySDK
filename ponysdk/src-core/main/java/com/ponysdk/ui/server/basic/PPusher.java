@@ -130,8 +130,8 @@ public class PPusher extends PObject implements ConnectionListener {
     public void onClientData(final JSONObject event) throws JSONException {
         if (event.has(PROPERTY.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
-            pusherState = PusherState.STARTED;
             polling = true;
+            onOpen();
         } else if (event.has(PROPERTY.POLL)) {
             for (final Instruction instruction : updates) {
                 getUIContext().stackInstruction(instruction);
