@@ -38,12 +38,8 @@ public class CompositeFieldValidator implements FieldValidator {
             final ValidationResult result = fieldValidator.isValid(value);
             if (!result.isValid()) {
                 validationResult.setValid(false);
-                if (validationResult.getErrorMessage() == null) {
-                    validationResult.setErrorMessage(result.getErrorMessage());
-                } else {
-                    final String errorMessage = validationResult.getErrorMessage() + "<br>" + result.getErrorMessage();
-                    validationResult.setErrorMessage(errorMessage);
-                }
+                validationResult.setErrorMessage(result.getErrorMessage());
+                return validationResult;
             }
         }
         return validationResult;

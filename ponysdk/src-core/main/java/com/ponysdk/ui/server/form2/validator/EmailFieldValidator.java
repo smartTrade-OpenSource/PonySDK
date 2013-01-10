@@ -29,7 +29,7 @@ public class EmailFieldValidator implements FieldValidator {
 
     private static final String VALID_MAIL_REGEX = "^[a-z0-9._-]+@[a-z0-9.-]{1,}[.][a-z]{2,3}";
 
-    private static final String INVALID_CHARACTERS_MSG = "Contains invalid characters.<br/> Allowed characters " + VALID_MAIL_REGEX;
+    private static final String INVALID_CHARACTERS_MSG = "Invalid e-mail";
 
     @Override
     public ValidationResult isValid(final String value) {
