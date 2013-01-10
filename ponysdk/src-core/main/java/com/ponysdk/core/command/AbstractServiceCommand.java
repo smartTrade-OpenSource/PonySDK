@@ -78,7 +78,6 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
             onSuccess(result);
             return result;
         } catch (final Throwable e) {
-            log.error("Service command execution failed", e);
             onFailure(e);
             return null;
         } finally {
