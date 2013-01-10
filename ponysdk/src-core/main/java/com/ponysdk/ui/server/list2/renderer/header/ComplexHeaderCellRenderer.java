@@ -64,9 +64,14 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<FilterListener>();
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
+        this(caption, formField, key, null);
+    }
+
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
         this.formField = formField;
         this.key = key;
         builGUI(caption);
+        addFilterListener(filterListener);
     }
 
     protected void builGUI(final String s) {
@@ -186,6 +191,7 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     @Override
     public void addFilterListener(final FilterListener listener) {
+        if (listener == null) return;
         filterListeners.register(listener);
     }
 
