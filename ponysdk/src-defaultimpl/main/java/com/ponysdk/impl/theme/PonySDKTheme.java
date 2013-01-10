@@ -184,4 +184,9 @@ public interface PonySDKTheme {
 
     String BREADCRUMBS = "pony-BreadCrumbs";
 
+    String TWIN_LISTBOX = "pony-TwinListBox";
+    String TWIN_LISTBOX_LEFT_LISTBOX = "pony-TwinListBox-Left-ListBox";
+    String TWIN_LISTBOX_RIGHT_LISTBOX = "pony-TwinListBox-Right-ListBox";
+    String TWIN_LISTBOX_SWITCH_BUTTON = "pony-TwinListBox-Switch-ListBox";
+
 }
