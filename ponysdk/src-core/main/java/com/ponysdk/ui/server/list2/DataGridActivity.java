@@ -70,10 +70,10 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
         for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
             final IsPWidget renderCell = field.renderCell(row, data);
-            view.addWidget(renderCell, col++, row);
+            view.addWidget(renderCell, col++, row + 1);
         }
-        view.addWidget(new PSimplePanel(), col, row);
-        view.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
+        view.addWidget(new PSimplePanel(), col, row + 1);
+        view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
     }
 
     public void insertSubList(final int row, final List<D> datas) {
@@ -164,21 +164,21 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         view.clear(1);
         subListSizeByFather.clear();
 
-        int rowIndex = 1;
+        int rowIndex = 0;
         for (final D t : data) {
             setData(rowIndex++, t);
         }
     }
 
     public void addData(final D data) {
-        insertData(getVisibleItemCount() + 1, data);
+        insertData(getVisibleItemCount(), data);
     }
 
     public void insertData(final int index, final D data) {
         rows.add(index, data);
 
         view.insertRow(index + 1);
-        setData(index + 1, data);
+        setData(index, data);
     }
 
     public void remove(final int index) {
