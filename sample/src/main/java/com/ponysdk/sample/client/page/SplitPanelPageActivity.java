@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
@@ -35,6 +36,9 @@ public class SplitPanelPageActivity extends SamplePageActivity {
 
     public SplitPanelPageActivity() {
         super("Split Panel", "Panels");
+        final DefaultPageView pageView = new DefaultPageView("Split Panel");
+        pageView.setHeaderHeight(20);
+        setPageView(pageView);
     }
 
     @Override

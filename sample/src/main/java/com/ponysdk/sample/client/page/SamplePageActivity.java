@@ -98,7 +98,7 @@ public class SamplePageActivity extends PageActivity {
 
         tabPanel.add(codePanel, "Source Code");
 
-        pageView.getBody().setWidget(tabPanel);
+        pageView.setWidget(tabPanel);
 
     }
 
