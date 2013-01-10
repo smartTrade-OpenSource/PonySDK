@@ -52,7 +52,7 @@ public class MarketPageActivity extends PageActivity {
         scrollPanel.setWidget(boxContainer);
         scrollPanel.setSizeFull();
 
-        pageView.getBody().setWidget(scrollPanel);
+        pageView.setWidget(scrollPanel);
     }
 
     @Override
