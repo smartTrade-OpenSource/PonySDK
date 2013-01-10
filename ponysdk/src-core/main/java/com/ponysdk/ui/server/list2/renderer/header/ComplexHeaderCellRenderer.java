@@ -53,54 +53,26 @@ import com.ponysdk.ui.server.list2.Validable;
 
 public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
-    protected final PGrid headerGrid = new PGrid(2, 1);
-    protected final PLabel title;
     protected final FormField<?> formField;
     protected final String key;
+
+    protected PGrid panel;
+    protected PLabel caption;
 
     protected SortingType sortingType = SortingType.NONE;
 
     protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<FilterListener>();
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
-        this(caption, formField, key, null);
-    }
-
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
-        this.title = new PLabel(caption);
         this.formField = formField;
         this.key = key;
-
-        if (filterListener != null) this.filterListeners.add(filterListener);
-
-        builGUI();
+        builGUI(caption);
     }
 
-    private void builGUI() {
-        headerGrid.setWidget(0, 0, title);
+    protected void builGUI(final String s) {
+        buildGrid();
+        buildCaption(s);
 
-        headerGrid.setSizeFull();
-        headerGrid.setCellPadding(0);
-        headerGrid.setCellSpacing(0);
-        headerGrid.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX);
-
-        title.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
-        title.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
-                final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
-                sort(nextSortingType);
-                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
-
-                for (final FilterListener filterListener : filterListeners) {
-                    filterListener.onSort(ComplexHeaderCellRenderer.this);
-                }
-            }
-        });
-
-        headerGrid.setWidget(1, 0, formField.asWidget());
         formField.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
@@ -114,9 +86,35 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
         formField.addFormFieldListener(this);
     }
 
+    protected void buildGrid() {
+        panel = new PGrid(2, 1);
+        panel.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX);
+        panel.setWidget(1, 0, formField.asWidget());
+    }
+
+    protected void buildCaption(final String s) {
+        caption = new PLabel(s);
+        caption.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
+        caption.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
+                final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
+                sort(nextSortingType);
+                caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
+
+                for (final FilterListener filterListener : filterListeners) {
+                    filterListener.onSort(ComplexHeaderCellRenderer.this);
+                }
+            }
+        });
+        panel.setWidget(0, 0, caption);
+    }
+
     @Override
     public IsPWidget render() {
-        return headerGrid;
+        return panel;
     }
 
     @Override
@@ -145,9 +143,9 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     @Override
     public void sort(final SortingType newSortingType) {
-        title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
+        caption.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
         sortingType = newSortingType;
-        title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
+        caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
     }
 
     @Override

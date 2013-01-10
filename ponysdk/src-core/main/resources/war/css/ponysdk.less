@@ -26,6 +26,14 @@
 // Mixins
 // -------------------------
 
+.box-shadow (@shadow) {
+	-webkit-box-shadow: @shadow;
+	-moz-box-shadow: @shadow;
+	-ms-box-shadow: @shadow;
+	-o-box-shadow: @shadow;
+	box-shadow: @shadow;
+}
+
 .box-shadow (@x: 0, @y: 0, @blur: 1px, @color: @black) {
   box-shadow: @arguments;
   -moz-box-shadow: @arguments;
@@ -934,6 +942,35 @@ td.datePickerMonth {
 
 .pony-Form-FormField-Component{
 	width:100%;
+
+	.caption{
+		margin-left:2px;
+	}
+
+	.error-label{
+		height:12px;
+	}
+
+	&.error{
+		.error-label{
+			color:#C00;
+			font-size:10px;
+			margin-left:2px;
+			font-weight:bold;
+		}
+		
+		input{
+			border:2px solid rgba(204,0,0,.5);
+		}
+		
+		checkbox{
+			border:2px solid rgba(204,0,0,.5);
+		}
+		
+		.gwt-ListBox{
+			border:2px solid rgba(204,0,0,.5);
+		}
+	}
 }
 
 .pony-Form-FormField-Component .pony-PFlextable-Cell .gwt-Label{

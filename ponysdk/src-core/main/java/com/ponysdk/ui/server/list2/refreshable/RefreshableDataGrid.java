@@ -68,7 +68,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             map = new HashMap<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>();
             cells.put(key, map);
 
-            final int row = getVisibleItemCount() + 1;
+            final int row = getVisibleItemCount();
             rows.add(data);
             valueByKey.put(key, data);
 
@@ -83,10 +83,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 cell.value = d.getValueProvider().getValue(data);
                 cell.w = d.getCellRenderer().render(row, cell.value);
                 map.put(d, cell);
-                view.addWidget(cell.w, cell.col, cell.row);
+                view.addWidget(cell.w, cell.col, cell.row + 1);
             }
-            view.addWidget(new PSimplePanel(), col, row);
-            view.addRowStyle(row, PonySDKTheme.SIMPLELIST_ROW);
+            view.addWidget(new PSimplePanel(), col, row + 1);
+            view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
 
         } else {
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
