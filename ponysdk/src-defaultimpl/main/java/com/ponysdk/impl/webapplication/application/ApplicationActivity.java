@@ -50,6 +50,8 @@ public class ApplicationActivity implements Activity {
 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
+        world.setWidget(applicationView.asWidget());
+
         if (applicationView.getMenu() != null) {
             menuActivity.start(applicationView.getMenu(), place);
         }
@@ -86,7 +88,6 @@ public class ApplicationActivity implements Activity {
             activityPlace.getActivity().start(applicationView.getBody(), place);
         }
 
-        world.setWidget(applicationView.asWidget());
     }
 
     public ApplicationView getApplicationView() {

@@ -37,7 +37,7 @@ public class EmptyPageActivity extends AbstractActivity {
 
     @Override
     public IsPWidget buildView() {
-        return pageView.getBody();
+        return pageView;
     }
 
     @Override

@@ -49,8 +49,6 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
         final Criterion field = context.getCriterion();
         Criteria criteria = context.getOrderingCriteria();
 
-        if (field.getValue() == null && field.getComparator() != ComparatorType.IS_NULL && field.getComparator() != ComparatorType.IS_NOT_NULL) { return; }
-
         final List<String> propertyNamePath = Arrays.asList(field.getPojoProperty().split(REGEX_SPLIT));
         final Iterator<String> iter = propertyNamePath.iterator();
         String key = null;
@@ -79,47 +77,51 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
             }
         }
 
-        switch (comparator) {
-            case EQ:
-                criteria.add(Restrictions.eq(associationPath, value));
-                break;
-            case GE:
-                criteria.add(Restrictions.ge(associationPath, value));
-                break;
-            case GT:
-                criteria.add(Restrictions.gt(associationPath, value));
-                break;
-            case LE:
-                criteria.add(Restrictions.le(associationPath, value));
-                break;
-            case LT:
-                criteria.add(Restrictions.lt(associationPath, value));
-                break;
-            case NE:
-                criteria.add(Restrictions.ne(associationPath, value));
-                break;
-            case LIKE:
-                criteria.add(Restrictions.ilike(associationPath, value));
-                break;
-            case IS_NULL:
-                criteria.add(Restrictions.isNull(associationPath));
-                break;
-            case IS_NOT_NULL:
-                criteria.add(Restrictions.isNotNull(associationPath));
-                break;
-            case IN:
-                if (value instanceof Collection) {
-                    criteria.add(Restrictions.in(associationPath, (Collection) value));
-                } else if (value instanceof Object[]) {
-                    criteria.add(Restrictions.in(associationPath, (Object[]) value));
-                } else {
-                    log.warn("Type not allowed for IN clause: " + value.getClass() + ", value: " + value);
-                }
-                break;
+        if (field.getValue() != null || field.getComparator() == ComparatorType.IS_NULL || field.getComparator() == ComparatorType.IS_NOT_NULL) {
 
-            default:
-                log.warn("Restriction not supported: " + comparator);
-                break;
+            switch (comparator) {
+                case EQ:
+
+                    criteria.add(Restrictions.eq(associationPath, value));
+                    break;
+                case GE:
+                    criteria.add(Restrictions.ge(associationPath, value));
+                    break;
+                case GT:
+                    criteria.add(Restrictions.gt(associationPath, value));
+                    break;
+                case LE:
+                    criteria.add(Restrictions.le(associationPath, value));
+                    break;
+                case LT:
+                    criteria.add(Restrictions.lt(associationPath, value));
+                    break;
+                case NE:
+                    criteria.add(Restrictions.ne(associationPath, value));
+                    break;
+                case LIKE:
+                    criteria.add(Restrictions.ilike(associationPath, value));
+                    break;
+                case IS_NULL:
+                    criteria.add(Restrictions.isNull(associationPath));
+                    break;
+                case IS_NOT_NULL:
+                    criteria.add(Restrictions.isNotNull(associationPath));
+                    break;
+                case IN:
+                    if (value instanceof Collection) {
+                        criteria.add(Restrictions.in(associationPath, (Collection) value));
+                    } else if (value instanceof Object[]) {
+                        criteria.add(Restrictions.in(associationPath, (Object[]) value));
+                    } else {
+                        log.warn("Type not allowed for IN clause: " + value.getClass() + ", value: " + value);
+                    }
+                    break;
+
+                default:
+                    log.warn("Restriction not supported: " + comparator);
+                    break;
+            }
         }
 
         switch (field.getSortingType()) {

@@ -23,48 +23,79 @@
 
 package com.ponysdk.impl.webapplication.application;
 
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.terminal.PUnit;
 
-public class DefaultApplicationView extends PDockLayoutPanel implements ApplicationView {
+public class DefaultApplicationView implements IsPWidget, ApplicationView {
 
-    private final PSimplePanel header = new PSimpleLayoutPanel();
+    protected PDockLayoutPanel panel;
 
-    private final PSimpleLayoutPanel menu = new PSimpleLayoutPanel();
+    protected PSimplePanel header;
+    protected PSimpleLayoutPanel menu;
+    protected PSimplePanel body;
+    protected PSimplePanel footer;
+    protected PSimplePanel logs;
+    protected PSplitLayoutPanel center;
 
-    private final PSimplePanel body = new PSimpleLayoutPanel();
-
-    private final PSimplePanel footer = new PSimpleLayoutPanel();
-
-    private final PSimplePanel logs = new PSimpleLayoutPanel();
-
-    private final PSplitLayoutPanel center;
-
+    private PUnit unit = PUnit.PX;
     private int headerHeight = 30;
-
     private int footerHeight = 20;
-
     private int logsHeight = 130;
+    private int menuWidth = 190;
 
-    private final int menuWidth = 190;
+    @Override
+    public PWidget asWidget() {
+        if (panel == null) {
+            buildUI();
+        }
+        return panel;
+    }
 
-    public DefaultApplicationView() {
-        super(PUnit.PX);
-        setSizeFull();
+    private void buildUI() {
+        panel = new PDockLayoutPanel(unit);
 
-        addNorth(header, headerHeight);
-        addSouth(footer, footerHeight);
+        buildHeader();
+        buildFooter();
+        buildCenter();
 
+        panel.add(center);
+    }
+
+    protected void buildFooter() {
+        footer = new PSimpleLayoutPanel();
+        panel.addSouth(footer, footerHeight);
+    }
+
+    protected void buildHeader() {
+        header = new PSimpleLayoutPanel();
+        panel.addNorth(header, headerHeight);
+    }
+
+    protected void buildCenter() {
         center = new PSplitLayoutPanel(PUnit.PX);
-        center.setSizeFull();
-        center.addSouth(logs, logsHeight);
-        center.addWest(menu, menuWidth);
-        center.add(body);
+        buildLogs();
+        buildMenu();
+        buildBody();
+    }
 
-        add(center);
+    protected void buildBody() {
+        body = new PSimpleLayoutPanel();
+        center.add(body);
+    }
+
+    protected void buildMenu() {
+        menu = new PSimpleLayoutPanel();
+        center.addWest(menu, menuWidth);
+    }
+
+    protected void buildLogs() {
+        logs = new PSimpleLayoutPanel();
+        center.addSouth(logs, logsHeight);
     }
 
     @Override
@@ -92,6 +123,10 @@ public class DefaultApplicationView extends PDockLayoutPanel implements Applicat
         return logs;
     }
 
+    public void setUnit(final PUnit unit) {
+        this.unit = unit;
+    }
+
     public void setHeaderHeight(final int height) {
         this.headerHeight = height;
     }
@@ -102,6 +137,10 @@ public class DefaultApplicationView extends PDockLayoutPanel implements Applicat
 
     public void setLogsHeight(final int height) {
         this.logsHeight = height;
+    }
+
+    public void setMenuWidth(final int menuWidth) {
+        this.menuWidth = menuWidth;
     }
 
 }

@@ -25,15 +25,12 @@ package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
 
 public class DefaultScrollablePageView extends DefaultPageView implements PageView {
 
     @Override
-    protected PSimplePanel buildBody() {
-        final PScrollPanel panel = new PScrollPanel();
-        panel.setSizeFull();
-        panel.addStyleName(PonySDKTheme.PAGE_BODY);
-        return panel;
+    protected void buildBody() {
+        body = new PScrollPanel();
+        body.addStyleName(PonySDKTheme.PAGE_BODY);
     }
 }

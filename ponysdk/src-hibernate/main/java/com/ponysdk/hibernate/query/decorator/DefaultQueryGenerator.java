@@ -66,7 +66,8 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
 
     @Override
     public OrderingCriteria generate(final Query query) {
-        String ordering = null;
+        boolean applyDefaultSorting = (defaultSortingProperty != null);
+
         final List<Criterion> fields = query.getCriteria();
         if (fields != null) {
             for (final Criterion criterion : fields) {
@@ -74,30 +75,27 @@ public class DefaultQueryGenerator<T> implements QueryGenerator {
                 context.setCriterion(criterion);
                 context.setOrderingCriteria(criteria);
 
-                if (criterion.getValue() != null || criterion.getComparator() == ComparatorType.IS_NULL || criterion.getComparator() == ComparatorType.IS_NOT_NULL) {
+                if (criterion.getValue() != null || criterion.getSortingType() != SortingType.NONE || criterion.getComparator() == ComparatorType.IS_NULL || criterion.getComparator() == ComparatorType.IS_NOT_NULL) {
                     CriteriaDecorator criteriaDecorator = criteriaDecoratorByPojoPropertyKey.get(criterion.getPojoProperty());
                     if (criteriaDecorator == null) {
                         criteriaDecorator = new DefaultCriteriaDecorator();
                     }
                     criteriaDecorator.render(context);
                 }
-                if (criterion.getSortingType() != SortingType.NONE) {
-                    sortCriteriaDecorator.render(context);
-                    ordering = criterion.getPojoProperty();
+                if (applyDefaultSorting && criterion.getSortingType() != SortingType.NONE && criterion.getPojoProperty().equals(defaultSortingProperty)) {
+                    applyDefaultSorting = false;
                 }
             }
         }
 
         // sort forced on the default property
-        if (ordering == null || !ordering.equals(defaultSortingProperty)) {
-            if (defaultSortingProperty != null) {
-                final Criterion field = new Criterion(defaultSortingProperty);
-                field.setSortingType(sortingType);
-                final CriteriaContext context = new CriteriaContext();
-                context.setCriterion(field);
-                context.setOrderingCriteria(criteria);
-                sortCriteriaDecorator.render(context);
-            }
+        if (applyDefaultSorting) {
+            final Criterion field = new Criterion(defaultSortingProperty);
+            field.setSortingType(sortingType);
+            final CriteriaContext context = new CriteriaContext();
+            context.setCriterion(field);
+            context.setOrderingCriteria(criteria);
+            sortCriteriaDecorator.render(context);
         }
 
         // handle scrolling when too many data

@@ -71,9 +71,9 @@ public abstract class PageActivity extends AbstractActivity implements Initializ
 
     @Override
     protected IsPWidget buildView() {
+        final IsPWidget widget = pageView.asWidget();
         onFirstShowPage();
-
-        return pageView;
+        return widget;
     }
 
     @Override

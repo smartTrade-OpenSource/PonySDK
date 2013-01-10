@@ -43,17 +43,17 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
     }
 
     @Override
-    public PSimplePanel getBody() {
-        return body;
-    }
-
-    @Override
     public void setPageTitle(final String caption) {}
 
     protected PSimplePanel buildBody() {
         final PSimplePanel panel = new PSimpleLayoutPanel();
         panel.addStyleName(PonySDKTheme.PAGE_BODY);
         return panel;
+    }
+
+    @Override
+    public PSimplePanel getBody() {
+        return body;
     }
 
 }

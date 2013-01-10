@@ -24,59 +24,92 @@
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.terminal.PUnit;
 
-public class DefaultPageView extends PSimpleLayoutPanel implements PageView {
+public class DefaultPageView implements IsPWidget, PageView {
 
-    private final PHorizontalPanel header = new PHorizontalPanel();
+    private int headerHeight = 40;
 
-    private final PSimplePanel body;
+    protected PSimpleLayoutPanel panel;
+    protected PFlowPanel header;
+    protected PSimplePanel body;
+    protected PLabel title;
 
-    private final PLabel title = new PLabel();
-
-    public DefaultPageView(final String pageTitle) {
-        setSizeFull();
-        addStyleName(PonySDKTheme.PAGE);
-        header.addStyleName(PonySDKTheme.PAGE_HEADER);
-
-        body = buildBody();
-
-        header.add(title);
-
-        title.setText(pageTitle);
-        title.addStyleName(PonySDKTheme.PAGE_HEADER_CAPTION);
-
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
-        dockLayoutPanel.setSizeFull();
-        dockLayoutPanel.addNorth(header, 40);
-        dockLayoutPanel.add(body);
-
-        setWidget(dockLayoutPanel);
-    }
+    private String pageTitle;
 
     public DefaultPageView() {
-        this("");
+        this(null);
+    }
+
+    public DefaultPageView(final String pageTitle) {
+        this.pageTitle = pageTitle;
+    }
+
+    @Override
+    public PWidget asWidget() {
+        if (panel == null) buildUI();
+        return panel;
+    }
+
+    private void buildUI() {
+        panel = new PSimpleLayoutPanel();
+        panel.addStyleName(PonySDKTheme.PAGE);
+        buildHeader();
+        buildBody();
+        buildLayout();
+    }
+
+    protected void buildLayout() {
+        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
+        dockLayoutPanel.addNorth(header, headerHeight);
+        dockLayoutPanel.add(body);
+        panel.setWidget(dockLayoutPanel);
+    }
+
+    protected void buildHeader() {
+        header = new PFlowPanel();
+        header.addStyleName(PonySDKTheme.PAGE_HEADER);
+        buildTitle();
+    }
+
+    protected void buildTitle() {
+        title = new PLabel(pageTitle);
+        title.setText(pageTitle);
+        title.addStyleName(PonySDKTheme.PAGE_HEADER_CAPTION);
+        header.add(title);
+    }
+
+    protected void buildBody() {
+        body = new PSimpleLayoutPanel();
+        body.addStyleName(PonySDKTheme.PAGE_BODY);
+    }
+
+    @Override
+    public void setWidget(final IsPWidget w) {
+        if (panel == null) buildUI();
+        body.setWidget(w);
+    }
+
+    @Override
+    public void setPageTitle(final String caption) {
+        pageTitle = caption;
+        if (title != null) title.setText(pageTitle);
+    }
+
+    public void setHeaderHeight(final int headerHeight) {
+        this.headerHeight = headerHeight;
     }
 
     @Override
     public PSimplePanel getBody() {
         return body;
-    }
-
-    @Override
-    public void setPageTitle(final String caption) {
-        title.setText(caption);
-    }
-
-    protected PSimplePanel buildBody() {
-        final PSimplePanel panel = new PSimpleLayoutPanel();
-        panel.addStyleName(PonySDKTheme.PAGE_BODY);
-        return panel;
     }
 
 }
