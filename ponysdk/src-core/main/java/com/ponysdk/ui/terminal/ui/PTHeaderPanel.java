@@ -42,9 +42,21 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
         final Widget w = asWidget(add.getObjectID(), uiService);
         if (add.containsKey(Dictionnary.PROPERTY.INDEX)) {
             final int index = add.getInt(Dictionnary.PROPERTY.INDEX);
-            if (index == 0) cast().setHeaderWidget(w);
-            else if (index == 2) cast().setFooterWidget(w);
-            else cast().setContentWidget(w);
+            if (index == 0) {
+                cast().setHeaderWidget(w);
+                // Wait GWT fix :
+                // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
+                w.getElement().getParentElement().getStyle().clearProperty("minWidth");
+                w.getElement().getParentElement().getStyle().clearProperty("minHeight");
+            } else if (index == 2) {
+                cast().setFooterWidget(w);
+                // Wait GWT fix :
+                // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
+                w.getElement().getParentElement().getStyle().clearProperty("minWidth");
+                w.getElement().getParentElement().getStyle().clearProperty("minHeight");
+            } else {
+                cast().setContentWidget(w);
+            }
         } else {
             uiObject.add(asWidget(add.getObjectID(), uiService));
         }
