@@ -71,7 +71,8 @@ public class ServiceGenerator extends BaseGenerator {
 
             // Create the implementation class of these CRUD methods if the HibernateDAO is set
             if (domain.getService().getDao() != null) {
-                final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServerServicePackage(domain), GeneratorHelper.getServiceImplClassName(domain));
+                final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getServerServicePackage(domain), GeneratorHelper.getServiceImplClassName(domain));
+
                 classWriter.addImplements(GeneratorHelper.getServiceClassName(domain));
                 classWriter.setGenerateGetter(true);
                 classWriter.setGenerateSetter(true);
@@ -192,7 +193,7 @@ public class ServiceGenerator extends BaseGenerator {
 
     private void generateService() throws Exception {
         final String className = GeneratorHelper.getServiceClassName(domain);
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getServicePackage(domain), className);
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getServicePackage(domain), className);
 
         classWriter.setInterface(true);
         classWriter.addExtend("com.ponysdk.core.service.PonyService");
@@ -235,7 +236,7 @@ public class ServiceGenerator extends BaseGenerator {
      */
 
     private void generateHibernateDAO(final Dao dao) throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
         classWriter.addExtend("com.ponysdk.hibernate.dao.HibernateDAO");
 
@@ -291,7 +292,7 @@ public class ServiceGenerator extends BaseGenerator {
      * Services : MongoDBDAO
      */
     private void generateMongoDBDAO(final Dao dao) throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getDAOPackage(domain), GeneratorHelper.getDAOClassName(domain));
 
         classWriter.addImport("com.fasterxml.jackson.databind.ObjectMapper");
         classWriter.addImport("com.mongodb.BasicDBObject");
@@ -435,7 +436,7 @@ public class ServiceGenerator extends BaseGenerator {
 
     private ClassWriter generatePushCommandX(final Pushmethod method, final String type) throws Exception {
         final String className = method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1) + "Command";
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
 
         final Parameter pushListener = new Parameter();
         pushListener.setName("listener");
@@ -475,7 +476,7 @@ public class ServiceGenerator extends BaseGenerator {
     private ClassWriter generateCommandX(final Method method, final String resultClass) throws Exception {
         final String className = method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1) + "Command";
 
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getCommandPackage(domain), className);
 
         final Constructor constructor = new Constructor();
         final Parameter eventBusParameter = new Parameter();
@@ -564,7 +565,7 @@ public class ServiceGenerator extends BaseGenerator {
     }
 
     private void generateEvent(final Event event) throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getEventClassName(event));
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getEventClassName(event));
 
         if (event.getParameter() != null) {
             for (final Parameter parameter : event.getParameter()) {
@@ -609,7 +610,7 @@ public class ServiceGenerator extends BaseGenerator {
     }
 
     private void generateHandler(final Event event) throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getHandlerClassName(event));
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getHandlerClassName(event));
 
         classWriter.setInterface(true);
         classWriter.addExtend("com.ponysdk.core.event.EventHandler");
@@ -622,7 +623,7 @@ public class ServiceGenerator extends BaseGenerator {
 
     private void generateEventsHandler() throws Exception {
         if (domain.getCrudevent() != null || (domain.getEvent() != null && !domain.getEvent().isEmpty())) {
-            final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getMasterHandlerClassName(domain));
+            final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), GeneratorHelper.getEventPackage(domain), GeneratorHelper.getMasterHandlerClassName(domain));
 
             classWriter.setInterface(true);
 

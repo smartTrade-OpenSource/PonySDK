@@ -49,7 +49,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
 
     private String packageName = "com.ponysdk.service";
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             final List<Root> definitions = getDefinitions(args[0]);
             final ProxyBuilderGenerator generator = new ProxyBuilderGenerator(definitions);
@@ -62,7 +62,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
         }
     }
 
-    public static List<Root> getDefinitions(String directories) throws JAXBException {
+    public static List<Root> getDefinitions(final String directories) throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
@@ -96,12 +96,12 @@ public class ProxyBuilderGenerator extends BaseGenerator {
         return files;
     }
 
-    public ProxyBuilderGenerator(List<Root> domains) {
+    public ProxyBuilderGenerator(final List<Root> domains) {
         this.domains = domains;
     }
 
     public void generate() throws Exception {
-        final ClassWriter classWriter = new ClassWriter(getSrcGeneratedDirectory(), getPackageName(), "ProxyBuilder");
+        final ClassWriter classWriter = new ClassWriter(this, getSrcGeneratedDirectory(), getPackageName(), "ProxyBuilder");
         classWriter.addImplements(ApplicationContextAware.class);
         classWriter.addNewLine();
         classWriter.addLine("private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyBuilder.class);");
@@ -135,7 +135,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
         classWriter.generateContentAndStore();
     }
 
-    public void setSrcGeneratedDirectory(String srcGeneratedDirectory) {
+    public void setSrcGeneratedDirectory(final String srcGeneratedDirectory) {
         this.srcGeneratedDirectory = srcGeneratedDirectory;
     }
 
@@ -147,7 +147,7 @@ public class ProxyBuilderGenerator extends BaseGenerator {
         return packageName;
     }
 
-    public void setPackageName(String packageName) {
+    public void setPackageName(final String packageName) {
         this.packageName = packageName;
     }
 }

@@ -164,6 +164,7 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("<!doctype html>");
         builder.append("<html>");
         builder.append("<head>");
+        builder.append("    <!-- Powered by PonySDK http://www.ponysdk.com -->");
         builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         builder.append("    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">");
         builder.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">");
