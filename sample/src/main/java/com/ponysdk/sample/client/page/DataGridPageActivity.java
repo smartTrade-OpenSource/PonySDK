@@ -25,13 +25,9 @@ package com.ponysdk.sample.client.page;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.impl.webapplication.application.ApplicationView;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.command.pony.CreatePonyCommand;
 import com.ponysdk.sample.command.pony.FindPonysCommand;
@@ -62,7 +58,6 @@ import com.ponysdk.ui.server.form2.formfield.StringTextBoxFormField;
 import com.ponysdk.ui.server.form2.formfield.TextBoxFormField;
 import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.list.DefaultSimpleListView;
-import com.ponysdk.ui.server.list.ExportConfiguration;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.dataprovider.RemoteDataProvider;
@@ -84,9 +79,6 @@ import com.ponysdk.ui.server.list2.valueprovider.IdentityValueProvider;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler {
-
-    @Autowired
-    protected ApplicationView applicationView;
 
     private DataGridActivity<Pony> dataGrid;
 
@@ -288,14 +280,6 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         listContainer.setWidget(dataGrid);
 
-    }
-
-    private ExportConfiguration initExportConfiguration() {
-        final ExportConfiguration exportConfiguration = new ExportConfiguration();
-        exportConfiguration.addExportableField(new ExportableField("name", "Name"));
-        exportConfiguration.addExportableField(new ExportableField("age", "Age"));
-        exportConfiguration.addExportableField(new ExportableField("race", "type"));
-        return exportConfiguration;
     }
 
     @Override

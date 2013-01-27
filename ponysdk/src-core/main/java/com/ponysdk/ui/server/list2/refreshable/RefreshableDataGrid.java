@@ -35,8 +35,8 @@ import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
-    private final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();
-    private final Map<K, D> valueByKey = new HashMap<K, D>();
+    protected final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();
+    protected final Map<K, D> valueByKey = new HashMap<K, D>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
         super(listView);
@@ -119,7 +119,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     @Override
     public void clear() {
-        super.clear();
+        view.clear(1);
         cells.clear();
     }
 

@@ -123,6 +123,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<!-- Rich components pages -->
 	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DataGridPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.RefreshableDataGridPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.Form2PageActivity" />
 	<bean class="com.ponysdk.sample.client.page.MultiSelectionPageActivity" />

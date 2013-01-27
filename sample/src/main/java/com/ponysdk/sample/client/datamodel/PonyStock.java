@@ -23,53 +23,50 @@
 
 package com.ponysdk.sample.client.datamodel;
 
-public class Pony {
+public class PonyStock {
 
     private Long id;
-
-    private String name;
-
-    private Integer age;
-
     private String race;
+    private Float price;
+    private Integer count;
 
-    public Pony(final Long id, final String name, final Integer age, final String race) {
+    public PonyStock(final Long id, final String race, final Float price, final Integer count) {
         this.id = id;
-        this.name = name;
-        this.age = age;
         this.race = race;
+        this.price = price;
+        this.count = count;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Integer getAge() {
-        return age;
+    public void setId(final Long id) {
+        this.id = id;
     }
 
     public String getRace() {
         return race;
     }
 
-    public void setId(final Long id) {
-        this.id = id;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setAge(final Integer age) {
-        this.age = age;
-    }
-
     public void setRace(final String race) {
         this.race = race;
+    }
+
+    public Float getPrice() {
+        return price;
+    }
+
+    public void setPrice(final Float price) {
+        this.price = price;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(final Integer count) {
+        this.count = count;
     }
 
 }

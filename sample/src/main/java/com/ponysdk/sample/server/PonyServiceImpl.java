@@ -2,18 +2,26 @@
 package com.ponysdk.sample.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Application;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
+import com.ponysdk.core.servlet.SessionManager;
 import com.ponysdk.impl.query.memory.FilteringTools;
 import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.sample.client.datamodel.PonyStock;
+import com.ponysdk.ui.server.basic.PPusher;
 
 public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyService {
 
@@ -22,6 +30,7 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
     private static AtomicLong id = new AtomicLong();
 
     private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<Long, Pony>();
+    private final List<PonyStock> stocks = new ArrayList<PonyStock>();
 
     public PonyServiceImpl() {
         final Random rdm = new Random();
@@ -34,6 +43,51 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
             addPony(new Pony(id.incrementAndGet(), "Altai horse", rdm.nextInt(10), "Equus ferus caballus"));
         }
 
+        initAndPushStock();
+    }
+
+    private void initAndPushStock() {
+        for (int i = 0; i < 5; i++) {
+            stocks.add(new PonyStock(id.incrementAndGet(), "Altai horseBengin v" + i, 5.5f, 100));
+            stocks.add(new PonyStock(id.incrementAndGet(), "American Warmblood v" + i, 10f, 100));
+            stocks.add(new PonyStock(id.incrementAndGet(), "Falabella v" + i, 15f, 100));
+            stocks.add(new PonyStock(id.incrementAndGet(), "Friesian horse v" + i, 20f, 100));
+            stocks.add(new PonyStock(id.incrementAndGet(), "Mustang v" + i, 30f, 100));
+            stocks.add(new PonyStock(id.incrementAndGet(), "Altai horse v" + i, 50f, 100));
+        }
+
+        final Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                final Random rdm = new Random();
+                while (true) {
+                    try {
+                        final int index = rdm.nextInt(stocks.size());
+                        final int newStock = rdm.nextInt(10000);
+                        final float newPrice = rdm.nextFloat() * 100;
+                        final PonyStock stock = stocks.get(index);
+                        stock.setCount(newStock);
+                        stock.setPrice(newPrice);
+                        pushData(stock);
+                        Thread.sleep(500);
+                    } catch (final Exception e) {
+                        log.error("", e);
+                    }
+                }
+            }
+        });
+    }
+
+    protected void pushData(final PonyStock stock) {
+        final Collection<Application> applications = SessionManager.get().getApplications();
+        for (final Application application : applications) {
+            for (final UIContext uiContext : application.getUIContexts()) {
+                final PPusher pusher = uiContext.getPusher();
+                if (pusher != null) pusher.pushToClient(stock);
+            }
+        }
     }
 
     @Override
