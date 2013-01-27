@@ -73,6 +73,7 @@ import com.ponysdk.ui.terminal.ui.PTStackLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSuggestBox;
 import com.ponysdk.ui.terminal.ui.PTTabLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTTabPanel;
+import com.ponysdk.ui.terminal.ui.PTTerminalScheduledCommand;
 import com.ponysdk.ui.terminal.ui.PTTextArea;
 import com.ponysdk.ui.terminal.ui.PTTextBox;
 import com.ponysdk.ui.terminal.ui.PTTree;
@@ -134,6 +135,7 @@ public class UIFactory {
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
         if (WidgetType.SCRIPT.equals(widgetType)) { return new PTScript(); }
         if (WidgetType.PUSHER.equals(widgetType)) { return new PTPusher(); }
+        if (WidgetType.TERMINAL_SCHEDULED_COMMAND.equals(widgetType)) { return new PTTerminalScheduledCommand(); }
         if (WidgetType.HEADER_PANEL.equals(widgetType)) { return new PTHeaderPanel(); }
 
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);

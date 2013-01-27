@@ -30,6 +30,10 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class PNotificationManager {
 
+    public static int humanizedDuration = 3000;
+    public static int warningDuration = 4000;
+    public static int trayDuration = 4000;
+
     public enum Notification {
         TRAY, HUMANIZED, WARNING_MESSAGE, ERROR_MESSAGE;
     }
@@ -102,7 +106,7 @@ public class PNotificationManager {
         }, PClickEvent.TYPE);
 
         displayAtCenter(popupPanel, "closing");
-        addAutoCloseTimer(popupPanel, 2500);
+        addAutoCloseTimer(popupPanel, humanizedDuration);
     }
 
     private static void showWarningNotification(final IsPWidget content) {
@@ -119,7 +123,7 @@ public class PNotificationManager {
         }, PClickEvent.TYPE);
 
         displayAtCenter(popupPanel, "closing");
-        addAutoCloseTimer(popupPanel, 3500);
+        addAutoCloseTimer(popupPanel, warningDuration);
     }
 
     private static void showErrorNotification(final IsPWidget content) {
@@ -151,7 +155,7 @@ public class PNotificationManager {
         popupPanel.setWidget(div2);
 
         displayAtBottomRight(popupPanel, "closing");
-        addAutoCloseTimer(popupPanel, 3500);
+        addAutoCloseTimer(popupPanel, trayDuration);
     }
 
     private static void displayAtBottomRight(final PPopupPanel popupPanel, final String closingAnimation) {
@@ -177,13 +181,13 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        final PTimer timer = new PTimer() {
+        final PTerminalScheduledCommand hideCommand = new PTerminalScheduledCommand() {
 
             @Override
-            public void run() {
+            protected void run() {
                 popupPanel.hide();
             }
         };
-        timer.schedule(delayBeforeClosing);
+        hideCommand.schedule(delayBeforeClosing);
     }
 }

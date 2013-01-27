@@ -204,10 +204,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
                 } catch (final Throwable e) {
                     log.log(Level.SEVERE, "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: "
                             + lastReceived, e);
-                    final JSONObject jsoObject = new JSONObject();
-                    jsoObject.put("message", new JSONString("PonySDK has encountered an internal error on instruction : " + currentInstruction));
-                    jsoObject.put("details", new JSONString(e.getMessage()));
-                    stackedErrors.add(jsoObject);
+                    stackError(currentInstruction, e);
                 }
             }
 
@@ -222,7 +219,20 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         }
     }
 
-    protected void processInstruction(final PTInstruction instruction) throws Exception {
+    @Override
+    public void stackError(final PTInstruction currentInstruction, final Throwable e) {
+        String msg;
+        if (e.getMessage() == null) msg = "NA";
+        else msg = e.getMessage();
+
+        final JSONObject jsoObject = new JSONObject();
+        jsoObject.put("message", new JSONString("PonySDK has encountered an internal error on instruction : " + currentInstruction));
+        jsoObject.put("details", new JSONString(msg));
+        stackedErrors.add(jsoObject);
+    }
+
+    @Override
+    public void processInstruction(final PTInstruction instruction) throws Exception {
 
         final String type = instruction.getString(TYPE.KEY);
 

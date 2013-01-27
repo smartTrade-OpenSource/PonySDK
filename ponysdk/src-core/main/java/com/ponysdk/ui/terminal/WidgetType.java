@@ -79,5 +79,6 @@ public enum WidgetType {
     DATEPICKER,
     SCRIPT,
     PUSHER,
+    TERMINAL_SCHEDULED_COMMAND,
     HEADER_PANEL;
 }

@@ -78,7 +78,8 @@ public class UIContext {
     // to do a weak reference ?
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
-    private final List<Instruction> pendingInstructions = new ArrayList<Instruction>();
+    private final List<Instruction> instructionStacker = new ArrayList<Instruction>();
+    private List<Instruction> currentStacker = instructionStacker;
 
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
@@ -107,7 +108,7 @@ public class UIContext {
             final Add add = (Add) instruction;
             weakReferences.assignParentID(add.getObjectID(), add.getParentID());
         }
-        pendingInstructions.add(instruction);
+        currentStacker.add(instruction);
     }
 
     void fireClientData(final JSONObject instruction) throws JSONException {
@@ -147,15 +148,15 @@ public class UIContext {
     }
 
     public boolean flushInstructions(final JSONObject data) throws JSONException {
-        if (pendingInstructions.isEmpty()) return false;
-        data.put(APPLICATION.INSTRUCTIONS, pendingInstructions);
-        pendingInstructions.clear();
+        if (currentStacker.isEmpty()) return false;
+        data.put(APPLICATION.INSTRUCTIONS, currentStacker);
+        currentStacker.clear();
         return true;
     }
 
     public Collection<Instruction> clearPendingInstructions() {
-        final List<Instruction> removed = new ArrayList<Instruction>(pendingInstructions);
-        pendingInstructions.clear();
+        final List<Instruction> removed = new ArrayList<Instruction>(currentStacker);
+        currentStacker.clear();
         return removed;
     }
 
@@ -358,6 +359,12 @@ public class UIContext {
         final long n = nextSent;
         nextSent++;
         return n;
+    }
+
+    public List<Instruction> setCurrentStacker(final List<Instruction> stacker) {
+        final List<Instruction> previous = currentStacker;
+        currentStacker = stacker;
+        return previous;
     }
 
     public void stackIncomingMessage(final Long receivedSeqNum, final JSONObject data) {

@@ -46,4 +46,7 @@ public interface UIService {
 
     public void update(JSONObject data);
 
+    public void processInstruction(final PTInstruction instruction) throws Exception;
+
+    public void stackError(final PTInstruction currentInstruction, final Throwable e);
 }
