@@ -190,6 +190,7 @@
 		"loadingOnRequest": [],
 		"limit": [],
 		"suggestion": [],
+		"suggestions": [],
 		"displayString": [],
 		"replacementString": [],
 		"state": [],
@@ -215,6 +216,7 @@
 		"htmltableColumnStyle": [],
 		"itemUpdated": [],
 		"resize": [],
+		"oracle": [],
 		"instructions": [],
 		"placeholder": []
 	}

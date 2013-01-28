@@ -23,10 +23,14 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -39,19 +43,21 @@ import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+    public static Map<Long, SuggestOracle> oracleByID = new HashMap<Long, SuggestOracle>();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getLong(PROPERTY.TEXTBOX_ID));
+        final long oracleID = create.getLong(PROPERTY.ORACLE);
+        final SuggestOracle oracle = oracleByID.get(oracleID);
+        if (oracle == null) throw new RuntimeException("Oracle #" + oracleID + " not registered");
+
         init(create, uiService, new SuggestBox(oracle, ptTextBox.cast()));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.SUGGESTION)) {
-            oracle.add(update.getString(PROPERTY.SUGGESTION));
-        } else if (update.containsKey(PROPERTY.LIMIT)) {
+        if (update.containsKey(PROPERTY.LIMIT)) {
             uiObject.setLimit(update.getInt(PROPERTY.LIMIT));
         } else {
             super.update(update, uiService);
@@ -95,4 +101,33 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         }
     }
 
+    public static class PTMultiWordSuggestOracle extends AbstractPTObject {
+
+        private MultiWordSuggestOracle oracle;
+
+        @Override
+        public void create(final PTInstruction create, final UIService uiService) {
+            this.objectID = create.getObjectID();
+            this.oracle = new MultiWordSuggestOracle();
+
+            PTSuggestBox.oracleByID.put(objectID, oracle);
+        }
+
+        @Override
+        public void update(final PTInstruction update, final UIService uiService) {
+            if (update.containsKey(PROPERTY.SUGGESTION)) {
+                oracle.add(update.getString(PROPERTY.SUGGESTION));
+            } else if (update.containsKey(PROPERTY.SUGGESTIONS)) {
+                final JSONArray jsonArray = update.get(PROPERTY.SUGGESTIONS).isArray();
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    oracle.add(jsonArray.get(i).isString().stringValue());
+                }
+            } else if (update.containsKey(PROPERTY.CLEAR)) {
+                oracle.clear();
+            } else {
+                super.update(update, uiService);
+            }
+        }
+
+    }
 }

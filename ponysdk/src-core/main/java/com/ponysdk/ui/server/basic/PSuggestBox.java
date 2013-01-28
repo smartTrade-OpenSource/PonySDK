@@ -83,7 +83,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<PSelectionHandler<PSuggestion>>();
 
-    private PSuggestOracle suggestOracle;
+    private final PSuggestOracle suggestOracle;
     private PTextBox textBox;
 
     private int limit;
@@ -91,27 +91,25 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     private String replacementString;
     private String displayString;
 
+    public PSuggestBox() {
+        this(new PMultiWordSuggestOracle());
+    }
+
     public PSuggestBox(final PSuggestOracle suggestOracle) {
 
         this.suggestOracle = suggestOracle;
-        if (suggestOracle == null) {
-            this.suggestOracle = new PMultiWordSuggestOracle();
-        }
 
         getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
         getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
 
         create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
+        create.put(PROPERTY.ORACLE, this.suggestOracle.getID());
     }
 
     @Override
     protected void init(final WidgetType widgetType) {
         this.textBox = new PTextBox();
         super.init(widgetType);
-    }
-
-    public PSuggestBox() {
-        this(null);
     }
 
     @Override
@@ -230,7 +228,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
     }
 
-    public class PMultiWordSuggestOracle extends PSuggestOracle {
+    public static class PMultiWordSuggestOracle extends PSuggestOracle {
 
         @Override
         public void add(final String suggestion) {
@@ -240,10 +238,21 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
 
         @Override
-        public final void addAll(final Collection<String> collection) {
-            for (final String suggestion : collection) {
-                add(suggestion);
-            }
+        public void addAll(final Collection<String> collection) {
+            final Update update = new Update(getID());
+            update.put(PROPERTY.SUGGESTIONS, collection);
+            getUIContext().stackInstruction(update);
+        }
+
+        public void clear() {
+            final Update update = new Update(getID());
+            update.put(PROPERTY.CLEAR, true);
+            getUIContext().stackInstruction(update);
+        }
+
+        @Override
+        protected WidgetType getWidgetType() {
+            return WidgetType.MULTIWORD_SUGGEST_ORACLE;
         }
     }
 }

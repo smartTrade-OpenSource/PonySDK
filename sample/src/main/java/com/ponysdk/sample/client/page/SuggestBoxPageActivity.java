@@ -35,6 +35,7 @@ import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PSuggestBox;
+import com.ponysdk.ui.server.basic.PSuggestBox.PMultiWordSuggestOracle;
 import com.ponysdk.ui.server.basic.PSuggestOracle;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -44,6 +45,8 @@ import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
+
+    private int current = 0;
 
     public SuggestBoxPageActivity() {
         super("Suggest Box", "Text Input");
@@ -58,6 +61,8 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         panel.add(new PLabel("Choose a word:"));
 
         final PSuggestBox suggestBox = new PSuggestBox();
+        suggestBox.setLimit(10);
+
         final PSuggestOracle suggestOracle = suggestBox.getSuggestOracle();
 
         suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
@@ -72,7 +77,6 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         final Query query = new Query();
         final FindPonysCommand command = new FindPonysCommand(query);
         final Result<List<Pony>> ponys = command.execute();
-
         for (final Pony pony : ponys.getData()) {
             suggestOracle.add(pony.getName());
         }
@@ -86,6 +90,8 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         operation.addItem("Select \"Friesian horse\"", 0);
         operation.addItem("Get textbox value", 1);
         operation.addItem("Enable/Disable textbox", 2);
+        operation.addItem("Clear", 3);
+        operation.addItem("Add items", 4);
         operation.addChangeHandler(new PChangeHandler() {
 
             @Override
@@ -99,6 +105,15 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
                     UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
                 } else if (item.equals(2)) {
                     suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
+                } else if (item.equals(3)) {
+                    final PMultiWordSuggestOracle oracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
+                    oracle.clear();
+                } else if (item.equals(4)) {
+                    current++;
+                    final Result<List<Pony>> ponys = command.execute();
+                    for (final Pony pony : ponys.getData()) {
+                        suggestOracle.add(pony.getName() + " " + current);
+                    }
                 }
             }
         });

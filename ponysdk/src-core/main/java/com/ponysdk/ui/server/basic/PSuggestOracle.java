@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 
-public abstract class PSuggestOracle {
+public abstract class PSuggestOracle extends PObject {
 
     public abstract void add(final String suggestion);
 

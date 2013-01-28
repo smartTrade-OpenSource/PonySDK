@@ -71,6 +71,7 @@ import com.ponysdk.ui.terminal.ui.PTSimplePanel;
 import com.ponysdk.ui.terminal.ui.PTSplitLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTStackLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTSuggestBox;
+import com.ponysdk.ui.terminal.ui.PTSuggestBox.PTMultiWordSuggestOracle;
 import com.ponysdk.ui.terminal.ui.PTTabLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTTabPanel;
 import com.ponysdk.ui.terminal.ui.PTTerminalScheduledCommand;
@@ -130,6 +131,7 @@ public class UIFactory {
         if (WidgetType.DIALOG_BOX.equals(widgetType)) { return new PTDialogBox(); }
         if (WidgetType.FLOW_PANEL.equals(widgetType)) { return new PTFlowPanel(); }
         if (WidgetType.SUGGESTBOX.equals(widgetType)) { return new PTSuggestBox(); }
+        if (WidgetType.MULTIWORD_SUGGEST_ORACLE.equals(widgetType)) { return new PTMultiWordSuggestOracle(); }
         if (WidgetType.DISCLOSURE_PANEL.equals(widgetType)) { return new PTDisclosurePanel(); }
         if (WidgetType.DECORATOR_PANEL.equals(widgetType)) { return new PTDecoratorPanel(); }
         if (WidgetType.ELEMENT.equals(widgetType)) { return new PTElement(); }
