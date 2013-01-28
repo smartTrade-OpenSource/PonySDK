@@ -22,6 +22,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
     private static final long serialVersionUID = 1L;
 
+    public int maxIdleTime = -1;
+
     @Override
     public WebSocket doWebSocketConnect(final HttpServletRequest req, final String arg1) {
         final long key = Long.parseLong(req.getParameter(APPLICATION.VIEW_ID));
@@ -46,7 +48,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         return jettyWebSocket;
     }
 
-    private class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
+    public class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
         private final UIContext uiContext;
         private Connection connection;
@@ -60,6 +62,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         public void onOpen(final Connection connection) {
             log.info("Connection received from: " + connection.toString());
             this.connection = connection;
+            this.connection.setMaxIdleTime(maxIdleTime);
             connectionListener.onOpen();
         }
 
@@ -88,6 +91,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         @Override
         public void onMessage(final String arg0) {}
 
+    }
+
+    public void setMaxIdleTime(final int maxIdleTime) {
+        this.maxIdleTime = maxIdleTime;
     }
 
 }

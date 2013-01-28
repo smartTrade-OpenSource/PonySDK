@@ -164,6 +164,7 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("<!doctype html>");
         builder.append("<html>");
         builder.append("<head>");
+        builder.append("    <!-- Powered by PonySDK http://www.ponysdk.com -->");
         builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         builder.append("    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">");
         builder.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">");
@@ -185,7 +186,7 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("</head>");
         builder.append("<body>");
         builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
-        builder.append("    <div id=\"loading\">loading " + applicationName + "...</div>");
+        builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
         builder.append("    <noscript>");
         builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">");
         builder.append("            Your web browser must have JavaScript enabled");

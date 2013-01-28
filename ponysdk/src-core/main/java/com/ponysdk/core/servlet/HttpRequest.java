@@ -38,9 +38,9 @@ public class HttpRequest implements Request {
             getReader().mark(1024 * 10000);
             final String input = readFully(getReader());
             getReader().reset();
-            log.debug("Received: " + input);
+            if (log.isDebugEnabled()) log.debug("Received: " + input);
         } catch (final IOException e) {
-            e.printStackTrace();
+            log.error("Cannot read received data", e);
         }
     }
 

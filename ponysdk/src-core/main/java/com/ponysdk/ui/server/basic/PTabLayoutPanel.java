@@ -148,6 +148,8 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     }
 
     public void selectTab(final int index) {
+        if (index >= getWidgetCount()) throw new IndexOutOfBoundsException();
+
         this.selectedItemIndex = index;
         final Update update = new Update(ID);
         update.put(PROPERTY.SELECTED_INDEX, index);

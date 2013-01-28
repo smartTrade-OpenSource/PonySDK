@@ -661,16 +661,16 @@ td.datePickerMonth {
 	}
 }
 
+.white {
+	.buttoncolor(black, #b7b7b7, #fff, #ededed);
+}
+
 .black {
 	.buttoncolor(#d7d7d7, #333, #666, #000);
 }
  
 .gray {
 	.buttoncolor(#e9e9e9, #555, #888, #575757);
-}
- 
-.white {
-	.buttoncolor(black, #b7b7b7, #fff, #ededed);
 }
  
 .orange {
@@ -1678,5 +1678,25 @@ ul.pony-MultiSelectListBox-ItemsSelectionPanel a:hover{
 	white-space: nowrap;
 	border:1px solid #56aaff;
 	.border-radius(4px);
+}
+
+.gwt-PopupPanelGlass {
+ .animation-name(opacity5);
+    .animation-duration(1s);
+    .animation-delay(0s);
+    .animation-fill-mode(forwards);
+}
+
+@-webkit-keyframes opacity5 {
+ from { opacity: 0; }
+ to { opacity: 0.5; }
+}
+@-moz-keyframes opacity5 {
+ from { opacity: 0; }
+ to { opacity: 0.5; }
+}
+@keyframes opacity5 {
+ from { opacity: 0; }
+ to { opacity: 0.5; }
 }
 
