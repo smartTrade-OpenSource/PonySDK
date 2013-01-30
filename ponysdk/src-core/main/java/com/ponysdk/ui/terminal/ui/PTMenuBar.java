@@ -52,7 +52,18 @@ public class PTMenuBar extends PTWidget<MenuBar> {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) child;
             menuBar.addSeparator(menuItem.cast());
         }
+    }
 
+    @Override
+    public void remove(final PTInstruction remove, final UIService uiService) {
+        final PTObject child = uiService.getPTObject(remove.getObjectID());
+        if (child instanceof PTMenuItem) {
+            final PTMenuItem menuItem = (PTMenuItem) child;
+            uiObject.removeItem(menuItem.cast());
+        } else {
+            final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) child;
+            uiObject.removeSeparator(menuItem.cast());
+        }
     }
 
     @Override

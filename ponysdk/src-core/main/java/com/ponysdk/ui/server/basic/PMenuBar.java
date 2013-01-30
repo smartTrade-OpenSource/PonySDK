@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -144,12 +145,41 @@ public class PMenuBar extends PWidget {
         return addItem(new PMenuItem(text, popup));
     }
 
+    public PWidget getItem(final int index) {
+        return items.get(index);
+    }
+
     public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, item);
         final Add add = new Add(item.getID(), getID());
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         getUIContext().stackInstruction(add);
         return item;
+    }
+
+    public boolean removeItem(final int index) {
+        final PWidget item = items.remove(index);
+        final Remove remove = new Remove(item.getID(), getID());
+        getUIContext().stackInstruction(remove);
+        return true;
+    }
+
+    public boolean removeItem(final PMenuItem item) {
+        final boolean removed = items.remove(item);
+        if (removed) {
+            final Remove remove = new Remove(item.getID(), getID());
+            getUIContext().stackInstruction(remove);
+        }
+        return removed;
+    }
+
+    public boolean removeItem(final PMenuItemSeparator item) {
+        final boolean removed = items.remove(item);
+        if (removed) {
+            final Remove remove = new Remove(item.getID(), getID());
+            getUIContext().stackInstruction(remove);
+        }
+        return removed;
     }
 
     public void addSeparator() {
