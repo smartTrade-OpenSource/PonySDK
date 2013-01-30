@@ -23,15 +23,26 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
-public class DockPanelPageActivity extends SamplePageActivity {
+public class DockPanelPageActivity extends SamplePageActivity implements PClickHandler {
+
+    final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
+    private final PTextBox headerSize = new PTextBox();
+    final PButton applySize = new PButton("Apply Size");
+    private PFlowPanel headerWidget;
 
     public DockPanelPageActivity() {
         super("Dock Panel", "Panels");
@@ -41,15 +52,21 @@ public class DockPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
-
-        dockLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
+        dockLayoutPanel.addNorth(buildAction(), 50);
         dockLayoutPanel.addSouth(buildComponent("south", "#75ffdc"), 50);
         dockLayoutPanel.addEast(buildComponent("east", "#b879fc"), 100);
         dockLayoutPanel.addWest(buildComponent("west", "#e8b6ea"), 100);
         dockLayoutPanel.add(buildCenterPanel());
 
         examplePanel.setWidget(dockLayoutPanel);
+    }
+
+    private PWidget buildAction() {
+        headerWidget = new PFlowPanel();
+        applySize.addClickHandler(this);
+        headerWidget.add(headerSize);
+        headerWidget.add(applySize);
+        return headerWidget;
     }
 
     private PScrollPanel buildCenterPanel() {
@@ -70,6 +87,12 @@ public class DockPanelPageActivity extends SamplePageActivity {
         panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
         panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);
         return panel;
+    }
+
+    @Override
+    public void onClick(final PClickEvent event) {
+        final double size = Double.parseDouble(headerSize.getText());
+        dockLayoutPanel.setWidgetSize(headerWidget, size);
     }
 
 }

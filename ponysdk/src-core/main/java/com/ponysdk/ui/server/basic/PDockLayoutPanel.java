@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -92,6 +93,20 @@ public class PDockLayoutPanel extends PComplexPanel {
 
     public void addLineStart(final PWidget widget, final double size) {
         add(widget, Direction.LINE_START, size);
+    }
+
+    public void setWidgetSize(final PWidget widget, final double size) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.WIDGET_SIZE, size);
+        update.put(PROPERTY.WIDGET, widget.getID());
+        getUIContext().stackInstruction(update);
+    }
+
+    public void setWidgetHidden(final PWidget widget, final boolean hidden) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.WIDGET_HIDDEN, hidden);
+        update.put(PROPERTY.WIDGET, widget.getID());
+        getUIContext().stackInstruction(update);
     }
 
     public void add(final PWidget child, final Direction direction, final double size) {

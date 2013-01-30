@@ -1,6 +1,7 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -14,9 +15,10 @@ public class MenuItem {
         this.categories = categories;
     }
 
-    public MenuItem(final String name, final String categorie) {
+    public MenuItem(final String name, final String category) {
         this.name = name;
-        this.categories = Collections.singleton(categorie);
+        if (category == null) this.categories = Collections.emptyList();
+        else this.categories = Arrays.asList(category);
     }
 
     public String getName() {
