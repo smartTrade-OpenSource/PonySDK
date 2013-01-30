@@ -39,6 +39,21 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     }
 
     @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.WIDGET_SIZE)) {
+            final double newSize = update.getDouble(PROPERTY.WIDGET_SIZE);
+            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+            uiObject.setWidgetSize(w, newSize);
+        } else if (update.containsKey(PROPERTY.WIDGET_HIDDEN)) {
+            final boolean hidden = update.getBoolean(PROPERTY.WIDGET_HIDDEN);
+            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+            uiObject.setWidgetHidden(w, hidden);
+        } else {
+            super.update(update, uiService);
+        }
+    }
+
+    @Override
     public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);

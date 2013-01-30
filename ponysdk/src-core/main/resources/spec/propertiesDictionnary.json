@@ -218,7 +218,9 @@
 		"resize": [],
 		"oracle": [],
 		"instructions": [],
-		"placeholder": []
+		"placeholder": [],
+		"widgetSize": [],
+		"widgetHidden": []
 	}
 	
 }

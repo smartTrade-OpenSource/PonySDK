@@ -29,10 +29,10 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
     private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<String, PTreeItem>();
 
-    private final Map<PTreeItem, MenuItem> menuItemByUIObject = new LinkedHashMap<PTreeItem, MenuItem>();
-    private final Map<MenuItem, PTreeItem> uiObjectByMenuItem = new LinkedHashMap<MenuItem, PTreeItem>();
+    protected final Map<PTreeItem, MenuItem> itemsByTree = new LinkedHashMap<PTreeItem, MenuItem>();
+    protected final Map<MenuItem, PTreeItem> treeByMenuItem = new LinkedHashMap<MenuItem, PTreeItem>();
 
-    private final PTree tree;
+    protected final PTree tree;
 
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<PSelectionHandler<MenuItem>>();
 
@@ -45,7 +45,7 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                final MenuItem menuItem = menuItemByUIObject.get(event.getSelectedItem());
+                final MenuItem menuItem = itemsByTree.get(event.getSelectedItem());
                 final PSelectionEvent<MenuItem> e = new PSelectionEvent<MenuItem>(this, menuItem);
                 for (final PSelectionHandler<MenuItem> handler : selectionHandlers) {
                     handler.onSelection(e);
@@ -69,14 +69,14 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
         if (menuItem.getName() != null) {
             final PTreeItem captionItem = new PTreeItem(menuItem.getName());
             categoryItem.addItem(captionItem);
-            menuItemByUIObject.put(captionItem, menuItem);
-            uiObjectByMenuItem.put(menuItem, captionItem);
+            itemsByTree.put(captionItem, menuItem);
+            treeByMenuItem.put(menuItem, captionItem);
         }
     }
 
     @Override
     public void selectItem(final MenuItem menuItem) {
-        final PTreeItem treeItem = uiObjectByMenuItem.get(menuItem);
+        final PTreeItem treeItem = treeByMenuItem.get(menuItem);
         tree.setSelectedItem(treeItem);
     }
 
