@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.UIContext;
@@ -36,7 +37,6 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PSuggestBox;
 import com.ponysdk.ui.server.basic.PSuggestBox.PMultiWordSuggestOracle;
-import com.ponysdk.ui.server.basic.PSuggestOracle;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
@@ -63,8 +63,7 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         final PSuggestBox suggestBox = new PSuggestBox();
         suggestBox.setLimit(10);
 
-        final PSuggestOracle suggestOracle = suggestBox.getSuggestOracle();
-
+        final PMultiWordSuggestOracle suggestOracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
         suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
 
             @Override
@@ -77,9 +76,13 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         final Query query = new Query();
         final FindPonysCommand command = new FindPonysCommand(query);
         final Result<List<Pony>> ponys = command.execute();
+
+        final List<String> datas = new ArrayList<String>();
         for (final Pony pony : ponys.getData()) {
-            suggestOracle.add(pony.getName());
+            datas.add(pony.getName());
         }
+        suggestOracle.addAll(datas);
+        suggestOracle.setDefaultSuggestions(datas.subList(0, 5));
 
         panel.add(suggestBox);
 

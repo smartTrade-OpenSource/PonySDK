@@ -244,6 +244,12 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
             getUIContext().stackInstruction(update);
         }
 
+        public void setDefaultSuggestions(final Collection<String> collection) {
+            final Update update = new Update(getID());
+            update.put(PROPERTY.DEFAULT_SUGGESTIONS, collection);
+            getUIContext().stackInstruction(update);
+        }
+
         public void clear() {
             final Update update = new Update(getID());
             update.put(PROPERTY.CLEAR, true);

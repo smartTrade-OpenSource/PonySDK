@@ -23,7 +23,9 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -122,6 +124,13 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     oracle.add(jsonArray.get(i).isString().stringValue());
                 }
+            } else if (update.containsKey(PROPERTY.DEFAULT_SUGGESTIONS)) {
+                final List<String> defaultSuggestions = new ArrayList<String>();
+                final JSONArray jsonArray = update.get(PROPERTY.DEFAULT_SUGGESTIONS).isArray();
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    defaultSuggestions.add(jsonArray.get(i).isString().stringValue());
+                }
+                oracle.setDefaultSuggestionsFromText(defaultSuggestions);
             } else if (update.containsKey(PROPERTY.CLEAR)) {
                 oracle.clear();
             } else {

@@ -191,6 +191,7 @@
 		"limit": [],
 		"suggestion": [],
 		"suggestions": [],
+		"defaultSuggestions": [],
 		"displayString": [],
 		"replacementString": [],
 		"state": [],
