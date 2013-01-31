@@ -188,9 +188,8 @@ public abstract class PHTMLTable extends PPanel {
         public void setWidth(final int column, final String width) {
             final Update update = new Update(ID);
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
-            update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH);
+            update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH, width);
             update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.WIDTH, width);
             getUIContext().stackInstruction(update);
         }
 
