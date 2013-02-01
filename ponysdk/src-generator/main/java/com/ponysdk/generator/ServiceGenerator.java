@@ -260,7 +260,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addLine("   }");
         classWriter.addNewLine();
         classWriter.addLine("   try {");
-        classWriter.addLine("       final " + dao.getClazz() + " instance = (" + dao.getClazz() + ") sessionFactory.getCurrentSession().get(" + dao.getClazz() + ".class, id);");
+        classWriter.addLine("       " + dao.getClazz() + " instance = (" + dao.getClazz() + ") sessionFactory.getCurrentSession().get(" + dao.getClazz() + ".class, id);");
         classWriter.addLine("       return instance;");
         classWriter.addLine("   } catch (final RuntimeException re) {");
         classWriter.addLine("       log.error(\"getting " + domain.getName() + " by id failed\", re);");
@@ -277,7 +277,7 @@ public class ServiceGenerator extends BaseGenerator {
         classWriter.addLine("   }");
         classWriter.addNewLine();
         classWriter.addLine("   try {");
-        classWriter.addLine("       final java.util.List<" + dao.getClazz() + "> results = sessionFactory.getCurrentSession().createQuery(\"final FROM " + domain.getName() + "\").list();");
+        classWriter.addLine("       final java.util.List<" + dao.getClazz() + "> results = sessionFactory.getCurrentSession().createQuery(\"FROM " + domain.getName() + "\").list();");
         classWriter.addLine("       return results;");
         classWriter.addLine("   } catch (final RuntimeException re) {");
         classWriter.addLine("       log.error(\"finding all " + domain.getName() + " failed\", re);");
