@@ -62,7 +62,6 @@ public class StreamServiceServlet extends HttpServlet {
             final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-
             final StreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {

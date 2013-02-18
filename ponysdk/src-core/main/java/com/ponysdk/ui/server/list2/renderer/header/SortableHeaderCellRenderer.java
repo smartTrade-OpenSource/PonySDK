@@ -67,13 +67,8 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
             @Override
             public void onClick(final PClickEvent event) {
-                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
                 final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
                 sort(nextSortingType);
-                title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
-
-                filterListener.onSort(SortableHeaderCellRenderer.this);
-
             }
         });
     }
@@ -98,9 +93,17 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
     @Override
     public void sort(final SortingType newSortingType) {
+        title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
         title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
         this.sortingType = newSortingType;
         title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
+        if (SortingType.NONE != newSortingType) {
+            filterListener.onSort(this);
+        }
+    }
+
+    public SortingType getSortingType() {
+        return sortingType;
     }
 
     @Override
