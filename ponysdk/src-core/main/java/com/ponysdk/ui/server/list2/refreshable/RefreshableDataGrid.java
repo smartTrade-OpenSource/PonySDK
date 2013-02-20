@@ -23,11 +23,14 @@
 
 package com.ponysdk.ui.server.list2.refreshable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.list.SimpleListView;
 import com.ponysdk.ui.server.list2.DataGridActivity;
@@ -111,6 +114,17 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) return -1;
         return map.entrySet().iterator().next().getValue().row;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <W extends IsPWidget> Collection<Cell<D, W>> getColumn(final RefreshableDataGridColumnDescriptor<D, ?, W> descriptor) {
+        final List<Cell<D, W>> c = new ArrayList<Cell<D, W>>();
+        final Collection<Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> values = cells.values();
+        for (final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map : values) {
+            final Cell<D, W> cell = (Cell<D, W>) map.get(descriptor);
+            if (cell != null) c.add(cell);
+        }
+        return c;
     }
 
     public D getData(final K key) {
