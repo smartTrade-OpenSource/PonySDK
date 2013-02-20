@@ -23,12 +23,14 @@
 
 package com.ponysdk.core.instruction;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class Add extends Instruction {
 
     public Add(final long objectID, final long parentID) {
         super(objectID, parentID);
+        UIContext.get().assignParentID(objectID, parentID);
         put(TYPE.KEY, TYPE.KEY_.ADD);
     }
 

@@ -25,7 +25,6 @@ package com.ponysdk.ui.server.rich;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PComposite;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -34,7 +33,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
-public class POptionPane extends PComposite {
+public class POptionPane {
 
     final PDialogBox dialogBox;
 

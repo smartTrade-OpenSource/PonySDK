@@ -196,7 +196,13 @@ public abstract class AbstractApplicationManager {
         if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
             final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
             for (int i = 0; i < instructions.length(); i++) {
-                uiContext.fireClientData(instructions.getJSONObject(i));
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = instructions.getJSONObject(i);
+                    uiContext.fireClientData(jsonObject);
+                } catch (final Throwable e) {
+                    log.error("Failed to process instruction: " + jsonObject, e);
+                }
             }
         }
     }

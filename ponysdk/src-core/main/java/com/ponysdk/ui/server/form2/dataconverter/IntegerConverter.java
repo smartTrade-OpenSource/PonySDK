@@ -5,6 +5,7 @@ public class IntegerConverter implements DataConverter<String, Integer> {
 
     @Override
     public String from(final Integer t) {
+        if (t == null) return null;
         return t.toString();
     }
 

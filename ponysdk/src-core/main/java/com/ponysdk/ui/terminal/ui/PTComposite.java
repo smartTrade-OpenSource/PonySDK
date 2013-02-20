@@ -25,32 +25,39 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public abstract class PTComposite extends PTWidget<Composite> {
 
-    private UIService uiService;
-    private PTInstruction create;
-
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        this.create = create;
-        this.uiService = uiService;
+        init(create, uiService, new MyComposite());
     }
 
-    protected void initWidget(final PTWidget<?> widget) {
-        init(create, uiService, new MyComposite(widget.cast()));
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+
+        if (update.containsKey(PROPERTY.WIDGET)) {
+            cast().initWidget(asWidget(update.getLong(PROPERTY.WIDGET), uiService));
+        } else {
+            super.update(update, uiService);
+        }
     }
 
-    protected void initWidget(final Widget widget) {
-        init(create, uiService, new MyComposite(widget));
+    @Override
+    public MyComposite cast() {
+        return (MyComposite) super.cast();
     }
 
     class MyComposite extends Composite {
 
-        public MyComposite(final Widget widget) {
-            initWidget(widget);
+        public MyComposite() {}
+
+        @Override
+        public void initWidget(final Widget widget) {
+            super.initWidget(widget);
         }
     }
 }

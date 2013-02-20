@@ -5,6 +5,7 @@ public class LongConverter implements DataConverter<String, Long> {
 
     @Override
     public String from(final Long t) {
+        if (t == null) return null;
         return t.toString();
     }
 

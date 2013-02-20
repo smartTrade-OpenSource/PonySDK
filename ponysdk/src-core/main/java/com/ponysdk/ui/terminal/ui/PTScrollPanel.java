@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
@@ -32,7 +33,7 @@ public class PTScrollPanel extends PTSimplePanel {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new PCScrollPanel());
+        init(create, uiService, new ScrollPanel());
     }
 
     @Override
@@ -57,7 +58,7 @@ public class PTScrollPanel extends PTSimplePanel {
     }
 
     @Override
-    public PCScrollPanel cast() {
-        return (PCScrollPanel) uiObject;
+    public ScrollPanel cast() {
+        return (ScrollPanel) uiObject;
     }
 }

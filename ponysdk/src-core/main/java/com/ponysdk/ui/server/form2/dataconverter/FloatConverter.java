@@ -5,6 +5,7 @@ public class FloatConverter implements DataConverter<String, Float> {
 
     @Override
     public String from(final Float t) {
+        if (t == null) return null;
         return t.toString();
     }
 

@@ -44,7 +44,6 @@ import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Close;
 import com.ponysdk.core.instruction.Instruction;
@@ -104,10 +103,6 @@ public class UIContext {
     }
 
     public void stackInstruction(final Instruction instruction) {
-        if (instruction instanceof Add) {
-            final Add add = (Add) instruction;
-            weakReferences.assignParentID(add.getObjectID(), add.getParentID());
-        }
         currentStacker.add(instruction);
     }
 
@@ -187,6 +182,10 @@ public class UIContext {
     public void unRegisterObject(final PObject object) {
         timers.remove(object.getID());
         weakReferences.remove(object.getID());
+    }
+
+    public void assignParentID(final long objectID, final long parentID) {
+        weakReferences.assignParentID(objectID, parentID);
     }
 
     @SuppressWarnings("unchecked")
@@ -381,6 +380,7 @@ public class UIContext {
             lastReceived = expected;
             expected++;
         }
+        log.info("Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         return datas;
     }
 }

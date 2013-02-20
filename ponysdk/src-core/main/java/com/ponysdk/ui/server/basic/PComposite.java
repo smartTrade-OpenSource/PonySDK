@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -45,24 +44,16 @@ public abstract class PComposite extends PWidget {
         return WidgetType.COMPOSITE;
     }
 
-    @Override
-    protected void init(final WidgetType widgetType) {}
-
     protected void initWidget(final PWidget child) {
         if (this.widget != null) { throw new IllegalStateException("PComposite.initWidget() may only be " + "called once."); }
-        ID = UIContext.get().nextID();
-        create = new Create(ID, getWidgetType());
-
-        UIContext.get().stackInstruction(create);
-        UIContext.get().registerObject(this);
 
         child.removeFromParent();
         this.widget = child;
         child.setParent(this);
 
-        create.put(PROPERTY.WIDGET, child.getID());
-
-        getUIContext().stackInstruction(create);
+        final Update update = new Update(ID);
+        update.put(PROPERTY.WIDGET, child.getID());
+        getUIContext().stackInstruction(update);
     }
 
 }

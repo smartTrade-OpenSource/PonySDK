@@ -5,6 +5,7 @@ public class DoubleConverter implements DataConverter<String, Double> {
 
     @Override
     public String from(final Double t) {
+        if (t == null) return null;
         return t.toString();
     }
 

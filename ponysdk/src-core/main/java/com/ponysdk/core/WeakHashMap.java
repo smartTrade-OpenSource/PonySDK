@@ -9,11 +9,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.instruction.GC;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
 
 public class WeakHashMap implements Map<Long, PObject> {
+
+    private final Logger log = LoggerFactory.getLogger(WeakHashMap.class);
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<PObject>();
 
@@ -62,9 +67,12 @@ public class WeakHashMap implements Map<Long, PObject> {
         referenceByObjectID.put(objectID, weakReference);
         objectIDByReferences.put(weakReference, objectID);
 
+        if (log.isDebugEnabled()) log.debug("Registering object: " + value);
+
         if (value instanceof PWidget) {
             final PWidget widget = (PWidget) value;
             if (widget.getParent() != null) {
+                if (log.isDebugEnabled()) log.debug("Attaching object #" + objectID + " to parent: " + widget);
                 parentObjectIDByReferences.put(weakReference, widget.getParent().getID());
             }
         }
@@ -76,6 +84,8 @@ public class WeakHashMap implements Map<Long, PObject> {
     public PObject remove(final Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> reference = referenceByObjectID.remove(key);
+
+        if (log.isDebugEnabled()) log.debug("Removing reference on object #" + key);
         if (reference == null) return null;
 
         objectIDByReferences.remove(reference);
@@ -113,6 +123,10 @@ public class WeakHashMap implements Map<Long, PObject> {
     }
 
     public void assignParentID(final Long objectID, final Long parentObjectID) {
+        if (referenceByObjectID.get(objectID) == null) {
+            log.warn("Unkwnown reference to object: " + objectID);
+            return;
+        }
         parentObjectIDByReferences.put(referenceByObjectID.get(objectID), parentObjectID);
     }
 
@@ -123,6 +137,7 @@ public class WeakHashMap implements Map<Long, PObject> {
             final Long objectID = objectIDByReferences.remove(reference);
             final Long parentObjectID = parentObjectIDByReferences.remove(reference);
             referenceByObjectID.remove(objectID);
+            if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
 
             if (parentObjectID != null) {
                 UIContext.get().stackInstruction(new GC(objectID, parentObjectID));

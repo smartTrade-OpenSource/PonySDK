@@ -54,8 +54,8 @@ public class PTPusher extends AbstractPTObject {
             eventInstruction.put(PROPERTY.ERROR_MSG, "WebSocket not supported");
             uiService.sendDataToServer(eventInstruction);
 
-            final int delay = 1000;
-            if (create.containsKey(PROPERTY.FIXDELAY)) create.getInt(PROPERTY.FIXDELAY);
+            int delay = 1000;
+            if (create.containsKey(PROPERTY.FIXDELAY)) delay = create.getInt(PROPERTY.FIXDELAY);
 
             Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 

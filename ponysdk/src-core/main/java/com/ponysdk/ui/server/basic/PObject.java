@@ -49,6 +49,7 @@ public abstract class PObject {
 
     PObject() {
         init(getWidgetType());
+        UIContext.get().registerObject(this);
     }
 
     protected abstract WidgetType getWidgetType();
@@ -61,18 +62,13 @@ public abstract class PObject {
             create.setAddOnSignature(((PAddOn) this).getSignature());
         }
         UIContext.get().stackInstruction(create);
-        registerObject();
-    }
-
-    protected void registerObject() {
-        UIContext.get().registerObject(this);
     }
 
     public long getID() {
         return ID;
     }
 
-	public void bindTerminalFunction(final String functionName) {
+    public void bindTerminalFunction(final String functionName) {
 
         if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
