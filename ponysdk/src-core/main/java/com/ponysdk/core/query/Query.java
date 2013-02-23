@@ -36,11 +36,9 @@ public class Query {
 
     private int pageNum = 0;
 
-    private QueryMode queryMode = QueryMode.PAGINATION; // TODO nciaravola to avoid breaking existing queries
+    private QueryMode queryMode = QueryMode.PAGINATION;
 
     private final List<Criterion> criteria = new ArrayList<Criterion>();
-
-    // private final Map<String, CriterionField> criteria = new HashMap<String, CriterionField>();
 
     public Query() {
         super();
@@ -73,7 +71,6 @@ public class Query {
     }
 
     public Criterion getCriterion(final String pojoProperty) {
-        // temp return a list
         for (final Criterion criterion : criteria) {
             if (criterion.getPojoProperty().equals(pojoProperty)) return criterion;
         }

@@ -157,6 +157,8 @@ public interface PonySDKTheme {
 
     String CLOSABLE_DIALOGBOX_HEADER = "header";
 
+    String CLOSABLE_DIALOGBOX_LAYOUT = "layout";
+
     String CLOSABLE_DIALOGBOX_CAPTION = "caption";
 
     String CLOSABLE_DIALOGBOX_CLOSE = "close";

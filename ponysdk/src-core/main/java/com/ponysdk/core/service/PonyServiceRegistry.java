@@ -24,7 +24,7 @@ public class PonyServiceRegistry {
         for (final Class<?> clazz : classes) {
             if (PonyService.class.isAssignableFrom(clazz)) {
                 registeredServices.put(clazz, service);
-                log.info("Registering impl " + service + " for service : " + clazz);
+                log.info("Service registered #" + clazz);
             }
         }
     }
@@ -44,7 +44,7 @@ public class PonyServiceRegistry {
     public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
         @SuppressWarnings("unchecked")
         final T ponyService = (T) registeredServices.get(clazz);
-        if (ponyService == null) throw new RuntimeException("Service not registered for the class #" + clazz.getCanonicalName());
+        if (ponyService == null) throw new RuntimeException("Service not registered #" + clazz.getCanonicalName());
         return ponyService;
     }
 }

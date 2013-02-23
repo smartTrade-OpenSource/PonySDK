@@ -39,9 +39,8 @@ public class PClosableDialogBox extends PPopupPanel {
         contentContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CONTENT);
 
         final PFlexTable layout = new PFlexTable();
-        layout.setCellPadding(0);
-        layout.setCellSpacing(0);
-        layout.setStyleProperty("border", "none");
+        layout.addStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_LAYOUT);
+
         layout.setWidget(0, 0, captionContainer);
         layout.setWidget(0, 1, closeContainer);
         layout.setWidget(1, 0, contentContainer);
@@ -51,7 +50,6 @@ public class PClosableDialogBox extends PPopupPanel {
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         layout.getFlexCellFormatter().addStyleName(0, 0, PonySDKTheme.CLOSABLE_DIALOGBOX_HEADER);
         layout.getFlexCellFormatter().addStyleName(0, 1, PonySDKTheme.CLOSABLE_DIALOGBOX_HEADER);
-        layout.getColumnFormatter().setWidth(1, "30px");
 
         closeContainer.addDomHandler(new PClickHandler() {
 

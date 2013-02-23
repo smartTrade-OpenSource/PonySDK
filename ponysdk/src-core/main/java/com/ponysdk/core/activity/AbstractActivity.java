@@ -42,22 +42,10 @@ public abstract class AbstractActivity implements Activity {
     protected PAcceptsOneWidget world;
     protected IsPWidget view;
 
-    // protected final Permission permission;
-
-    public AbstractActivity() {
-        // this.permission = Permission.ALLOWED;
-    }
-
-    // public AbstractActivity(final Permission permission) {
-    // this.permission = permission;
-    // }
+    public AbstractActivity() {}
 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
-
-        // if (!SecurityManager.checkPermission(getPermission())) throw new
-        // RuntimeException("Missing permission #" + getPermission());
-
         if (!started) {
             this.world = world;
             this.started = true;
@@ -72,11 +60,6 @@ public abstract class AbstractActivity implements Activity {
     protected abstract IsPWidget buildView();
 
     protected abstract void updateView(Place place);
-
-    // @Override
-    // public Permission getPermission() {
-    // return permission;
-    // }
 
     public void goTo(final Place place) {
         UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));

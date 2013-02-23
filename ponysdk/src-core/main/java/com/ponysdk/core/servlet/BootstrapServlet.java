@@ -181,14 +181,12 @@ public class BootstrapServlet extends HttpServlet {
             builder.append("    <script type=\"text/javascript\" src=\"" + script + "\"></script>");
         }
 
-        // builder.append("    <script src=\"script/less.js\" type=\"text/javascript\"></script>");
-
         builder.append("</head>");
         builder.append("<body>");
         builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
         builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
         builder.append("    <noscript>");
-        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">");
+        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         builder.append("            Your web browser must have JavaScript enabled");
         builder.append("            in order for this application to display correctly.");
         builder.append("        </div>");

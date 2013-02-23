@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.list.SelectionMode;
 import com.ponysdk.ui.server.list2.Resetable;
 
 public class Selector<T> implements SelectorViewListener, SelectableListener, Resetable {

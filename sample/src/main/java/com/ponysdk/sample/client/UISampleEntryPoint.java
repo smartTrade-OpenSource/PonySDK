@@ -23,9 +23,6 @@
 
 package com.ponysdk.sample.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
@@ -38,7 +35,7 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
 
     public static final String USER = "user";
 
-    private static Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
+    // private static Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
 
     @Override
     public void start(final UIContext uiContext) {

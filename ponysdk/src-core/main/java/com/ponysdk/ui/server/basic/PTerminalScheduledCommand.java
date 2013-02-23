@@ -37,27 +37,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public abstract class PTerminalScheduledCommand extends PObject {
 
-    // private int delayMillis;
-
-    // private boolean repeat = false;
-
-    // private final RepeatingCommand cmd = new RepeatingCommand() {
-    //
-    // @Override
-    // public boolean execute() {
-    // run();
-    // return repeat;
-    // }
-    // };
-
-    // public void scheduleRepeating(final int delayMillis) {
-    // repeat = true;
-    // PScheduler.get().scheduleFixedDelay(cmd, delayMillis);
-    // }
-
     public void schedule(final int delayMillis) {
-        // this.delayMillis = delayMillis;
-
         final UIContext context = UIContext.get();
         final List<Instruction> stacker = new ArrayList<Instruction>();
         final List<Instruction> mainStacker = context.setCurrentStacker(stacker);
@@ -70,12 +50,7 @@ public abstract class PTerminalScheduledCommand extends PObject {
         update.put(PROPERTY.FIXDELAY, delayMillis);
         update.put(PROPERTY.INSTRUCTIONS, stacker);
         UIContext.get().stackInstruction(update);
-        // repeat = false;
     }
-
-    // public void cancel() {
-    // repeat = false;
-    // }
 
     protected abstract void run();
 

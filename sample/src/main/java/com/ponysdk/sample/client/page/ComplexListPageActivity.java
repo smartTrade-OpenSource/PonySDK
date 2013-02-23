@@ -175,8 +175,8 @@ public class ComplexListPageActivity extends SamplePageActivity implements Submi
         buildCreatePonyActivity();
     }
 
-    private ExportConfiguration initExportConfiguration() {
-        final ExportConfiguration exportConfiguration = new ExportConfiguration();
+    private ExportConfiguration<Pony> initExportConfiguration() {
+        final ExportConfiguration<Pony> exportConfiguration = new ExportConfiguration<Pony>();
         exportConfiguration.addExporter(new CSVExporter<Pony>("pony"));
         exportConfiguration.addExporter(new PDFExporter<Pony>("Pony export", "users"));
         exportConfiguration.addExporter(new XMLExporter<Pony>("root", "pony"));

@@ -521,7 +521,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
                         if (SelectionMode.FULL.equals(selectionMode)) {
                             query.setQueryMode(QueryMode.FULL_RESULT);
                         }
-                        final ExportContext exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
+                        final ExportContext<D> exportContext = new ExportContext<D>(query, complexListConfiguration.getExportConfiguration().getExportableFields(), selectionResult);
                         exportContext.setExporter(exporter);
 
                         final Command<String> command = commandFactory.newExportCommand(ComplexListActivity.this, exportContext);

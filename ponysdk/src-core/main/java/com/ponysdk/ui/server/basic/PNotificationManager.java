@@ -30,9 +30,9 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class PNotificationManager {
 
-    public static int humanizedDuration = 3000;
-    public static int warningDuration = 4000;
-    public static int trayDuration = 4000;
+    public static int humanizedDuration = 5000;
+    public static int warningDuration = 6000;
+    public static int trayDuration = 6000;
 
     public enum Notification {
         TRAY, HUMANIZED, WARNING_MESSAGE, ERROR_MESSAGE;
@@ -146,8 +146,6 @@ public class PNotificationManager {
     private static void showTrayNotification(final IsPWidget content) {
         final PSimplePanel div2 = new PSimplePanel();
         div2.setWidget(content);
-        div2.setWidth("200px");
-        div2.setHeight("70px");
 
         final PPopupPanel popupPanel = new PPopupPanel(true);
         popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);

@@ -7,7 +7,6 @@ import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.list.SelectionMode;
 
 public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 

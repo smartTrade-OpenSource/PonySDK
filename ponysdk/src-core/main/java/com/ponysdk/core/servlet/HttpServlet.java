@@ -55,7 +55,6 @@ public class HttpServlet extends AbstractHttpServlet {
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) throws ServletException {
                 EntryPoint entryPoint = null;
-                // final String entryPointClassName = getServletConfig().getInitParameter("entryPoint");
                 try {
                     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                     final Class<?> clazz = classLoader.loadClass(entryPointClassName);
@@ -72,9 +71,6 @@ public class HttpServlet extends AbstractHttpServlet {
 
                 ponySession.setRootEventBus(rootEventBus);
                 ponySession.setHistory(history);
-
-                // final PCookies cookies = new PCookies(data.getString(PROPERTY.COOKIE));
-                // ponySession.setCookies(cookies);
 
                 return entryPoint;
             }

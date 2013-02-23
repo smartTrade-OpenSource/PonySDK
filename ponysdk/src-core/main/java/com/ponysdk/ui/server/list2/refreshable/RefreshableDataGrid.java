@@ -32,9 +32,9 @@ import java.util.Map;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.list.SimpleListView;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
+import com.ponysdk.ui.server.list2.SimpleListView;
 
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 

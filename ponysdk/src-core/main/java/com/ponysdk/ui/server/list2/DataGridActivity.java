@@ -33,7 +33,6 @@ import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.list.SimpleListView;
 
 public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 

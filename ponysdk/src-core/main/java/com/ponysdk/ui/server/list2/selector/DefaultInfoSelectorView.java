@@ -8,7 +8,6 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.list.SelectionMode;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {

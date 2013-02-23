@@ -74,10 +74,10 @@ public class UIContext {
 
     private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
 
-    // to do a weak reference ?
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
     private final List<Instruction> instructionStacker = new ArrayList<Instruction>();
+
     private List<Instruction> currentStacker = instructionStacker;
 
     private Map<String, Permission> permissions = new HashMap<String, Permission>();

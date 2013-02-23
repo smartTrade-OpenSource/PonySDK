@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.list.SelectionMode;
 
 public class CompositeSelectorView implements SelectorView {
 

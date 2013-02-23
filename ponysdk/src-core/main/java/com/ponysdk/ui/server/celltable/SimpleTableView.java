@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.celltable;
 import java.util.Iterator;
 
 import com.ponysdk.ui.server.basic.PElement;
-import com.ponysdk.ui.server.list.SimpleListView;
+import com.ponysdk.ui.server.list2.SimpleListView;
 
 public class SimpleTableView extends SimpleTable implements SimpleListView {
 

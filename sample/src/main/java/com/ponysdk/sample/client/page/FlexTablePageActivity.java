@@ -64,9 +64,10 @@ public class FlexTablePageActivity extends SamplePageActivity {
 
         pusher.addConnectionListener(new ConnectionListener() {
 
+            final Timer timer = new Timer();
+
             @Override
             public void onOpen() {
-                final Timer timer = new Timer();
 
                 timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -94,7 +95,9 @@ public class FlexTablePageActivity extends SamplePageActivity {
             }
 
             @Override
-            public void onClose() {}
+            public void onClose() {
+                timer.cancel();
+            }
         });
 
         final PScrollPanel scrollPanel = new PScrollPanel();

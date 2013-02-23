@@ -60,7 +60,6 @@ public class PConfirmDialog extends PDialogBox {
                     confirmDialog.setHeight((windowHeight - 100) + "px");
                 }
                 confirmDialog.setWidth((offsetWidth + 35) + "px");
-                content.setWidth("100%");
                 confirmDialog.center();
             }
         });

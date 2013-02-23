@@ -59,8 +59,6 @@ public class SimpleTable extends PElement {
             newCell.clear();
         }
 
-        // final PElement newCell = new PElement("td");
-        // newRow.insert(newCell, column);
         newCell.add(widget);
         newCell.addStyleName("pony-PFlextable-Cell");
     }
@@ -119,32 +117,6 @@ public class SimpleTable extends PElement {
 
         };
     }
-
-    // public void addColumn(final IsPWidget header, final Cell<D> cell) {
-    // headers.add(header);
-    // cells.add(cell);
-    // }
-    //
-    // public void build() {
-    // final PElement row = new PElement("tr");
-    // for (final IsPWidget header : headers) {
-    // final PElement cell = new PElement("td");
-    // cell.add(header);
-    // row.add(cell);
-    // }
-    // table.add(row);
-    // }
-    //
-    // public void setData(final D data) {
-    // final PElement row = new PElement("tr");
-    // for (final Cell<D> cell : cells) {
-    // final PElement td = new PElement("td");
-    // td.setInnerHTML(cell.render(new Context(), data));
-    // td.setAttribute("cuid", Integer.toString(id++));
-    // row.add(td);
-    // }
-    // table.add(row);
-    // }
 
     public void moveRow(final int index, final int beforeIndex) {
         checkRowBound(index);
