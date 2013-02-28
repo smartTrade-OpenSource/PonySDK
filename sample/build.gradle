@@ -110,7 +110,7 @@ task copyAllLibs << {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '1.2'
+    gradleVersion = '1.4'
 }
 
 task createPackage << {

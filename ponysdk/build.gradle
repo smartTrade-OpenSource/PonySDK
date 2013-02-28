@@ -1,27 +1,28 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
+version = 1.2
 
-project.ext.coreversion = 0.6;
-project.ext.version = 1.2;
-
-project.ext.srcCore = 'src-core/main/java';
-project.ext.srcTerminal = 'src-core/main/java/com/ponysdk/ui/terminal';
-project.ext.srcDefaultimpl = 'src-defaultimpl/main/java';
-project.ext.srcGenerator = 'src-generator/main/java';
-project.ext.srcGenerated = 'src-generated/main/java';
-project.ext.srcJetty = 'src-jetty/main/java';
-project.ext.srcSpring = 'src-spring/main/java';
-project.ext.srcPersistency = 'src-persistency/main/java';
-project.ext.srcHibernate = 'src-hibernate/main/java';
-project.ext.srcMongoDB = 'src-mongodb/main/java';
-project.ext.srcJasper = 'src-jasper/main/java';
-project.ext.gwtOutputDirName = buildDir.name + '/gwt';
-project.ext.buildInfoOutputDirName = buildDir.name + '/buildinfo';
-project.ext.warResources = 'src-core/main/resources/war';
-project.ext.specResources = 'src-core/main/resources/spec';
-project.ext.confResources = 'src-spring/main/resources/conf';
-project.ext.javadocResources = 'src-core/main/javadoc';
+ext{
+    coreversion = 0.6
+    srcCore = "src-core/main/java"
+    srcTerminal = "src-core/main/java/com/ponysdk/ui/terminal"
+    srcDefaultimpl = "src-defaultimpl/main/java"
+    srcGenerator = "src-generator/main/java"
+    srcGenerated = "src-generated/main/java"
+    srcJetty = "src-jetty/main/java"
+    srcSpring = "src-spring/main/java"
+    srcPersistency = "src-persistency/main/java"
+    srcHibernate = "src-hibernate/main/java"
+    srcMongoDB = "src-mongodb/main/java"
+    srcJasper = "src-jasper/main/java"
+    gwtOutputDirName = buildDir.name + "/gwt"
+    buildInfoOutputDirName = buildDir.name + "/buildinfo"
+    warResources = "src-core/main/resources/war"
+    specResources = "src-core/main/resources/spec"
+    confResources = "src-spring/main/resources/conf"
+    javadocResources = "src-core/main/javadoc"
+}
 
 
 sourceSets {
@@ -83,8 +84,6 @@ dependencies {
 	gwt 'com.google.gwt:gwt-codeserver:2.5.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
-    gwt 'com.watopi:gwtchosen:1.0.2'
-    gwt 'com.googlecode.gwtquery:gwtquery:1.2.0'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
 	spring 'org.springframework:spring-web:3.0.6.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
@@ -120,12 +119,6 @@ jar {
         from buildInfoOutputDirName
     }
 
-    /** waiting fix : https://github.com/jDramaix/gwtchosen/issues/2 **/
-    copy{
-        from gwtOutputDirName + '/ponyterminal/chosen-sprite.png'
-        into gwtOutputDirName
-    }    
-    
     into('conf') {
         from confResources
     }
@@ -139,10 +132,10 @@ jar {
 		attributes("License-Title": "Apache License 2.0")
 		attributes("Implementation-Vendor": "PonySDK")
 	    attributes("Implementation-Title": "PonySDK")
-	    attributes("Implementation-Version": project.ext.version)
-	    attributes("Implementation-Core-Version": project.ext.coreversion)
-	    attributes("Revision": ext.revision)
-	    attributes("Date": ext.timestamp + " / " + new Date().toGMTString())
+	    attributes("Implementation-Version": version)
+	    attributes("Implementation-Core-Version": coreversion)
+	    attributes("Revision": revision)
+	    attributes("Date": timestamp + " / " + new Date().toGMTString())
 	}
 }
 
@@ -215,7 +208,7 @@ task generate(dependsOn: generateDictionnary) {
 
 
 task compileTerminal << {
-	result = System.getProperty('nogwtc', 'false')
+	def result = System.getProperty('nogwtc', 'false')
 	println('nogwtc ? ' + result)
 	if(result == 'true') {
 		println('[WARN] terminal compilation disabled');
@@ -229,7 +222,6 @@ task gwtc(type: JavaExec) {
 	main = 'com.google.gwt.dev.Compiler'
 	maxHeapSize = '512M'
 	workingDir = buildDir
-	project.ext.workers = Runtime.getRuntime().availableProcessors()
 	inputs.dir file(srcTerminal)
 	classpath {
 		[
@@ -243,7 +235,7 @@ task gwtc(type: JavaExec) {
 		'-war',
 		'gwt',
 		'-localWorkers',
-		workers,
+		Runtime.getRuntime().availableProcessors(),
 		'com.ponysdk.ui.PonyTerminal'
 	]
 }
@@ -264,7 +256,7 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 	
     manifest {
 		attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0")
-		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version)
+		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": version)
 	}
 }
 
@@ -284,7 +276,7 @@ task javadocJar(type: Jar, dependsOn:javadoc) {
     
 	manifest {
 		attributes("Manifest-Version": "1.0", "License-Title": "Apache License 2.0")
-		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": project.ext.version)
+		attributes("Implementation-Vendor": "PonySDK", "Implementation-Title": "PonySDK", "Implementation-Version": version)
 	}
 }
  
@@ -319,7 +311,7 @@ task copyAllLibs << {
 }
 
 task sendTo(type: Copy) {
-	outputdir = System.getProperty("jar.destination", ".");
+	def outputdir = System.getProperty("jar.destination", ".");
 	println('copying jars to: ' + outputdir)
 	
 	from file("$buildDir/libs")

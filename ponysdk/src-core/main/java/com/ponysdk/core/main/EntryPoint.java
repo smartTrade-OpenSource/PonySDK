@@ -30,19 +30,19 @@ public interface EntryPoint {
     /**
      * Newly created session.
      * 
-     * @param session
+     * @param uiContext
      */
-    public void start(UIContext session);
+    public void start(UIContext uiContext);
 
     /**
-     * The HTTP session already exists, and a new PonySession has been created. <h4>Cases :</h4>
+     * The HTTP session already exists, and a new UIContext has been created. <h4>Cases :</h4>
      * <ul>
      * <li>Reload</li>
      * <li>New browser tabulation</li>
      * </ul>
      * 
-     * @param session
+     * @param uiContext
      */
-    public void restart(UIContext session);
+    public void restart(UIContext uiContext);
 
 }
