@@ -126,7 +126,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.RefreshableDataGridPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.Form2PageActivity" />
-	<bean class="com.ponysdk.sample.client.page.MultiSelectionPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.BreadCrumbsPageActivity" />
 
 	<!-- Timer pages -->

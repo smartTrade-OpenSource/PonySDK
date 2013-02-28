@@ -31,7 +31,6 @@ import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
-import com.ponysdk.ui.terminal.ui.PTChosenListBox;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDecoratorPanel;
@@ -108,7 +107,6 @@ public class UIFactory {
         if (WidgetType.RADIO_BUTTON.equals(widgetType)) { return new PTRadioButton(); }
         if (WidgetType.PUSH_BUTTON.equals(widgetType)) { return new PTPushButton(); }
         if (WidgetType.LISTBOX.equals(widgetType)) { return new PTListBox(); }
-        if (WidgetType.CHOSEN_LISTBOX.equals(widgetType)) { return new PTChosenListBox(); }
         if (WidgetType.SIMPLE_LAYOUT_PANEL.equals(widgetType)) { return new PTSimpleLayoutPanel(); }
         if (WidgetType.SIMPLE_PANEL.equals(widgetType)) { return new PTSimplePanel(); }
         if (WidgetType.FOCUS_PANEL.equals(widgetType)) { return new PTFocusPanel(); }
