@@ -32,6 +32,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -43,11 +45,14 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Exception> {
 
     private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+
+    private static EventBus rootEventBus = new SimpleEventBus();
 
     protected RequestBuilder requestBuilder;
     protected UIBuilder uiBuilder;
@@ -56,6 +61,10 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
     // protected int scriptToLoad = 0;
 
     protected JSONObject data;
+
+    public static EventBus getRootEventBus() {
+        return rootEventBus;
+    }
 
     @Override
     public void onModuleLoad() {
@@ -138,6 +147,8 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
                 @Override
                 public void onError(final Throwable exception) {
                     uiBuilder.onCommunicationError(exception);
+
+                    rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
                 }
 
             };

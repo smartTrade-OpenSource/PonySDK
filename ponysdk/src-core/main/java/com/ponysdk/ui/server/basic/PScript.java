@@ -28,6 +28,8 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
@@ -44,6 +46,22 @@ public abstract class PScript extends PObject {
         public void onFailure(String msg);
 
         public void onSuccess(String msg);
+    }
+
+    public static class PScriptExecutionLogger implements ExecutionCallback {
+
+        private static Logger log = LoggerFactory.getLogger(PScriptExecutionLogger.class);
+
+        @Override
+        public void onFailure(final String msg) {
+            log.error(msg);
+        }
+
+        @Override
+        public void onSuccess(final String msg) {
+            log.info(msg);
+        }
+
     }
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();

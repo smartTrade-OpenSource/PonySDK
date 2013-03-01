@@ -30,24 +30,30 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.ponysdk.ui.terminal.CommunicationEntryPoint;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
-public class PTPusher extends AbstractPTObject {
+public class PTPusher extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private WebSocketClient socketClient;
+    private boolean hasCommunicationError = false;
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         if (!WebSocketClient.isSupported()) {
+
+            CommunicationEntryPoint.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
+
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(create.getObjectID());
             eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
@@ -66,7 +72,7 @@ public class PTPusher extends AbstractPTObject {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(PROPERTY.POLL, true);
                     uiService.sendDataToServer(eventInstruction);
-                    return true;
+                    return !hasCommunicationError;
                 }
             }, delay);
 
@@ -99,5 +105,10 @@ public class PTPusher extends AbstractPTObject {
 
         log.info("Connecting to: " + wsServerURL);
         socketClient.connect(wsServerURL);
+    }
+
+    @Override
+    public void onCommunicationError(final CommunicationErrorEvent event) {
+        hasCommunicationError = true;
     }
 }
