@@ -26,6 +26,7 @@ package com.ponysdk.sample.client;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.servlet.HTTPServletContext;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
@@ -43,7 +44,7 @@ public class LoginActivity extends AbstractActivity {
 
     @Override
     protected IsPWidget buildView() {
-        loginPageView = new DefaultLoginPageView("PonySDK Showcase");
+        loginPageView = new DefaultLoginPageView("PonySDK Showcase [" + HTTPServletContext.get().getRequest().getRequestURL() + "]");
 
         loginPageView.getLoginTextBox().setText("Guest");
         loginPageView.getPasswordTextBox().setText("Guest");

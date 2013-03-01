@@ -34,7 +34,7 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
 
     public PonyServiceImpl() {
         final Random rdm = new Random();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 11; i++) {
             addPony(new Pony(id.incrementAndGet(), "Altai horseBengin", rdm.nextInt(10), "Equus ferus caballus"));
             addPony(new Pony(id.incrementAndGet(), "American Warmblood", rdm.nextInt(10), "Equus ferus caballus"));
             addPony(new Pony(id.incrementAndGet(), "Falabella", rdm.nextInt(10), "Equus ferus caballus"));
@@ -47,7 +47,7 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
     }
 
     private void initAndPushStock() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             stocks.add(new PonyStock(id.incrementAndGet(), "Altai horseBengin v" + i, 5.5f, 100));
             stocks.add(new PonyStock(id.incrementAndGet(), "American Warmblood v" + i, 10f, 100));
             stocks.add(new PonyStock(id.incrementAndGet(), "Falabella v" + i, 15f, 100));

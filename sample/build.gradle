@@ -2,11 +2,13 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
-project.ext.srcSample = 'src/main/java'
-project.ext.srcGenerated = 'src-generated/main/java'
-project.ext.srcTrading = 'src-trading/main/java'
-project.ext.ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
-project.ext.packageOutputDirName = buildDir.name + '/package';
+ext{
+	srcSample = 'src/main/java'
+	srcGenerated = 'src-generated/main/java'
+	srcTrading = 'src-trading/main/java'
+	ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
+	packageOutputDirName = buildDir.name + '/package'
+}
 
 repositories {
     mavenCentral()
@@ -147,8 +149,8 @@ task createPackage << {
 	delete packageOutputDirName + '/start.bat'
 	delete packageOutputDirName + '/start.sh'
 
-	f = new File(packageOutputDirName + '/start.bat')
-	writer = f.newWriter("UTF-8", true)
+	def f = new File(packageOutputDirName + '/start.bat')
+	def writer = f.newWriter("UTF-8", true)
 	writer.write("java -server -cp .;etc/;lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
 	writer.write("pause\n")
 	writer.close()

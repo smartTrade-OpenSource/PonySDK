@@ -124,5 +124,4 @@ public class Selector<T> implements SelectorViewListener, SelectableListener, Re
     public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
-
 }

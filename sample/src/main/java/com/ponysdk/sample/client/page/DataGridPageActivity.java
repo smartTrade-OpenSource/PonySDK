@@ -148,11 +148,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             protected List<Pony> getData(final Query query) {
                 final Result<List<Pony>> result = new FindPonysCommand(query).execute();
+                final List<Pony> data = result.getData();
                 final int fullSize = result.getFullSize();
                 pager.process(fullSize);
                 selector.reset();
+                selector.setPageSize(data.size());
                 selector.setFullSize(fullSize);
-                return result.getData();
+                return data;
             }
 
             @Override
@@ -180,12 +182,10 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                     public void onValueChange(final PValueChangeEvent<Boolean> event) {
                         if (event.getValue()) {
                             selectorCheckBox.onCheck();
-                            System.err.println("select : " + dataGrid.getVisibleItem(row).getName());
                             dataGrid.selectRow(row);
 
                         } else {
                             selectorCheckBox.onUncheck();
-                            System.err.println("unselect : " + dataGrid.getVisibleItem(row).getName());
                             dataGrid.unSelectRow(row);
 
                         }

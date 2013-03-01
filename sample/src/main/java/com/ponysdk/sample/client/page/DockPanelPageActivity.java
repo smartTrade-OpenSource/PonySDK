@@ -28,6 +28,7 @@ import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -41,8 +42,8 @@ public class DockPanelPageActivity extends SamplePageActivity implements PClickH
 
     final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
     private final PTextBox headerSize = new PTextBox();
-    final PButton applySize = new PButton("Apply Size");
-    private PFlowPanel headerWidget;
+    final PButton applySize = new PButton("Apply Header Size");
+    private final PFlowPanel headerWidget = new PFlowPanel();
 
     public DockPanelPageActivity() {
         super("Dock Panel", "Panels");
@@ -62,7 +63,6 @@ public class DockPanelPageActivity extends SamplePageActivity implements PClickH
     }
 
     private PWidget buildAction() {
-        headerWidget = new PFlowPanel();
         applySize.addClickHandler(this);
         headerWidget.add(headerSize);
         headerWidget.add(applySize);
@@ -92,7 +92,13 @@ public class DockPanelPageActivity extends SamplePageActivity implements PClickH
     @Override
     public void onClick(final PClickEvent event) {
         final double size = Double.parseDouble(headerSize.getText());
-        dockLayoutPanel.setWidgetSize(headerWidget, size);
+
+        if (size < 50) {
+            PNotificationManager.showHumanizedNotification("Size to small for the demo");
+        } else {
+            dockLayoutPanel.setWidgetSize(headerWidget, size);
+        }
+
     }
 
 }

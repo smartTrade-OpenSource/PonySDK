@@ -25,10 +25,6 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScheduler;
-import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
 
 public class ListBoxPageActivity extends SamplePageActivity {
 
@@ -54,51 +50,52 @@ public class ListBoxPageActivity extends SamplePageActivity {
         listBoxCategory.addItem("Test2");
         listBoxCategory.addItem("Test2");
 
-        listBoxCategory.addStyleName("chzn-select"); // normal
+        // listBoxCategory.addStyleName("chzn-select"); // normal
         // listBoxCategory.addStyleName("chzn-rtl"); // align to right
-        listBoxCategory.addStyleName("chzn-select-deselect"); // allow deselect
+        // listBoxCategory.addStyleName("chzn-select-deselect"); // allow deselect
 
         // listBoxCategory.setAttribute("multiple", ""); // enable multiselect
-        listBoxCategory.setAttribute("data-placeholder", "oh oh th eplace holder"); // place holder
+        // listBoxCategory.setAttribute("data-placeholder", "oh oh th eplace holder"); // place holder
 
-        PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
-
-            @Override
-            public boolean execute() {
-                PScript.get().execute("$(\".chzn-select\").chosen();", new ExecutionCallback() {
-
-                    @Override
-                    public void onSuccess(final String msg) {
-                        System.err.println("on succes " + msg);
-                    }
-
-                    @Override
-                    public void onFailure(final String msg) {
-                        System.err.println("on onFailure " + msg);
-                    }
-                });
-                return false;
-            }
-        }, 0);
-        PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
-
-            @Override
-            public boolean execute() {
-                PScript.get().execute("$(\".chzn-select-deselect\").chosen({allow_single_deselect:true});", new ExecutionCallback() {
-
-                    @Override
-                    public void onSuccess(final String msg) {
-                        System.err.println("on succes " + msg);
-                    }
-
-                    @Override
-                    public void onFailure(final String msg) {
-                        System.err.println("on onFailure " + msg);
-                    }
-                });
-                return false;
-            }
-        }, 0);
+        // PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
+        //
+        // @Override
+        // public boolean execute() {
+        // PScript.get().execute("$(\".chzn-select\").chosen();", new ExecutionCallback() {
+        //
+        // @Override
+        // public void onSuccess(final String msg) {
+        // System.err.println("on succes " + msg);
+        // }
+        //
+        // @Override
+        // public void onFailure(final String msg) {
+        // System.err.println("on onFailure " + msg);
+        // }
+        // });
+        // return false;
+        // }
+        // }, 0);
+        // PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
+        //
+        // @Override
+        // public boolean execute() {
+        // PScript.get().execute("$(\".chzn-select-deselect\").chosen({allow_single_deselect:true});", new
+        // ExecutionCallback() {
+        //
+        // @Override
+        // public void onSuccess(final String msg) {
+        // System.err.println("on succes " + msg);
+        // }
+        //
+        // @Override
+        // public void onFailure(final String msg) {
+        // System.err.println("on onFailure " + msg);
+        // }
+        // });
+        // return false;
+        // }
+        // }, 0);
 
         // final PChosenListBox listBoxApplied = new PChosenListBox();
         // listBoxApplied.setVisibleItemCount(20);

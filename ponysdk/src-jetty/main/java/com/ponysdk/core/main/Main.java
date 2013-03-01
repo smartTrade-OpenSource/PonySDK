@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionListener;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.servlet.BootstrapServlet;
+import com.ponysdk.core.servlet.ServletContextFilter;
 import com.ponysdk.core.servlet.StreamServiceServlet;
 import com.ponysdk.core.servlet.WebSocketServlet;
 import com.ponysdk.spring.service.SpringApplicationLoader;
@@ -67,6 +69,7 @@ public class Main {
     private Servlet bootstrapServlet;
     private ServletContextListener servletContextListener;
     private HttpSessionListener httpSessionListener;
+    private Filter servletConextFilter;
 
     public static void main(final String[] args) throws Exception {
         final Main main = new Main();
@@ -115,12 +118,16 @@ public class Main {
             servletContextListener = applicationLoader;
         }
 
+        if (servletConextFilter == null) servletConextFilter = new ServletContextFilter();
+
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + applicationContextName);
         context.addServlet(new ServletHolder(new StreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(new WebSocketServlet()), MAPPING_WS);
         context.addServlet(new ServletHolder(bootstrapServlet), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(httpServlet), MAPPING_TERMINAL);
+
+        context.addFilter(new FilterHolder(servletConextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
         // context.getSessionHandler().getSessionManager().setMaxInactiveInterval(30);
 
@@ -178,4 +185,9 @@ public class Main {
     public void setBootstrapServlet(final Servlet bootstrapServlet) {
         this.bootstrapServlet = bootstrapServlet;
     }
+
+    public void setServletConextFilter(final Filter servletConextFilter) {
+        this.servletConextFilter = servletConextFilter;
+    }
+
 }
