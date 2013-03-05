@@ -81,7 +81,6 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
 
             switch (comparator) {
                 case EQ:
-
                     criteria.add(Restrictions.eq(associationPath, value));
                     break;
                 case GE:
@@ -126,10 +125,10 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
 
         switch (field.getSortingType()) {
             case ASCENDING:
-                criteria.addOrder(Order.asc(field.getPojoProperty()));
+                criteria.addOrder(Order.asc(associationPath));
                 break;
             case DESCENDING:
-                criteria.addOrder(Order.desc(field.getPojoProperty()));
+                criteria.addOrder(Order.desc(associationPath));
                 break;
             case NONE:
                 break;

@@ -40,6 +40,6 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-remote-driver.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-support.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
-	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar" sourcepath="/Users/nciaravola/.m2/repository/com/google/gwt/gwt-user/2.5.0/gwt-user-2.5.0-sources.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar" sourcepath="libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
