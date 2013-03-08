@@ -70,6 +70,7 @@ public class Main {
     private ServletContextListener servletContextListener;
     private HttpSessionListener httpSessionListener;
     private Filter servletConextFilter;
+    private Handler handler;
 
     public static void main(final String[] args) throws Exception {
         final Main main = new Main();
@@ -89,11 +90,11 @@ public class Main {
         main.start();
     }
 
-    public void start() throws Exception {
+    public Main() throws IOException {}
 
-        Handler handler;
+    public void start() throws Exception {
         if (war == null || war.isEmpty()) {
-            handler = loadServletContext();
+            handler = newServletContext();
         } else {
             handler = loadWar();
         }
@@ -107,7 +108,7 @@ public class Main {
         webServer.start();
     }
 
-    private ServletContextHandler loadServletContext() {
+    protected ServletContextHandler newServletContext() {
 
         // set default value
         if (httpServlet == null) httpServlet = new SpringHttpServlet();
@@ -129,8 +130,6 @@ public class Main {
 
         context.addFilter(new FilterHolder(servletConextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
-        // context.getSessionHandler().getSessionManager().setMaxInactiveInterval(30);
-
         final FilterHolder filterHolder = new FilterHolder(GzipFilter.class);
         context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 
@@ -140,7 +139,7 @@ public class Main {
         return context;
     }
 
-    public Handler loadWar() throws IOException {
+    protected Handler loadWar() throws IOException {
 
         final WebAppContext webapp = new WebAppContext();
         if (applicationContextName != null) {
@@ -188,6 +187,10 @@ public class Main {
 
     public void setServletConextFilter(final Filter servletConextFilter) {
         this.servletConextFilter = servletConextFilter;
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 
 }

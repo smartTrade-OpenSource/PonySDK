@@ -87,9 +87,7 @@ public class BootstrapServlet extends HttpServlet {
 
     private void handlePonyResource(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         try {
-            final String contextPath = request.getContextPath();
-            final String requestURI = request.getRequestURI();
-            final String extraPathInfo = requestURI.replaceFirst(contextPath, "");
+            final String extraPathInfo = getPath(request);
 
             if (extraPathInfo == null || extraPathInfo.isEmpty() || extraPathInfo.equals("/")) {
                 log.info("Loading initial webpage ...");
@@ -106,6 +104,13 @@ public class BootstrapServlet extends HttpServlet {
             log.error("Cannot process the request", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    protected String getPath(final HttpServletRequest request) {
+        final String contextPath = request.getContextPath();
+        final String requestURI = request.getRequestURI();
+        final String extraPathInfo = requestURI.replaceFirst(contextPath, "");
+        return extraPathInfo;
     }
 
     private void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
