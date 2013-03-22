@@ -61,13 +61,15 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
+import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
-public class UIBuilder implements ValueChangeHandler<String>, UIService {
+public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
@@ -84,7 +86,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
-    private int numberOfrequestInProgress;
+    private int numberOfrequestInProgress = 0;
 
     private boolean updateMode;
     private boolean pendingClose;
@@ -108,6 +110,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         for (final AddonFactory addonFactory : addonFactoryList) {
             addonByKey.put(addonFactory.getSignature(), addonFactory);
         }
+
+        CommunicationEntryPoint.getRootEventBus().addHandler(HttpResponseReceivedEvent.TYPE, this);
+        CommunicationEntryPoint.getRootEventBus().addHandler(HttpRequestSendEvent.TYPE, this);
     }
 
     public void init() {
@@ -119,7 +124,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         communicationErrorMessagePanel.setStyleName("pony-notification");
         communicationErrorMessagePanel.addStyleName("error");
 
-        // RootPanel.get().add(loadingMessageBox);
+        RootPanel.get().add(loadingMessageBox);
 
         loadingMessageBox.setStyleName("pony-LoadingMessageBox");
         loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
@@ -154,10 +159,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         if (pendingClose) return;
 
         if (exception instanceof StatusCodeException) {
-            numberOfrequestInProgress--;
             final StatusCodeException statusCodeException = (StatusCodeException) exception;
             showCommunicationErrorMessage(statusCodeException);
-            hideLoadingMessageBox();
         } else {
             Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
         }
@@ -171,8 +174,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
             incomingMessageQueue.put(receivedSeqNum, data);
             return;
         }
-
-        hideLoadingMessageBox();
 
         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
         final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
@@ -362,7 +363,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
     }
 
     private void sendDataToServer(final List<PTInstruction> instructions) {
-        numberOfrequestInProgress++;
 
         if (timer == null) timer = scheduleLoadingMessageBox();
 
@@ -459,14 +459,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         });
     }
 
-    public void hideLoadingMessageBox() {
-        if (numberOfrequestInProgress < 1 && timer != null) {
-            timer.cancel();
-            timer = null;
-            loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-        }
-    }
-
     @Override
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
@@ -494,4 +486,27 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
     }
+
+    @Override
+    public void onHttpRequestSend(final HttpRequestSendEvent event) {
+        numberOfrequestInProgress++;
+    }
+
+    @Override
+    public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
+        if (numberOfrequestInProgress > 0) {
+            numberOfrequestInProgress--;
+        }
+
+        hideLoadingMessageBox();
+    }
+
+    private void hideLoadingMessageBox() {
+        if (numberOfrequestInProgress < 1 && timer != null) {
+            timer.cancel();
+            timer = null;
+            loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+        }
+    }
+
 }

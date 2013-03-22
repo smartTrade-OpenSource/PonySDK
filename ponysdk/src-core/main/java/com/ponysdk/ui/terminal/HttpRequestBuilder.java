@@ -11,6 +11,8 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
+import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 
 public class HttpRequestBuilder extends RequestBuilder {
 
@@ -25,10 +27,13 @@ public class HttpRequestBuilder extends RequestBuilder {
     @Override
     public void send(final String s) {
         try {
+            CommunicationEntryPoint.getRootEventBus().fireEvent(new HttpRequestSendEvent());
             requestBuilder.sendRequest(s, new com.google.gwt.http.client.RequestCallback() {
 
                 @Override
                 public void onResponseReceived(final Request request, final Response response) {
+
+                    CommunicationEntryPoint.getRootEventBus().fireEvent(new HttpResponseReceivedEvent());
 
                     if (response.getStatusCode() != 200) {
                         onError(request, new StatusCodeException(response.getStatusCode(), response.getStatusText()));
@@ -41,9 +46,11 @@ public class HttpRequestBuilder extends RequestBuilder {
 
                 @Override
                 public void onError(final Request request, final Throwable exception) {
+                    CommunicationEntryPoint.getRootEventBus().fireEvent(new HttpResponseReceivedEvent(exception));
                     callback.onError(exception);
                 }
             });
+
         } catch (final RequestException e) {
             log.log(Level.SEVERE, "Error ", e);
             Window.alert("Failed to send request #" + e);
