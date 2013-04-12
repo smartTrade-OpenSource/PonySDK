@@ -79,9 +79,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.5.0'
-	gwt 'com.google.gwt:gwt-dev:2.5.0'
-	gwt 'com.google.gwt:gwt-codeserver:2.5.0'
+	gwt 'com.google.gwt:gwt-user:2.5.1'
+	gwt 'com.google.gwt:gwt-dev:2.5.1'
+	gwt 'com.google.gwt:gwt-codeserver:2.5.1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
