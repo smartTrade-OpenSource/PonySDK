@@ -18,10 +18,10 @@
     <set-property name="gwt.logging.enabled" value="TRUE"/>
     <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
     <set-property name="gwt.logging.popupHandler" value="DISABLED" />
-
+	
 	<!--  
     <add-linker name="xsiframe"/>
 	<set-configuration-property name="devModeRedirectEnabled" value="true"/>
 	-->
-	
+
 </module>
