@@ -79,5 +79,6 @@ public enum WidgetType {
     SCRIPT,
     PUSHER,
     TERMINAL_SCHEDULED_COMMAND,
+    WINDOW,
     HEADER_PANEL;
 }

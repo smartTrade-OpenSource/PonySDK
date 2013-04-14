@@ -119,6 +119,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<!-- Popup pages -->
 	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.EventPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.WindowPageActivity" />
 	
 	<!-- Rich components pages -->
 	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" />

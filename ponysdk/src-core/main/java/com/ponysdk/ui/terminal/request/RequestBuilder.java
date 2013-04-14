@@ -1,5 +1,5 @@
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.terminal.request;
 
 public abstract class RequestBuilder {
 

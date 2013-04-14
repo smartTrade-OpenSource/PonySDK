@@ -65,6 +65,7 @@ import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
@@ -364,8 +365,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     private void sendDataToServer(final List<PTInstruction> instructions) {
 
-        if (timer == null) timer = scheduleLoadingMessageBox();
-
         final PTInstruction requestData = new PTInstruction();
         requestData.put(APPLICATION.VIEW_ID, sessionID);
 
@@ -490,6 +489,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void onHttpRequestSend(final HttpRequestSendEvent event) {
         numberOfrequestInProgress++;
+
+        if (timer == null) timer = scheduleLoadingMessageBox();
     }
 
     @Override

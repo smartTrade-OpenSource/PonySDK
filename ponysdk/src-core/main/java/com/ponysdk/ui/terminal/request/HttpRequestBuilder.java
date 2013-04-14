@@ -1,5 +1,5 @@
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.terminal.request;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +11,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.ponysdk.ui.terminal.CommunicationEntryPoint;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 

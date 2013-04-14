@@ -41,13 +41,17 @@ public class PRootLayoutPanel extends PLayoutPanel {
     private PRootLayoutPanel() {}
 
     public static PRootLayoutPanel get() {
+        return get(0);
+    }
+
+    public static PRootLayoutPanel get(final long windowID) {
+        final String rootID = ROOT + "_" + windowID;
         final UIContext session = UIContext.get();
-        PRootLayoutPanel root = session.getAttribute(ROOT);
+        PRootLayoutPanel root = session.getAttribute(rootID);
         if (root == null) {
             root = new PRootLayoutPanel();
-            session.setAttribute(ROOT, root);
+            session.setAttribute(rootID, root);
         }
-
         return root;
     }
 

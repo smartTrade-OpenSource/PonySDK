@@ -47,6 +47,10 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.request.HttpRequestBuilder;
+import com.ponysdk.ui.terminal.request.ParentWindowRequest;
+import com.ponysdk.ui.terminal.request.RequestBuilder;
+import com.ponysdk.ui.terminal.request.RequestCallback;
 
 public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Exception> {
 
@@ -151,12 +155,19 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
 
             };
 
-            requestBuilder = new HttpRequestBuilder(requestCallback);
+            requestBuilder = newRequestBuilder(requestCallback);
             requestBuilder.send(requestData.toString());
 
         } catch (final Exception e) {
             Window.alert("Loading application has failed #" + e);
         }
+    }
+
+    // TODO pure js factory to get the connector ?
+    protected RequestBuilder newRequestBuilder(final RequestCallback requestCallback) {
+        final String windowID = Window.Location.getParameter("wid");
+        if (windowID != null) { return new ParentWindowRequest(windowID, requestCallback); }
+        return new HttpRequestBuilder(requestCallback);
     }
 
     protected void initUIBuilder() {
@@ -181,6 +192,8 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
                                                  }-*/;
 
     public static native void reload() /*-{$wnd.location.reload();}-*/;
+
+    public static native void log(String msg) /*-{ if($wnd.console) $wnd.console.log(msg);}-*/;
 
     @Override
     public void onFailure(final Exception reason) {
