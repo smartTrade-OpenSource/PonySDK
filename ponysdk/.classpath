@@ -41,5 +41,6 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-support.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar" sourcepath="libs/gwt/gwt-user.jar"/>
+	<classpathentry kind="lib" path="libs/commons/commons-beanutils.jar"/>
 	<classpathentry kind="output" path="build/classes/main"/>
 </classpath>
