@@ -1,6 +1,7 @@
 
 package com.ponysdk.core;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -115,6 +116,8 @@ public abstract class AbstractApplicationManager {
                 entryPoint.restart(uiContext);
             }
 
+            executeFinallyCommand(uiContext);
+
             try {
                 jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
 
@@ -162,6 +165,8 @@ public abstract class AbstractApplicationManager {
                 process(uiContext, jsoObject);
             }
 
+            executeFinallyCommand(uiContext);
+
             try {
                 if (uiContext.flushInstructions(jsonObject)) {
                     jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
@@ -177,6 +182,17 @@ public abstract class AbstractApplicationManager {
         }
     }
 
+    private void executeFinallyCommand(final UIContext uiContext) {
+        final Collection<Runnable> commands = uiContext.expungeCommandsQueue();
+        for (final Runnable cmd : commands) {
+            try {
+                cmd.run();
+            } catch (final Throwable e) {
+                log.error("Failed to execute command: " + cmd, e);
+            }
+        }
+    }
+
     private void printClientErrorMessage(final JSONObject data) {
         try {
             final JSONArray errors = data.getJSONArray(APPLICATION.ERRORS);
@@ -187,7 +203,7 @@ public abstract class AbstractApplicationManager {
                 final String details = jsoObject.getString("details");
                 log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
             }
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             log.error("Failed to display errors", e);
         }
     }

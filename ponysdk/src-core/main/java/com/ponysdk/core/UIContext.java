@@ -76,6 +76,7 @@ public class UIContext {
 
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
+    private final List<Runnable> commandsQueue = new ArrayList<Runnable>();
     private final List<Instruction> instructionStacker = new ArrayList<Instruction>();
 
     private List<Instruction> currentStacker = instructionStacker;
@@ -106,7 +107,7 @@ public class UIContext {
         currentStacker.add(instruction);
     }
 
-    void fireClientData(final JSONObject instruction) throws JSONException {
+    public void fireClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
                 UIContext.get().invalidate();
@@ -342,6 +343,18 @@ public class UIContext {
     @SuppressWarnings("unchecked")
     public <T> T getApplicationAttribute(final String name) {
         return (T) this.application.getAttribute(name);
+    }
+
+    Collection<Runnable> expungeCommandsQueue() {
+        if (commandsQueue.isEmpty()) return Collections.emptyList();
+
+        final List<Runnable> commands = new ArrayList<Runnable>(commandsQueue);
+        commandsQueue.clear();
+        return commands;
+    }
+
+    public void enqueue(final Runnable command) {
+        commandsQueue.add(command);
     }
 
     public boolean updateIncomingSeqNum(final long receivedSeqNum) {
