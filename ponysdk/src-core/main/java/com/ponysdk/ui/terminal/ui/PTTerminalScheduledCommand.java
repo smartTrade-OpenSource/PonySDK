@@ -42,32 +42,46 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         final int delayMs = update.getInt(PROPERTY.FIXDELAY);
+        if (delayMs < 0) {
+            Scheduler.get().scheduleFinally(new RepeatingCommand() {
 
-        Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+                @Override
+                public boolean execute() {
+                    executeInstruction(update, uiService);
+                    return false;
+                }
+            });
+        } else {
+            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 
-            @Override
-            public boolean execute() {
-                final JSONArray jsonArray = update.get(PROPERTY.INSTRUCTIONS).isArray();
-                final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+                @Override
+                public boolean execute() {
+                    executeInstruction(update, uiService);
+                    return false;
                 }
 
-                PTInstruction currentInstruction = null;
-                try {
-                    for (final PTInstruction instruction : instructions) {
-                        currentInstruction = instruction;
-                        uiService.processInstruction(instruction);
-                    }
-                } catch (final Throwable e) {
-                    log.log(Level.SEVERE, "PonySDK has encountered an internal error while executing a scheduled command : " + currentInstruction + " => Error Message " + e.getMessage(), e);
-                    uiService.stackError(currentInstruction, e);
-                } finally {
-                    uiService.flushEvents();
-                }
+            }, delayMs);
+        }
+    }
 
-                return false;
+    protected void executeInstruction(final PTInstruction update, final UIService uiService) {
+        final JSONArray jsonArray = update.get(PROPERTY.INSTRUCTIONS).isArray();
+        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+        }
+
+        PTInstruction currentInstruction = null;
+        try {
+            for (final PTInstruction instruction : instructions) {
+                currentInstruction = instruction;
+                uiService.processInstruction(instruction);
             }
-        }, delayMs);
+        } catch (final Throwable e) {
+            log.log(Level.SEVERE, "PonySDK has encountered an internal error while executing a scheduled command : " + currentInstruction + " => Error Message " + e.getMessage(), e);
+            uiService.stackError(currentInstruction, e);
+        } finally {
+            uiService.flushEvents();
+        }
     }
 }
