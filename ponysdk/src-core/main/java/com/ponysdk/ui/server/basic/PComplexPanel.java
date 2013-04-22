@@ -27,6 +27,7 @@ import java.util.Iterator;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 /**
@@ -54,7 +55,7 @@ public abstract class PComplexPanel extends PPanel {
 
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.INDEX, beforeIndex);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     @Override
@@ -63,7 +64,7 @@ public abstract class PComplexPanel extends PPanel {
         orphan(w);
         if (getChildren().remove(w)) {
             final Remove remove = new Remove(w.getID(), getID());
-            getUIContext().stackInstruction(remove);
+            Txn.get().getTxnContext().save(remove);
             return true;
         } else {
             return false;

@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -95,7 +96,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
@@ -108,26 +109,26 @@ public class PMenuItem extends PWidget implements PHasHTML {
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, enabled);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
         final Add add = new Add(subMenu.getID(), getID());
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.COMMAND);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override

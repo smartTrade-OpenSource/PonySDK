@@ -32,7 +32,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnBoolean;
+import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -56,16 +58,18 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<PValueChangeHandler<Boolean>>();
 
-    private boolean value;
+    private final TxnBoolean value = new TxnBoolean();
 
     public PCheckBox() {
         this(null);
     }
 
     public PCheckBox(final String text) {
+        value.setListener(this);
+
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -90,20 +94,17 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public Boolean getValue() {
-        return value;
+        return value.get();
     }
 
     @Override
     public void setValue(final Boolean value) {
-        this.value = value;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VALUE, value);
-        getUIContext().stackInstruction(update);
+        this.value.set(value);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        this.value = event.getValue();
+        this.value.reset(event.getValue());
         for (final PValueChangeHandler<Boolean> handler : handlers) {
             handler.onValueChange(event);
         }
@@ -115,6 +116,15 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
             onValueChange(new PValueChangeEvent<Boolean>(this, e.getBoolean(PROPERTY.VALUE)));
         } else {
             super.onClientData(e);
+        }
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == value) {
+            saveUpdate(PROPERTY.VALUE, value.get());
+        } else {
+            super.beforeFlush(txnObject);
         }
     }
 }

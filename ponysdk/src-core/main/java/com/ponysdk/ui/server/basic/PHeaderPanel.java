@@ -30,6 +30,7 @@ import java.util.List;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -47,7 +48,7 @@ public class PHeaderPanel extends PPanel {
     public void resize() {
         final Update update = new Update(getID());
         update.put(PROPERTY.RESIZE, true);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class PHeaderPanel extends PPanel {
 
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.INDEX, 0);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     public void setContentWidget(final PWidget child) {
@@ -84,7 +85,7 @@ public class PHeaderPanel extends PPanel {
 
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.INDEX, 1);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     public void setFooterWidget(final PWidget child) {
@@ -94,7 +95,7 @@ public class PHeaderPanel extends PPanel {
 
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.INDEX, 2);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     @Override
@@ -123,7 +124,7 @@ public class PHeaderPanel extends PPanel {
 
     private void sendRemove(final PWidget child) {
         final Remove remove = new Remove(child.getID(), getID());
-        getUIContext().stackInstruction(remove);
+        Txn.get().getTxnContext().save(remove);
     }
 
     @Override

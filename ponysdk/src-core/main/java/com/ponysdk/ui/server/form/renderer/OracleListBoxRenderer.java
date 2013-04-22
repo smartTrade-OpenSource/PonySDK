@@ -448,7 +448,7 @@ public class OracleListBoxRenderer implements FormFieldRenderer, PValueChangeHan
     public void addItem(final String item, final Object hiddenValue) {
         if (item.length() > maxCharacterLength) {
             maxCharacterLength = item.length();
-            textbox.setSize(maxCharacterLength);
+            // textbox.setSize(maxCharacterLength);
         }
         items.add(item);
         hiddenValueByItems.put(item, hiddenValue);

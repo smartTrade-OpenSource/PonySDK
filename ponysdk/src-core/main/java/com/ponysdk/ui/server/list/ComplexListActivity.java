@@ -118,6 +118,7 @@ import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
 import com.ponysdk.ui.server.rich.PConfirmDialog;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
+@Deprecated
 public class ComplexListActivity<D> extends AbstractActivity implements PagingSelectionChangeHandler, SortColumnHandler, ComparatorTypeChangeHandler, RefreshListHandler, ShowSubListHandler<D>, ShowCustomColumnDescriptorFormHandler,
         ShowColumnDescriptorHandler, MoveColumnDescriptorHandler, RemoveColumnDescriptorHandler, AddCustomColumnDescriptorHandler {
 
@@ -129,7 +130,7 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     protected final List<ListColumnDescriptor<D, ?>> listColumnDescriptors;
 
-    private static SimpleDateFormat formater = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+    private SimpleDateFormat dateFormater = new SimpleDateFormat("d MMM yyyy HH:mm:ss");
 
     private final Map<Criterion, FormField> formFieldsByCriterionFields = new HashMap<Criterion, FormField>();
 
@@ -560,7 +561,9 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
         getComplexListView().addHeaderStyle("pony-ComplexList-ColumnHeader");
         final float executionTime = result.getExecutionTime() * 0.000000001f;// TO
-        complexListView.setSearchResultInformation("found " + result.getData().size() + " out of " + result.getFullSize() + " records (" + executionTime + " secondes), last refresh at " + formater.format(Calendar.getInstance().getTime()));
+
+        complexListView.setSearchResultInformation("found " + result.getData().size() + " out of " + result.getFullSize() + " records (" + executionTime + " seconds), last refresh: " + dateFormater.format(Calendar.getInstance().getTime()));
+
         pagingActivity.process(result.getFullSize());
     }
 
@@ -1098,6 +1101,10 @@ public class ComplexListActivity<D> extends AbstractActivity implements PagingSe
 
     public void setColumnDescriptorFormHandler(final ShowCustomColumnDescriptorFormHandler columnDescriptorFormHandler) {
         this.columnDescriptorFormHandler = columnDescriptorFormHandler;
+    }
+
+    public void setDateFormater(final SimpleDateFormat formater) {
+        this.dateFormater = formater;
     }
 
 }

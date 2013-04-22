@@ -1,9 +1,7 @@
 
 package com.ponysdk.core;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.ServiceLoader;
 
 import javax.servlet.ServletException;
 
@@ -14,12 +12,12 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.addon.Addon;
-import com.ponysdk.core.addon.ScriptInjector;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
 import com.ponysdk.core.servlet.Session;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnContextHttp;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
@@ -29,32 +27,6 @@ import com.ponysdk.ui.terminal.exception.ServerException;
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
-
-    private final ServiceLoader<Addon> addonServiceLoader = ServiceLoader.load(Addon.class);
-    private final ServiceLoader<ScriptInjector> scriptInjectorServiceLoader = ServiceLoader.load(ScriptInjector.class);
-
-    // private final Set<String> scripts = new HashSet<String>();
-
-    public AbstractApplicationManager() {
-        final Iterator<Addon> addons = addonServiceLoader.iterator();
-        while (addons.hasNext()) {
-            final Addon addon = addons.next();
-            log.info("Addon detected : " + addon.getName());
-        }
-        final Iterator<ScriptInjector> scriptInjectors = scriptInjectorServiceLoader.iterator();
-        while (scriptInjectors.hasNext()) {
-            final ScriptInjector scriptInjector = scriptInjectors.next();
-            log.info("Script dependencies for Addon #" + scriptInjector.getAddon().getName());
-            for (final String script : scriptInjector.getScripts()) {
-                log.info(script);
-            }
-            // scripts.addAll(scriptInjector.getScripts());
-        }
-        //
-        // for (final String script : scripts) {
-        // log.info("Injected script : " + script);
-        // }
-    }
 
     public void process(final Request request, final Response response) throws Exception {
         final JSONObject data = new JSONObject(new JSONTokener(request.getReader()));
@@ -66,72 +38,67 @@ public abstract class AbstractApplicationManager {
     }
 
     public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
-        final JSONObject jsonObject = new JSONObject();
-
         final Session session = request.getSession();
 
         Long reloadedViewID = null;
         boolean isNewHttpSession = false;
-        Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
-        if (applicationSession == null) {
+        Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
+        if (application == null) {
             log.info("Creating a new application ... Session ID #" + session.getId());
-            applicationSession = new Application(session);
+            application = new Application(session);
             session.setUserAgent(request.getHeader("User-Agent"));
-            session.setAttribute(Application.class.getCanonicalName(), applicationSession);
+            session.setAttribute(Application.class.getCanonicalName(), application);
             isNewHttpSession = true;
         } else {
             if (data.has(APPLICATION.VIEW_ID)) reloadedViewID = data.getLong(APPLICATION.VIEW_ID);
             log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
         }
 
-        synchronized (applicationSession) {
-            if (reloadedViewID != null) applicationSession.unregisterUIContext(reloadedViewID);
+        synchronized (application) {
+            if (reloadedViewID != null) application.unregisterUIContext(reloadedViewID);
 
-            final UIContext uiContext = new UIContext(applicationSession);
-            jsonObject.put(APPLICATION.VIEW_ID, applicationSession.registerUIContext(uiContext));
-
+            final UIContext uiContext = new UIContext(application);
+            application.registerUIContext(uiContext);
             UIContext.setCurrent(uiContext);
-
-            final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
-            uiContext.updateIncomingSeqNum(receivedSeqNum);
-
-            final EntryPoint entryPoint = initializePonySession(uiContext);
-
-            final String historyToken = data.getString(HISTORY.TOKEN);
-            if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
-
-            final PCookies pCookies = uiContext.getCookies();
-            final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIES);
-            for (int i = 0; i < cookies.length(); i++) {
-                final JSONObject jsoObject = cookies.getJSONObject(i);
-                final String name = jsoObject.getString(PROPERTY.KEY);
-                final String value = jsoObject.getString(PROPERTY.VALUE);
-                pCookies.cacheCookie(name, value);
-            }
-
-            if (isNewHttpSession) {
-                entryPoint.start(uiContext);
-            } else {
-                entryPoint.restart(uiContext);
-            }
-
             try {
-                jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
+                final Txn txn = Txn.get();
+                txn.begin(new TxnContextHttp(true, request, response));
+                try {
 
-                // if (!scripts.isEmpty()) jsonObject.put(APPLICATION.SCRIPTS, scripts);
+                    final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+                    uiContext.updateIncomingSeqNum(receivedSeqNum);
 
-                uiContext.flushInstructions(jsonObject);
-                response.write(jsonObject.toString());
-                response.flush();
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
+                    final EntryPoint entryPoint = initializePonySession(uiContext);
+
+                    final String historyToken = data.getString(HISTORY.TOKEN);
+                    if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
+
+                    final PCookies pCookies = uiContext.getCookies();
+                    final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIES);
+                    for (int i = 0; i < cookies.length(); i++) {
+                        final JSONObject jsoObject = cookies.getJSONObject(i);
+                        final String name = jsoObject.getString(PROPERTY.KEY);
+                        final String value = jsoObject.getString(PROPERTY.VALUE);
+                        pCookies.cacheCookie(name, value);
+                    }
+
+                    if (isNewHttpSession) {
+                        entryPoint.start(uiContext);
+                    } else {
+                        entryPoint.restart(uiContext);
+                    }
+                    txn.commit();
+                } catch (final Exception e) {
+                    log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
+                    txn.rollback();
+                }
+            } finally {
+                UIContext.remove();
             }
         }
     }
 
     protected void fireInstructions(final JSONObject data, final Request request, final Response response) throws Exception {
-        final JSONObject jsonObject = new JSONObject();
-
         final long key = data.getLong(APPLICATION.VIEW_ID);
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
@@ -143,33 +110,26 @@ public abstract class AbstractApplicationManager {
         if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
 
         uiContext.acquire();
+        UIContext.setCurrent(uiContext);
         try {
-            printClientErrorMessage(data);
-
-            final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
-            if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
-                uiContext.stackIncomingMessage(receivedSeqNum, data);
-                log.info("Stacking incoming message #" + receivedSeqNum);
-                return;
-            }
-
-            UIContext.setCurrent(uiContext);
-
-            process(uiContext, data);
-
-            final List<JSONObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
-            for (final JSONObject jsoObject : datas) {
-                process(uiContext, jsoObject);
-            }
-
+            final Txn txn = Txn.get();
+            txn.begin(new TxnContextHttp(false, request, response));
             try {
-                if (uiContext.flushInstructions(jsonObject)) {
-                    jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
-                    response.write(jsonObject.toString());
-                    response.flush();
+                final Long receivedSeqNum = checkClientMessage(data, uiContext);
+
+                if (receivedSeqNum != null) {
+                    process(uiContext, data);
+
+                    final List<JSONObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+                    for (final JSONObject jsoObject : datas) {
+                        process(uiContext, jsoObject);
+                    }
                 }
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
+
+                txn.commit();
+            } catch (final Exception e) {
+                log.error("Cannot process client instruction", e);
+                txn.rollback();
             }
         } finally {
             UIContext.remove();
@@ -177,12 +137,23 @@ public abstract class AbstractApplicationManager {
         }
     }
 
+    private Long checkClientMessage(final JSONObject data, final UIContext uiContext) throws JSONException {
+        printClientErrorMessage(data);
+
+        final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+        if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
+            uiContext.stackIncomingMessage(receivedSeqNum, data);
+            log.info("Stacking incoming message #" + receivedSeqNum);
+            return null;
+        }
+        return receivedSeqNum;
+    }
+
     private void printClientErrorMessage(final JSONObject data) {
         try {
             final JSONArray errors = data.getJSONArray(APPLICATION.ERRORS);
             for (int i = 0; i < errors.length(); i++) {
                 final JSONObject jsoObject = errors.getJSONObject(i);
-                // TODO temp
                 final String message = jsoObject.getString("message");
                 final String details = jsoObject.getString("details");
                 log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);

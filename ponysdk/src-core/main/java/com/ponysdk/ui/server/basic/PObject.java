@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
@@ -61,7 +62,7 @@ public abstract class PObject {
         if (this instanceof PAddOn) {
             create.setAddOnSignature(((PAddOn) this).getSignature());
         }
-        UIContext.get().stackInstruction(create);
+        Txn.get().getTxnContext().save(create);
     }
 
     public long getID() {
@@ -74,7 +75,7 @@ public abstract class PObject {
 
         final Update update = new Update(getID());
         update.put(Dictionnary.PROPERTY.BIND, functionName);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
 
         nativeBindingFunction = functionName;
     }
@@ -85,7 +86,7 @@ public abstract class PObject {
 
         final Update update = new Update(getID());
         update.put(Dictionnary.PROPERTY.NATIVE, data);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void addNativeHandler(final PNativeHandler handler) {

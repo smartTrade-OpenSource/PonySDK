@@ -1,22 +1,24 @@
 
 package com.ponysdk.core.place;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.event.EventBus;
 
 public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
 
-    protected final Map<String, Place> placeContextByToken = new ConcurrentHashMap<String, Place>();
+    protected final Map<String, Place> placeContextByToken = new HashMap<String, Place>();
+
+    protected PlaceTokenizer<Place> placeTokenizer;
 
     public DefaultPlaceHistoryMapper(final EventBus eventBus) {
         eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeHandler() {
 
             @Override
             public void onPlaceChange(final PlaceChangeEvent event) {
-                final Place newPlace = event.getNewPlace();
-                placeContextByToken.put(newPlace.getToken(), newPlace);
+                final Place place = event.getNewPlace();
+                placeContextByToken.put(getToken(place), place);
             }
         });
     }
@@ -26,4 +28,12 @@ public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
         return placeContextByToken.get(token);
     }
 
+    @Override
+    public String getToken(final Place place) {
+        return place.getClass().getSimpleName();
+    }
+
+    public void setPlaceTokenizer(final PlaceTokenizer<Place> placeTokenizer) {
+        this.placeTokenizer = placeTokenizer;
+    }
 }

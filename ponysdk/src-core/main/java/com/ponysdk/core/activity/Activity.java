@@ -30,4 +30,6 @@ public interface Activity {
 
     void start(PAcceptsOneWidget world, Place place);
 
+    void stop();
+
 }

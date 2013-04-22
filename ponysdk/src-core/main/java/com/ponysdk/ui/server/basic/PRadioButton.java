@@ -23,7 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -45,14 +46,15 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PRadioButton extends PCheckBox {
 
-    private String name;
+    private final TxnString name = new TxnString();
 
     public PRadioButton(final String label) {
         super(label);
+        this.name.setListener(this);
     }
 
     public PRadioButton(final String name, final String label) {
-        super(label);
+        this(label);
         setName(name);
     }
 
@@ -62,14 +64,20 @@ public class PRadioButton extends PCheckBox {
     }
 
     public void setName(final String name) {
-        this.name = name;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.NAME, name);
-        getUIContext().stackInstruction(update);
+        this.name.set(name);
     }
 
     public String getName() {
-        return name;
+        return name.get();
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == name) {
+            saveUpdate(PROPERTY.NAME, name.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
     }
 
 }

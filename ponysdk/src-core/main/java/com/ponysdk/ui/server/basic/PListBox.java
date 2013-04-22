@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
@@ -83,11 +84,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         this.isMultipleSelect = isMultipleSelect;
 
         if (containsEmptyItem) {
-        	addItem("", null);
+            addItem("", null);
         }
 
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
 
         create.put(PROPERTY.MULTISELECT, isMultipleSelect);
     }
@@ -133,7 +134,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final String s = items.toString();
         update.put(PROPERTY.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", ""));
         update.put(PROPERTY.ITEM_GROUP, group);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void addItem(final String item) {
@@ -163,7 +164,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         update.put(PROPERTY.ITEM_INSERTED);
         update.put(PROPERTY.INDEX, index);
         update.put(PROPERTY.ITEM_TEXT, label);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setItemText(final int index, final String text) {
@@ -176,7 +177,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         update.put(PROPERTY.INDEX, index);
         update.put(PROPERTY.ITEM_TEXT, text);
 
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setValue(final int index, final Object value) {
@@ -229,7 +230,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         update.put(PROPERTY.ITEM_REMOVED);
         update.put(PROPERTY.INDEX, index);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
 
         if (selectedIndex >= index) setSelectedIndex((selectedIndex - 1));
     }
@@ -245,7 +246,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         selectedItems.clear();
         final Update update = new Update(getID());
         update.put(PROPERTY.CLEAR, true);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
 
         if (containsEmptyItem) {
             addItem("", null);
@@ -262,7 +263,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final Update update = new Update(getID());
         update.put(PROPERTY.SELECTED, selected);
         update.put(PROPERTY.SELECTED_INDEX, index);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setSelectedIndex(final int index) {
@@ -363,7 +364,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         this.visibleItemCount = visibleItemCount;
         final Update update = new Update(getID());
         update.put(PROPERTY.VISIBLE_ITEM_COUNT, visibleItemCount);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public int getVisibleItemCount() {
@@ -374,7 +375,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         this.isMultipleSelect = isMultipleSelect;
         final Update update = new Update(getID());
         update.put(PROPERTY.MULTISELECT, isMultipleSelect);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public class ListItem {

@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -60,7 +61,7 @@ public class PFlexTable extends PHTMLTable {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.SET_COL_SPAN, colSpan);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
@@ -69,7 +70,7 @@ public class PFlexTable extends PHTMLTable {
             update.put(PROPERTY.ROW, row);
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.SET_ROW_SPAN, rowSpan);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 }

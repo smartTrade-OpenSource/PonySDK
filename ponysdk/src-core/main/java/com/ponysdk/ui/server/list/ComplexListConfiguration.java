@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.basic.PPanel;
 
+@Deprecated
 public class ComplexListConfiguration<T> extends ListConfiguration<T> {
 
     private int pageSize = 30;

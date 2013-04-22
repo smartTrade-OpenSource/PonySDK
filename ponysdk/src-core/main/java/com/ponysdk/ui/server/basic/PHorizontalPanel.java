@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
@@ -50,7 +51,7 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
         this.horizontalAlignment = horizontalAlignment;
         final Update update = new Update(getID());
         update.put(PROPERTY.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
         this.verticalAlignment = verticalAlignment;
         final Update update = new Update(getID());
         update.put(PROPERTY.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

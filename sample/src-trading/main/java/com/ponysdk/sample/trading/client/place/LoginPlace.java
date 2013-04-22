@@ -24,12 +24,12 @@
 package com.ponysdk.sample.trading.client.place;
 
 import com.ponysdk.core.place.Place;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
-public class LoginPlace implements Place {
+public class LoginPlace extends PagePlace implements Place {
 
-    @Override
-    public String getToken() {
-        return getClass().getSimpleName();
+    public LoginPlace() {
+        super(LoginPlace.class.getSimpleName());
     }
 
 }

@@ -26,7 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnBoolean;
+import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -51,13 +52,18 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
  */
 public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
-    private boolean enabled = true;
+    private final TxnBoolean enabled = new TxnBoolean(Boolean.TRUE);
+    private final TxnBoolean enabledOnRequest = new TxnBoolean();
+    private final TxnBoolean focused = new TxnBoolean();
+    private final TxnBoolean showLoadingOnRequest = new TxnBoolean();
 
-    private boolean enabledOnRequest = false;
-
-    private boolean focused;
-
-    private boolean showLoadingOnRequest;
+    public PFocusWidget() {
+        super();
+        this.enabled.setListener(this);
+        this.enabledOnRequest.setListener(this);
+        this.focused.setListener(this);
+        this.showLoadingOnRequest.setListener(this);
+    }
 
     @Override
     public Collection<PClickHandler> getClickHandlers() {
@@ -105,59 +111,68 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ENABLED, enabled);
-        getUIContext().stackInstruction(update);
+        this.enabled.set(enabled);
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
-        this.enabledOnRequest = enabledOnRequest;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ENABLED_ON_REQUEST, enabledOnRequest);
-        getUIContext().stackInstruction(update);
+        this.enabledOnRequest.set(enabledOnRequest);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
-        this.showLoadingOnRequest = showLoadingOnRequest;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest);
-        getUIContext().stackInstruction(update);
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public boolean isFocused() {
-        return focused;
+        this.showLoadingOnRequest.set(showLoadingOnRequest);
     }
 
     @Override
     public void setFocus(final boolean focused) {
-        this.focused = focused;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.FOCUSED, focused);
-        getUIContext().stackInstruction(update);
+        this.focused.set(focused);
+    }
+
+    public boolean isEnabled() {
+        return enabled.get();
+    }
+
+    public boolean isShowLoadingOnRequest() {
+        return showLoadingOnRequest.get();
+    }
+
+    public boolean isEnabledOnRequest() {
+        return enabledOnRequest.get();
+    }
+
+    public boolean isFocused() {
+        return focused.get();
     }
 
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
-        if (showLoadingOnRequest || !enabledOnRequest) {
+        if (showLoadingOnRequest.get() || !enabledOnRequest.get()) {
             final PClickHandler clickHandler = new PClickHandler() {
 
                 @Override
                 public void onClick(final PClickEvent event) {
                     handler.onClick(event);
-                    final Update update = new Update(ID);
-                    update.put(PROPERTY.END_OF_PROCESSING, true);
-                    getUIContext().stackInstruction(update);
+                    saveUpdate(PROPERTY.END_OF_PROCESSING, true);
                 }
             };
 
             return addDomHandler(clickHandler, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
+        }
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == enabled) {
+            saveUpdate(PROPERTY.ENABLED, enabled.get());
+        } else if (txnObject == enabledOnRequest) {
+            saveUpdate(PROPERTY.ENABLED_ON_REQUEST, enabledOnRequest.get());
+        } else if (txnObject == focused) {
+            saveUpdate(PROPERTY.FOCUSED, focused.get());
+        } else if (txnObject == showLoadingOnRequest) {
+            saveUpdate(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest.get());
+        } else {
+            super.beforeFlush(txnObject);
         }
     }
 

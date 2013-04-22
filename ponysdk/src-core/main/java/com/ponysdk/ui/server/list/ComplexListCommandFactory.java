@@ -30,6 +30,7 @@ import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.query.Query;
 import com.ponysdk.core.query.Result;
 
+@Deprecated
 public interface ComplexListCommandFactory<T> {
 
     public Command<Result<List<T>>> newFindCommand(final ComplexListActivity<T> complexListActivity, final Query query);

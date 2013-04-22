@@ -118,4 +118,7 @@ public class ApplicationActivity implements Activity {
         this.pageProvider = pageProvider;
     }
 
+    @Override
+    public void stop() {}
+
 }

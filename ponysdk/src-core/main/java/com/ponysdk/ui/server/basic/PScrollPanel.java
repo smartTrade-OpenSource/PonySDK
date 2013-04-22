@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -40,7 +41,7 @@ public class PScrollPanel extends PSimplePanel {
     public void setHorizontalScrollPosition(final int position) {
         final Update update = new Update(ID);
         update.put(PROPERTY.HORIZONTAL_SCROLL_POSITION, position);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void scrollToBottom() {
@@ -62,6 +63,6 @@ public class PScrollPanel extends PSimplePanel {
     private void scrollTo(final int type) {
         final Update update = new Update(ID);
         update.put(PROPERTY.SCROLL_TO, type);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 }

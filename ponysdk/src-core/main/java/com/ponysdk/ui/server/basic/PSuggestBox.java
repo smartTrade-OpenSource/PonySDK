@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -99,8 +100,8 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
         this.suggestOracle = suggestOracle;
 
-        getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
-        getUIContext().stackInstruction(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
+        Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
+        Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
 
         create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
         create.put(PROPERTY.ORACLE, this.suggestOracle.getID());
@@ -120,7 +121,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
         if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
             final String text = event.getString(PROPERTY.TEXT);
-            textBox.onValueChange(new PValueChangeEvent<String>(this, text));
+            textBox.fireOnValueChange(new PValueChangeEvent<String>(this, text));
         } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handlerKey)) {
             this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
             this.displayString = event.getString(PROPERTY.DISPLAY_STRING);
@@ -157,7 +158,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         this.limit = limit;
         final Update update = new Update(getID());
         update.put(PROPERTY.LIMIT, limit);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setText(final String text) {
@@ -234,26 +235,26 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         public void add(final String suggestion) {
             final Update update = new Update(getID());
             update.put(PROPERTY.SUGGESTION, suggestion);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         @Override
         public void addAll(final Collection<String> collection) {
             final Update update = new Update(getID());
             update.put(PROPERTY.SUGGESTIONS, collection);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void setDefaultSuggestions(final Collection<String> collection) {
             final Update update = new Update(getID());
             update.put(PROPERTY.DEFAULT_SUGGESTIONS, collection);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void clear() {
             final Update update = new Update(getID());
             update.put(PROPERTY.CLEAR, true);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         @Override

@@ -24,7 +24,6 @@
 package com.ponysdk.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,15 +45,14 @@ import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Close;
-import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.Session;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PTimer;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -76,10 +74,6 @@ public class UIContext {
 
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
-    private final List<Instruction> instructionStacker = new ArrayList<Instruction>();
-
-    private List<Instruction> currentStacker = instructionStacker;
-
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private PHistory history;
@@ -98,12 +92,18 @@ public class UIContext {
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
+    private long uiContextID;
+
     public UIContext(final Application ponyApplication) {
         this.application = ponyApplication;
     }
 
-    public void stackInstruction(final Instruction instruction) {
-        currentStacker.add(instruction);
+    void setUiContextID(final long uiContextID) {
+        this.uiContextID = uiContextID;
+    }
+
+    public long getUiContextID() {
+        return uiContextID;
     }
 
     void fireClientData(final JSONObject instruction) throws JSONException {
@@ -140,19 +140,6 @@ public class UIContext {
                 object.onClientData(instruction);
             }
         }
-    }
-
-    public boolean flushInstructions(final JSONObject data) throws JSONException {
-        if (currentStacker.isEmpty()) return false;
-        data.put(APPLICATION.INSTRUCTIONS, currentStacker);
-        currentStacker.clear();
-        return true;
-    }
-
-    public Collection<Instruction> clearPendingInstructions() {
-        final List<Instruction> removed = new ArrayList<Instruction>(currentStacker);
-        currentStacker.clear();
-        return removed;
     }
 
     public void acquire() {
@@ -205,7 +192,7 @@ public class UIContext {
         final AddHandler addHandler = new AddHandler(0, HANDLER.KEY_.STREAM_REQUEST_HANDLER);
         final long streamRequestID = UIContext.get().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
-        stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
@@ -213,7 +200,7 @@ public class UIContext {
         final AddHandler addHandler = new AddHandler(objectID, HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER);
         final long streamRequestID = UIContext.get().nextStreamRequestID();
         addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
-        stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
@@ -278,8 +265,7 @@ public class UIContext {
     }
 
     public void close() {
-        final Close close = new Close();
-        stackInstruction(close);
+        Txn.get().getTxnContext().save(new Close());
     }
 
     public boolean hasPermission(final String key) {
@@ -360,12 +346,6 @@ public class UIContext {
         return n;
     }
 
-    public List<Instruction> setCurrentStacker(final List<Instruction> stacker) {
-        final List<Instruction> previous = currentStacker;
-        currentStacker = stacker;
-        return previous;
-    }
-
     public void stackIncomingMessage(final Long receivedSeqNum, final JSONObject data) {
         incomingMessageQueue.put(receivedSeqNum, data);
     }
@@ -383,4 +363,5 @@ public class UIContext {
         log.info("Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         return datas;
     }
+
 }

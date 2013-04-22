@@ -28,8 +28,8 @@ public class PlaceHistoryHandler {
 
             @Override
             public void onPlaceChange(final PlaceChangeEvent event) {
-                final Place newPlace = event.getNewPlace();
-                history.newItem(newPlace.getToken(), false);
+                final Place place = event.getNewPlace();
+                history.newItem(mapper.getToken(place), false);
             }
         });
 

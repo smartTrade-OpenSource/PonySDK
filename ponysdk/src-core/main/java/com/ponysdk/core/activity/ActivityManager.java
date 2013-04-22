@@ -23,16 +23,39 @@
 
 package com.ponysdk.core.activity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.place.Place;
 import com.ponysdk.core.place.PlaceChangeEvent;
 import com.ponysdk.core.place.PlaceChangeHandler;
+import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
+/**
+ * Manages {@link Activity} objects that should be kicked off in response to {@link PlaceChangeEvent} events.
+ */
 public class ActivityManager implements PlaceChangeHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(ActivityManager.class);
+
+    private static final Activity NULL_ACTIVITY = new AbstractActivity() {
+
+        @Override
+        protected void updateView(final Place place) {}
+
+        @Override
+        protected IsPWidget buildView() {
+            return null;
+        }
+    };
 
     private final ActivityMapper mapper;
     private PAcceptsOneWidget world;
+
+    private Activity currentActivity = NULL_ACTIVITY;
 
     public ActivityManager(final ActivityMapper mapper) {
         this.mapper = mapper;
@@ -52,10 +75,20 @@ public class ActivityManager implements PlaceChangeHandler {
 
     @Override
     public void onPlaceChange(final PlaceChangeEvent event) {
+        if (world == null) {
+            if (log.isDebugEnabled()) log.debug("No world to display this place #" + event);
+            return;
+        }
+
         final Activity activity = mapper.getActivity(event.getNewPlace());
-        if (activity == null) throw new IllegalArgumentException("No activity defined for the place #" + event.getNewPlace().getToken());
 
-        activity.start(world, event.getNewPlace());
+        if (activity == null) return;
+
+        if (!activity.equals(currentActivity)) {
+            currentActivity.stop();
+        }
+
+        currentActivity = activity;
+        currentActivity.start(world, event.getNewPlace());
     }
-
 }

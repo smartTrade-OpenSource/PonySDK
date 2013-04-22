@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -89,7 +90,7 @@ public abstract class PScript extends PObject {
         final Update update = new Update(ID);
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, (executionID++));
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void execute(final String js, final ExecutionCallback callback) {
@@ -99,7 +100,7 @@ public abstract class PScript extends PObject {
         final Update update = new Update(ID);
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, id);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override

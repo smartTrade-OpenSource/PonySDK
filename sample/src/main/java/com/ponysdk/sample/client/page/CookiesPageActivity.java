@@ -43,9 +43,9 @@ public class CookiesPageActivity extends SamplePageActivity {
         super.onFirstShowPage();
 
         final PTextBox name = new PTextBox();
-        name.setPlaceHolder("Cookie name");
+        name.setPlaceholder("Cookie name");
         final PTextBox value = new PTextBox();
-        name.setPlaceHolder("Cookie value");
+        name.setPlaceholder("Cookie value");
         final PButton add = new PButton("Add");
         add.addClickHandler(new PClickHandler() {
 
@@ -56,7 +56,7 @@ public class CookiesPageActivity extends SamplePageActivity {
         });
 
         final PTextBox name2 = new PTextBox();
-        name2.setPlaceHolder("Cookie name");
+        name2.setPlaceholder("Cookie name");
         final PButton remove = new PButton("Remove");
         remove.addClickHandler(new PClickHandler() {
 

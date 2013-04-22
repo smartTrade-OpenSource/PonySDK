@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public class PCookies {
@@ -51,7 +51,7 @@ public class PCookies {
         final Update update = new Update(objectID);
         update.put(PROPERTY.REMOVE, Boolean.TRUE);
         update.put(PROPERTY.NAME, name);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
 
         return cachedCookies.remove(name);
     }
@@ -70,7 +70,7 @@ public class PCookies {
         if (expires != null) {
             update.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
         }
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
 }

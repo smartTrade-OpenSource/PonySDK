@@ -1,6 +1,7 @@
 
 package com.ponysdk.ui.server.list;
 
+@Deprecated
 public class ColumnDescriptorFieldHolder {
 
     private final String caption;
@@ -11,7 +12,7 @@ public class ColumnDescriptorFieldHolder {
 
     private final String tableName;
 
-    public ColumnDescriptorFieldHolder(String caption, String fieldPath, Class<?> fieldType, String tableName) {
+    public ColumnDescriptorFieldHolder(final String caption, final String fieldPath, final Class<?> fieldType, final String tableName) {
         super();
         this.caption = caption;
         this.fieldPath = fieldPath;

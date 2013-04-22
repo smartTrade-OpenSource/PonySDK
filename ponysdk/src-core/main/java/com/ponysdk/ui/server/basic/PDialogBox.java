@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -80,7 +81,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
         this.caption = caption;
         final Update update = new Update(ID);
         update.put(PROPERTY.POPUP_CAPTION, caption);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public String getCaption() {

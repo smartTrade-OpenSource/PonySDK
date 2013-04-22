@@ -12,4 +12,13 @@ public interface PlaceHistoryMapper {
      */
     Place getPlace(String token);
 
+    /**
+     * Returns the String token associated with the given {@link Place}.
+     * 
+     * @param place
+     *            a {@link Place} instance
+     * @return a String token
+     */
+    String getToken(Place place);
+
 }

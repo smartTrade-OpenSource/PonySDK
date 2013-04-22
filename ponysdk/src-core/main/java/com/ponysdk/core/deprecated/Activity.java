@@ -25,6 +25,7 @@ package com.ponysdk.core.deprecated;
 
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
+@Deprecated
 public interface Activity {
 
     void start(PAcceptsOneWidget world);

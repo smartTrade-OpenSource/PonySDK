@@ -67,8 +67,8 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                textBox.setPlaceHolder(placeHolder.getText());
-                textBoxReadOnly.setPlaceHolder(placeHolder.getText());
+                textBox.setPlaceholder(placeHolder.getText());
+                textBoxReadOnly.setPlaceholder(placeHolder.getText());
             }
         });
         panel.add(button);

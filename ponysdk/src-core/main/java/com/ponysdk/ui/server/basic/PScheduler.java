@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -89,7 +90,7 @@ public abstract class PScheduler extends PObject {
         update.put(PROPERTY.START, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
         update.put(PROPERTY.FIXRATE, delayMs);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
@@ -97,14 +98,14 @@ public abstract class PScheduler extends PObject {
         update.put(PROPERTY.START, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
         update.put(PROPERTY.FIXDELAY, delayMs);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     private void cancelScheduleCommand(final long cmdID) {
         final Update update = new Update(ID);
         update.put(PROPERTY.STOP, true);
         update.put(PROPERTY.COMMAND_ID, cmdID);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
 
         final RepeatingCommand command = commandByID.remove(cmdID);
         IDByCommand.remove(command);

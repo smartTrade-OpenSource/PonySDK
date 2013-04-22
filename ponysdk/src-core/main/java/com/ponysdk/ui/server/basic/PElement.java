@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -60,7 +61,7 @@ public class PElement extends PComplexPanel {
 
         final Update update = new Update(ID);
         update.put(PROPERTY.INNER_HTML, innerTxt);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setInnerText(final String innerTxt) {
@@ -73,7 +74,7 @@ public class PElement extends PComplexPanel {
             update.put(PROPERTY.INNER_TEXT, innerTxt);
         }
 
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public String getInnerTxt() {

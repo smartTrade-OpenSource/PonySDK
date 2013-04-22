@@ -42,5 +42,4 @@ public class PAbsolutePanel extends PComplexPanel {
     protected WidgetType getWidgetType() {
         return WidgetType.ABSOLUTE_PANEL;
     }
-
 }

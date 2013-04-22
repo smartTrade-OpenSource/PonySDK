@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -68,7 +69,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         } finally {
             // Physical detach.
             final Remove remove = new Remove(w.getID(), getID());
-            getUIContext().stackInstruction(remove);
+            Txn.get().getTxnContext().save(remove);
 
             // Logical detach.
             widget = null;
@@ -98,7 +99,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w != null) {
             // Physical attach.
             final Add add = new Add(w.getID(), getID());
-            getUIContext().stackInstruction(add);
+            Txn.get().getTxnContext().save(add);
 
             adopt(w);
         }

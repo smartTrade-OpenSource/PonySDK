@@ -7,6 +7,7 @@ import java.util.List;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -63,14 +64,14 @@ public class PTreeItem extends PObject {
         if (tree != null) {
             tree.orphan(widget);
             final Remove remove = new Remove(widget.getID(), tree.getID());
-            widget.getUIContext().stackInstruction(remove);
+            Txn.get().getTxnContext().save(remove);
         }
 
         if (tree != null) {
             tree.adopt(widget, this);
             final Add add = new Add(widget.getID(), getID());
             add.put(PROPERTY.WIDGET, true);
-            widget.getUIContext().stackInstruction(add);
+            Txn.get().getTxnContext().save(add);
         }
     }
 
@@ -91,7 +92,8 @@ public class PTreeItem extends PObject {
         this.html = html;
         final Update update = new Update(ID);
         update.put(PROPERTY.TEXT, html);
-        getUIContext().stackInstruction(update);
+
+        Txn.get().getTxnContext().save(update);
     }
 
     final void setTree(final PTree tree) {
@@ -99,7 +101,7 @@ public class PTreeItem extends PObject {
         if (isRoot) {
             final Add add = new Add(tree.getID(), getID());
             add.put(PROPERTY.ROOT, true);
-            getUIContext().stackInstruction(add);
+            Txn.get().getTxnContext().save(add);
         }
         setWidget();
     }
@@ -117,7 +119,7 @@ public class PTreeItem extends PObject {
         item.setTree(tree);
         final Add add = new Add(item.getID(), getID());
         add.put(PROPERTY.INDEX, beforeIndex);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
         return item;
     }
 
@@ -131,7 +133,7 @@ public class PTreeItem extends PObject {
 
     public boolean removeItem(final PTreeItem item) {
         final Remove add = new Remove(tree.getID(), getID());
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
         return children.remove(item);
     }
 
@@ -139,7 +141,7 @@ public class PTreeItem extends PObject {
         this.selected = selected;
         final Update update = new Update(ID);
         update.put(PROPERTY.SELECTED, selected);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public boolean isSelected() {
@@ -150,7 +152,7 @@ public class PTreeItem extends PObject {
         this.open = open;
         final Update update = new Update(ID);
         update.put(PROPERTY.STATE, open);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public boolean getState() {

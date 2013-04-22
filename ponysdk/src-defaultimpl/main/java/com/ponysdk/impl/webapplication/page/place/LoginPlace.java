@@ -25,11 +25,10 @@ package com.ponysdk.impl.webapplication.page.place;
 
 import com.ponysdk.core.place.Place;
 
-public class LoginPlace implements Place {
+public class LoginPlace extends PagePlace implements Place {
 
-    @Override
-    public String getToken() {
-        return getClass().getSimpleName();
+    public LoginPlace() {
+        super(LoginPlace.class.getSimpleName());
     }
 
 }

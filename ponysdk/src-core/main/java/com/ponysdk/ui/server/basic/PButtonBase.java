@@ -23,41 +23,50 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
-    private String text;
-    private String html;
+    private final TxnString text = new TxnString("");
+    private final TxnString html = new TxnString("");
+
+    public PButtonBase() {
+        super();
+        this.text.setListener(this);
+        this.html.setListener(this);
+    }
 
     @Override
-    public void setText(String text) {
-        if (text == null) text = "";
-        if (text.equals(this.text)) return;
-        this.text = text;
-
-        final Update update = new Update(ID);
-        update.put(PROPERTY.TEXT, text);
-        getUIContext().stackInstruction(update);
+    public void setText(final String text) {
+        this.text.set(text);
     }
 
     @Override
     public String getHTML() {
-        return html;
+        return html.get();
     }
 
     @Override
     public void setHTML(final String html) {
-        this.html = html;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.HTML, html);
-        getUIContext().stackInstruction(update);
+        this.html.set(html);
     }
 
     @Override
     public String getText() {
-        return text;
+        return text.get();
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == text) {
+            saveUpdate(PROPERTY.TEXT, text.get());
+        } else if (txnObject == html) {
+            saveUpdate(PROPERTY.HTML, html.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
     }
 }

@@ -32,16 +32,16 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
         if (applicationSession == null) throw new RuntimeException("Invalid session, please reload your application");
 
+        JettyWebSocket jettyWebSocket;
+
         final UIContext uiContext = applicationSession.getUIContext(key);
-
-        UIContext.setCurrent(uiContext);
-
-        final JettyWebSocket jettyWebSocket = new JettyWebSocket(uiContext);
-
         uiContext.acquire();
         try {
+            UIContext.setCurrent(uiContext);
+            jettyWebSocket = new JettyWebSocket();
             PPusher.get().initialize(jettyWebSocket);
         } finally {
+            UIContext.remove();
             uiContext.release();
         }
 
@@ -50,13 +50,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
     public class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
-        private final UIContext uiContext;
         private Connection connection;
         private ConnectionListener connectionListener;
-
-        public JettyWebSocket(final UIContext uiContext) {
-            this.uiContext = uiContext;
-        }
 
         @Override
         public void onOpen(final Connection connection) {
@@ -79,13 +74,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         @Override
         public void onClose(final int arg0, final String arg1) {
             log.info("Connection lost from: " + connection.toString());
-            uiContext.acquire();
-            try {
-                UIContext.setCurrent(uiContext);
-                connectionListener.onClose();
-            } finally {
-                uiContext.release();
-            }
+            connectionListener.onClose();
         }
 
         @Override

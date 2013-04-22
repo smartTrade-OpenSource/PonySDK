@@ -24,6 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnInteger;
+import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
@@ -38,57 +41,62 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
  */
 public abstract class PCellPanel extends PComplexPanel {
 
-    private int borderWidth;
+    private final TxnInteger borderWidth = new TxnInteger();
+    private final TxnInteger spacing = new TxnInteger();
 
-    private int spacing;
-
-    public void setBorderWidth(final int width) {
-        this.borderWidth = width;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.BORDER_WIDTH, width);
-        getUIContext().stackInstruction(update);
+    public void setBorderWidth(final int borderWidth) {
+        this.borderWidth.set(borderWidth);
     }
 
     public void setSpacing(final int spacing) {
-        this.spacing = spacing;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.SPACING, spacing);
-        getUIContext().stackInstruction(update);
+        this.spacing.set(spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
         update.put(PROPERTY.CELL, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
         update.put(PROPERTY.CELL, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_HEIGHT, height);
         update.put(PROPERTY.CELL, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
         final Update update = new Update(getID());
         update.put(PROPERTY.CELL_WIDTH, width);
         update.put(PROPERTY.CELL, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public int getBorderWidth() {
-        return borderWidth;
+        return borderWidth.get();
     }
 
     public int getSpacing() {
-        return spacing;
+        return spacing.get();
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == borderWidth) {
+            saveUpdate(PROPERTY.BORDER_WIDTH, borderWidth.get());
+        } else if (txnObject == spacing) {
+            saveUpdate(PROPERTY.SPACING, spacing.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
+
     }
 }

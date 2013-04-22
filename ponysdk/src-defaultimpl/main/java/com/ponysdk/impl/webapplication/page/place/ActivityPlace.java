@@ -24,19 +24,14 @@
 package com.ponysdk.impl.webapplication.page.place;
 
 import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.place.AbstractPlace;
 
-public class ActivityPlace extends AbstractPlace implements HasActivity {
+public class ActivityPlace extends PagePlace implements HasActivity {
 
     private final Activity activity;
 
     public ActivityPlace(final Activity activity) {
+        super(activity.getClass().getSimpleName());
         this.activity = activity;
-    }
-
-    @Override
-    public String getToken() {
-        return activity.getClass().getSimpleName();
     }
 
     @Override

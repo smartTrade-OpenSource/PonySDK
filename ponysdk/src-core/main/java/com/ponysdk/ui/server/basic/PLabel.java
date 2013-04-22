@@ -26,7 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -56,11 +57,15 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPAllDragAndDropHandlers {
 
-    private String text;
+    private final TxnString text = new TxnString();
 
-    public PLabel() {}
+    public PLabel() {
+        super();
+        this.text.setListener(this);
+    }
 
     public PLabel(final String text) {
+        this();
         setText(text);
     }
 
@@ -71,16 +76,21 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
 
     @Override
     public String getText() {
-        return text;
+        return text.get();
     }
 
     @Override
     public void setText(final String text) {
-        if (text == null) return;
-        this.text = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        getUIContext().stackInstruction(update);
+        this.text.set(text);
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == text) {
+            saveUpdate(PROPERTY.TEXT, text.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
     }
 
     @Override

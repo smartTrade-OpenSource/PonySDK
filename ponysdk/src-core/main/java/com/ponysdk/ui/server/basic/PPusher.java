@@ -23,11 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,11 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnSocketContext;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -50,20 +47,15 @@ public class PPusher extends PObject implements ConnectionListener {
     public static final String PUSHER = "com.ponysdk.ui.server.basic.PPusher";
 
     private WebSocket websocket;
+
     private final UIContext uiContext;
 
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<DataListener>();
 
-    private final List<Instruction> updates = new ArrayList<Instruction>();
-
-    private boolean polling = false;
     private PusherState pusherState = PusherState.STOPPED;
 
-    // In ms
-    private final int maxIdleTime;
-
-    private long lastPoll;
+    private final TxnSocketContext txnContext;
 
     public enum PusherState {
         STOPPED, INITIALIZING, STARTED
@@ -72,17 +64,18 @@ public class PPusher extends PObject implements ConnectionListener {
     private PPusher(final int pollingDelay, final int maxIdleTime) {
         super();
 
+        this.txnContext = new TxnSocketContext(maxIdleTime);
+
         create.put(PROPERTY.FIXDELAY, pollingDelay);
 
-        this.maxIdleTime = maxIdleTime;
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();
-        this.lastPoll = System.currentTimeMillis();
     }
 
     public void initialize(final WebSocket websocket) {
         this.websocket = websocket;
         this.websocket.addConnectionListener(this);
+        this.txnContext.setSocket(websocket);
     }
 
     public static PPusher initialize(final int pollingDelay, final int maxIdleTime) {
@@ -110,50 +103,26 @@ public class PPusher extends PObject implements ConnectionListener {
         return WidgetType.PUSHER;
     }
 
-    public void begin() {
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
+    public void newCommand(final com.ponysdk.core.command.Command<?> command) {
+        command.execute();
     }
 
-    public void end() {
-        UIContext.remove();
-        uiContext.release();
+    public UIContext getUiContext() {
+        return uiContext;
     }
 
-    public void flush() throws IOException, JSONException {
-        if (polling) {
-            final Collection<Instruction> instructions = uiContext.clearPendingInstructions();
-            updates.addAll(instructions);
-
-            final long timeElapsed = System.currentTimeMillis() - lastPoll;
-            if (timeElapsed > maxIdleTime) {
-                log.error(TimeUnit.MILLISECONDS.toSeconds(timeElapsed) + " seconds elapsed since last poll. Closing session.");
-                updates.clear();
-                onClose();
-                uiContext.getSession().invalidate();
-            }
-            return;
-        }
-
-        final JSONObject jsonObject = new JSONObject();
-        if (!uiContext.flushInstructions(jsonObject)) return;
-
-        jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
-        websocket.send(jsonObject.toString());
+    TxnSocketContext getTxContext() {
+        return txnContext;
     }
 
     @Override
     public void onClientData(final JSONObject event) throws JSONException {
         if (event.has(PROPERTY.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
-            polling = true;
+            txnContext.switchToPollingMode();
             onOpen();
         } else if (event.has(PROPERTY.POLL)) {
-            for (final Instruction instruction : updates) {
-                getUIContext().stackInstruction(instruction);
-            }
-            updates.clear();
-            lastPoll = System.currentTimeMillis();
+            txnContext.flushNow();
         }
     }
 
@@ -170,49 +139,115 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     public void pushToClient(final Object data) {
-
         if (pusherState != PusherState.STARTED) {
             if (log.isDebugEnabled()) log.debug("Pusher not started. Skipping message #" + data);
             return;
         }
 
-        begin();
-        try {
+        if (UIContext.get() == null) {
+            uiContext.acquire();
+            UIContext.setCurrent(uiContext);
+            try {
+                if (listenerCollection.isEmpty()) return;
+                final Txn txn = Txn.get();
+                txn.begin(txnContext);
+                try {
+                    for (final DataListener listener : listenerCollection) {
+                        listener.onData(data);
+                    }
+                    txn.commit();
+                } catch (final Exception e) {
+                    log.error("Cannot process open socket", e);
+                    txn.rollback();
+                }
+            } finally {
+                UIContext.remove();
+                uiContext.release();
+            }
+        } else {
             if (listenerCollection.isEmpty()) return;
 
             for (final DataListener listener : listenerCollection) {
                 listener.onData(data);
             }
-            PPusher.get().flush();
-        } catch (final Exception exception) {
-            log.error("Cannot push data", exception);
-        } finally {
-            PPusher.get().end();
         }
     }
 
     @Override
     public void onClose() {
-        pusherState = PusherState.STOPPED;
-        for (final ConnectionListener listener : connectionListeners) {
-            listener.onClose();
+        uiContext.acquire();
+        UIContext.setCurrent(uiContext);
+        try {
+            final Txn txn = Txn.get();
+            txn.begin(txnContext);
+            try {
+                pusherState = PusherState.STOPPED;
+
+                for (final ConnectionListener listener : connectionListeners) {
+                    listener.onClose();
+                }
+                txn.commit();
+            } catch (final Exception e) {
+                log.error("Cannot process open socket", e);
+                txn.rollback();
+            }
+        } finally {
+            UIContext.remove();
+            uiContext.release();
         }
+
     }
 
     @Override
     public void onOpen() {
-        pusherState = PusherState.STARTED;
-
-        begin();
+        uiContext.acquire();
+        UIContext.setCurrent(uiContext);
         try {
-            for (final ConnectionListener listener : connectionListeners) {
-                listener.onOpen();
+            final Txn txn = Txn.get();
+            txn.begin(txnContext);
+            try {
+                pusherState = PusherState.STARTED;
+
+                PusherCommandExecutor.execute(this, new PCommand() {
+
+                    @Override
+                    public void execute() {
+                        for (final ConnectionListener listener : connectionListeners) {
+                            listener.onOpen();
+                        }
+                    }
+                });
+                txn.commit();
+            } catch (final Exception e) {
+                log.error("Cannot process open socket", e);
+                txn.rollback();
             }
-            PPusher.get().flush();
-        } catch (final Exception exception) {
-            log.error("Cannot push data", exception);
         } finally {
-            PPusher.get().end();
+            UIContext.remove();
+            uiContext.release();
+        }
+    }
+
+    public void execute(final PCommand command) {
+        if (UIContext.get() == null) {
+            uiContext.acquire();
+            UIContext.setCurrent(uiContext);
+            try {
+                final Txn txn = Txn.get();
+                txn.begin(txnContext);
+                try {
+                    PusherCommandExecutor.execute(this, command);
+                    txn.commit();
+                } catch (final Exception e) {
+                    log.error("Cannot process open socket", e);
+                    txn.rollback();
+                }
+            } finally {
+                UIContext.remove();
+                uiContext.release();
+            }
+        } else {
+            PusherCommandExecutor.execute(this, command);
         }
     }
 

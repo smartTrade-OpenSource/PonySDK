@@ -33,7 +33,6 @@ public class PagePlace extends AbstractPlace implements HasPageName {
         this.pageName = pageName;
     }
 
-    @Override
     public String getToken() {
         return pageName;
     }

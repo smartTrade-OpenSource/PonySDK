@@ -29,6 +29,7 @@ import java.util.List;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -153,14 +154,14 @@ public class PMenuBar extends PWidget {
         items.add(beforeIndex, item);
         final Add add = new Add(item.getID(), getID());
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
         return item;
     }
 
     public boolean removeItem(final int index) {
         final PWidget item = items.remove(index);
         final Remove remove = new Remove(item.getID(), getID());
-        getUIContext().stackInstruction(remove);
+        Txn.get().getTxnContext().save(remove);
         return true;
     }
 
@@ -168,7 +169,7 @@ public class PMenuBar extends PWidget {
         final boolean removed = items.remove(item);
         if (removed) {
             final Remove remove = new Remove(item.getID(), getID());
-            getUIContext().stackInstruction(remove);
+            Txn.get().getTxnContext().save(remove);
         }
         return removed;
     }
@@ -177,7 +178,7 @@ public class PMenuBar extends PWidget {
         final boolean removed = items.remove(item);
         if (removed) {
             final Remove remove = new Remove(item.getID(), getID());
-            getUIContext().stackInstruction(remove);
+            Txn.get().getTxnContext().save(remove);
         }
         return removed;
     }
@@ -194,14 +195,14 @@ public class PMenuBar extends PWidget {
         items.add(beforeIndex, itemSeparator);
         final Add add = new Add(itemSeparator.getID(), getID());
         add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
         return itemSeparator;
     }
 
     public void clearItems() {
         final Update update = new Update(getID());
         update.put(PROPERTY.CLEAR, true);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
         // clear
         items.clear();
     }

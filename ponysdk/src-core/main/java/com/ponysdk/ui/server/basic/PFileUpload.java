@@ -34,6 +34,7 @@ import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
@@ -62,7 +63,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public PFileUpload() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         this.name = name;
         final Update update = new Update(getID());
         update.put(PROPERTY.NAME, this.name);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void submit() {
@@ -120,7 +121,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, this.enabled);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public String getFileName() {

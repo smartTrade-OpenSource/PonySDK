@@ -26,9 +26,9 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -38,18 +38,17 @@ import com.ponysdk.ui.terminal.WidgetType;
 public abstract class PTerminalScheduledCommand extends PObject {
 
     public void schedule(final int delayMillis) {
-        final UIContext context = UIContext.get();
         final List<Instruction> stacker = new ArrayList<Instruction>();
-        final List<Instruction> mainStacker = context.setCurrentStacker(stacker);
+        final List<Instruction> mainStacker = Txn.get().getTxnContext().setCurrentStacker(stacker);
         try {
             run();
         } finally {
-            context.setCurrentStacker(mainStacker);
+            Txn.get().getTxnContext().setCurrentStacker(mainStacker);
         }
         final Update update = new Update(ID);
         update.put(PROPERTY.FIXDELAY, delayMillis);
         update.put(PROPERTY.INSTRUCTIONS, stacker);
-        UIContext.get().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     protected abstract void run();

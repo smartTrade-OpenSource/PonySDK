@@ -23,16 +23,12 @@
 
 package com.ponysdk.core.place;
 
+/**
+ * Represents a bookmarkable location in an app. Implementations are expected to provide correct
+ * {@link Object#equals(Object)} and {@link Object#hashCode()} methods.
+ */
 public interface Place {
 
-    Place NOWHERE = new Place() {
-
-        @Override
-        public String getToken() {
-            return "";
-        }
-    };
-
-    public String getToken();
+    Place NOWHERE = new Place() {};
 
 }

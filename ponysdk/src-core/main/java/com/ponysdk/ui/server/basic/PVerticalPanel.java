@@ -23,7 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnObjectImpl;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
@@ -37,9 +38,8 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
  */
 public class PVerticalPanel extends PCellPanel implements HasPAlignment {
 
-    private PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.ALIGN_LEFT;
-
-    private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
+    private final TxnObjectImpl<PHorizontalAlignment> horizontalAlignment = new TxnObjectImpl<PHorizontalAlignment>(PHorizontalAlignment.ALIGN_LEFT);
+    private final TxnObjectImpl<PVerticalAlignment> verticalAlignment = new TxnObjectImpl<PVerticalAlignment>(PVerticalAlignment.ALIGN_TOP);
 
     @Override
     protected WidgetType getWidgetType() {
@@ -48,31 +48,36 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
 
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
-        this.horizontalAlignment = horizontalAlignment;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        getUIContext().stackInstruction(update);
+        this.horizontalAlignment.set(horizontalAlignment);
     }
 
     @Override
     public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
-        this.verticalAlignment = verticalAlignment;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        getUIContext().stackInstruction(update);
+        this.verticalAlignment.set(verticalAlignment);
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {
-        return horizontalAlignment;
+        return horizontalAlignment.get();
     }
 
     public PVerticalAlignment getVerticalAlignment() {
-        return verticalAlignment;
+        return verticalAlignment.get();
     }
 
     @Override
     public void insert(final PWidget child, final int beforeIndex) {
         super.insert(child, beforeIndex);
+    }
+
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == horizontalAlignment) {
+            saveUpdate(PROPERTY.HORIZONTAL_ALIGNMENT, horizontalAlignment.get().ordinal());
+        } else if (txnObject == verticalAlignment) {
+            saveUpdate(PROPERTY.VERTICAL_ALIGNMENT, verticalAlignment.get().ordinal());
+        } else {
+            super.beforeFlush(txnObject);
+        }
     }
 
 }

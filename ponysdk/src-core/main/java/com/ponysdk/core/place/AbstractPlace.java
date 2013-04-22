@@ -23,10 +23,7 @@
 
 package com.ponysdk.core.place;
 
+@Deprecated
 public abstract class AbstractPlace implements Place {
 
-    @Override
-    public String getToken() {
-        return getClass().getSimpleName();
-    }
 }

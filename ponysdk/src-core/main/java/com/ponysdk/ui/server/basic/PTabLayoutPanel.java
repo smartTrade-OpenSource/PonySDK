@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -85,7 +86,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
 
     public PTabLayoutPanel() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         final Add addWidget = new Add(widget.getID(), getID());
         addWidget.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         addWidget.put(PROPERTY.TAB_WIDGET, tabWidget.getID());
-        getUIContext().stackInstruction(addWidget);
+        Txn.get().getTxnContext().save(addWidget);
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
@@ -128,7 +129,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         final Add addWidget = new Add(widget.getID(), getID());
         addWidget.put(PROPERTY.BEFORE_INDEX, beforeIndex);
         addWidget.put(PROPERTY.TAB_TEXT, tabText);
-        getUIContext().stackInstruction(addWidget);
+        Txn.get().getTxnContext().save(addWidget);
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -153,7 +154,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         this.selectedItemIndex = index;
         final Update update = new Update(ID);
         update.put(PROPERTY.SELECTED_INDEX, index);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
@@ -171,14 +172,14 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
         this.animationEnabled = animationEnabled;
         final Update update = new Update(ID);
         update.put(PROPERTY.ANIMATION, animationEnabled);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override

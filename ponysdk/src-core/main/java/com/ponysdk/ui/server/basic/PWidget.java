@@ -43,6 +43,11 @@ import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnBoolean;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnObjectListener;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -68,13 +73,11 @@ import com.ponysdk.ui.terminal.DomHandlerType;
  * The base class for the majority of user-interface objects. Widget adds support for receiving events from
  * the browser and being added directly to {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget {
+public abstract class PWidget extends PObject implements IsPWidget, TxnObjectListener {
 
     private static Logger log = LoggerFactory.getLogger(PWidget.class);
 
     protected PWidget parent;
-
-    private boolean visible = true;
 
     protected Object data;
 
@@ -86,38 +89,35 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> elementProperties = new HashMap<String, String>();
     private final Map<String, String> elementAttributes = new HashMap<String, String>();
-    
-    private String title;
-    private String width;
-    private String height;
-    private String styleName;
-    private String stylePrimaryName;
-    private String debugID;
+
+    private final TxnBoolean visible = new TxnBoolean();
+    private final TxnString title = new TxnString();
+    private final TxnString width = new TxnString();
+    private final TxnString height = new TxnString();
+    private final TxnString styleName = new TxnString();
+    private final TxnString stylePrimaryName = new TxnString();
+    private final TxnString debugID = new TxnString();
+
+    public PWidget() {
+        visible.setListener(this);
+        title.setListener(this);
+        width.setListener(this);
+        height.setListener(this);
+        styleName.setListener(this);
+        stylePrimaryName.setListener(this);
+        debugID.setListener(this);
+    }
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
 
-    protected void stackUpdate(final String key, final int value) {
-        final Update update = new Update(getID());
-        update.put(key, value);
-        getUIContext().stackInstruction(update);
-    }
-
-    protected void stackUpdate(final String key, final String value) {
-        final Update update = new Update(getID());
-        update.put(key, value);
-        getUIContext().stackInstruction(update);
-    }
-
     public void setWidth(final String width) {
-        this.width = width;
-        stackUpdate(PROPERTY.WIDGET_WIDTH, width);
+        this.width.set(width);
     }
 
     public void setHeight(final String height) {
-        this.height = height;
-        stackUpdate(PROPERTY.WIDGET_HEIGHT, height);
+        this.height.set(height);
     }
 
     public PWidget getParent() {
@@ -133,7 +133,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setProperty(final String name, final String value) {
@@ -141,7 +141,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
         update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setAttribute(final String name, final String value) {
@@ -149,7 +149,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public String getProperty(final String key) {
@@ -161,24 +161,18 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleName(final String styleName) {
-        this.styleName = styleName;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STYLE_NAME, styleName);
-        getUIContext().stackInstruction(update);
+        this.styleName.set(styleName);
     }
 
-    public void setStylePrimaryName(final String styleName) {
-        this.stylePrimaryName = styleName;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STYLE_PRIMARY_NAME, styleName);
-        getUIContext().stackInstruction(update);
+    public void setStylePrimaryName(final String stylePrimaryName) {
+        this.stylePrimaryName.set(stylePrimaryName);
     }
 
     public void addStyleName(final String styleName) {
         if (styleNames.add(styleName)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.ADD_STYLE_NAME, styleName);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 
@@ -186,7 +180,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (styleNames.remove(styleName)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.REMOVE_STYLE_NAME, styleName);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 
@@ -195,10 +189,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void ensureDebugId(final String debugID) {
-        this.debugID = debugID;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ENSURE_DEBUG_ID, debugID);
-        getUIContext().stackInstruction(update);
+        this.debugID.set(debugID);
     }
 
     @Override
@@ -212,29 +203,30 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setVisible(final boolean visible) {
-        this.visible = visible;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.WIDGET_VISIBLE, visible);
-        getUIContext().stackInstruction(update);
+        this.visible.set(visible);
     }
 
     public void setTitle(final String title) {
-        this.title = title;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.WIDGET_TITLE, title);
-        getUIContext().stackInstruction(update);
+        this.title.set(title);
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(final Object data) {
-        this.data = data;
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == title) {
+            saveUpdate(PROPERTY.WIDGET_TITLE, title.get());
+        } else if (txnObject == visible) {
+            saveUpdate(PROPERTY.WIDGET_VISIBLE, visible.get());
+        } else if (txnObject == width) {
+            saveUpdate(PROPERTY.WIDGET_WIDTH, height.get());
+        } else if (txnObject == height) {
+            saveUpdate(PROPERTY.WIDGET_HEIGHT, height.get());
+        } else if (txnObject == debugID) {
+            saveUpdate(PROPERTY.ENSURE_DEBUG_ID, debugID.get());
+        } else if (txnObject == styleName) {
+            saveUpdate(PROPERTY.STYLE_NAME, styleName.get());
+        } else if (txnObject == stylePrimaryName) {
+            saveUpdate(PROPERTY.STYLE_PRIMARY_NAME, stylePrimaryName.get());
+        }
     }
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
@@ -243,7 +235,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (handler instanceof JSONObject) {
             removeHandler.put(PROPERTY.DOM_HANDLER_CODE, handler);
         }
-        getUIContext().stackInstruction(removeHandler);
+        Txn.get().getTxnContext().save(removeHandler);
         return handlerRegistration;
     }
 
@@ -265,7 +257,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     log.error("Failed to copy value", e);
                 }
             }
-            getUIContext().stackInstruction(addHandler);
+            Txn.get().getTxnContext().save(addHandler);
         }
         return handlerRegistration;
     }
@@ -360,31 +352,62 @@ public abstract class PWidget extends PObject implements IsPWidget {
         } else if (parent != null) { throw new IllegalStateException("This widget's parent does not implement HasPWidgets"); }
     }
 
+    protected void saveUpdate(final String key, final boolean value) {
+        final Update update = new Update(getID());
+        update.put(key, value);
+        Txn.get().getTxnContext().save(update);
+    }
+
+    protected void saveUpdate(final String key, final int value) {
+        final Update update = new Update(getID());
+        update.put(key, value);
+        Txn.get().getTxnContext().save(update);
+    }
+
+    protected void saveUpdate(final String key, final String value) {
+        final Update update = new Update(getID());
+        update.put(key, value);
+        Txn.get().getTxnContext().save(update);
+    }
+
+    public String getTitle() {
+        return title.get();
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
+    }
+
     public boolean isVisible() {
-        return visible;
+        return visible.get();
     }
 
     public String getWidth() {
-        return width;
+        return width.get();
     }
 
     public String getHeight() {
-        return height;
+        return height.get();
     }
 
     public String getStyleName() {
-        return styleName;
+        return styleName.get();
     }
 
     public String getDebugID() {
-        return debugID;
+        return debugID.get();
     }
 
     public String getStylePrimaryName() {
-        return stylePrimaryName;
+        return stylePrimaryName.get();
     }
 
     public void setDomHandler(final EventBus domHandler) {
         this.domHandler = domHandler;
     }
+
 }

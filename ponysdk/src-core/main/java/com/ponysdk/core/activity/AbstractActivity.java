@@ -57,6 +57,11 @@ public abstract class AbstractActivity implements Activity {
         updateView(place);
     }
 
+    @Override
+    public void stop() {
+        // nothing to do by default
+    }
+
     protected abstract IsPWidget buildView();
 
     protected abstract void updateView(Place place);

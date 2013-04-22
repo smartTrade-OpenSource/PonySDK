@@ -26,8 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.History;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
@@ -75,7 +75,7 @@ public class PHistory {
         final History history = new History(token);
         history.put(HISTORY.FIRE_EVENTS, fireEvents);
 
-        UIContext.get().stackInstruction(history);
+        Txn.get().getTxnContext().save(history);
     }
 
     public void fireHistoryChanged(final String token) {

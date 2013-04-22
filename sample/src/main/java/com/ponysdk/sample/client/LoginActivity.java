@@ -65,6 +65,8 @@ public class LoginActivity extends AbstractActivity {
             }
         });
 
+        doLogin();
+
         return loginPageView;
     }
 

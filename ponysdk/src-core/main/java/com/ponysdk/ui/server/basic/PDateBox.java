@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -70,7 +71,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     public PDateBox(final SimpleDateFormat dateFormat) {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
 
         setDateFormat(dateFormat);
     }
@@ -127,7 +128,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
         final Update update = new Update(getID());
         update.put(PROPERTY.DATE_FORMAT_PATTERN, dateFormat.toPattern());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public SimpleDateFormat getDateFormat() {
@@ -149,7 +150,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         this.date = date;
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : "");
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
 }

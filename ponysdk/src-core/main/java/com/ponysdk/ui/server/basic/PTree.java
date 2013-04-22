@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.RemoveHandler;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
@@ -132,14 +133,14 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem> {
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
         final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getUIContext().stackInstruction(removeHandler);
+        Txn.get().getTxnContext().save(removeHandler);
     }
 
     @Override

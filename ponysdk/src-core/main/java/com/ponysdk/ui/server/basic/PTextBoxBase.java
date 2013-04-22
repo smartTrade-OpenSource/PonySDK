@@ -32,7 +32,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -40,11 +42,12 @@ import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
-public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String>, PValueChangeHandler<String> {
+public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String> {
 
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
-    private String text = "";
+    private final TxnString text = new TxnString("");
+    private final TxnString placeholder = new TxnString("");
 
     public PTextBoxBase() {
         this(null);
@@ -52,18 +55,12 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     public PTextBoxBase(final String text) {
         super();
+        this.text.setListener(this);
+        this.placeholder.setListener(this);
+
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-        getUIContext().stackInstruction(addHandler);
-    }
-
-    @Override
-    public void onClientData(final JSONObject e) throws JSONException {
-        if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
-            onValueChange(new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE)));
-        } else {
-            super.onClientData(e);
-        }
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -73,17 +70,30 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     @Override
     public String getText() {
-        return text;
+        return text.get();
     }
 
     @Override
-    public void setText(String text) {
-        if (text == null) text = "";
-        if (text.equals(this.text)) return;
-        this.text = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        getUIContext().stackInstruction(update);
+    public void setText(final String text) {
+        this.text.set(text);
+    }
+
+    @Override
+    public String getValue() {
+        return getText();
+    }
+
+    @Override
+    public void setValue(final String value) {
+        setText(value);
+    }
+
+    public void setPlaceholder(final String placeholder) {
+        this.placeholder.set(placeholder);
+    }
+
+    public String getPlaceholder() {
+        return placeholder.get();
     }
 
     @Override
@@ -102,33 +112,31 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     @Override
-    public void onValueChange(final PValueChangeEvent<String> event) {
-        this.text = event.getValue();
+    public void onClientData(final JSONObject e) throws JSONException {
+        if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
+            final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE));
+            fireOnValueChange(event);
+        } else {
+            super.onClientData(e);
+        }
+    }
+
+    protected void fireOnValueChange(final PValueChangeEvent<String> event) {
+        this.text.reset(event.getValue());
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
         }
     }
 
-    public void setSize(final int maxCharacterLength) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.SIZE, maxCharacterLength + "");
-        getUIContext().stackInstruction(update);
-    }
-
-    public void setPlaceHolder(final String placeHolder) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.PLACEHOLDER, placeHolder);
-        getUIContext().stackInstruction(update);
-    }
-
     @Override
-    public String getValue() {
-        return getText();
-    }
-
-    @Override
-    public void setValue(final String value) {
-        setText(value);
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == text) {
+            saveUpdate(PROPERTY.TEXT, text.get());
+        } else if (txnObject == placeholder) {
+            saveUpdate(PROPERTY.PLACEHOLDER, placeholder.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
     }
 
 }

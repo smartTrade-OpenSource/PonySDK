@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -99,14 +100,14 @@ public class PDockLayoutPanel extends PComplexPanel {
         final Update update = new Update(getID());
         update.put(PROPERTY.WIDGET_SIZE, size);
         update.put(PROPERTY.WIDGET, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         final Update update = new Update(getID());
         update.put(PROPERTY.WIDGET_HIDDEN, hidden);
         update.put(PROPERTY.WIDGET, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void add(final PWidget child, final Direction direction, final double size) {
@@ -121,7 +122,7 @@ public class PDockLayoutPanel extends PComplexPanel {
         add.put(PROPERTY.DIRECTION, direction.ordinal());
         add.put(PROPERTY.SIZE, size);
 
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
 }

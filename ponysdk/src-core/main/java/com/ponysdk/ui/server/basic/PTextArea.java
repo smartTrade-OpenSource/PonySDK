@@ -23,7 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.TxnInteger;
+import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -40,9 +41,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PTextArea extends PTextBoxBase {
 
-    private int visibleLines = 5;
-
-    private int characterWidth = 25;
+    private final TxnInteger visibleLines = new TxnInteger(0);
+    private final TxnInteger characterWidth = new TxnInteger(0);
 
     public PTextArea() {
         this(null);
@@ -50,8 +50,8 @@ public class PTextArea extends PTextBoxBase {
 
     public PTextArea(final String text) {
         super();
-        setVisibleLines(visibleLines);
-        setCharacterWidth(characterWidth);
+        visibleLines.set(5);// must be the default value ?
+        characterWidth.set(25);
     }
 
     @Override
@@ -60,25 +60,29 @@ public class PTextArea extends PTextBoxBase {
     }
 
     public int getVisibleLines() {
-        return visibleLines;
+        return visibleLines.get();
     }
 
     public void setVisibleLines(final int visibleLines) {
-        this.visibleLines = visibleLines;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VISIBLE_LINES, visibleLines);
-        getUIContext().stackInstruction(update);
+        this.visibleLines.set(visibleLines);
     }
 
     public int getCharacterWidth() {
-        return characterWidth;
+        return characterWidth.get();
     }
 
     public void setCharacterWidth(final int characterWidth) {
-        this.characterWidth = characterWidth;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CHARACTER_WIDTH, characterWidth);
-        getUIContext().stackInstruction(update);
+        this.characterWidth.set(characterWidth);
     }
 
+    @Override
+    public void beforeFlush(final TxnObject<?> txnObject) {
+        if (txnObject == visibleLines) {
+            saveUpdate(PROPERTY.VISIBLE_LINES, visibleLines.get());
+        } else if (txnObject == characterWidth) {
+            saveUpdate(PROPERTY.CHARACTER_WIDTH, characterWidth.get());
+        } else {
+            super.beforeFlush(txnObject);
+        }
+    }
 }

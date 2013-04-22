@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
@@ -103,7 +104,7 @@ public abstract class PHTMLTable extends PPanel {
                 update.put(PROPERTY.ROW, row);
                 update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
-                getUIContext().stackInstruction(update);
+                Txn.get().getTxnContext().save(update);
             }
         }
 
@@ -117,7 +118,7 @@ public abstract class PHTMLTable extends PPanel {
                 update.put(PROPERTY.ROW, row);
                 update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
                 update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                getUIContext().stackInstruction(update);
+                Txn.get().getTxnContext().save(update);
             }
         }
 
@@ -152,7 +153,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
@@ -161,7 +162,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
@@ -170,7 +171,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, align.ordinal());
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
@@ -179,7 +180,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.COLUMN, column);
             update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
             update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 
@@ -190,7 +191,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH, width);
             update.put(PROPERTY.COLUMN, column);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void addStyleName(final int column, final String styleName) {
@@ -198,7 +199,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         public void removeStyleName(final int column, final String styleName) {
@@ -206,7 +207,7 @@ public abstract class PHTMLTable extends PPanel {
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 
@@ -279,7 +280,7 @@ public abstract class PHTMLTable extends PPanel {
             remove(w, false);
         }
 
-        stackUpdate(PROPERTY.CLEAR, "");
+        saveUpdate(PROPERTY.CLEAR, "");
     }
 
     public void removeRow(final int row) {
@@ -303,7 +304,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        stackUpdate(PROPERTY.CLEAR_ROW, row);
+        saveUpdate(PROPERTY.CLEAR_ROW, row);
 
     }
 
@@ -319,7 +320,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        stackUpdate(PROPERTY.INSERT_ROW, row);
+        saveUpdate(PROPERTY.INSERT_ROW, row);
     }
 
     @Override
@@ -340,7 +341,7 @@ public abstract class PHTMLTable extends PPanel {
                 // Physical detach.
                 if (physicalDetach) {
                     final Remove remove = new Remove(widget.getID(), getID());
-                    getUIContext().stackInstruction(remove);
+                    Txn.get().getTxnContext().save(remove);
                 }
             }
         }
@@ -349,17 +350,17 @@ public abstract class PHTMLTable extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        stackUpdate(PROPERTY.BORDER_WIDTH, width);
+        saveUpdate(PROPERTY.BORDER_WIDTH, width);
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        stackUpdate(PROPERTY.CELL_PADDING, padding);
+        saveUpdate(PROPERTY.CELL_PADDING, padding);
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        stackUpdate(PROPERTY.CELL_SPACING, spacing);
+        saveUpdate(PROPERTY.CELL_SPACING, spacing);
     }
 
     protected void setCellFormatter(final PCellFormatter cellFormatter) {
@@ -380,7 +381,7 @@ public abstract class PHTMLTable extends PPanel {
             final Add add = new Add(widget.getID(), getID());
             add.put(PROPERTY.ROW, row);
             add.put(PROPERTY.CELL, column);
-            getUIContext().stackInstruction(add);
+            Txn.get().getTxnContext().save(add);
             adopt(widget);
         }
     }

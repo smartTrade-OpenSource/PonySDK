@@ -55,27 +55,32 @@ public class SpringHttpServlet extends AbstractHttpServlet {
 
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) {
-                if (clientConfigurations.isEmpty()) clientConfigurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
-
-                final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(clientConfigurations.toArray(new String[0]));
-
-                final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
-                final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
-                final PHistory history = applicationContext.getBean(PHistory.class);
-
-                ponySession.setRootEventBus(rootEventBus);
-                ponySession.setHistory(history);
-
-                final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-                if (initializingPages != null && !initializingPages.isEmpty()) {
-                    for (final InitializingActivity p : initializingPages.values()) {
-                        p.afterContextInitialized();
-                    }
-                }
-
-                return entryPoint;
+                return newPonySession(ponySession);
             }
+
         };
+    }
+
+    protected EntryPoint newPonySession(final UIContext ponySession) {
+        if (clientConfigurations.isEmpty()) clientConfigurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
+
+        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(clientConfigurations.toArray(new String[0]));
+
+        final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
+        final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
+        final PHistory history = applicationContext.getBean(PHistory.class);
+
+        ponySession.setRootEventBus(rootEventBus);
+        ponySession.setHistory(history);
+
+        final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
+        if (initializingPages != null && !initializingPages.isEmpty()) {
+            for (final InitializingActivity p : initializingPages.values()) {
+                p.afterContextInitialized();
+            }
+        }
+
+        return entryPoint;
     }
 
     public void addClientConfiguration(final String conf) {

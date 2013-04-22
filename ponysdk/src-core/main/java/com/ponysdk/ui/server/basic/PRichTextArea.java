@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -70,7 +71,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public Formatter getFormatter() {
@@ -95,127 +96,127 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
         void createLink(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.CREATE_LINK, html);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void insertHorizontalRule() {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HORIZONTAL_RULE);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void insertHTML(final String html) {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HTML, html);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void insertImage(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.IMAGE, url);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void insertOrderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.ORDERED);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void insertUnorderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.UNORDERED);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void setBackColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.BACK_COLOR, color);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void setFontName(final String name) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_NAME, name);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void setFontSize(final String fontSize) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_SIZE, fontSize);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void setForeColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_COLOR, color);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void setJustification(final Justification justification) {
             final Update update = new Update(getID());
             update.put(PROPERTY.JUSTIFICATION, justification.name());
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void toggleBold() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_BOLD);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void toggleItalic() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_ITALIC);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void toggleSubscript() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_SUBSCRIPT);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void toggleUnderline() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_UNDERLINE);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void leftIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.LEFT_INDENT);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void redo() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REDO);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void removeFormat() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_FORMAT);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void removeLink() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_LINK);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void rightIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_RIGHT_INDENT);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
 
         void selectAll() {
             final Update update = new Update(getID());
             update.put(PROPERTY.SELECT_ALL);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 

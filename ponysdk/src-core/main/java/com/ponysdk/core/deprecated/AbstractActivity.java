@@ -31,6 +31,7 @@ import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 
+@Deprecated
 public abstract class AbstractActivity implements Activity {
 
     public AbstractActivity() {}

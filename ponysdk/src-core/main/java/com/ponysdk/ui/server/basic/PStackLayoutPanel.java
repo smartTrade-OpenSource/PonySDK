@@ -32,6 +32,7 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
@@ -88,7 +89,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         final Add add = new Add(child.getID(), getID());
         add.put(PROPERTY.HTML, header);
         add.put(PROPERTY.SIZE, headerSize);
-        getUIContext().stackInstruction(add);
+        Txn.get().getTxnContext().save(add);
     }
 
     @Override
@@ -99,7 +100,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         children.remove(child);
 
         final Remove remove = new Remove(child.getID(), getID());
-        getUIContext().stackInstruction(remove);
+        Txn.get().getTxnContext().save(remove);
         return true;
     }
 
@@ -141,7 +142,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -158,7 +159,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        getUIContext().stackInstruction(addHandler);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     public void showWidget(final PWidget widget) {
         final Update update = new Update(getID());
         update.put(PROPERTY.OPEN, widget.getID());
-        getUIContext().stackInstruction(update);
+        Txn.get().getTxnContext().save(update);
     }
 
 }

@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
@@ -129,7 +130,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         if (w != null) {
             // Physical attach.
             final Add add = new Add(w.getID(), getID());
-            getUIContext().stackInstruction(add);
+            Txn.get().getTxnContext().save(add);
 
             adopt(w);
         }
@@ -182,7 +183,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
             this.isOpen = isOpen;
             final Update update = new Update(getID());
             update.put(PROPERTY.OPEN, isOpen);
-            getUIContext().stackInstruction(update);
+            Txn.get().getTxnContext().save(update);
         }
     }
 

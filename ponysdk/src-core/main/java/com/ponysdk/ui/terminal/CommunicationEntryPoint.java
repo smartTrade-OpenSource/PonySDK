@@ -137,7 +137,6 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
                             // }
                         } else {
                             uiBuilder.update(data);
-                            uiBuilder.hideLoadingMessageBox();
                         }
                     } catch (final RuntimeException exception) {
                         Window.alert("Loading application has failed #" + exception);
@@ -147,7 +146,6 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
                 @Override
                 public void onError(final Throwable exception) {
                     uiBuilder.onCommunicationError(exception);
-
                     rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
                 }
 
@@ -165,7 +163,6 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
         uiBuilder = new UIBuilder(applicationViewID, requestBuilder);
         uiBuilder.init();
         uiBuilder.update(data);
-        uiBuilder.hideLoadingMessageBox();
     }
 
     public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {

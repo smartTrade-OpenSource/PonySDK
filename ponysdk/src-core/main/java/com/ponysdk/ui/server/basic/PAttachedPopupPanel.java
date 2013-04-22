@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -40,9 +39,6 @@ public class PAttachedPopupPanel extends PPopupPanel {
     }
 
     public void repaint() {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.REPAINT, "");
-        getUIContext().stackInstruction(update);
+        saveUpdate(PROPERTY.REPAINT, "");
     }
-
 }
