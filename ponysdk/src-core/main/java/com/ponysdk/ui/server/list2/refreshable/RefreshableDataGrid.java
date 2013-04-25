@@ -26,8 +26,10 @@ package com.ponysdk.ui.server.list2.refreshable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -39,6 +41,9 @@ import com.ponysdk.ui.server.list2.SimpleListView;
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     protected final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();
+
+    private final Map<D, K> keyByValue = new HashMap<D, K>();
+
     protected final Map<K, D> valueByKey = new HashMap<K, D>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
@@ -68,10 +73,11 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public void setData(final K key, final D data) {
         Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) {
+            final int row = getVisibleItemCount();
             map = new HashMap<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>();
             cells.put(key, map);
+            keyByValue.put(data, key);
 
-            final int row = getVisibleItemCount();
             rows.add(data);
             valueByKey.put(key, data);
 
@@ -105,9 +111,43 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public void removeByKey(final K key) {
         final D removed = valueByKey.remove(key);
         if (removed != null) {
-            cells.remove(key);
+            final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.remove(key);
+            if (map == null) return;
+            final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
+            keyByValue.remove(cell.value);
             super.remove(removed);
         }
+    }
+
+    public void moveRow(final K key, final int beforeIndex) {
+        final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        if (map == null) throw new IndexOutOfBoundsException("cell not found");
+
+        final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
+        final int row = cell.row;
+
+        view.moveRow(row, beforeIndex);
+
+        // permutation
+        rows.remove(row);
+        rows.add(beforeIndex, cell.data);
+
+        final int min = Math.min(row, beforeIndex);
+
+        // update model
+        for (int i = min; i < rows.size(); i++) {
+            final K k = keyByValue.get(rows.get(i));
+            final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> cellRow = cells.get(k);
+            final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
+            while (iter.hasNext()) {
+                final Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> entry = iter.next();
+                entry.getValue().row = i;
+            }
+        }
+    }
+
+    public void moveColumn(final int index, final int beforeIndex) {
+        throw new RuntimeException("not yet implemented");
     }
 
     public int getRow(final K key) {
@@ -137,6 +177,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public void clear() {
         view.clear(1);
         cells.clear();
+        keyByValue.clear();
     }
 
 }

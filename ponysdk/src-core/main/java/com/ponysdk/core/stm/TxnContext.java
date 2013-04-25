@@ -12,4 +12,6 @@ public interface TxnContext {
     void flush() throws Exception;
 
     List<Instruction> setCurrentStacker(List<Instruction> instructions);
+
+    void clear();
 }

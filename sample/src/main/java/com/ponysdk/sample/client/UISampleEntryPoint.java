@@ -25,15 +25,11 @@ package com.ponysdk.sample.client;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PRadioButton;
-import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 
 public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
 
@@ -77,21 +73,6 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
         script();
 
         start(new LoginPlace());
-    }
-
-    @Override
-    protected void start(final Place place) {
-
-        final PFlowPanel panel = new PFlowPanel();
-        PRootLayoutPanel.get().add(panel);
-
-        final PRadioButton radioButton1 = new PRadioButton("a", "Test");
-        final PRadioButton radioButton2 = new PRadioButton("a", "Test2");
-
-        panel.add(radioButton1);
-        panel.add(radioButton2);
-
-        radioButton2.setValue(true);
     }
 
     @Override

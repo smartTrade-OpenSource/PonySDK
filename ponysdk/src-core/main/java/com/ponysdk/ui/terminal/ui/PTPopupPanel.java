@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
@@ -51,12 +53,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     private int dragStartY;
 
-    private int clientLeft;
-
-    private int windowWidth;
-
-    private int clientTop;
-
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         final boolean autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
@@ -65,9 +61,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
         addCloseHandler(create, uiService);
 
-        windowWidth = Window.getClientWidth();
-        clientLeft = Document.get().getBodyOffsetLeft();
-        clientTop = Document.get().getBodyOffsetTop();
     }
 
     protected PopupPanel createPopupPanel(final boolean autoHide) {
@@ -106,16 +99,22 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
             popupPanel.setVisible(false);
             popupPanel.show();
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-            final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.setObjectID(addHandler.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
-            eventInstruction.put(PROPERTY.OFFSETWIDTH, popupPanel.getOffsetWidth());
-            eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
-            eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
-            eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
-            uiService.sendDataToServer(eventInstruction);
+                @Override
+                public void execute() {
+                    final PTInstruction eventInstruction = new PTInstruction();
+                    eventInstruction.setObjectID(addHandler.getObjectID());
+                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
+                    eventInstruction.put(PROPERTY.OFFSETWIDTH, popupPanel.getOffsetWidth());
+                    eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
+                    eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
+                    eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
+                    uiService.sendDataToServer(eventInstruction);
+                }
+            });
+
             return;
         }
 
@@ -129,6 +128,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         if (update.containsKey(PROPERTY.ANIMATION)) {
             popup.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
         } else if (update.containsKey(PROPERTY.POPUP_CENTER)) {
+            popup.show();
             popup.center();
         } else if (update.containsKey(PROPERTY.POPUP_SHOW)) {
             popup.show();
@@ -170,7 +170,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             final int absX = event.getX() + uiObject.getAbsoluteLeft();
             final int absY = event.getY() + uiObject.getAbsoluteTop();
 
-            if (absX < clientLeft || absX >= windowWidth || absY < clientTop) { return; }
+            if (absX < Document.get().getBodyOffsetLeft() || absX >= Window.getClientWidth() || absY < Document.get().getBodyOffsetTop()) { return; }
 
             cast().setPopupPosition(absX - dragStartX, absY - dragStartY);
         }

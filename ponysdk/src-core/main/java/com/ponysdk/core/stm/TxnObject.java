@@ -3,7 +3,7 @@ package com.ponysdk.core.stm;
 
 public interface TxnObject<T> {
 
-    void set(T object);
+    boolean set(T object);
 
     T get();
 

@@ -46,4 +46,9 @@ public class TxnContextHttp implements TxnContext {
         instructions = stacker;
         return list;
     }
+
+    @Override
+    public void clear() {
+        instructions.clear();
+    }
 }

@@ -48,7 +48,7 @@ public abstract class PComplexPanel extends PPanel {
         insert(child, getChildren().size());
     }
 
-    protected void insert(final PWidget child, final int beforeIndex) {
+    public void insert(final PWidget child, final int beforeIndex) {
         child.removeFromParent();
         getChildren().insert(child, beforeIndex);
         adopt(child);

@@ -9,4 +9,6 @@ public interface TxnListener {
 
     void beforeRollback();
 
+    void afterFlush(TxnContext txnContext);
+
 }

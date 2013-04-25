@@ -50,7 +50,8 @@ public class PTElement extends PTComplexPanel<MyWidget> {
             uiObject.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));
         } else if (update.containsKey(PROPERTY.INNER_TEXT)) {
             uiObject.getElement().setInnerText(update.getString(PROPERTY.INNER_TEXT));
-        } else if (update.containsKey(PROPERTY.CLEAR_INNER_TEXT)) {
+        } else if (update.containsKey(PROPERTY.CLEAR_INNER_TEXT)) {// ? if null setInnerText of null do
+                                                                   // nothing ? must be removed ?
             uiObject.getElement().setInnerText(null);
         } else {
             super.update(update, uiService);

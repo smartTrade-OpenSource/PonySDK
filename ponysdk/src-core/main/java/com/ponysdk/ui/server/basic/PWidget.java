@@ -23,10 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -41,10 +39,12 @@ import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnBoolean;
+import com.ponysdk.core.stm.TxnHashMap;
 import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.core.stm.TxnObjectListener;
 import com.ponysdk.core.stm.TxnString;
@@ -83,14 +83,13 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
 
     private final Set<String> styleNames = new HashSet<String>();
 
-    private final Map<String, String> styleProperties = new HashMap<String, String>();
-
     private EventBus domHandler;
 
-    private final Map<String, String> elementProperties = new HashMap<String, String>();
-    private final Map<String, String> elementAttributes = new HashMap<String, String>();
+    private final TxnHashMap<String, String> styleProperties = new TxnHashMap<String, String>();
+    private final TxnHashMap<String, String> elementProperties = new TxnHashMap<String, String>();
+    private final TxnHashMap<String, String> elementAttributes = new TxnHashMap<String, String>();
 
-    private final TxnBoolean visible = new TxnBoolean();
+    private final TxnBoolean visible = new TxnBoolean(true);
     private final TxnString title = new TxnString();
     private final TxnString width = new TxnString();
     private final TxnString height = new TxnString();
@@ -99,6 +98,10 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     private final TxnString debugID = new TxnString();
 
     public PWidget() {
+        styleProperties.setListener(this);
+        elementProperties.setListener(this);
+        elementAttributes.setListener(this);
+
         visible.setListener(this);
         title.setListener(this);
         width.setListener(this);
@@ -133,7 +136,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        styleProperties.addPendingInstruction(name, update);
     }
 
     public void setProperty(final String name, final String value) {
@@ -141,7 +144,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
         update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        elementProperties.addPendingInstruction(name, update);
     }
 
     public void setAttribute(final String name, final String value) {
@@ -149,7 +152,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        elementAttributes.addPendingInstruction(name, update);
     }
 
     public String getProperty(final String key) {
@@ -178,10 +181,14 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
 
     public void removeStyleName(final String styleName) {
         if (styleNames.remove(styleName)) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.REMOVE_STYLE_NAME, styleName);
-            Txn.get().getTxnContext().save(update);
+            removeStyle(styleName);
         }
+    }
+
+    private void removeStyle(final String styleName) {
+        final Update update = new Update(ID);
+        update.put(PROPERTY.REMOVE_STYLE_NAME, styleName);
+        Txn.get().getTxnContext().save(update);
     }
 
     public boolean hasStyleName(final String styleName) {
@@ -217,7 +224,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         } else if (txnObject == visible) {
             saveUpdate(PROPERTY.WIDGET_VISIBLE, visible.get());
         } else if (txnObject == width) {
-            saveUpdate(PROPERTY.WIDGET_WIDTH, height.get());
+            saveUpdate(PROPERTY.WIDGET_WIDTH, width.get());
         } else if (txnObject == height) {
             saveUpdate(PROPERTY.WIDGET_HEIGHT, height.get());
         } else if (txnObject == debugID) {
@@ -226,6 +233,18 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
             saveUpdate(PROPERTY.STYLE_NAME, styleName.get());
         } else if (txnObject == stylePrimaryName) {
             saveUpdate(PROPERTY.STYLE_PRIMARY_NAME, stylePrimaryName.get());
+        } else if (txnObject == elementAttributes) {
+            for (final Instruction instruction : elementAttributes.getPendingInstructions().values()) {
+                Txn.get().getTxnContext().save(instruction);
+            }
+        } else if (txnObject == elementProperties) {
+            for (final Instruction instruction : elementProperties.getPendingInstructions().values()) {
+                Txn.get().getTxnContext().save(instruction);
+            }
+        } else if (txnObject == styleProperties) {
+            for (final Instruction instruction : styleProperties.getPendingInstructions().values()) {
+                Txn.get().getTxnContext().save(instruction);
+            }
         }
     }
 

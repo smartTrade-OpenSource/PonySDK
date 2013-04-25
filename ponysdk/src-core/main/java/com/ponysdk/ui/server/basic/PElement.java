@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -34,7 +33,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PElement extends PComplexPanel {
 
     private final String tagName;
-    private String innerTxt;
+
+    private TxnString innerText;
+    private TxnString innerHTML;
 
     public PElement(final String tagName) {
         super();
@@ -51,38 +52,23 @@ public class PElement extends PComplexPanel {
         return tagName;
     }
 
-    @Override
-    public void insert(final PWidget child, final int beforeIndex) {
-        super.insert(child, beforeIndex);
+    public void setInnerHTML(final String html) {
+        if (innerHTML == null) innerHTML = new TxnString();
+        if (innerHTML.set(html)) saveUpdate(PROPERTY.INNER_HTML, html);
     }
 
-    public void setInnerHTML(final String innerHTML) {
-        this.innerTxt = innerHTML;
-
-        final Update update = new Update(ID);
-        update.put(PROPERTY.INNER_HTML, innerTxt);
-        Txn.get().getTxnContext().save(update);
+    public void setInnerText(final String text) {
+        if (innerText == null) innerText = new TxnString();
+        if (innerText.set(text)) saveUpdate(PROPERTY.INNER_TEXT, text);
     }
 
-    public void setInnerText(final String innerTxt) {
-        this.innerTxt = innerTxt;
-
-        final Update update = new Update(ID);
-        if (innerTxt == null) {
-            update.put(PROPERTY.CLEAR_INNER_TEXT, true);
-        } else {
-            update.put(PROPERTY.INNER_TEXT, innerTxt);
-        }
-
-        Txn.get().getTxnContext().save(update);
-    }
-
-    public String getInnerTxt() {
-        return innerTxt;
+    public String getInnerText() {
+        if (innerText == null) return null;
+        return innerText.get();
     }
 
     public String getInnerHTML() {
-        return innerTxt;
+        if (innerHTML == null) return null;
+        return innerHTML.get();
     }
-
 }

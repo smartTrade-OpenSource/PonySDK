@@ -108,4 +108,10 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
         getColumnFormatter().setWidth(column, width);
     }
 
+    @Override
+    public void moveRow(final int index, final int beforeIndex) {}
+
+    @Override
+    public void moveColumn(final int index, final int beforeIndex) {}
+
 }

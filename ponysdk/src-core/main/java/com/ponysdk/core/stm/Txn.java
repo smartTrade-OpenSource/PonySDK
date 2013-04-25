@@ -53,6 +53,7 @@ public class Txn {
         txnObjects.clear();
         fireBeforeFlush();
         flush();
+        fireAfterFlush();
         transactions.remove();
     }
 
@@ -65,6 +66,7 @@ public class Txn {
         }
         txnObjects.clear();
         transactions.remove();
+        txnContext.clear();
     }
 
     public void flush() {
@@ -102,6 +104,12 @@ public class Txn {
     private void fireBeforeFlush() {
         for (final TxnListener txnListener : txnListnener) {
             txnListener.beforeFlush(txnContext);
+        }
+    }
+
+    private void fireAfterFlush() {
+        for (final TxnListener txnListener : txnListnener) {
+            txnListener.afterFlush(txnContext);
         }
     }
 

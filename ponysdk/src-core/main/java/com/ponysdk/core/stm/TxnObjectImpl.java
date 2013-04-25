@@ -17,22 +17,29 @@ public class TxnObjectImpl<T> implements TxnObject<T>, TxnListener {
 
     public TxnObjectImpl(final T initialValue) {
         this.initialValue = initialValue;
+        this.workingValue = initialValue;
     }
 
     @Override
-    public void set(final T object) {
+    public boolean set(final T object) {
         if (transaction == null) {
             transaction = Txn.get();
             if (transaction == null) {
+                if (isEquals(initialValue, object)) return false;
                 initialValue = object;
-                return;
+                return true;
             } else {
                 transaction.addTnxListener(this);
             }
         }
 
         set = true;
+
+        if (isEquals(initialValue, object)) return false;
+
         workingValue = object;
+
+        return true;
     }
 
     @Override
@@ -74,14 +81,25 @@ public class TxnObjectImpl<T> implements TxnObject<T>, TxnListener {
     }
 
     @Override
+    public void beforeFlush(final TxnContext txnContext) {
+        if (listener == null) return;
+        listener.beforeFlush(this);
+    }
+
+    private static boolean isEquals(final Object initialValue, final Object workingValue) {
+        if (initialValue == null && workingValue == null) return true;
+        if (initialValue != null && initialValue.equals(workingValue)) return true;
+        return false;
+    }
+
+    @Override
     public void beforeRollback() {
         // nothing to do
     }
 
     @Override
-    public void beforeFlush(final TxnContext txnContext) {
-        if (listener == null) return;
-        listener.beforeFlush(this);
+    public void afterFlush(final TxnContext txnContext) {
+        // nothing to do
     }
 
 }

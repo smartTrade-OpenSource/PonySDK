@@ -80,4 +80,9 @@ public class TxnSocketContext implements TxnContext {
     public void flushNow() {
         flushNow = true;
     }
+
+    @Override
+    public void clear() {
+        instructions.clear();
+    }
 }

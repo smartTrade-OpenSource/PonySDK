@@ -45,11 +45,28 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
 
         panelTop.add(new PLabel("Select your favorite color:"));
 
+        panelTop.add(newPRadioButton("color", "blue"));
+        panelTop.add(newPRadioButton("color", "red"));
+
+        final PRadioButton yellow = newPRadioButton("color", "yellow");
+        yellow.setEnabled(false);
+        panelTop.add(yellow);
+
+        panelTop.add(newPRadioButton("color", "green"));
+
         final PVerticalPanel panelBottom = new PVerticalPanel();
         panelBottom.setSpacing(10);
 
         panelBottom.add(new PLabel("Select your favorite sport:"));
         panelBottom.add(newPRadioButton("sport", "Polo"));
+        panelBottom.add(newPRadioButton("sport", "Rodeo"));
+        panelBottom.add(newPRadioButton("sport", "Horse racing"));
+        panelBottom.add(newPRadioButton("sport", "Dressage"));
+        panelBottom.add(newPRadioButton("sport", "Endurance riding"));
+        panelBottom.add(newPRadioButton("sport", "Eventing"));
+        panelBottom.add(newPRadioButton("sport", "Reining"));
+        panelBottom.add(newPRadioButton("sport", "Show jumping"));
+        panelBottom.add(newPRadioButton("sport", "Tent pegging"));
         panelBottom.add(newPRadioButton("sport", "Vaulting"));
 
         panelTop.add(panelBottom);
@@ -63,7 +80,6 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
 
     private PRadioButton newPRadioButton(final String name, final String label) {
         final PRadioButton radioButton = new PRadioButton(name, label);
-        if (label.equals("Polo")) radioButton.setValue(true);
         radioButton.addValueChangeHandler(this);
         return radioButton;
     }

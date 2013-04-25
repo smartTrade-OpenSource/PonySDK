@@ -233,4 +233,14 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         return preferencesLayout;
     }
 
+    @Override
+    public void moveRow(final int index, final int beforeIndex) {
+        simpleListView.moveRow(index, beforeIndex);
+    }
+
+    @Override
+    public void moveColumn(final int index, final int beforeIndex) {
+        simpleListView.moveColumn(index, beforeIndex);
+    }
+
 }

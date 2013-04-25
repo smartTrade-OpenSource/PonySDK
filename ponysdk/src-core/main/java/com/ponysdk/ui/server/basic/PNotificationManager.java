@@ -94,7 +94,7 @@ public class PNotificationManager {
 
     private static void showHumanizedNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_HUMANIZED);
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(new PClickHandler() {
@@ -104,14 +104,15 @@ public class PNotificationManager {
                 popupPanel.hide();
             }
         }, PClickEvent.TYPE);
+        popupPanel.addStyleName("closing");
+        popupPanel.center();
 
-        displayAtCenter(popupPanel, "closing");
         addAutoCloseTimer(popupPanel, humanizedDuration);
     }
 
     private static void showWarningNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_WARNING);
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(new PClickHandler() {
@@ -122,14 +123,14 @@ public class PNotificationManager {
             }
         }, PClickEvent.TYPE);
 
-        displayAtCenter(popupPanel, "closing");
+        popupPanel.center();
         addAutoCloseTimer(popupPanel, warningDuration);
     }
 
     private static void showErrorNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(false);
         popupPanel.setGlassEnabled(true);
-        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_ERROR);
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(new PClickHandler() {
@@ -140,7 +141,7 @@ public class PNotificationManager {
             }
         }, PClickEvent.TYPE);
 
-        displayAtCenter(popupPanel, null);
+        popupPanel.center();
     }
 
     private static void showTrayNotification(final IsPWidget content) {
@@ -148,10 +149,9 @@ public class PNotificationManager {
         div2.setWidget(content);
 
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.setStyleName(PonySDKTheme.NOTIFICATION);
+        popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_TRAY);
         popupPanel.setWidget(div2);
-
         displayAtBottomRight(popupPanel, "closing");
         addAutoCloseTimer(popupPanel, trayDuration);
     }
@@ -162,17 +162,6 @@ public class PNotificationManager {
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                 popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
-                if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
-            }
-        });
-    }
-
-    private static void displayAtCenter(final PPopupPanel popupPanel, final String closingAnimation) {
-        popupPanel.setPopupPositionAndShow(new PPositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
-                popupPanel.setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2);
                 if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
             }
         });

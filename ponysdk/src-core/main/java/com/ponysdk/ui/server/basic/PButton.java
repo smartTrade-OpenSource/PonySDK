@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -39,12 +38,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PButton extends PButtonBase {
 
-    public PButton() {
-        setStyleName(PonySDKTheme.BUTTON_WHITE);
-    }
+    public PButton() {}
 
     public PButton(final String text) {
-        this();
         setText(text);
     }
 
