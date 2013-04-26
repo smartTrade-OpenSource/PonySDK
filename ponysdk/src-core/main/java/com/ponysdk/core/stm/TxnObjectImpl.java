@@ -27,6 +27,7 @@ public class TxnObjectImpl<T> implements TxnObject<T>, TxnListener {
             if (transaction == null) {
                 if (isEquals(initialValue, object)) return false;
                 initialValue = object;
+                workingValue = object;
                 return true;
             } else {
                 transaction.addTnxListener(this);
@@ -65,7 +66,7 @@ public class TxnObjectImpl<T> implements TxnObject<T>, TxnListener {
     @Override
     public void reset(final T initialValue) {
         this.initialValue = initialValue;
-        this.workingValue = null;
+        this.workingValue = initialValue;
         this.set = false;
         this.transaction = null;
     }
