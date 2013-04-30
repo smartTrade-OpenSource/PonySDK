@@ -106,7 +106,7 @@ public class UIContext {
         return uiContextID;
     }
 
-    void fireClientData(final JSONObject instruction) throws JSONException {
+    public void fireClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
                 UIContext.get().invalidate();

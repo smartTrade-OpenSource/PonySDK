@@ -103,10 +103,6 @@ public class PPusher extends PObject implements ConnectionListener {
         return WidgetType.PUSHER;
     }
 
-    public void newCommand(final com.ponysdk.core.command.Command<?> command) {
-        command.execute();
-    }
-
     public UIContext getUiContext() {
         return uiContext;
     }
@@ -115,12 +111,29 @@ public class PPusher extends PObject implements ConnectionListener {
         return txnContext;
     }
 
+    public void begin() {
+        uiContext.acquire();
+        UIContext.setCurrent(uiContext);
+    }
+
+    public void end() {
+        UIContext.remove();
+        uiContext.release();
+    }
+
     @Override
     public void onClientData(final JSONObject event) throws JSONException {
         if (event.has(PROPERTY.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             txnContext.switchToPollingMode();
-            onOpen();
+
+            begin();
+            try {
+                doOpen();
+            } finally {
+                end();
+            }
+
         } else if (event.has(PROPERTY.POLL)) {
             txnContext.flushNow();
         }
@@ -145,8 +158,7 @@ public class PPusher extends PObject implements ConnectionListener {
         }
 
         if (UIContext.get() == null) {
-            uiContext.acquire();
-            UIContext.setCurrent(uiContext);
+            begin();
             try {
                 if (listenerCollection.isEmpty()) return;
                 final Txn txn = Txn.get();
@@ -161,8 +173,7 @@ public class PPusher extends PObject implements ConnectionListener {
                     txn.rollback();
                 }
             } finally {
-                UIContext.remove();
-                uiContext.release();
+                end();
             }
         } else {
             if (listenerCollection.isEmpty()) return;
@@ -175,79 +186,73 @@ public class PPusher extends PObject implements ConnectionListener {
 
     @Override
     public void onClose() {
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
+        begin();
         try {
             final Txn txn = Txn.get();
             txn.begin(txnContext);
             try {
-                pusherState = PusherState.STOPPED;
-
-                for (final ConnectionListener listener : connectionListeners) {
-                    listener.onClose();
-                }
+                doClose();
                 txn.commit();
             } catch (final Exception e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
         } finally {
-            UIContext.remove();
-            uiContext.release();
+            end();
         }
 
     }
 
     @Override
     public void onOpen() {
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
+        begin();
         try {
             final Txn txn = Txn.get();
             txn.begin(txnContext);
             try {
-                pusherState = PusherState.STARTED;
-
-                PusherCommandExecutor.execute(this, new PCommand() {
-
-                    @Override
-                    public void execute() {
-                        for (final ConnectionListener listener : connectionListeners) {
-                            listener.onOpen();
-                        }
-                    }
-                });
+                doOpen();
                 txn.commit();
             } catch (final Exception e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
         } finally {
-            UIContext.remove();
-            uiContext.release();
+            end();
+        }
+    }
+
+    public void doOpen() {
+        pusherState = PusherState.STARTED;
+        for (final ConnectionListener listener : connectionListeners) {
+            listener.onOpen();
+        }
+    }
+
+    public void doClose() {
+        pusherState = PusherState.STOPPED;
+        for (final ConnectionListener listener : connectionListeners) {
+            listener.onClose();
         }
     }
 
     public void execute(final PCommand command) {
         if (UIContext.get() == null) {
-            uiContext.acquire();
-            UIContext.setCurrent(uiContext);
+            begin();
             try {
                 final Txn txn = Txn.get();
                 txn.begin(txnContext);
                 try {
-                    PusherCommandExecutor.execute(this, command);
+                    command.execute();
                     txn.commit();
                 } catch (final Exception e) {
                     log.error("Cannot process open socket", e);
                     txn.rollback();
                 }
             } finally {
-                UIContext.remove();
-                uiContext.release();
+                end();
             }
         } else {
-            PusherCommandExecutor.execute(this, command);
+            command.execute();
         }
     }
 

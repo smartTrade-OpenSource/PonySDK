@@ -79,9 +79,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.5.0'
-	gwt 'com.google.gwt:gwt-dev:2.5.0'
-	gwt 'com.google.gwt:gwt-codeserver:2.5.0'
+	gwt 'com.google.gwt:gwt-user:2.5.1'
+	gwt 'com.google.gwt:gwt-dev:2.5.1'
+	gwt 'com.google.gwt:gwt-codeserver:2.5.1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
 	spring 'org.springframework:spring-context:3.0.6.RELEASE'
@@ -215,10 +215,12 @@ task generate(dependsOn: generateDictionnary) {
 
 
 task compileTerminal << {
-	def result = System.getProperty('nogwtc', 'false')
-	println('nogwtc ? ' + result)
-	if(result == 'true') {
+	def result = System.getProperty('gwtc', 'true')
+	println('gwtc ? ' + result)
+	if(result == 'false') {
 		println('[WARN] terminal compilation disabled');
+	} else if(result == 'devmode') {
+		tasks.devmode.execute();
 	} else {
 		tasks.gwtc.execute();
 	}
@@ -244,6 +246,29 @@ task gwtc(type: JavaExec) {
 		'-localWorkers',
 		Runtime.getRuntime().availableProcessors(),
 		'com.ponysdk.ui.PonyTerminal'
+	]
+}
+
+task devmode(type: JavaExec) {
+	description = 'GWT compile'
+	main = 'com.google.gwt.dev.Compiler'
+	maxHeapSize = '512M'
+	workingDir = buildDir
+	inputs.dir file(srcTerminal)
+	classpath {
+		[
+			sourceSets.main.java.srcDirs,
+			sourceSets.main.output,
+			configurations.gwt
+		]
+	}
+	args = [
+		'-XenableClosureCompiler',
+		'-war',
+		'gwt',
+		'-localWorkers',
+		Runtime.getRuntime().availableProcessors(),
+		'com.ponysdk.ui.PonyTerminalDevMode'
 	]
 }
 

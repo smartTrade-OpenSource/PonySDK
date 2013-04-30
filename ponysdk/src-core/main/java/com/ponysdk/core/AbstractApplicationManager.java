@@ -60,6 +60,7 @@ public abstract class AbstractApplicationManager {
             final UIContext uiContext = new UIContext(application);
             application.registerUIContext(uiContext);
             UIContext.setCurrent(uiContext);
+
             try {
                 final Txn txn = Txn.get();
                 txn.begin(new TxnContextHttp(true, request, response));
@@ -124,6 +125,7 @@ public abstract class AbstractApplicationManager {
                     for (final JSONObject jsoObject : datas) {
                         process(uiContext, jsoObject);
                     }
+
                 }
 
                 txn.commit();
@@ -147,6 +149,7 @@ public abstract class AbstractApplicationManager {
             return null;
         }
         return receivedSeqNum;
+
     }
 
     private void printClientErrorMessage(final JSONObject data) {
@@ -158,7 +161,7 @@ public abstract class AbstractApplicationManager {
                 final String details = jsoObject.getString("details");
                 log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
             }
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             log.error("Failed to display errors", e);
         }
     }

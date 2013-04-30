@@ -15,7 +15,7 @@ import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 
-public class TxnSocketContext implements TxnContext {
+public class TxnSocketContext implements TxnContext, TxnListener {
 
     private static final Logger log = LoggerFactory.getLogger(TxnSocketContext.class);
 
@@ -44,20 +44,8 @@ public class TxnSocketContext implements TxnContext {
 
     @Override
     public void flush() throws Exception {
-        if (polling) {
-            final long timeElapsed = System.currentTimeMillis() - lastPoll;
-            if (timeElapsed > maxIdleTime) {
-                log.error(TimeUnit.MILLISECONDS.toSeconds(timeElapsed) + " seconds elapsed since last poll. Closing session.");
-                instructions.clear();
-                PPusher.get().onClose();
-                PPusher.get().getUiContext().getSession().invalidate();
-                return;
-            }
-            if (!flushNow) return;
-        }
+        if (polling) return;
 
-        flushNow = false;
-        lastPoll = System.currentTimeMillis();
         if (instructions.isEmpty()) return;
         final JSONObject data = new JSONObject();
         data.put(APPLICATION.INSTRUCTIONS, instructions);
@@ -79,10 +67,41 @@ public class TxnSocketContext implements TxnContext {
 
     public void flushNow() {
         flushNow = true;
+        Txn.get().addTnxListener(this);
     }
 
     @Override
     public void clear() {
         instructions.clear();
     }
+
+    @Override
+    public void beforeCommit() {}
+
+    @Override
+    public void beforeFlush(final TxnContext txnContext) {
+        final long timeElapsed = System.currentTimeMillis() - lastPoll;
+        if (timeElapsed > maxIdleTime) {
+            log.error(TimeUnit.MILLISECONDS.toSeconds(timeElapsed) + " seconds elapsed since last poll. Closing session.");
+            instructions.clear();
+            PPusher.get().doClose();
+            PPusher.get().getUiContext().getSession().invalidate();
+            return;
+        }
+        if (!flushNow) return;
+
+        flushNow = false;
+        lastPoll = System.currentTimeMillis();
+
+        for (final Instruction instruction : instructions) {
+            Txn.get().getTxnContext().save(instruction);
+        }
+        instructions.clear();
+    }
+
+    @Override
+    public void beforeRollback() {}
+
+    @Override
+    public void afterFlush(final TxnContext txnContext) {}
 }
