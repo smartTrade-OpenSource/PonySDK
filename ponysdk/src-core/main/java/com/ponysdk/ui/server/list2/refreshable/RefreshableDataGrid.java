@@ -98,6 +98,15 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
 
         } else {
+
+            final D previousData = valueByKey.remove(key);
+            final int previousIndex = rows.indexOf(previousData);
+            keyByValue.remove(previousData);
+            rows.remove(previousIndex);
+            rows.add(previousIndex, data);
+            valueByKey.put(key, data);
+            keyByValue.put(data, key);
+
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
                 final Object value = d.getValueProvider().getValue(data);
@@ -109,14 +118,22 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public void removeByKey(final K key) {
-        final D removed = valueByKey.remove(key);
-        if (removed != null) {
-            final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.remove(key);
-            if (map == null) return;
-            final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
-            keyByValue.remove(cell.value);
-            super.remove(removed);
+        super.remove(valueByKey.get(key));
+    }
+
+    @Override
+    public void remove(final int index) {
+        final D d = rows.get(index);
+
+        super.remove(index);
+
+        final K k = keyByValue.remove(d);
+        if (k != null) {
+            valueByKey.remove(k);
+            cells.remove(k);
         }
+
+        updateRowIndex(index);
     }
 
     public void moveRow(final K key, final int beforeIndex) {
@@ -133,7 +150,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         rows.add(beforeIndex, cell.data);
 
         final int min = Math.min(row, beforeIndex);
+        updateRowIndex(min);
+    }
 
+    private void updateRowIndex(final int min) {
         // update model
         for (int i = min; i < rows.size(); i++) {
             final K k = keyByValue.get(rows.get(i));
