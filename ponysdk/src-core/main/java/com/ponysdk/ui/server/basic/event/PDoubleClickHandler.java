@@ -21,25 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.server.basic.event;
 
-public enum DomHandlerType {
-    CLICK, //
-    DOUBLE_CLICK, //
-    MOUSE_OVER, //
-    KEY_PRESS, //
-    KEY_UP, //
-    MOUSE_OUT, //
-    MOUSE_DOWN, //
-    MOUSE_UP, //
-    FOCUS, //
-    BLUR, //
-    DRAG_ENTER, //
-    DRAG_END, //
-    DRAG_START, //
-    DRAG_LEAVE, //
-    DRAG_OVER, //
-    DROP, //
-    CONTEXT_MENU, //
-    CHANGE_HANDLER;
+import com.ponysdk.core.event.EventHandler;
+
+public interface PDoubleClickHandler extends EventHandler {
+
+    void onDoubleClick(PDoubleClickEvent event);
 }

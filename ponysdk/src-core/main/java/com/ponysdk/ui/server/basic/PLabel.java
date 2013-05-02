@@ -30,8 +30,11 @@ import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
+import com.ponysdk.ui.server.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
+import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
 import com.ponysdk.ui.server.basic.event.PDragEndEvent;
 import com.ponysdk.ui.server.basic.event.PDragEndHandler;
 import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
@@ -55,7 +58,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * <li>.gwt-Label { }</li>
  * </ul>
  */
-public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPAllDragAndDropHandlers {
+public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
     private final TxnString text = new TxnString();
 
@@ -101,6 +104,16 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     @Override
     public Collection<PClickHandler> getClickHandlers() {
         return getHandlerSet(PClickEvent.TYPE, this);
+    }
+
+    @Override
+    public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
+        return addDomHandler(handler, PDoubleClickEvent.TYPE);
+    }
+
+    @Override
+    public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
+        return getHandlerSet(PDoubleClickEvent.TYPE, this);
     }
 
     @Override

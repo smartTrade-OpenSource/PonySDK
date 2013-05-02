@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -67,10 +67,10 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
     }
 
     @Override
-    protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
+    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         if (!enabledOnRequest) uiObject.setEnabled(false);
         if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
-        super.triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
+        super.triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
     }
 
 }

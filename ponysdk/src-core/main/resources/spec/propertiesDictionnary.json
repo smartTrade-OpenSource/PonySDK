@@ -140,6 +140,9 @@
 		"keyFilter": [],
 		"clientX": [],
 		"clientY": [],
+		"x": [],
+		"y": [],
+		"nativeButton": [],
 		"sourceAbsoluteLeft": [],
 		"sourceAbsoluteTop": [],
 		"sourceOffsetHeight": [],
@@ -224,6 +227,7 @@
 		"url": [],
 		"features": [],
 		"data": [],
+		"disableEvent": [],
 		"widgetHidden": []
 	}
 	

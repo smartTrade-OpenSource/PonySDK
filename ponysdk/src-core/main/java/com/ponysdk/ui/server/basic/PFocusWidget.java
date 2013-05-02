@@ -31,12 +31,15 @@ import com.ponysdk.core.stm.TxnObject;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
+import com.ponysdk.ui.server.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.ui.server.basic.event.HasPFocusHandlers;
 import com.ponysdk.ui.server.basic.event.HasPMouseOverHandlers;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PBlurHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
+import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
@@ -50,7 +53,7 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
+public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private final TxnBoolean enabled = new TxnBoolean(Boolean.TRUE);
     private final TxnBoolean enabledOnRequest = new TxnBoolean();
@@ -159,6 +162,29 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
         }
+    }
+
+    @Override
+    public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
+        if (showLoadingOnRequest.get() || !enabledOnRequest.get()) {
+            final PDoubleClickHandler clickHandler = new PDoubleClickHandler() {
+
+                @Override
+                public void onDoubleClick(final PDoubleClickEvent event) {
+                    handler.onDoubleClick(event);
+                    saveUpdate(PROPERTY.END_OF_PROCESSING, true);
+                }
+            };
+
+            return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);
+        } else {
+            return addDomHandler(handler, PDoubleClickEvent.TYPE);
+        }
+    }
+
+    @Override
+    public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
+        return getHandlerSet(PDoubleClickEvent.TYPE, this);
     }
 
     @Override

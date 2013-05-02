@@ -51,7 +51,9 @@ import com.ponysdk.core.stm.TxnString;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PContextMenuEvent;
 import com.ponysdk.ui.server.basic.event.PDomEvent;
+import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
 import com.ponysdk.ui.server.basic.event.PDragEndEvent;
 import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
 import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
@@ -62,6 +64,7 @@ import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PMouseDownEvent;
+import com.ponysdk.ui.server.basic.event.PMouseEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseUpEvent;
@@ -82,6 +85,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     protected Object data;
 
     private final Set<String> styleNames = new HashSet<String>();
+    private final Set<PEvent> disabledEvents = new HashSet<PEvent>();
 
     private EventBus domHandler;
 
@@ -169,6 +173,14 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
 
     public void setStylePrimaryName(final String stylePrimaryName) {
         this.stylePrimaryName.set(stylePrimaryName);
+    }
+
+    public void disableEvent(final PEvent e) {
+        if (disabledEvents.add(e)) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.DISABLE_EVENT, e.getCode());
+            Txn.get().getTxnContext().save(update);
+        }
     }
 
     public void addStyleName(final String styleName) {
@@ -293,32 +305,28 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
                     fireEvent(new PKeyUpEvent(this, instruction.getInt(PROPERTY.VALUE)));
                     break;
                 case CLICK:
-                    final PClickEvent event = new PClickEvent(this);
-                    event.setClientX(instruction.getInt(PROPERTY.CLIENT_X));
-                    event.setClientY(instruction.getInt(PROPERTY.CLIENT_Y));
-                    event.setSourceAbsoluteLeft((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_LEFT));
-                    event.setSourceAbsoluteTop((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_TOP));
-                    event.setSourceOffsetHeight((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_HEIGHT));
-                    event.setSourceOffsetWidth((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_WIDTH));
-                    fireEvent(event);
+                    fireMouseEvent(instruction, new PClickEvent(this));
+                    break;
+                case DOUBLE_CLICK:
+                    fireMouseEvent(instruction, new PDoubleClickEvent(this));
                     break;
                 case MOUSE_OVER:
-                    fireEvent(new PMouseOverEvent(this));
+                    fireMouseEvent(instruction, new PMouseOverEvent(this));
+                    break;
+                case MOUSE_OUT:
+                    fireMouseEvent(instruction, new PMouseOutEvent(this));
+                    break;
+                case MOUSE_DOWN:
+                    fireMouseEvent(instruction, new PMouseDownEvent(this));
+                    break;
+                case MOUSE_UP:
+                    fireMouseEvent(instruction, new PMouseUpEvent(this));
                     break;
                 case FOCUS:
                     fireEvent(new PFocusEvent(this));
                     break;
                 case BLUR:
                     fireEvent(new PBlurEvent(this));
-                    break;
-                case MOUSE_OUT:
-                    fireEvent(new PMouseOutEvent(this));
-                    break;
-                case MOUSE_DOWN:
-                    fireEvent(new PMouseDownEvent(this));
-                    break;
-                case MOUSE_UP:
-                    fireEvent(new PMouseUpEvent(this));
                     break;
                 case DRAG_START:
                     fireEvent(new PDragStartEvent(this));
@@ -343,6 +351,9 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
                     }
                     fireEvent(dropEvent);
                     break;
+                case CONTEXT_MENU:
+                    fireEvent(new PContextMenuEvent(this));
+                    break;
                 default:
                     log.error("Dom Handler not implemented: " + domHandler);
                     break;
@@ -359,6 +370,19 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
 
     protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
         return ensureDomHandler().getHandlerSet(type, null);
+    }
+
+    public void fireMouseEvent(final JSONObject instruction, final PMouseEvent<?> event) throws JSONException {
+        event.setX(instruction.getInt(PROPERTY.X));
+        event.setY(instruction.getInt(PROPERTY.Y));
+        event.setNativeButton(instruction.getInt(PROPERTY.NATIVE_BUTTON));
+        event.setClientX(instruction.getInt(PROPERTY.CLIENT_X));
+        event.setClientY(instruction.getInt(PROPERTY.CLIENT_Y));
+        event.setSourceAbsoluteLeft((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_LEFT));
+        event.setSourceAbsoluteTop((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_TOP));
+        event.setSourceOffsetHeight((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_HEIGHT));
+        event.setSourceOffsetWidth((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_WIDTH));
+        ensureDomHandler().fireEvent(event);
     }
 
     public void fireEvent(final Event<?> event) {

@@ -143,7 +143,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
         final int row = cell.row;
 
-        view.moveRow(row, beforeIndex);
+        view.moveRow((row + 1), (beforeIndex + 1));
 
         // permutation
         rows.remove(row);

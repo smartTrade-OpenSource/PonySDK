@@ -23,12 +23,19 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.DragEndEvent;
 import com.google.gwt.event.dom.client.DragEndHandler;
 import com.google.gwt.event.dom.client.DragEnterEvent;
@@ -49,6 +56,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -58,6 +66,7 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -70,6 +79,8 @@ import com.ponysdk.ui.terminal.instruction.PTInstruction;
 public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
+
+    private final Set<Integer> preventedEvents = new HashSet<Integer>();
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
@@ -99,6 +110,15 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     }
 
     @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.DISABLE_EVENT)) {
+            preventedEvents.add(update.getInt(PROPERTY.DISABLE_EVENT));
+        } else {
+            super.update(update, uiService);
+        }
+    }
+
+    @Override
     public Widget asWidget(final Long objectID, final UIService uiService) {
         return ((PTWidget<?>) uiService.getPTObject(objectID)).cast();
     }
@@ -109,20 +129,25 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     // return uiObject;
     // }
 
-    protected void triggerOnClick(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final ClickEvent event) {
+    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(PROPERTY.CLIENT_X, event.getClientX());
         eventInstruction.put(PROPERTY.CLIENT_Y, event.getClientY());
+        eventInstruction.put(PROPERTY.X, event.getX());
+        eventInstruction.put(PROPERTY.Y, event.getY());
+        eventInstruction.put(PROPERTY.NATIVE_BUTTON, event.getNativeButton());
         eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
         eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
         uiService.sendDataToServer(eventInstruction);
+        preventEvent(event);
     }
 
-    protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService) {
+    protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         uiService.sendDataToServer(eventInstruction);
+        preventEvent(event);
     }
 
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
@@ -154,6 +179,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             // eventInstruction.setMainProperty(main);
             uiService.sendDataToServer(eventInstruction);
         }
+
+        preventEvent(event);
     }
 
     private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService) {
@@ -165,47 +192,36 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onClick(final ClickEvent event) {
-                        triggerOnClick(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
                     }
 
                 }, ClickEvent.getType());
+                break;
+            case DOUBLE_CLICK:
+                widget.addDomHandler(new DoubleClickHandler() {
+
+                    @Override
+                    public void onDoubleClick(final DoubleClickEvent event) {
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                    }
+                }, DoubleClickEvent.getType());
                 break;
             case MOUSE_OVER:
                 widget.addDomHandler(new MouseOverHandler() {
 
                     @Override
                     public void onMouseOver(final MouseOverEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
                     }
 
                 }, MouseOverEvent.getType());
-                break;
-            case BLUR:
-                widget.addDomHandler(new BlurHandler() {
-
-                    @Override
-                    public void onBlur(final BlurEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
-                    }
-
-                }, BlurEvent.getType());
-                break;
-            case FOCUS:
-                widget.addDomHandler(new FocusHandler() {
-
-                    @Override
-                    public void onFocus(final FocusEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
-                    }
-
-                }, FocusEvent.getType());
                 break;
             case MOUSE_OUT:
                 widget.addDomHandler(new MouseOutHandler() {
 
                     @Override
                     public void onMouseOut(final MouseOutEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
                     }
 
                 }, MouseOutEvent.getType());
@@ -215,7 +231,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseDown(final MouseDownEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
                     }
 
                 }, MouseDownEvent.getType());
@@ -225,10 +241,30 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseUp(final MouseUpEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
                     }
 
                 }, MouseUpEvent.getType());
+                break;
+            case BLUR:
+                widget.addDomHandler(new BlurHandler() {
+
+                    @Override
+                    public void onBlur(final BlurEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                    }
+
+                }, BlurEvent.getType());
+                break;
+            case FOCUS:
+                widget.addDomHandler(new FocusHandler() {
+
+                    @Override
+                    public void onFocus(final FocusEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                    }
+
+                }, FocusEvent.getType());
                 break;
             case KEY_PRESS:
                 widget.addDomHandler(new KeyPressHandler() {
@@ -273,6 +309,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 uiService.stackInstrution(eventInstruction);
                                 uiService.flushEvents();
                             }
+                            preventEvent(event);
                         }
                     });
                 } else {
@@ -297,6 +334,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 uiService.sendDataToServer(eventInstruction);
                                 uiService.flushEvents();
                             }
+                            preventEvent(event);
                         }
                     }, KeyUpEvent.getType());
                 }
@@ -309,7 +347,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     public void onDragStart(final DragStartEvent event) {
                         event.setData("text", Long.toString(addHandler.getObjectID()));
                         event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
                     }
                 }, DragStartEvent.getType());
                 break;
@@ -318,7 +356,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragEnd(final DragEndEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
                     }
                 }, DragEndEvent.getType());
                 break;
@@ -327,7 +365,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragEnter(final DragEnterEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
                     }
                 }, DragEnterEvent.getType());
                 break;
@@ -336,7 +374,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragLeave(final DragLeaveEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService);
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
                     }
                 }, DragLeaveEvent.getType());
                 break;
@@ -362,9 +400,25 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     }
                 }, DropEvent.getType());
                 break;
+            case CONTEXT_MENU:
+                widget.addDomHandler(new ContextMenuHandler() {
+
+                    @Override
+                    public void onContextMenu(final ContextMenuEvent event) {
+                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                    }
+                }, ContextMenuEvent.getType());
+                break;
             default:
                 log.info("Handler not supported #" + h);
                 break;
+        }
+    }
+
+    protected void preventEvent(final DomEvent<?> event) {
+        final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
+        if (preventedEvents.contains(typeInt)) {
+            event.preventDefault();
         }
     }
 }
