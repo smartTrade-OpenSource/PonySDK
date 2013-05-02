@@ -71,7 +71,7 @@ public class HTMLPageActivity extends SamplePageActivity {
         });
 
         final PHTML htmlWithContextMenu = new PHTML("<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
-        htmlWithContextMenu.disableEvent(PEvent.ONCONTEXTMENU);
+        htmlWithContextMenu.preventEvent(PEvent.ONCONTEXTMENU);
         htmlWithContextMenu.addDomHandler(new PContextMenuHandler() {
 
             @Override

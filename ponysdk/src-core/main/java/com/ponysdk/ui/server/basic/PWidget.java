@@ -85,7 +85,8 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     protected Object data;
 
     private final Set<String> styleNames = new HashSet<String>();
-    private final Set<PEvent> disabledEvents = new HashSet<PEvent>();
+    private final Set<PEvent> preventEvents = new HashSet<PEvent>();
+    private final Set<PEvent> stopEvents = new HashSet<PEvent>();
 
     private EventBus domHandler;
 
@@ -175,10 +176,18 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         this.stylePrimaryName.set(stylePrimaryName);
     }
 
-    public void disableEvent(final PEvent e) {
-        if (disabledEvents.add(e)) {
+    public void preventEvent(final PEvent e) {
+        if (preventEvents.add(e)) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.DISABLE_EVENT, e.getCode());
+            update.put(PROPERTY.PREVENT_EVENT, e.getCode());
+            Txn.get().getTxnContext().save(update);
+        }
+    }
+
+    public void stopEvent(final PEvent e) {
+        if (stopEvents.add(e)) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.STOP_EVENT, e.getCode());
             Txn.get().getTxnContext().save(update);
         }
     }

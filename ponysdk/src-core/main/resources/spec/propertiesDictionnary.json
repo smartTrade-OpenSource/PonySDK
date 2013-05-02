@@ -227,7 +227,8 @@
 		"url": [],
 		"features": [],
 		"data": [],
-		"disableEvent": [],
+		"preventEvent": [],
+		"stopEvent": [],
 		"widgetHidden": []
 	}
 	

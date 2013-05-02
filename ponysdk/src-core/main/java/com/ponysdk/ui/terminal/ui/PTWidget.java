@@ -81,6 +81,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
     private final Set<Integer> preventedEvents = new HashSet<Integer>();
+    private final Set<Integer> stoppedEvents = new HashSet<Integer>();
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
@@ -111,8 +112,10 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.DISABLE_EVENT)) {
-            preventedEvents.add(update.getInt(PROPERTY.DISABLE_EVENT));
+        if (update.containsKey(PROPERTY.PREVENT_EVENT)) {
+            preventedEvents.add(update.getInt(PROPERTY.PREVENT_EVENT));
+        } else if (update.containsKey(PROPERTY.STOP_EVENT)) {
+            stoppedEvents.add(update.getInt(PROPERTY.STOP_EVENT));
         } else {
             super.update(update, uiService);
         }
@@ -141,13 +144,13 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
         uiService.sendDataToServer(eventInstruction);
-        preventEvent(event);
+        preventOrStopEvent(event);
     }
 
     protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         uiService.sendDataToServer(eventInstruction);
-        preventEvent(event);
+        preventOrStopEvent(event);
     }
 
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
@@ -180,7 +183,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             uiService.sendDataToServer(eventInstruction);
         }
 
-        preventEvent(event);
+        preventOrStopEvent(event);
     }
 
     private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService) {
@@ -309,7 +312,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 uiService.stackInstrution(eventInstruction);
                                 uiService.flushEvents();
                             }
-                            preventEvent(event);
+                            preventOrStopEvent(event);
                         }
                     });
                 } else {
@@ -334,7 +337,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 uiService.sendDataToServer(eventInstruction);
                                 uiService.flushEvents();
                             }
-                            preventEvent(event);
+                            preventOrStopEvent(event);
                         }
                     }, KeyUpEvent.getType());
                 }
@@ -415,10 +418,26 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
         }
     }
 
-    protected void preventEvent(final DomEvent<?> event) {
+    protected void preventOrStopEvent(final DomEvent<?> event) {
+        preventEvent(event);
+        stopEvent(event);
+    }
+
+    private void preventEvent(final DomEvent<?> event) {
+        if (preventedEvents.isEmpty()) return;
+
         final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
         if (preventedEvents.contains(typeInt)) {
             event.preventDefault();
+        }
+    }
+
+    private void stopEvent(final DomEvent<?> event) {
+        if (stoppedEvents.isEmpty()) return;
+
+        final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
+        if (stoppedEvents.contains(typeInt)) {
+            event.stopPropagation();
         }
     }
 }
