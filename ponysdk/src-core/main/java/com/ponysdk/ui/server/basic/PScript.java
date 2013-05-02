@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +102,17 @@ public abstract class PScript extends PObject {
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, id);
         Txn.get().getTxnContext().save(update);
+    }
+
+    public void executeDeffered(final String js, final int delay, final TimeUnit unit) {
+        final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
+
+            @Override
+            protected void run() {
+                PScript.get().execute(js);
+            }
+        };
+        command.schedule(unit.toMillis(delay));
     }
 
     @Override

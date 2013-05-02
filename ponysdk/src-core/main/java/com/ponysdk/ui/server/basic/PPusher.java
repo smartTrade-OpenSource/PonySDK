@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.json.JSONException;
@@ -149,6 +150,44 @@ public class PPusher extends PObject implements ConnectionListener {
 
     public void addDataListener(final DataListener listener) {
         listenerCollection.register(listener);
+    }
+
+    public void pushBatchToClient(final Collection<Object> collection) {
+        if (pusherState != PusherState.STARTED) {
+            if (log.isDebugEnabled()) log.debug("Pusher not started. Skipping message #" + collection);
+            return;
+        }
+
+        if (UIContext.get() == null) {
+            begin();
+            try {
+                if (listenerCollection.isEmpty()) return;
+                final Txn txn = Txn.get();
+                txn.begin(txnContext);
+                try {
+                    for (final Object data : collection) {
+                        for (final DataListener listener : listenerCollection) {
+                            listener.onData(data);
+                        }
+                    }
+
+                    txn.commit();
+                } catch (final Exception e) {
+                    log.error("Cannot process open socket", e);
+                    txn.rollback();
+                }
+            } finally {
+                end();
+            }
+        } else {
+            if (listenerCollection.isEmpty()) return;
+
+            for (final Object data : collection) {
+                for (final DataListener listener : listenerCollection) {
+                    listener.onData(data);
+                }
+            }
+        }
     }
 
     public void pushToClient(final Object data) {

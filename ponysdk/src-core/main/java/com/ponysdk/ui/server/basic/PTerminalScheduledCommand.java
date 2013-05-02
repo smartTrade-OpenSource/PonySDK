@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.instruction.Update;
@@ -37,7 +38,11 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public abstract class PTerminalScheduledCommand extends PObject {
 
-    public void schedule(final int delayMillis) {
+    public void schedule(final long delay, final TimeUnit unit) {
+        schedule(unit.toMillis(delay));
+    }
+
+    public void schedule(final long delayMillis) {
         final List<Instruction> stacker = new ArrayList<Instruction>();
         final List<Instruction> mainStacker = Txn.get().getTxnContext().setCurrentStacker(stacker);
         try {
