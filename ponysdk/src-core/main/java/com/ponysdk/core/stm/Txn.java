@@ -18,6 +18,7 @@ public class Txn {
     private static ThreadLocal<Txn> transactions = new ThreadLocal<Txn>();
 
     private final List<TxnListener> txnListnener = new ArrayList<TxnListener>();
+    private final List<ClientLoopListener> clientLoopListnener = new ArrayList<ClientLoopListener>();
 
     private final Set<TxnObject<?>> txnObjects = new LinkedHashSet<TxnObject<?>>();
 
@@ -46,6 +47,7 @@ public class Txn {
     public void commit() {
         final Txn txn = transactions.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
+        fireClientLoopEnd();
         fireBeforeCommit();
         for (final TxnObject<?> txnObject : txnObjects) {
             txnObject.commit();
@@ -91,8 +93,18 @@ public class Txn {
         return txnContext;
     }
 
-    void addTnxListener(final TxnListener txnListener) {
+    public void addTnxListener(final TxnListener txnListener) {
         txnListnener.add(txnListener);
+    }
+
+    public void addClientLoopListener(final ClientLoopListener listener) {
+        clientLoopListnener.add(listener);
+    }
+
+    private void fireClientLoopEnd() {
+        for (final ClientLoopListener listener : clientLoopListnener) {
+            listener.onLoopEnd();
+        }
     }
 
     private void fireBeforeCommit() {
