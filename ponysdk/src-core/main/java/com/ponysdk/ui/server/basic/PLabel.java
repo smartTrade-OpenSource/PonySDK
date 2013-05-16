@@ -44,6 +44,7 @@ import com.ponysdk.ui.server.basic.event.PDragStartHandler;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
+import com.ponysdk.ui.server.utils.E;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -76,7 +77,9 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
 
     @Override
     public void setText(final String text) {
-        if (text == null) return;
+        if (text == null) return; // ??
+        if (E.quals(text, this.text)) return;
+
         this.text = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);

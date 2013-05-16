@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.server.utils.E;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -68,6 +69,9 @@ public class PHTML extends PLabel implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
+
+        if (E.quals(html, this.html)) return;
+
         this.html = html;
         final Update update = new Update(getID());
         update.put(PROPERTY.HTML, html);

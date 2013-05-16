@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
+import com.ponysdk.ui.server.utils.E;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -56,6 +57,9 @@ public class PElement extends PComplexPanel {
     }
 
     public void setInnerHTML(final String innerHTML) {
+
+        if (E.quals(innerHTML, this.innerTxt)) return;
+
         this.innerTxt = innerHTML;
 
         final Update update = new Update(ID);
@@ -64,6 +68,9 @@ public class PElement extends PComplexPanel {
     }
 
     public void setInnerText(final String innerTxt) {
+
+        if (E.quals(innerTxt, this.innerTxt)) return;
+
         this.innerTxt = innerTxt;
 
         final Update update = new Update(ID);

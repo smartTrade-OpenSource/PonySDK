@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.server.utils.E;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
@@ -33,9 +34,10 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     private String html;
 
     @Override
-    public void setText(String text) {
-        if (text == null) text = "";
-        if (text.equals(this.text)) return;
+    public void setText(final String text) {
+
+        if (E.quals(text, this.text)) return;
+
         this.text = text;
 
         final Update update = new Update(ID);
@@ -50,6 +52,9 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
+
+        if (E.quals(html, this.html)) return;
+
         this.html = html;
         final Update update = new Update(ID);
         update.put(PROPERTY.HTML, html);
