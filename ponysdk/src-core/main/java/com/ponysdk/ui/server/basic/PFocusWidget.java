@@ -105,6 +105,8 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     public void setEnabled(final boolean enabled) {
+        if (this.enabled == enabled) return;
+
         this.enabled = enabled;
         final Update update = new Update(getID());
         update.put(PROPERTY.ENABLED, enabled);
@@ -135,6 +137,8 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
 
     @Override
     public void setFocus(final boolean focused) {
+        if (this.focused == focused) return;
+
         this.focused = focused;
         final Update update = new Update(getID());
         update.put(PROPERTY.FOCUSED, focused);

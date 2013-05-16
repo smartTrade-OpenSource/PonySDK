@@ -77,8 +77,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         }
 
         @Override
-        public void onClose(final int arg0, final String arg1) {
-            log.info("Connection lost from: " + connection.toString());
+        public void onClose(final int closeCode, final String message) {
+            log.info("Connection lost from: " + connection.toString() + ". Code: " + closeCode + ". Message: " + message);
             uiContext.acquire();
             try {
                 UIContext.setCurrent(uiContext);

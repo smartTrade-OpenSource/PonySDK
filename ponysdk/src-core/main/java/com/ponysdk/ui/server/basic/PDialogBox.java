@@ -64,7 +64,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
     private String caption;
 
     public PDialogBox() {
-        super(false);
+        this(false);
     }
 
     public PDialogBox(final boolean autoHide) {

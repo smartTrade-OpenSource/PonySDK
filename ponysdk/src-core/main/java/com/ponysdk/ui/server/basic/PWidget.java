@@ -74,7 +74,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     protected PWidget parent;
 
-    private boolean visible = true;
+    protected boolean visible = true;
 
     protected Object data;
 
@@ -86,7 +86,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private final Map<String, String> elementProperties = new HashMap<String, String>();
     private final Map<String, String> elementAttributes = new HashMap<String, String>();
-    
+
     private String title;
     private String width;
     private String height;
@@ -129,27 +129,40 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleProperty(final String name, final String value) {
-        styleProperties.put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STYLE_KEY, name);
-        update.put(PROPERTY.STYLE_VALUE, value);
-        getUIContext().stackInstruction(update);
+        final String previous = styleProperties.get(name);
+        if (previous == null || !previous.equals(value)) {
+            styleProperties.put(name, value);
+            final Update update = new Update(ID);
+            update.put(PROPERTY.STYLE_KEY, name);
+            update.put(PROPERTY.STYLE_VALUE, value);
+            getUIContext().stackInstruction(update);
+        }
+    }
+
+    public String getStyleProperty(final String name) {
+        return styleProperties.get(name);
     }
 
     public void setProperty(final String name, final String value) {
-        elementProperties.put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
-        update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
-        getUIContext().stackInstruction(update);
+        final String previous = elementProperties.get(name);
+        if (previous == null || !previous.equals(value)) {
+            elementProperties.put(name, value);
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
+            update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
+            getUIContext().stackInstruction(update);
+        }
     }
 
     public void setAttribute(final String name, final String value) {
-        elementAttributes.put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
-        update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
-        getUIContext().stackInstruction(update);
+        final String previous = elementAttributes.get(name);
+        if (previous == null || !previous.equals(value)) {
+            elementAttributes.put(name, value);
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
+            update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
+            getUIContext().stackInstruction(update);
+        }
     }
 
     public String getProperty(final String key) {
@@ -212,6 +225,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setVisible(final boolean visible) {
+        if (this.visible == visible) return;
+
         this.visible = visible;
         final Update update = new Update(ID);
         update.put(PROPERTY.WIDGET_VISIBLE, visible);

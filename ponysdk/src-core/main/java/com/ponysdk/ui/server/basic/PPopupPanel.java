@@ -104,6 +104,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public PPopupPanel(final boolean autoHide) {
         super();
+        this.visible = false;
         this.autoHide = autoHide;
 
         removeFromParent();
