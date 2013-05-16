@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,25 +59,18 @@ public class PPusher extends PObject implements ConnectionListener {
     private boolean polling = false;
     private PusherState pusherState = PusherState.STOPPED;
 
-    // In ms
-    private final int maxIdleTime;
-
-    private long lastPoll;
-
     public enum PusherState {
         STOPPED, INITIALIZING, STARTED
     }
 
-    private PPusher(final int pollingDelay, final int maxIdleTime, final int ping) {
+    private PPusher(final int pollingDelay, final int ping) {
         super();
 
         create.put(PROPERTY.FIXDELAY, pollingDelay);
         create.put(PROPERTY.PINGDELAY, ping);
 
-        this.maxIdleTime = maxIdleTime;
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();
-        this.lastPoll = System.currentTimeMillis();
     }
 
     public void initialize(final WebSocket websocket) {
@@ -86,16 +78,16 @@ public class PPusher extends PObject implements ConnectionListener {
         this.websocket.addConnectionListener(this);
     }
 
-    public static PPusher initialize(final int pollingDelay, final int maxIdleTime, final int ping) {
+    public static PPusher initialize(final int pollingDelay, final int ping) {
         if (UIContext.get() == null) throw new RuntimeException("It's not possible to instanciate a pusher in a new Thread.");
         if (UIContext.get().getAttribute(PUSHER) != null) return get();
-        final PPusher pusher = new PPusher(pollingDelay, maxIdleTime, ping);
+        final PPusher pusher = new PPusher(pollingDelay, ping);
         UIContext.get().setAttribute(PUSHER, pusher);
         return pusher;
     }
 
     public static PPusher initialize() {
-        return initialize(1000, 10 * 1000, 5 * 1000);
+        return initialize(1000, 5 * 1000);
     }
 
     public static PPusher get() {
@@ -125,14 +117,6 @@ public class PPusher extends PObject implements ConnectionListener {
         if (polling) {
             final Collection<Instruction> instructions = uiContext.clearPendingInstructions();
             updates.addAll(instructions);
-
-            final long timeElapsed = System.currentTimeMillis() - lastPoll;
-            if (timeElapsed > maxIdleTime) {
-                log.error(TimeUnit.MILLISECONDS.toSeconds(timeElapsed) + " seconds elapsed since last poll. Closing session.");
-                updates.clear();
-                onClose();
-                uiContext.getSession().invalidate();
-            }
             return;
         }
 
@@ -155,7 +139,6 @@ public class PPusher extends PObject implements ConnectionListener {
             }
             updates.clear();
         }
-        lastPoll = System.currentTimeMillis();
     }
 
     public PusherState getPusherState() {
