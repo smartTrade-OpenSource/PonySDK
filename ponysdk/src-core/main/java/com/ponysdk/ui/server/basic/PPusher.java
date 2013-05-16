@@ -69,10 +69,11 @@ public class PPusher extends PObject implements ConnectionListener {
         STOPPED, INITIALIZING, STARTED
     }
 
-    private PPusher(final int pollingDelay, final int maxIdleTime) {
+    private PPusher(final int pollingDelay, final int maxIdleTime, final int ping) {
         super();
 
         create.put(PROPERTY.FIXDELAY, pollingDelay);
+        create.put(PROPERTY.PINGDELAY, ping);
 
         this.maxIdleTime = maxIdleTime;
         this.pusherState = PusherState.INITIALIZING;
@@ -85,16 +86,16 @@ public class PPusher extends PObject implements ConnectionListener {
         this.websocket.addConnectionListener(this);
     }
 
-    public static PPusher initialize(final int pollingDelay, final int maxIdleTime) {
+    public static PPusher initialize(final int pollingDelay, final int maxIdleTime, final int ping) {
         if (UIContext.get() == null) throw new RuntimeException("It's not possible to instanciate a pusher in a new Thread.");
         if (UIContext.get().getAttribute(PUSHER) != null) return get();
-        final PPusher pusher = new PPusher(pollingDelay, maxIdleTime);
+        final PPusher pusher = new PPusher(pollingDelay, maxIdleTime, ping);
         UIContext.get().setAttribute(PUSHER, pusher);
         return pusher;
     }
 
     public static PPusher initialize() {
-        return initialize(1000, 10 * 1000);
+        return initialize(1000, 10 * 1000, 5 * 1000);
     }
 
     public static PPusher get() {
@@ -153,8 +154,8 @@ public class PPusher extends PObject implements ConnectionListener {
                 getUIContext().stackInstruction(instruction);
             }
             updates.clear();
-            lastPoll = System.currentTimeMillis();
         }
+        lastPoll = System.currentTimeMillis();
     }
 
     public PusherState getPusherState() {

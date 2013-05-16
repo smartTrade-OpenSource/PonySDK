@@ -23,14 +23,17 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.CommunicationEntryPoint;
+import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
@@ -88,6 +91,8 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
             @Override
             public void message(final String message) {
                 final JSONObject data = JSONParser.parseLenient(message).isObject();
+                if (data.containsKey(Dictionnary.APPLICATION.PING)) return;
+
                 uiService.update(data);
             }
 
@@ -105,6 +110,24 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
 
         log.info("Connecting to: " + wsServerURL);
         socketClient.connect(wsServerURL);
+
+        int ping = 1000;
+        if (create.containsKey(PROPERTY.PINGDELAY)) ping = create.getInt(PROPERTY.PINGDELAY);
+
+        if (ping > 0) {
+            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+                @Override
+                public boolean execute() {
+                    final int timeStamp = (int) (new Date().getTime() * .001);
+                    final JSONObject jso = new JSONObject();
+                    jso.put(Dictionnary.APPLICATION.PING, new JSONNumber(timeStamp));
+                    socketClient.send(jso.toString());
+                    return !hasCommunicationError;
+                }
+            }, ping);
+        }
+
     }
 
     @Override

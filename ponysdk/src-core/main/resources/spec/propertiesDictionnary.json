@@ -4,6 +4,7 @@
 			"start"
 		],
 		"viewId": [],
+		"ping": [],
 		"seqNum": [],
 		"errors": [],
 		"instructions": [],
@@ -107,6 +108,7 @@
 		"streamRequestId": [],
 		"repeatingDelay": [],
 		"fixdelay": [],
+		"pingdelay": [],
 		"multiselect": [],
 		"cellHorizontalAlignment": [],
 		"cellVerticalAlignment": [],
