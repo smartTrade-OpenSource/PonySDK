@@ -82,7 +82,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
             return;
         }
 
-        final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http:", "ws:") + "ws" + "?" + APPLICATION.VIEW_ID + "=" + UIBuilder.sessionID;
+        final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws" + "?" + APPLICATION.VIEW_ID + "=" + UIBuilder.sessionID;
 
         super.create(create, uiService);
 
