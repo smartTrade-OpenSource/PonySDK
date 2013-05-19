@@ -92,9 +92,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 cell.value = d.getValueProvider().getValue(data);
                 cell.w = d.getCellRenderer().render(row, cell.value);
                 map.put(d, cell);
-                view.addWidget(cell.w, cell.col, cell.row + 1);
+                view.addWidget(cell.w, cell.col, cell.row + 1, 1);
             }
-            view.addWidget(new PSimplePanel(), col, row + 1);
+            view.addWidget(new PSimplePanel(), col, row + 1, 1);
             view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
 
         } else {
@@ -153,7 +153,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         updateRowIndex(min);
     }
 
-    private void updateRowIndex(final int min) {
+    @Override
+    protected void updateRowIndex(final int min) {
         // update model
         for (int i = min; i < rows.size(); i++) {
             final K k = keyByValue.get(rows.get(i));

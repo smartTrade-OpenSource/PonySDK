@@ -29,7 +29,7 @@ public interface SimpleListView extends IsPWidget {
 
     void clearList();
 
-    void addWidget(IsPWidget widget, int column, int row);
+    void addWidget(IsPWidget widget, int column, int row, int colspan);
 
     void insertRow(int row);
 

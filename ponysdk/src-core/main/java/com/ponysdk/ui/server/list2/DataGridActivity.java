@@ -52,14 +52,14 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
-        view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0);
+        view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0, 1);
         addFillColumn();
     }
 
     protected void addFillColumn() {
         final PSimplePanel widget = new PSimplePanel();
         view.removeCellStyle(0, colCount - 1, PonySDKTheme.FILL_COLUMN);
-        view.addWidget(widget, colCount, 0);
+        view.addWidget(widget, colCount, 0, 1);
         view.addCellStyle(0, colCount, PonySDKTheme.FILL_COLUMN);
         view.addHeaderStyle(PonySDKTheme.COMPLEXLIST_COLUMNHEADER_COMPLEX);
     }
@@ -69,10 +69,21 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
         for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
             final IsPWidget renderCell = field.renderCell(row, data);
-            view.addWidget(renderCell, col++, row + 1);
+            view.addWidget(renderCell, col++, row + 1, 1);
         }
-        view.addWidget(new PSimplePanel(), col, row + 1);
+        view.addWidget(new PSimplePanel(), col, row + 1, 1);
         view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
+    }
+
+    protected void updateRowIndex(final int min) {
+        // update model
+        // for (int i = min; i < rows.size(); i++) {}
+    }
+
+    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
+        view.insertRow(row);
+        view.addWidget(widget, column, row, colSpan);
+        updateRowIndex(row);
     }
 
     public void insertSubList(final int row, final List<D> datas) {
@@ -87,9 +98,9 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             view.addRowStyle(subRow, PonySDKTheme.SIMPLELIST_SUBROW);
             int col = 0;
             for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
-                view.addWidget(field.renderSubCell(subRow, data), col++, subRow);
+                view.addWidget(field.renderSubCell(subRow, data), col++, subRow, 1);
             }
-            view.addWidget(new PSimplePanel(), col, subRow++);
+            view.addWidget(new PSimplePanel(), col, subRow++, 1);
         }
     }
 

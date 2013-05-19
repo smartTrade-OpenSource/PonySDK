@@ -30,12 +30,16 @@ import java.util.List;
 
 import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.ui.server.basic.DataListener;
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.celltable.SimpleTableView;
 import com.ponysdk.ui.server.list2.refreshable.Cell;
 import com.ponysdk.ui.server.list2.refreshable.RefreshableCellRenderer;
@@ -47,6 +51,7 @@ import com.ponysdk.ui.server.list2.valueprovider.IdentityValueProvider;
 public class RefreshableDataGridPageActivity extends SamplePageActivity implements DataListener {
 
     private SortableRefreshableDataGrid<Long, PonyStock> dataGrid;
+    private boolean ok = false;
 
     public RefreshableDataGridPageActivity() {
         super("Refreshable Data Grid", "Rich UI Components");
@@ -62,6 +67,18 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         final PFlexTable formContainer = new PFlexTable();
         final PSimplePanel listContainer = new PSimplePanel();
         layout.add(formContainer);
+
+        final PButton addRow = new PButton("add row");
+        addRow.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                ok = true;
+                dataGrid.insertRow(5, 0, 4, new PLabel("coucou pd"));
+            }
+        });
+
+        layout.add(addRow);
         layout.add(listContainer);
         scroll.setWidget(layout);
         examplePanel.setWidget(scroll);
@@ -164,6 +181,8 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         if (data instanceof PonyStock) {
             final PonyStock ponyStock = (PonyStock) data;
             dataGrid.setData(ponyStock.getId(), ponyStock);
+
+            System.err.println(dataGrid.getRow(ponyStock.getId()));
         }
     }
 
@@ -186,6 +205,11 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
 
         @Override
         public void setData(final K key, final D data) {
+
+            if (ok) {
+                dataGrid.getListView().remove(5);
+            }
+
             int previousIndex = keys.indexOf(key);
             if (previousIndex == -1) {
                 previousIndex = datas.size();
@@ -206,6 +230,10 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
                 getListView().moveRow(previousIndex + 1, newIndex + 1);
                 keys.remove(previousIndex);
                 keys.add(newIndex, key);
+            }
+
+            if (ok) {
+                dataGrid.insertRow(5, 0, 2, new PLabel("coucou pd " + System.currentTimeMillis()));
             }
         }
     }

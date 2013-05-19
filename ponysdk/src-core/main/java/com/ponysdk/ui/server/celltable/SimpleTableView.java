@@ -47,7 +47,7 @@ public class SimpleTableView extends SimpleTable implements SimpleListView {
 
     @Override
     public void insertRow(final int row) {
-        throw new IllegalAccessError("Not implemented");
+        insert(new PElement("tr"), row);
     }
 
     @Override

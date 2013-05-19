@@ -143,8 +143,8 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addWidget(final IsPWidget component, final int column, final int row) {
-        simpleListView.addWidget(component, column, row);
+    public void addWidget(final IsPWidget component, final int column, final int row, final int colspan) {
+        simpleListView.addWidget(component, column, row, colspan);
     }
 
     @Override
