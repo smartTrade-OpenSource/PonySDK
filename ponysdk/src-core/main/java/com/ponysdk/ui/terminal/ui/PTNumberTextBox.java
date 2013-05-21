@@ -117,6 +117,9 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         private boolean hasMin = false;
         private boolean hasMax = false;
 
+        private final int initialDelay = 200;
+        private int currentDelay = initialDelay;
+
         private int page = 10;
         private int decimal = 0;
         private BigDecimal min = new BigDecimal(0);
@@ -125,8 +128,6 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         private BigDecimal pagedStep = new BigDecimal(10);
 
         private final List<ValueChangeHandler> handlers = new ArrayList<ValueChangeHandler>();
-
-        private final RefreshCommand command;
 
         private class RefreshCommand implements RepeatingCommand {
 
@@ -140,11 +141,18 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 }
 
                 if (!timerScheduled) {
+                    // Timer cancelled, fire change
                     paged = false;
+                    currentDelay = initialDelay;
                     fire();
+                } else {
+                    // Re-schedule
+                    currentDelay -= 20;
+                    if (currentDelay < 10) currentDelay = 10;
+                    Scheduler.get().scheduleFixedDelay(new RefreshCommand(), currentDelay);
                 }
 
-                return timerScheduled;
+                return false;
             }
 
         }
@@ -173,8 +181,6 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             textBox.addKeyDownHandler(this);
             textBox.addKeyUpHandler(this);
             textBox.addValueChangeHandler(this);
-
-            command = new RefreshCommand();
 
             applyOptions(options);
         }
@@ -352,7 +358,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
                 if (trigger) {
                     timerScheduled = true;
-                    Scheduler.get().scheduleFixedDelay(command, 120);
+                    Scheduler.get().scheduleFixedDelay(new RefreshCommand(), initialDelay);
                 }
             }
         }
@@ -372,7 +378,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                     increment = false;
                 }
                 timerScheduled = true;
-                Scheduler.get().scheduleFixedDelay(command, 120);
+                Scheduler.get().scheduleFixedDelay(new RefreshCommand(), initialDelay);
             }
         }
 
