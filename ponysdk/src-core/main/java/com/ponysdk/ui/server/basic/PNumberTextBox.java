@@ -44,17 +44,17 @@ public class PNumberTextBox extends PTextBox {
 
         if (options.min != null) {
             min = options.min;
-            create.put(Dictionnary.PROPERTY.MIN, options.min);
+            create.put(Dictionnary.PROPERTY.MIN, String.valueOf(options.min));
         }
 
         if (options.max != null) {
             max = options.max;
-            create.put(Dictionnary.PROPERTY.MAX, options.max);
+            create.put(Dictionnary.PROPERTY.MAX, String.valueOf(options.max));
         }
 
         if (options.step != null) {
             step = options.step;
-            create.put(Dictionnary.PROPERTY.STEP, options.step);
+            create.put(Dictionnary.PROPERTY.STEP, String.valueOf(options.step));
         }
 
         if (options.page != null) {
@@ -71,17 +71,17 @@ public class PNumberTextBox extends PTextBox {
     public void setOptions(final Options options) {
         if (options.min != null) {
             min = options.min;
-            update(Dictionnary.PROPERTY.MIN, options.min);
+            update(Dictionnary.PROPERTY.MIN, String.valueOf(options.min));
         }
 
         if (options.max != null) {
             max = options.max;
-            update(Dictionnary.PROPERTY.MAX, options.max);
+            update(Dictionnary.PROPERTY.MAX, String.valueOf(options.max));
         }
 
         if (options.step != null) {
             step = options.step;
-            update(Dictionnary.PROPERTY.STEP, options.step);
+            update(Dictionnary.PROPERTY.STEP, String.valueOf(options.step));
         }
 
         if (options.page != null) {

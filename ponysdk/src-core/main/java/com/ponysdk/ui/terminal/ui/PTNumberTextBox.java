@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,8 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -94,7 +97,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         public void onValueChange(String v);
     }
 
-    public static class NumberBox extends Composite implements MouseDownHandler, MouseUpHandler, KeyDownHandler, KeyUpHandler, com.google.gwt.event.logical.shared.ValueChangeHandler<String> {
+    public static class NumberBox extends Composite implements MouseDownHandler, MouseUpHandler, KeyDownHandler, KeyUpHandler, com.google.gwt.event.logical.shared.ValueChangeHandler<String>, MouseOutHandler {
 
         private static final String ZEROS = "0000000000000000";
 
@@ -109,16 +112,17 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         private boolean increment = true;
         private final boolean enabled = true;
 
-        private Double value = null;
+        private BigDecimal value = null;
 
         private boolean hasMin = false;
         private boolean hasMax = false;
 
-        private double min = 0;
-        private double max = 0;
-        private double step = 1;
         private int page = 10;
         private int decimal = 0;
+        private BigDecimal min = new BigDecimal(0);
+        private BigDecimal max = new BigDecimal(0);
+        private BigDecimal step = new BigDecimal(1);
+        private BigDecimal pagedStep = new BigDecimal(10);
 
         private final List<ValueChangeHandler> handlers = new ArrayList<ValueChangeHandler>();
 
@@ -162,8 +166,10 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
             up.addMouseDownHandler(this);
             up.addMouseUpHandler(this);
+            up.addMouseOutHandler(this);
             down.addMouseDownHandler(this);
             down.addMouseUpHandler(this);
+            down.addMouseOutHandler(this);
             textBox.addKeyDownHandler(this);
             textBox.addKeyUpHandler(this);
             textBox.addValueChangeHandler(this);
@@ -192,12 +198,18 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             if (value == null) {
                 value = min;
             } else {
-                if (paged) value -= (step * page);
-                else value -= step;
+                if (paged) {
+                    value = value.subtract(pagedStep);
+                } else {
+                    log("step: " + step.toString());
+                    log("dec1: " + value.toString());
+                    value = value.subtract(step);
+                    log("dec2: " + value.toString());
+                }
             }
 
             if (hasMin) {
-                if (value < min) {
+                if (value.compareTo(min) < 0) {
                     value = min;
                     timerScheduled = false;
                 }
@@ -211,12 +223,15 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             if (value == null) {
                 value = min;
             } else {
-                if (paged) value += (step * page);
-                else value += step;
+                if (paged) {
+                    value = value.add(pagedStep);
+                } else {
+                    value = value.add(step);
+                }
             }
 
             if (hasMax) {
-                if (value > max) {
+                if (value.compareTo(max) > 0) {
                     value = max;
                     timerScheduled = false;
                 }
@@ -228,18 +243,33 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         public void applyOptions(final PTInstruction options) {
             if (options.containsKey(PROPERTY.MIN)) {
                 hasMin = true;
-                min = options.getDouble(PROPERTY.MIN);
+                min = new BigDecimal(options.getString(PROPERTY.MIN));
             }
             if (options.containsKey(PROPERTY.MAX)) {
                 hasMax = true;
-                max = options.getDouble(PROPERTY.MAX);
+                max = new BigDecimal(options.getString(PROPERTY.MAX));
             }
-            if (options.containsKey(PROPERTY.STEP)) step = options.getDouble(Dictionnary.PROPERTY.STEP);
-            if (options.containsKey(PROPERTY.PAGE)) page = options.getInt(Dictionnary.PROPERTY.PAGE);
+            if (options.containsKey(PROPERTY.STEP)) {
+                step = new BigDecimal(options.getString(Dictionnary.PROPERTY.STEP));
+                pagedStep = step.multiply(new BigDecimal(page));
+            }
+            if (options.containsKey(PROPERTY.PAGE)) {
+                page = options.getInt(Dictionnary.PROPERTY.PAGE);
+                pagedStep = step.multiply(new BigDecimal(page));
+            }
             if (options.containsKey(PROPERTY.DECIMAL)) decimal = options.getInt(Dictionnary.PROPERTY.DECIMAL);
 
             if (options.containsKey(PROPERTY.TEXT)) {
-                textBox.setText(options.getString(PROPERTY.TEXT));
+                final String text = options.getString(PROPERTY.TEXT);
+                if (text == null || text.isEmpty()) {
+                    value = null;
+                    textBox.setText(text);
+                } else {
+                    try {
+                        value = new BigDecimal(text);
+                        textBox.setText(format());
+                    } catch (final NumberFormatException e) {}
+                }
             } else if (options.containsKey(PROPERTY.ENABLED)) {
                 textBox.setEnabled(options.getBoolean(PROPERTY.ENABLED));
             }
@@ -250,7 +280,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             final String valueAsString = event.getValue();
             if (valueAsString != null && !valueAsString.isEmpty()) {
                 try {
-                    final Double newvalue = Double.parseDouble(textBox.getText());
+                    final BigDecimal newvalue = new BigDecimal(textBox.getText());
                     if (!newvalue.equals(value)) {
                         value = newvalue;
                         refreshTextBox();
@@ -279,7 +309,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             String v = value.toString();
             final int actual = decimals(v);
             int diff = actual - decimal;
-            if (decimal == 0) diff++;
+            if (decimal == 0 && diff == 1) diff++;
 
             if (diff == 0) return v;
             if (diff > 0) return v.substring(0, v.length() - diff);
@@ -351,6 +381,11 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             timerScheduled = false;
         }
 
+        @Override
+        public void onMouseOut(final MouseOutEvent event) {
+            timerScheduled = false;
+        }
+
         protected void fireIfNotEqual(final String prev, final String text) {
             if (prev != text && (prev == null || !prev.equals(text))) {
                 fire();
@@ -359,7 +394,14 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
         protected void fire() {
             final String text = textBox.getText();
-            value = Double.parseDouble(text);
+            if (text != null && !text.isEmpty()) {
+                try {
+                    value = new BigDecimal(text);
+                } catch (final NumberFormatException e) {}
+            } else {
+                value = null;
+            }
+
             for (final ValueChangeHandler h : handlers) {
                 h.onValueChange(text);
             }
@@ -367,4 +409,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
     }
 
+    public static native void log(String msg) /*-{
+                                              console.log(msg);
+                                              }-*/;
 }

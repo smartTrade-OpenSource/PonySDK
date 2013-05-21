@@ -29,10 +29,13 @@ import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PNumberTextBox;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PScript;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
@@ -71,9 +74,22 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
     private void start() {
         final PFlowPanel flow = new PFlowPanel();
 
+        final PNumberTextBox nb2 = buildNB(new PNumberTextBox.Options().withMin(1d).withMax(100d));
+        final PNumberTextBox nb3 = buildNB(new PNumberTextBox.Options().withMin(0d).withMax(10d).withStep(0.01d).withNumberFormat(2));
         flow.add(buildNB(new PNumberTextBox.Options()));
-        flow.add(buildNB(new PNumberTextBox.Options().withMin(1d).withMax(100d)));
-        flow.add(buildNB(new PNumberTextBox.Options().withMin(0d).withMax(10d).withStep(0.01d).withNumberFormat(2)));
+        flow.add(nb2);
+        flow.add(nb3);
+
+        final PButton b = new PButton("set value");
+        b.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                nb2.setValue("5");
+                nb3.setValue("5");
+            }
+        });
+        flow.add(b);
 
         PRootLayoutPanel.get().add(flow);
     }
