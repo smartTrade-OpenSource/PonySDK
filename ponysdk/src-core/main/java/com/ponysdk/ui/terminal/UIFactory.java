@@ -53,6 +53,7 @@ import com.ponysdk.ui.terminal.ui.PTListBox;
 import com.ponysdk.ui.terminal.ui.PTMenuBar;
 import com.ponysdk.ui.terminal.ui.PTMenuItem;
 import com.ponysdk.ui.terminal.ui.PTMenuItemSeparator;
+import com.ponysdk.ui.terminal.ui.PTNumberTextBox;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
@@ -102,6 +103,7 @@ public class UIFactory {
         if (WidgetType.HTML.equals(widgetType)) { return new PTHTML(); }
         if (WidgetType.TEXTBOX.equals(widgetType)) { return new PTTextBox(); }
         if (WidgetType.PASSWORD_TEXTBOX.equals(widgetType)) { return new PTPasswordTextBox(); }
+        if (WidgetType.NUMBERBOX.equals(widgetType)) { return new PTNumberTextBox(); }
         if (WidgetType.TEXT_AREA.equals(widgetType)) { return new PTTextArea(); }
         if (WidgetType.CHECKBOX.equals(widgetType)) { return new PTCheckBox(); }
         if (WidgetType.RADIO_BUTTON.equals(widgetType)) { return new PTRadioButton(); }

@@ -223,6 +223,11 @@
 		"instructions": [],
 		"placeholder": [],
 		"widgetSize": [],
+		"min": [],
+		"max": [],
+		"step": [],
+		"page": [],
+		"decimal": [],
 		"widgetHidden": []
 	}
 	
