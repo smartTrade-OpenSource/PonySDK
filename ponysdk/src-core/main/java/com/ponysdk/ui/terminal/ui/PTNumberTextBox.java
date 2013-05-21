@@ -110,7 +110,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
         private boolean paged = false;
         private boolean increment = true;
-        private final boolean enabled = true;
+        private boolean enabled = true;
 
         private BigDecimal value = null;
 
@@ -186,6 +186,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         }
 
         public void enabled(final boolean enabled) {
+            this.enabled = enabled;
             textBox.setEnabled(enabled);
             if (enabled) {
                 wrapper.addStyleName("enabled");
@@ -211,14 +212,24 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 }
             }
 
+            checkMinMax();
+
+            refreshTextBox();
+        }
+
+        private void checkMinMax() {
             if (hasMin) {
                 if (value.compareTo(min) < 0) {
                     value = min;
                     timerScheduled = false;
                 }
             }
-
-            refreshTextBox();
+            if (hasMax) {
+                if (value.compareTo(max) > 0) {
+                    value = max;
+                    timerScheduled = false;
+                }
+            }
         }
 
         protected void increase() {
@@ -233,12 +244,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 }
             }
 
-            if (hasMax) {
-                if (value.compareTo(max) > 0) {
-                    value = max;
-                    timerScheduled = false;
-                }
-            }
+            checkMinMax();
 
             refreshTextBox();
         }
