@@ -207,10 +207,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 if (paged) {
                     value = value.subtract(pagedStep);
                 } else {
-                    log("step: " + step.toString());
-                    log("dec1: " + value.toString());
                     value = value.subtract(step);
-                    log("dec2: " + value.toString());
                 }
             }
 
@@ -277,7 +274,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                     } catch (final NumberFormatException e) {}
                 }
             } else if (options.containsKey(PROPERTY.ENABLED)) {
-                textBox.setEnabled(options.getBoolean(PROPERTY.ENABLED));
+                enabled(options.getBoolean(PROPERTY.ENABLED));
             }
         }
 
