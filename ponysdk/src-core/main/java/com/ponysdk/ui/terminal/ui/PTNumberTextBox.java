@@ -112,6 +112,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         private boolean increment = true;
         private boolean enabled = true;
 
+        private BigDecimal lastSendValue = null;
         private BigDecimal value = null;
 
         private boolean hasMin = false;
@@ -369,6 +370,10 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         @Override
         public void onKeyUp(final KeyUpEvent event) {
             timerScheduled = false;
+
+            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                fire();
+            }
         }
 
         @Override
@@ -411,11 +416,20 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 value = null;
             }
 
+            if (!valueChanged()) return;
+            lastSendValue = value;
+
             for (final ValueChangeHandler h : handlers) {
                 h.onValueChange(text);
             }
         }
 
+        private boolean valueChanged() {
+            if (lastSendValue == null) {
+                if (value != null) return true;
+            } else if (!lastSendValue.equals(value)) return true;
+            return false;
+        }
     }
 
     public static native void log(String msg) /*-{
