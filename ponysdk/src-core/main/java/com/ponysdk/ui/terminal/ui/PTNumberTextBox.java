@@ -285,6 +285,8 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 }
             } else if (options.containsKey(PROPERTY.ENABLED)) {
                 enabled(options.getBoolean(PROPERTY.ENABLED));
+            } else if (options.containsKey(PROPERTY.TABINDEX)) {
+                textBox.setTabIndex(options.getInt(PROPERTY.TABINDEX));
             } else if (options.containsKey(PROPERTY.FOCUSED)) {
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
