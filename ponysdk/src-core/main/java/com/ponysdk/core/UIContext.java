@@ -49,6 +49,7 @@ import com.ponysdk.core.instruction.Close;
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.Session;
+import com.ponysdk.core.stm.ClientLoopListener;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
@@ -80,6 +81,8 @@ public class UIContext {
 
     private List<Instruction> currentStacker = instructionStacker;
 
+    private final List<ClientLoopListener> clientLoopListener = new ArrayList<ClientLoopListener>();
+
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private PHistory history;
@@ -94,6 +97,7 @@ public class UIContext {
 
     private final ReentrantLock lock = new ReentrantLock();
 
+    private long viewID = -1;
     private long lastReceived = -1;
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
@@ -382,5 +386,27 @@ public class UIContext {
         }
         log.info("Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         return datas;
+    }
+
+    public void begin() {
+        clientLoopListener.clear();
+    }
+
+    public void end() {
+        for (final ClientLoopListener listener : clientLoopListener) {
+            listener.onLoopEnd();
+        }
+    }
+
+    public long getViewID() {
+        return viewID;
+    }
+
+    public void setViewID(final long viewID) {
+        this.viewID = viewID;
+    }
+
+    public void addClientLoopListener(final ClientLoopListener listener) {
+        clientLoopListener.add(listener);
     }
 }

@@ -153,6 +153,34 @@ public class PPusher extends PObject implements ConnectionListener {
         listenerCollection.register(listener);
     }
 
+    public void pushBatchToClient(final Collection<Object> collection) {
+        if (pusherState != PusherState.STARTED) {
+            if (log.isDebugEnabled()) log.debug("Pusher not started. Skipping message #" + collection);
+            return;
+        }
+
+        begin();
+        try {
+            uiContext.begin();
+
+            if (listenerCollection.isEmpty()) return;
+
+            for (final Object data : collection) {
+                for (final DataListener listener : listenerCollection) {
+                    listener.onData(data);
+                }
+            }
+
+            uiContext.end();
+
+            PPusher.get().flush();
+        } catch (final Exception exception) {
+            log.error("Cannot push data", exception);
+        } finally {
+            PPusher.get().end();
+        }
+    }
+
     public void pushToClient(final Object data) {
 
         if (pusherState != PusherState.STARTED) {
@@ -162,11 +190,16 @@ public class PPusher extends PObject implements ConnectionListener {
 
         begin();
         try {
+            uiContext.begin();
+
             if (listenerCollection.isEmpty()) return;
 
             for (final DataListener listener : listenerCollection) {
                 listener.onData(data);
             }
+
+            uiContext.end();
+
             PPusher.get().flush();
         } catch (final Exception exception) {
             log.error("Cannot push data", exception);

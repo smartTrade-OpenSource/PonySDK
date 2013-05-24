@@ -154,6 +154,7 @@ public abstract class AbstractApplicationManager {
             }
 
             UIContext.setCurrent(uiContext);
+            uiContext.begin();
 
             process(uiContext, data);
 
@@ -161,6 +162,8 @@ public abstract class AbstractApplicationManager {
             for (final JSONObject jsoObject : datas) {
                 process(uiContext, jsoObject);
             }
+
+            uiContext.end();
 
             try {
                 if (uiContext.flushInstructions(jsonObject)) {
