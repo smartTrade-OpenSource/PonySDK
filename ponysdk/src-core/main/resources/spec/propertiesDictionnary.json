@@ -223,6 +223,7 @@
 		"instructions": [],
 		"placeholder": [],
 		"widgetSize": [],
+		"tabindex": [],
 		"min": [],
 		"max": [],
 		"step": [],
