@@ -53,6 +53,8 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
         } else if (update.containsKey(PROPERTY.ENABLED)) {
             this.enabled = update.getBoolean(PROPERTY.ENABLED);
             uiObject.setEnabled(enabled);
+        } else if (update.containsKey(PROPERTY.TABINDEX)) {
+            uiObject.setTabIndex(update.getInt(PROPERTY.TABINDEX));
         } else if (update.containsKey(PROPERTY.FOCUSED)) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
