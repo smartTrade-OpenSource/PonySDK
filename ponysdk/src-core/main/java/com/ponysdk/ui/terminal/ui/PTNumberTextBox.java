@@ -29,6 +29,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -273,15 +274,25 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                 final String text = options.getString(PROPERTY.TEXT);
                 if (text == null || text.isEmpty()) {
                     value = null;
+                    lastSendValue = null;
                     textBox.setText(text);
                 } else {
                     try {
                         value = new BigDecimal(text);
+                        lastSendValue = value;
                         textBox.setText(format());
                     } catch (final NumberFormatException e) {}
                 }
             } else if (options.containsKey(PROPERTY.ENABLED)) {
                 enabled(options.getBoolean(PROPERTY.ENABLED));
+            } else if (options.containsKey(PROPERTY.FOCUSED)) {
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                    @Override
+                    public void execute() {
+                        textBox.setFocus(options.getBoolean(PROPERTY.FOCUSED));
+                    }
+                });
             }
         }
 
