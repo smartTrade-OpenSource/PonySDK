@@ -30,6 +30,8 @@ import java.util.List;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -98,7 +100,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         public void onValueChange(String v);
     }
 
-    public static class NumberBox extends Composite implements MouseDownHandler, MouseUpHandler, KeyDownHandler, KeyUpHandler, com.google.gwt.event.logical.shared.ValueChangeHandler<String>, MouseOutHandler {
+    public static class NumberBox extends Composite implements MouseDownHandler, MouseUpHandler, KeyDownHandler, KeyUpHandler, com.google.gwt.event.logical.shared.ValueChangeHandler<String>, MouseOutHandler, ClickHandler {
 
         private static final String ZEROS = "0000000000000000";
 
@@ -131,10 +133,16 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
         private final List<ValueChangeHandler> handlers = new ArrayList<ValueChangeHandler>();
 
+        private RefreshCommand refreshCommand;
+
         private class RefreshCommand implements RepeatingCommand {
+
+            protected boolean cancelled = false;
 
             @Override
             public boolean execute() {
+
+                if (cancelled) return false;
 
                 if (increment) {
                     increase();
@@ -149,12 +157,16 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                     fire();
                 } else {
                     // Re-schedule
-                    currentDelay -= 20;
+                    currentDelay -= 10;
                     if (currentDelay < 10) currentDelay = 10;
-                    Scheduler.get().scheduleFixedDelay(new RefreshCommand(), currentDelay);
+                    scheduleRefresh(currentDelay);
                 }
 
                 return false;
+            }
+
+            public void cancel() {
+                cancelled = true;
             }
 
         }
@@ -177,6 +189,8 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             up.addMouseDownHandler(this);
             up.addMouseUpHandler(this);
             up.addMouseOutHandler(this);
+            up.addClickHandler(this);
+            down.addClickHandler(this);
             down.addMouseDownHandler(this);
             down.addMouseUpHandler(this);
             down.addMouseOutHandler(this);
@@ -322,7 +336,9 @@ public class PTNumberTextBox extends PTWidget<Composite> {
         }
 
         private void refreshTextBox() {
-            textBox.setText(format());
+            final String format = format();
+            textBox.setText(format);
+            // textBox.setCursorPos(format.length());
         }
 
         private String format() {
@@ -375,9 +391,16 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
                 if (trigger) {
                     timerScheduled = true;
-                    Scheduler.get().scheduleFixedDelay(new RefreshCommand(), initialDelay);
+                    scheduleRefresh(initialDelay);
                 }
             }
+        }
+
+        protected void scheduleRefresh(final int delayMs) {
+            if (refreshCommand != null) refreshCommand.cancel();
+
+            refreshCommand = new RefreshCommand();
+            Scheduler.get().scheduleFixedDelay(refreshCommand, delayMs);
         }
 
         @Override
@@ -399,13 +422,35 @@ public class PTNumberTextBox extends PTWidget<Composite> {
                     increment = false;
                 }
                 timerScheduled = true;
-                Scheduler.get().scheduleFixedDelay(new RefreshCommand(), initialDelay);
+                scheduleRefresh(initialDelay);
             }
         }
 
         @Override
         public void onMouseUp(final MouseUpEvent event) {
             timerScheduled = false;
+        }
+
+        @Override
+        public void onClick(final ClickEvent event) {
+            if (enabled) {
+
+                if (refreshCommand != null) {
+                    refreshCommand.cancel();
+                    refreshCommand = null;
+                }
+
+                final Object sender = event.getSource();
+                if (sender == up) {
+                    increase();
+                } else {
+                    decrease();
+                }
+
+                paged = false;
+                currentDelay = initialDelay;
+                fire();
+            }
         }
 
         @Override
@@ -443,6 +488,7 @@ public class PTNumberTextBox extends PTWidget<Composite> {
             } else if (!lastSendValue.equals(value)) return true;
             return false;
         }
+
     }
 
     public static native void log(String msg) /*-{
