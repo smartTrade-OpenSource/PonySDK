@@ -169,11 +169,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void update(final JSONObject data) {
 
-        long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
+        final long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
         if ((lastReceived + 1) != receivedSeqNum) {
             incomingMessageQueue.put(receivedSeqNum, data);
+            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
             return;
         }
+        lastReceived = receivedSeqNum;
 
         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
         final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
@@ -189,9 +191,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 for (int i = 0; i < jsonArray2.size(); i++) {
                     instructions.add(new PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject()));
                 }
+                lastReceived = expected;
                 expected++;
-                receivedSeqNum = expected;
             }
+            log.log(Level.SEVERE, "Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         }
 
         updateMode = true;
@@ -208,9 +211,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                     stackError(currentInstruction, e);
                 }
             }
-
-            updateIncomingSeqNum(receivedSeqNum);
-
         } catch (final Throwable e) {
             Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived);
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
