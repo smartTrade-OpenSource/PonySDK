@@ -28,15 +28,22 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.ponysdk.ui.terminal.CommunicationEntryPoint;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTScheduler extends AbstractPTObject {
+public class PTScheduler extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
     private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<Long, PTScheduler.SchedulerCommand>();
+    private boolean hasCommunicationError = false;
+
+    public PTScheduler() {
+        CommunicationEntryPoint.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
+    }
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {}
@@ -115,7 +122,7 @@ public class PTScheduler extends AbstractPTObject {
 
             uiService.sendDataToServer(instruction);
 
-            return true;
+            return !hasCommunicationError;
         }
 
     }
@@ -143,5 +150,10 @@ public class PTScheduler extends AbstractPTObject {
             return false;
         }
 
+    }
+
+    @Override
+    public void onCommunicationError(final CommunicationErrorEvent event) {
+        hasCommunicationError = true;
     }
 }
