@@ -85,7 +85,7 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
             final Storage storage = Storage.getSessionStorageIfSupported();
             if (storage != null) {
                 final String v = storage.getItem(APPLICATION.VIEW_ID);
-                if (v != null) viewID = Long.parseLong(v);
+                if (v != null && !v.isEmpty()) viewID = Long.parseLong(v);
             }
 
             final PTInstruction requestData = new PTInstruction();
@@ -122,24 +122,13 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
 
                             if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(applicationViewID));
 
-                            // if (data.containsKey(APPLICATION.SCRIPTS)) {
-                            // final JSONArray scripts = data.get(APPLICATION.SCRIPTS).isArray();
-                            //
-                            // scriptToLoad = scripts.size();
-                            //
-                            // for (int i = 0; i < scripts.size(); i++) {
-                            // final String script = scripts.get(i).isString().stringValue();
-                            // ScriptInjector.fromUrl(GWT.getHostPageBaseURL() +
-                            // script).setCallback(CommunicationEntryPoint.this).inject();
-                            // }
-                            // } else {
                             initUIBuilder();
-                            // }
                         } else {
                             uiBuilder.update(data);
                         }
                     } catch (final RuntimeException exception) {
-                        Window.alert("Loading application has failed #" + exception);
+                        log.log(Level.SEVERE, "Failed to process data with error #" + exception.getMessage() + ", data: " + data, exception);
+                        Window.alert("Failed to process data with error #" + exception.getMessage() + ", data: " + data);
                     }
                 }
 
@@ -155,6 +144,7 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
             requestBuilder.send(requestData.toString());
 
         } catch (final Exception e) {
+            log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
             Window.alert("Loading application has failed #" + e);
         }
     }

@@ -491,7 +491,4 @@ public class PTNumberTextBox extends PTWidget<Composite> {
 
     }
 
-    public static native void log(String msg) /*-{
-                                              console.log(msg);
-                                              }-*/;
 }

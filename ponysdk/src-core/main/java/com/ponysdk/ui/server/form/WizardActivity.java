@@ -1,11 +1,3 @@
-/*============================================================================
- *
- * Copyright (c) 2000-2008 Smart Trade Technologies. All Rights Reserved.
- *
- * This software is the proprietary information of Smart Trade Technologies
- * Use is subject to license terms. Duplication or distribution prohibited.
- *
- *============================================================================*/
 
 package com.ponysdk.ui.server.form;
 

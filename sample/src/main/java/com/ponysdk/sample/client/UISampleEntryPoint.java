@@ -30,6 +30,8 @@ import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
+import com.ponysdk.ui.server.basic.PScheduler;
+import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
 
 public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity {
 
@@ -64,6 +66,17 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
         // @Override
         // public void onFailure(final String msg) {}
         // });
+
+        PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
+
+            @Override
+            public boolean execute() {
+                // Do nothing
+                System.err.println("la");
+                return true;
+            }
+        }, 1000);
+
     }
 
     @Override
