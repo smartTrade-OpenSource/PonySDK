@@ -11,6 +11,7 @@
 	<classpathentry kind="src" path="src-persistency/main/java"/>
 	<classpathentry kind="src" path="src-mongodb/main/java"/>
 	<classpathentry kind="src" path="src-core/test/java"/>
+	<classpathentry kind="src" path="src-jetty/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/gwt/json.jar"/>
 	<classpathentry kind="lib" path="libs/logging/slf4j-api.jar"/>
@@ -42,5 +43,7 @@
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar" sourcepath="libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="lib" path="libs/commons/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/jetty-client.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/jetty-io.jar"/>
 	<classpathentry kind="output" path="build/classes/main"/>
 </classpath>

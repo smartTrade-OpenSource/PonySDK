@@ -1,6 +1,9 @@
 
 package com.ponysdk.sample.trading.client.activity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.trading.command.trading.FindCurrenciesCommand;
@@ -28,6 +31,8 @@ import com.ponysdk.ui.server.basic.event.PDropHandler;
 
 public class MarketPageActivity extends PageActivity {
 
+    private static Logger log = LoggerFactory.getLogger(MarketPageActivity.class);
+
     protected PFlowPanel currentDrag;
 
     protected final PFlowPanel boxContainer = new PFlowPanel();
@@ -41,6 +46,7 @@ public class MarketPageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
+        log.info("Showing market page");
 
         final FindCurrenciesCommand currenciesCommand = new FindCurrenciesCommand();
 
