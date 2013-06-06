@@ -12,8 +12,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.jetty.test.bench.mock.UIMock;
+import com.ponysdk.jetty.test.bench.mock.UIMockScheduler;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.Dictionnary.WIDGETTYPE;
+import com.ponysdk.ui.terminal.WidgetType;
 
 public class UI {
 
@@ -37,10 +42,17 @@ public class UI {
 
     private long lastReceivedSeqNum = -1;
     public Map<String, UI.Object> objectByID = new HashMap<String, UI.Object>();
+    public Map<Long, UIMock> uiObjectByID = new HashMap<Long, UIMock>();
     public AtomicLong seqnum = new AtomicLong();
     public long viewID;
 
     protected List<Listener> listeners = new ArrayList<UI.Listener>();
+
+    protected final Client client;
+
+    public UI(final Client client) {
+        this.client = client;
+    }
 
     public void init(final JSONObject response) throws Exception {
 
@@ -62,16 +74,29 @@ public class UI {
         final JSONArray instructions = response.getJSONArray(APPLICATION.INSTRUCTIONS);
         for (int i = 0; i < instructions.length(); i++) {
             final JSONObject instruction = instructions.getJSONObject(i);
-            if (instruction.has(PROPERTY.ENSURE_DEBUG_ID)) {
-                final String did = instruction.getString(PROPERTY.ENSURE_DEBUG_ID);
-                final long pid = instruction.getLong(PROPERTY.OBJECT_ID);
+            final String type = instruction.getString(TYPE.KEY);
+            if (TYPE.KEY_.CREATE.equals(type)) {
+                final WidgetType widgetType = WidgetType.values()[instruction.getInt(WIDGETTYPE.KEY)];
+                if (WidgetType.SCHEDULER.equals(widgetType)) {
+                    final Long pid = instruction.getLong(PROPERTY.OBJECT_ID);
+                    uiObjectByID.put(pid, new UIMockScheduler(pid));
+                }
+            } else if (TYPE.KEY_.UPDATE.equals(type)) {
+                final Long pid = instruction.getLong(PROPERTY.OBJECT_ID);
+                final UIMock uiMock = uiObjectByID.get(pid);
+                if (uiMock != null) uiMock.update(this, instruction);
 
-                final UI.Object o = new UI.Object();
-                o.did = did;
-                o.pid = pid;
+                if (instruction.has(PROPERTY.ENSURE_DEBUG_ID)) {
+                    final String did = instruction.getString(PROPERTY.ENSURE_DEBUG_ID);
 
-                objectByID.put(did, o);
+                    final UI.Object o = new UI.Object();
+                    o.did = did;
+                    o.pid = pid;
+
+                    objectByID.put(did, o);
+                }
             }
+
         }
     }
 
@@ -84,4 +109,10 @@ public class UI {
     public void addListener(final Listener listener) {
         listeners.add(listener);
     }
+
+    public void sendToServer(final JSONObject i) throws Exception {
+        client.pending.add(i);
+        client.flush();
+    }
+
 }

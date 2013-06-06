@@ -40,6 +40,11 @@ sourceSets {
 			srcDir srcJasper
 		}
 	}
+	test {
+		java {
+			srcDir "src-jetty/main/test"
+		}
+	}
 }
 
 repositories {
@@ -114,6 +119,7 @@ dependencies {
 jar {
 	baseName = 'ponysdk'
     from sourceSets.main.output
+    from sourceSets.test.output
     from gwtOutputDirName
     from warResources
     
@@ -279,6 +285,7 @@ task devmode(type: JavaExec) {
 task sourcesJar(type: Jar, dependsOn:classes) {
     classifier = 'sources'
 	from sourceSets.main.allJava
+	from sourceSets.test.allJava
 	from(srcCore) {
 		include '**/*.xml'
 	}

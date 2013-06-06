@@ -136,11 +136,11 @@ public abstract class AbstractApplicationManager {
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
 
-        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
+        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application (viewID #" + key + ")."); }
 
         final UIContext uiContext = applicationSession.getUIContext(key);
 
-        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
+        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext), please reload your application (viewID #" + key + ")."); }
 
         uiContext.acquire();
         try {
@@ -149,7 +149,7 @@ public abstract class AbstractApplicationManager {
             final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
             if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
                 uiContext.stackIncomingMessage(receivedSeqNum, data);
-                log.info("Stacking incoming message #" + receivedSeqNum);
+                log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data);
                 return;
             }
 

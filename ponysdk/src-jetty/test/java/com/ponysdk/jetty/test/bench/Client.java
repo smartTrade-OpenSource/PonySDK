@@ -43,7 +43,7 @@ public class Client {
         this.httpClient.setTimeout(10000);
         this.httpClient.start();
 
-        this.ui = new UI();
+        this.ui = new UI(this);
     }
 
     public void start() throws Exception {
@@ -77,6 +77,8 @@ public class Client {
 
         websocketClient = factory.newWebSocketClient();
         websocketClient.getCookies().put("JSESSIONID", sessionID);
+        websocketClient.setMaxTextMessageSize(Integer.MAX_VALUE);
+        websocketClient.setMaxBinaryMessageSize(Integer.MAX_VALUE);
 
         final URI uri = new URI(url.replaceFirst("http", "ws") + "/ws" + "?" + APPLICATION.VIEW_ID + "=" + ui.viewID);
         websocketConnection = websocketClient.open(uri, new WebSocket.OnTextMessage() {
@@ -104,12 +106,18 @@ public class Client {
         }).get(5, TimeUnit.SECONDS);
     }
 
+    public void stop() throws Exception {
+        if (websocketConnection != null) websocketConnection.close();
+        httpClient.stop();
+    }
+
     public void add(final Action action) throws Exception {
         action.setUI(ui);
         pending.add(action.asJSON());
     }
 
     public void flush() throws Exception {
+
         final JSONObject update = new JSONObject();
         update.put(APPLICATION.VIEW_ID, ui.viewID);
         update.put(APPLICATION.INSTRUCTIONS, new JSONArray(pending));
@@ -119,6 +127,8 @@ public class Client {
         final JSONExchange exchange = new JSONExchange(url);
         exchange.setContent(update);
         exchange.addRequestHeader("Cookie", jsessionID);
+
+        pending.clear();
 
         httpClient.send(exchange);
 
