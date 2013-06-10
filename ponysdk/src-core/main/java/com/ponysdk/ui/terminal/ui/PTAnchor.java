@@ -41,6 +41,8 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
             uiObject.setText(update.get(PROPERTY.TEXT).isString().stringValue());
         } else if (update.containsKey(PROPERTY.HTML)) {
             uiObject.setHTML(update.get(PROPERTY.HTML).isString().stringValue());
+        } else if (update.containsKey(PROPERTY.HREF)) {
+            uiObject.setHref(update.get(PROPERTY.HREF).isString().stringValue());
         } else {
             super.update(update, uiService);
         }

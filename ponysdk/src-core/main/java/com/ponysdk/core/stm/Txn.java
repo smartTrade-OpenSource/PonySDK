@@ -2,9 +2,7 @@
 package com.ponysdk.core.stm;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +17,6 @@ public class Txn {
 
     private final List<TxnListener> txnListnener = new ArrayList<TxnListener>();
     private final List<ClientLoopListener> clientLoopListnener = new ArrayList<ClientLoopListener>();
-
-    private final Set<TxnObject<?>> txnObjects = new LinkedHashSet<TxnObject<?>>();
 
     private TxnContext txnContext;
 
@@ -49,10 +45,6 @@ public class Txn {
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
         fireClientLoopEnd();
         fireBeforeCommit();
-        for (final TxnObject<?> txnObject : txnObjects) {
-            txnObject.commit();
-        }
-        txnObjects.clear();
         fireBeforeFlush();
         flush();
         fireAfterFlush();
@@ -63,10 +55,6 @@ public class Txn {
         final Txn txn = transactions.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
-        for (final TxnObject<?> txnObject : txnObjects) {
-            txnObject.rollback();
-        }
-        txnObjects.clear();
         transactions.remove();
         txnContext.clear();
     }
@@ -79,14 +67,6 @@ public class Txn {
             log.error(msg, e);
             throw new RuntimeException(msg);
         }
-    }
-
-    boolean attach(final TxnObject<?> txnObject) {
-        return txnObjects.add(txnObject);
-    }
-
-    boolean detach(final TxnObject<?> txnObject) {
-        return txnObjects.remove(txnObject);
     }
 
     public TxnContext getTxnContext() {
