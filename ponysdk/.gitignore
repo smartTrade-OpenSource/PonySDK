@@ -4,3 +4,5 @@ src-generated
 bin
 classes
 libs
+/doc
+/javadoc.xml
