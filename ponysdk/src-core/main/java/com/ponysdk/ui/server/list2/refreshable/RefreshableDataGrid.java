@@ -38,6 +38,13 @@ import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.SimpleListView;
 
+/**
+ * Extends {@link DataGridActivity} Capable of moving columns and refreshing a set of rows instead of always
+ * refreshing the entire grid
+ * 
+ * @param <K>
+ * @param <D>
+ */
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     protected final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();

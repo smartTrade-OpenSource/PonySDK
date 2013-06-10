@@ -16,8 +16,10 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.ui.PTSimplePanel;
 
+/**
+ * Implemented by displays that can be given accept an {@link IsPWidget} to show.
+ */
 public interface PAcceptsOneWidget {
 
     /**
@@ -25,7 +27,7 @@ public interface PAcceptsOneWidget {
      * 
      * @param w
      *            the widget, or <code>null</code> to remove the widget
-     * @see PTSimplePanel
+     * @see PSimplePanel
      */
     void setWidget(IsPWidget w);
 }

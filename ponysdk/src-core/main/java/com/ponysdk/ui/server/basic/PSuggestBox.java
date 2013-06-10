@@ -65,11 +65,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * 
  * Using the example above, if the user types "C" into the text widget, the oracle will configure the
  * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key into the
- * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
- * <p>
- * <img class='gallery' src='doc-files/SuggestBox.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-SuggestBox</dt>
  * <dd>the suggest box itself</dd>

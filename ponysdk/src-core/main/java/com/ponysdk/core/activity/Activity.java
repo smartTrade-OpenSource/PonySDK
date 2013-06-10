@@ -24,8 +24,14 @@
 package com.ponysdk.core.activity;
 
 import com.ponysdk.core.place.Place;
+import com.ponysdk.core.place.PlaceChangeEvent;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
+/**
+ * Implemented by objects that control a piece of user interface, with a life cycle managed by an
+ * {@link ActivityManager}, in response to {@link PlaceChangeEvent} events as the user navigates through the
+ * app.
+ */
 public interface Activity {
 
     void start(PAcceptsOneWidget world, Place place);

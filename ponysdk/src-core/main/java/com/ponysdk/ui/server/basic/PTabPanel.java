@@ -32,9 +32,6 @@ import com.ponysdk.ui.terminal.WidgetType;
  * This widget will <em>only</em> work in quirks mode. If your application is in Standards Mode, use
  * {@link PTabLayoutPanel} instead.
  * </p>
- * <p>
- * <img class='gallery' src='doc-files/PTabPanel.png'/>
- * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-TabPanel { the tab panel itself }</li>

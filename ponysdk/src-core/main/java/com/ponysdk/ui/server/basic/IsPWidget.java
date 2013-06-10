@@ -23,6 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+/**
+ * Extended by view interfaces that are likely to be implemented by Widgets. Provides access to that widget,
+ * if it exists, without compromising the ability to provide a mock view instance in JRE unit tests.
+ */
 public interface IsPWidget {
 
     /**

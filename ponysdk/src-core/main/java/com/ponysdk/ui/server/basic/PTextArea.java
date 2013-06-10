@@ -23,17 +23,12 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.TxnInteger;
-import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A text box that allows multiple lines of text to be entered.
- * <p>
- * <img class='gallery' src='doc-files/PTextArea.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * A text box that allows multiple lines of text to be entered.<h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-TextArea { primary style }</li>
  * <li>.gwt-TextArea-readonly { dependent style set when the text area is read-only }</li>
@@ -41,17 +36,15 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PTextArea extends PTextBoxBase {
 
-    private final TxnInteger visibleLines = new TxnInteger(0);
-    private final TxnInteger characterWidth = new TxnInteger(0);
+    private int visibleLines = 5;
+    private int characterWidth = 25;
 
     public PTextArea() {
-        this(null);
+        super();
     }
 
     public PTextArea(final String text) {
-        super();
-        visibleLines.set(5);// must be the default value ?
-        characterWidth.set(25);
+        super(text);
     }
 
     @Override
@@ -60,29 +53,23 @@ public class PTextArea extends PTextBoxBase {
     }
 
     public int getVisibleLines() {
-        return visibleLines.get();
+        return visibleLines;
     }
 
     public void setVisibleLines(final int visibleLines) {
-        this.visibleLines.set(visibleLines);
+        if (Objects.equals(this.visibleLines, visibleLines)) return;
+        this.visibleLines = visibleLines;
+        saveUpdate(PROPERTY.VISIBLE_LINES, this.visibleLines);
     }
 
     public int getCharacterWidth() {
-        return characterWidth.get();
+        return characterWidth;
     }
 
     public void setCharacterWidth(final int characterWidth) {
-        this.characterWidth.set(characterWidth);
+        if (Objects.equals(this.characterWidth, characterWidth)) return;
+        this.characterWidth = characterWidth;
+        saveUpdate(PROPERTY.CHARACTER_WIDTH, this.characterWidth);
     }
 
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == visibleLines) {
-            saveUpdate(PROPERTY.VISIBLE_LINES, visibleLines.get());
-        } else if (txnObject == characterWidth) {
-            saveUpdate(PROPERTY.CHARACTER_WIDTH, characterWidth.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
-    }
 }

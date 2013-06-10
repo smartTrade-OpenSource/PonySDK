@@ -10,6 +10,9 @@ import com.ponysdk.ui.server.form2.validator.ValidationResult;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Validable;
 
+/**
+ * Rendering of a {@link FormField}
+ */
 public class FormFieldComponent extends PFlowPanel implements FormFieldListener, Validable, Resetable {
 
     public enum CaptionOrientation {

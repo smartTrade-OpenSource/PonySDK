@@ -32,9 +32,6 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 /**
  * A panel that lays all of its widgets out in a single horizontal column.
- * <p>
- * <img class='gallery' src='doc-files/PHorizontalPanel.png'/>
- * </p>
  */
 public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
 

@@ -32,13 +32,18 @@ public class PTGrid extends PTHTMLTable {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
+        Grid grid;
         if (create.containsKey(PROPERTY.ROW)) {
             final int rows = create.getInt(PROPERTY.ROW);
             final int columns = create.getInt(PROPERTY.COLUMN);
-            init(create, uiService, new Grid(rows, columns));
+            grid = new Grid(rows, columns);
+            init(create, uiService, grid);
         } else {
-            init(create, uiService, new Grid());
+            grid = new Grid();
+            init(create, uiService, grid);
         }
+
+        grid.addStyleName("pony-PGrid");
     }
 
     @Override

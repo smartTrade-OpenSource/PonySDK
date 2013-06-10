@@ -95,10 +95,9 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         final String handler = addHandler.getString(HANDLER.KEY);
 
         if (HANDLER.KEY_.POPUP_POSITION_CALLBACK.equals(handler)) {
-            final PopupPanel popupPanel = cast();
-
-            popupPanel.setVisible(false);
-            popupPanel.show();
+            final PopupPanel popup = cast();
+            popup.setVisible(true);
+            popup.show();
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
                 @Override
@@ -107,8 +106,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                     eventInstruction.setObjectID(addHandler.getObjectID());
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
-                    eventInstruction.put(PROPERTY.OFFSETWIDTH, popupPanel.getOffsetWidth());
-                    eventInstruction.put(PROPERTY.OFFSETHEIGHT, popupPanel.getOffsetHeight());
+                    eventInstruction.put(PROPERTY.OFFSETWIDTH, popup.getOffsetWidth());
+                    eventInstruction.put(PROPERTY.OFFSETHEIGHT, popup.getOffsetHeight());
                     eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
                     eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
                     uiService.sendDataToServer(eventInstruction);
@@ -132,6 +131,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             popup.center();
         } else if (update.containsKey(PROPERTY.POPUP_SHOW)) {
             popup.show();
+        } else if (update.containsKey(PROPERTY.POPUP_POSITION_AND_SHOW)) {
+            popup.setVisible(true);
         } else if (update.containsKey(PROPERTY.POPUP_HIDE)) {
             popup.hide();
         } else if (update.containsKey(PROPERTY.POPUP_GLASS_ENABLED)) {

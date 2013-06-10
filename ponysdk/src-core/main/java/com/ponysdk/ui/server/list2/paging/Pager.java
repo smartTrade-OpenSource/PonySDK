@@ -26,6 +26,12 @@ package com.ponysdk.ui.server.list2.paging;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PWidget;
 
+/**
+ * Manages and displays a Pagination Component
+ * 
+ * @see PagerView
+ * @param <T>
+ */
 public class Pager<T> implements IsPWidget {
 
     private final int pageSize;

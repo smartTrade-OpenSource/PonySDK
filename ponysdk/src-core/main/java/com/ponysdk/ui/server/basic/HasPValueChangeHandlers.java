@@ -25,8 +25,15 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
 
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
+/**
+ * A widget that implements this interface is a public source of {@link PValueChangeEvent} events.
+ * 
+ * @param <T>
+ *            the value about to be changed
+ */
 public interface HasPValueChangeHandlers<T> {
 
     void addValueChangeHandler(PValueChangeHandler<T> handler);

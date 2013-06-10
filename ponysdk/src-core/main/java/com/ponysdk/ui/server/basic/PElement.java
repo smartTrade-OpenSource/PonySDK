@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -34,8 +34,8 @@ public class PElement extends PComplexPanel {
 
     private final String tagName;
 
-    private TxnString innerText;
-    private TxnString innerHTML;
+    private String innerText;
+    private String innerHTML;
 
     public PElement(final String tagName) {
         super();
@@ -52,23 +52,23 @@ public class PElement extends PComplexPanel {
         return tagName;
     }
 
-    public void setInnerHTML(final String html) {
-        if (innerHTML == null) innerHTML = new TxnString();
-        if (innerHTML.set(html)) saveUpdate(PROPERTY.INNER_HTML, html);
+    public void setInnerHTML(final String innerHTML) {
+        if (Objects.equals(this.innerHTML, innerHTML)) return;
+        this.innerHTML = innerHTML;
+        saveUpdate(PROPERTY.INNER_HTML, this.innerHTML);
     }
 
-    public void setInnerText(final String text) {
-        if (innerText == null) innerText = new TxnString();
-        if (innerText.set(text)) saveUpdate(PROPERTY.INNER_TEXT, text);
+    public void setInnerText(final String innerText) {
+        if (Objects.equals(this.innerText, innerText)) return;
+        this.innerText = innerText;
+        saveUpdate(PROPERTY.INNER_TEXT, this.innerText);
     }
 
     public String getInnerText() {
-        if (innerText == null) return null;
-        return innerText.get();
+        return innerText;
     }
 
     public String getInnerHTML() {
-        if (innerHTML == null) return null;
-        return innerHTML.get();
+        return innerHTML;
     }
 }

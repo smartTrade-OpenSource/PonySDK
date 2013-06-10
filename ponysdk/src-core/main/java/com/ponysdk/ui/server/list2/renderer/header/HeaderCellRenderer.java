@@ -24,7 +24,17 @@
 package com.ponysdk.ui.server.list2.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.list2.DataGridActivity;
+import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 
+/**
+ * <p>
+ * Way to display a the column Header of a {@link DataGridActivity}
+ * </p>
+ * <p>
+ * Defined in a {@link DataGridColumnDescriptor}
+ * </p>
+ */
 public interface HeaderCellRenderer {
 
     public IsPWidget render();

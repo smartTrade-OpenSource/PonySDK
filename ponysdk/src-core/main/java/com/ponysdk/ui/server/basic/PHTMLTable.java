@@ -43,9 +43,6 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and {@link PFlexTable}.
- * <p>
- * <img class='gallery' src='doc-files/PTable.png'/>
- * </p>
  */
 public abstract class PHTMLTable extends PPanel {
 

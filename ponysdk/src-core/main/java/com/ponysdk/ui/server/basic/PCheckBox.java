@@ -33,8 +33,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.stm.TxnBoolean;
-import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -42,11 +41,8 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
- * <p>
- * <img class='gallery' src='doc-files/PCheckBox.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * A standard check box widget. This class also serves as a base class for {@link PRadioButton}. <h3>CSS Style
+ * Rules</h3>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
  * <dd>the outer element</dd>
@@ -58,16 +54,23 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<PValueChangeHandler<Boolean>>();
 
-    private final TxnBoolean value = new TxnBoolean();
+    private Boolean value = Boolean.FALSE;
 
+    /**
+     * Creates a check box with no label.
+     */
     public PCheckBox() {
         this(null);
     }
 
-    public PCheckBox(final String text) {
-        value.setListener(this);
-
-        setText(text);
+    /**
+     * Creates a check box with the specified text label.
+     * 
+     * @param label
+     *            the check box's label
+     */
+    public PCheckBox(final String label) {
+        setText(label);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
         Txn.get().getTxnContext().save(addHandler);
     }
@@ -92,19 +95,32 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         return Collections.unmodifiableCollection(handlers);
     }
 
+    /**
+     * Determines whether this check box is currently checked.
+     * 
+     * @return <code>true</code> if the check box is checked, false otherwise. Will not return null
+     */
     @Override
     public Boolean getValue() {
-        return value.get();
+        return value;
     }
 
+    /**
+     * Checks or unchecks the check box.
+     * 
+     * @param value
+     *            true to check, false to uncheck; null value implies false
+     */
     @Override
     public void setValue(final Boolean value) {
-        this.value.set(value);
+        if (Objects.equals(this.value, value)) return;
+        this.value = value;
+        saveUpdate(PROPERTY.VALUE, this.value);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        this.value.reset(event.getValue());
+        this.value = event.getValue();
         for (final PValueChangeHandler<Boolean> handler : handlers) {
             handler.onValueChange(event);
         }
@@ -119,12 +135,4 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         }
     }
 
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == value) {
-            saveUpdate(PROPERTY.VALUE, value.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
-    }
 }

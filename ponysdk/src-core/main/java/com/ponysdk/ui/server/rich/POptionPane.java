@@ -33,6 +33,10 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
+/**
+ * POptionPane makes it easy to pop up a standard dialog box that prompts users for a value or informs them of
+ * something.
+ */
 public class POptionPane {
 
     final PDialogBox dialogBox;

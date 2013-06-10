@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.TxnObject;
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -34,11 +33,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * A mutually-exclusive selection radio button widget. Fires {@link PClickEvent}s when the radio button is
  * clicked, and {@link PValueChangeEvent}s when the button becomes checked. Note, however, that browser
  * limitations prevent PValueChangeEvents from being sent when the radio button is cleared as a side effect of
- * another in the group being clicked.
- * <p>
- * <img class='gallery' src='doc-files/PRadioButton.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * another in the group being clicked. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RadioButton</dt>
  * <dd>the outer element</dd>
@@ -46,11 +41,10 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PRadioButton extends PCheckBox {
 
-    private final TxnString name = new TxnString();
+    private String name;
 
     public PRadioButton(final String label) {
         super(label);
-        this.name.setListener(this);
     }
 
     public PRadioButton(final String name, final String label) {
@@ -64,20 +58,13 @@ public class PRadioButton extends PCheckBox {
     }
 
     public void setName(final String name) {
-        this.name.set(name);
+        if (Objects.equals(this.name, name)) return;
+        this.name = name;
+        saveUpdate(PROPERTY.NAME, this.name);
     }
 
     public String getName() {
-        return name.get();
-    }
-
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == name) {
-            saveUpdate(PROPERTY.NAME, name.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
+        return name;
     }
 
 }

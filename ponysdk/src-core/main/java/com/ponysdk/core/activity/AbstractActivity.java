@@ -46,11 +46,10 @@ public abstract class AbstractActivity implements Activity {
 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
-        if (!started) {
-            this.world = world;
-            this.started = true;
-            this.view = buildView();
-        }
+        this.world = world;
+        this.started = true;
+
+        if (view == null) this.view = buildView();
 
         this.world.setWidget(view);
 
@@ -59,7 +58,7 @@ public abstract class AbstractActivity implements Activity {
 
     @Override
     public void stop() {
-        // nothing to do by default
+        this.started = false;
     }
 
     protected abstract IsPWidget buildView();

@@ -37,19 +37,23 @@ public class PTScript extends AbstractPTObject {
         try {
             final Object result = eval(scriptToEval);
 
-            final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.setObjectID(update.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
-            eventInstruction.put(PROPERTY.RESULT, result == null ? "" : result.toString());
-            uiService.sendDataToServer(eventInstruction);
+            if (update.containsKey(PROPERTY.CALLBACK)) {
+                final PTInstruction eventInstruction = new PTInstruction();
+                eventInstruction.setObjectID(update.getObjectID());
+                eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
+                eventInstruction.put(PROPERTY.RESULT, result == null ? "" : result.toString());
+                uiService.sendDataToServer(eventInstruction);
+            }
         } catch (final Throwable e) {
-            final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.setObjectID(update.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
-            eventInstruction.put(PROPERTY.ERROR_MSG, e.getMessage());
-            uiService.sendDataToServer(eventInstruction);
+            if (update.containsKey(PROPERTY.CALLBACK)) {
+                final PTInstruction eventInstruction = new PTInstruction();
+                eventInstruction.setObjectID(update.getObjectID());
+                eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+                eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
+                eventInstruction.put(PROPERTY.ERROR_MSG, e.getMessage());
+                uiService.sendDataToServer(eventInstruction);
+            }
         }
     }
 

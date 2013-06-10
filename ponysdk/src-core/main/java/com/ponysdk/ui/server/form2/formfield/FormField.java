@@ -27,12 +27,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.form2.Form;
 import com.ponysdk.ui.server.form2.dataconverter.DataConverter;
 import com.ponysdk.ui.server.form2.validator.FieldValidator;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
 import com.ponysdk.ui.server.list2.Resetable;
 import com.ponysdk.ui.server.list2.Validable;
 
+/**
+ * A field of a {@link Form} that can be validated or reset
+ */
 public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
 
     private final Set<FormFieldListener> listeners = new HashSet<FormFieldListener>();

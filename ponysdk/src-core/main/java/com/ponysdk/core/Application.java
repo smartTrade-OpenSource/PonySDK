@@ -32,6 +32,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.ponysdk.core.servlet.Session;
 
+/**
+ * <p>
+ * Wrapper of the HTTPSession, and contains the UIContexts.
+ * </p>
+ */
 public class Application {
 
     private static final AtomicLong ponySessionIDcount = new AtomicLong();

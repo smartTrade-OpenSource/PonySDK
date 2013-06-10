@@ -32,7 +32,9 @@ public class PTFlexTable extends PTHTMLTable {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new FlexTable());
+        final FlexTable flexTable = new FlexTable();
+        flexTable.addStyleName("pony-PFlexTable");
+        init(create, uiService, flexTable);
     }
 
     @Override

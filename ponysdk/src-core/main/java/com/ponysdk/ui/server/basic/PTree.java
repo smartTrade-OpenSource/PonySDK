@@ -43,11 +43,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of {@link PTreeItem TreeItems} that the
- * user can open, close, and select.
- * <p>
- * <img class='gallery' src='doc-files/PTree.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * user can open, close, and select. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Tree</dt>
  * <dd>the tree itself</dd>

@@ -29,9 +29,6 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * A rectangular grid that can contain text, html, or a child {@link PWidget} within its cells. It must be
  * resized explicitly to the desired number of rows and columns.
- * <p>
- * <img class='gallery' src='doc-files/PGrid.png'/>
- * </p>
  */
 public class PGrid extends PHTMLTable {
 
@@ -48,8 +45,6 @@ public class PGrid extends PHTMLTable {
     }
 
     public PGrid() {
-        // TODO nciaravola must be moved terminal side
-        addStyleName("pony-PGrid");
         setCellFormatter(new PCellFormatter());
     }
 

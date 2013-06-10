@@ -52,9 +52,6 @@ import com.ponysdk.ui.terminal.WidgetType;
  * PPopupPanel's widget.
  * </p>
  * <p>
- * <img class='gallery' src='doc-files/PPopupPanel.png'/>
- * </p>
- * <p>
  * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly used to gray
  * out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}. It has a default
  * style name of "gwt-PopupPanelGlass", which can be changed using {@link #setGlassStyleName(String)}.
@@ -230,6 +227,9 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             final Integer clientWith = instruction.getInt(PROPERTY.CLIENT_WIDTH);
             final Integer clientHeight = instruction.getInt(PROPERTY.CLIENT_HEIGHT);
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
+            final Update update = new Update(ID);
+            update.put(PROPERTY.POPUP_POSITION_AND_SHOW);
+            Txn.get().getTxnContext().save(update);
         } else if (HANDLER.KEY_.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
             this.showing = false;
             fireOnClose();
@@ -246,7 +246,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
         this.positionCallback.setPosition(offsetWidth, offsetHeight, windowWidth, windowHeight);
-        setVisible(true);
     }
 
     public boolean isAutoHide() {

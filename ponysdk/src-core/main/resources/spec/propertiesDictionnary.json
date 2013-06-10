@@ -90,6 +90,7 @@
 		"popupGlassEnabled": [],
 		"popupCenter": [],
 		"popupShow": [],
+		"popupPositionAndShow": [],
 		"popupHide": [],
 		"popupCaption": [],
 		"popupDraggable": [],
@@ -229,7 +230,9 @@
 		"data": [],
 		"preventEvent": [],
 		"stopEvent": [],
-		"widgetHidden": []
+		"widgetHidden": [],
+		"href": [],
+		"callback": []
 	}
 	
 }

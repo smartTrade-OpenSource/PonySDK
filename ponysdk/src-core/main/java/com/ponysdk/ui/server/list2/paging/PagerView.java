@@ -3,6 +3,9 @@ package com.ponysdk.ui.server.list2.paging;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
 
+/**
+ * View of a {@link Pager}
+ */
 public interface PagerView extends IsPWidget {
 
     public void addPagerListener(PagerListener pagerListener);

@@ -26,8 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.stm.TxnBoolean;
-import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -55,18 +54,10 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
  */
 public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
-    private final TxnBoolean enabled = new TxnBoolean(Boolean.TRUE);
-    private final TxnBoolean enabledOnRequest = new TxnBoolean();
-    private final TxnBoolean focused = new TxnBoolean();
-    private final TxnBoolean showLoadingOnRequest = new TxnBoolean();
-
-    public PFocusWidget() {
-        super();
-        this.enabled.setListener(this);
-        this.enabledOnRequest.setListener(this);
-        this.focused.setListener(this);
-        this.showLoadingOnRequest.setListener(this);
-    }
+    private boolean enabled = true;
+    private boolean enabledOnRequest;
+    private boolean focused;
+    private boolean showLoadingOnRequest;
 
     @Override
     public Collection<PClickHandler> getClickHandlers() {
@@ -114,41 +105,49 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     public void setEnabled(final boolean enabled) {
-        this.enabled.set(enabled);
+        if (Objects.equals(this.enabled, enabled)) return;
+        this.enabled = enabled;
+        saveUpdate(PROPERTY.ENABLED, enabled);
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
-        this.enabledOnRequest.set(enabledOnRequest);
+        if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
+        this.enabledOnRequest = enabledOnRequest;
+        saveUpdate(PROPERTY.ENABLED_ON_REQUEST, this.enabledOnRequest);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
-        this.showLoadingOnRequest.set(showLoadingOnRequest);
+        if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
+        this.showLoadingOnRequest = showLoadingOnRequest;
+        saveUpdate(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest);
     }
 
     @Override
     public void setFocus(final boolean focused) {
-        this.focused.set(focused);
+        if (Objects.equals(this.focused, focused)) return;
+        this.focused = focused;
+        saveUpdate(PROPERTY.FOCUSED, focused);
     }
 
     public boolean isEnabled() {
-        return enabled.get();
+        return enabled;
     }
 
     public boolean isShowLoadingOnRequest() {
-        return showLoadingOnRequest.get();
+        return showLoadingOnRequest;
     }
 
     public boolean isEnabledOnRequest() {
-        return enabledOnRequest.get();
+        return enabledOnRequest;
     }
 
     public boolean isFocused() {
-        return focused.get();
+        return focused;
     }
 
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
-        if (showLoadingOnRequest.get() || !enabledOnRequest.get()) {
+        if (showLoadingOnRequest || !enabledOnRequest) {
             final PClickHandler clickHandler = new PClickHandler() {
 
                 @Override
@@ -166,7 +165,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
 
     @Override
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
-        if (showLoadingOnRequest.get() || !enabledOnRequest.get()) {
+        if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = new PDoubleClickHandler() {
 
                 @Override
@@ -185,21 +184,6 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     @Override
     public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
         return getHandlerSet(PDoubleClickEvent.TYPE, this);
-    }
-
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == enabled) {
-            saveUpdate(PROPERTY.ENABLED, enabled.get());
-        } else if (txnObject == enabledOnRequest) {
-            saveUpdate(PROPERTY.ENABLED_ON_REQUEST, enabledOnRequest.get());
-        } else if (txnObject == focused) {
-            saveUpdate(PROPERTY.FOCUSED, focused.get());
-        } else if (txnObject == showLoadingOnRequest) {
-            saveUpdate(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
     }
 
 }

@@ -25,8 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.stm.TxnInteger;
-import com.ponysdk.core.stm.TxnObject;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
@@ -41,15 +40,19 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
  */
 public abstract class PCellPanel extends PComplexPanel {
 
-    private final TxnInteger borderWidth = new TxnInteger();
-    private final TxnInteger spacing = new TxnInteger();
+    private Integer borderWidth;
+    private Integer spacing;
 
-    public void setBorderWidth(final int borderWidth) {
-        this.borderWidth.set(borderWidth);
+    public void setBorderWidth(final Integer borderWidth) {
+        if (Objects.equals(this.borderWidth, borderWidth)) return;
+        this.borderWidth = borderWidth;
+        saveUpdate(PROPERTY.BORDER_WIDTH, this.borderWidth);
     }
 
-    public void setSpacing(final int spacing) {
-        this.spacing.set(spacing);
+    public void setSpacing(final Integer spacing) {
+        if (Objects.equals(this.spacing, spacing)) return;
+        this.spacing = spacing;
+        saveUpdate(PROPERTY.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
@@ -80,23 +83,12 @@ public abstract class PCellPanel extends PComplexPanel {
         Txn.get().getTxnContext().save(update);
     }
 
-    public int getBorderWidth() {
-        return borderWidth.get();
+    public Integer getBorderWidth() {
+        return borderWidth;
     }
 
-    public int getSpacing() {
-        return spacing.get();
+    public Integer getSpacing() {
+        return spacing;
     }
 
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == borderWidth) {
-            saveUpdate(PROPERTY.BORDER_WIDTH, borderWidth.get());
-        } else if (txnObject == spacing) {
-            saveUpdate(PROPERTY.SPACING, spacing.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
-
-    }
 }

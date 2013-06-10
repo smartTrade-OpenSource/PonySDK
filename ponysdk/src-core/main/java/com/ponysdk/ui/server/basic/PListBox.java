@@ -44,11 +44,8 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
- * <p>
- * <img class='gallery' src='doc-files/PistBox.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * A widget that presents a list of choices to the user, either as a list box or as a drop-down list. <h3>CSS
+ * Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-ListBox { }</li>
  * </ul>

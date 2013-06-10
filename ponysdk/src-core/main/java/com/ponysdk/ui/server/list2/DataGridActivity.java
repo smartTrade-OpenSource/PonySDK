@@ -34,6 +34,11 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
+/***
+ * A Grid of data that supports paging and columns.
+ * 
+ * @see DataGridColumnDescriptor
+ */
 public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     protected final SimpleListView view;
@@ -44,10 +49,11 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     private int colCount = 0;
     protected final List<D> rows = new ArrayList<D>();
 
+    protected final Map<Integer, Integer> reservedRowByRealRow = new HashMap<Integer, Integer>();
+
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
         this.view.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
-
     }
 
     public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
@@ -75,15 +81,14 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
     }
 
-    protected void updateRowIndex(final int min) {
-        // update model
-        // for (int i = min; i < rows.size(); i++) {}
-    }
+    protected void updateRowIndex(final int min) {}
 
     public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
-        view.insertRow(row);
-        view.addWidget(widget, column, row, colSpan);
-        updateRowIndex(row);
+        final int realRowPosition = Math.min(row, getVisibleItemCount() + 1);
+        reservedRowByRealRow.put(realRowPosition, row);
+        view.insertRow(realRowPosition);
+        view.addWidget(widget, column, realRowPosition, colSpan);
+        updateRowIndex(realRowPosition);
     }
 
     public void insertSubList(final int row, final List<D> datas) {
@@ -150,6 +155,10 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     @Override
     public D getVisibleItem(final int indexOnPage) {
         return rows.get(indexOnPage);
+    }
+
+    public int getRowCount() {
+        return rows.size() + reservedRowByRealRow.size();
     }
 
     @Override

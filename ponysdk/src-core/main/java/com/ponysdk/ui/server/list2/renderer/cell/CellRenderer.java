@@ -24,7 +24,19 @@
 package com.ponysdk.ui.server.list2.renderer.cell;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.list2.DataGridActivity;
+import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 
+/**
+ * <p>
+ * Way to display a Cell of a {@link DataGridActivity}
+ * </p>
+ * <p>
+ * Defined in a {@link DataGridColumnDescriptor}
+ * </p>
+ * 
+ * @param <V>
+ */
 public interface CellRenderer<V> {
 
     public IsPWidget render(final int row, V value);

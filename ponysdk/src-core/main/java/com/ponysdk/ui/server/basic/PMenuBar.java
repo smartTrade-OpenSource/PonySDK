@@ -36,11 +36,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can either fire
- * a {@link PCommand} or open a cascaded menu bar.
- * <p>
- * <img class='gallery' src='doc-files/PMenuBar.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * a {@link PCommand} or open a cascaded menu bar. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-MenuBar</dt>
  * <dd>the menu bar itself</dd>

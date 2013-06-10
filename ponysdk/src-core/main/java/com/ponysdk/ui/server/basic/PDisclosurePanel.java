@@ -55,9 +55,6 @@ import com.ponysdk.ui.terminal.WidgetType;
  * <dd>dependent style set when panel is closed
  * </dl>
  * <p>
- * <img class='gallery' src='doc-files/PDisclosurePanel.png'/>
- * </p>
- * <p>
  * The header and content sections can be easily selected using css with a child selector:<br/>
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>

@@ -23,8 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -39,15 +41,10 @@ import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.stm.TxnBoolean;
-import com.ponysdk.core.stm.TxnHashMap;
-import com.ponysdk.core.stm.TxnObject;
-import com.ponysdk.core.stm.TxnObjectListener;
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -76,7 +73,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
  * The base class for the majority of user-interface objects. Widget adds support for receiving events from
  * the browser and being added directly to {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget, TxnObjectListener {
+public abstract class PWidget extends PObject implements IsPWidget {
 
     private static Logger log = LoggerFactory.getLogger(PWidget.class);
 
@@ -84,48 +81,132 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
 
     protected Object data;
 
-    private final Set<String> styleNames = new HashSet<String>();
-    private final Set<PEvent> preventEvents = new HashSet<PEvent>();
-    private final Set<PEvent> stopEvents = new HashSet<PEvent>();
+    private Set<String> styleNames;
+    private Set<PEvent> preventEvents;
+    private Set<PEvent> stopEvents;
 
     private EventBus domHandler;
 
-    private final TxnHashMap<String, String> styleProperties = new TxnHashMap<String, String>();
-    private final TxnHashMap<String, String> elementProperties = new TxnHashMap<String, String>();
-    private final TxnHashMap<String, String> elementAttributes = new TxnHashMap<String, String>();
+    private Map<String, String> styleProperties;
+    private Map<String, String> elementProperties;
+    private Map<String, String> elementAttributes;
 
-    private final TxnBoolean visible = new TxnBoolean(true);
-    private final TxnString title = new TxnString();
-    private final TxnString width = new TxnString();
-    private final TxnString height = new TxnString();
-    private final TxnString styleName = new TxnString();
-    private final TxnString stylePrimaryName = new TxnString();
-    private final TxnString debugID = new TxnString();
-
-    public PWidget() {
-        styleProperties.setListener(this);
-        elementProperties.setListener(this);
-        elementAttributes.setListener(this);
-
-        visible.setListener(this);
-        title.setListener(this);
-        width.setListener(this);
-        height.setListener(this);
-        styleName.setListener(this);
-        stylePrimaryName.setListener(this);
-        debugID.setListener(this);
-    }
+    private boolean visible = true;
+    private String title;
+    private String width;
+    private String height;
+    private String styleName;
+    private String stylePrimaryName;
+    private String debugID;
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
 
+    private final Set<String> safeStyleName() {
+        if (styleNames != null) return styleNames;
+        styleNames = new HashSet<String>();
+        return styleNames;
+    }
+
+    private final Set<PEvent> safePreventEvents() {
+        if (preventEvents != null) return preventEvents;
+        preventEvents = new HashSet<PEvent>();
+        return preventEvents;
+    }
+
+    private final Set<PEvent> safeStopEvents() {
+        if (stopEvents != null) return stopEvents;
+        stopEvents = new HashSet<PEvent>();
+        return stopEvents;
+    }
+
+    private final Map<String, String> safeStyleProperties() {
+        if (styleProperties != null) return styleProperties;
+        styleProperties = new HashMap<String, String>();
+        return styleProperties;
+    }
+
+    private final Map<String, String> safeElementProperties() {
+        if (elementProperties != null) return elementProperties;
+        elementProperties = new HashMap<String, String>();
+        return elementProperties;
+    }
+
+    private final Map<String, String> safeElementAttributes() {
+        if (elementAttributes != null) return elementAttributes;
+        elementAttributes = new HashMap<String, String>();
+        return elementAttributes;
+    }
+
+    public void setVisible(final boolean visible) {
+        if (Objects.equals(this.visible, visible)) return;
+        this.visible = visible;
+        saveUpdate(PROPERTY.WIDGET_VISIBLE, visible);
+    }
+
     public void setWidth(final String width) {
-        this.width.set(width);
+        if (Objects.equals(this.width, width)) return;
+        this.width = width;
+        saveUpdate(PROPERTY.WIDGET_WIDTH, width);
     }
 
     public void setHeight(final String height) {
-        this.height.set(height);
+        if (Objects.equals(this.height, height)) return;
+        this.height = height;
+        saveUpdate(PROPERTY.WIDGET_HEIGHT, height);
+    }
+
+    public void setTitle(final String title) {
+        if (Objects.equals(this.title, title)) return;
+        this.title = title;
+        saveUpdate(PROPERTY.WIDGET_TITLE, title);
+    }
+
+    public void setStyleName(final String styleName) {
+        if (Objects.equals(this.styleName, styleName)) return;
+        this.styleName = styleName;
+        saveUpdate(PROPERTY.STYLE_NAME, styleName);
+    }
+
+    public void setStylePrimaryName(final String stylePrimaryName) {
+        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
+        this.stylePrimaryName = stylePrimaryName;
+        saveUpdate(PROPERTY.STYLE_PRIMARY_NAME, stylePrimaryName);
+    }
+
+    public void ensureDebugId(final String debugID) {
+        if (Objects.equals(this.debugID, debugID)) return;
+        this.debugID = debugID;
+        saveUpdate(PROPERTY.ENSURE_DEBUG_ID, debugID);
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public String getWidth() {
+        return width;
+    }
+
+    public String getHeight() {
+        return height;
+    }
+
+    public String getStyleName() {
+        return styleName;
+    }
+
+    public String getDebugID() {
+        return debugID;
+    }
+
+    public String getStylePrimaryName() {
+        return stylePrimaryName;
     }
 
     public PWidget getParent() {
@@ -137,47 +218,41 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public void setStyleProperty(final String name, final String value) {
-        styleProperties.put(name, value);
+        safeStyleProperties().put(name, value);
         final Update update = new Update(ID);
         update.put(PROPERTY.STYLE_KEY, name);
         update.put(PROPERTY.STYLE_VALUE, value);
-        styleProperties.addPendingInstruction(name, update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setProperty(final String name, final String value) {
-        elementProperties.put(name, value);
+        safeElementProperties().put(name, value);
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
         update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
-        elementProperties.addPendingInstruction(name, update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public void setAttribute(final String name, final String value) {
-        elementAttributes.put(name, value);
+        safeElementAttributes().put(name, value);
         final Update update = new Update(ID);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
         update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
-        elementAttributes.addPendingInstruction(name, update);
+        Txn.get().getTxnContext().save(update);
     }
 
     public String getProperty(final String key) {
+        if (elementProperties == null) return null;
         return elementProperties.get(key);
     }
 
     public String getAttribute(final String key) {
+        if (elementAttributes == null) return null;
         return elementAttributes.get(key);
     }
 
-    public void setStyleName(final String styleName) {
-        this.styleName.set(styleName);
-    }
-
-    public void setStylePrimaryName(final String stylePrimaryName) {
-        this.stylePrimaryName.set(stylePrimaryName);
-    }
-
     public void preventEvent(final PEvent e) {
-        if (preventEvents.add(e)) {
+        if (safePreventEvents().add(e)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.PREVENT_EVENT, e.getCode());
             Txn.get().getTxnContext().save(update);
@@ -185,7 +260,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public void stopEvent(final PEvent e) {
-        if (stopEvents.add(e)) {
+        if (safeStopEvents().add(e)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.STOP_EVENT, e.getCode());
             Txn.get().getTxnContext().save(update);
@@ -193,7 +268,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public void addStyleName(final String styleName) {
-        if (styleNames.add(styleName)) {
+        if (safeStyleName().add(styleName)) {
             final Update update = new Update(ID);
             update.put(PROPERTY.ADD_STYLE_NAME, styleName);
             Txn.get().getTxnContext().save(update);
@@ -201,6 +276,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public void removeStyleName(final String styleName) {
+        if (styleNames == null) return;
         if (styleNames.remove(styleName)) {
             removeStyle(styleName);
         }
@@ -213,11 +289,20 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public boolean hasStyleName(final String styleName) {
+        if (styleNames == null) return false;
         return styleNames.contains(styleName);
     }
 
-    public void ensureDebugId(final String debugID) {
-        this.debugID.set(debugID);
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
+    }
+
+    public void setDomHandler(final EventBus domHandler) {
+        this.domHandler = domHandler;
     }
 
     @Override
@@ -226,47 +311,8 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     }
 
     public void setSizeFull() {
-        setWidth("100%");
-        setHeight("100%");
-    }
-
-    public void setVisible(final boolean visible) {
-        this.visible.set(visible);
-    }
-
-    public void setTitle(final String title) {
-        this.title.set(title);
-    }
-
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == title) {
-            saveUpdate(PROPERTY.WIDGET_TITLE, title.get());
-        } else if (txnObject == visible) {
-            saveUpdate(PROPERTY.WIDGET_VISIBLE, visible.get());
-        } else if (txnObject == width) {
-            saveUpdate(PROPERTY.WIDGET_WIDTH, width.get());
-        } else if (txnObject == height) {
-            saveUpdate(PROPERTY.WIDGET_HEIGHT, height.get());
-        } else if (txnObject == debugID) {
-            saveUpdate(PROPERTY.ENSURE_DEBUG_ID, debugID.get());
-        } else if (txnObject == styleName) {
-            saveUpdate(PROPERTY.STYLE_NAME, styleName.get());
-        } else if (txnObject == stylePrimaryName) {
-            saveUpdate(PROPERTY.STYLE_PRIMARY_NAME, stylePrimaryName.get());
-        } else if (txnObject == elementAttributes) {
-            for (final Instruction instruction : elementAttributes.getPendingInstructions().values()) {
-                Txn.get().getTxnContext().save(instruction);
-            }
-        } else if (txnObject == elementProperties) {
-            for (final Instruction instruction : elementProperties.getPendingInstructions().values()) {
-                Txn.get().getTxnContext().save(instruction);
-            }
-        } else if (txnObject == styleProperties) {
-            for (final Instruction instruction : styleProperties.getPendingInstructions().values()) {
-                Txn.get().getTxnContext().save(instruction);
-            }
-        }
+        setWidth(Size.HUNDRED_PERCENT);
+        setHeight(Size.HUNDRED_PERCENT);
     }
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
@@ -282,7 +328,7 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
     @SuppressWarnings("unchecked")
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final Set<H> handlerSet = ensureDomHandler().getHandlerSet(type, this);
-        final HandlerRegistration handlerRegistration = ensureDomHandler().addHandlerToSource(type, this, handler);
+        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerSet.isEmpty()) {
             final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
             addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
@@ -391,11 +437,13 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         event.setSourceAbsoluteTop((int) instruction.getDouble(PROPERTY.SOURCE_ABSOLUTE_TOP));
         event.setSourceOffsetHeight((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_HEIGHT));
         event.setSourceOffsetWidth((int) instruction.getDouble(PROPERTY.SOURCE_OFFSET_WIDTH));
-        ensureDomHandler().fireEvent(event);
+
+        fireEvent(event);
     }
 
     public void fireEvent(final Event<?> event) {
-        ensureDomHandler().fireEvent(event);
+        if (domHandler == null) return;
+        domHandler.fireEvent(event);
     }
 
     public void removeFromParent() {
@@ -420,46 +468,6 @@ public abstract class PWidget extends PObject implements IsPWidget, TxnObjectLis
         final Update update = new Update(getID());
         update.put(key, value);
         Txn.get().getTxnContext().save(update);
-    }
-
-    public String getTitle() {
-        return title.get();
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(final Object data) {
-        this.data = data;
-    }
-
-    public boolean isVisible() {
-        return visible.get();
-    }
-
-    public String getWidth() {
-        return width.get();
-    }
-
-    public String getHeight() {
-        return height.get();
-    }
-
-    public String getStyleName() {
-        return styleName.get();
-    }
-
-    public String getDebugID() {
-        return debugID.get();
-    }
-
-    public String getStylePrimaryName() {
-        return stylePrimaryName.get();
-    }
-
-    public void setDomHandler(final EventBus domHandler) {
-        this.domHandler = domHandler;
     }
 
 }

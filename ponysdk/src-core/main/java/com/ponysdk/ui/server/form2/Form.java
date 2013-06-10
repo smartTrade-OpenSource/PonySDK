@@ -29,6 +29,9 @@ import java.util.List;
 import com.ponysdk.ui.server.form2.formfield.FormField;
 import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
+/**
+ * A list of {@link FormField} validated or reset altogether
+ */
 public class Form {
 
     protected final List<FormField<?>> formFields = new ArrayList<FormField<?>>();

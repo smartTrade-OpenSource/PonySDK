@@ -41,6 +41,9 @@ import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
+/**
+ * Push data to clients using WebSocket.
+ */
 public class PPusher extends PObject implements ConnectionListener {
 
     private static final Logger log = LoggerFactory.getLogger(PPusher.class);

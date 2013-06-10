@@ -26,11 +26,7 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A standard push-button widget.
- * <p>
- * <img class='gallery' src='doc-files/PButton.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
+ * A standard push-button widget. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Button</dt>
  * <dd>the outer element</dd>

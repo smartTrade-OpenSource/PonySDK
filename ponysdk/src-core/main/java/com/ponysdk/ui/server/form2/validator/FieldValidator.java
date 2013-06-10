@@ -23,7 +23,11 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
+import com.ponysdk.ui.server.form2.formfield.FormField;
 
+/**
+ * Validates a {@link FormField}
+ */
 public interface FieldValidator {
 
     ValidationResult isValid(String value);

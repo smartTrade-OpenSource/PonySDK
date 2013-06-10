@@ -23,9 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.TxnBoolean;
-import com.ponysdk.core.stm.TxnObject;
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -44,23 +42,18 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PHTML extends PLabel implements PHasHTML {
 
-    private final TxnString html = new TxnString();
-    private final TxnBoolean wordWrap = new TxnBoolean(false);
+    private String html;
+    private boolean wordWrap = false;
 
-    public PHTML() {
-        super();
-        this.html.setListener(this);
-        this.wordWrap.setListener(this);
-    }
+    public PHTML() {}
 
     public PHTML(final String text) {
         this(text, false);
     }
 
-    public PHTML(final String text, final boolean wordWrap) {
-        this.html.setListener(this);
-        this.wordWrap.setListener(this);
-        setHTML(text);
+    public PHTML(final String html, final boolean wordWrap) {
+        setHTML(html);
+        setWordWrap(wordWrap);
     }
 
     @Override
@@ -70,31 +63,24 @@ public class PHTML extends PLabel implements PHasHTML {
 
     @Override
     public String getHTML() {
-        return html.get();
+        return html;
     }
 
     @Override
     public void setHTML(final String html) {
-        this.html.set(html);
+        if (Objects.equals(this.html, html)) return;
+        this.html = html;
+        saveUpdate(PROPERTY.HTML, this.html);
     }
 
     public boolean isWordWrap() {
-        return wordWrap.get();
+        return wordWrap;
     }
 
     public void setWordWrap(final boolean wordWrap) {
-        this.wordWrap.set(wordWrap);
-    }
-
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == html) {
-            saveUpdate(PROPERTY.HTML, html.get());
-        } else if (txnObject == wordWrap) {
-            saveUpdate(PROPERTY.WORD_WRAP, wordWrap.get());
-        } else {
-            super.beforeFlush(txnObject);
-        }
+        if (Objects.equals(this.wordWrap, wordWrap)) return;
+        this.wordWrap = wordWrap;
+        saveUpdate(PROPERTY.WORD_WRAP, this.wordWrap);
     }
 
 }

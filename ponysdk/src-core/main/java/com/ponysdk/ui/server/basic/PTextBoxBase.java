@@ -33,8 +33,7 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.stm.TxnObject;
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -46,18 +45,15 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
-    private final TxnString text = new TxnString("");
-    private final TxnString placeholder = new TxnString("");
+    private String text = "";
+    private String placeholder = "";
 
     public PTextBoxBase() {
-        this(null);
+        this("");
     }
 
     public PTextBoxBase(final String text) {
         super();
-        this.text.setListener(this);
-        this.placeholder.setListener(this);
-
         setText(text);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
         Txn.get().getTxnContext().save(addHandler);
@@ -70,12 +66,14 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
 
     @Override
     public String getText() {
-        return text.get();
+        return text;
     }
 
     @Override
     public void setText(final String text) {
-        this.text.set(text);
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        saveUpdate(PROPERTY.TEXT, this.text);
     }
 
     @Override
@@ -89,11 +87,13 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     public void setPlaceholder(final String placeholder) {
-        this.placeholder.set(placeholder);
+        if (Objects.equals(this.placeholder, placeholder)) return;
+        this.placeholder = placeholder;
+        saveUpdate(PROPERTY.PLACEHOLDER, this.text);
     }
 
     public String getPlaceholder() {
-        return placeholder.get();
+        return placeholder;
     }
 
     @Override
@@ -122,20 +122,9 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
-        this.text.reset(event.getValue());
+        this.text = event.getValue();
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
-        }
-    }
-
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == text) {
-            saveUpdate(PROPERTY.TEXT, text.get());
-        } else if (txnObject == placeholder) {
-            saveUpdate(PROPERTY.PLACEHOLDER, placeholder.get());
-        } else {
-            super.beforeFlush(txnObject);
         }
     }
 

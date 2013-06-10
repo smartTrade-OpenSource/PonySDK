@@ -25,6 +25,9 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
+/**
+ * Characteristic interface which indicates that a widget has an associated vertical alignment.
+ */
 public interface HasPVerticalAlignment {
 
     void setVerticalAlignment(PVerticalAlignment verticalAlignment);

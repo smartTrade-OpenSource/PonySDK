@@ -58,6 +58,17 @@ import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
+/**
+ * <p>
+ * Provides a way to identify a user across more than one page request or visit to a Web site and to store
+ * information about that user.
+ * </p>
+ * <p>
+ * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
+ * {@link Application} .
+ * </p>
+ */
+
 public class UIContext {
 
     private static ThreadLocal<UIContext> currentContext = new ThreadLocal<UIContext>();

@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.TxnObject;
-import com.ponysdk.core.stm.TxnString;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -37,13 +36,17 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
-    private final TxnString text = new TxnString("");
-    private final TxnString html = new TxnString("");
+    private String text;
+    private String html;
+    private String href;
 
+    /**
+     * Creates an anchor with its text specified.
+     * 
+     * @param text
+     *            the anchor's text
+     */
     public PAnchor(final String text) {
-        this.text.setListener(this);
-        this.html.setListener(this);
-
         setText(text);
     }
 
@@ -51,37 +54,67 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         this("");
     }
 
+    /**
+     * Creates an anchor with its text and href (target URL) specified.
+     * 
+     * @param text
+     *            the anchor's text
+     * @param href
+     *            the url to which it will link
+     */
+    public PAnchor(final String text, final String href) {
+        this(text);
+        setHref(href);
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ANCHOR;
     }
 
+    /**
+     * Gets the anchor's href (the url to which it links).
+     * 
+     * @return the anchor's href
+     */
+    public String getHref() {
+        return href;
+    }
+
+    /**
+     * Sets the anchor's href (the url to which it links).
+     * 
+     * @param href
+     *            the anchor's href
+     */
+    public void setHref(final String href) {
+        if (Objects.equals(this.href, href)) return;
+        this.href = href;
+        saveUpdate(PROPERTY.HREF, this.href);
+    }
+
     @Override
     public String getText() {
-        return text.get();
+        return text;
     }
 
     @Override
     public void setText(final String text) {
-        this.text.set(text);
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        saveUpdate(PROPERTY.TEXT, this.text);
     }
 
     @Override
     public String getHTML() {
-        return html.get();
+        return html;
     }
 
     @Override
     public void setHTML(final String html) {
-        this.html.set(html);
+        if (Objects.equals(this.html, html)) return;
+        this.html = html;
+        saveUpdate(PROPERTY.HTML, this.html);
     }
 
-    @Override
-    public void beforeFlush(final TxnObject<?> txnObject) {
-        if (txnObject == text) {
-            saveUpdate(PROPERTY.TEXT, text.get());
-        } else if (txnObject == html) {
-            saveUpdate(PROPERTY.HTML, html.get());
-        } else super.beforeFlush(txnObject);
-    }
 }

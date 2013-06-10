@@ -25,6 +25,9 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
+/**
+ * Characteristic interface which indicates that a widget can be aligned horizontally.
+ */
 public interface HasPHorizontalAlignment {
 
     void setHorizontalAlignment(PHorizontalAlignment horizontalAlignment);

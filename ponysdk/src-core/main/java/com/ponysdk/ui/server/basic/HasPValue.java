@@ -23,7 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
-
+/**
+ * An object that implements this interface should be a user input widget, where the user and programmer can
+ * both set and get the object's value. It is intended to provide a unified interface to widgets with "atomic"
+ * values, like Strings and Dates.
+ * 
+ * @param <T>
+ *            the type of value
+ */
 public interface HasPValue<T> extends HasPValueChangeHandlers<T> {
 
     T getValue();

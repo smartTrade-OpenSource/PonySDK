@@ -39,7 +39,7 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * This class allows to execute native javascript code.
+ * This class allows to execute native Javascript code.
  */
 public abstract class PScript extends PObject {
 
@@ -101,6 +101,7 @@ public abstract class PScript extends PObject {
         final Update update = new Update(ID);
         update.put(PROPERTY.EVAL, js);
         update.put(PROPERTY.ID, id);
+        update.put(PROPERTY.CALLBACK, true);
         Txn.get().getTxnContext().save(update);
     }
 

@@ -23,11 +23,18 @@
 
 package com.ponysdk.ui.server.list2;
 
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
 import com.ponysdk.ui.server.list2.renderer.header.HeaderCellRenderer;
 import com.ponysdk.ui.server.list2.valueprovider.ValueProvider;
 
+/**
+ * Defines a {@link DataGrid} column
+ * 
+ * @param <D>
+ * @param <V>
+ */
 public class DataGridColumnDescriptor<D, V> {
 
     protected HeaderCellRenderer headerCellRenderer;
