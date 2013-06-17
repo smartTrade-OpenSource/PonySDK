@@ -152,16 +152,15 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         if (pendingClose) return;
 
-        // if (loadingMessageBox == null) {
-        // // First load failed
-        // if (exception instanceof StatusCodeException) {
-        // final StatusCodeException codeException = (StatusCodeException) exception;
-        // if (codeException.getStatusCode() == 0) return;
-        // }
-        // Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception +
-        // "\nPlease reload your application");
-        // return;
-        // }
+        if (loadingMessageBox == null) {
+            // First load failed
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException codeException = (StatusCodeException) exception;
+                if (codeException.getStatusCode() == 0) return;
+            }
+            Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
+            return;
+        }
 
         if (hasCommunicationErrorFunction()) {
             if (exception instanceof StatusCodeException) {

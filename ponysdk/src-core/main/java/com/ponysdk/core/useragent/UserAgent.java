@@ -93,6 +93,10 @@ public class UserAgent implements Serializable {
         return new UserAgent(operatingSystem, browser);
     }
 
+    public String getUserAgentString() {
+        return userAgentString;
+    }
+
     /**
      * Returns UserAgent based on combined string representation
      * 
