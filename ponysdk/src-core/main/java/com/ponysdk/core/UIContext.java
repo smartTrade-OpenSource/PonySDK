@@ -99,7 +99,7 @@ public class UIContext {
 
     private long viewID = -1;
     private long lastReceived = -1;
-    private long lastProcessedTimestamp = 0;
+    private long lastSyncErrorTimestamp = 0;
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
@@ -352,10 +352,12 @@ public class UIContext {
         final long previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
             log.error("Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+            if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
         lastReceived = receivedSeqNum;
-        lastProcessedTimestamp = System.currentTimeMillis();
+
+        lastSyncErrorTimestamp = -1;
         return true;
     }
 
@@ -411,7 +413,7 @@ public class UIContext {
         clientLoopListener.add(listener);
     }
 
-    public long getLastProcessedTimestamp() {
-        return lastProcessedTimestamp;
+    public long getLastSyncErrorTimestamp() {
+        return lastSyncErrorTimestamp;
     }
 }

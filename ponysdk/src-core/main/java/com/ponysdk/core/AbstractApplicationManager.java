@@ -150,9 +150,9 @@ public abstract class AbstractApplicationManager {
 
             if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
                 uiContext.stackIncomingMessage(receivedSeqNum, data);
-                if (options.maxOutOfSyncDuration > 0) {
-                    if (System.currentTimeMillis() - uiContext.getLastProcessedTimestamp() > options.maxOutOfSyncDuration) {
-                        log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastProcessedTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
+                if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
+                    if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {
+                        log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
                         session.invalidate();
                         return;
                     }

@@ -99,6 +99,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
             @Override
             public void disconnected() {
                 log.info("Disconnected from: " + wsServerURL);
+                uiService.onCommunicationError(new Exception("Websocket connection lost."));
                 uiService.unRegisterObject(getObjectID());
             }
 

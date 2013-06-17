@@ -45,7 +45,6 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
-import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Exception> {
@@ -135,7 +134,6 @@ public class CommunicationEntryPoint implements EntryPoint, Callback<Void, Excep
                 @Override
                 public void onError(final Throwable exception) {
                     uiBuilder.onCommunicationError(exception);
-                    rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
                 }
 
             };
