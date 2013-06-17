@@ -41,7 +41,8 @@ public class UIMockScheduler extends UIMock {
                         i.put(PROPERTY.FIXRATE, delay);
                         ui.sendToServer(i);
                     } catch (final Exception e) {
-                        log.error("", e);
+                        log.error("UIScheduler failed. Shutting down", e);
+                        executor.shutdownNow();
                     }
                 }
             }, delay, delay, TimeUnit.MILLISECONDS);

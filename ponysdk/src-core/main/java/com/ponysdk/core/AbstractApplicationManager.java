@@ -33,9 +33,16 @@ public abstract class AbstractApplicationManager {
     private final ServiceLoader<Addon> addonServiceLoader = ServiceLoader.load(Addon.class);
     private final ServiceLoader<ScriptInjector> scriptInjectorServiceLoader = ServiceLoader.load(ScriptInjector.class);
 
-    // private final Set<String> scripts = new HashSet<String>();
+    private final ApplicationManagerOption options;
 
     public AbstractApplicationManager() {
+        this(new ApplicationManagerOption());
+    }
+
+    public AbstractApplicationManager(final ApplicationManagerOption options) {
+        this.options = options;
+        log.info("ApplicationManagerOption: " + options);
+
         final Iterator<Addon> addons = addonServiceLoader.iterator();
         while (addons.hasNext()) {
             final Addon addon = addons.next();
@@ -48,12 +55,7 @@ public abstract class AbstractApplicationManager {
             for (final String script : scriptInjector.getScripts()) {
                 log.info(script);
             }
-            // scripts.addAll(scriptInjector.getScripts());
         }
-        //
-        // for (final String script : scripts) {
-        // log.info("Injected script : " + script);
-        // }
     }
 
     public void process(final Request request, final Response response) throws Exception {
@@ -118,8 +120,6 @@ public abstract class AbstractApplicationManager {
             try {
                 jsonObject.put(APPLICATION.SEQ_NUM, uiContext.getAndIncrementNextSentSeqNum());
 
-                // if (!scripts.isEmpty()) jsonObject.put(APPLICATION.SCRIPTS, scripts);
-
                 uiContext.flushInstructions(jsonObject);
                 response.write(jsonObject.toString());
                 response.flush();
@@ -147,9 +147,17 @@ public abstract class AbstractApplicationManager {
             printClientErrorMessage(data);
 
             final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+
             if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
                 uiContext.stackIncomingMessage(receivedSeqNum, data);
-                log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data);
+                if (options.maxOutOfSyncDuration > 0) {
+                    if (System.currentTimeMillis() - uiContext.getLastProcessedTimestamp() > options.maxOutOfSyncDuration) {
+                        log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastProcessedTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
+                        session.invalidate();
+                        return;
+                    }
+                }
+                log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data + " (viewID #" + key + ")");
                 return;
             }
 

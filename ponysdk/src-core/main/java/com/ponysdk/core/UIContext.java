@@ -99,6 +99,7 @@ public class UIContext {
 
     private long viewID = -1;
     private long lastReceived = -1;
+    private long lastProcessedTimestamp = 0;
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
@@ -123,7 +124,6 @@ public class UIContext {
                 }
                 return;
             }
-
         }
 
         final PObject object = weakReferences.get(instruction.getLong(PROPERTY.OBJECT_ID));
@@ -355,6 +355,7 @@ public class UIContext {
             return false;
         }
         lastReceived = receivedSeqNum;
+        lastProcessedTimestamp = System.currentTimeMillis();
         return true;
     }
 
@@ -408,5 +409,9 @@ public class UIContext {
 
     public void addClientLoopListener(final ClientLoopListener listener) {
         clientLoopListener.add(listener);
+    }
+
+    public long getLastProcessedTimestamp() {
+        return lastProcessedTimestamp;
     }
 }
