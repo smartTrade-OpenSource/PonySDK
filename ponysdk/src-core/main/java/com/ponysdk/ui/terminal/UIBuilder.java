@@ -61,6 +61,7 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
@@ -144,25 +145,38 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    @Override
     public void onCommunicationError(final Throwable exception) {
 
-        if (loadingMessageBox == null) {
-            // log.log(Level.SEVERE, "Error ", exception);
-            if (exception instanceof StatusCodeException) {
-                final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0) return;
-            }
-            Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
-            return;
-        }
+        CommunicationEntryPoint.getRootEventBus().fireEvent(new CommunicationErrorEvent(exception));
 
         if (pendingClose) return;
 
-        if (exception instanceof StatusCodeException) {
-            final StatusCodeException statusCodeException = (StatusCodeException) exception;
-            showCommunicationErrorMessage(statusCodeException);
+        // if (loadingMessageBox == null) {
+        // // First load failed
+        // if (exception instanceof StatusCodeException) {
+        // final StatusCodeException codeException = (StatusCodeException) exception;
+        // if (codeException.getStatusCode() == 0) return;
+        // }
+        // Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception +
+        // "\nPlease reload your application");
+        // return;
+        // }
+
+        if (hasCommunicationErrorFunction()) {
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException statusCodeException = (StatusCodeException) exception;
+                triggerCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
+            } else {
+                triggerCommunicationError("x", exception.getMessage());
+            }
         } else {
-            Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException statusCodeException = (StatusCodeException) exception;
+                showCommunicationErrorMessage(statusCodeException);
+            } else {
+                Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
+            }
         }
     }
 
@@ -508,5 +522,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
         }
     }
+
+    private native boolean hasCommunicationErrorFunction() /*-{
+                                                                                      if($wnd.onCommunicationError) return true;
+                                                                                      return false;
+                                                                                      }-*/;
+
+    private native void triggerCommunicationError(String code, String message) /*-{
+                                                                                      $wnd.onCommunicationError(code, message);
+                                                                                      }-*/;
 
 }
