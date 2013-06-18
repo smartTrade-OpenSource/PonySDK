@@ -93,13 +93,13 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
                 final Cell cell = new Cell();
-                cell.col = col++;
-                cell.data = data;
-                cell.row = row;
-                cell.value = d.getValueProvider().getValue(data);
-                cell.w = d.getCellRenderer().render(row, cell.value);
+                cell.setCol(col++);
+                cell.setData(data);
+                cell.setRow(row);
+                cell.setValue(d.getValueProvider().getValue(data));
+                cell.setW(d.getCellRenderer().render(row, cell.getValue()));
                 map.put(d, cell);
-                view.addWidget(cell.w, cell.col, cell.row + 1, 1);
+                view.addWidget(cell.getW(), cell.getCol(), cell.getRow() + 1, 1);
             }
             view.addWidget(new PSimplePanel(), col, row + 1, 1);
             view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
@@ -118,8 +118,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
                 final Object value = d.getValueProvider().getValue(data);
                 d.getCellRenderer().update(value, map.get(d));
-                map.get(d).data = data;
-                map.get(d).value = value;
+                map.get(d).setData(data);
+                map.get(d).setValue(value);
             }
         }
     }
@@ -148,13 +148,13 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         if (map == null) throw new IndexOutOfBoundsException("cell not found");
 
         final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
-        final int row = cell.row;
+        final int row = cell.getRow();
 
         view.moveRow((row + 1), (beforeIndex + 1));
 
         // permutation
         rows.remove(row);
-        rows.add(beforeIndex, cell.data);
+        rows.add(beforeIndex, cell.getData());
 
         final int min = Math.min(row, beforeIndex);
         updateRowIndex(min);
@@ -169,7 +169,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
             while (iter.hasNext()) {
                 final Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> entry = iter.next();
-                entry.getValue().row = i;
+                entry.getValue().setRow(i);
             }
         }
     }
@@ -181,7 +181,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public int getRow(final K key) {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) return -1;
-        return map.entrySet().iterator().next().getValue().row;
+        return map.entrySet().iterator().next().getValue().getRow();
     }
 
     @SuppressWarnings("unchecked")
@@ -198,7 +198,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public D getData(final K key) {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) return null;
-        return map.entrySet().iterator().next().getValue().data;
+        return map.entrySet().iterator().next().getValue().getData();
     }
 
     @Override
