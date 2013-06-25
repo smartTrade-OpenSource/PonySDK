@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src-core/main/java"/>
 	<classpathentry kind="src" path="src-defaultimpl/main/java"/>
-	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="src" path="src-generator/main/java"/>
 	<classpathentry kind="src" path="src-hibernate/main/java"/>
 	<classpathentry kind="src" path="src-jasper/main/java"/>
@@ -12,6 +11,7 @@
 	<classpathentry kind="src" path="src-mongodb/main/java"/>
 	<classpathentry kind="src" path="src-core/test/java"/>
 	<classpathentry kind="src" path="src-jetty/test/java"/>
+	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/gwt/json.jar"/>
 	<classpathentry kind="lib" path="libs/logging/slf4j-api.jar"/>

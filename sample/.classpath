@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="src" path="src-trading/main/java"/>
+	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ponysdk"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/gwt/json.jar"/>

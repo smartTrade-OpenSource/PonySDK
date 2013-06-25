@@ -26,13 +26,19 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
+import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
+import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
+import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class SplitPanelPageActivity extends SamplePageActivity {
+
+    private PHorizontalPanel south;
 
     public SplitPanelPageActivity() {
         super("Split Panel", "Panels");
@@ -45,15 +51,30 @@ public class SplitPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PSplitLayoutPanel dockLayoutPanel = new PSplitLayoutPanel(PUnit.PX);
+        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel(PUnit.PX);
 
-        dockLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
-        dockLayoutPanel.addSouth(buildComponent("south", "#75ffdc"), 50);
-        dockLayoutPanel.addEast(buildComponent("east", "#b879fc"), 100);
-        dockLayoutPanel.addWest(buildComponent("west", "#e8b6ea"), 100);
-        dockLayoutPanel.add(buildCenterPanel());
+        splitLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
+        splitLayoutPanel.addSouth(south = buildComponent("south", "#75ffdc"), 50);
+        splitLayoutPanel.addEast(buildComponent("east", "#b879fc"), 100);
+        splitLayoutPanel.addWest(buildComponent("west", "#e8b6ea"), 100);
+        splitLayoutPanel.add(buildCenterPanel());
 
-        examplePanel.setWidget(dockLayoutPanel);
+        splitLayoutPanel.setWidgetSnapClosedSize(south, 40);
+        splitLayoutPanel.setWidgetToggleDisplayAllowed(south, true);
+
+        splitLayoutPanel.addLayoutResizeHandler(new PLayoutResizeHandler() {
+
+            @Override
+            public void onLayoutResize(final PLayoutResizeEvent resizeEvent) {
+                for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
+                    if (data.w == south) {
+                        PNotificationManager.showTrayNotification("South size: " + data.size);
+                    }
+                }
+            }
+        });
+
+        examplePanel.setWidget(splitLayoutPanel);
     }
 
     private PScrollPanel buildCenterPanel() {

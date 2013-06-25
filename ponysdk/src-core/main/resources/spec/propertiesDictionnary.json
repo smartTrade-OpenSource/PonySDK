@@ -24,7 +24,7 @@
 	
 	"handler": {
 		"key": [
-			"selectionHandler", "stringSelectionHandler", "stringValueChangeHandler", "booleanValueChangeHandler", "command", "beforeSelectionHandler", "dateValueChangeHandler", "streamRequestHandler", "embededStreamRequestHandler", "changeHandler", "timer", "scheduler", "history", "popupPositionCallback", "closeHandler", "domHandler", "submitCompleteHandler", "openHandler"
+			"selectionHandler", "stringSelectionHandler", "stringValueChangeHandler", "booleanValueChangeHandler", "command", "beforeSelectionHandler", "dateValueChangeHandler", "streamRequestHandler", "embededStreamRequestHandler", "changeHandler", "timer", "scheduler", "history", "popupPositionCallback", "closeHandler", "domHandler", "submitCompleteHandler", "openHandler", "resizeHandler"
 		]
 	},
 	
@@ -42,6 +42,7 @@
 		"remove": [],
 		"poll": [],
 		"width": [],
+		"height": [],
 		"bind": [],
 		"native": [],
 		"fixrate": [],
@@ -229,7 +230,9 @@
 		"step": [],
 		"page": [],
 		"decimal": [],
+		"minSize": [],
+		"snapClosedSize": [],
+		"toggleDisplayAllowed": [],
 		"widgetHidden": []
 	}
-	
 }
