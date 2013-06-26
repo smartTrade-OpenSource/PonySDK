@@ -102,6 +102,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public PPopupPanel(final boolean autoHide) {
         super();
+        this.visible = false;
         this.autoHide = autoHide;
 
         removeFromParent();
@@ -246,6 +247,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
         this.positionCallback.setPosition(offsetWidth, offsetHeight, windowWidth, windowHeight);
+        this.visible = false;
+        setVisible(true);
     }
 
     public boolean isAutoHide() {

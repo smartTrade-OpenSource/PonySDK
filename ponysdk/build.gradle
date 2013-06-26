@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
-version = '1.7'
+version = '1.8'
 
 ext{
     coreversion = 0.6
@@ -38,6 +38,11 @@ sourceSets {
 			srcDir srcHibernate
 			srcDir srcMongoDB
 			srcDir srcJasper
+		}
+	}
+	test {
+		java {
+			srcDir "src-jetty/test/java"
 		}
 	}
 }
@@ -104,6 +109,9 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-webapp:8.1.4.v20120524'
     jetty 'org.eclipse.jetty:jetty-servlets:8.1.4.v20120524'
     jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
+    'org.eclipse.jetty:jetty-io:8.1.4.v20120524'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
 
@@ -111,6 +119,7 @@ dependencies {
 jar {
 	baseName = 'ponysdk'
     from sourceSets.main.output
+    from sourceSets.test.output
     from gwtOutputDirName
     from warResources
     
@@ -276,6 +285,7 @@ task devmode(type: JavaExec) {
 task sourcesJar(type: Jar, dependsOn:classes) {
     classifier = 'sources'
 	from sourceSets.main.allJava
+	from sourceSets.test.allJava
 	from(srcCore) {
 		include '**/*.xml'
 	}

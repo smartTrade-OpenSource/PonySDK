@@ -49,10 +49,11 @@ public class Application {
         this.session = session;
     }
 
-    public void registerUIContext(final UIContext uiContext) {
+    public long registerUIContext(final UIContext uiContext) {
         final long id = ponySessionIDcount.incrementAndGet();
         uiContexts.put(id, uiContext);
         uiContext.setUiContextID(id);
+        return id;
     }
 
     public void unregisterUIContext(final Long reloadedViewID) {

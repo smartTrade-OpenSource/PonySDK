@@ -55,9 +55,11 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
-    private boolean enabledOnRequest;
+    private boolean enabledOnRequest = false;
+
     private boolean focused;
     private boolean showLoadingOnRequest;
+    private int tabindex = Integer.MIN_VALUE;
 
     @Override
     public Collection<PClickHandler> getClickHandlers() {
@@ -110,6 +112,12 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
         saveUpdate(PROPERTY.ENABLED, enabled);
     }
 
+    public void setTabindex(final int tabindex) {
+        if (this.tabindex == tabindex) return;
+        this.tabindex = tabindex;
+        saveUpdate(PROPERTY.TABINDEX, tabindex);
+    }
+
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
@@ -143,6 +151,10 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
 
     public boolean isFocused() {
         return focused;
+    }
+
+    public int getTabindex() {
+        return tabindex;
     }
 
     @Override

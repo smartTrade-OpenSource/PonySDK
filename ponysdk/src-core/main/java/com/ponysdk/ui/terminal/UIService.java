@@ -49,4 +49,6 @@ public interface UIService {
     public void processInstruction(final PTInstruction instruction) throws Exception;
 
     public void stackError(final PTInstruction currentInstruction, final Throwable e);
+
+    public void onCommunicationError(final Throwable exception);
 }

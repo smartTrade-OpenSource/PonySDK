@@ -61,6 +61,7 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
@@ -145,10 +146,15 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    @Override
     public void onCommunicationError(final Throwable exception) {
 
+        CommunicationEntryPoint.getRootEventBus().fireEvent(new CommunicationErrorEvent(exception));
+
+        if (pendingClose) return;
+
         if (loadingMessageBox == null) {
-            // log.log(Level.SEVERE, "Error ", exception);
+            // First load failed
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException codeException = (StatusCodeException) exception;
                 if (codeException.getStatusCode() == 0) return;
@@ -157,24 +163,33 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             return;
         }
 
-        if (pendingClose) return;
-
-        if (exception instanceof StatusCodeException) {
-            final StatusCodeException statusCodeException = (StatusCodeException) exception;
-            showCommunicationErrorMessage(statusCodeException);
+        if (hasCommunicationErrorFunction()) {
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException statusCodeException = (StatusCodeException) exception;
+                triggerCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
+            } else {
+                triggerCommunicationError("x", exception.getMessage());
+            }
         } else {
-            Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException statusCodeException = (StatusCodeException) exception;
+                showCommunicationErrorMessage(statusCodeException);
+            } else {
+                Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
+            }
         }
     }
 
     @Override
     public void update(final JSONObject data) {
 
-        long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
+        final long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
         if ((lastReceived + 1) != receivedSeqNum) {
             incomingMessageQueue.put(receivedSeqNum, data);
+            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
             return;
         }
+        lastReceived = receivedSeqNum;
 
         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
         final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
@@ -190,9 +205,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 for (int i = 0; i < jsonArray2.size(); i++) {
                     instructions.add(new PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject()));
                 }
+                lastReceived = expected;
                 expected++;
-                receivedSeqNum = expected;
             }
+            log.log(Level.SEVERE, "Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         }
 
         updateMode = true;
@@ -209,9 +225,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                     stackError(currentInstruction, e);
                 }
             }
-
-            updateIncomingSeqNum(receivedSeqNum);
-
         } catch (final Throwable e) {
             Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived);
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
@@ -509,5 +522,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
         }
     }
+
+    private native boolean hasCommunicationErrorFunction() /*-{
+                                                                                      if($wnd.onCommunicationError) return true;
+                                                                                      return false;
+                                                                                      }-*/;
+
+    private native void triggerCommunicationError(String code, String message) /*-{
+                                                                                      $wnd.onCommunicationError(code, message);
+                                                                                      }-*/;
 
 }

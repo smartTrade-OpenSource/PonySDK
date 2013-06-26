@@ -12,6 +12,9 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Application;
+import com.ponysdk.core.ApplicationManagerOption;
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
@@ -27,6 +30,17 @@ import com.ponysdk.ui.terminal.exception.ServerException;
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
+
+    private final ApplicationManagerOption options;
+
+    public AbstractApplicationManager() {
+        this(new ApplicationManagerOption());
+    }
+
+    public AbstractApplicationManager(final ApplicationManagerOption options) {
+        this.options = options;
+        log.info("ApplicationManagerOption: " + options);
+    }
 
     public void process(final Request request, final Response response) throws Exception {
         final JSONObject data = new JSONObject(new JSONTokener(request.getReader()));
@@ -104,11 +118,11 @@ public abstract class AbstractApplicationManager {
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
 
-        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
+        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application (viewID #" + key + ")."); }
 
         final UIContext uiContext = applicationSession.getUIContext(key);
 
-        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application"); }
+        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext), please reload your application (viewID #" + key + ")."); }
 
         uiContext.acquire();
         UIContext.setCurrent(uiContext);
@@ -116,7 +130,7 @@ public abstract class AbstractApplicationManager {
             final Txn txn = Txn.get();
             txn.begin(new TxnContextHttp(false, request, response));
             try {
-                final Long receivedSeqNum = checkClientMessage(data, uiContext);
+                final Long receivedSeqNum = checkClientMessage(request.getSession(), data, uiContext);
 
                 if (receivedSeqNum != null) {
                     process(uiContext, data);
@@ -125,7 +139,6 @@ public abstract class AbstractApplicationManager {
                     for (final JSONObject jsoObject : datas) {
                         process(uiContext, jsoObject);
                     }
-
                 }
 
                 txn.commit();
@@ -139,13 +152,21 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private Long checkClientMessage(final JSONObject data, final UIContext uiContext) throws JSONException {
+    private Long checkClientMessage(final Session session, final JSONObject data, final UIContext uiContext) throws JSONException {
         printClientErrorMessage(data);
 
         final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
         if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
+            final long key = data.getLong(APPLICATION.VIEW_ID);
             uiContext.stackIncomingMessage(receivedSeqNum, data);
-            log.info("Stacking incoming message #" + receivedSeqNum);
+            if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
+                if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {
+                    log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
+                    session.invalidate();
+                    return null;
+                }
+            }
+            log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data + " (viewID #" + key + ")");
             return null;
         }
         return receivedSeqNum;

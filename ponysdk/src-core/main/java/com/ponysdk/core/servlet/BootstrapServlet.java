@@ -47,16 +47,16 @@ public class BootstrapServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6993633431616272739L;
 
-    private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
+    protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
-    private static final int BUFFER_SIZE = 4096;
+    protected static final int BUFFER_SIZE = 4096;
 
-    private static byte[] indexPage;
+    protected static byte[] indexPage;
 
-    private String applicationName = "";
+    protected String applicationName = "";
 
-    private final List<String> stylesheets = new ArrayList<String>();
-    private final List<String> javascripts = new ArrayList<String>();
+    protected final List<String> stylesheets = new ArrayList<String>();
+    protected final List<String> javascripts = new ArrayList<String>();
 
     public BootstrapServlet() {}
 
@@ -85,7 +85,7 @@ public class BootstrapServlet extends HttpServlet {
         handlePonyResource(request, response);
     }
 
-    private void handlePonyResource(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    protected void handlePonyResource(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         try {
             final String extraPathInfo = getPath(request);
 
@@ -113,7 +113,7 @@ public class BootstrapServlet extends HttpServlet {
         return extraPathInfo;
     }
 
-    private void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
         // Try to load from webapp context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
         String type;
@@ -163,7 +163,7 @@ public class BootstrapServlet extends HttpServlet {
         }
     }
 
-    private byte[] generateIndexPage() {
+    protected byte[] generateIndexPage() {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("<!doctype html>");

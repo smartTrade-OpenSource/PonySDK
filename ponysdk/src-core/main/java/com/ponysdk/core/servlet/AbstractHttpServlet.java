@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.ui.terminal.exception.ServerException;
 
 /**
@@ -45,6 +46,15 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpServlet.class);
 
     protected AbstractApplicationManager applicationManager;
+    protected final ApplicationManagerOption options;
+
+    public AbstractHttpServlet() {
+        this(new ApplicationManagerOption());
+    }
+
+    public AbstractHttpServlet(final ApplicationManagerOption options) {
+        this.options = options;
+    }
 
     @Override
     public void init() throws ServletException {

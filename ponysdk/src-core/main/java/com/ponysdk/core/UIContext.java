@@ -99,7 +99,9 @@ public class UIContext {
 
     private final ReentrantLock lock = new ReentrantLock();
 
+    private long viewID = -1;
     private long lastReceived = -1;
+    private long lastSyncErrorTimestamp = 0;
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
@@ -130,7 +132,6 @@ public class UIContext {
                 }
                 return;
             }
-
         }
 
         final PObject object = weakReferences.get(instruction.getLong(PROPERTY.OBJECT_ID));
@@ -345,9 +346,12 @@ public class UIContext {
         final long previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
             log.error("Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+            if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
         lastReceived = receivedSeqNum;
+
+        lastSyncErrorTimestamp = -1;
         return true;
     }
 
@@ -375,4 +379,15 @@ public class UIContext {
         return datas;
     }
 
+    public long getViewID() {
+        return viewID;
+    }
+
+    public void setViewID(final long viewID) {
+        this.viewID = viewID;
+    }
+
+    public long getLastSyncErrorTimestamp() {
+        return lastSyncErrorTimestamp;
+    }
 }

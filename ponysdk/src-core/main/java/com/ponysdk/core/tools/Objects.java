@@ -10,6 +10,14 @@ public class Objects {
         if (a != null && b != null) return a.equals(b);
         return false;
     }
+    
+    public static boolean quals(final String s1, final String s2) {
+        if (s1 != null) {
+            return s1.equals(s2);
+        } else {
+            return s2 == null;
+        }
+    }
 
     public static boolean equals(final boolean a, final boolean b) {
         return a == b;

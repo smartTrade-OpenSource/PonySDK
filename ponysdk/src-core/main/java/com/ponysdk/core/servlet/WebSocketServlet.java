@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.ui.server.basic.PPusher;
+import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServlet {
@@ -72,13 +75,23 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         }
 
         @Override
-        public void onClose(final int arg0, final String arg1) {
-            log.info("Connection lost from: " + connection.toString());
+        public void onClose(final int closeCode, final String message) {
+            log.info("Connection lost from: " + connection.toString() + ". Code: " + closeCode + ". Message: " + message);
             connectionListener.onClose();
         }
 
         @Override
-        public void onMessage(final String arg0) {}
+        public void onMessage(final String message) {
+            try {
+                final JSONObject jso = new JSONObject();
+                jso.put(Dictionnary.APPLICATION.PING, (int) (System.currentTimeMillis() * .001));
+                connection.sendMessage(jso.toString());
+            } catch (final JSONException e) {
+                log.error("", e);
+            } catch (final IOException e) {
+                log.error("", e);
+            }
+        }
 
     }
 

@@ -32,6 +32,7 @@ import java.util.Map;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.main.EntryPoint;
@@ -49,9 +50,13 @@ public class SpringHttpServlet extends AbstractHttpServlet {
 
     public SpringHttpServlet() {}
 
+    public SpringHttpServlet(final ApplicationManagerOption options) {
+        super(options);
+    }
+
     @Override
     protected AbstractApplicationManager createApplicationManager() {
-        return new AbstractApplicationManager() {
+        return new AbstractApplicationManager(options) {
 
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) {

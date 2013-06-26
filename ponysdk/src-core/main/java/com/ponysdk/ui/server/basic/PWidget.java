@@ -91,7 +91,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
 
-    private boolean visible = true;
+    protected boolean visible = true;
     private String title;
     private String width;
     private String height;
@@ -218,27 +218,33 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleProperty(final String name, final String value) {
-        safeStyleProperties().put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STYLE_KEY, name);
-        update.put(PROPERTY.STYLE_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        final String previous = safeStyleProperties().put(name, value);
+        if (!Objects.equals(previous, value)) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.STYLE_KEY, name);
+            update.put(PROPERTY.STYLE_VALUE, value);
+            Txn.get().getTxnContext().save(update);
+        }
     }
 
     public void setProperty(final String name, final String value) {
-        safeElementProperties().put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
-        update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        final String previous = safeElementProperties().put(name, value);
+        if (!Objects.equals(previous, value)) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
+            update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
+            Txn.get().getTxnContext().save(update);
+        }
     }
 
     public void setAttribute(final String name, final String value) {
-        safeElementAttributes().put(name, value);
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
-        update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
-        Txn.get().getTxnContext().save(update);
+        final String previous = safeElementAttributes().put(name, value);
+        if (!Objects.equals(previous, value)) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
+            update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
+            Txn.get().getTxnContext().save(update);
+        }
     }
 
     public String getProperty(final String key) {
@@ -464,7 +470,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         Txn.get().getTxnContext().save(update);
     }
 
-    protected void saveUpdate(final String key, final String value) {
+    protected void saveUpdate(final String key, final Object value) {
         final Update update = new Update(getID());
         update.put(key, value);
         Txn.get().getTxnContext().save(update);

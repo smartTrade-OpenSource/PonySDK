@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.trading.client.activity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
@@ -40,14 +43,22 @@ import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 
 public class LoginActivity extends AbstractActivity {
 
+    private static Logger log = LoggerFactory.getLogger(LoginActivity.class);
+
     private DefaultLoginPageView loginPageView;
 
     @Override
     protected IsPWidget buildView() {
+        log.info("Showing login page");
+
         loginPageView = new DefaultLoginPageView("PonySDK trading showcase");
 
         loginPageView.getLoginTextBox().setText("Trader");
         loginPageView.getPasswordTextBox().setText("Trader");
+
+        loginPageView.getLoginTextBox().ensureDebugId("login");
+        loginPageView.getPasswordTextBox().ensureDebugId("password");
+        loginPageView.getLoginButton().ensureDebugId("signin");
 
         loginPageView.addLoginClickHandler(new PClickHandler() {
 
@@ -84,6 +95,8 @@ public class LoginActivity extends AbstractActivity {
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
         fireEvent(loggedInEvent);
+
+        log.info("Logged with #" + user.getLogin() + "/" + user.getPassword());
 
         goTo(new PagePlace("CheckBox"));
     }

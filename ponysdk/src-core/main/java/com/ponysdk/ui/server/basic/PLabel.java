@@ -83,6 +83,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
+
         this.text = text;
         saveUpdate(PROPERTY.TEXT, this.text);
     }
