@@ -35,7 +35,7 @@ public class SimpleTable extends PElement {
         super("table");
     }
 
-    public void addWidget(final IsPWidget widget, final int column, final int row) {
+    public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
 
         if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
         if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
@@ -61,6 +61,8 @@ public class SimpleTable extends PElement {
 
         newCell.add(widget);
         newCell.addStyleName("pony-PFlextable-Cell");
+        
+        if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
 
     public void clear(final int from) {
