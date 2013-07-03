@@ -108,6 +108,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.TabLayoutPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DockPanelPageActivity" />
+	<bean class="com.ponysdk.sample.client.page.LayoutPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.SplitPanelPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.HeaderPanelPageActivity" />
 	
