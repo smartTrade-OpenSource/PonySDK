@@ -49,8 +49,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     protected final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>>();
 
-    private final Map<D, K> keyByValue = new HashMap<D, K>();
-
+    protected final List<K> keyByIndex = new ArrayList<K>();
     protected final Map<K, D> valueByKey = new HashMap<K, D>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
@@ -83,7 +82,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             final int row = getRowCount();
             map = new HashMap<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>();
             cells.put(key, map);
-            keyByValue.put(data, key);
+            keyByIndex.add(key);
 
             rows.add(data);
 
@@ -112,11 +111,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
             final D previousData = valueByKey.remove(key);
             final int previousIndex = rows.indexOf(previousData);
-            keyByValue.remove(previousData);
             rows.remove(previousIndex);
             rows.add(previousIndex, data);
             valueByKey.put(key, data);
-            keyByValue.put(data, key);
 
             for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
                 final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
@@ -129,16 +126,17 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public void removeByKey(final K key) {
-        super.remove(valueByKey.get(key));
+        final D removed = valueByKey.get(key);
+        if (removed != null) {
+            super.remove(removed);
+        }
     }
 
     @Override
     public void remove(final int index) {
-        final D d = rows.get(index);
-
         super.remove(index);
 
-        final K k = keyByValue.remove(d);
+        final K k = keyByIndex.remove(index);
         if (k != null) {
             valueByKey.remove(k);
             cells.remove(k);
@@ -151,7 +149,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     protected void updateRowIndex(final int min) {
         // update model
         for (int i = min; i < rows.size(); i++) {
-            final K k = keyByValue.get(rows.get(i));
+            final K k = keyByIndex.get(i);
             final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> cellRow = cells.get(k);
             final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
             int realRow = i;
@@ -194,7 +192,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     public void clear() {
         view.clear(1);
         cells.clear();
-        keyByValue.clear();
+        keyByIndex.clear();
+        valueByKey.clear();
     }
 
 }
