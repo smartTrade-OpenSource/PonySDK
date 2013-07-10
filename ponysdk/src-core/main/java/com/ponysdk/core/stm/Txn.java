@@ -1,8 +1,9 @@
 
 package com.ponysdk.core.stm;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,8 @@ public class Txn {
 
     private static ThreadLocal<Txn> transactions = new ThreadLocal<Txn>();
 
-    private final List<TxnListener> txnListnener = new ArrayList<TxnListener>();
-    private final List<ClientLoopListener> clientLoopListnener = new ArrayList<ClientLoopListener>();
+    private final Set<TxnListener> txnListnener = Collections.newSetFromMap(new ConcurrentHashMap<TxnListener, Boolean>());
+    private final Set<ClientLoopListener> clientLoopListnener = Collections.newSetFromMap(new ConcurrentHashMap<ClientLoopListener, Boolean>());
 
     private TxnContext txnContext;
 
