@@ -4,7 +4,7 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 	<listener>
-		<listener-class>com.ponysdk.core.service.ApplicationLoader</listener-class>
+		<listener-class>com.ponysdk.core.servlet.ApplicationLoader</listener-class>
 	</listener>
 
 	<servlet>

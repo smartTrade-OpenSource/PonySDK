@@ -146,7 +146,7 @@ public class TextBoxBaseFormFieldRenderer implements FormFieldRenderer, PValueCh
     @Override
     public void reset() {
         for (final FormFieldComponent<? extends PTextBoxBase> field : fields) {
-            field.getInput().setText(null);
+            field.getInput().setText("");
 
         }
         value = null;

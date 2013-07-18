@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
-version = '1.9'
+version = '1.10'
 
 ext{
     coreversion = 0.6
@@ -89,8 +89,8 @@ dependencies {
 	gwt 'com.google.gwt:gwt-codeserver:2.5.1'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
-	spring 'org.springframework:spring-context:3.0.6.RELEASE'
-	spring 'org.springframework:spring-web:3.0.6.RELEASE'
+	spring 'org.springframework:spring-core:3.2.3.RELEASE'
+	spring 'org.springframework:spring-web:3.2.3.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
 	sl4j 'org.slf4j:log4j-over-slf4j:1.6.4'
 	sl4j 'ch.qos.logback:logback-classic:1.0.0'
