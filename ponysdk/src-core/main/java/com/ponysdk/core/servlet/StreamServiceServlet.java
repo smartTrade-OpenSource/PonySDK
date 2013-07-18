@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnContextHttp;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 /**
@@ -59,11 +61,27 @@ public class StreamServiceServlet extends HttpServlet {
 
     private void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
+            final Application application = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
-            final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
-            streamHandler.onStream(req, resp);
+            final UIContext uiContext = application.getUIContext(ponySessionID);
+
+            UIContext.setCurrent(uiContext);
+            try {
+                final Session session = SessionManager.get().getSession(req.getSession().getId());
+                final Txn txn = Txn.get();
+                txn.begin(new TxnContextHttp(true, new HttpRequest(session, req), new HttpResponse(resp)));
+                try {
+                    final StreamHandler streamHandler = uiContext.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
+                    streamHandler.onStream(req, resp);
+                    txn.commit();
+                } catch (final Exception e) {
+                    log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
+                    txn.rollback();
+                }
+            } finally {
+                UIContext.remove();
+            }
+
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             try {
