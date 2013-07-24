@@ -23,7 +23,12 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.basic.PAlignment;
 
 /**
  * A panel that lays its children
@@ -34,21 +39,72 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PLayoutPanel extends PComplexPanel {
 
-    // TODO nciaravola missing methods
-    //
-    // void setWidgetBottomHeight(PWidget child,double bottom,Unit bottomUnit,double height,Unit heightUnit)
-    // void setWidgetHorizontalPosition(Widget child, Alignment position)
-    // void setWidgetLeftRight(Widget child, double left,Unit leftUnit,double right,Unit rightUnit);
-    // void setWidgetLeftWidth(Widget child, double left, Unit leftUnit,double width, Unit widthUnit) ;
-    // void setWidgetRightWidth(Widget child, double right, Unit rightUnit,double width, Unit widthUnit) ;
-    // void setWidgetTopBottom(Widget child, double top, Unit topUnit,double bottom, Unit bottomUnit) ;
-    // void setWidgetTopHeight(Widget child, double top, Unit topUnit,double height, Unit heightUnit) ;
-    // void setWidgetVerticalPosition(Widget child, Alignment position) ;
-    // void setWidgetVisible(Widget child, boolean visible) ;
-
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.LAYOUT_PANEL;
     }
 
+    public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
+        assertIsChild(child);
+        final Update update = new Update(getID());
+        update.put(PROPERTY.HORIZONTAL_ALIGNMENT, position.ordinal());
+        update.put(PROPERTY.WIDGET, child.getID());
+        Txn.get().getTxnContext().save(update);
+    }
+
+    public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
+        assertIsChild(child);
+        final Update update = new Update(getID());
+        update.put(PROPERTY.VERTICAL_ALIGNMENT, position.ordinal());
+        update.put(PROPERTY.WIDGET, child.getID());
+        Txn.get().getTxnContext().save(update);
+    }
+
+    public void setWidgetHidden(final PWidget widget, final boolean hidden) {
+        assertIsChild(widget);
+        final Update update = new Update(getID());
+        update.put(PROPERTY.WIDGET_HIDDEN, hidden);
+        update.put(PROPERTY.WIDGET, widget.getID());
+        Txn.get().getTxnContext().save(update);
+    }
+
+    public void setWidgetLeftRight(final PWidget child, final double left, final double right, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.LEFT, left, PROPERTY.RIGHT, right, unit);
+    }
+
+    public void setWidgetLeftWidth(final PWidget child, final double left, final double width, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.LEFT, left, PROPERTY.WIDTH, width, unit);
+    }
+
+    public void setWidgetRightWidth(final PWidget child, final double right, final double width, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.RIGHT, right, PROPERTY.WIDTH, width, unit);
+    }
+
+    public void setWidgetTopBottom(final PWidget child, final double top, final double bottom, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.TOP, top, PROPERTY.BOTTOM, bottom, unit);
+    }
+
+    public void setWidgetTopHeight(final PWidget child, final double top, final double height, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.TOP, top, PROPERTY.HEIGHT, height, unit);
+    }
+
+    public void setWidgetBottomHeight(final PWidget child, final double bottom, final double height, final PUnit unit) {
+        assertIsChild(child);
+        sendUpdate(child, PROPERTY.BOTTOM, bottom, PROPERTY.HEIGHT, height, unit);
+    }
+
+    private void sendUpdate(final PWidget child, final String key1, final double v1, final String key2, final double v2, final PUnit unit) {
+        final Update u = new Update(getID());
+        u.put(PROPERTY.UNIT, unit.ordinal());
+        u.put(PROPERTY.WIDGET, child.getID());
+        u.put(key1, v1);
+        u.put(key2, v2);
+
+        Txn.get().getTxnContext().save(u);
+    }
 }

@@ -96,4 +96,8 @@ public abstract class PComplexPanel extends PPanel {
         return getChildren().iterator();
     }
 
+    void assertIsChild(final PWidget widget) {
+        if ((widget != null) && (widget.getParent() != this)) throw new IllegalStateException("The specified widget is not a child of this panel");
+    }
+
 }

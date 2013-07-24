@@ -49,7 +49,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     private int colCount = 0;
     protected final List<D> rows = new ArrayList<D>();
 
-    protected final Map<Integer, Integer> reservedRowByRealRow = new HashMap<Integer, Integer>();
+    protected final List<Integer> reserved = new ArrayList<Integer>();
+    protected int reservedExtra = 0;
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
@@ -84,11 +85,23 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     protected void updateRowIndex(final int min) {}
 
     public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
-        final int realRowPosition = Math.min(row, getVisibleItemCount() + 1);
-        reservedRowByRealRow.put(realRowPosition, row);
-        view.insertRow(realRowPosition);
-        view.addWidget(widget, column, realRowPosition, colSpan);
-        updateRowIndex(realRowPosition);
+        if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
+
+        if (row >= reserved.size()) {
+            reservedExtra++;
+        } else {
+            for (int i = row; i < reserved.size(); i++) {
+                reserved.set(i, reserved.get(i) + 1);
+            }
+        }
+
+        view.insertRow(row);
+        view.addWidget(widget, column, row, colSpan);
+        updateRowIndex(row);
+    }
+
+    public void insertWidget(final int row, final int column, final int colSpan, final PWidget widget) {
+        view.addWidget(widget, column, row, colSpan);
     }
 
     public void insertSubList(final int row, final List<D> datas) {
@@ -158,7 +171,12 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     }
 
     public int getRowCount() {
-        return rows.size() + reservedRowByRealRow.size();
+        return rows.size() + getReservedRowCount();
+    }
+
+    public int getReservedRowCount() {
+        if (reserved.isEmpty()) return reservedExtra;
+        return reserved.get(reserved.size() - 1) + reservedExtra;
     }
 
     @Override
@@ -178,6 +196,9 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     @Override
     public void setData(final List<D> data) {
         rows.clear();
+        reserved.clear();
+        reservedExtra = 0;
+
         rows.addAll(data);
 
         view.clear(1);
@@ -186,6 +207,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         int rowIndex = 0;
         for (final D t : data) {
             setData(rowIndex++, t);
+            reserved.add(0);
         }
     }
 
@@ -196,6 +218,9 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     public void insertData(final int index, final D data) {
         rows.add(index, data);
 
+        if (index == 0) reserved.add(index, 0);
+        else reserved.add(index, reserved.get(index - 1));
+
         view.insertRow(index + 1);
         setData(index, data);
     }
@@ -203,6 +228,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     public void remove(final int index) {
         view.removeRow(index + 1);
         rows.remove(index);
+        reserved.remove(index);
     }
 
     public void remove(final D data) {

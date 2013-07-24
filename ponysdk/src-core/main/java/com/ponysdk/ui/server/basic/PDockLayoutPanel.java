@@ -125,8 +125,4 @@ public class PDockLayoutPanel extends PComplexPanel {
         Txn.get().getTxnContext().save(add);
     }
 
-    void assertIsChild(final PWidget widget) {
-        if ((widget != null) && (widget.getParent() != this)) throw new IllegalStateException("The specified widget is not a child of this panel");
-    }
-
 }
