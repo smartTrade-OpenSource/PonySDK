@@ -74,7 +74,7 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
             @Override
             public void onClick(final PClickEvent event) {
                 ok = true;
-                dataGrid.insertRow(5, 0, 4, new PLabel("coucou pd"));
+                insertColspanRow();
             }
         });
 
@@ -181,8 +181,6 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         if (data instanceof PonyStock) {
             final PonyStock ponyStock = (PonyStock) data;
             dataGrid.setData(ponyStock.getId(), ponyStock);
-
-            System.err.println(dataGrid.getRow(ponyStock.getId()));
         }
     }
 
@@ -206,36 +204,63 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         @Override
         public void setData(final K key, final D data) {
 
-            if (ok) {
-                dataGrid.getListView().remove(5);
-            }
+            // if (ok) {
+            // removeColspanRow();
+            // }
 
-            int previousIndex = keys.indexOf(key);
-            if (previousIndex == -1) {
-                previousIndex = datas.size();
+            final int previousRow = getRow(key);
+            if (previousRow == -1) {
+                // add new row
+                System.err.println("adding: " + data);
                 datas.add(data);
-                keys.add(key);
-            } else {
-                datas.remove(previousIndex);
-                datas.add(previousIndex, data);
             }
-
-            Collections.sort(datas, comparator);
-
-            final int newIndex = datas.indexOf(data);
 
             super.setData(key, data);
 
-            if (newIndex != previousIndex) {
-                getListView().moveRow(previousIndex + 1, newIndex + 1);
-                keys.remove(previousIndex);
-                keys.add(newIndex, key);
-            }
+            Collections.sort(datas, comparator);
 
-            if (ok) {
-                dataGrid.insertRow(5, 0, 2, new PLabel("coucou pd " + System.currentTimeMillis()));
-            }
+            int newRow = datas.indexOf(data);
+            newRow = newRow + getReservedRow(newRow);
+            moveRow(key, newRow);
+
+            // dataGrid.getDataIndex(data);
+            //
+            // int previousIndex = keys.indexOf(key);
+            // if (previousIndex == -1) {
+            // previousIndex = datas.size();
+            // datas.add(data);
+            // keys.add(key);
+            // }
+            //
+            // // else {
+            // // datas.remove(previousIndex);
+            // // datas.add(previousIndex, data);
+            // // }
+            //
+            // Collections.sort(datas, comparator);
+            //
+            // final int newIndex = datas.indexOf(data);
+            //
+            // super.setData(key, data);
+            //
+            // if (newIndex != previousIndex) {
+            // moveRow(previousIndex + 1, newIndex + 1);
+            // keys.remove(previousIndex);
+            // keys.add(newIndex, key);
+            // }
+
+            // if (ok) {
+            // insertColspanRow();
+            // }
         }
+    }
+
+    protected void removeColspanRow() {
+        dataGrid.remove(5);
+    }
+
+    protected void insertColspanRow() {
+        dataGrid.insertRow(5, 0, 4, new PLabel("hello " + System.currentTimeMillis()));
     }
 
 }

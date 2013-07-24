@@ -65,13 +65,11 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
                 while (true) {
                     try {
                         final int index = rdm.nextInt(stocks.size());
-                        final int newStock = rdm.nextInt(10000);
                         final float newPrice = rdm.nextFloat() * 100;
                         final PonyStock stock = stocks.get(index);
-                        stock.setCount(newStock);
                         stock.setPrice(newPrice);
                         pushData(stock);
-                        Thread.sleep(500);
+                        Thread.sleep(1000);
                     } catch (final Exception e) {
                         log.error("", e);
                     }

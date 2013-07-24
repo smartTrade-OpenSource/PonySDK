@@ -49,6 +49,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     private int colCount = 0;
     protected final List<D> rows = new ArrayList<D>();
 
+    // number of reserved row at data index row
     protected final List<Integer> reserved = new ArrayList<Integer>();
     protected int reservedExtra = 0;
 
@@ -246,6 +247,14 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public SimpleListView getListView() {
         return view;
+    }
+
+    protected int getDataRowFromReal(final int real) {
+        for (int i = 0; i < reserved.size(); i++) {
+            final int index = i + reserved.get(i);
+            if (index >= real) return i;
+        }
+        return -1;
     }
 
     protected int getRowIndex(final int row) {

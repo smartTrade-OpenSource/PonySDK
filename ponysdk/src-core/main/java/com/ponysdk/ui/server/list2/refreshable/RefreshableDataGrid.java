@@ -161,18 +161,31 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         }
     }
 
-    public void moveRow(final K key, final int beforeIndex) {
+    public void moveRow(final K key, final int beforeIndexReal) {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) throw new IndexOutOfBoundsException("cell not found");
 
         final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
-        final int row = cell.getRow();
+        final int realRow = cell.getRow();
 
-        view.moveRow((row + 1), (beforeIndex + 1));
+        view.moveRow((realRow + 1), (beforeIndexReal + 1));
+
+        final D data = valueByKey.get(key);
+        final int row = getDataIndex(data);
+
+        final int beforeIndex = getDataRowFromReal(beforeIndexReal);
+
+        keyByIndex.remove(row);
+        keyByIndex.add(beforeIndex, key);
 
         // permutation
         rows.remove(row);
         rows.add(beforeIndex, cell.getData());
+
+        // update reserved index
+        final Integer prev = reserved.get(beforeIndex);
+        reserved.remove(row);
+        reserved.add(beforeIndex, prev);
 
         final int min = Math.min(row, beforeIndex);
         updateRowIndex(min);
@@ -186,6 +199,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) return -1;
         return map.entrySet().iterator().next().getValue().getRow();
+    }
+
+    public int getReservedRow(final int index) {
+        return reserved.get(index);
     }
 
     @SuppressWarnings("unchecked")

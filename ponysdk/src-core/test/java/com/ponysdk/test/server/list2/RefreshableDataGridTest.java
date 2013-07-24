@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.stm.Txn;
 import com.ponysdk.test.server.mock.EmptySession;
+import com.ponysdk.test.server.mock.EmptyTxnContext;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -34,6 +36,8 @@ public class RefreshableDataGridTest {
 
     private RefreshableDataGrid<String, Data> datagrid;
 
+    private Txn txn;
+
     @Before
     public void beforeTest() {
         log.info("Running #" + name.getMethodName());
@@ -41,6 +45,8 @@ public class RefreshableDataGridTest {
         final Application application = new Application(new EmptySession());
         final UIContext uiContext = new UIContext(application);
         UIContext.setCurrent(uiContext);
+        txn = Txn.get();
+        txn.begin(new EmptyTxnContext());
         PPusher.initialize();
 
         final RefreshableDataGridColumnDescriptor<Data, Data, PHTML> descriptor = new RefreshableDataGridColumnDescriptor<Data, Data, PHTML>();
@@ -71,6 +77,7 @@ public class RefreshableDataGridTest {
 
     @After
     public void afterTest() {
+        txn.commit();
         UIContext.remove();
     }
 
@@ -400,6 +407,252 @@ public class RefreshableDataGridTest {
         checkIndex("00", 2);
     }
 
+    @Test
+    public void testMove01() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("02", 0);
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("02", 0);
+        checkIndex("00", 1);
+        checkIndex("01", 2);
+        checkIndex("03", 3);
+    }
+
+    @Test
+    public void testMove02() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("02", 3);
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("03", 2);
+        checkIndex("02", 3);
+    }
+
+    @Test
+    public void testMove03() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("01", 3);
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("02", 1);
+        checkIndex("03", 2);
+        checkIndex("01", 3);
+
+        moveRow("01", 2);
+
+        checkIndex("00", 0);
+        checkIndex("02", 1);
+        checkIndex("01", 2);
+        checkIndex("03", 3);
+
+        moveRow("02", 2);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+    }
+
+    @Test
+    public void testMoveAndAdd01() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("02", 3);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("03", 2);
+        checkIndex("02", 3);
+
+        setData("04", "Data 04");
+
+        checkRowCount(5);
+        checkVisibleItemCount(5);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("03", 2);
+        checkIndex("02", 3);
+        checkIndex("04", 4);
+
+        moveRow("04", 3);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("03", 2);
+        checkIndex("04", 3);
+        checkIndex("02", 4);
+    }
+
+    @Test
+    public void testMoveAndAdd02() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("02", 3);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("03", 2);
+        checkIndex("02", 3);
+
+        insertColspan(1);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        // XX/1
+        checkIndex("01", 2);
+        checkIndex("03", 3);
+        checkIndex("02", 4);
+
+        moveRow("02", 0);
+
+        checkIndex("02", 0);
+        checkIndex("00", 1);
+        // XX/2
+        checkIndex("01", 3);
+        checkIndex("03", 4);
+    }
+
+    @Test
+    public void testMoveAndAdd03() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        insertColspan(3);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 4);
+
+        moveRow("01", 4);
+
+        checkIndex("00", 0);
+        checkIndex("02", 1);
+        checkIndex("03", 3);
+        checkIndex("01", 4);
+    }
+
+    @Test
+    public void testRemoveColspan() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        insertColspan(2);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        // XX / 2
+        checkIndex("02", 3);
+        checkIndex("03", 4);
+
+        remove(2);
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+    }
+
     private void setData(final String key, final String value) {
         final Data d = new Data();
         d.v1 = value;
@@ -418,6 +671,10 @@ public class RefreshableDataGridTest {
 
     private void insertColspan(final int row) {
         datagrid.insertRow(row, 0, datagrid.getColumnDescriptors().size() + 1, new PLabel("colspan " + row));
+    }
+
+    private void moveRow(final String key, final int to) {
+        datagrid.moveRow(key, to);
     }
 
     private void checkIndex(final String key, final int expectedIndex) {
