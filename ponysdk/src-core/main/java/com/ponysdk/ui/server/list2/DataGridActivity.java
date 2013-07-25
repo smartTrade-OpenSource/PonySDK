@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.list2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,10 +49,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     private int colCount = 0;
     protected final List<D> rows = new ArrayList<D>();
-
-    // number of reserved row at data index row
-    protected final List<Integer> reserved = new ArrayList<Integer>();
-    protected int reservedExtra = 0;
+    protected int dataCount = 0;
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
@@ -88,16 +86,10 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
         if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
 
-        if (row >= reserved.size()) {
-            reservedExtra++;
-        } else {
-            for (int i = row; i < reserved.size(); i++) {
-                reserved.set(i, reserved.get(i) + 1);
-            }
-        }
+        rows.add(row, null);
 
-        view.insertRow(row);
-        view.addWidget(widget, column, row, colSpan);
+        view.insertRow((row + 1));
+        view.addWidget(widget, column, (row + 1), colSpan);
         updateRowIndex(row);
     }
 
@@ -113,6 +105,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
         int subRow = row + 2 + totalSubCount;
         for (final D data : datas) {
+            rows.add((subRow - 1), data);
             view.insertRow(subRow); // create a new row after
             view.addRowStyle(subRow, PonySDKTheme.SIMPLELIST_SUBROW);
             int col = 0;
@@ -129,6 +122,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         if (subListSize != null) {
             for (int i = 1; i <= subListSize; i++) {
                 view.removeRow(fatherRow + totalSubCount + 2);
+                rows.remove(fatherRow + totalSubCount + 1);
             }
         }
     }
@@ -172,22 +166,50 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     }
 
     public int getRowCount() {
-        return rows.size() + getReservedRowCount();
-    }
-
-    public int getReservedRowCount() {
-        if (reserved.isEmpty()) return reservedExtra;
-        return reserved.get(reserved.size() - 1) + reservedExtra;
-    }
-
-    @Override
-    public int getVisibleItemCount() {
         return rows.size();
     }
 
     @Override
+    public int getVisibleItemCount() {
+        return dataCount;
+    }
+
+    @Override
     public Iterable<D> getVisibleItems() {
-        return rows;
+
+        return new Iterable<D>() {
+
+            private D next;
+            private final Iterator<D> rowsIterator = rows.iterator();
+
+            private final Iterator<D> visibleItemIterator = new Iterator<D>() {
+
+                @Override
+                public boolean hasNext() {
+
+                    while (rowsIterator.hasNext()) {
+                        next = rowsIterator.next();
+                        if (next != null) return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public D next() {
+                    return next;
+                }
+
+                @Override
+                public void remove() {
+                    throw new IllegalAccessError("Not implemented");
+                }
+            };
+
+            @Override
+            public Iterator<D> iterator() {
+                return visibleItemIterator;
+            }
+        };
     }
 
     public int getDataIndex(final D data) {
@@ -197,10 +219,9 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     @Override
     public void setData(final List<D> data) {
         rows.clear();
-        reserved.clear();
-        reservedExtra = 0;
 
         rows.addAll(data);
+        dataCount = data.size();
 
         view.clear(1);
         subListSizeByFather.clear();
@@ -208,7 +229,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         int rowIndex = 0;
         for (final D t : data) {
             setData(rowIndex++, t);
-            reserved.add(0);
         }
     }
 
@@ -218,9 +238,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public void insertData(final int index, final D data) {
         rows.add(index, data);
-
-        if (index == 0) reserved.add(index, 0);
-        else reserved.add(index, reserved.get(index - 1));
+        dataCount++;
 
         view.insertRow(index + 1);
         setData(index, data);
@@ -228,8 +246,9 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public void remove(final int index) {
         view.removeRow(index + 1);
-        rows.remove(index);
-        reserved.remove(index);
+
+        final D removed = rows.remove(index);
+        if (removed != null) dataCount--;
     }
 
     public void remove(final D data) {
@@ -247,14 +266,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public SimpleListView getListView() {
         return view;
-    }
-
-    protected int getDataRowFromReal(final int real) {
-        for (int i = 0; i < reserved.size(); i++) {
-            final int index = i + reserved.get(i);
-            if (index >= real) return i;
-        }
-        return -1;
     }
 
     protected int getRowIndex(final int row) {

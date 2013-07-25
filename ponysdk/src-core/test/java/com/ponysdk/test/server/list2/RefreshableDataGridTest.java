@@ -122,8 +122,10 @@ public class RefreshableDataGridTest {
 
         checkRowCount(5);
         checkVisibleItemCount(4);
+
         checkIndex("00", 0);
         checkIndex("01", 1);
+        // XX/2
         checkIndex("02", 3);
         checkIndex("03", 4);
     }
@@ -500,6 +502,43 @@ public class RefreshableDataGridTest {
     }
 
     @Test
+    public void testMove04() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        moveRow("00", 2);
+
+        checkIndex("01", 0);
+        checkIndex("02", 1);
+        checkIndex("00", 2);
+        checkIndex("03", 3);
+
+        moveRow("00", 2);
+
+        checkIndex("01", 0);
+        checkIndex("02", 1);
+        checkIndex("00", 2);
+        checkIndex("03", 3);
+
+        moveRow("00", 2);
+
+        checkIndex("01", 0);
+        checkIndex("02", 1);
+        checkIndex("00", 2);
+        checkIndex("03", 3);
+    }
+
+    @Test
     public void testMoveAndAdd01() {
         setData("00", "Data 00");
         setData("01", "Data 01");
@@ -617,6 +656,93 @@ public class RefreshableDataGridTest {
     }
 
     @Test
+    public void testMoveAndAdd04() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        insertColspan(1);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 2);
+        checkIndex("02", 3);
+        checkIndex("03", 4);
+
+        moveRow("03", 1);
+
+        checkIndex("00", 0);
+        checkIndex("03", 1);
+        checkIndex("01", 3);
+        checkIndex("02", 4);
+
+        moveRow("03", 1);
+
+        checkIndex("00", 0);
+        checkIndex("03", 1);
+        checkIndex("01", 3);
+        checkIndex("02", 4);
+
+        moveRow("03", 1);
+
+        checkIndex("00", 0);
+        checkIndex("03", 1);
+        checkIndex("01", 3);
+        checkIndex("02", 4);
+    }
+
+    @Test
+    public void testMoveAndAdd05() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        insertColspan(1);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 2);
+        checkIndex("02", 3);
+        checkIndex("03", 4);
+
+        moveRow("03", 2);
+
+        checkIndex("00", 0);
+        checkIndex("03", 2);
+        checkIndex("01", 3);
+        checkIndex("02", 4);
+
+        moveRow("03", 2);
+
+        checkIndex("00", 0);
+        checkIndex("03", 2);
+        checkIndex("01", 3);
+        checkIndex("02", 4);
+    }
+
+    @Test
     public void testRemoveColspan() {
         setData("00", "Data 00");
         setData("01", "Data 01");
@@ -653,8 +779,62 @@ public class RefreshableDataGridTest {
         checkIndex("03", 3);
     }
 
+    @Test
+    public void testIterateVisible01() {
+        setData("00", "Data 00");
+        setData("01", "Data 01");
+        setData("02", "Data 02");
+        setData("03", "Data 03");
+
+        checkRowCount(4);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 2);
+        checkIndex("03", 3);
+
+        int i = 0;
+        for (final Data d : datagrid.getVisibleItems()) {
+            if (i == 0) checkKey(d.key, "00");
+            else if (i == 1) checkKey(d.key, "01");
+            else if (i == 2) checkKey(d.key, "02");
+            else if (i == 3) checkKey(d.key, "03");
+            i++;
+        }
+
+        i = 0;
+        for (final Data d : datagrid.getVisibleItems()) {
+            if (i == 0) checkKey(d.key, "00");
+            else if (i == 1) checkKey(d.key, "01");
+            else if (i == 2) checkKey(d.key, "02");
+            else if (i == 3) checkKey(d.key, "03");
+            i++;
+        }
+
+        insertColspan(2);
+
+        checkRowCount(5);
+        checkVisibleItemCount(4);
+
+        checkIndex("00", 0);
+        checkIndex("01", 1);
+        checkIndex("02", 3);
+        checkIndex("03", 4);
+
+        i = 0;
+        for (final Data d : datagrid.getVisibleItems()) {
+            if (i == 0) checkKey(d.key, "00");
+            else if (i == 1) checkKey(d.key, "01");
+            else if (i == 2) checkKey(d.key, "02");
+            else if (i == 3) checkKey(d.key, "03");
+            i++;
+        }
+    }
+
     private void setData(final String key, final String value) {
         final Data d = new Data();
+        d.key = key;
         d.v1 = value;
         d.v2 = 0;
 
@@ -677,6 +857,10 @@ public class RefreshableDataGridTest {
         datagrid.moveRow(key, to);
     }
 
+    private void checkKey(final String key, final String expectedKey) {
+        Assert.assertEquals(expectedKey, key);
+    }
+
     private void checkIndex(final String key, final int expectedIndex) {
         Assert.assertEquals(expectedIndex, datagrid.getRow(key));
     }
@@ -691,6 +875,7 @@ public class RefreshableDataGridTest {
 
     private static class Data {
 
+        public String key;
         public String v1;
         public int v2;
 
@@ -698,6 +883,7 @@ public class RefreshableDataGridTest {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
+            result = prime * result + ((key == null) ? 0 : key.hashCode());
             result = prime * result + ((v1 == null) ? 0 : v1.hashCode());
             result = prime * result + v2;
             return result;
@@ -709,11 +895,19 @@ public class RefreshableDataGridTest {
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
             final Data other = (Data) obj;
+            if (key == null) {
+                if (other.key != null) return false;
+            } else if (!key.equals(other.key)) return false;
             if (v1 == null) {
                 if (other.v1 != null) return false;
             } else if (!v1.equals(other.v1)) return false;
             if (v2 != other.v2) return false;
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return key;
         }
     }
 }

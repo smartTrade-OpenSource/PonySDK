@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.list2.DataGridActivity;
 import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list2.SimpleListView;
@@ -85,9 +86,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             keyByIndex.add(key);
 
             rows.add(data);
-
-            reserved.add(getReservedRowCount());
-            reservedExtra = 0;
+            dataCount++;
 
             valueByKey.put(key, data);
 
@@ -150,30 +149,37 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         // update model
         for (int i = min; i < rows.size(); i++) {
             final K k = keyByIndex.get(i);
-            final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> cellRow = cells.get(k);
-            final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
-            int realRow = i;
-            realRow += reserved.get(i);
-            while (iter.hasNext()) {
-                final Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> entry = iter.next();
-                entry.getValue().setRow(realRow);
+            if (k != null) {
+                final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> cellRow = cells.get(k);
+                final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
+                final int realRow = i;
+                while (iter.hasNext()) {
+                    final Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> entry = iter.next();
+                    entry.getValue().setRow(realRow);
+                }
             }
         }
     }
 
-    public void moveRow(final K key, final int beforeIndexReal) {
+    @Override
+    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
+        keyByIndex.add(row, null);
+        super.insertRow(row, column, colSpan, widget);
+    }
+
+    public void moveRow(final K key, final int beforeIndex) {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) throw new IndexOutOfBoundsException("cell not found");
 
         final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
         final int realRow = cell.getRow();
 
-        view.moveRow((realRow + 1), (beforeIndexReal + 1));
+        if (realRow == beforeIndex) return;
+
+        view.moveRow((realRow + 1), (beforeIndex + 1));
 
         final D data = valueByKey.get(key);
         final int row = getDataIndex(data);
-
-        final int beforeIndex = getDataRowFromReal(beforeIndexReal);
 
         keyByIndex.remove(row);
         keyByIndex.add(beforeIndex, key);
@@ -181,11 +187,6 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         // permutation
         rows.remove(row);
         rows.add(beforeIndex, cell.getData());
-
-        // update reserved index
-        final Integer prev = reserved.get(beforeIndex);
-        reserved.remove(row);
-        reserved.add(beforeIndex, prev);
 
         final int min = Math.min(row, beforeIndex);
         updateRowIndex(min);
@@ -199,10 +200,6 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
         if (map == null) return -1;
         return map.entrySet().iterator().next().getValue().getRow();
-    }
-
-    public int getReservedRow(final int index) {
-        return reserved.get(index);
     }
 
     @SuppressWarnings("unchecked")
