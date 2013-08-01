@@ -60,10 +60,12 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setHeight(update.getString(PROPERTY.WIDGET_HEIGHT));
         } else if (update.containsKey(PROPERTY.WIDGET_FONT_SIZE)) {
             uiObject.getElement().getStyle().setProperty(FONT_SIZE, update.getString(PROPERTY.WIDGET_FONT_SIZE));
-        } else if (update.containsKey(PROPERTY.ELEMENT_PROPERTY_KEY)) {
-            uiObject.getElement().setPropertyString(update.getString(PROPERTY.ELEMENT_PROPERTY_KEY), update.getString(PROPERTY.ELEMENT_PROPERTY_VALUE));
-        } else if (update.containsKey(PROPERTY.ELEMENT_ATTRIBUTE_KEY)) {
-            uiObject.getElement().setAttribute(update.getString(PROPERTY.ELEMENT_ATTRIBUTE_KEY), update.getString(PROPERTY.ELEMENT_ATTRIBUTE_VALUE));
+        } else if (update.containsKey(PROPERTY.PUT_PROPERTY_KEY)) {
+            uiObject.getElement().setPropertyString(update.getString(PROPERTY.PUT_PROPERTY_KEY), update.getString(PROPERTY.PROPERTY_VALUE));
+        } else if (update.containsKey(PROPERTY.PUT_ATTRIBUTE_KEY)) {
+            uiObject.getElement().setAttribute(update.getString(PROPERTY.PUT_ATTRIBUTE_KEY), update.getString(PROPERTY.ATTRIBUTE_VALUE));
+        } else if (update.containsKey(PROPERTY.REMOVE_ATTRIBUTE_KEY)) {
+            uiObject.getElement().removeAttribute(update.getString(PROPERTY.REMOVE_ATTRIBUTE_KEY));
         } else if (update.containsKey(PROPERTY.STYLE_NAME)) {
             uiObject.setStyleName(update.getString(PROPERTY.STYLE_NAME));
         } else if (update.containsKey(PROPERTY.STYLE_PRIMARY_NAME)) {
@@ -78,8 +80,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.ensureDebugId(update.getString(PROPERTY.ENSURE_DEBUG_ID));
         } else if (update.containsKey(PROPERTY.WIDGET_TITLE)) {
             uiObject.setTitle(update.getString(PROPERTY.WIDGET_TITLE));
-        } else if (update.containsKey(PROPERTY.STYLE_KEY)) {
-            uiObject.getElement().getStyle().setProperty(update.getString(PROPERTY.STYLE_KEY), update.getString(PROPERTY.STYLE_VALUE));
+        } else if (update.containsKey(PROPERTY.PUT_STYLE_KEY)) {
+            uiObject.getElement().getStyle().setProperty(update.getString(PROPERTY.PUT_STYLE_KEY), update.getString(PROPERTY.STYLE_VALUE));
+        } else if (update.containsKey(PROPERTY.REMOVE_STYLE_KEY)) {
+            uiObject.getElement().getStyle().clearProperty(update.getString(PROPERTY.REMOVE_STYLE_KEY));
         } else if (update.containsKey(PROPERTY.BIND)) {
             nativeObject = bind(update.getString(PROPERTY.BIND), objectID.toString(), uiObject.getElement());
         } else if (update.containsKey(PROPERTY.NATIVE)) {

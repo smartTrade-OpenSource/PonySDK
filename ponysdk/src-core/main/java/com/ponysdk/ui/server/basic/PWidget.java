@@ -221,8 +221,17 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeStyleProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.STYLE_KEY, name);
+            update.put(PROPERTY.PUT_STYLE_KEY, name);
             update.put(PROPERTY.STYLE_VALUE, value);
+            Txn.get().getTxnContext().save(update);
+        }
+    }
+
+    public void removeStyleProperty(final String name) {
+        final String previous = safeStyleProperties().remove(name);
+        if (previous != null) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.REMOVE_STYLE_KEY, name);
             Txn.get().getTxnContext().save(update);
         }
     }
@@ -231,8 +240,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeElementProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.ELEMENT_PROPERTY_KEY, name);
-            update.put(PROPERTY.ELEMENT_PROPERTY_VALUE, value);
+            update.put(PROPERTY.PUT_PROPERTY_KEY, name);
+            update.put(PROPERTY.PROPERTY_VALUE, value);
             Txn.get().getTxnContext().save(update);
         }
     }
@@ -241,8 +250,17 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeElementAttributes().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Update update = new Update(ID);
-            update.put(PROPERTY.ELEMENT_ATTRIBUTE_KEY, name);
-            update.put(PROPERTY.ELEMENT_ATTRIBUTE_VALUE, value);
+            update.put(PROPERTY.PUT_ATTRIBUTE_KEY, name);
+            update.put(PROPERTY.ATTRIBUTE_VALUE, value);
+            Txn.get().getTxnContext().save(update);
+        }
+    }
+
+    public void removeAttribute(final String name) {
+        final String previous = safeElementAttributes().remove(name);
+        if (previous != null) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.REMOVE_ATTRIBUTE_KEY, name);
             Txn.get().getTxnContext().save(update);
         }
     }
