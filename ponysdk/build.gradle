@@ -168,7 +168,7 @@ task cleanGenerated(type: Delete) {
 task generateDatamodel {
 	description = 'Model generation'
 	inputs.file file('src-core/main/resources/spec/project_schema.xsd')
-	outputs.dir file('src-generated/main/java/com/ponysdk/generator')
+	outputs.dir fileTree('src-generated/main/java/com/ponysdk/generator')
 	doLast {
 		file(srcGenerated).mkdirs();
 		ant {
@@ -186,42 +186,42 @@ task compileDatamodel(type: JavaCompile, dependsOn: generateDatamodel) {
 	classpath = configurations.xjc
 	source = file(srcGenerated)
 	destinationDir = file("$buildDir/classes/main")
-	inputs.file file('src-generated/main/java/com/ponysdk/generator')
-	outputs.dir file("$buildDir/classes/main/com/ponysdk/generator")
+	inputs.files fileTree('src-generated/main/java/com/ponysdk/generator')
 }
 
 task compileGenerator(type: JavaCompile, dependsOn: compileDatamodel) {
 	classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
 	source = srcGenerator
 	destinationDir = file("$buildDir/classes/main")
-	inputs.file file(srcGenerator)
-	outputs.dir file("$buildDir/classes/main/com/ponysdk/generator")
+	inputs.files fileTree(srcGenerator)
 }
 
-task generateDictionnary(type: JavaExec, dependsOn: compileGenerator) {
+task generateDictionnary(dependsOn: compileGenerator) {
 	description = 'Dictionnary generation'
-	main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
-	classpath { 
-		[
-			file("$buildDir/classes/main"),
-			configurations.sl4j,
-			configurations.gwt
-		]
-	}
-	args = [
-		'verbose=false'
-	]
 	inputs.file file('src-core/main/resources/spec/propertiesDictionnary.json')
-	outputs.dir file('src-generated/main/java/com/ponysdk/ui')
+    outputs.files fileTree('src-generated/main/java/com/ponysdk/ui')
+    doLast {
+    	javaexec {
+			main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
+			classpath {
+				[
+					file("$buildDir/classes/main"),
+					configurations.sl4j,
+					configurations.gwt
+				]
+			}
+			args = [
+					'verbose=false'
+			]
+    	}
+    }
 }
-
 
 task generate(dependsOn: generateDictionnary) {
 	doLast {
 		println 'generation done'
 	}
 }
-
 
 task compileTerminal << {
 	def result = System.getProperty('gwtc', 'true')
@@ -235,28 +235,33 @@ task compileTerminal << {
 	}
 }
 
-task gwtc(type: JavaExec) {
+task gwtc {
 	description = 'GWT compile'
-	main = 'com.google.gwt.dev.Compiler'
-	maxHeapSize = '512M'
-	workingDir = buildDir
-	inputs.dir file(srcTerminal)
-	classpath {
-		[
-			sourceSets.main.java.srcDirs,
-			sourceSets.main.output,
-			configurations.gwt
-		]
-	}
-	args = [
-		'-XenableClosureCompiler',
-		'-war',
-		'gwt',
-		'-localWorkers',
-		Runtime.getRuntime().availableProcessors(),
-		'com.ponysdk.ui.PonyTerminal'
-	]
+	inputs.files fileTree(srcTerminal)
+    outputs.files fileTree(gwtOutputDirName)
+    doLast {
+    	javaexec {
+			main = 'com.google.gwt.dev.Compiler'
+			maxHeapSize = '512M'
+			workingDir = buildDir
+			classpath {
+				[
+					sourceSets.main.java.srcDirs,
+					sourceSets.main.output,
+					configurations.gwt
+				]
+			}
+			args = [
+				'-war',
+				'gwt',
+				'-localWorkers',
+				Runtime.getRuntime().availableProcessors(),
+				'com.ponysdk.ui.PonyTerminal'
+			]
+    	}
+    }
 }
+
 
 task devmode(type: JavaExec) {
 	description = 'GWT compile'

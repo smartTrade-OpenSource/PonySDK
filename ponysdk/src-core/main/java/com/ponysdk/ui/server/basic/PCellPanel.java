@@ -33,10 +33,6 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 /**
  * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set
  * independently. Each child widget can take up a subset of its cell and can be aligned within it.
- * <p>
- * Note: This class is not related to the {@link PCell} based data presentation widgets such as
- * {@link PCellList} and {@link PCellTable}.
- * </p>
  */
 public abstract class PCellPanel extends PComplexPanel {
 
