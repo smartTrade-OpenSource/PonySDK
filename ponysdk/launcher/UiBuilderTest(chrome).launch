@@ -58,4 +58,5 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.test.UiBuilderTest"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="ponysdk"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Duitest.webdriver=chrome"/>
 </launchConfiguration>

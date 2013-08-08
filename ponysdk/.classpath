@@ -45,5 +45,7 @@
 	<classpathentry kind="lib" path="libs/commons/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-client.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-io.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-chrome-driver.jar"/>
+	<classpathentry kind="lib" path="libs/tests/selenium-ie-driver.jar"/>
 	<classpathentry kind="output" path="build/classes/main"/>
 </classpath>

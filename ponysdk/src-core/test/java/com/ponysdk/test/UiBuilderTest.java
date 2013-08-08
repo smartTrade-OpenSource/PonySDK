@@ -24,13 +24,12 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.main.Main;
 import com.ponysdk.test.UiBuilderTestEntryPoint.RequestHandler;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;
@@ -123,7 +123,6 @@ public class UiBuilderTest {
 
     private static final Logger log = LoggerFactory.getLogger(UiBuilderTest.class);
 
-    private static Server webServer;
     private static WebDriver webDriver;
     private static PEventsListener eventsListener;
 
@@ -136,16 +135,11 @@ public class UiBuilderTest {
     public static void runBeforeClass() throws Throwable {
 
         log.info("Starting jetty webserver");
-        webServer = new Server(5000);
-        final WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/test");
-        webapp.setDescriptor("test");
-        webapp.setWar("src-core/test/resources/war");
-        webapp.setExtractWAR(true);
-        webapp.setParentLoaderPriority(true);
-        webapp.setClassLoader(new WebAppClassLoader(UiBuilderTest.class.getClassLoader(), webapp));
-        webServer.addHandler(webapp);
-        webServer.start();
+        final Main main = new Main();
+        main.setApplicationContextName("test");
+        main.setPort(5000);
+        main.setWar("src-core/test/resources/war");
+        main.start();
 
         final Properties testProperties = loadProperties();
 
@@ -179,8 +173,16 @@ public class UiBuilderTest {
     }
 
     private static WebDriver buildWebDriver(final Properties testProperties) {
-        final WebDriver driver = new FirefoxDriver();
-        // final WebDriver driver = new ChromeDriver();
+        final String webdriverType = System.getProperty("uitest.webdriver", "firefox");
+
+        WebDriver driver;
+        if (webdriverType.equals("chrome")) {
+            driver = new ChromeDriver();
+        } else if (webdriverType.equals("firefox")) {
+            driver = new FirefoxDriver();
+        } else {
+            driver = new InternetExplorerDriver();
+        }
         return driver;
     }
 
@@ -190,7 +192,7 @@ public class UiBuilderTest {
         webDriver.quit();
 
         log.info("Stopping jetty webserver");
-        webServer.stop();
+        // webServer.stop();
     }
 
     @Before
@@ -499,9 +501,15 @@ public class UiBuilderTest {
         final PValueChangeEvent<Date> e1 = eventsListener.poll();
         Assert.assertNull(e1.getValue());
 
-        element.sendKeys(new String("2012-10-30"));
-        element = findElementById("label1");
         element.click();
+        element.sendKeys("");
+        element.sendKeys(new String("2012-10-30"));
+
+        element = findElementById("label1");
+
+        final Actions actions = new Actions(webDriver);
+        actions.moveToElement(element).build().perform();
+        actions.click().build().perform();
 
         final PValueChangeEvent<Date> e2 = eventsListener.poll();
         Assert.assertEquals("2012-10-30", dateFormat.format(e2.getValue()));
@@ -896,7 +904,16 @@ public class UiBuilderTest {
 
             @Override
             public void onRequest() {
+
+                final PLabel focusTest = new PLabel("Focus top label");
+                focusTest.ensureDebugId("focusTopLabel");
+                final PLabel focusTest2 = new PLabel("Focus bottom label");
+                focusTest2.ensureDebugId("focusBottomLabel");
+
                 final PFocusPanel focusPanel1 = new PFocusPanel();
+                focusPanel1.setHeight("30px");
+                focusPanel1.setWidth("300px");
+                focusPanel1.setStyleProperty("border", "1px solid blue");
                 focusPanel1.ensureDebugId("focusPanel1");
                 focusPanel1.setWidget(new PLabel("A focusable widget"));
                 focusPanel1.addMouseOverHandler(eventsListener);
@@ -904,14 +921,19 @@ public class UiBuilderTest {
                 focusPanel1.addKeyPressHandler(eventsListener);
                 focusPanel1.addKeyUpHandler(eventsListener);
                 focusPanel1.addBlurHandler(eventsListener);
+
+                PRootPanel.get().add(focusTest);
                 PRootPanel.get().add(focusPanel1);
+                PRootPanel.get().add(focusTest2);
                 register(focusPanel1);
             }
         });
 
-        final WebElement focusPanel1 = findElementById("focusPanel1");
+        final WebElement focusTopLabel = findElementById("focusTopLabel");
+        actions.moveToElement(focusTopLabel).click().build().perform();
 
         // Mouse over
+        final WebElement focusPanel1 = findElementById("focusPanel1");
         actions.moveToElement(focusPanel1).build().perform();
         final PMouseOverEvent e1 = eventsListener.poll();
         Assert.assertNotNull(e1);
@@ -922,16 +944,14 @@ public class UiBuilderTest {
         Assert.assertNotNull(e2);
 
         // Key press/ Key up
-        actions.sendKeys("A").build().perform();
+        actions.sendKeys("a").build().perform();
         final PKeyPressEvent e3 = eventsListener.poll();
         final PKeyUpEvent e4 = eventsListener.poll();
         Assert.assertNotNull(e3);
         Assert.assertEquals(65, e4.getKeyCode());
 
-        eventsListener.clear(); // TODO keyup received 2x, selenium issue ?
-
-        final WebElement element = findElementById("startingpoint");
-        element.click();
+        final WebElement focusBottomLabel = findElementById("focusBottomLabel");
+        actions.moveToElement(focusBottomLabel).click().build().perform();
         final PBlurEvent e5 = eventsListener.poll();
         Assert.assertNotNull(e5);
     }
@@ -1023,7 +1043,6 @@ public class UiBuilderTest {
                 final PHTML html1 = new PHTML();
                 html1.ensureDebugId("html1");
                 html1.setHTML("Pure <b>HTML</b>");
-                html1.setWordWrap(false);
                 PRootPanel.get().add(html1);
                 register(html1);
             }
@@ -1031,7 +1050,6 @@ public class UiBuilderTest {
 
         final WebElement html1 = findElementById("html1");
         Assert.assertEquals("Pure HTML", html1.getText());
-        Assert.assertTrue(html1.getAttribute("style").contains("white-space: nowrap;"));
         Assert.assertEquals(1, html1.findElements(By.tagName("b")).size());
 
         final PHTML pHtml = get("html1");
@@ -1219,7 +1237,8 @@ public class UiBuilderTest {
         Assert.assertEquals(new Long(5), plistBox2.getValue(4));
         Assert.assertEquals(new Long(6), plistBox2.getValue(5));
 
-        options2.get(4).click(); // select item5
+        final Select select2 = new Select(listBox2);
+        select2.selectByIndex(4); // select item5
 
         final PChangeEvent e2 = eventsListener.poll();
         Assert.assertNotNull(e2);
@@ -1265,7 +1284,6 @@ public class UiBuilderTest {
             }
         });
 
-        final Select select2 = new Select(listBox2);
         final WebElement selectedOption2 = select2.getFirstSelectedOption();
         Assert.assertEquals("Item 3", selectedOption2.getText());
         Assert.assertEquals("Item 3", plistBox2.getSelectedItem());
