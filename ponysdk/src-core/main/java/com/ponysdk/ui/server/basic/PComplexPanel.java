@@ -49,6 +49,8 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     public void insert(final PWidget child, final int beforeIndex) {
+        assertNotMe(child);
+
         child.removeFromParent();
         getChildren().insert(child, beforeIndex);
         adopt(child);
@@ -98,6 +100,10 @@ public abstract class PComplexPanel extends PPanel {
 
     void assertIsChild(final PWidget widget) {
         if ((widget != null) && (widget.getParent() != this)) throw new IllegalStateException("The specified widget is not a child of this panel");
+    }
+
+    void assertNotMe(final PWidget widget) {
+        if (widget == this) throw new IllegalStateException("Cannot insert widget to itself");
     }
 
 }
