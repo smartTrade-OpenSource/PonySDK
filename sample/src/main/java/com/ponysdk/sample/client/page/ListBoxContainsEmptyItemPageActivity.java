@@ -23,14 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
 
@@ -62,17 +59,25 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             }
         });
 
-        final PCheckBox checkBox = new PCheckBox("Enable multi-selection");
-        checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
+        final PListBox multiListBox = new PListBox(true, true);
+        multiListBox.setVisibleItemCount(10);
+        multiListBox.addItem("Altai horseBengin");
+        multiListBox.addItem("American Warmblood");
+        multiListBox.addItem("Falabella");
+        multiListBox.addItem("Friesian horse");
+        multiListBox.addItem("Mustang");
+        multiListBox.addItem("Altai horse");
+
+        multiListBox.addChangeHandler(new PChangeHandler() {
 
             @Override
-            public void onValueChange(final PValueChangeEvent<Boolean> event) {
-                listBox.setMultiSelect(event.getValue());
+            public void onChange(final PChangeEvent event) {
+                PNotificationManager.showTrayNotification("Item selected : " + multiListBox.getSelectedItems());
             }
         });
 
         panel.add(listBox);
-        panel.add(checkBox);
+        panel.add(multiListBox);
 
         examplePanel.setWidget(panel);
     }

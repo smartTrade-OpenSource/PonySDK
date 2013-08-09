@@ -82,7 +82,6 @@ public class PTListBox extends PTFocusWidget<ListBox> {
         super.addHandler(addHandler, uiService);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.CLEAR)) {
@@ -133,8 +132,6 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             else uiObject.setItemSelected(index, selected);
         } else if (update.containsKey(PROPERTY.VISIBLE_ITEM_COUNT)) {
             uiObject.setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
-        } else if (update.containsKey(PROPERTY.MULTISELECT)) {
-            uiObject.setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
         } else {
             super.update(update, uiService);
         }

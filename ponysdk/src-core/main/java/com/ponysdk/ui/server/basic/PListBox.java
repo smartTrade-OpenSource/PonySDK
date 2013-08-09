@@ -62,7 +62,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     protected int selectedIndex = -1;
 
-    private boolean isMultipleSelect;
+    private final boolean isMultipleSelect;
 
     private final boolean containsEmptyItem;
 
@@ -366,13 +366,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public int getVisibleItemCount() {
         return visibleItemCount;
-    }
-
-    public void setMultiSelect(final Boolean isMultipleSelect) {
-        this.isMultipleSelect = isMultipleSelect;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.MULTISELECT, isMultipleSelect);
-        Txn.get().getTxnContext().save(update);
     }
 
     public class ListItem {
