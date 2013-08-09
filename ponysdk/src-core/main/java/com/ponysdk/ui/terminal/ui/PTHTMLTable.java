@@ -60,7 +60,9 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
             final int row = update.getInt(PROPERTY.ROW);
             if (update.containsKey(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME)) {
                 uiObject.getRowFormatter().addStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME));
-            } else {
+            } else if (update.containsKey(PROPERTY.ROW_FORMATTER_SET_STYLE_NAME)) {
+                uiObject.getRowFormatter().setStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_SET_STYLE_NAME));
+            } else if (update.containsKey(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME)) {
                 uiObject.getRowFormatter().removeStyleName(row, update.getString(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME));
             }
         } else if (update.containsKey(PROPERTY.HTMLTABLE_CELL_STYLE)) {
@@ -68,9 +70,10 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
             final int cellColumn = update.getInt(PROPERTY.COLUMN);
             if (update.containsKey(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME)) {
                 uiObject.getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME));
-            }
-            if (update.containsKey(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME)) {
+            } else if (update.containsKey(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME)) {
                 uiObject.getCellFormatter().removeStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME));
+            } else if (update.containsKey(PROPERTY.CELL_FORMATTER_SET_STYLE_NAME)) {
+                uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, update.getString(PROPERTY.CELL_FORMATTER_SET_STYLE_NAME));
             }
             if (update.containsKey(PROPERTY.CELL_VERTICAL_ALIGNMENT)) {
                 final VerticalAlignmentConstant asVerticalAlignmentConstant = PVerticalAlignment.values()[update.getInt(PROPERTY.CELL_VERTICAL_ALIGNMENT)].asVerticalAlignmentConstant();
@@ -84,9 +87,10 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
             final int column = update.getInt(PROPERTY.COLUMN);
             if (update.containsKey(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME)) {
                 uiObject.getColumnFormatter().addStyleName(column, update.getString(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME));
-            }
-            if (update.containsKey(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME)) {
+            } else if (update.containsKey(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME)) {
                 uiObject.getColumnFormatter().removeStyleName(column, update.getString(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME));
+            } else if (update.containsKey(PROPERTY.COLUMN_FORMATTER_SET_STYLE_NAME)) {
+                uiObject.getColumnFormatter().setStyleName(column, update.getString(PROPERTY.COLUMN_FORMATTER_SET_STYLE_NAME));
             }
             if (update.containsKey(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH)) {
                 uiObject.getColumnFormatter().setWidth(column, update.getString(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH));

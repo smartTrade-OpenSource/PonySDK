@@ -93,9 +93,9 @@ public abstract class PHTMLTable extends PPanel {
             Set<String> styles = styleNames.get(row);
             if (styles == null) {
                 styles = new HashSet<String>();
-
                 styleNames.put(row, styles);
             }
+
             if (styles.add(styleName)) {
                 final Update update = new Update(ID);
                 update.put(PROPERTY.ROW, row);
@@ -117,6 +117,23 @@ public abstract class PHTMLTable extends PPanel {
                 update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 Txn.get().getTxnContext().save(update);
             }
+        }
+
+        public void setStyleName(final int row, final String styleName) {
+            Set<String> styles = styleNames.get(row);
+            if (styles == null) {
+                styles = new HashSet<String>();
+                styleNames.put(row, styles);
+            }
+
+            styles.clear();
+            styles.add(styleName);
+
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
+            update.put(PROPERTY.ROW_FORMATTER_SET_STYLE_NAME, styleName);
+            Txn.get().getTxnContext().save(update);
         }
 
         protected void insertRowStyle(final int row) {
@@ -162,6 +179,15 @@ public abstract class PHTMLTable extends PPanel {
             Txn.get().getTxnContext().save(update);
         }
 
+        public void setStyleName(final int row, final int column, final String styleName) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.ROW, row);
+            update.put(PROPERTY.COLUMN, column);
+            update.put(PROPERTY.CELL_FORMATTER_SET_STYLE_NAME, styleName);
+            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
+            Txn.get().getTxnContext().save(update);
+        }
+
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
             final Update update = new Update(getID());
             update.put(PROPERTY.ROW, row);
@@ -203,6 +229,14 @@ public abstract class PHTMLTable extends PPanel {
             final Update update = new Update(ID);
             update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
             update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            update.put(PROPERTY.COLUMN, column);
+            Txn.get().getTxnContext().save(update);
+        }
+
+        public void setStyleName(final int column, final String styleName) {
+            final Update update = new Update(ID);
+            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
+            update.put(PROPERTY.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
             update.put(PROPERTY.COLUMN, column);
             Txn.get().getTxnContext().save(update);
         }
