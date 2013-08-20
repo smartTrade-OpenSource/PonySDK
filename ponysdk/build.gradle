@@ -16,6 +16,7 @@ ext{
     srcHibernate = "src-hibernate/main/java"
     srcMongoDB = "src-mongodb/main/java"
     srcJasper = "src-jasper/main/java"
+    resourcesCoreTest = "src-core/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     warResources = "src-core/main/resources/war"
@@ -363,7 +364,16 @@ task javadocJar(type: Jar, dependsOn:javadoc) {
 	    attributes("Date": timestamp + " / " + new Date().toGMTString())
 	}
 }
- 
+
+test {
+    classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    afterSuite { desc, result -> 
+    	if (!desc.parent) {
+    		println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+    	}
+    }
+}
+
 // add javadoc/source jar tasks as artifacts
 artifacts {
      archives sourcesJar
