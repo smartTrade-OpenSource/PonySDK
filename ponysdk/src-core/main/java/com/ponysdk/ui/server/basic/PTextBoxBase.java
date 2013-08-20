@@ -43,13 +43,15 @@ import com.ponysdk.ui.terminal.WidgetType;
 
 public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String> {
 
+    private static final String EMPTY = "";
+
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
-    private String text = "";
-    private String placeholder = "";
+    private String text = EMPTY;
+    private String placeholder = EMPTY;
 
     public PTextBoxBase() {
-        this("");
+        this(EMPTY);
     }
 
     public PTextBoxBase(final String text) {
@@ -70,7 +72,8 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
     }
 
     @Override
-    public void setText(final String text) {
+    public void setText(String text) {
+        if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         saveUpdate(PROPERTY.TEXT, this.text);
@@ -86,10 +89,11 @@ public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<St
         setText(value);
     }
 
-    public void setPlaceholder(final String placeholder) {
+    public void setPlaceholder(String placeholder) {
+        if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(PROPERTY.PLACEHOLDER, this.text);
+        saveUpdate(PROPERTY.PLACEHOLDER, this.placeholder);
     }
 
     public String getPlaceholder() {
