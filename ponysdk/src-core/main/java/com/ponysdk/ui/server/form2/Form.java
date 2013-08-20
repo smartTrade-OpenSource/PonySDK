@@ -61,4 +61,8 @@ public class Form {
         }
     }
 
+    public List<FormField<?>> getFormFields() {
+        return formFields;
+    }
+
 }
