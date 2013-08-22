@@ -23,8 +23,16 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PRichTextArea;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.ui.server.basic.PRichTextToolbar;
+import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class RichTextAreaPageActivity extends SamplePageActivity {
 
@@ -36,12 +44,38 @@ public class RichTextAreaPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel layout = new PVerticalPanel();
+        final PScrollPanel scroll = new PScrollPanel();
+        final PRichTextArea richTextArea = new PRichTextArea();
+        final PRichTextToolbar richTextToolbar = new PRichTextToolbar(richTextArea);
+        final PFlowPanel flow = new PFlowPanel();
+        flow.add(new PLabel("Edit rich content"));
+        flow.add(richTextToolbar);
+        flow.add(richTextArea);
+        flow.add(buildCustomToolbar(richTextArea));
+        scroll.setWidget(flow);
+        examplePanel.setWidget(scroll);
 
-        final PRichTextArea ritchTextArea = new PRichTextArea();
+        richTextArea.setWidth("100%");
+    }
 
-        layout.add(ritchTextArea);
+    private PWidget buildCustomToolbar(final PRichTextArea richTextArea) {
 
-        examplePanel.setWidget(layout);
+        final PTextBox color = new PTextBox();
+        color.setPlaceholder("Color");
+        final PButton update = new PButton("Set back color");
+        update.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                final String c = color.getValue();
+                richTextArea.getFormatter().setBackColor(c);
+            }
+        });
+
+        final PFlowPanel toolbar = new PFlowPanel();
+        toolbar.add(color);
+        toolbar.add(update);
+        toolbar.setStyleProperty("padding-top", "15px");
+        return toolbar;
     }
 }

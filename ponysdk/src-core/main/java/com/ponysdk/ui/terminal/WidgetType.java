@@ -67,6 +67,7 @@ public enum WidgetType {
     PUSH_BUTTON,
     ADDON,
     RICH_TEXT_AREA,
+    RICH_TEXT_TOOLBAR,
     DISCLOSURE_PANEL,
     DECORATED_POPUP_PANEL,
     DIALOG_BOX,

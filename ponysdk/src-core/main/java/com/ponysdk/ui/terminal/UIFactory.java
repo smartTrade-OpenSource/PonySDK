@@ -60,6 +60,7 @@ import com.ponysdk.ui.terminal.ui.PTPushButton;
 import com.ponysdk.ui.terminal.ui.PTPusher;
 import com.ponysdk.ui.terminal.ui.PTRadioButton;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea;
+import com.ponysdk.ui.terminal.ui.PTRichTextToolbar;
 import com.ponysdk.ui.terminal.ui.PTRootLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTRootPanel;
 import com.ponysdk.ui.terminal.ui.PTScheduler;
@@ -127,6 +128,7 @@ public class UIFactory {
         if (WidgetType.ATTACHED_POPUP_PABEL.equals(widgetType)) { return new PTAttachedPopupPanel(); }
         if (WidgetType.SCHEDULER.equals(widgetType)) { return new PTScheduler(); }
         if (WidgetType.RICH_TEXT_AREA.equals(widgetType)) { return new PTRichTextArea(); }
+        if (WidgetType.RICH_TEXT_TOOLBAR.equals(widgetType)) { return new PTRichTextToolbar(); }
         if (WidgetType.DIALOG_BOX.equals(widgetType)) { return new PTDialogBox(); }
         if (WidgetType.FLOW_PANEL.equals(widgetType)) { return new PTFlowPanel(); }
         if (WidgetType.SUGGESTBOX.equals(widgetType)) { return new PTSuggestBox(); }

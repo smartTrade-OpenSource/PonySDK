@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTRichTextArea extends PTWidget<RichTextArea> {
+public class PTRichTextArea extends PTFocusWidget<RichTextArea> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -54,6 +54,8 @@ public class PTRichTextArea extends PTWidget<RichTextArea> {
             uiObject.getFormatter().insertUnorderedList();
         } else if (update.containsKey(PROPERTY.BACK_COLOR)) {
             uiObject.getFormatter().setBackColor(update.getString(PROPERTY.BACK_COLOR));
+        } else if (update.containsKey(PROPERTY.FONT_COLOR)) {
+            uiObject.getFormatter().setForeColor(update.getString(PROPERTY.FONT_COLOR));
         } else if (update.containsKey(PROPERTY.FONT_NAME)) {
             uiObject.getFormatter().setFontName(update.getString(PROPERTY.FONT_NAME));
         } else if (update.containsKey(PROPERTY.FONT_SIZE)) {
@@ -97,6 +99,5 @@ public class PTRichTextArea extends PTWidget<RichTextArea> {
 
     public enum Justification {
         CENTER, FULL, LEFT, RIGHT;
-
     }
 }

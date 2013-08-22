@@ -89,127 +89,127 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
     public class Formatter {
 
-        void createLink(final String url) {
+        public void createLink(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.CREATE_LINK, html);
             Txn.get().getTxnContext().save(update);
         }
 
-        void insertHorizontalRule() {
+        public void insertHorizontalRule() {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HORIZONTAL_RULE);
             Txn.get().getTxnContext().save(update);
         }
 
-        void insertHTML(final String html) {
+        public void insertHTML(final String html) {
             final Update update = new Update(getID());
             update.put(PROPERTY.INSERT_HTML, html);
             Txn.get().getTxnContext().save(update);
         }
 
-        void insertImage(final String url) {
+        public void insertImage(final String url) {
             final Update update = new Update(getID());
             update.put(PROPERTY.IMAGE, url);
             Txn.get().getTxnContext().save(update);
         }
 
-        void insertOrderedList() {
+        public void insertOrderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.ORDERED);
             Txn.get().getTxnContext().save(update);
         }
 
-        void insertUnorderedList() {
+        public void insertUnorderedList() {
             final Update update = new Update(getID());
             update.put(PROPERTY.UNORDERED);
             Txn.get().getTxnContext().save(update);
         }
 
-        void setBackColor(final String color) {
+        public void setBackColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.BACK_COLOR, color);
             Txn.get().getTxnContext().save(update);
         }
 
-        void setFontName(final String name) {
+        public void setFontName(final String name) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_NAME, name);
             Txn.get().getTxnContext().save(update);
         }
 
-        void setFontSize(final String fontSize) {
+        public void setFontSize(final String fontSize) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_SIZE, fontSize);
             Txn.get().getTxnContext().save(update);
         }
 
-        void setForeColor(final String color) {
+        public void setForeColor(final String color) {
             final Update update = new Update(getID());
             update.put(PROPERTY.FONT_COLOR, color);
             Txn.get().getTxnContext().save(update);
         }
 
-        void setJustification(final Justification justification) {
+        public void setJustification(final Justification justification) {
             final Update update = new Update(getID());
             update.put(PROPERTY.JUSTIFICATION, justification.name());
             Txn.get().getTxnContext().save(update);
         }
 
-        void toggleBold() {
+        public void toggleBold() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_BOLD);
             Txn.get().getTxnContext().save(update);
         }
 
-        void toggleItalic() {
+        public void toggleItalic() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_ITALIC);
             Txn.get().getTxnContext().save(update);
         }
 
-        void toggleSubscript() {
+        public void toggleSubscript() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_SUBSCRIPT);
             Txn.get().getTxnContext().save(update);
         }
 
-        void toggleUnderline() {
+        public void toggleUnderline() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_UNDERLINE);
             Txn.get().getTxnContext().save(update);
         }
 
-        void leftIndent() {
+        public void leftIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.LEFT_INDENT);
             Txn.get().getTxnContext().save(update);
         }
 
-        void redo() {
+        public void redo() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REDO);
             Txn.get().getTxnContext().save(update);
         }
 
-        void removeFormat() {
+        public void removeFormat() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_FORMAT);
             Txn.get().getTxnContext().save(update);
         }
 
-        void removeLink() {
+        public void removeLink() {
             final Update update = new Update(getID());
             update.put(PROPERTY.REMOVE_LINK);
             Txn.get().getTxnContext().save(update);
         }
 
-        void rightIndent() {
+        public void rightIndent() {
             final Update update = new Update(getID());
             update.put(PROPERTY.TOGGLE_RIGHT_INDENT);
             Txn.get().getTxnContext().save(update);
         }
 
-        void selectAll() {
+        public void selectAll() {
             final Update update = new Update(getID());
             update.put(PROPERTY.SELECT_ALL);
             Txn.get().getTxnContext().save(update);
