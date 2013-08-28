@@ -21,7 +21,7 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
+    protected static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         final long key = Long.parseLong(req.getParameter(APPLICATION.VIEW_ID));
 
         final Application applicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
-
         if (applicationSession == null) throw new RuntimeException("Invalid session, please reload your application");
 
         JettyWebSocket jettyWebSocket;
@@ -41,7 +40,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         uiContext.acquire();
         try {
             UIContext.setCurrent(uiContext);
-            jettyWebSocket = new JettyWebSocket();
+            jettyWebSocket = newJettyWebsocket();
             PPusher.get().initialize(jettyWebSocket);
         } finally {
             UIContext.remove();
@@ -51,10 +50,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         return jettyWebSocket;
     }
 
+    protected JettyWebSocket newJettyWebsocket() {
+        return new JettyWebSocket();
+    }
+
     public class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
-        private Connection connection;
-        private ConnectionListener connectionListener;
+        protected Connection connection;
+        protected ConnectionListener connectionListener;
 
         @Override
         public void onOpen(final Connection connection) {
@@ -92,7 +95,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
                 log.error("", e);
             }
         }
-
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
