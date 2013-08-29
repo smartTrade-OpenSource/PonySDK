@@ -21,6 +21,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     private CaptionOrientation captionOrientation;
 
+    protected PFlowPanel container = new PFlowPanel();;
     protected PLabel captionLabel;
     protected PLabel errorLabel;
     protected final FormField<?> formField;
@@ -35,24 +36,25 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation, final FormField<?> formField) {
         this.formField = formField;
-        setCaptionOrientation(captionOrientation);
+        this.container.addStyleName("ctn");
+        add(container);
         buildUI(caption);
+        setCaptionOrientation(captionOrientation);
     }
 
     protected void buildUI(final String caption) {
         addStyleName(PonySDKTheme.FORM_FORMFIELD_COMPONENT);
 
         formField.addFormFieldListener(this);
-
         buildCaption(caption);
-        add(formField.asWidget());
+        container.add(formField.asWidget());
         buildErrorLabel();
     }
 
     protected void buildErrorLabel() {
         errorLabel = new PLabel();
         errorLabel.addStyleName("error-label");
-        add(errorLabel);
+        container.add(errorLabel);
     }
 
     protected void buildCaption(final String caption) {
@@ -67,6 +69,21 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
         if (this.captionOrientation != null) removeStyleName(this.captionOrientation.name());
         this.captionOrientation = captionOriantation;
         addStyleName(captionOriantation.name());
+
+        if (this.captionOrientation != null) {
+            final int captionPosition = getWidgetIndex(captionLabel);
+            if (captionOrientation == CaptionOrientation.TOP || captionOrientation == CaptionOrientation.LEFT) {
+                if (captionPosition != 0) {
+                    remove(captionLabel);
+                    insert(captionLabel, 0);
+                }
+            } else {
+                if (captionPosition != 1) {
+                    remove(captionLabel);
+                    insert(captionLabel, 1);
+                }
+            }
+        }
     }
 
     public void setCaption(final String caption) {

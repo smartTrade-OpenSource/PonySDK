@@ -951,15 +951,42 @@ td.datePickerMonth {
 // FormField Component
 // -------------------------
 
+.pony-PFlexTable {
+	&.cell-top {
+		td {
+			vertical-align: top;
+		}
+	}
+}
+
 .pony-Form-FormField-Component{
 	width:100%;
-
+	clear: both;
+	
 	.caption{
 		margin-left:2px;
 	}
 
 	.error-label{
 		height:12px;
+	}
+	
+	&.TOP {
+	}
+	
+	&.BOTTOM {
+	}
+	
+	&.LEFT {
+		div {
+			float: left;
+		}
+	}
+	
+	&.RIGHT {
+		div {
+			float: left;
+		}
 	}
 
 	&.error{
@@ -981,7 +1008,10 @@ td.datePickerMonth {
 		.gwt-ListBox{
 			border:2px solid rgba(204,0,0,.5);
 		}
+		margin-bottom: 10px;
 	}
+	
+	
 }
 
 .pony-Form-FormField-Component .pony-PFlextable-Cell .gwt-Label{

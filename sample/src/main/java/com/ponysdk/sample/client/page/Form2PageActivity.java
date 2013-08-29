@@ -25,12 +25,10 @@ package com.ponysdk.sample.client.page;
 
 import java.util.Date;
 
-import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -51,8 +49,6 @@ import com.ponysdk.ui.server.form2.validator.UncheckedFieldValidator;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class Form2PageActivity extends SamplePageActivity {
-
-    private PPopupPanel popupPanel;
 
     public Form2PageActivity() {
         super("Form 2", "Rich UI Components");
@@ -113,6 +109,7 @@ public class Form2PageActivity extends SamplePageActivity {
         final FormFieldComponent formFieldComponent8 = new FormFieldComponent("field8", field8);
 
         final PFlexTable formLayout = new PFlexTable();
+        formLayout.addStyleName("cell-top");
         formLayout.setWidget(0, 0, formFieldComponent1);
         formLayout.setWidget(0, 1, formFieldComponent2);
         formLayout.setWidget(1, 0, formFieldComponent3);
@@ -172,43 +169,7 @@ public class Form2PageActivity extends SamplePageActivity {
         panel.setWidget(1, 0, formLayout);
         panel.getFlexCellFormatter().setColSpan(1, 0, 3);
 
-        popupPanel = new PPopupPanel();
-        final PButton ok = new PButton("OK");
-        ok.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final boolean isValid = form.isValid();
-                if (isValid) popupPanel.hide();
-                PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
-            }
-        });
-
-        final PButton close = new PButton("Close");
-        close.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        });
-
-        panel.setWidget(2, 0, ok);
-        panel.setWidget(2, 2, close);
-
-        popupPanel.setWidget(panel);
-        popupPanel.center();
+        examplePanel.setWidget(panel);
     }
 
-    @Override
-    protected void onShowPage(final Place place) {
-        super.onShowPage(place);
-        popupPanel.center();
-    }
-
-    @Override
-    protected void onLeavingPage() {
-        super.onLeavingPage();
-        popupPanel.hide();
-    }
 }
