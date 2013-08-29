@@ -12,4 +12,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 	<bean name="ponyService" class="com.ponysdk.sample.server.PonyServiceImpl" />
 
+	<bean name="executor" class="com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor" factory-method="initDefault" />
+
 </beans>
