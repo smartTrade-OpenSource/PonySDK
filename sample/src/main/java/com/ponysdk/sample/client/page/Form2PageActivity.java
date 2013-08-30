@@ -45,6 +45,7 @@ import com.ponysdk.ui.server.form2.validator.CompositeFieldValidator;
 import com.ponysdk.ui.server.form2.validator.DoubleFieldValidator;
 import com.ponysdk.ui.server.form2.validator.EmailFieldValidator;
 import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
+import com.ponysdk.ui.server.form2.validator.TwinFieldValidator;
 import com.ponysdk.ui.server.form2.validator.UncheckedFieldValidator;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
@@ -90,6 +91,12 @@ public class Form2PageActivity extends SamplePageActivity {
         final FormField<Date> field8 = new DateBoxFormField();
         field7.setValidator(new NotEmptyFieldValidator());
 
+        final FormField<String> field9 = new StringTextBoxFormField();
+        field9.setValidator(new NotEmptyFieldValidator());
+
+        final FormField<String> field10 = new StringTextBoxFormField();
+        field10.setValidator(new TwinFieldValidator("Field doesn't match", field9));
+
         form.addFormField(field1);
         form.addFormField(field2);
         form.addFormField(field3);
@@ -98,6 +105,8 @@ public class Form2PageActivity extends SamplePageActivity {
         form.addFormField(field6);
         form.addFormField(field7);
         form.addFormField(field8);
+        form.addFormField(field9);
+        form.addFormField(field10);
 
         final FormFieldComponent formFieldComponent1 = new FormFieldComponent("field1", field1);
         final FormFieldComponent formFieldComponent2 = new FormFieldComponent("field2", field2);
@@ -107,6 +116,8 @@ public class Form2PageActivity extends SamplePageActivity {
         final FormFieldComponent formFieldComponent6 = new FormFieldComponent("field6", field6);
         final FormFieldComponent formFieldComponent7 = new FormFieldComponent("field7", field7);
         final FormFieldComponent formFieldComponent8 = new FormFieldComponent("field8", field8);
+        final FormFieldComponent formFieldComponent9 = new FormFieldComponent("field9", field9);
+        final FormFieldComponent formFieldComponent10 = new FormFieldComponent("field10", field10);
 
         final PFlexTable formLayout = new PFlexTable();
         formLayout.addStyleName("cell-top");
@@ -118,6 +129,8 @@ public class Form2PageActivity extends SamplePageActivity {
         formLayout.setWidget(2, 1, formFieldComponent6);
         formLayout.setWidget(3, 0, formFieldComponent7);
         formLayout.setWidget(3, 1, formFieldComponent8);
+        formLayout.setWidget(4, 0, formFieldComponent9);
+        formLayout.setWidget(4, 1, formFieldComponent10);
 
         final PButton validateButton = new PButton("Validate");
         validateButton.addClickHandler(new PClickHandler() {
