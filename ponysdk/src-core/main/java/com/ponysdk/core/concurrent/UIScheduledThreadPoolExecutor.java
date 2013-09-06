@@ -106,7 +106,6 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         @Override
         public void run() {
-
             if (cancelled) return;
 
             uiContext.getPusher().execute(new PCommand() {

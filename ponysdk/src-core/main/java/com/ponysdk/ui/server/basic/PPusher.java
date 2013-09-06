@@ -174,9 +174,8 @@ public class PPusher extends PObject implements ConnectionListener {
                             listener.onData(data);
                         }
                     }
-
                     txn.commit();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     log.error("Cannot process open socket", e);
                     txn.rollback();
                 }
@@ -211,7 +210,7 @@ public class PPusher extends PObject implements ConnectionListener {
                         listener.onData(data);
                     }
                     txn.commit();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     log.error("Cannot process open socket", e);
                     txn.rollback();
                 }
@@ -236,7 +235,7 @@ public class PPusher extends PObject implements ConnectionListener {
             try {
                 doClose();
                 txn.commit();
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
@@ -255,7 +254,7 @@ public class PPusher extends PObject implements ConnectionListener {
             try {
                 doOpen();
                 txn.commit();
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
@@ -287,8 +286,8 @@ public class PPusher extends PObject implements ConnectionListener {
                 try {
                     command.execute();
                     txn.commit();
-                } catch (final Exception e) {
-                    log.error("Cannot process open socket", e);
+                } catch (final Throwable e) {
+                    log.error("Cannot process commmand", e);
                     txn.rollback();
                 }
             } finally {
