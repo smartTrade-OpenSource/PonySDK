@@ -242,7 +242,6 @@ public class PPusher extends PObject implements ConnectionListener {
         } finally {
             end();
         }
-
     }
 
     @Override

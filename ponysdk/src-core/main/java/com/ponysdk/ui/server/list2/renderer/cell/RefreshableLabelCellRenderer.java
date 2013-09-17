@@ -14,7 +14,6 @@ public class RefreshableLabelCellRenderer<V> implements RefreshableCellRenderer<
 
     @Override
     public void update(final V value, final Cell<V, PHTML> previous) {
-        if (value == previous.getValue()) return;
         previous.getW().setText((value == null ? "-" : value.toString()));
     }
 
