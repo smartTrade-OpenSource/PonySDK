@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +60,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private final List<ListItem> items = new ArrayList<ListItem>();
 
-    private List<Integer> selectedItems = new ArrayList<Integer>();
+    private final Set<Integer> selectedIndexes = new TreeSet<Integer>();
 
     protected int selectedIndex = -1;
 
@@ -102,13 +104,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<Integer>();
 
-            selectedIndex = Integer.parseInt(tokens[0]);
+            this.selectedIndex = Integer.parseInt(tokens[0]);
 
             for (final String index : tokens) {
                 selectedItems.add(Integer.valueOf(index));
             }
 
-            syncSelectedItems(selectedItems);
+            this.selectedIndexes.clear();
+            this.selectedIndexes.addAll(selectedItems);
 
             onChange(new PChangeEvent(PListBox.this));
         } else {
@@ -184,11 +187,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public ListItem removeItem(final int index) {
         checkIndex(index);
-
-        if (selectedItems.contains(index)) {
-            selectedItems.remove(Integer.valueOf(index));
-        }
-
+        selectedIndexes.remove(index);
         final ListItem removedItem = items.remove(index);
         sendRemoveItemInstruction(index);
         return removedItem;
@@ -199,7 +198,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
             if (item.label.equals(label)) {
-                if (selectedItems.contains(currentIndex)) selectedItems.remove(Integer.valueOf(currentIndex));
+                selectedIndexes.remove(currentIndex);
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
             } else {
@@ -213,7 +212,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
             if (item.value.equals(value)) {
-                if (selectedItems.contains(currentIndex)) selectedItems.remove(Integer.valueOf(currentIndex));
+                selectedIndexes.remove(currentIndex);
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
             } else {
@@ -240,7 +239,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void clear() {
         selectedIndex = -1;
         items.clear();
-        selectedItems.clear();
+        selectedIndexes.clear();
         final Update update = new Update(getID());
         update.put(PROPERTY.CLEAR, true);
         Txn.get().getTxnContext().save(update);
@@ -257,6 +256,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void setSelectedIndex(final int index, final boolean selected) {
         checkIndex(index);
         this.selectedIndex = index;
+
+        if (isMultipleSelect && selected) {
+            selectedIndexes.add(index);
+        } else {
+            selectedIndexes.remove(index);
+        }
+
         final Update update = new Update(getID());
         update.put(PROPERTY.SELECTED, selected);
         update.put(PROPERTY.SELECTED_INDEX, index);
@@ -337,24 +343,35 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public boolean isItemSelected(final int index) {
-        return selectedItems.contains(index);
+        return selectedIndexes.contains(index);
     }
 
     public String getItem(final int index) {
         return items.get(index).label;
     }
 
-    // TODO nciaravola must be package
-    public void syncSelectedItems(final List<Integer> selectedItems) {
-        this.selectedItems = selectedItems;
-    }
-
     private void checkIndex(final int index) {
         if (index >= getItemCount()) throw new IndexOutOfBoundsException();
     }
 
-    public List<Integer> getSelectedItems() {
-        return selectedItems;
+    public List<Integer> getSelectedIndexes() {
+        return new ArrayList<Integer>(selectedIndexes);
+    }
+
+    public List<String> getSelectedItems() {
+        final List<String> items = new ArrayList<String>();
+        for (final Integer index : selectedIndexes) {
+            items.add(this.items.get(index).label);
+        }
+        return items;
+    }
+
+    public List<Object> getSelectedValues() {
+        final List<Object> values = new ArrayList<Object>();
+        for (final Integer index : selectedIndexes) {
+            values.add(this.items.get(index).value);
+        }
+        return values;
     }
 
     public void setVisibleItemCount(final int visibleItemCount) {

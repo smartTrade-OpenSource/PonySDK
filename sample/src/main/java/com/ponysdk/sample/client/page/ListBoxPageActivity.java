@@ -23,8 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
+import com.ponysdk.ui.server.basic.PNotificationManager;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class ListBoxPageActivity extends SamplePageActivity {
 
@@ -39,7 +43,6 @@ public class ListBoxPageActivity extends SamplePageActivity {
         final PFlexTable table = new PFlexTable();
 
         final PListBox listBoxCategory = new PListBox();
-        listBoxCategory.setWidth("100%");
         listBoxCategory.addItem("Test1");
         listBoxCategory.addItem("Test2");
         listBoxCategory.addItem("Test3");
@@ -50,94 +53,39 @@ public class ListBoxPageActivity extends SamplePageActivity {
         listBoxCategory.addItem("Test2");
         listBoxCategory.addItem("Test2");
 
-        // listBoxCategory.addStyleName("chzn-select"); // normal
-        // listBoxCategory.addStyleName("chzn-rtl"); // align to right
-        // listBoxCategory.addStyleName("chzn-select-deselect"); // allow deselect
-
-        // listBoxCategory.setAttribute("multiple", ""); // enable multiselect
-        // listBoxCategory.setAttribute("data-placeholder", "oh oh th eplace holder"); // place holder
-
-        // PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
-        //
-        // @Override
-        // public boolean execute() {
-        // PScript.get().execute("$(\".chzn-select\").chosen();", new ExecutionCallback() {
-        //
-        // @Override
-        // public void onSuccess(final String msg) {
-        // System.err.println("on succes " + msg);
-        // }
-        //
-        // @Override
-        // public void onFailure(final String msg) {
-        // System.err.println("on onFailure " + msg);
-        // }
-        // });
-        // return false;
-        // }
-        // }, 0);
-        // PScheduler.get().scheduleFixedRate(new RepeatingCommand() {
-        //
-        // @Override
-        // public boolean execute() {
-        // PScript.get().execute("$(\".chzn-select-deselect\").chosen({allow_single_deselect:true});", new
-        // ExecutionCallback() {
-        //
-        // @Override
-        // public void onSuccess(final String msg) {
-        // System.err.println("on succes " + msg);
-        // }
-        //
-        // @Override
-        // public void onFailure(final String msg) {
-        // System.err.println("on onFailure " + msg);
-        // }
-        // });
-        // return false;
-        // }
-        // }, 0);
-
-        // final PChosenListBox listBoxApplied = new PChosenListBox();
-        // listBoxApplied.setVisibleItemCount(20);
-        //
-        // listBoxApplied.addChangeHandler(new PChangeHandler() {
-        //
-        // @Override
-        // public void onChange(final PChangeEvent event) {
-        // PNotificationManager.showTrayNotification("Item selected : " + listBoxApplied.getSelectedItem());
-        // }
-        // });
-        //
-        // fillSports(listBoxApplied);
-        //
-        // final PCheckBox checkBox = new PCheckBox("Enable multi-selection");
-        // checkBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
-        //
-        // @Override
-        // public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        // listBoxApplied.setMultiSelect(event.getValue());
-        // }
-        // });
-        //
-        // listBoxCategory.addChangeHandler(new PChangeHandler() {
-        //
-        // @Override
-        // public void onChange(final PChangeEvent event) {
-        // listBoxApplied.clear();
-        //
-        // if ("Sports".equals(listBoxCategory.getSelectedItem())) {
-        // fillSports(listBoxApplied);
-        // } else {
-        // fillPony(listBoxApplied);
-        // }
-        // }
-        //
-        // });
-
         table.setWidth("100%");
         table.setWidget(0, 0, listBoxCategory);
-        // table.setWidget(1, 1, listBoxApplied);
-        // table.setWidget(0, 2, checkBox);
+
+        final PListBox roleListBox = new PListBox(false, true);
+        roleListBox.setVisibleItemCount(5);
+        for (int i = 0; i < 10; i++) {
+            roleListBox.addItem("Role" + i, i);
+        }
+
+        final PButton selectedRole = new PButton("Selected roles [1,2]");
+        selectedRole.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                roleListBox.setSelectedValue(1);
+                roleListBox.setSelectedValue(2);
+
+                PNotificationManager.showHumanizedNotification("Selected items " + roleListBox.getSelectedItems());
+            }
+        });
+        final PButton unSelectedRole = new PButton("Selected roles [1,2]");
+        unSelectedRole.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                roleListBox.setSelectedValue(1, false);
+                roleListBox.setSelectedValue(2, false);
+                PNotificationManager.showHumanizedNotification("Unselected items " + roleListBox.getSelectedItems());
+            }
+        });
+        table.setWidget(1, 0, roleListBox);
+        table.setWidget(1, 1, selectedRole);
+        table.setWidget(1, 2, unSelectedRole);
 
         examplePanel.setWidget(table);
     }
