@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
-import com.ponysdk.ui.server.basic.PCommand;
 
 public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, ConnectionListener {
 
@@ -107,19 +106,12 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         @Override
         public void run() {
             if (cancelled) return;
-
-            uiContext.getPusher().execute(new PCommand() {
-
-                @Override
-                public void execute() {
-                    runnable.run();
-                }
-            });
+            if (!uiContext.getPusher().execute(runnable)) cancel();
         }
 
-        public void setCancelled(final boolean cancelled) {
-            this.cancelled = cancelled;
-            this.future.cancel(false);
+        public void cancel() {
+            this.cancelled = true;
+            this.future.cancel(true);
         }
 
         public void setFuture(final ScheduledFuture<?> future) {
@@ -152,7 +144,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         final Set<UIRunnable> runnables = runnablesBySession.remove(UIContext.get());
         if (runnables != null) {
             for (final UIRunnable runnable : runnables) {
-                runnable.setCancelled(true);
+                runnable.cancel();
             }
         }
     }
