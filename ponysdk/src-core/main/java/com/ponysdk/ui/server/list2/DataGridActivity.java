@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -45,7 +44,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     protected final SimpleListView view;
     private PSelectionModel<D> setSelectionModel;
     protected final List<DataGridColumnDescriptor<D, ?>> columnDescriptors = new ArrayList<DataGridColumnDescriptor<D, ?>>();
-    private final Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
+    private final Map<D, Integer> subListSizeByFather = new HashMap<D, Integer>();
 
     private int colCount = 0;
     protected final List<D> rows = new ArrayList<D>();
@@ -97,57 +96,54 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         view.addWidget(widget, column, row, colSpan);
     }
 
-    public void insertSubList(final int row, final List<D> datas) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void insertSubList(final D fatherData, final List<D> datas) {
         if (datas.isEmpty()) return;
 
-        final int totalSubCount = computeTotalSubRows(row);
-        subListSizeByFather.put(row, datas.size());
+        final int fatherRow = getDataIndex(fatherData);
+        subListSizeByFather.put(fatherData, Integer.valueOf(datas.size()));
 
-        int subRow = row + 2 + totalSubCount;
-        for (final D data : datas) {
-            rows.add((subRow - 1), data);
-            view.insertRow(subRow); // create a new row after
-            view.addRowStyle(subRow, PonySDKTheme.SIMPLELIST_SUBROW);
+        // rows start includes data only
+        // views include grid header (consumes 1 line) + data
+        // therefore for a given "data", index is n in rows and n+1 in view
+        int subRow = fatherRow + 1;
+        for (final Iterator<D> dataIt = datas.iterator(); dataIt.hasNext();) {
+            final D data = dataIt.next();
+            this.rows.add(subRow, data);
+            this.view.insertRow(subRow + 1);
+            this.view.addRowStyle(subRow + 1, "pony-SimpleList-SubRow");
             int col = 0;
-            for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
-                view.addWidget(field.renderSubCell(subRow, data), col++, subRow, 1);
+            for (final DataGridColumnDescriptor field : this.columnDescriptors) {
+                this.view.addWidget(field.renderSubCell(subRow + 1, data), col++, subRow + 1, 1);
             }
-            view.addWidget(new PSimplePanel(), col, subRow++, 1);
+            this.view.addWidget(new PSimplePanel(), col, subRow + 1, 1);
+            subRow++;
         }
     }
 
-    public void removeSubList(final int fatherRow) {
-        final int totalSubCount = computeTotalSubRows(fatherRow);
-        final Integer subListSize = subListSizeByFather.remove(fatherRow);
+    public void removeSubList(final D fatherData) {
+        final int fatherRow = getDataIndex(fatherData);
+        final Integer subListSize = subListSizeByFather.remove(fatherData);
+
         if (subListSize != null) {
-            for (int i = 1; i <= subListSize; i++) {
-                view.removeRow(fatherRow + totalSubCount + 2);
-                rows.remove(fatherRow + totalSubCount + 1);
+            final int subRow = fatherRow + 1;
+            for (int i = 1; i <= subListSize.intValue(); ++i) {
+                this.rows.remove(subRow);
+                this.view.removeRow(subRow + 1);
             }
         }
-    }
-
-    private int computeTotalSubRows(final int row) {
-        int totalSubCount = 0;
-
-        for (final Entry<Integer, Integer> entry : subListSizeByFather.entrySet()) {
-            if (entry.getKey() >= row) continue;
-
-            totalSubCount += entry.getValue();
-        }
-        return totalSubCount;
     }
 
     public void clear() {
         view.clearList();
     }
 
-    public void selectRow(final int row) {
-        view.selectRow(getRowIndex(row));
+    public void selectRow(final D data) {
+        view.selectRow(getDataIndex(data));
     }
 
-    public void unSelectRow(final int row) {
-        view.unSelectRow(getRowIndex(row));
+    public void unSelectRow(final D data) {
+        view.unSelectRow(getDataIndex(data));
     }
 
     @Override
@@ -268,7 +264,4 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         return view;
     }
 
-    protected int getRowIndex(final int row) {
-        return row + computeTotalSubRows(row);
-    }
 }
