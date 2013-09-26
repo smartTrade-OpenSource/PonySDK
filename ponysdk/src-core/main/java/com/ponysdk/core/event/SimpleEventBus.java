@@ -76,18 +76,11 @@ public class SimpleEventBus implements EventBus {
     public void fireEvent(final Event<?> event) {
         if (event == null) { throw new NullPointerException("Cannot fire null event"); }
         doFire(event, null);
-        fireBroadcastEvent(event);
     }
 
     @Override
     public void addHandler(final BroadcastEventHandler handler) {
         broadcastHandlerManager.add(handler);
-    }
-
-    private void fireBroadcastEvent(final Event<?> event) {
-        for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-            handler.onEvent(event);
-        }
     }
 
     @Override
@@ -180,7 +173,12 @@ public class SimpleEventBus implements EventBus {
                 final Iterator<? extends EventHandler> it = handlers.iterator();
                 while (it.hasNext()) {
                     try {
+                        if (log.isDebugEnabled()) log.debug("dispatch event #" + e);
                         e.dispatch(it.next());
+                        for (final BroadcastEventHandler handler : broadcastHandlerManager) {
+                            if (log.isDebugEnabled()) log.debug("broadcast event #" + event);
+                            handler.onEvent(event);
+                        }
                     } catch (final Throwable t) {
                         log.error("Cannot process fired event #" + e.getAssociatedType(), t);
                         if (causes == null) {

@@ -12,9 +12,6 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Application;
-import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
@@ -103,7 +100,7 @@ public abstract class AbstractApplicationManager {
                         entryPoint.restart(uiContext);
                     }
                     txn.commit();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
                     txn.rollback();
                 }
@@ -142,7 +139,7 @@ public abstract class AbstractApplicationManager {
                 }
 
                 txn.commit();
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 log.error("Cannot process client instruction", e);
                 txn.rollback();
             }

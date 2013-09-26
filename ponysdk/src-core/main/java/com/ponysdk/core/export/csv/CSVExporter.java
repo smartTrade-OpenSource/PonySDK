@@ -26,8 +26,6 @@ public class CSVExporter<T> implements Exporter<T> {
 
     private static final char DELIMITER = ';';
 
-    private static final char LF = '\n';
-
     private final String fileName;
 
     public CSVExporter(final String fileName) {
@@ -41,39 +39,41 @@ public class CSVExporter<T> implements Exporter<T> {
 
     @Override
     public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
-        final StringBuffer buffer = new StringBuffer();
-        final Iterator<ExportableField> iter = exportableFields.iterator();
-
-        while (iter.hasNext()) {
-            final ExportableField exportableField = iter.next();
-            final String header = exportableField.getCaption();
-            buffer.append(header);
-            if (iter.hasNext()) buffer.append(DELIMITER);
-        }
-
-        buffer.append(LF);
-        for (final T row : records) {
-            for (final ExportableField exportableField : exportableFields) {
-                buffer.append(getDisplayValue(row, exportableField));
-                buffer.append(DELIMITER);
-            }
-            buffer.append(LF);
-        }
-
         final StreamResource streamResource = new StreamResource();
         streamResource.open(new StreamHandler() {
 
             @Override
             public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
-                response.reset();
-                response.setContentType("text/csv");
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
-                PrintWriter printer;
                 try {
-                    printer = response.getWriter();
-                    printer.print(buffer.toString());
-                    printer.flush();
-                    printer.close();
+                    response.reset();
+                    response.setContentType("text/csv");
+                    response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
+                    final PrintWriter printer = response.getWriter();
+                    try {
+                        final Iterator<ExportableField> iter = exportableFields.iterator();
+
+                        while (iter.hasNext()) {
+                            final ExportableField exportableField = iter.next();
+                            final String header = exportableField.getCaption();
+                            printer.print(header);
+                            if (iter.hasNext()) printer.print(DELIMITER);
+                        }
+
+                        printer.println();
+                        for (final T row : records) {
+                            for (final ExportableField exportableField : exportableFields) {
+                                printer.print(getDisplayValue(row, exportableField));
+                                printer.print(DELIMITER);
+                            }
+                            printer.println();
+                            printer.flush();
+                        }
+                    } catch (final Exception e) {
+                        log.error("Error when exporting", e);
+                    } finally {
+                        printer.flush();
+                        printer.close();
+                    }
                 } catch (final Exception e) {
                     log.error("Error when exporting", e);
                 }

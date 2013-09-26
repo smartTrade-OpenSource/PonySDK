@@ -45,11 +45,11 @@ public class Txn {
         final Txn txn = transactions.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
         fireClientLoopEnd();
-        fireBeforeCommit();
         fireBeforeFlush();
         flush();
         fireAfterFlush();
         transactions.remove();
+        txnContext.clear();
     }
 
     public void rollback() {
@@ -85,12 +85,6 @@ public class Txn {
     private void fireClientLoopEnd() {
         for (final ClientLoopListener listener : clientLoopListnener) {
             listener.onLoopEnd();
-        }
-    }
-
-    private void fireBeforeCommit() {
-        for (final TxnListener txnListener : txnListnener) {
-            txnListener.beforeCommit();
         }
     }
 

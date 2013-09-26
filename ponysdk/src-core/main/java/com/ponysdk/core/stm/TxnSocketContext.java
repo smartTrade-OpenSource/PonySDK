@@ -66,9 +66,6 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public void beforeCommit() {}
-
-    @Override
     public void beforeFlush(final TxnContext txnContext) {
         if (!flushNow) return;
 
