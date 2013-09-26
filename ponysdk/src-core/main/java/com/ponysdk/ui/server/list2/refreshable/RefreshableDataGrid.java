@@ -72,6 +72,11 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     @Override
+    public void addData(final D data) {
+        throw new RuntimeException("Use setData(key, data)");
+    }
+
+    @Override
     public void remove(final D data) {
         throw new RuntimeException("Use removeByKey(key)");
     }
