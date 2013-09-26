@@ -112,14 +112,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
+                final Pony father = dataGrid.getVisibleItem(i);
                 final List<Pony> copy = new ArrayList<Pony>();
-                final List<Pony> ponys = new FindPonysCommand(new Query()).execute().getData();
                 for (int j = 0; j < 3; j++) {
-                    final Pony src = ponys.get(j);
-                    final Pony p = new Pony(src.getId(), "Copy-" + src.getName(), src.getAge(), src.getRace());
+                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(), father.getRace());
                     copy.add(p);
                 }
-                dataGrid.insertSubList(i, copy);
+                dataGrid.insertSubList(father, copy);
             }
         });
 
@@ -129,7 +128,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
-                dataGrid.removeSubList(i);
+                final Pony father = dataGrid.getVisibleItem(i);
+                dataGrid.removeSubList(father);
             }
         });
 
@@ -190,11 +190,11 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                     public void onValueChange(final PValueChangeEvent<Boolean> event) {
                         if (event.getValue()) {
                             selectorCheckBox.onCheck();
-                            dataGrid.selectRow(row);
+                            dataGrid.selectRow(value);
 
                         } else {
                             selectorCheckBox.onUncheck();
-                            dataGrid.unSelectRow(row);
+                            dataGrid.unSelectRow(value);
 
                         }
                     }
