@@ -174,9 +174,8 @@ public class PPusher extends PObject implements ConnectionListener {
                             listener.onData(data);
                         }
                     }
-
                     txn.commit();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     log.error("Cannot process open socket", e);
                     txn.rollback();
                 }
@@ -211,7 +210,7 @@ public class PPusher extends PObject implements ConnectionListener {
                         listener.onData(data);
                     }
                     txn.commit();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     log.error("Cannot process open socket", e);
                     txn.rollback();
                 }
@@ -236,14 +235,13 @@ public class PPusher extends PObject implements ConnectionListener {
             try {
                 doClose();
                 txn.commit();
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
         } finally {
             end();
         }
-
     }
 
     @Override
@@ -255,7 +253,7 @@ public class PPusher extends PObject implements ConnectionListener {
             try {
                 doOpen();
                 txn.commit();
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 log.error("Cannot process open socket", e);
                 txn.rollback();
             }
@@ -278,25 +276,32 @@ public class PPusher extends PObject implements ConnectionListener {
         }
     }
 
-    public void execute(final PCommand command) {
-        if (UIContext.get() == null) {
-            begin();
-            try {
-                final Txn txn = Txn.get();
-                txn.begin(txnContext);
+    public boolean execute(final Runnable runnable) {
+        try {
+            if (UIContext.get() == null) {
+                begin();
                 try {
-                    command.execute();
-                    txn.commit();
-                } catch (final Exception e) {
-                    log.error("Cannot process open socket", e);
-                    txn.rollback();
+                    final Txn txn = Txn.get();
+                    txn.begin(txnContext);
+                    try {
+                        runnable.run();
+                        txn.commit();
+                    } catch (final Throwable e) {
+                        log.error("Cannot process commmand", e);
+                        txn.rollback();
+                        return false;
+                    }
+                } finally {
+                    end();
                 }
-            } finally {
-                end();
+            } else {
+                runnable.run();
             }
-        } else {
-            command.execute();
+        } catch (final Throwable e) {
+            log.error("Cannot execute command : " + runnable, e);
+            return false;
         }
+        return true;
     }
 
 }
