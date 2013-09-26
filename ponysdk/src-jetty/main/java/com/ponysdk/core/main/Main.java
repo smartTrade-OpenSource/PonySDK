@@ -62,6 +62,7 @@ public class Main {
     private Server webServer;
 
     private Integer port;
+    private int sessionTimeout = 60;
     private String war;
     private String applicationContextName;
 
@@ -128,6 +129,8 @@ public class Main {
         context.addServlet(new ServletHolder(bootstrapServlet), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(httpServlet), MAPPING_TERMINAL);
 
+        context.getSessionHandler().getSessionManager().setMaxInactiveInterval(60 * sessionTimeout);
+
         context.addFilter(new FilterHolder(servletConextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
         final FilterHolder filterHolder = new FilterHolder(GzipFilter.class);
@@ -191,6 +194,10 @@ public class Main {
 
     public Handler getHandler() {
         return handler;
+    }
+
+    public void setSessionTimeout(final int sessionTimeout) {
+        this.sessionTimeout = sessionTimeout;
     }
 
 }
