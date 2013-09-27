@@ -176,8 +176,8 @@ public class SimpleEventBus implements EventBus {
                         if (log.isDebugEnabled()) log.debug("dispatch event #" + e);
                         e.dispatch(it.next());
                         for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-                            if (log.isDebugEnabled()) log.debug("broadcast event #" + event);
-                            handler.onEvent(event);
+                            if (log.isDebugEnabled()) log.debug("broadcast event #" + e);
+                            handler.onEvent(e);
                         }
                     } catch (final Throwable t) {
                         log.error("Cannot process fired event #" + e.getAssociatedType(), t);
