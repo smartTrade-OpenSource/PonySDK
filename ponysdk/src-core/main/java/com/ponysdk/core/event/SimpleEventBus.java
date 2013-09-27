@@ -175,10 +175,6 @@ public class SimpleEventBus implements EventBus {
                     try {
                         if (log.isDebugEnabled()) log.debug("dispatch event #" + e);
                         e.dispatch(it.next());
-                        for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-                            if (log.isDebugEnabled()) log.debug("broadcast event #" + e);
-                            handler.onEvent(e);
-                        }
                     } catch (final Throwable t) {
                         log.error("Cannot process fired event #" + e.getAssociatedType(), t);
                         if (causes == null) {
@@ -187,6 +183,12 @@ public class SimpleEventBus implements EventBus {
                         causes.add(t);
                     }
                 }
+
+                for (final BroadcastEventHandler handler : broadcastHandlerManager) {
+                    if (log.isDebugEnabled()) log.debug("broadcast event #" + e);
+                    handler.onEvent(e);
+                }
+
             }
 
             for (final HandlerContext<? extends EventHandler> context : pendingHandlerRegistration) {
