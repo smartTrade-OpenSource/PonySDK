@@ -1,10 +1,9 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
-version = '1.14'
+version = '0.7'
 
 ext{
-    coreversion = 0.6
     srcCore = "src-core/main/java"
     srcTerminal = "src-core/main/java/com/ponysdk/ui/terminal"
     srcDefaultimpl = "src-defaultimpl/main/java"
@@ -151,7 +150,6 @@ jar {
 	    attributes("Implementation-Version": version)
 	    attributes("Implementation-Vendor-Id": "com.ponysdk")
 		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Implementation-Core-Version": coreversion)
 	    attributes("Revision": revision)
 	    attributes("Date": timestamp + " / " + new Date().toGMTString())
 	}
@@ -320,7 +318,6 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 	    attributes("Implementation-Version": version)
 	    attributes("Implementation-Vendor-Id": "com.ponysdk")
 		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Implementation-Core-Version": coreversion)
 	    attributes("Revision": revision)
 	    attributes("Classifier": "sources")
 	    attributes("Date": timestamp + " / " + new Date().toGMTString())
@@ -358,7 +355,6 @@ task javadocJar(type: Jar, dependsOn:javadoc) {
 	    attributes("Implementation-Version": version)
 	    attributes("Implementation-Vendor-Id": "com.ponysdk")
 		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Implementation-Core-Version": coreversion)
 	    attributes("Revision": revision)
 	    attributes("Classifier": "javadocs")
 	    attributes("Date": timestamp + " / " + new Date().toGMTString())
