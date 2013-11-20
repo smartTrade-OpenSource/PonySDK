@@ -79,10 +79,16 @@ public abstract class PScript extends PObject {
     }
 
     public static PScript get() {
-        PScript script = UIContext.get().getAttribute(SCRIPT_KEY);
+        return get(0);
+    }
+
+    public static PScript get(final long windowID) {
+        final String rootID = SCRIPT_KEY + "_" + windowID;
+        final UIContext session = UIContext.get();
+        PScript script = session.getAttribute(rootID);
         if (script == null) {
             script = new PScript() {};
-            UIContext.get().setAttribute(SCRIPT_KEY, script);
+            session.setAttribute(rootID, script);
         }
         return script;
     }

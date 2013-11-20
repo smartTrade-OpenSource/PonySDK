@@ -30,6 +30,7 @@ import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
+import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWindow;
@@ -129,6 +130,8 @@ public class WindowPageActivity extends SamplePageActivity {
     private static class MyWindow extends PWindow {
 
         private int count = 1;
+        private PScript script;
+        private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
             super(null, name, features);
@@ -136,6 +139,9 @@ public class WindowPageActivity extends SamplePageActivity {
 
         @Override
         protected void onLoad() {
+            script = PScript.get(getID());
+            rootLayoutPanel = PRootLayoutPanel.get(getID());
+
             final PFlowPanel flow = new PFlowPanel();
             final PButton addMessage = new PButton("Add message");
             addMessage.addClickHandler(new PClickHandler() {
@@ -163,10 +169,19 @@ public class WindowPageActivity extends SamplePageActivity {
                     MyWindow.this.postOpenerCommand(new SayHelloCommand());
                 }
             });
+            final PButton execJs = new PButton("Exec javascript");
+            execJs.addClickHandler(new PClickHandler() {
+
+                @Override
+                public void onClick(final PClickEvent event) {
+                    script.execute("alert('from the popup');");
+                }
+            });
             flow.add(addMessage);
             flow.add(clearMessage);
             flow.add(postMessage);
-            PRootLayoutPanel.get(getID()).add(flow);
+            flow.add(execJs);
+            rootLayoutPanel.add(flow);
         }
 
         private class SayHelloCommand implements Runnable {
