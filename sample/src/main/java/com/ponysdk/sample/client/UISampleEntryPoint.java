@@ -32,7 +32,6 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PScript;
 
 public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity, ConnectionListener {
 
@@ -67,7 +66,7 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
 
     @Override
     public void onOpen() {
-        PScript.get().execute("less.watch();");
+        // PScript.get().execute("less.watch();");
         start(new LoginPlace());
     }
 
