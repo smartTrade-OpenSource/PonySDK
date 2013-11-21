@@ -139,8 +139,8 @@ public class WindowPageActivity extends SamplePageActivity {
 
         @Override
         protected void onLoad() {
-            script = PScript.get(getID());
-            rootLayoutPanel = PRootLayoutPanel.get(getID());
+            script = PScript.get();
+            rootLayoutPanel = PRootLayoutPanel.get();
 
             final PFlowPanel flow = new PFlowPanel();
             final PButton addMessage = new PButton("Add message");
