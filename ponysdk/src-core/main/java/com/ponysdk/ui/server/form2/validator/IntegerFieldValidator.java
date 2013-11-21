@@ -21,10 +21,8 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.form2.formfield;
+package com.ponysdk.ui.server.form2.validator;
 
-import com.ponysdk.ui.server.form2.validator.FieldValidator;
-import com.ponysdk.ui.server.form2.validator.ValidationResult;
 
 public class IntegerFieldValidator implements FieldValidator {
 

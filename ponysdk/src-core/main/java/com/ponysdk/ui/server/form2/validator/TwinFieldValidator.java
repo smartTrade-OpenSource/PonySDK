@@ -37,8 +37,11 @@ public class TwinFieldValidator implements FieldValidator {
     }
 
     @Override
-    public ValidationResult isValid(final String value) {
-        final String twinText = twinFormField.getValue();
+    public ValidationResult isValid(String value) {
+        String twinText = twinFormField.getValue();
+
+        if ("".equals(twinText)) twinText = null;
+        if ("".equals(value)) value = null;
 
         if (twinText == null && value == null) { return ValidationResult.newOKValidationResult(); }
         if (twinText == null || value == null) { return ValidationResult.newFailedValidationResult(errorMessage); }

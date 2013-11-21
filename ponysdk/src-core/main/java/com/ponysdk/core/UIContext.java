@@ -53,6 +53,7 @@ import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PTimer;
+import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -88,8 +89,8 @@ public class UIContext {
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private PHistory history;
-
     private EventBus rootEventBus;
+    private PWindow window;
 
     private final PCookies cookies = new PCookies();
 
@@ -224,6 +225,14 @@ public class UIContext {
         return rootEventBus;
     }
 
+    private void setWindow(final PWindow window) {
+        this.window = window;
+    }
+
+    private PWindow getWindow() {
+        return window;
+    }
+
     public PCookies getCookies() {
         return cookies;
     }
@@ -268,8 +277,16 @@ public class UIContext {
         get().getEventBus().addHandler(handler);
     }
 
+    public static void setCurrentWindow(final PWindow window) {
+        get().setWindow(window);
+    }
+
     public static EventBus getRootEventBus() {
         return get().getEventBus();
+    }
+
+    public static PWindow getCurrentWindow() {
+        return get().getWindow();
     }
 
     void invalidate() {
