@@ -79,10 +79,11 @@ public abstract class PScript extends PObject {
     }
 
     public static PScript get() {
-        return get(0);
+        if (UIContext.getCurrentWindow() == null) return get(0);
+        return get(UIContext.getCurrentWindow().getID());
     }
 
-    public static PScript get(final long windowID) {
+    private static PScript get(final long windowID) {
         final String rootID = SCRIPT_KEY + "_" + windowID;
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(rootID);
@@ -109,6 +110,17 @@ public abstract class PScript extends PObject {
         update.put(PROPERTY.ID, id);
         update.put(PROPERTY.CALLBACK, true);
         Txn.get().getTxnContext().save(update);
+    }
+
+    public void executeDeffered(final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
+        final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
+
+            @Override
+            protected void run() {
+                PScript.get().execute(js, callback);
+            }
+        };
+        command.schedule(unit.toMillis(delay));
     }
 
     public void executeDeffered(final String js, final int delay, final TimeUnit unit) {

@@ -104,6 +104,7 @@ public class PWindow extends PObject implements PNativeHandler {
         context = UIContext.get();
         popupstacker = new ArrayList<Instruction>();
         mainStacker = Txn.get().getTxnContext().setCurrentStacker(popupstacker);
+        UIContext.setCurrentWindow(this);
     }
 
     public void flush() {
@@ -117,11 +118,14 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void release() {
-        Txn.get().getTxnContext().setCurrentStacker(mainStacker);
-
-        final Update update = new Update(ID);
-        update.put(PROPERTY.TEXT, out.toString());
-        Txn.get().getTxnContext().save(update);
+        try {
+            Txn.get().getTxnContext().setCurrentStacker(mainStacker);
+            final Update update = new Update(ID);
+            update.put(PROPERTY.TEXT, out.toString());
+            Txn.get().getTxnContext().save(update);
+        } finally {
+            UIContext.setCurrentWindow(null);
+        }
     }
 
     private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
