@@ -132,12 +132,12 @@ public class PPusher extends PObject implements ConnectionListener {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             txnContext.switchToPollingMode();
 
-            begin();
-            try {
-                doOpen();
-            } finally {
-                end();
-            }
+            // begin();
+            // try {
+            doOpen();
+            // } finally {
+            // end();
+            // }
 
         } else if (event.has(PROPERTY.POLL)) {
             txnContext.flushNow();

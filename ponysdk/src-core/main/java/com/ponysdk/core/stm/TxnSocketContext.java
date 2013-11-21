@@ -62,6 +62,8 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void clear() {
+        if (polling) return;
+
         instructions.clear();
     }
 
