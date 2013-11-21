@@ -37,9 +37,13 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Instruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -55,6 +59,7 @@ public class PWindow extends PObject implements PNativeHandler {
     private List<Instruction> mainStacker;
 
     private final List<Runnable> postedCommands = new ArrayList<Runnable>();
+    private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<PCloseHandler>();
 
     public PWindow(final String url, final String name, final String features) {
         super();
@@ -71,9 +76,42 @@ public class PWindow extends PObject implements PNativeHandler {
         Txn.get().getTxnContext().save(update);
     }
 
+    public void close() {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.CLOSE, true);
+        Txn.get().getTxnContext().save(update);
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.WINDOW;
+    }
+
+    @Override
+    public void onClientData(final JSONObject instruction) throws JSONException {
+        if (instruction.has(HANDLER.KEY)) {
+            if (HANDLER.KEY_.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
+                fireClose();
+                return;
+            }
+        }
+
+        super.onClientData(instruction);
+    }
+
+    public void addCloseHandler(final PCloseHandler handler) {
+        closeHandlers.add(handler);
+    }
+
+    public void removeCloseHandler(final PCloseHandler handler) {
+        closeHandlers.remove(handler);
+    }
+
+    private void fireClose() {
+        final PCloseEvent e = new PCloseEvent(this);
+        for (final PCloseHandler h : closeHandlers) {
+            h.onClose(e);
+        }
     }
 
     @Override

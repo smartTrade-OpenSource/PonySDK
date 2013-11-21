@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PFlowPanel;
@@ -36,10 +39,12 @@ import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
 
-public class WindowPageActivity extends SamplePageActivity {
+public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 
-    protected PWindow window;
+    protected List<PWindow> windows = new ArrayList<PWindow>();
 
     private PTextBox urlTextBox;
     private PTextBox nameTextBox;
@@ -93,10 +98,13 @@ public class WindowPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
+                final String disc = windows.size() == 0 ? "" : Integer.toString(windows.size());
                 final String name = popNameTextBox.getText();
                 final String features = popFeaturesTextBox.getText();
-                window = new MyWindow(name, features);
+                final MyWindow window = new MyWindow(name + disc, features);
                 window.open();
+                window.addCloseHandler(WindowPageActivity.this);
+                windows.add(window);
             }
         });
 
@@ -105,12 +113,25 @@ public class WindowPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                window.acquire();
-                try {
-                    PNotificationManager.showHumanizedNotification("Hello from opener");
-                    window.flush();
-                } finally {
-                    window.release();
+                for (final PWindow window : windows) {
+                    window.acquire();
+                    try {
+                        PNotificationManager.showHumanizedNotification("Hello from opener");
+                        window.flush();
+                    } finally {
+                        window.release();
+                    }
+                }
+            }
+        });
+
+        final PButton closeAllWindow = new PButton("Close all windows");
+        closeAllWindow.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                for (final PWindow window : windows) {
+                    window.close();
                 }
             }
         });
@@ -123,6 +144,7 @@ public class WindowPageActivity extends SamplePageActivity {
         verticalPanel.add(table2);
         verticalPanel.add(open2);
         verticalPanel.add(postHello);
+        verticalPanel.add(closeAllWindow);
 
         examplePanel.setWidget(verticalPanel);
     }
@@ -193,5 +215,14 @@ public class WindowPageActivity extends SamplePageActivity {
 
         }
 
+    }
+
+    @Override
+    public void onClose(final PCloseEvent closeEvent) {
+        final PWindow source = (PWindow) closeEvent.getSource();
+        final boolean remove = windows.remove(source);
+        if (remove) {
+            PNotificationManager.showTrayNotification("Window #" + source.getID() + " closed.");
+        }
     }
 }

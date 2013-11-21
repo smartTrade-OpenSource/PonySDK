@@ -26,8 +26,12 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.Element;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
@@ -40,8 +44,14 @@ public class PTWindow extends AbstractPTObject {
     private String name;
     private String features;
 
+    private UIService uiService;
+    private Long id;
+
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
+
+        this.id = create.getObjectID();
+        this.uiService = uiService;
 
         if (create.containsKey(PROPERTY.URL)) url = create.getString(PROPERTY.URL);
         else url = GWT.getHostPageBaseURL() + "?wid=" + create.getObjectID();
@@ -57,15 +67,43 @@ public class PTWindow extends AbstractPTObject {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.OPEN)) {
             window = open(url, name, features);
+            if (window != null) {
+                checkWindowAlive();
+            }
         } else if (update.containsKey(PROPERTY.TEXT)) {
             onDataReceived(window, update.getString(PROPERTY.TEXT));
+        } else if (update.containsKey(PROPERTY.CLOSE)) {
+            close(window);
         }
+    }
+
+    private void checkWindowAlive() {
+        Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+            @Override
+            public boolean execute() {
+                if (isOpen(window)) return true;
+
+                onClose();
+                return false;
+            }
+        }, 2000);
+    }
+
+    public void onClose() {
+        final PTInstruction instruction = new PTInstruction();
+        instruction.setObjectID(id);
+        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
+        uiService.sendDataToServer(instruction);
     }
 
     private native void onDataReceived(Element win, final String text) /*-{win.onDataReceived(text);}-*/;
 
     private native Element open(String url, String name, String features) /*-{
-                                                                          return $wnd.open(url, name, features);
+                                                                              var that = this;
+                                                                              var w = $wnd.open(url, name, features);
+                                                                              return w;
                                                                           }-*/;
 
     private native boolean isOpen(Element win) /*-{
@@ -79,5 +117,4 @@ public class PTWindow extends AbstractPTObject {
     private native void focus(Element win) /*-{
                                               if (win) win.focus();
                                               }-*/;
-
 }
