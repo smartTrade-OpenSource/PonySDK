@@ -132,15 +132,22 @@ public class PConfirmDialog extends PDialogBox {
     @Override
     public void ensureDebugId(final String debugID) {
         super.ensureDebugId(debugID);
-        okButton.ensureDebugId(debugID + "[ok]");
-        cancelButton.ensureDebugId(debugID + "[cancel]");
+        enrichEnsureDebugID();
     }
 
     protected void setOkButton(final PButton okButton) {
         this.okButton = okButton;
+        enrichEnsureDebugID();
     }
 
     protected void setCancelButton(final PButton cancelButton) {
         this.cancelButton = cancelButton;
+        enrichEnsureDebugID();
     }
+
+    protected void enrichEnsureDebugID() {
+        if (okButton != null) okButton.ensureDebugId(getDebugID() + "[ok]");
+        if (cancelButton != null) cancelButton.ensureDebugId(getDebugID() + "[cancel]");
+    }
+
 }
