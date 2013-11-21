@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
@@ -150,6 +151,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public void insertItem(final String label, final Object value, int index) {
+        checkItem(label);
 
         final int itemCount = getItemCount();
         if (index < 0 || index > itemCount) {
@@ -194,10 +196,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public void removeItem(final String label) {
+        checkItem(label);
         int currentIndex = 0;
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
-            if (item.label.equals(label)) {
+            if (Objects.equals(item.label, label)) {
                 selectedIndexes.remove(currentIndex);
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
@@ -207,11 +210,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         }
     }
 
-    public void removeItem(final Object value) {
+    public void removeValue(final Object value) {
         int currentIndex = 0;
         for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
             final ListItem item = iterator.next();
-            if (item.value.equals(value)) {
+            if (Objects.equals(item.value, value)) {
                 selectedIndexes.remove(currentIndex);
                 iterator.remove();
                 sendRemoveItemInstruction(currentIndex);
@@ -348,6 +351,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public String getItem(final int index) {
         return items.get(index).label;
+    }
+
+    private void checkItem(final String label) {
+        if (label == null) throw new NullPointerException("Null item is unsupported");
     }
 
     private void checkIndex(final int index) {

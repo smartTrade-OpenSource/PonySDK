@@ -1255,7 +1255,7 @@ public class UiBuilderTest {
                 final PListBox listBox2 = get("listBox2");
                 listBox2.removeItem("Item 2");
                 listBox2.removeItem(2);
-                listBox2.removeItem(new Long(6));
+                listBox2.removeValue(new Long(6));
             }
         });
 
