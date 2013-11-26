@@ -25,23 +25,31 @@ package com.ponysdk.ui.terminal.ui;
 
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
+import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.ui.PTDateBox.MyDateBox;
 
-public class PTDateBox extends PTWidget<DateBox> {
+public class PTDateBox extends PTWidget<MyDateBox> {
+
+    private static final DefaultFormat DEFAULT_FORMAT = GWT.create(DefaultFormat.class);
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new DateBox());
+
+        final PTDatePicker datePicker = (PTDatePicker) uiService.getPTObject(create.getLong(PROPERTY.PICKER));
+
+        init(create, uiService, new MyDateBox(datePicker.cast(), null, DEFAULT_FORMAT));
     }
 
     @Override
@@ -68,7 +76,6 @@ public class PTDateBox extends PTWidget<DateBox> {
         } else {
             super.addHandler(addHandler, uiService);
         }
-
     }
 
     protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final DateBox dateBox) {
@@ -83,7 +90,7 @@ public class PTDateBox extends PTWidget<DateBox> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        final DateBox dateBox = cast();
+        final MyDateBox dateBox = cast();
 
         if (update.containsKey(PROPERTY.VALUE)) {
             dateBox.getTextBox().setText(update.getString(PROPERTY.VALUE));
@@ -94,9 +101,36 @@ public class PTDateBox extends PTWidget<DateBox> {
             dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(PROPERTY.DATE_FORMAT_PATTERN))));
         } else if (update.containsKey(PROPERTY.ENABLED)) {
             dateBox.setEnabled(update.getBoolean(PROPERTY.ENABLED));
+        } else if (update.containsKey(PROPERTY.MONTH)) {
+            dateBox.setDefaultMonth(update.getString(PROPERTY.MONTH));
         } else {
             super.update(update, uiService);
         }
     }
 
+    public static class MyDateBox extends DateBox {
+
+        private Date defaultMonth = null;
+
+        public MyDateBox(final DatePicker picker, final Date date, final Format format) {
+            super(picker, date, format);
+        }
+
+        public void setDefaultMonth(final String m) {
+            if (m.isEmpty()) defaultMonth = null;
+            else defaultMonth = new Date(Long.parseLong(m));
+        }
+
+        @Override
+        public void showDatePicker() {
+            if (!getTextBox().getText().trim().isEmpty() || defaultMonth == null) {
+                super.showDatePicker();
+                return;
+            }
+
+            super.showDatePicker();
+            getDatePicker().setCurrentMonth(defaultMonth);
+        }
+
+    }
 }

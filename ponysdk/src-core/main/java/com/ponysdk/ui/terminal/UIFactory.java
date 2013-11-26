@@ -32,6 +32,7 @@ import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
 import com.ponysdk.ui.terminal.ui.PTDateBox;
+import com.ponysdk.ui.terminal.ui.PTDatePicker;
 import com.ponysdk.ui.terminal.ui.PTDecoratedPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTDecoratorPanel;
 import com.ponysdk.ui.terminal.ui.PTDialogBox;
@@ -114,6 +115,7 @@ public class UIFactory {
         if (WidgetType.FOCUS_PANEL.equals(widgetType)) { return new PTFocusPanel(); }
         if (WidgetType.SCROLL_PANEL.equals(widgetType)) { return new PTScrollPanel(); }
         if (WidgetType.DATEBOX.equals(widgetType)) { return new PTDateBox(); }
+        if (WidgetType.DATEPICKER.equals(widgetType)) { return new PTDatePicker(); }
         if (WidgetType.FLEX_TABLE.equals(widgetType)) { return new PTFlexTable(); }
         if (WidgetType.GRID.equals(widgetType)) { return new PTGrid(); }
         if (WidgetType.IMAGE.equals(widgetType)) { return new PTImage(); }

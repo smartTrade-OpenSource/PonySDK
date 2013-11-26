@@ -24,7 +24,7 @@
 	
 	"handler": {
 		"key": [
-			"selectionHandler", "stringSelectionHandler", "stringValueChangeHandler", "booleanValueChangeHandler", "command", "beforeSelectionHandler", "dateValueChangeHandler", "streamRequestHandler", "embededStreamRequestHandler", "changeHandler", "timer", "scheduler", "history", "popupPositionCallback", "closeHandler", "domHandler", "submitCompleteHandler", "openHandler", "resizeHandler"
+			"selectionHandler", "stringSelectionHandler", "stringValueChangeHandler", "booleanValueChangeHandler", "command", "beforeSelectionHandler", "dateValueChangeHandler", "streamRequestHandler", "embededStreamRequestHandler", "changeHandler", "timer", "scheduler", "history", "popupPositionCallback", "closeHandler", "domHandler", "submitCompleteHandler", "openHandler", "resizeHandler", "showRange"
 		]
 	},
 	
@@ -221,6 +221,7 @@
 		"open": [],
 		"close": [],
 		"start": [],
+		"end": [],
 		"commandId": [],
 		"stop": [],
 		"eval": [],
@@ -234,6 +235,7 @@
 		"itemUpdated": [],
 		"resize": [],
 		"oracle": [],
+		"picker": [],
 		"instructions": [],
 		"placeholder": [],
 		"widgetSize": [],
@@ -248,6 +250,12 @@
 		"tabindex": [],
 		"minSize": [],
 		"snapClosedSize": [],
-		"toggleDisplayAllowed": []
+		"toggleDisplayAllowed": [],
+		"dateEnabled": [],
+		"addDateStyle": [],
+		"removeDateStyle": [],
+		"mask": [],
+		"visibility": [],
+		"month": []
 	}
 }

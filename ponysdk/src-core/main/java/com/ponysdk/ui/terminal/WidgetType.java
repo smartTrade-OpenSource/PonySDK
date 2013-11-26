@@ -43,6 +43,7 @@ public enum WidgetType {
     TREE_ITEM,
     COMPOSITE,
     DATEBOX,
+    DATEPICKER,
     NUMBERBOX,
     TEXTBOX,
     PASSWORD_TEXTBOX,

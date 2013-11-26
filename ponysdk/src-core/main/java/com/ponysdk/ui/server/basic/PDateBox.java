@@ -62,6 +62,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     private final List<PValueChangeHandler<Date>> handlers = new ArrayList<PValueChangeHandler<Date>>();
 
+    private final PDatePicker datePicker;
     private Date date;
     private SimpleDateFormat dateFormat;
 
@@ -70,10 +71,19 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final SimpleDateFormat dateFormat) {
+        this(new PDatePicker(), dateFormat);
+    }
+
+    public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
+
+        this.datePicker = picker;
+
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
         Txn.get().getTxnContext().save(addHandler);
 
         setDateFormat(dateFormat);
+
+        create.put(PROPERTY.PICKER, this.datePicker.getID());
     }
 
     @Override
@@ -151,6 +161,16 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : "");
         Txn.get().getTxnContext().save(update);
+    }
+
+    public void setDefaultMonth(final Date date) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.MONTH, Long.toString(date.getTime()));
+        Txn.get().getTxnContext().save(update);
+    }
+
+    public PDatePicker getDatePicker() {
+        return datePicker;
     }
 
 }
