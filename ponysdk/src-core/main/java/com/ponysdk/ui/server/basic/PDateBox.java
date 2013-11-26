@@ -67,7 +67,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private SimpleDateFormat dateFormat;
 
     public PDateBox() {
-        this(new SimpleDateFormat());
+        this(new SimpleDateFormat("MM/dd/yyyy"));
     }
 
     public PDateBox(final SimpleDateFormat dateFormat) {
