@@ -23,6 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+
 /**
  * A standard single-line text box.
  * <p>
@@ -43,6 +47,29 @@ public class PTextBox extends PTextBoxBase {
 
     public PTextBox(final String text) {
         super(text);
+    }
+
+    public void applyMask(final String mask) {
+        applyMask(mask, true, " ");
+    }
+
+    /**
+     * Apply a mask to the textbox. Value get/set from the textbox will have the mask. <br>
+     * Example: ({{000}}) {{000}}.{{0000}}
+     * 
+     * @param pattern
+     *            {{[0A]+}}
+     * @param showMask
+     *            true to display the mask when input is empty
+     * @param freeSymbol
+     *            replacement char when there is no input yet
+     */
+    public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
+        final Update update = new Update(getID());
+        update.put(PROPERTY.MASK, pattern);
+        update.put(PROPERTY.VISIBILITY, showMask);
+        update.put(PROPERTY.REPLACEMENT_STRING, freeSymbol);
+        Txn.get().getTxnContext().save(update);
     }
 
 }

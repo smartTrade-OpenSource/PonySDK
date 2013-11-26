@@ -27,8 +27,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
 public class PTTextBox extends PTTextBoxBase<TextBox> {
+
+    private TextBoxMaskedDecorator maskDecorator;
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -43,6 +46,12 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
             uiObject.setValue(update.getString(PROPERTY.VALUE));
         } else if (update.containsKey(PROPERTY.VISIBLE_LENGTH)) {
             uiObject.setVisibleLength(update.getInt(PROPERTY.VISIBLE_LENGTH));
+        } else if (update.containsKey(PROPERTY.MASK)) {
+            final boolean showMask = update.getBoolean(PROPERTY.VISIBILITY);
+            final String mask = update.getString(PROPERTY.MASK);
+            final String replace = update.getString(PROPERTY.REPLACEMENT_STRING);
+            if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
+            maskDecorator.setMask(mask, showMask, replace.charAt(0));
         } else {
             super.update(update, uiService);
         }
