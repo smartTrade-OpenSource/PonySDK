@@ -51,10 +51,7 @@ public class MenuActivity extends com.ponysdk.core.activity.AbstractActivity imp
         if (place instanceof HasPageName) {
             final String pageName = ((HasPageName) place).getPageName();
             final PageActivity pageActivity = pageProvider.getPageActivity(pageName);
-
-            if (pageActivity == null) throw new RuntimeException("The page hasn't been loaded : " + pageName);
-
-            if (pageActivity.getPageName() != null) {
+            if (pageActivity != null && pageActivity.getPageName() != null) {
                 menuView.selectItem(new MenuItem(pageActivity.getPageName(), pageActivity.getPageCategories()));
             }
         }
