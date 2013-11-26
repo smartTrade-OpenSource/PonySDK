@@ -46,6 +46,8 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
             uiObject.setValue(update.getString(PROPERTY.VALUE));
         } else if (update.containsKey(PROPERTY.VISIBLE_LENGTH)) {
             uiObject.setVisibleLength(update.getInt(PROPERTY.VISIBLE_LENGTH));
+        } else if (update.containsKey(PROPERTY.MAX_LENGTH)) {
+            uiObject.setMaxLength(update.getInt(PROPERTY.MAX_LENGTH));
         } else if (update.containsKey(PROPERTY.MASK)) {
             final boolean showMask = update.getBoolean(PROPERTY.VISIBILITY);
             final String mask = update.getString(PROPERTY.MASK);

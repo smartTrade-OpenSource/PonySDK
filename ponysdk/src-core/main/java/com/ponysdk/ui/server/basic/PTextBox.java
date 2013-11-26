@@ -41,12 +41,55 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
  */
 public class PTextBox extends PTextBoxBase {
 
+    private int maxLength;
+    private int visibleLength;
+
     public PTextBox() {
         this(null);
     }
 
     public PTextBox(final String text) {
         super(text);
+    }
+
+    /**
+     * Gets the maximum allowable length of the text box.
+     * 
+     * @return the maximum length, in characters
+     */
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    /**
+     * Gets the number of visible characters in the text box.
+     * 
+     * @return the number of visible characters
+     */
+    public int getVisibleLength() {
+        return visibleLength;
+    }
+
+    /**
+     * Sets the maximum allowable length of the text box.
+     * 
+     * @param length
+     *            the maximum length, in characters
+     */
+    public void setMaxLength(final int length) {
+        this.maxLength = length;
+        saveUpdate(PROPERTY.MAX_LENGTH, length);
+    }
+
+    /**
+     * Sets the number of visible characters in the text box.
+     * 
+     * @param length
+     *            the number of visible characters
+     */
+    public void setVisibleLength(final int length) {
+        this.visibleLength = length;
+        saveUpdate(PROPERTY.VISIBLE_LENGTH, visibleLength);
     }
 
     public void applyMask(final String mask) {
