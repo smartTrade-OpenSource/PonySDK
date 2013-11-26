@@ -25,8 +25,8 @@ package com.ponysdk.ui.server.form.renderer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,9 +52,9 @@ public class TwinListBoxFormFieldRenderer<T> implements FormFieldRenderer, HasPC
 
     private final List<String> items = new ArrayList<String>();
 
-    private final Map<String, Object> hiddenValueByItems = new HashMap<String, Object>();
+    private final Map<String, Object> hiddenValueByItems = new LinkedHashMap<String, Object>();
 
-    private final Map<Object, String> itemsByHiddenValue = new HashMap<Object, String>();
+    private final Map<Object, String> itemsByHiddenValue = new LinkedHashMap<Object, String>();
 
     private boolean enabled = true;
 
