@@ -23,10 +23,11 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
+import com.ponysdk.core.internalization.PString;
+
 public class StringLengthValidator implements FieldValidator {
 
     private int minLength = 0;
-
     private int maxLength = 0;
 
     public StringLengthValidator(final int minLength, final int maxLength) {
@@ -37,8 +38,8 @@ public class StringLengthValidator implements FieldValidator {
     @Override
     public ValidationResult isValid(final String value) {
         if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
-        if (value.length() < minLength) return ValidationResult.newFailedValidationResult(minLength + " chars at minimum.");
-        if (value.length() > maxLength) return ValidationResult.newFailedValidationResult(maxLength + " chars at maximum.");
+        if (value.length() < minLength) return ValidationResult.newFailedValidationResult(PString.get("validator.error.minlength", minLength));
+        if (value.length() > maxLength) return ValidationResult.newFailedValidationResult(PString.get("validator.error.maxlength", maxLength));
         return ValidationResult.newOKValidationResult();
     }
 }

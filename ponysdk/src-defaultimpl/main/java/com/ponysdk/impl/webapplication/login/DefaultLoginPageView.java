@@ -1,6 +1,7 @@
 
 package com.ponysdk.impl.webapplication.login;
 
+import com.ponysdk.core.internalization.PString;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
@@ -15,13 +16,12 @@ import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 
-    private final PButton loginButton = new PButton("Sign in");
+    private final PButton loginButton;
+    private final PCheckBox rememberMe;
 
     private final PTextBox loginTextBox = new PTextBox();
 
     private final PPasswordTextBox passwordTextBox = new PPasswordTextBox();
-
-    private final PCheckBox rememberMe = new PCheckBox("Stay signed in");
 
     private final PFlowPanel messagePanel = new PFlowPanel();
 
@@ -30,6 +30,10 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     private int messageIndex = 1;
 
     public DefaultLoginPageView(final String title) {
+
+        loginButton = new PButton(PString.get("activity.login.signin"));
+        rememberMe = new PCheckBox(PString.get("activity.login.rememberme"));
+
         loginTextBox.setStyleName("pony-LoginPage-LoginTextBox");
         passwordTextBox.setStyleName("pony-LoginPage-PasswordTextBox");
         loginButton.addStyleName("pony-LoginPage-SubmitButton");
@@ -67,14 +71,14 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
 
     private PWidget buildLoginInput() {
         final PFlowPanel panel = new PFlowPanel();
-        panel.add(new PLabel("Login:"));
+        panel.add(new PLabel(PString.get("activity.login.login")));
         panel.add(loginTextBox);
         return panel;
     }
 
     private PWidget buildPasswordInput() {
         final PFlowPanel panel = new PFlowPanel();
-        panel.add(new PLabel("Password:"));
+        panel.add(new PLabel(PString.get("activity.login.password")));
         panel.add(passwordTextBox);
         return panel;
     }

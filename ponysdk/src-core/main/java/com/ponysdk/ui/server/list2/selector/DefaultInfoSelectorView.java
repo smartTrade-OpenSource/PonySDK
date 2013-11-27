@@ -1,6 +1,7 @@
 
 package com.ponysdk.ui.server.list2.selector;
 
+import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -60,9 +61,9 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
                 clear();
                 add(numberOfSelectedMessage);
 
-                numberOfSelectedMessage.setText("All " + numberOfSelectedItems + " items are selected.");
+                numberOfSelectedMessage.setText(PString.get("list.selector.allitemselected", numberOfSelectedItems));
                 if (numberOfSelectedItems > pageSize) {
-                    selectNoneAnchor.setText("Clear Selection");
+                    selectNoneAnchor.setText(PString.get("list.selector.clear"));
                     add(selectNoneAnchor);
                 }
                 break;
@@ -73,10 +74,10 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
                 setVisible(true);
                 clear();
                 add(numberOfSelectedMessage);
-                numberOfSelectedMessage.setText("All " + numberOfSelectedItems + " items on this page are selected.");
+                numberOfSelectedMessage.setText(PString.get("list.selector.pageitemselected", numberOfSelectedItems));
 
                 final int itemsLeft = fullSize - numberOfSelectedItems;
-                selectAllAnchor.setText("Select all " + itemsLeft + " final items");
+                selectAllAnchor.setText(PString.get("list.selector.selectitemleft", itemsLeft));
                 add(selectAllAnchor);
                 break;
             case PARTIAL:

@@ -17,6 +17,7 @@ import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;
 import com.ponysdk.core.export.xml.XMLExporter;
+import com.ponysdk.core.internalization.PString;
 
 public class CSVExporter<T> implements Exporter<T> {
 
@@ -80,7 +81,7 @@ public class CSVExporter<T> implements Exporter<T> {
             }
         });
 
-        return records.size() + " row(s) exported in " + fileName;
+        return PString.get("export.result", records.size(), fileName);
     }
 
     protected String getDisplayValue(final T row, final ExportableField exportableField) throws Exception {

@@ -23,15 +23,15 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
-public class UncheckedFieldValidator implements FieldValidator {
+import com.ponysdk.core.internalization.PString;
 
-    private static final String ERROR_MESSAGE = "Unchecked field";
+public class UncheckedFieldValidator implements FieldValidator {
 
     @Override
     public ValidationResult isValid(final String value) {
-        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
         if (Boolean.valueOf(value)) return ValidationResult.newOKValidationResult();
-        return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+        return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
     }
 
 }

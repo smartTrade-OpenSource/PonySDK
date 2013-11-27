@@ -23,16 +23,16 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
-public class DoubleFieldValidator implements FieldValidator {
+import com.ponysdk.core.internalization.PString;
 
-    private static final String ERROR_MESSAGE = "Not a double";
+public class DoubleFieldValidator implements FieldValidator {
 
     private static ValidationResult isADouble(final String value) {
         try {
             Double.parseDouble(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.double"));
         }
     }
 

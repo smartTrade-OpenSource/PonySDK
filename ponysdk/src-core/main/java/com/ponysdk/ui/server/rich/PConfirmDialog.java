@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.rich;
 
+import com.ponysdk.core.internalization.PString;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
@@ -36,11 +37,6 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class PConfirmDialog extends PDialogBox {
-
-    public static final String DEFAULT_CAPTION = "Confirm";
-    public static final String DEFAULT_MESSAGE = "Are You sure?";
-    public static final String DEFAULT_OK_CAPTION = "Ok";
-    public static final String DEFAULT_CANCEL_CAPTION = "Cancel";
 
     private PButton okButton;
     private PButton cancelButton;
@@ -82,7 +78,7 @@ public class PConfirmDialog extends PDialogBox {
 
         if (cancelCaption != null) {
             final PButton cancelButton = new PButton();
-            cancelButton.setText(cancelCaption != null ? cancelCaption : DEFAULT_CANCEL_CAPTION);
+            cancelButton.setText(cancelCaption != null ? cancelCaption : PString.get("dialog.cancel"));
             cancelButton.addClickHandler(new PClickHandler() {
 
                 @Override
@@ -98,7 +94,7 @@ public class PConfirmDialog extends PDialogBox {
         }
         if (okCaption != null) {
             final PButton okButton = new PButton();
-            okButton.setText(okCaption != null ? okCaption : DEFAULT_OK_CAPTION);
+            okButton.setText(okCaption != null ? okCaption : PString.get("dialog.ok"));
             okButton.addClickHandler(new PClickHandler() {
 
                 @Override
@@ -122,11 +118,11 @@ public class PConfirmDialog extends PDialogBox {
 
     // show a popup which have a ok button hiding the popup by default
     public static PDialogBox show(final String windowCaption, final PWidget content) {
-        return show(windowCaption, content, "Ok", null, null);
+        return show(windowCaption, content, PString.get("dialog.ok"), null, null);
     }
 
     public static PDialogBox show(final String windowCaption, final PWidget content, final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowCaption, content, "Ok", null, confirmDialogHandler);
+        return show(windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 
     @Override

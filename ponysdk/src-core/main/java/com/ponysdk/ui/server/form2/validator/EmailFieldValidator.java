@@ -23,13 +23,12 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
+import com.ponysdk.core.internalization.PString;
+
 public class EmailFieldValidator implements FieldValidator {
 
     private static final String EMAILS_SEPARATOR = ";";
-
     private static final String VALID_MAIL_REGEX = "^[a-z0-9._-]+@[a-z0-9.-]{1,}[.][a-z]{2,3}";
-
-    private static final String INVALID_CHARACTERS_MSG = "Invalid e-mail";
 
     @Override
     public ValidationResult isValid(final String value) {
@@ -37,7 +36,7 @@ public class EmailFieldValidator implements FieldValidator {
 
         final String[] emails = value.split(EMAILS_SEPARATOR);
         for (int i = 0; i < emails.length; i++) {
-            if (!emails[i].matches(VALID_MAIL_REGEX)) { return ValidationResult.newFailedValidationResult(INVALID_CHARACTERS_MSG); }
+            if (!emails[i].matches(VALID_MAIL_REGEX)) { return ValidationResult.newFailedValidationResult(PString.get("validator.error.email")); }
         }
 
         return ValidationResult.newOKValidationResult();

@@ -33,6 +33,7 @@ import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.event.DataExportedEvent;
+import com.ponysdk.core.internalization.PString;
 
 public class ExportCommand<T> implements Command<String> {
 
@@ -55,8 +56,8 @@ public class ExportCommand<T> implements Command<String> {
     public String execute() {
         if (exportContext.getSelectionResult().getSelectedData() == null || exportContext.getSelectionResult().getSelectedData().isEmpty()) return null;
         try {
-            Exporter<T> exporter = exportContext.getExporter();
-            String message = exporter.export(exportContext.getExportableFields(), exportContext.getSelectionResult().getSelectedData());
+            final Exporter<T> exporter = exportContext.getExporter();
+            final String message = exporter.export(exportContext.getExportableFields(), exportContext.getSelectionResult().getSelectedData());
             onSuccess(message);
             return message;
         } catch (final Exception e) {
@@ -76,7 +77,7 @@ public class ExportCommand<T> implements Command<String> {
         final DataExportedEvent event = new DataExportedEvent(this, exportContext.getExporter());
         event.setLevel(Level.INFO);
         log.error("Failure occured when exporting", caught);
-        event.setBusinessMessage(caught.getMessage() + ", see server logs for more details.");
+        event.setBusinessMessage(PString.get("export.failure", caught.getMessage()));
         eventBus.fireEvent(event);
     }
 

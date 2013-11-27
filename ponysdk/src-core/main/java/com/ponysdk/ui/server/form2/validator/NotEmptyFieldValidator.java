@@ -23,13 +23,13 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
-public class NotEmptyFieldValidator implements FieldValidator {
+import com.ponysdk.core.internalization.PString;
 
-    private static final String FIELD_MSG_EMPTY = "Empty field";
+public class NotEmptyFieldValidator implements FieldValidator {
 
     @Override
     public ValidationResult isValid(final String value) {
-        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(FIELD_MSG_EMPTY);
+        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(PString.get("validator.error.empty"));
         return ValidationResult.newOKValidationResult();
     }
 

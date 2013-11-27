@@ -17,6 +17,7 @@ import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;
+import com.ponysdk.core.internalization.PString;
 
 public class XMLExporter<T> implements Exporter<T> {
 
@@ -42,7 +43,8 @@ public class XMLExporter<T> implements Exporter<T> {
     public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
         final String xml = convert(exportableFields, records, rootName).toString();
         exportXMLString(fileName, xml);
-        return records.size() + " row(s) exported in " + fileName;
+
+        return PString.get("export.result", records.size(), fileName);
     }
 
     public void exportXMLString(final String fileName, final String content) throws Exception {

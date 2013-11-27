@@ -23,16 +23,16 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
-public class FloatFieldValidator implements FieldValidator {
+import com.ponysdk.core.internalization.PString;
 
-    private static final String ERROR_MESSAGE = "Not a float";
+public class FloatFieldValidator implements FieldValidator {
 
     private static ValidationResult isAFloat(final String value) {
         try {
             Float.parseFloat(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.float"));
         }
     }
 

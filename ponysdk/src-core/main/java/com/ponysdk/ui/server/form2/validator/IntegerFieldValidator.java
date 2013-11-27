@@ -23,17 +23,16 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
+import com.ponysdk.core.internalization.PString;
 
 public class IntegerFieldValidator implements FieldValidator {
-
-    private static final String ERROR_MESSAGE = "Not an integer";
 
     public ValidationResult isAInteger(final String value) {
         try {
             Integer.parseInt(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.integer"));
         }
     }
 

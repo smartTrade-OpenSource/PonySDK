@@ -23,16 +23,16 @@
 
 package com.ponysdk.ui.server.form2.validator;
 
-public class LongFieldValidator implements FieldValidator {
+import com.ponysdk.core.internalization.PString;
 
-    private static final String ERROR_MESSAGE = "Not a long";
+public class LongFieldValidator implements FieldValidator {
 
     private static ValidationResult isALong(final String value) {
         try {
             Long.parseLong(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.long"));
         }
     }
 
