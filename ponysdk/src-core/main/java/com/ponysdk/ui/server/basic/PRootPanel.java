@@ -52,11 +52,17 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     public static PRootPanel get() {
-        return get(DEFAULTID);
+        if (UIContext.getCurrentWindow() == null) return get(0, DEFAULTID);
+        return get(UIContext.getCurrentWindow().getID(), DEFAULTID);
     }
 
     public static PRootPanel get(final String id) {
-        final Map<String, PRootPanel> childs = ensureChilds();
+        if (UIContext.getCurrentWindow() == null) return get(0, id);
+        return get(UIContext.getCurrentWindow().getID(), id);
+    }
+
+    private static PRootPanel get(final long windowID, final String id) {
+        final Map<String, PRootPanel> childs = ensureChilds(windowID);
         PRootPanel defaultRoot = childs.get(id);
         if (defaultRoot == null) {
             if (id.equals(DEFAULTID)) defaultRoot = new PRootPanel();
@@ -66,9 +72,10 @@ public class PRootPanel extends PAbsolutePanel {
         return defaultRoot;
     }
 
-    private static Map<String, PRootPanel> ensureChilds() {
+    private static Map<String, PRootPanel> ensureChilds(final long windowID) {
+        final String rootID = ROOTID + "_" + windowID;
         final UIContext session = UIContext.get();
-        Map<String, PRootPanel> rootByIDs = session.getAttribute(ROOTID);
+        Map<String, PRootPanel> rootByIDs = session.getAttribute(rootID);
         if (rootByIDs == null) {
             rootByIDs = new HashMap<String, PRootPanel>();
             session.setAttribute(ROOTID, rootByIDs);
