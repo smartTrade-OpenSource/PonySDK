@@ -31,8 +31,20 @@ import com.ponysdk.ui.server.basic.PWidget;
 
 public class SimpleTable extends PElement {
 
+    private final PElement thead = new PElement("thead");
+    private final PElement tbody = new PElement("tbody");
+
     public SimpleTable() {
         super("table");
+
+        super.insert(thead, 0);
+        super.insert(tbody, 1);
+    }
+
+    @Override
+    public void insert(final PWidget child, final int beforeIndex) {
+        final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
+        parentElement.insert(child, beforeIndex);
     }
 
     public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
@@ -40,13 +52,25 @@ public class SimpleTable extends PElement {
         if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
         if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
+        if (row > 0) {
+            addBodyWidget(widget, column, row, colspan);
+        } else {
+            addHeadWidget(widget, column, row, colspan);
+        }
+    }
+
+    public void addBodyWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
+
+        if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
+        if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
+
         PElement newRow;
-        final int maxRowIndex = getWidgetCount() - 1;
+        final int maxRowIndex = tbody.getWidgetCount();
         if (row > maxRowIndex) {
             newRow = new PElement("tr");
-            add(newRow);
+            tbody.add(newRow);
         } else {
-            newRow = (PElement) getWidget(row);
+            newRow = (PElement) tbody.getWidget(row - 1);
         }
 
         PElement newCell;
@@ -65,9 +89,41 @@ public class SimpleTable extends PElement {
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
 
+    public void addHeadWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
+
+        if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
+        if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
+
+        PElement newRow;
+        final int maxRowIndex = thead.getWidgetCount() - 1;
+        if (row > maxRowIndex) {
+            newRow = new PElement("tr");
+            thead.add(newRow);
+        } else {
+            newRow = (PElement) thead.getWidget(row);
+        }
+
+        PElement newCell;
+        final int maxCellIndex = newRow.getWidgetCount() - 1;
+        if (column > maxCellIndex) {
+            newCell = new PElement("th");
+            newRow.add(newCell);
+        } else {
+            newCell = (PElement) newRow.getWidget(column);
+            newCell.clear();
+        }
+
+        newCell.add(widget);
+        newCell.addStyleName("pony-PFlextable-Cell");
+
+        if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
+    }
+
     public void clear(final int from) {
-        for (int i = getWidgetCount() - 1; i >= from; i++) {
-            remove(i);
+        if (from == 0) thead.clear();
+
+        for (int i = tbody.getWidgetCount() - 1; i >= from - 1; i++) {
+            tbody.remove(i);
         }
     }
 
@@ -76,15 +132,26 @@ public class SimpleTable extends PElement {
         remove(row);
     }
 
+    @Override
+    public boolean remove(final int row) {
+        final PElement parentElement = (row == 0) ? thead : tbody;
+        return parentElement.remove(parentElement.getWidget(row - (row == 0 ? 0 : 1)));
+    }
+
     public PElement getRow(final int row) {
         checkRowBound(row);
-        return (PElement) getWidget(row);
+
+        final PElement parentElement = (row == 0) ? thead : tbody;
+
+        return (PElement) parentElement.getWidget(row - (row == 0 ? 0 : 1));
     }
 
     public PElement getCell(final int row, final int column) {
+        final PElement parentElement = (row == 0) ? thead : tbody;
+
         checkRowBound(row);
         checkColumnBound(column);
-        final PElement r = (PElement) getWidget(row);
+        final PElement r = (PElement) parentElement.getWidget(row);
         return (PElement) r.getWidget(column);
     }
 
@@ -94,7 +161,7 @@ public class SimpleTable extends PElement {
         return new Iterator<PElement>() {
 
             int index = 0;
-            int rows = getWidgetCount();
+            int rows = tbody.getWidgetCount();
 
             @Override
             public boolean hasNext() {
@@ -104,7 +171,7 @@ public class SimpleTable extends PElement {
 
             @Override
             public PElement next() {
-                final PElement row = (PElement) getWidget(index);
+                final PElement row = (PElement) tbody.getWidget(index);
                 final PElement next = (PElement) row.getWidget(column);
                 index++;
                 return next;
@@ -112,7 +179,7 @@ public class SimpleTable extends PElement {
 
             @Override
             public void remove() {
-                final PElement row = (PElement) getWidget(index);
+                final PElement row = (PElement) tbody.getWidget(index);
                 row.remove(index);
                 index++;
             }
@@ -124,32 +191,41 @@ public class SimpleTable extends PElement {
         checkRowBound(index);
         checkRowBound(beforeIndex);
 
-        final PWidget source = getWidget(index);
-        insert(source, beforeIndex);
+        final PElement parentElement = (index == 0) ? thead : tbody;
+
+        final PWidget source = parentElement.getWidget(index - (index == 0 ? 0 : 1));
+        parentElement.insert(source, beforeIndex - (beforeIndex == 0 ? 0 : 1));
     }
 
     public void moveColumn(final int index, final int beforeIndex) {
         checkColumnBound(index);
         checkColumnBound(beforeIndex);
 
-        for (int r = 0; r < getWidgetCount(); r++) {
-            final PElement row = (PElement) getWidget(r);
+        final PElement parentElement = (index == 0) ? thead : tbody;
+
+        for (int r = 0; r < parentElement.getWidgetCount(); r++) {
+            final PElement row = (PElement) parentElement.getWidget(r);
             row.insert(row.getWidget(index), beforeIndex);
         }
     }
 
     private void checkRowBound(final int beforeIndex) {
-        if ((beforeIndex < 0) || (beforeIndex >= getWidgetCount())) {
+        final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
+
+        if ((beforeIndex < 0) || (beforeIndex >= parentElement.getWidgetCount() + (beforeIndex == 0 ? 0 : 1))) {
             if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
-            else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" + getWidgetCount() + ")");
+            else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
         }
     }
 
     private void checkColumnBound(final int beforeIndex) {
-        final PElement header = (PElement) getWidget(0);
-        if ((beforeIndex < 0) || (beforeIndex >= header.getWidgetCount())) {
-            if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
-            else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" + header.getWidgetCount() + ")");
-        }
+        return;
+        // final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
+        // if ((beforeIndex < 0) || (beforeIndex >= parentElement.getWidgetCount())) {
+        // if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex +
+        // ") < 0)");
+        // else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" +
+        // parentElement.getWidgetCount() + ")");
+        // }
     }
 }
