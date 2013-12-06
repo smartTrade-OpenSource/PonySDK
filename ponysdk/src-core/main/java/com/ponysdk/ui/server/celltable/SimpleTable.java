@@ -119,6 +119,12 @@ public class SimpleTable extends PElement {
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
 
+    @Override
+    public void clear() {
+        thead.clear();
+        tbody.clear();
+    }
+
     public void clear(final int from) {
         if (from == 0) thead.clear();
 
