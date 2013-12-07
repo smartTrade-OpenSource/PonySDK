@@ -38,7 +38,6 @@ public class PTTree extends PTWidget<Tree> {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         final Tree tree = new Tree();
-        tree.setAnimationEnabled(true);
         init(create, uiService, tree);
     }
 
@@ -72,4 +71,12 @@ public class PTTree extends PTWidget<Tree> {
         uiObject.remove(asWidget(remove.getObjectID(), uiService));
     }
 
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
+        } else {
+            super.update(update, uiService);
+        }
+    }
 }

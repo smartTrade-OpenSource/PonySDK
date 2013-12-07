@@ -106,6 +106,8 @@ public class PTTabPanel extends PTWidget<TabPanel> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
             uiObject.selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
+        } else if (update.containsKey(PROPERTY.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
         } else {
             super.update(update, uiService);
         }

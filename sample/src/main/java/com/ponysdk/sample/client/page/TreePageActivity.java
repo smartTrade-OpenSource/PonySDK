@@ -57,20 +57,21 @@ public class TreePageActivity extends SamplePageActivity {
         panel.add(new PLabel("Static Tree:"));
 
         final PTree tree = new PTree();
+        tree.setAnimationEnabled(false);
         tree.setWidth("300px");
 
         tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
 
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                String msg = "Selected item : name = " + event.getSelectedItem();
+                final String msg = "Selected item : name = " + event.getSelectedItem();
                 UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
             }
         });
 
-        PTreeItem firstItem = new PTreeItem("First item");
+        final PTreeItem firstItem = new PTreeItem("First item");
 
-        PAnchor anchor = new PAnchor("Second item");
+        final PAnchor anchor = new PAnchor("Second item");
         final PTreeItem secondItem = new PTreeItem(anchor);
         anchor.addClickHandler(new PClickHandler() {
 
@@ -80,17 +81,17 @@ public class TreePageActivity extends SamplePageActivity {
             }
         });
 
-        PTreeItem thirdItem = new PTreeItem(new PImage("images/pony.png"));
+        final PTreeItem thirdItem = new PTreeItem(new PImage("images/pony.png"));
 
         tree.addItem(firstItem);
         tree.addItem(secondItem);
         tree.addItem(thirdItem);
 
-        Query query = new Query();
-        FindPonysCommand command = new FindPonysCommand(query);
-        Result<List<Pony>> ponys = command.execute();
+        final Query query = new Query();
+        final FindPonysCommand command = new FindPonysCommand(query);
+        final Result<List<Pony>> ponys = command.execute();
 
-        for (Pony pony : ponys.getData()) {
+        for (final Pony pony : ponys.getData()) {
             firstItem.addItem(pony.getName());
             secondItem.addItem(pony.getName());
             thirdItem.addItem(pony.getName());
