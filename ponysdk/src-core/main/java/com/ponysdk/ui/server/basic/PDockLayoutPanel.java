@@ -51,7 +51,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * of the directional children.
  * </p>
  */
-public class PDockLayoutPanel extends PComplexPanel {
+public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public enum Direction {
         NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END
@@ -125,4 +125,8 @@ public class PDockLayoutPanel extends PComplexPanel {
         Txn.get().getTxnContext().save(add);
     }
 
+    @Override
+    public void animate(final int duration) {
+        saveUpdate(PROPERTY.ANIMATE, duration);
+    }
 }

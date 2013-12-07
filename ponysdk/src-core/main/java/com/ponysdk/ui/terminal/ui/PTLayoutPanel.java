@@ -119,6 +119,8 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
                 final double height = update.getDouble(PROPERTY.HEIGHT);
                 uiObject.setWidgetBottomHeight(w, bottom, unit, height, unit);
             }
+        } else if (update.containsKey(PROPERTY.ANIMATE)) {
+            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
         } else {
             super.update(update, uiService);
         }

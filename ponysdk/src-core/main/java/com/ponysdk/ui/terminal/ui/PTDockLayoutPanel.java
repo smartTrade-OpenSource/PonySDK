@@ -48,6 +48,8 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
             final boolean hidden = update.getBoolean(PROPERTY.WIDGET_HIDDEN);
             final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
             uiObject.setWidgetHidden(w, hidden);
+        } else if (update.containsKey(PROPERTY.ANIMATE)) {
+            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
         } else {
             super.update(update, uiService);
         }

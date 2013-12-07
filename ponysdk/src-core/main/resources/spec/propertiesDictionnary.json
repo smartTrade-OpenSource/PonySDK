@@ -105,6 +105,8 @@
 		"widget": [],
 		"tabText": [],
 		"animation": [],
+		"animationDuration": [],
+		"animate": [],
 		"widgetTitle": [],
 		"menuBarIsVertical": [],
 		"selectedIndex": [],

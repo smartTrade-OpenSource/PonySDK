@@ -104,13 +104,16 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.ANIMATION)) {
-            uiObject.animate(1);
+        if (update.containsKey(PROPERTY.ANIMATE)) {
+            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
+        } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
+            uiObject.setAnimationVertical(update.getBoolean(PROPERTY.VERTICAL_ALIGNMENT));
+        } else if (update.containsKey(PROPERTY.ANIMATION_DURATION)) {
+            uiObject.setAnimationDuration(update.getInt(PROPERTY.ANIMATION_DURATION));
         } else if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
             uiObject.selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
         } else {
             super.update(update, uiService);
         }
     }
-
 }
