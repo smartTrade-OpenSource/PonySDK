@@ -4,6 +4,8 @@
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="com.ponysdk.ui.Generated" />
 	
+	<add-linker name="xsiframe"/>
+	
 	<entry-point class='com.ponysdk.ui.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />
 	<generate-with class="com.ponysdk.ui.server.AddonListGenerator">

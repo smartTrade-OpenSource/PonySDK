@@ -52,10 +52,10 @@ import com.ponysdk.spring.servlet.SpringHttpServlet;
 
 public class Main {
 
-    public static final String MAPPING_TERMINAL = "/ponyterminal/p";
+    public static final String MAPPING_TERMINAL = "/p";
     public static final String MAPPING_BOOTSTRAP = "/*";
     public static final String MAPPING_WS = "/ws/*";
-    public static final String MAPPING_STREAM = "/ponyterminal/stream";
+    public static final String MAPPING_STREAM = "/stream";
 
     protected static final Logger log = LoggerFactory.getLogger(Main.class);
 

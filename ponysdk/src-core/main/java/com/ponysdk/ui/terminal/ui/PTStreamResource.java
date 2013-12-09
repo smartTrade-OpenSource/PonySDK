@@ -39,7 +39,7 @@ public class PTStreamResource extends AbstractPTObject {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+        final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
         frame = new Frame();
         frame.setWidth("0px");
         frame.setHeight("0px");

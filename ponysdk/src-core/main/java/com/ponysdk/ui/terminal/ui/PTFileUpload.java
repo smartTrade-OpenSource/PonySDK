@@ -90,10 +90,10 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                 }
             });
         } else if (HANDLER.KEY_.STREAM_REQUEST_HANDLER.equals(handler)) {
-            final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
             getFrame().setUrl(action);
         } else if (HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER.equals(handler)) {
-            final String action = GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
             wrappedFormPanel.setAction(action);
             wrappedFormPanel.submit();
         } else {
