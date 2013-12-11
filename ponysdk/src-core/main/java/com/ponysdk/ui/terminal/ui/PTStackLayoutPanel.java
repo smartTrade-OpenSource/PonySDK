@@ -98,6 +98,10 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.OPEN)) {
             uiObject.showWidget(asWidget(update.getLong(PROPERTY.OPEN), uiService));
+        } else if (update.containsKey(PROPERTY.ANIMATE)) {
+            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
+        } else if (update.containsKey(PROPERTY.ANIMATION_DURATION)) {
+            uiObject.setAnimationDuration(update.getInt(PROPERTY.ANIMATION_DURATION));
         } else {
             super.update(update, uiService);
         }

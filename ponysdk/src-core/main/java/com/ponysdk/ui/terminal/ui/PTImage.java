@@ -51,7 +51,7 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         if (addHandler.containsKey(HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER)) {
-            cast().setUrl(GWT.getModuleBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getString(PROPERTY.STREAM_REQUEST_ID));
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getString(PROPERTY.STREAM_REQUEST_ID));
         } else {
             super.addHandler(addHandler, uiService);
         }

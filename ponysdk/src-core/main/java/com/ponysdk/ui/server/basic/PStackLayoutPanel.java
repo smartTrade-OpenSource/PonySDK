@@ -62,13 +62,15 @@ import com.ponysdk.ui.terminal.WidgetType;
  * <dd>applied to each child widget
  * </dl>
  */
-public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer> {
+public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
 
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
+
+    private int animationDuration;
 
     public PStackLayoutPanel(final PUnit unit) {
         super();
@@ -176,6 +178,26 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         final Update update = new Update(getID());
         update.put(PROPERTY.OPEN, widget.getID());
         Txn.get().getTxnContext().save(update);
+    }
+
+    /**
+     * Set the duration of the animated transition between children.
+     * 
+     * @param duration
+     *            the duration in milliseconds.
+     */
+    public void setAnimationDuration(final int duration) {
+        this.animationDuration = duration;
+        saveUpdate(PROPERTY.ANIMATION_DURATION, duration);
+    }
+
+    @Override
+    public void animate(final int duration) {
+        saveUpdate(PROPERTY.ANIMATE, duration);
+    }
+
+    public int getAnimationDuration() {
+        return animationDuration;
     }
 
 }

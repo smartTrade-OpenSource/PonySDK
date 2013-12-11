@@ -70,6 +70,8 @@ public class PTMenuBar extends PTWidget<MenuBar> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.CLEAR)) {
             uiObject.clearItems();
+        } else if (update.containsKey(PROPERTY.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
         } else {
             super.update(update, uiService);
         }

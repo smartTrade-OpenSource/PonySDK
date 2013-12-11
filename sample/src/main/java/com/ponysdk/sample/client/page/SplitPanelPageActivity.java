@@ -39,6 +39,8 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 public class SplitPanelPageActivity extends SamplePageActivity {
 
     private PHorizontalPanel south;
+    private PHorizontalPanel east;
+    private PHorizontalPanel west;
 
     public SplitPanelPageActivity() {
         super("Split Panel", "Panels");
@@ -55,10 +57,12 @@ public class SplitPanelPageActivity extends SamplePageActivity {
 
         splitLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         splitLayoutPanel.addSouth(south = buildComponent("south", "#75ffdc"), 50);
-        splitLayoutPanel.addEast(buildComponent("east", "#b879fc"), 100);
-        splitLayoutPanel.addWest(buildComponent("west", "#e8b6ea"), 100);
+        splitLayoutPanel.addEast(east = buildComponent("east", "#b879fc"), 100);
+        splitLayoutPanel.addWest(west = buildComponent("west", "#e8b6ea"), 100);
         splitLayoutPanel.add(buildCenterPanel());
 
+        splitLayoutPanel.setWidgetToggleDisplayAllowed(east, true);
+        splitLayoutPanel.setWidgetToggleDisplayAllowed(west, true);
         splitLayoutPanel.setWidgetSnapClosedSize(south, 40);
         splitLayoutPanel.setWidgetToggleDisplayAllowed(south, true);
 
@@ -69,6 +73,8 @@ public class SplitPanelPageActivity extends SamplePageActivity {
                 for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
                     if (data.w == south) {
                         PNotificationManager.showTrayNotification("South size: " + data.size);
+                    } else if (data.w == east) {
+                        PNotificationManager.showTrayNotification("East size: " + data.size);
                     }
                 }
             }

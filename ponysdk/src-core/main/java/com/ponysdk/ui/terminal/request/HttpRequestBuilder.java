@@ -19,7 +19,7 @@ public class HttpRequestBuilder extends RequestBuilder {
 
     private final static Logger log = Logger.getLogger(HttpRequestBuilder.class.getName());
 
-    private final com.google.gwt.http.client.RequestBuilder requestBuilder = new com.google.gwt.http.client.RequestBuilder(com.google.gwt.http.client.RequestBuilder.POST, GWT.getModuleBaseURL() + "p");
+    private final com.google.gwt.http.client.RequestBuilder requestBuilder = new com.google.gwt.http.client.RequestBuilder(com.google.gwt.http.client.RequestBuilder.POST, GWT.getHostPageBaseURL() + "p");
 
     public HttpRequestBuilder(final RequestCallback callback) {
         super(callback);

@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
@@ -59,12 +60,13 @@ import com.ponysdk.ui.terminal.WidgetType;
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */
-public class PDisclosurePanel extends PWidget implements HasPWidgets {
+public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation {
 
     // TODO nciaravola must be moved in PTDisclosurePanel
     private static final String CLOSED = "images/disclosure_closed.png";
     private static final String OPENNED = "images/disclosure_openned.png";
 
+    private boolean animationEnabled = false;
     private PWidget content;
     private boolean isOpen;
 
@@ -196,4 +198,16 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets {
         return isOpen;
     }
 
+    @Override
+    public boolean isAnimationEnabled() {
+        return animationEnabled;
+    }
+
+    @Override
+    public void setAnimationEnabled(final boolean animationEnabled) {
+        this.animationEnabled = animationEnabled;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.ANIMATION, animationEnabled);
+        Txn.get().getTxnContext().save(update);
+    }
 }

@@ -93,6 +93,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         setWidget(layoutPanel);
         setSizeFull();
         layoutPanel.setSizeFull();
+        layoutPanel.setAnimationDuration(100);
     }
 
     @Override

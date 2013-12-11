@@ -34,7 +34,6 @@ import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
@@ -74,15 +73,13 @@ import com.ponysdk.ui.terminal.WidgetType;
  * child and one of two types of header elements. A &lt;g:header> element can hold html, or a
  * &lt;g:customHeader> element can hold a widget.
  */
-public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer> {
-
-    private boolean animationEnabled = false;
+public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
 
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
-
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
 
     private Integer selectedItemIndex;
+    private int animationDuration;
 
     public PTabLayoutPanel() {
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
@@ -163,19 +160,6 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
     }
 
     @Override
-    public boolean isAnimationEnabled() {
-        return animationEnabled;
-    }
-
-    @Override
-    public void setAnimationEnabled(final boolean animationEnabled) {
-        this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
-    }
-
-    @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
@@ -234,6 +218,36 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPAnimation, Has
 
     public Integer getSelectedItemIndex() {
         return selectedItemIndex;
+    }
+
+    /**
+     * Set the duration of the animated transition between tabs.
+     * 
+     * @param duration
+     *            the duration in milliseconds.
+     */
+    public void setAnimationDuration(final int duration) {
+        this.animationDuration = duration;
+        saveUpdate(PROPERTY.ANIMATION_DURATION, duration);
+    }
+
+    /**
+     * Set whether or not transitions slide in vertically or horizontally.
+     * 
+     * @param isVertical
+     *            true for vertical transitions, false for horizontal
+     */
+    public void setAnimationVertical(final boolean isVertical) {
+        saveUpdate(PROPERTY.VERTICAL_ALIGNMENT, isVertical);
+    }
+
+    @Override
+    public void animate(final int duration) {
+        saveUpdate(PROPERTY.ANIMATE, duration);
+    }
+
+    public int getAnimationDuration() {
+        return animationDuration;
     }
 
 }

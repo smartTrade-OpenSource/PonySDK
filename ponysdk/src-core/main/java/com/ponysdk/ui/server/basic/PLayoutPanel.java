@@ -37,7 +37,7 @@ import com.ponysdk.ui.terminal.basic.PAlignment;
  * have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  */
-public class PLayoutPanel extends PComplexPanel {
+public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     protected WidgetType getWidgetType() {
@@ -106,5 +106,10 @@ public class PLayoutPanel extends PComplexPanel {
         u.put(key2, v2);
 
         Txn.get().getTxnContext().save(u);
+    }
+
+    @Override
+    public void animate(final int duration) {
+        saveUpdate(PROPERTY.ANIMATE, duration);
     }
 }

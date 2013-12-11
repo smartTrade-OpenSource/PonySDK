@@ -45,6 +45,7 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
+    private final String[] colors = { "#F34A53", "#FAE3B4", "#AAC789", "#437356", "#1E4147" };
     protected int tabCount = 0;
 
     public TabLayoutPanelPageActivity() {
@@ -60,6 +61,8 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
         final PTabLayoutPanel tabPanel = new PTabLayoutPanel();
         tabPanel.setSizeFull();
+        tabPanel.setAnimationVertical(false);
+        tabPanel.setAnimationDuration(1000);
 
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
 
@@ -125,9 +128,11 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
     protected void addTabContent(final PTabLayoutPanel tabPanel) {
         final PSimpleLayoutPanel tabContent = new PSimpleLayoutPanel();
+        tabContent.setStyleProperty("background-color", colors[tabCount % colors.length]);
 
         final int tabIndex = tabCount;
         final PLabel label = new PLabel("content-" + tabIndex);
+        label.setStyleProperty("color", "white");
         tabContent.setWidget(label);
         tabPanel.add(tabContent, "Tab-" + tabIndex);
         tabCount++;

@@ -27,6 +27,8 @@ import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PLayoutPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
@@ -59,6 +61,33 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
 
         layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
         layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
+
+        // test animation
+        leftPane.addDomHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                // permute left/right
+                layoutPanel.setWidgetLeftWidth(rightPane, 50, 200, PUnit.PX);
+                layoutPanel.setWidgetTopHeight(rightPane, 50, 100, PUnit.PX);
+                layoutPanel.setWidgetRightWidth(leftPane, 50, 200, PUnit.PX);
+                layoutPanel.setWidgetBottomHeight(leftPane, 50, 100, PUnit.PX);
+                layoutPanel.animate(2000);
+            }
+        }, PClickEvent.TYPE);
+
+        rightPane.addDomHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                // restore
+                layoutPanel.setWidgetLeftWidth(leftPane, 50, 200, PUnit.PX);
+                layoutPanel.setWidgetTopHeight(leftPane, 50, 100, PUnit.PX);
+                layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
+                layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
+                layoutPanel.animate(2000);
+            }
+        }, PClickEvent.TYPE);
 
         examplePanel.setWidget(layoutPanel);
     }

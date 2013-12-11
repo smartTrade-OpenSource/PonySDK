@@ -23,6 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.basic.event.HasPAnimation;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -40,7 +44,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  * 
  * @see PTabLayoutPanel
  */
-public class PTabPanel extends PTabLayoutPanel {
+public class PTabPanel extends PTabLayoutPanel implements HasPAnimation {
+
+    private boolean animationEnabled = false;
 
     @Override
     protected WidgetType getWidgetType() {
@@ -48,8 +54,16 @@ public class PTabPanel extends PTabLayoutPanel {
     }
 
     @Override
+    public boolean isAnimationEnabled() {
+        return animationEnabled;
+    }
+
+    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
-        throw new IllegalArgumentException("Not supported");
+        this.animationEnabled = animationEnabled;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.ANIMATION, animationEnabled);
+        Txn.get().getTxnContext().save(update);
     }
 
 }

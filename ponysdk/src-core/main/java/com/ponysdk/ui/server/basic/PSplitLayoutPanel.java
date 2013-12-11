@@ -24,6 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,11 +63,15 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private int minSize = -1;
-    private int snapClosedSize = -1;
-    private boolean toggleDisplayAllowed = false;
+    private static class SplitInfoHolder {
+
+        private int minSize = -1;
+        private int snapClosedSize = -1;
+        private boolean toggleDisplayAllowed = false;
+    }
 
     private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<PLayoutResizeHandler>();
+    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<PWidget, PSplitLayoutPanel.SplitInfoHolder>();
 
     public PSplitLayoutPanel(final PUnit unit) {
         super(unit);
@@ -74,6 +80,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SPLIT_LAYOUT_PANEL;
+    }
+
+    @Override
+    public boolean remove(final PWidget w) {
+        splitInfoByWidget.remove(w);
+        return super.remove(w);
     }
 
     /**
@@ -90,12 +102,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      */
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
-        if (this.minSize != minSize) {
-            this.minSize = minSize;
+        if (getMinSize(child) != minSize) {
             final Update update = new Update(getID());
             update.put(PROPERTY.MIN_SIZE, minSize);
             update.put(PROPERTY.WIDGET, child.getID());
             Txn.get().getTxnContext().save(update);
+            ensureWidgetInfo(child).minSize = minSize;
         }
     }
 
@@ -114,12 +126,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      */
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
-        if (this.snapClosedSize != snapClosedSize) {
-            this.snapClosedSize = snapClosedSize;
+        if (getSnapClosedSize(child) != snapClosedSize) {
             final Update update = new Update(getID());
             update.put(PROPERTY.SNAP_CLOSED_SIZE, snapClosedSize);
             update.put(PROPERTY.WIDGET, child.getID());
             Txn.get().getTxnContext().save(update);
+            ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
         }
     }
 
@@ -133,12 +145,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      */
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
-        if (this.toggleDisplayAllowed != allowed) {
-            this.toggleDisplayAllowed = allowed;
+        if (isToggleDisplayAllowed(child) != allowed) {
             final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_DISPLAY_ALLOWED, toggleDisplayAllowed);
+            update.put(PROPERTY.TOGGLE_DISPLAY_ALLOWED, allowed);
             update.put(PROPERTY.WIDGET, child.getID());
             Txn.get().getTxnContext().save(update);
+            ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
         }
     }
 
@@ -192,15 +204,34 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         return handlers;
     }
 
-    public int getMinSize() {
-        return minSize;
+    private SplitInfoHolder getWidgetInfo(final PWidget w) {
+        return splitInfoByWidget.get(w);
     }
 
-    public int getSnapClosedSize() {
-        return snapClosedSize;
+    private SplitInfoHolder ensureWidgetInfo(final PWidget w) {
+        SplitInfoHolder splitHolder = splitInfoByWidget.get(w);
+        if (splitHolder != null) return splitHolder;
+
+        splitHolder = new SplitInfoHolder();
+        splitInfoByWidget.put(w, splitHolder);
+        return splitHolder;
     }
 
-    public boolean isToggleDisplayAllowed() {
-        return toggleDisplayAllowed;
+    public int getMinSize(final PWidget w) {
+        final SplitInfoHolder info = getWidgetInfo(w);
+        if (info == null) return -1;
+        return info.minSize;
+    }
+
+    public int getSnapClosedSize(final PWidget w) {
+        final SplitInfoHolder info = getWidgetInfo(w);
+        if (info == null) return -1;
+        return info.snapClosedSize;
+    }
+
+    public boolean isToggleDisplayAllowed(final PWidget w) {
+        final SplitInfoHolder info = getWidgetInfo(w);
+        if (info == null) return false;
+        return info.toggleDisplayAllowed;
     }
 }

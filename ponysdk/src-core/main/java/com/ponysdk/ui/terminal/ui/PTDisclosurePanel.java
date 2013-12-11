@@ -90,6 +90,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(PROPERTY.OPEN)) {
             uiObject.setOpen(update.getBoolean(PROPERTY.OPEN));
+        } else if (update.containsKey(PROPERTY.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
         } else {
             super.update(update, uiService);
         }

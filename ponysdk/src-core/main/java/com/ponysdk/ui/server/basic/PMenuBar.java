@@ -31,6 +31,7 @@ import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -95,11 +96,12 @@ import com.ponysdk.ui.terminal.WidgetType;
  * MenuBars.
  * </p>
  */
-public class PMenuBar extends PWidget {
+public class PMenuBar extends PWidget implements HasPAnimation {
 
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
     private final List<PWidget> items = new ArrayList<PWidget>();
 
+    private boolean animationEnabled = false;
     private final boolean vertical;
 
     public PMenuBar() {
@@ -205,6 +207,19 @@ public class PMenuBar extends PWidget {
 
     public boolean isVertical() {
         return vertical;
+    }
+
+    @Override
+    public boolean isAnimationEnabled() {
+        return animationEnabled;
+    }
+
+    @Override
+    public void setAnimationEnabled(final boolean animationEnabled) {
+        this.animationEnabled = animationEnabled;
+        final Update update = new Update(ID);
+        update.put(PROPERTY.ANIMATION, animationEnabled);
+        Txn.get().getTxnContext().save(update);
     }
 
 }
