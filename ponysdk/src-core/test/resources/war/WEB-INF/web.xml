@@ -38,7 +38,7 @@
 
 	<servlet-mapping>
 		<servlet-name>PonyHttpServlet</servlet-name>
-		<url-pattern>/ponyterminal/p</url-pattern>
+		<url-pattern>/p</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>PonyBootstrapServlet</servlet-name>
@@ -46,7 +46,7 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>StreamServiceServlet</servlet-name>
-		<url-pattern>/ponyterminal/stream</url-pattern>
+		<url-pattern>/stream</url-pattern>
 	</servlet-mapping>
 	
 </web-app>
