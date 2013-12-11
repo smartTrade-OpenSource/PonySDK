@@ -85,8 +85,9 @@ public class PPusher extends PObject implements ConnectionListener {
 
     public static PPusher initialize(final int pollingDelay, final int ping) {
         if (UIContext.get() == null) throw new RuntimeException("It's not possible to instanciate a pusher in a new Thread.");
-        if (UIContext.get().getAttribute(PUSHER) != null) return get();
-        final PPusher pusher = new PPusher(pollingDelay, ping);
+        PPusher pusher = UIContext.get().getAttribute(PUSHER);
+        if (pusher != null) return pusher;
+        pusher = new PPusher(pollingDelay, ping);
         UIContext.get().setAttribute(PUSHER, pusher);
         return pusher;
     }
@@ -152,8 +153,16 @@ public class PPusher extends PObject implements ConnectionListener {
         connectionListeners.add(listener);
     }
 
+    public void removeConnectionListener(final ConnectionListener listener) {
+        connectionListeners.remove(listener);
+    }
+
     public void addDataListener(final DataListener listener) {
         listenerCollection.register(listener);
+    }
+
+    public void removeDataListener(final DataListener listener) {
+        listenerCollection.unregister(listener);
     }
 
     public void pushBatchToClient(final Collection<Object> collection) {

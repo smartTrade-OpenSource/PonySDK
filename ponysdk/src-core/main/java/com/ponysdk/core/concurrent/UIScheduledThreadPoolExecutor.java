@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
+import com.ponysdk.ui.server.basic.PWindow;
 
 public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, ConnectionListener {
 
@@ -90,6 +91,30 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         return future;
     }
 
+    static class WindowUIRunnable implements Runnable {
+
+        private final Runnable runnable;
+        private final PWindow window;
+
+        public WindowUIRunnable(final PWindow window, final Runnable runnable) {
+            this.runnable = runnable;
+            this.window = window;
+        }
+
+        @Override
+        public void run() {
+            window.acquire();
+            try {
+                runnable.run();
+                window.flush();
+            } catch (final Exception e) {
+                log.error("Cannot run UIRunnable", e);
+            } finally {
+                window.release();
+            }
+        }
+    }
+
     static protected class UIRunnable implements Runnable {
 
         private final Runnable runnable;
@@ -97,10 +122,17 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         private boolean cancelled;
         private ScheduledFuture<?> future;
+        private final PWindow window;
 
         public UIRunnable(final Runnable runnable) {
             this.uiContext = UIContext.get();
-            this.runnable = runnable;
+
+            this.window = UIContext.getCurrentWindow();
+            if (window != null) {
+                this.runnable = new WindowUIRunnable(window, runnable);
+            } else {
+                this.runnable = runnable;
+            }
         }
 
         @Override

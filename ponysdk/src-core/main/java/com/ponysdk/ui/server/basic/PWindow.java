@@ -61,6 +61,8 @@ public class PWindow extends PObject implements PNativeHandler {
     private final List<Runnable> postedCommands = new ArrayList<Runnable>();
     private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<PCloseHandler>();
 
+    private boolean loaded = false;
+
     public PWindow(final String url, final String name, final String features) {
         super();
         if (url != null && !url.isEmpty()) create.put(PROPERTY.URL, url);
@@ -116,13 +118,14 @@ public class PWindow extends PObject implements PNativeHandler {
 
     @Override
     public void onNativeEvent(final PNativeEvent event) {
-        acquire();
+        acquireOnNativeEvent();
         try {
             final String in = event.getJsonObject().getString(PROPERTY.DATA);
             final JSONObject inputData = new JSONObject(new JSONTokener(in));
             if (inputData.has(APPLICATION.KEY)) {
                 sendSeqNum = 0;
                 onLoad();
+                loaded = true;
                 out.put(APPLICATION.VIEW_ID, 0);
             } else {
                 process(context, inputData);
@@ -138,6 +141,18 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void acquire() {
+        if (!isLoaded()) {
+            if (log.isWarnEnabled()) log.warn("Window is not loaded yet.");
+            return;
+        }
+        out = new JSONObject();
+        context = UIContext.get();
+        popupstacker = new ArrayList<Instruction>();
+        mainStacker = Txn.get().getTxnContext().setCurrentStacker(popupstacker);
+        UIContext.setCurrentWindow(this);
+    }
+
+    private void acquireOnNativeEvent() {
         out = new JSONObject();
         context = UIContext.get();
         popupstacker = new ArrayList<Instruction>();
@@ -194,6 +209,10 @@ public class PWindow extends PObject implements PNativeHandler {
             }
         }
         postedCommands.clear();
+    }
+
+    public boolean isLoaded() {
+        return loaded;
     }
 
     protected void onLoad() {}

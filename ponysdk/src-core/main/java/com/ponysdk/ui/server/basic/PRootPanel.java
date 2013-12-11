@@ -78,7 +78,7 @@ public class PRootPanel extends PAbsolutePanel {
         Map<String, PRootPanel> rootByIDs = session.getAttribute(rootID);
         if (rootByIDs == null) {
             rootByIDs = new HashMap<String, PRootPanel>();
-            session.setAttribute(ROOTID, rootByIDs);
+            session.setAttribute(rootID, rootByIDs);
         }
         return rootByIDs;
     }
