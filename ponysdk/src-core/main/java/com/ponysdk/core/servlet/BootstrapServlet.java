@@ -55,6 +55,7 @@ public class BootstrapServlet extends HttpServlet {
 
     protected String applicationName = "";
 
+    protected final List<String> meta = new ArrayList<String>();
     protected final List<String> stylesheets = new ArrayList<String>();
     protected final List<String> javascripts = new ArrayList<String>();
 
@@ -125,7 +126,8 @@ public class BootstrapServlet extends HttpServlet {
             inputStream = classLoader.getResourceAsStream(jarPath);
             if (inputStream == null) {
                 if (path.equals("/index.html")) {
-                    inputStream = new ByteArrayInputStream(generateIndexPage());
+                    if (indexPage == null) indexPage = generateIndexPage().toString().getBytes();
+                    inputStream = new ByteArrayInputStream(indexPage);
                 } else {
                     log.error("Failed to load resource: " + request.getPathInfo());
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -163,17 +165,19 @@ public class BootstrapServlet extends HttpServlet {
         }
     }
 
-    protected byte[] generateIndexPage() {
+    protected StringBuilder generateIndexPage() {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("<!doctype html>");
         builder.append("<html>");
         builder.append("<head>");
         builder.append("    <!-- Powered by PonySDK http://www.ponysdk.com -->");
-        builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
-        builder.append("    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">");
-        builder.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">");
         builder.append("    <title>" + applicationName + "</title>");
+        builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
+        for (final String m : meta) {
+            builder.append("    <meta " + m + ">");
+        }
+
         builder.append("    <script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
 
         for (final String style : stylesheets) {
@@ -186,6 +190,8 @@ public class BootstrapServlet extends HttpServlet {
             builder.append("    <script type=\"text/javascript\" src=\"" + script + "\"></script>");
         }
 
+        addToHeader(builder);
+
         builder.append("</head>");
         builder.append("<body>");
         builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
@@ -196,15 +202,25 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("            in order for this application to display correctly.");
         builder.append("        </div>");
         builder.append("    </noscript>");
+
+        addToBody(builder);
+
         builder.append("</body>");
         builder.append("</html>");
 
-        indexPage = builder.toString().getBytes();
-        return indexPage;
+        return builder;
     }
+
+    protected void addToHeader(final StringBuilder builder) {}
+
+    protected void addToBody(final StringBuilder builder) {}
 
     public void addStylesheet(final String stylesheetPath) {
         stylesheets.add(stylesheetPath);
+    }
+
+    public void addMeta(final String m) {
+        meta.add(m);
     }
 
     public void addJavascript(final String javascriptPath) {
