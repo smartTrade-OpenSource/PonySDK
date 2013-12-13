@@ -33,19 +33,19 @@ public abstract class PSuggestOracle extends PObject {
      * replacement string would be identical.
      * </p>
      * <h3>Associating Data Transfer Objects (DTOs) with Suggestion Objects</h3> Some applications retrieve
-     * suggesstions from a server, and may want to send back a DTO with each suggestion. In the previous
+     * suggestions from a server, and may want to send back a DTO with each suggestion. In the previous
      * example, a DTO returned with the suggestion may provide additional contact information about the
      * selected employee, and this information could be used to fill out other fields on the form. To send
      * back a DTO with each suggestion, extend the <code>Suggestion</code> interface and define a getter
-     * method that has a return value of the DTO's type. Define a class that implements this subinterface and
+     * method that has a return value of the DTO's type. Define a class that implements this sub-interface and
      * use it to encapsulate each suggestion.
      * <p>
      * To access a suggestion's DTO when the suggestion is selected, add a {@link PChangeHandler} to the
      * PSuggestBox (see PSuggestBox's documentation for more information). In the
      * <code>SuggestionHandler.onSuggestionSelected(PSuggestionEvent event)</code> method, obtain the selected
      * <code>Suggestion</code> object from the {@link PChangeHandler} object, and downcast the
-     * <code>Suggestion</code> object to the subinterface. Then, acces the DTO using the DTO getter method
-     * that was defined on the subinterface.
+     * <code>Suggestion</code> object to the sub-interface. Then, access the DTO using the DTO getter method
+     * that was defined on the sub-interface.
      * </p>
      */
     public interface PSuggestion {
