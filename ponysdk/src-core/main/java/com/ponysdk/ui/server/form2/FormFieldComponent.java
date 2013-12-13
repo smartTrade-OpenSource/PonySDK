@@ -21,7 +21,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     private CaptionOrientation captionOrientation;
 
-    protected PFlowPanel container = new PFlowPanel();;
+    protected PFlowPanel container = new PFlowPanel();
     protected PLabel captionLabel;
     protected PLabel errorLabel;
     protected final FormField<?> formField;
