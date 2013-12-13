@@ -78,7 +78,7 @@ public class PConfirmDialog extends PDialogBox {
 
         if (cancelCaption != null) {
             final PButton cancelButton = new PButton();
-            cancelButton.setText(cancelCaption != null ? cancelCaption : PString.get("dialog.cancel"));
+            cancelButton.setText(cancelCaption);
             cancelButton.addClickHandler(new PClickHandler() {
 
                 @Override
@@ -94,7 +94,7 @@ public class PConfirmDialog extends PDialogBox {
         }
         if (okCaption != null) {
             final PButton okButton = new PButton();
-            okButton.setText(okCaption != null ? okCaption : PString.get("dialog.ok"));
+            okButton.setText(okCaption);
             okButton.addClickHandler(new PClickHandler() {
 
                 @Override
