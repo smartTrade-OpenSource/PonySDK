@@ -91,7 +91,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
         public void createLink(final String url) {
             final Update update = new Update(getID());
-            update.put(PROPERTY.CREATE_LINK, html);
+            update.put(PROPERTY.CREATE_LINK, url);
             Txn.get().getTxnContext().save(update);
         }
 
