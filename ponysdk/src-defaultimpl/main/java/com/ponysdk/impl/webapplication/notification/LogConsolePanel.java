@@ -38,7 +38,7 @@ public class LogConsolePanel extends PScrollPanel {
 
     protected static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    protected PVerticalPanel content = new PVerticalPanel();;
+    protected PVerticalPanel content = new PVerticalPanel();
 
     protected PVerticalPanel logsPanel = new PVerticalPanel();
 
