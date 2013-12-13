@@ -100,7 +100,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
                 try {
                     date = dateFormat.parse(data);
                 } catch (final ParseException ex) {
-                    log.error("Cannot parse the date", ex);
+                    if (log.isWarnEnabled()) log.warn("Cannot parse the date", ex);
                 }
             }
             onValueChange(new PValueChangeEvent<Date>(this, date));
