@@ -58,7 +58,7 @@ public class PreferenceForm extends PScrollPanel {
 
     private final PFlexTable labelPanel = new PFlexTable();
 
-    private final String tableName;;
+    private final String tableName;
 
     private static final String ARROW_DOWN_IMAGE_URL = "images/arrow-down.png";
 
