@@ -54,7 +54,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
         }
 
         public void unset() {
-            this.set = false;;
+            this.set = false;
         }
 
         public void set(final char c) {
