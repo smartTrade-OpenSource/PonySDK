@@ -362,7 +362,6 @@ public class UIContext {
     public boolean updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
-            log.error("Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
             if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
