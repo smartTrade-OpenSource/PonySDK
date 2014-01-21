@@ -34,20 +34,25 @@ import com.ponysdk.ui.server.basic.PWidget;
  */
 public class Pager<T> implements IsPWidget {
 
-    private final int pageSize;
-    private int currentPage = 0;
+    protected final int pageSize;
+    protected final int pagingWindow;
 
-    private final PagerView view;
+    protected int currentPage = 0;
 
-    private static final int PAGING_WINDOW = 5;
+    protected final PagerView view;
 
     public Pager(final PagerView view) {
         this(view, 20);
     }
 
     public Pager(final PagerView view, final int pageSize) {
+        this(view, pageSize, 5);
+    }
+
+    public Pager(final PagerView view, final int pageSize, final int pagingWindow) {
         this.view = view;
         this.pageSize = pageSize;
+        this.pagingWindow = pagingWindow;
     }
 
     public int getCurrentPage() {
@@ -87,12 +92,12 @@ public class Pager<T> implements IsPWidget {
         view.setPrevious(currentPage != 0 ? true : false, currentPage - 1);
         view.setNext(currentPage != pageCount - 1 ? true : false, currentPage + 1);
 
-        int page = currentPage - PAGING_WINDOW / 2;
-        if (page + PAGING_WINDOW > pageCount) {
-            page -= (page + PAGING_WINDOW) - pageCount;
+        int page = currentPage - pagingWindow / 2;
+        if (page + pagingWindow > pageCount) {
+            page -= (page + pagingWindow) - pageCount;
         }
 
-        for (int tempPageCount = 0; tempPageCount < PAGING_WINDOW && page < pageCount; page++) {
+        for (int tempPageCount = 0; tempPageCount < pagingWindow && page < pageCount; page++) {
             if (page >= 0) {
                 view.addPageIndex(page);
                 ++tempPageCount;
@@ -104,5 +109,9 @@ public class Pager<T> implements IsPWidget {
     @Override
     public PWidget asWidget() {
         return view.asWidget();
+    }
+
+    public PagerView getView() {
+        return view;
     }
 }
