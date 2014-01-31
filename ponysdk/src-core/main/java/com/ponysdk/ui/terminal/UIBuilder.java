@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -115,6 +116,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         CommunicationEntryPoint.getRootEventBus().addHandler(HttpResponseReceivedEvent.TYPE, this);
         CommunicationEntryPoint.getRootEventBus().addHandler(HttpRequestSendEvent.TYPE, this);
+
+        exportExecuteInstruction();
     }
 
     public void init() {
@@ -523,6 +526,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    public void executeInstruction(final JavaScriptObject jso) {
+        update(new JSONObject(jso));
+    }
+
     private native boolean hasCommunicationErrorFunction() /*-{
                                                                                       if($wnd.onCommunicationError) return true;
                                                                                       return false;
@@ -531,5 +538,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private native void triggerCommunicationError(String code, String message) /*-{
                                                                                       $wnd.onCommunicationError(code, message);
                                                                                       }-*/;
+
+    public native void exportExecuteInstruction() /*-{
+                                                  var that = this;
+                                                  $wnd.executeInstruction = function(jso) {
+                                                  $entry(that.@com.ponysdk.ui.terminal.UIBuilder::executeInstruction(Lcom/google/gwt/core/client/JavaScriptObject;)(jso));
+                                                  }
+                                                  }-*/;
 
 }
