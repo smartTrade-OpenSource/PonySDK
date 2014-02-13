@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.json.JSONException;
@@ -46,6 +47,7 @@ import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.instruction.AddHandler;
 import com.ponysdk.core.instruction.Close;
 import com.ponysdk.core.security.Permission;
+import com.ponysdk.core.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.servlet.Session;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PCookies;
@@ -106,14 +108,18 @@ public class UIContext {
     private long nextSent = 0;
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
-    private long uiContextID;
+    private final long uiContextID;
+    private static final AtomicLong ponySessionIDcount = new AtomicLong();
 
-    public UIContext(final Application ponyApplication) {
-        this.application = ponyApplication;
-    }
+    private final CommunicationSanityChecker communicationSanityChecker;
 
-    void setUiContextID(final long uiContextID) {
-        this.uiContextID = uiContextID;
+    public UIContext(final Application application) {
+        this.application = application;
+        this.uiContextID = ponySessionIDcount.incrementAndGet();
+        this.communicationSanityChecker = new CommunicationSanityChecker(this);
+        this.application.registerUIContext(this);
+
+        this.communicationSanityChecker.start();
     }
 
     public long getUiContextID() {
@@ -123,7 +129,7 @@ public class UIContext {
     public void fireClientData(final JSONObject instruction) throws JSONException {
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
-                UIContext.get().invalidate();
+                UIContext.get().destroy();
                 return;
             }
 
@@ -289,10 +295,6 @@ public class UIContext {
         return get().getWindow();
     }
 
-    void invalidate() {
-        application.getSession().invalidate();
-    }
-
     public void close() {
         Txn.get().getTxnContext().save(new Close());
     }
@@ -359,15 +361,21 @@ public class UIContext {
         return (T) this.application.getAttribute(name);
     }
 
+    public void notifyMessageReceived() {
+        communicationSanityChecker.onMessageReceived();
+    }
+
     public boolean updateIncomingSeqNum(final long receivedSeqNum) {
+        notifyMessageReceived();
+
         final long previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
             if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
         lastReceived = receivedSeqNum;
-
         lastSyncErrorTimestamp = -1;
+
         return true;
     }
 
@@ -405,5 +413,12 @@ public class UIContext {
 
     public long getLastSyncErrorTimestamp() {
         return lastSyncErrorTimestamp;
+    }
+
+    public void destroy() {
+        log.info("Destroying UIContext ViewID #{} from the Session #{}", viewID, application.getSession().getId());
+        communicationSanityChecker.stop();
+        application.unregisterUIContext(uiContextID);
+        log.info("UIContext destroyed ViewID #{} from the Session #{}", viewID, application.getSession().getId());
     }
 }

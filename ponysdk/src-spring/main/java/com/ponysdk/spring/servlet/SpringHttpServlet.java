@@ -67,9 +67,11 @@ public class SpringHttpServlet extends AbstractHttpServlet {
     }
 
     protected EntryPoint newPonySession(final UIContext ponySession) {
-        if (clientConfigurations.isEmpty()) clientConfigurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
+        final List<String> configurations = new ArrayList<String>();
+        if (clientConfigurations.isEmpty()) configurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
+        else configurations.addAll(clientConfigurations);
 
-        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(clientConfigurations.toArray(new String[0]));
+        final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations.toArray(new String[0]));
 
         final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
         final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);

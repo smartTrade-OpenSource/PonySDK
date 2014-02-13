@@ -78,57 +78,55 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
                     return !hasCommunicationError;
                 }
             }, delay);
+        } else {
+            super.create(create, uiService);
 
-            return;
-        }
+            final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws" + "?" + APPLICATION.VIEW_ID + "=" + UIBuilder.sessionID;
 
-        final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws" + "?" + APPLICATION.VIEW_ID + "=" + UIBuilder.sessionID;
-
-        super.create(create, uiService);
-
-        socketClient = new WebSocketClient(new WebSocketCallback() {
-
-            @Override
-            public void message(final String message) {
-                final JSONObject data = JSONParser.parseLenient(message).isObject();
-                if (data.containsKey(Dictionnary.APPLICATION.PING)) return;
-
-                uiService.update(data);
-            }
-
-            @Override
-            public void disconnected() {
-                log.info("Disconnected from: " + wsServerURL);
-                uiService.onCommunicationError(new Exception("Websocket connection lost."));
-                uiService.unRegisterObject(getObjectID());
-            }
-
-            @Override
-            public void connected() {
-                log.info("Connected to: " + wsServerURL);
-            }
-        });
-
-        log.info("Connecting to: " + wsServerURL);
-        socketClient.connect(wsServerURL);
-
-        int ping = 1000;
-        if (create.containsKey(PROPERTY.PINGDELAY)) ping = create.getInt(PROPERTY.PINGDELAY);
-
-        if (ping > 0) {
-            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+            socketClient = new WebSocketClient(new WebSocketCallback() {
 
                 @Override
-                public boolean execute() {
-                    final int timeStamp = (int) (new Date().getTime() * .001);
-                    final JSONObject jso = new JSONObject();
-                    jso.put(Dictionnary.APPLICATION.PING, new JSONNumber(timeStamp));
-                    socketClient.send(jso.toString());
-                    return !hasCommunicationError;
-                }
-            }, ping);
-        }
+                public void message(final String message) {
+                    final JSONObject data = JSONParser.parseLenient(message).isObject();
+                    if (data.containsKey(Dictionnary.APPLICATION.PING)) return;
 
+                    uiService.update(data);
+                }
+
+                @Override
+                public void disconnected() {
+                    log.info("Disconnected from: " + wsServerURL);
+                    uiService.onCommunicationError(new Exception("Websocket connection lost."));
+                    uiService.unRegisterObject(getObjectID());
+                }
+
+                @Override
+                public void connected() {
+                    log.info("Connected to: " + wsServerURL);
+                }
+            });
+
+            log.info("Connecting to: " + wsServerURL);
+            socketClient.connect(wsServerURL);
+
+            int ping = 1000;
+            if (create.containsKey(PROPERTY.PINGDELAY)) ping = create.getInt(PROPERTY.PINGDELAY);
+
+            if (ping > 0) {
+                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+                    @Override
+                    public boolean execute() {
+                        final int timeStamp = (int) (new Date().getTime() * .001);
+                        final JSONObject jso = new JSONObject();
+                        jso.put(Dictionnary.APPLICATION.PING, new JSONNumber(timeStamp));
+                        jso.put(Dictionnary.APPLICATION.VIEW_ID, new JSONNumber(UIBuilder.sessionID));
+                        socketClient.send(jso.toString());
+                        return !hasCommunicationError;
+                    }
+                }, ping);
+            }
+        }
     }
 
     @Override

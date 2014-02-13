@@ -85,9 +85,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.5.1'
-	gwt 'com.google.gwt:gwt-dev:2.5.1'
-	gwt 'com.google.gwt:gwt-codeserver:2.5.1'
+	gwt 'com.google.gwt:gwt-user:2.6.0'
+	gwt 'com.google.gwt:gwt-dev:2.6.0'
+	gwt 'com.google.gwt:gwt-codeserver:2.6.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
 	spring 'org.springframework:spring-core:3.2.3.RELEASE'
@@ -99,6 +99,7 @@ dependencies {
 	log4j 'log4j:log4j:1.2.16'
 	log4j 'commons-io:commons-io:20030203.000550'
 	commons 'commons-beanutils:commons-beanutils:1.8.3'
+	commons 'commons-lang:commons-lang:2.6'
 	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
 	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'

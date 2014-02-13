@@ -53,7 +53,6 @@ public class PBreadCrumbs extends PElement {
 
         while (itemLevel.hasNext()) {
             itemLevel = itemLevel.next;
-            System.err.println("item to delete " + itemLevel.item);
             elementsByItems.remove(itemLevel.item);
             itemLevel.removeFromParent();
         }

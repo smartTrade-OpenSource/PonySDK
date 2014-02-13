@@ -24,11 +24,11 @@
 package com.ponysdk.core;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.servlet.Session;
 
@@ -39,42 +39,33 @@ import com.ponysdk.core.servlet.Session;
  */
 public class Application {
 
-    private static final AtomicLong ponySessionIDcount = new AtomicLong();
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Session session;
 
     private final Map<Long, UIContext> uiContexts = new ConcurrentHashMap<Long, UIContext>();
 
-    public Application(final Session session) {
+    private final ApplicationManagerOption options;
+
+    public Application(final Session session, final ApplicationManagerOption options) {
         this.session = session;
+        this.options = options;
     }
 
-    public long registerUIContext(final UIContext uiContext) {
-        final long id = ponySessionIDcount.incrementAndGet();
-        uiContexts.put(id, uiContext);
-        uiContext.setUiContextID(id);
-        return id;
+    void registerUIContext(final UIContext uiContext) {
+        uiContexts.put(uiContext.getUiContextID(), uiContext);
     }
 
-    public void unregisterUIContext(final Long reloadedViewID) {
-        uiContexts.remove(reloadedViewID);
-    }
-
-    public boolean unregisterUIContext(final UIContext uiContext) {
-        boolean removed = false;
-        final Iterator<Entry<Long, UIContext>> iterator = uiContexts.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Entry<Long, UIContext> entry = iterator.next();
-            if (entry.getValue().equals(uiContext)) {
-                iterator.remove();
-                removed = true;
-            }
+    void unregisterUIContext(final long uiContextID) {
+        uiContexts.remove(uiContextID);
+        if (uiContexts.isEmpty()) {
+            log.info("Invalidate session, all ui contexts have been destroyed");
+            session.invalidate();
         }
-        return removed;
     }
 
-    public UIContext getUIContext(final long key) {
-        return uiContexts.get(key);
+    public UIContext getUIContext(final long uiContextID) {
+        return uiContexts.get(uiContextID);
     }
 
     public Collection<UIContext> getUIContexts() {
@@ -92,6 +83,10 @@ public class Application {
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) session.getAttribute(name);
+    }
+
+    public ApplicationManagerOption getOptions() {
+        return options;
     }
 
 }
