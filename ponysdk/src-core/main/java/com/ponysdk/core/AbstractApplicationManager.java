@@ -66,13 +66,13 @@ public abstract class AbstractApplicationManager {
                 log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
             }
 
+            final UIContext uiContext = new UIContext(application);
+            UIContext.setCurrent(uiContext);
+
             if (reloadedViewID != null) {
                 final UIContext previousUIContext = application.getUIContext(reloadedViewID);
                 if (previousUIContext != null) previousUIContext.destroy();
             }
-
-            final UIContext uiContext = new UIContext(application);
-            UIContext.setCurrent(uiContext);
 
             try {
                 final Txn txn = Txn.get();

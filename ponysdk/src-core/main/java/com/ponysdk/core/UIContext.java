@@ -102,7 +102,6 @@ public class UIContext {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    private long viewID = -1;
     private long lastReceived = -1;
     private long lastSyncErrorTimestamp = 0;
     private long nextSent = 0;
@@ -403,22 +402,14 @@ public class UIContext {
         return datas;
     }
 
-    public long getViewID() {
-        return viewID;
-    }
-
-    public void setViewID(final long viewID) {
-        this.viewID = viewID;
-    }
-
     public long getLastSyncErrorTimestamp() {
         return lastSyncErrorTimestamp;
     }
 
     public void destroy() {
-        log.info("Destroying UIContext ViewID #{} from the Session #{}", viewID, application.getSession().getId());
+        log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
         communicationSanityChecker.stop();
         application.unregisterUIContext(uiContextID);
-        log.info("UIContext destroyed ViewID #{} from the Session #{}", viewID, application.getSession().getId());
+        log.info("UIContext destroyed ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
     }
 }
