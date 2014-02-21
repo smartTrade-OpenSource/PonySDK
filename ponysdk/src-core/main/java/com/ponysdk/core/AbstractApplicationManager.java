@@ -51,26 +51,28 @@ public abstract class AbstractApplicationManager {
     public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
         final Session session = request.getSession();
 
-        Long reloadedViewID = null;
-        boolean isNewHttpSession = false;
-        Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
-        if (application == null) {
-            log.info("Creating a new application ... Session ID #" + session.getId());
-            application = new Application(session);
-            session.setUserAgent(request.getHeader("User-Agent"));
-            session.setAttribute(Application.class.getCanonicalName(), application);
-            isNewHttpSession = true;
-        } else {
-            if (data.has(APPLICATION.VIEW_ID)) reloadedViewID = data.getLong(APPLICATION.VIEW_ID);
-            log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
-        }
-
-        synchronized (application) {
-            if (reloadedViewID != null) application.unregisterUIContext(reloadedViewID);
+        synchronized (session) {
+            Long reloadedViewID = null;
+            boolean isNewHttpSession = false;
+            Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
+            if (application == null) {
+                log.info("Creating a new application ... Session ID #" + session.getId() + " - " + request.getHeader("User-Agent") + " - " + request.getRemoteAddr());
+                application = new Application(session, options);
+                session.setUserAgent(request.getHeader("User-Agent"));
+                session.setAttribute(Application.class.getCanonicalName(), application);
+                isNewHttpSession = true;
+            } else {
+                if (data.has(APPLICATION.VIEW_ID)) reloadedViewID = data.getLong(APPLICATION.VIEW_ID);
+                log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
+            }
 
             final UIContext uiContext = new UIContext(application);
-            application.registerUIContext(uiContext);
             UIContext.setCurrent(uiContext);
+
+            if (reloadedViewID != null) {
+                final UIContext previousUIContext = application.getUIContext(reloadedViewID);
+                if (previousUIContext != null) previousUIContext.destroy();
+            }
 
             try {
                 final Txn txn = Txn.get();
@@ -119,7 +121,7 @@ public abstract class AbstractApplicationManager {
 
         final UIContext uiContext = applicationSession.getUIContext(key);
 
-        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext), please reload your application (viewID #" + key + ")."); }
+        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
 
         uiContext.acquire();
         UIContext.setCurrent(uiContext);
@@ -159,7 +161,7 @@ public abstract class AbstractApplicationManager {
             if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
                 if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {
                     log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
-                    session.invalidate();
+                    uiContext.destroy();
                     return null;
                 }
             }

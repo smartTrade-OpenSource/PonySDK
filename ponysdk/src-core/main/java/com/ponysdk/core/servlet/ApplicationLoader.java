@@ -67,8 +67,8 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
     @Override
     public void sessionDestroyed(final HttpSessionEvent httpSessionEvent) {
-        if (log.isDebugEnabled()) {
-            log.debug("Session Destroyed #" + httpSessionEvent.getSession().getId());
+        if (log.isInfoEnabled()) {
+            log.info("Session Destroyed #" + httpSessionEvent.getSession().getId());
         }
 
         SessionManager.get().unregisterSession(httpSessionEvent.getSession().getId());

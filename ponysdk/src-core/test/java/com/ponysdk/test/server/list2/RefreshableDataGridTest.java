@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
+import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.test.server.mock.EmptySession;
@@ -42,7 +43,7 @@ public class RefreshableDataGridTest {
     public void beforeTest() {
         log.info("Running #" + name.getMethodName());
 
-        final Application application = new Application(new EmptySession());
+        final Application application = new Application(new EmptySession(), new ApplicationManagerOption());
         final UIContext uiContext = new UIContext(application);
         UIContext.setCurrent(uiContext);
         txn = Txn.get();

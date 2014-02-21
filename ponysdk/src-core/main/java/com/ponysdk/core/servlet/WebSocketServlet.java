@@ -58,13 +58,18 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
 
         protected Connection connection;
         protected ConnectionListener connectionListener;
+        protected UIContext uiContext;
+
+        public JettyWebSocket() {
+            this.uiContext = UIContext.get();
+        }
 
         @Override
         public void onOpen(final Connection connection) {
             log.info("Connection received from: " + connection.toString());
             this.connection = connection;
             this.connection.setMaxIdleTime(maxIdleTime);
-            connectionListener.onOpen();
+            this.connectionListener.onOpen();
         }
 
         @Override
@@ -81,11 +86,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         public void onClose(final int closeCode, final String message) {
             log.info("Connection lost from: " + connection.toString() + ". Code: " + closeCode + ". Message: " + message);
             connectionListener.onClose();
+            uiContext.destroy();
         }
 
         @Override
         public void onMessage(final String message) {
             try {
+                uiContext.notifyMessageReceived();
+
                 final JSONObject jso = new JSONObject();
                 jso.put(Dictionnary.APPLICATION.PING, (int) (System.currentTimeMillis() * .001));
                 connection.sendMessage(jso.toString());
@@ -94,6 +102,11 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
             } catch (final IOException e) {
                 log.error("", e);
             }
+        }
+
+        @Override
+        public void close() {
+            if (connection != null) connection.close();
         }
     }
 

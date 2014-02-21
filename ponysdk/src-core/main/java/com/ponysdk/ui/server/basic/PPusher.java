@@ -104,6 +104,11 @@ public class PPusher extends PObject implements ConnectionListener {
         return pusher;
     }
 
+    public void close() {
+        if (websocket == null) return;
+        websocket.close();
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.PUSHER;
@@ -132,14 +137,7 @@ public class PPusher extends PObject implements ConnectionListener {
         if (event.has(PROPERTY.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             txnContext.switchToPollingMode();
-
-            // begin();
-            // try {
             doOpen();
-            // } finally {
-            // end();
-            // }
-
         } else if (event.has(PROPERTY.POLL)) {
             txnContext.flushNow();
         }

@@ -31,4 +31,9 @@ public class SocketRequest implements Request {
         return request.getHeader(header);
     }
 
+    @Override
+    public String getRemoteAddr() {
+        return request.getRemoteAddr();
+    }
+
 }

@@ -19,7 +19,6 @@ public class HttpRequest implements Request {
     public HttpRequest(final Session session, final HttpServletRequest request) {
         this.request = request;
         this.session = session;
-
         if (log.isDebugEnabled()) outputIncomingRequest();
     }
 
@@ -59,4 +58,10 @@ public class HttpRequest implements Request {
     public String getHeader(final String header) {
         return request.getHeader(header);
     }
+
+    @Override
+    public String getRemoteAddr() {
+        return request.getRemoteAddr();
+    }
+
 }
