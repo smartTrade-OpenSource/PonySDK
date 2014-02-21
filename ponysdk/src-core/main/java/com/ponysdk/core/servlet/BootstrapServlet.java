@@ -51,7 +51,7 @@ public class BootstrapServlet extends HttpServlet {
 
     protected static final int BUFFER_SIZE = 4096;
 
-    protected static byte[] indexPage;
+    protected static byte[] cachedIndexPage;
 
     protected String applicationName = "";
 
@@ -126,8 +126,7 @@ public class BootstrapServlet extends HttpServlet {
             inputStream = classLoader.getResourceAsStream(jarPath);
             if (inputStream == null) {
                 if (path.equals("/index.html")) {
-                    if (indexPage == null) indexPage = generateIndexPage().toString().getBytes();
-                    inputStream = new ByteArrayInputStream(indexPage);
+                    inputStream = new ByteArrayInputStream(generateIndexPage(request, response));
                 } else {
                     log.error("Failed to load resource: " + request.getPathInfo());
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -165,6 +164,11 @@ public class BootstrapServlet extends HttpServlet {
         }
     }
 
+    protected byte[] generateIndexPage(final HttpServletRequest request, final HttpServletResponse response) {
+        if (cachedIndexPage == null) cachedIndexPage = generateIndexPage().toString().getBytes();
+        return cachedIndexPage;
+    }
+
     protected StringBuilder generateIndexPage() {
         final StringBuilder builder = new StringBuilder();
 
@@ -194,14 +198,10 @@ public class BootstrapServlet extends HttpServlet {
 
         builder.append("</head>");
         builder.append("<body>");
-        builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
-        builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
-        builder.append("    <noscript>");
-        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
-        builder.append("            Your web browser must have JavaScript enabled");
-        builder.append("            in order for this application to display correctly.");
-        builder.append("        </div>");
-        builder.append("    </noscript>");
+
+        addHistoryIFrame(builder);
+        addLoading(builder);
+        addNoScript(builder);
 
         addToBody(builder);
 
@@ -209,6 +209,23 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("</html>");
 
         return builder;
+    }
+
+    protected void addHistoryIFrame(final StringBuilder builder) {
+        builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+    }
+
+    protected void addLoading(final StringBuilder builder) {
+        builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
+    }
+
+    protected void addNoScript(final StringBuilder builder) {
+        builder.append("    <noscript>");
+        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        builder.append("            Your web browser must have JavaScript enabled");
+        builder.append("            in order for this application to display correctly.");
+        builder.append("        </div>");
+        builder.append("    </noscript>");
     }
 
     protected void addToHeader(final StringBuilder builder) {}
