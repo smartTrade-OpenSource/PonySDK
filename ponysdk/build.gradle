@@ -53,6 +53,9 @@ repositories {
     maven {
         url "https://github.com/PonySDK/Maven/raw/master/ext"
     }
+    maven {
+        url "http://oss.sonatype.org/content/repositories/snapshots"
+    }
 }
 
 configurations {
@@ -90,6 +93,7 @@ dependencies {
 	gwt 'com.google.gwt:gwt-codeserver:2.6.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
+	gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
 	spring 'org.springframework:spring-core:3.2.3.RELEASE'
 	spring 'org.springframework:spring-web:3.2.3.RELEASE'
 	sl4j 'org.slf4j:slf4j-api:1.6.2'
@@ -229,8 +233,6 @@ task compileTerminal << {
 	println('gwtc ? ' + result)
 	if(result == 'false') {
 		println('[WARN] terminal compilation disabled');
-	} else if(result == 'devmode') {
-		tasks.devmode.execute();
 	} else {
 		tasks.gwtc.execute();
 	}
@@ -263,29 +265,6 @@ task gwtc {
     }
 }
 
-
-task devmode(type: JavaExec) {
-	description = 'GWT compile'
-	main = 'com.google.gwt.dev.Compiler'
-	maxHeapSize = '512M'
-	workingDir = buildDir
-	inputs.dir file(srcTerminal)
-	classpath {
-		[
-			sourceSets.main.java.srcDirs,
-			sourceSets.main.output,
-			configurations.gwt
-		]
-	}
-	args = [
-		'-XenableClosureCompiler',
-		'-war',
-		'gwt',
-		'-localWorkers',
-		Runtime.getRuntime().availableProcessors(),
-		'com.ponysdk.ui.PonyTerminalDevMode'
-	]
-}
 
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn:classes) {

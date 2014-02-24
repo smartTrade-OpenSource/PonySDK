@@ -30,7 +30,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -58,6 +61,8 @@ public class BootstrapServlet extends HttpServlet {
     protected final List<String> meta = new ArrayList<String>();
     protected final List<String> stylesheets = new ArrayList<String>();
     protected final List<String> javascripts = new ArrayList<String>();
+    protected final Map<String, String> addons = new LinkedHashMap<String, String>();
+    protected String communicationErrorFunction;
 
     public BootstrapServlet() {}
 
@@ -202,6 +207,7 @@ public class BootstrapServlet extends HttpServlet {
         addHistoryIFrame(builder);
         addLoading(builder);
         addNoScript(builder);
+        addOnLoad(builder);
 
         addToBody(builder);
 
@@ -228,6 +234,27 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("    </noscript>");
     }
 
+    protected void addOnLoad(final StringBuilder builder) {
+
+        builder.append("    <script type=\"text/javascript\">");
+        builder.append("    var pony = null;");
+        builder.append("    function onPonySDKModuleLoaded() {");
+        builder.append("        pony = new ponysdk();");
+
+        if (communicationErrorFunction != null) {
+            builder.append("    pony.registerCommunicationError(" + communicationErrorFunction + ");");
+        }
+
+        for (final Entry<String, String> e : addons.entrySet()) {
+            builder.append("    pony.registerAddOnFactory(\"" + e.getKey() + "\", " + e.getValue() + ");");
+        }
+
+        builder.append("        pony.start();");
+        builder.append("    }");
+        builder.append("    </script>");
+
+    }
+
     protected void addToHeader(final StringBuilder builder) {}
 
     protected void addToBody(final StringBuilder builder) {}
@@ -244,7 +271,15 @@ public class BootstrapServlet extends HttpServlet {
         javascripts.add(javascriptPath);
     }
 
+    public void addAddOn(final String signature, final String factory) {
+        addons.put(signature, factory);
+    }
+
     public void setApplicationName(final String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public void setCommunicationErrorFunction(final String communicationErrorFunction) {
+        this.communicationErrorFunction = communicationErrorFunction;
     }
 }

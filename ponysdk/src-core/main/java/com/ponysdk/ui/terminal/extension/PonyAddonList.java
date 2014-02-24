@@ -21,6 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.terminal.extension;
 
-public @interface PonyAddOn {}
+import java.util.List;
+
+public class PonyAddonList implements AddonList {
+
+    @Override
+    public List<AddonFactory> getAddonFactoryList() {
+        return null;
+    }
+
+}

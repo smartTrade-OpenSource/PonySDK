@@ -15,6 +15,9 @@ repositories {
     maven {
     	url "https://github.com/PonySDK/Maven/raw/master/ext"
 	}
+	maven {
+        url "http://oss.sonatype.org/content/repositories/snapshots"
+    }
 }
 
 configurations {

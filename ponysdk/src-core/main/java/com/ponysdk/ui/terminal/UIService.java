@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.terminal;
 
+import java.util.Map;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -51,4 +53,6 @@ public interface UIService {
     public void stackError(final PTInstruction currentInstruction, final Throwable e);
 
     public void onCommunicationError(final Throwable exception);
+
+    public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory();
 }

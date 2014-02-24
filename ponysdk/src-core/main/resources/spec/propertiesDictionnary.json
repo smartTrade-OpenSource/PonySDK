@@ -229,6 +229,7 @@
 		"eval": [],
 		"result": [],
 		"errorMsg": [],
+		"factory": [],
 		"scrollTo": [],
 		"repaint": [],
 		"textboxId": [],

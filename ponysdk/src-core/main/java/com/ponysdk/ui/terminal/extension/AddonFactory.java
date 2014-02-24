@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal;
+package com.ponysdk.ui.terminal.extension;
 
 public interface AddonFactory {
 

@@ -32,7 +32,6 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.ponysdk.ui.terminal.CommunicationEntryPoint;
 import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -55,7 +54,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
     public void create(final PTInstruction create, final UIService uiService) {
         if (!WebSocketClient.isSupported()) {
 
-            CommunicationEntryPoint.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
+            UIBuilder.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
 
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(create.getObjectID());

@@ -28,6 +28,7 @@ import com.ponysdk.ui.terminal.Dictionnary.WIDGETTYPE;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
+import com.ponysdk.ui.terminal.ui.PTAddOn;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
 import com.ponysdk.ui.terminal.ui.PTButton;
 import com.ponysdk.ui.terminal.ui.PTCheckBox;
@@ -143,6 +144,7 @@ public class UIFactory {
         if (WidgetType.TERMINAL_SCHEDULED_COMMAND.equals(widgetType)) { return new PTTerminalScheduledCommand(); }
         if (WidgetType.WINDOW.equals(widgetType)) { return new PTWindow(); }
         if (WidgetType.HEADER_PANEL.equals(widgetType)) { return new PTHeaderPanel(); }
+        if (WidgetType.ADDON.equals(widgetType)) { return new PTAddOn(); }
 
         Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
 

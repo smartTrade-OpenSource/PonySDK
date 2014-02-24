@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module rename-to='ponyterminal'>
-
-	<inherits name="com.ponysdk.ui.PonyTerminal" />
-	
-    <add-linker name="xsiframe"/>
-	<set-configuration-property name="devModeRedirectEnabled" value="true"/>
-
-</module>
