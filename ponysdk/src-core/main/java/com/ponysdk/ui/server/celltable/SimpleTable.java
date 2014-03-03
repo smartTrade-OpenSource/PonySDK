@@ -53,7 +53,7 @@ public class SimpleTable extends PElement {
         if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
         if (row > 0) {
-            addBodyWidget(widget, column, row, colspan);
+            addBodyWidget(widget, column, row - 1, colspan);
         } else {
             addHeadWidget(widget, column, row, colspan);
         }
@@ -70,7 +70,7 @@ public class SimpleTable extends PElement {
             newRow = new PElement("tr");
             tbody.add(newRow);
         } else {
-            newRow = (PElement) tbody.getWidget(row - 1);
+            newRow = (PElement) tbody.getWidget(row);
         }
 
         PElement newCell;
@@ -126,11 +126,19 @@ public class SimpleTable extends PElement {
     }
 
     public void clear(final int from) {
-        if (from == 0) thead.clear();
+        if (from < 0) throw new IndexOutOfBoundsException("row (" + from + ") < 0)");
 
-        for (int i = tbody.getWidgetCount() - 1; i >= from - 1; i++) {
-            tbody.remove(i);
+        if (from == 0) {
+            thead.clear();
+            for (int i = tbody.getWidgetCount() - 1; i >= 0; i++) {
+                tbody.remove(i);
+            }
+        } else {
+            for (int i = tbody.getWidgetCount() - 1; i >= from - 1; i++) {
+                tbody.remove(i);
+            }
         }
+
     }
 
     public void removeRow(final int row) {
@@ -157,7 +165,7 @@ public class SimpleTable extends PElement {
 
         checkRowBound(row);
         checkColumnBound(column);
-        final PElement r = (PElement) parentElement.getWidget(row);
+        final PElement r = (PElement) parentElement.getWidget(row - (row == 0 ? 0 : 1));
         return (PElement) r.getWidget(column);
     }
 
@@ -226,12 +234,5 @@ public class SimpleTable extends PElement {
 
     private void checkColumnBound(final int beforeIndex) {
         return;
-        // final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
-        // if ((beforeIndex < 0) || (beforeIndex >= parentElement.getWidgetCount())) {
-        // if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex +
-        // ") < 0)");
-        // else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" +
-        // parentElement.getWidgetCount() + ")");
-        // }
     }
 }

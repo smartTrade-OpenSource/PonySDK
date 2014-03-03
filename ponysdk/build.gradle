@@ -113,7 +113,7 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
     jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
     jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
-    'org.eclipse.jetty:jetty-io:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-io:8.1.4.v20120524'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
 
