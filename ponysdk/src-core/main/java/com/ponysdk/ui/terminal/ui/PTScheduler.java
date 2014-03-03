@@ -28,10 +28,10 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.ponysdk.ui.terminal.CommunicationEntryPoint;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -42,7 +42,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
     private boolean hasCommunicationError = false;
 
     public PTScheduler() {
-        CommunicationEntryPoint.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
+        UIBuilder.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
     }
 
     @Override

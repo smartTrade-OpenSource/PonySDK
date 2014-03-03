@@ -26,6 +26,7 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
+import com.ponysdk.sample.client.page.addon.BasicAddOn;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -49,6 +50,8 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
     protected PButton disabledButton;
 
+    private BasicAddOn basicAddOn;
+
     public BasicButtonPageActivity() {
         super("Basic Button", "Widgets");
     }
@@ -61,6 +64,9 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
         panel.add(buildButtonPanel());
         panel.add(buildThemeSelectorPanel());
+
+        basicAddOn = new BasicAddOn();
+        basicAddOn.send("initialization done");
 
         examplePanel.setWidget(panel);
     }

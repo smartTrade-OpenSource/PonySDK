@@ -33,6 +33,7 @@ import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
+import com.ponysdk.ui.server.extension.PAddOn;
 import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.WidgetType;
 

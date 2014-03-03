@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.ui.server;
+package com.ponysdk.ui.server.extension;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import com.ponysdk.ui.terminal.PonyAddOn;
+import com.ponysdk.ui.terminal.extension.PonyAddOn;
 
 public class AddonListGenerator extends Generator {
 
@@ -109,11 +109,11 @@ public class AddonListGenerator extends Generator {
         final String simpleName = classType.getSimpleSourceName() + "Generated";
         final ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName, simpleName);
         composer.setSuperclass(classType.getName());
-        composer.addImplementedInterface("com.ponysdk.ui.terminal.AddonList");
+        composer.addImplementedInterface("com.ponysdk.ui.terminal.extension.AddonList");
         // Need to add whatever imports your generated class needs.
-        composer.addImport("com.ponysdk.ui.terminal.AddonList");
-        composer.addImport("com.ponysdk.ui.terminal.AddonFactory");
-        composer.addImport("com.ponysdk.ui.terminal.PonyAddonList");
+        composer.addImport("com.ponysdk.ui.terminal.extension.AddonList");
+        composer.addImport("com.ponysdk.ui.terminal.extension.AddonFactory");
+        composer.addImport("com.ponysdk.ui.terminal.extension.PonyAddonList");
         composer.addImport("java.util.*");
         final PrintWriter printWriter = context.tryCreate(logger, packageName, simpleName);
         if (printWriter == null) {

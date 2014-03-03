@@ -39,6 +39,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -66,6 +68,9 @@ import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
+import com.ponysdk.ui.terminal.extension.AddonFactory;
+import com.ponysdk.ui.terminal.extension.AddonList;
+import com.ponysdk.ui.terminal.extension.PonyAddonList;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
@@ -75,6 +80,8 @@ import com.ponysdk.ui.terminal.ui.PTStreamResource;
 public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
+
+    private static EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
     private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
@@ -94,16 +101,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private boolean updateMode;
     private boolean pendingClose;
 
-    private final RequestBuilder requestBuilder;
+    private RequestBuilder requestBuilder;
 
     private long lastReceived = -1;
     private long nextSent = 1;
 
     public static long sessionID;
 
-    public UIBuilder(final long ID, final RequestBuilder requestBuilder) {
-        this.requestBuilder = requestBuilder;
-        UIBuilder.sessionID = ID;
+    private CommunicationErrorHandler communicationErrorHandler;
+    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<String, JavascriptAddOnFactory>();
+
+    public UIBuilder() {
         History.addValueChangeHandler(this);
 
         final AddonList addonList = GWT.create(PonyAddonList.class);
@@ -114,13 +122,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             addonByKey.put(addonFactory.getSignature(), addonFactory);
         }
 
-        CommunicationEntryPoint.getRootEventBus().addHandler(HttpResponseReceivedEvent.TYPE, this);
-        CommunicationEntryPoint.getRootEventBus().addHandler(HttpRequestSendEvent.TYPE, this);
-
-        exportExecuteInstruction();
+        rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
+        rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
     }
 
-    public void init() {
+    public void init(final long ID, final RequestBuilder requestBuilder) {
+        this.requestBuilder = requestBuilder;
+        UIBuilder.sessionID = ID;
 
         loadingMessageBox = new SimplePanel();
 
@@ -152,7 +160,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void onCommunicationError(final Throwable exception) {
 
-        CommunicationEntryPoint.getRootEventBus().fireEvent(new CommunicationErrorEvent(exception));
+        rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
         if (pendingClose) return;
 
@@ -166,12 +174,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             return;
         }
 
-        if (hasCommunicationErrorFunction()) {
+        if (communicationErrorHandler != null) {
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
-                triggerCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
+                communicationErrorHandler.onCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
             } else {
-                triggerCommunicationError("x", exception.getMessage());
+                communicationErrorHandler.onCommunicationError("x", exception.getMessage());
             }
         } else {
             if (exception instanceof StatusCodeException) {
@@ -262,7 +270,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
                 @Override
                 public void execute() {
-                    CommunicationEntryPoint.reload();
+                    PonySDK.reload();
                 }
             };
 
@@ -413,6 +421,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private Timer scheduleLoadingMessageBox() {
+
+        if (loadingMessageBox == null) return null;
+
         final Timer timer = new Timer() {
 
             @Override
@@ -439,7 +450,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 @Override
                 public void onClick(final ClickEvent event) {
                     History.newItem("");
-                    CommunicationEntryPoint.reload();
+                    PonySDK.reload();
                 }
             });
 
@@ -519,6 +530,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void hideLoadingMessageBox() {
+
+        if (loadingMessageBox == null) return;
+
         if (numberOfrequestInProgress < 1 && timer != null) {
             timer.cancel();
             timer = null;
@@ -530,20 +544,21 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         update(new JSONObject(jso));
     }
 
-    private native boolean hasCommunicationErrorFunction() /*-{
-                                                                                      if($wnd.onCommunicationError) return true;
-                                                                                      return false;
-                                                                                      }-*/;
+    public static EventBus getRootEventBus() {
+        return rootEventBus;
+    }
 
-    private native void triggerCommunicationError(String code, String message) /*-{
-                                                                                      $wnd.onCommunicationError(code, message);
-                                                                                      }-*/;
+    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+        this.communicationErrorHandler = communicationErrorClosure;
+    }
 
-    public native void exportExecuteInstruction() /*-{
-                                                  var that = this;
-                                                  $wnd.executeInstruction = function(jso) {
-                                                  $entry(that.@com.ponysdk.ui.terminal.UIBuilder::executeInstruction(Lcom/google/gwt/core/client/JavaScriptObject;)(jso));
-                                                  }
-                                                  }-*/;
+    public void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+        this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
+    }
+
+    @Override
+    public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
+        return javascriptAddOnFactories;
+    }
 
 }

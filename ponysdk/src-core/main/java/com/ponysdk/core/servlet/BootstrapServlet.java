@@ -30,7 +30,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -51,13 +54,15 @@ public class BootstrapServlet extends HttpServlet {
 
     protected static final int BUFFER_SIZE = 4096;
 
-    protected static byte[] indexPage;
+    protected static byte[] cachedIndexPage;
 
     protected String applicationName = "";
 
     protected final List<String> meta = new ArrayList<String>();
     protected final List<String> stylesheets = new ArrayList<String>();
     protected final List<String> javascripts = new ArrayList<String>();
+    protected final Map<String, String> addons = new LinkedHashMap<String, String>();
+    protected String communicationErrorFunction;
 
     public BootstrapServlet() {}
 
@@ -126,8 +131,7 @@ public class BootstrapServlet extends HttpServlet {
             inputStream = classLoader.getResourceAsStream(jarPath);
             if (inputStream == null) {
                 if (path.equals("/index.html")) {
-                    if (indexPage == null) indexPage = generateIndexPage().toString().getBytes();
-                    inputStream = new ByteArrayInputStream(indexPage);
+                    inputStream = new ByteArrayInputStream(generateIndexPage(request, response));
                 } else {
                     log.error("Failed to load resource: " + request.getPathInfo());
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -165,6 +169,11 @@ public class BootstrapServlet extends HttpServlet {
         }
     }
 
+    protected byte[] generateIndexPage(final HttpServletRequest request, final HttpServletResponse response) {
+        if (cachedIndexPage == null) cachedIndexPage = generateIndexPage().toString().getBytes();
+        return cachedIndexPage;
+    }
+
     protected StringBuilder generateIndexPage() {
         final StringBuilder builder = new StringBuilder();
 
@@ -194,14 +203,11 @@ public class BootstrapServlet extends HttpServlet {
 
         builder.append("</head>");
         builder.append("<body>");
-        builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
-        builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
-        builder.append("    <noscript>");
-        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
-        builder.append("            Your web browser must have JavaScript enabled");
-        builder.append("            in order for this application to display correctly.");
-        builder.append("        </div>");
-        builder.append("    </noscript>");
+
+        addHistoryIFrame(builder);
+        addLoading(builder);
+        addNoScript(builder);
+        addOnLoad(builder);
 
         addToBody(builder);
 
@@ -209,6 +215,44 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("</html>");
 
         return builder;
+    }
+
+    protected void addHistoryIFrame(final StringBuilder builder) {
+        builder.append("    <iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+    }
+
+    protected void addLoading(final StringBuilder builder) {
+        builder.append("    <div id=\"loading\">Loading " + applicationName + "...</div>");
+    }
+
+    protected void addNoScript(final StringBuilder builder) {
+        builder.append("    <noscript>");
+        builder.append("        <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        builder.append("            Your web browser must have JavaScript enabled");
+        builder.append("            in order for this application to display correctly.");
+        builder.append("        </div>");
+        builder.append("    </noscript>");
+    }
+
+    protected void addOnLoad(final StringBuilder builder) {
+
+        builder.append("    <script type=\"text/javascript\">");
+        builder.append("    var pony = null;");
+        builder.append("    function onPonySDKModuleLoaded() {");
+        builder.append("        pony = new ponysdk();");
+
+        if (communicationErrorFunction != null) {
+            builder.append("    pony.registerCommunicationError(" + communicationErrorFunction + ");");
+        }
+
+        for (final Entry<String, String> e : addons.entrySet()) {
+            builder.append("    pony.registerAddOnFactory(\"" + e.getKey() + "\", " + e.getValue() + ");");
+        }
+
+        builder.append("        pony.start();");
+        builder.append("    }");
+        builder.append("    </script>");
+
     }
 
     protected void addToHeader(final StringBuilder builder) {}
@@ -227,7 +271,15 @@ public class BootstrapServlet extends HttpServlet {
         javascripts.add(javascriptPath);
     }
 
+    public void addAddOn(final String signature, final String factory) {
+        addons.put(signature, factory);
+    }
+
     public void setApplicationName(final String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public void setCommunicationErrorFunction(final String communicationErrorFunction) {
+        this.communicationErrorFunction = communicationErrorFunction;
     }
 }
