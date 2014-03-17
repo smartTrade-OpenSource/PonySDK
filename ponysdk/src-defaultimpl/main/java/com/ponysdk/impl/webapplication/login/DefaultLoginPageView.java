@@ -65,8 +65,6 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
         panel.add(versionInformation);
 
         setWidget(panel);
-
-        loginTextBox.setFocus(true);
     }
 
     private PWidget buildLoginInput() {
