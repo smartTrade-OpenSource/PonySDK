@@ -66,7 +66,7 @@ public class SimpleTable extends PElement {
 
         PElement newRow;
         final int maxRowIndex = tbody.getWidgetCount();
-        if (row > maxRowIndex) {
+        if (row >= maxRowIndex) {
             newRow = new PElement("tr");
             tbody.add(newRow);
         } else {

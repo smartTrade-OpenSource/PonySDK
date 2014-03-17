@@ -44,6 +44,7 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
+
                     eventInstruction.setObjectID(addHandler.getObjectID());
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);

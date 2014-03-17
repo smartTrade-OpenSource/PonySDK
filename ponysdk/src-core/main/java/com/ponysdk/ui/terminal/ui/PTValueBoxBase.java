@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
+import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
@@ -47,6 +48,15 @@ public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<
             });
         } else {
             super.addHandler(addHandler, uiService);
+        }
+    }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(PROPERTY.SELECT_ALL)) {
+            uiObject.selectAll();
+        } else {
+            super.update(update, uiService);
         }
     }
 }

@@ -41,7 +41,7 @@ import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
-public class PTextBoxBase extends PFocusWidget implements PHasText, HasPValue<String> {
+public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     private static final String EMPTY = "";
 

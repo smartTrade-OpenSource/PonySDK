@@ -57,7 +57,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
 
-    private boolean focused;
+    private boolean focused = false;
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;
 

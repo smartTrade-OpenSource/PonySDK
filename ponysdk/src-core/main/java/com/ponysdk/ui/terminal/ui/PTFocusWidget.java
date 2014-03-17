@@ -23,8 +23,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -56,13 +54,7 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
         } else if (update.containsKey(PROPERTY.TABINDEX)) {
             uiObject.setTabIndex(update.getInt(PROPERTY.TABINDEX));
         } else if (update.containsKey(PROPERTY.FOCUSED)) {
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-                @Override
-                public void execute() {
-                    uiObject.setFocus(update.getBoolean(PROPERTY.FOCUSED));
-                }
-            });
+            uiObject.setFocus(update.getBoolean(PROPERTY.FOCUSED));
         } else {
             super.update(update, uiService);
         }
