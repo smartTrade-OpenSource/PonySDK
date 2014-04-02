@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.socket.ConnectionListener;
+import com.ponysdk.core.UIContextListener;
 import com.ponysdk.ui.server.basic.PWindow;
 
-public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, ConnectionListener {
+public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, UIContextListener {
 
     private static Logger log = LoggerFactory.getLogger(UIScheduledThreadPoolExecutor.class);
 
@@ -137,6 +137,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         @Override
         public void run() {
+            System.err.println("Run task" + this);
             if (cancelled) return;
             if (!uiContext.getPusher().execute(runnable)) cancel();
         }
@@ -158,7 +159,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
     protected void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUiContext();
-        uiContext.getPusher().addConnectionListener(this);
+        uiContext.addUIContextListener(this);
         final String sessionID = uiContext.getSession().getId();
         Set<UIRunnable> runnables = runnablesBySession.get(sessionID);
         if (runnables == null) {
@@ -169,13 +170,11 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     }
 
     @Override
-    public void onOpen() {}
-
-    @Override
-    public void onClose() {
-        final Set<UIRunnable> runnables = runnablesBySession.remove(UIContext.get());
+    public void onUIContextDestroyed(final UIContext uiContext) {
+        final Set<UIRunnable> runnables = runnablesBySession.remove(uiContext);
         if (runnables != null) {
             for (final UIRunnable runnable : runnables) {
+                System.err.println("cancel task" + this);
                 runnable.cancel();
             }
         }
