@@ -26,7 +26,7 @@ public class ParentWindowRequest extends RequestBuilder {
     }
 
     public void onDataReceived(final String text) {
-        callback.onDataReceived(JSONParser.parseLenient(text).isObject());
+        callback.onDataReceived(JSONParser.parseStrict(text).isObject());
     }
 
     public static native void sendToParent(final String objectID, final JavaScriptObject data) /*-{$wnd.opener.sendDataToServer(objectID, data);}-*/;

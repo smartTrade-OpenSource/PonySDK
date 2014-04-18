@@ -42,7 +42,7 @@ public class HttpRequestBuilder extends RequestBuilder {
                     }
 
                     if (response.getText() == null || response.getText().isEmpty()) return;
-                    callback.onDataReceived(JSONParser.parseLenient(response.getText()).isObject());
+                    callback.onDataReceived(JSONParser.parseStrict(response.getText()).isObject());
                 }
 
                 @Override

@@ -86,7 +86,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
 
                 @Override
                 public void message(final String message) {
-                    final JSONObject data = JSONParser.parseLenient(message).isObject();
+                    final JSONObject data = JSONParser.parseStrict(message).isObject();
                     if (data.containsKey(Dictionnary.APPLICATION.PING)) return;
 
                     uiService.update(data);
