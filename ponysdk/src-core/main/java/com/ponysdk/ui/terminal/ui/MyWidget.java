@@ -23,21 +23,22 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-class MyWidget extends ComplexPanel {
+class MyWidget extends HTMLPanel {
+
+    private static final String EMPTY = "";
 
     public MyWidget(final String tagName) {
-        setElement(DOM.createElement(tagName));
+        super(tagName, EMPTY);
     }
 
-    @Override
-    public void add(final Widget w) {
-        super.add(w, getElement());
-    }
+    // @Override
+    // public void add(final Widget w) {
+    // super.add(w, getElement());
+    // }
 
     @Override
     public void insert(final Widget child, final Element container, final int beforeIndex, final boolean domInsert) {

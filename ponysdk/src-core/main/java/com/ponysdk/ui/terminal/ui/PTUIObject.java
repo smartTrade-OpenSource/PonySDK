@@ -24,8 +24,8 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
