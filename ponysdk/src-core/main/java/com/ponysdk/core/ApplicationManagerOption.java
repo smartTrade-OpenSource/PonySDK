@@ -6,10 +6,10 @@ import java.util.concurrent.TimeUnit;
 public class ApplicationManagerOption {
 
     public long maxOutOfSyncDuration = -1;
-    public long heartBeatPeriod = 5;// seconds
+    public long heartBeatPeriod = 0;// seconds
 
     public void setHeartBeatPreiod(final long heartBeatPeriod, final TimeUnit timeUnit) {
-        TimeUnit.SECONDS.convert(heartBeatPeriod, timeUnit);
+        this.heartBeatPeriod = TimeUnit.SECONDS.convert(heartBeatPeriod, timeUnit);
     }
 
     public long getHeartBeatPeriod() {
