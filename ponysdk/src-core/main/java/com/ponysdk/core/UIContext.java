@@ -54,7 +54,6 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
@@ -84,7 +83,7 @@ public class UIContext {
 
     private final WeakHashMap weakReferences = new WeakHashMap();
 
-    private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
+    // private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
 
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
@@ -98,7 +97,8 @@ public class UIContext {
 
     private final Application application;
 
-    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>();
+    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>(); // pourkoi
+                                                                                                       // ?
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -112,12 +112,13 @@ public class UIContext {
 
     private final CommunicationSanityChecker communicationSanityChecker;
 
+    private final List<UIContextListener> uiContextListeners = new ArrayList<UIContextListener>();
+
     public UIContext(final Application application) {
         this.application = application;
         this.uiContextID = ponySessionIDcount.incrementAndGet();
         this.communicationSanityChecker = new CommunicationSanityChecker(this);
         this.application.registerUIContext(this);
-
         this.communicationSanityChecker.start();
     }
 
@@ -184,10 +185,10 @@ public class UIContext {
         weakReferences.put(object.getID(), object);
     }
 
-    public void unRegisterObject(final PObject object) {
-        timers.remove(object.getID());
-        weakReferences.remove(object.getID());
-    }
+    // public void unRegisterObject(final PObject object) {
+    // timers.remove(object.getID());
+    // weakReferences.remove(object.getID());
+    // }
 
     public void assignParentID(final long objectID, final long parentID) {
         weakReferences.assignParentID(objectID, parentID);
@@ -410,6 +411,15 @@ public class UIContext {
         log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
         communicationSanityChecker.stop();
         application.unregisterUIContext(uiContextID);
+
+        for (final UIContextListener listener : uiContextListeners) {
+            listener.onUIContextDestroyed(this);
+        }
+
         log.info("UIContext destroyed ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
+    }
+
+    public void addUIContextListener(final UIContextListener listener) {
+        uiContextListeners.add(listener);
     }
 }
