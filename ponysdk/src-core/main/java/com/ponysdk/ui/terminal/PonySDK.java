@@ -181,6 +181,11 @@ public class PonySDK implements Exportable {
         uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
     }
 
+    @Export
+    public void executeInstruction(final JavaScriptObject jso) {
+        uiBuilder.executeInstruction(jso);
+    }
+
     public static native void reload() /*-{$wnd.location.reload();}-*/;
 
     public static native void log(String msg) /*-{ if($wnd.console) $wnd.console.log(msg);}-*/;
