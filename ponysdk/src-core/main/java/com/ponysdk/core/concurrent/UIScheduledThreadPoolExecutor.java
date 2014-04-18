@@ -137,7 +137,6 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         @Override
         public void run() {
-            System.err.println("Run task" + this);
             if (cancelled) return;
             if (!uiContext.getPusher().execute(runnable)) cancel();
         }
@@ -174,7 +173,6 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         final Set<UIRunnable> runnables = runnablesBySession.remove(uiContext);
         if (runnables != null) {
             for (final UIRunnable runnable : runnables) {
-                System.err.println("cancel task" + this);
                 runnable.cancel();
             }
         }
