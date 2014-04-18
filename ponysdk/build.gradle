@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 sourceCompatibility = 1.6
-version = '0.7.0.7'
+version = '0.7.0.8'
 
 ext{
     srcCore = "src-core/main/java"
