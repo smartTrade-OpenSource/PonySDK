@@ -23,7 +23,6 @@
 	<classpathentry kind="lib" path="libs/spring/spring-beans.jar"/>
 	<classpathentry kind="lib" path="libs/mongodb/mongo-java-driver.jar"/>
 	<classpathentry kind="lib" path="libs/json_jackson/jackson-core.jar"/>
-	<classpathentry kind="lib" path="libs/json_jackson/jackson-databind.jar"/>
 	<classpathentry kind="lib" path="libs/jasper/DynamicJasper.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-java.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-api.jar"/>
@@ -48,5 +47,6 @@
 	<classpathentry kind="lib" path="libs/tests/selenium-chrome-driver.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-ie-driver.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwtexporter.jar"/>
+	<classpathentry kind="lib" path="libs/json_jackson/jackson-databind.jar"/>
 	<classpathentry kind="output" path="build/classes/main"/>
 </classpath>

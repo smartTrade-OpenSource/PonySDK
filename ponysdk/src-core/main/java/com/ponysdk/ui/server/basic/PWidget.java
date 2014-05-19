@@ -213,8 +213,23 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return parent;
     }
 
-    public void setParent(final PWidget parent) {
+    void setParent(final PWidget parent) {
+        final PWidget oldParent = this.parent;
+        if (parent == null) {
+            onDetach();
+        } else {
+            if (oldParent != null) { throw new IllegalStateException("Cannot set a new parent without first clearing the old parent"); }
+            onAttach();
+        }
         this.parent = parent;
+    }
+
+    protected void onAttach() {
+
+    }
+
+    protected void onDetach() {
+
     }
 
     public void setStyleProperty(final String name, final String value) {

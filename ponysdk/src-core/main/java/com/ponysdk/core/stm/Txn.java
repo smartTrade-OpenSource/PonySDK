@@ -39,6 +39,7 @@ public class Txn {
 
     public void begin(final TxnContext txnContext) {
         this.txnContext = txnContext;
+        this.txnContext.init();
     }
 
     public void commit() {
@@ -49,7 +50,6 @@ public class Txn {
         flush();
         fireAfterFlush();
         transactions.remove();
-        txnContext.clear();
     }
 
     public void rollback() {
@@ -57,7 +57,6 @@ public class Txn {
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
         transactions.remove();
-        txnContext.clear();
     }
 
     public void flush() {

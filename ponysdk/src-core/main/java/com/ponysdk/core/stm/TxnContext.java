@@ -7,11 +7,13 @@ import com.ponysdk.core.instruction.Instruction;
 
 public interface TxnContext {
 
+    void init();
+
     void save(Instruction instruction);
 
     void flush() throws Exception;
 
-    List<Instruction> setCurrentStacker(List<Instruction> instructions);
+    void setCurrentStacker(List<Instruction> instructions);
 
-    void clear();
+    void removeCurrentStacker();
 }

@@ -9,9 +9,7 @@ import com.ponysdk.core.stm.TxnContext;
 public class EmptyTxnContext implements TxnContext {
 
     @Override
-    public List<Instruction> setCurrentStacker(final List<Instruction> instructions) {
-        return null;
-    }
+    public void setCurrentStacker(final List<Instruction> instructions) {}
 
     @Override
     public void save(final Instruction instruction) {}
@@ -20,5 +18,9 @@ public class EmptyTxnContext implements TxnContext {
     public void flush() throws Exception {}
 
     @Override
-    public void clear() {}
+    public void init() {}
+
+    @Override
+    public void removeCurrentStacker() {}
+
 }

@@ -68,13 +68,14 @@ public class PPusher extends PObject implements ConnectionListener {
     private PPusher(final int pollingDelay, final int ping) {
         super();
 
-        this.txnContext = new TxnSocketContext();
+        txnContext = new TxnSocketContext();
+        txnContext.init();
 
         create.put(PROPERTY.FIXDELAY, pollingDelay);
         create.put(PROPERTY.PINGDELAY, ping);
 
-        this.pusherState = PusherState.INITIALIZING;
-        this.uiContext = UIContext.get();
+        pusherState = PusherState.INITIALIZING;
+        uiContext = UIContext.get();
     }
 
     public void initialize(final WebSocket websocket) {
