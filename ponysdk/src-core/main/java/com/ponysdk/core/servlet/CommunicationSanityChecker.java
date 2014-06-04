@@ -72,7 +72,7 @@ public class CommunicationSanityChecker {
         lastReceivedTime = now;
         if (isSanityCheckEnabled() && !isStarted()) {
             currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleAtFixedRate(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
             logInfo("Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
         }
@@ -81,7 +81,7 @@ public class CommunicationSanityChecker {
     public void stop() {
         if (isSanityCheckEnabled() && isStarted()) {
             if (sanityChecker != null) {
-                sanityChecker.cancel(true);
+                sanityChecker.cancel(false);
                 sanityCheckerTimer.remove(sanityChecker);
                 sanityChecker = null;
             }
