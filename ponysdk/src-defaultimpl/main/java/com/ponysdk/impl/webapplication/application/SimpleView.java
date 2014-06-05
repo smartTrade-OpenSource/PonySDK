@@ -39,7 +39,7 @@ public class SimpleView extends PDockLayoutPanel implements ApplicationView {
         super(PUnit.PX);
         setSizeFull();
 
-        center = new PSplitLayoutPanel(PUnit.PX);
+        center = new PSplitLayoutPanel();
         center.setSizeFull();
         center.add(body);
 
