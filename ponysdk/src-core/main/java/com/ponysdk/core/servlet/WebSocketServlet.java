@@ -51,16 +51,18 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
     }
 
     protected JettyWebSocket newJettyWebsocket() {
-        return new JettyWebSocket();
+        return new JettyWebSocket(maxIdleTime);
     }
 
-    public class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
+    public static class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
         protected Connection connection;
         protected ConnectionListener connectionListener;
         protected UIContext uiContext;
+        private final int maxIdleTime;
 
-        public JettyWebSocket() {
+        public JettyWebSocket(final int maxIdleTime) {
+            this.maxIdleTime = maxIdleTime;
             this.uiContext = UIContext.get();
         }
 
