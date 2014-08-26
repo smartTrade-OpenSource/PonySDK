@@ -145,4 +145,8 @@ public class ComplexListConfiguration<T> extends ListConfiguration<T> {
         else super.addColumnDescriptor(listColumnDescriptor);
     }
 
+    public boolean isFormEnabled() {
+        return formEnabled;
+    }
+
 }
