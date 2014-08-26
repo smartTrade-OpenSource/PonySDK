@@ -5,9 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -23,21 +22,21 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
     private static UIScheduledThreadPoolExecutor INSTANCE;
 
-    protected final ScheduledExecutorService executor;
-    protected Map<UIContext, Set<UIRunnable>> runnablesBySession = new ConcurrentHashMap<UIContext, Set<UIRunnable>>();
+    protected final ScheduledThreadPoolExecutor executor;
+    protected Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<UIContext, Set<UIRunnable>>();
 
-    private UIScheduledThreadPoolExecutor(final ScheduledExecutorService executor) {
+    private UIScheduledThreadPoolExecutor(final ScheduledThreadPoolExecutor executor) {
         log.info("Initializing UIScheduledThreadPoolExecutor");
         this.executor = executor;
     }
 
     public static UIScheduledThreadPoolExecutor initDefault() {
         if (INSTANCE != null) throw new IllegalAccessError("Already initialized");
-        INSTANCE = new UIScheduledThreadPoolExecutor(Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()));
+        INSTANCE = new UIScheduledThreadPoolExecutor(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
         return INSTANCE;
     }
 
-    public static UIScheduledThreadPoolExecutor init(final ScheduledExecutorService executor) {
+    public static UIScheduledThreadPoolExecutor init(final ScheduledThreadPoolExecutor executor) {
         if (INSTANCE != null) throw new IllegalAccessError("Already initialized");
         INSTANCE = new UIScheduledThreadPoolExecutor(executor);
         return INSTANCE;
@@ -55,11 +54,9 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     @Override
     public ScheduledFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
         checkUIState();
-
         final UIRunnable runnable = new UIRunnable(command);
         final ScheduledFuture<?> future = executor.schedule(runnable, delay, unit);
         runnable.setFuture(future);
-
         registerTask(runnable);
 
         return future;
@@ -68,11 +65,9 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
         checkUIState();
-
         final UIRunnable runnable = new UIRunnable(command);
-        final ScheduledFuture<?> future = executor.scheduleAtFixedRate(new UIRunnable(command), initialDelay, period, unit);
+        final ScheduledFuture<?> future = executor.scheduleAtFixedRate(runnable, initialDelay, period, unit);
         runnable.setFuture(future);
-
         registerTask(runnable);
 
         return future;
@@ -83,9 +78,8 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         checkUIState();
 
         final UIRunnable runnable = new UIRunnable(command);
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(new UIRunnable(command), initialDelay, delay, unit);
+        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
         runnable.setFuture(future);
-
         registerTask(runnable);
 
         return future;
@@ -115,7 +109,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         }
     }
 
-    static protected class UIRunnable implements Runnable {
+    protected class UIRunnable implements Runnable {
 
         private final Runnable runnable;
         private final UIContext uiContext;
@@ -144,6 +138,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         public void cancel() {
             this.cancelled = true;
             this.future.cancel(true);
+            executor.purge();
         }
 
         public void setFuture(final ScheduledFuture<?> future) {
@@ -159,18 +154,17 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     protected void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUiContext();
         uiContext.addUIContextListener(this);
-        final String sessionID = uiContext.getSession().getId();
-        Set<UIRunnable> runnables = runnablesBySession.get(sessionID);
+        Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
             runnables = new HashSet<UIScheduledThreadPoolExecutor.UIRunnable>();
-            runnablesBySession.put(uiContext, runnables);
+            runnablesByUIContexts.put(uiContext, runnables);
         }
         runnables.add(runnable);
     }
 
     @Override
     public void onUIContextDestroyed(final UIContext uiContext) {
-        final Set<UIRunnable> runnables = runnablesBySession.remove(uiContext);
+        final Set<UIRunnable> runnables = runnablesByUIContexts.remove(uiContext);
         if (runnables != null) {
             for (final UIRunnable runnable : runnables) {
                 runnable.cancel();

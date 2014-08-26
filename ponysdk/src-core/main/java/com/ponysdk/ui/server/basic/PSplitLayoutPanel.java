@@ -73,8 +73,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<PLayoutResizeHandler>();
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<PWidget, PSplitLayoutPanel.SplitInfoHolder>();
 
-    public PSplitLayoutPanel(final PUnit unit) {
-        super(unit);
+    public PSplitLayoutPanel() {
+        super(PUnit.PX);
     }
 
     @Override

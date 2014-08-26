@@ -38,6 +38,10 @@ public class SessionManager {
         return applications;
     }
 
+    public Application getApplication(final Session session) {
+        return (Application) session.getAttribute(Application.class.getCanonicalName());
+    }
+
     public void registerSessionListener(final SessionListener listener) {
         sessionListeners.register(listener);
     }

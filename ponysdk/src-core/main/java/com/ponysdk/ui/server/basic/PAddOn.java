@@ -42,6 +42,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PAddOn extends PObject implements PNativeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
+    private final PWidget widget;
 
     /**
      * @param factory
@@ -53,12 +54,13 @@ public class PAddOn extends PObject implements PNativeHandler {
      */
     public PAddOn(final String factory, final PWidget w, final JSONObject params) {
         super();
+        this.widget = w;
 
         if (factory != null) create.put(PROPERTY.FACTORY, factory);
         else create.put(PROPERTY.FACTORY, getClass().getName());
 
         if (params != null) create.put(PROPERTY.NATIVE, params);
-        if (w != null) create.put(PROPERTY.WIDGET, w.ID);
+        if (this.widget != null) create.put(PROPERTY.WIDGET, this.widget.ID);
 
         addNativeHandler(this);
     }
@@ -94,5 +96,9 @@ public class PAddOn extends PObject implements PNativeHandler {
         } catch (final JSONException e) {
             log.error("Failed to encode json", e);
         }
+    }
+
+    public PWidget getWidget() {
+        return widget;
     }
 }

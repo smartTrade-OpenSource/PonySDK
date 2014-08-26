@@ -49,7 +49,7 @@ public class DefaultApplicationView2 extends PDockLayoutPanel implements Applica
         addSouth(footer, 3);
         addWest(menu, 10);
 
-        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel(PUnit.PX);
+        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel();
         splitLayoutPanel.setSizeFull();
         splitLayoutPanel.addSouth(logs, 70);
         splitLayoutPanel.add(body);

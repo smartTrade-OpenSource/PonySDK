@@ -32,7 +32,6 @@ import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
-import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
@@ -53,7 +52,7 @@ public class SplitPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel(PUnit.PX);
+        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel();
 
         splitLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         splitLayoutPanel.addSouth(south = buildComponent("south", "#75ffdc"), 50);

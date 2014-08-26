@@ -8,7 +8,7 @@ public class ApplicationManagerOption {
     public long maxOutOfSyncDuration = -1;
     public long heartBeatPeriod = 0;// seconds
 
-    public void setHeartBeatPreiod(final long heartBeatPeriod, final TimeUnit timeUnit) {
+    public void setHeartBeatPeriod(final long heartBeatPeriod, final TimeUnit timeUnit) {
         this.heartBeatPeriod = TimeUnit.SECONDS.convert(heartBeatPeriod, timeUnit);
     }
 

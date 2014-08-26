@@ -77,7 +77,7 @@ public class DefaultApplicationView implements IsPWidget, ApplicationView {
     }
 
     protected void buildCenter() {
-        center = new PSplitLayoutPanel(PUnit.PX);
+        center = new PSplitLayoutPanel();
         buildLogs();
         buildMenu();
         buildBody();

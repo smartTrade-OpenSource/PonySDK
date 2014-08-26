@@ -108,7 +108,7 @@ public class UIContext {
     private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
 
     private final long uiContextID;
-    private static final AtomicLong ponySessionIDcount = new AtomicLong();
+    private static final AtomicLong ponyUIContextIDcount = new AtomicLong();
 
     private final CommunicationSanityChecker communicationSanityChecker;
 
@@ -116,7 +116,7 @@ public class UIContext {
 
     public UIContext(final Application application) {
         this.application = application;
-        this.uiContextID = ponySessionIDcount.incrementAndGet();
+        this.uiContextID = ponyUIContextIDcount.incrementAndGet();
         this.communicationSanityChecker = new CommunicationSanityChecker(this);
         this.application.registerUIContext(this);
         this.communicationSanityChecker.start();
@@ -422,4 +422,23 @@ public class UIContext {
     public void addUIContextListener(final UIContextListener listener) {
         uiContextListeners.add(listener);
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (uiContextID ^ (uiContextID >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final UIContext other = (UIContext) obj;
+        if (uiContextID != other.uiContextID) return false;
+        return true;
+    }
+
 }
