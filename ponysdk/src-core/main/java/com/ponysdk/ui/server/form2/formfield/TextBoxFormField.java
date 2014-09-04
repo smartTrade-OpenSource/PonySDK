@@ -7,7 +7,7 @@ import com.ponysdk.ui.server.form2.dataconverter.DataConverter;
 
 public class TextBoxFormField<T> extends FormField<T> {
 
-    private PTextBox textBox;
+    protected final PTextBox textBox;
 
     public TextBoxFormField(final DataConverter<String, T> dataProvider) {
         this(new PTextBox(), dataProvider);
