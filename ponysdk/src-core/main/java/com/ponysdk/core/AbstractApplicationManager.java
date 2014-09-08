@@ -49,6 +49,7 @@ public abstract class AbstractApplicationManager {
     }
 
     public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
+
         final Session session = request.getSession();
 
         synchronized (session) {
@@ -57,7 +58,9 @@ public abstract class AbstractApplicationManager {
             Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
             if (application == null) {
                 log.info("Creating a new application ... Session ID #" + session.getId() + " - " + request.getHeader("User-Agent") + " - " + request.getRemoteAddr());
-                application = new Application(session, options);
+                final String applicationID = System.getProperty(SystemProperty.APPLICATION_ID);
+                final String applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
+                application = new Application(applicationID, applicationName, session, options);
                 session.setUserAgent(request.getHeader("User-Agent"));
                 session.setAttribute(Application.class.getCanonicalName(), application);
                 isNewHttpSession = true;

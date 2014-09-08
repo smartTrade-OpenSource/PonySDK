@@ -43,7 +43,7 @@ public class RefreshableDataGridTest {
     public void beforeTest() {
         log.info("Running #" + name.getMethodName());
 
-        final Application application = new Application(new EmptySession(), new ApplicationManagerOption());
+        final Application application = new Application("test", "Test", new EmptySession(), new ApplicationManagerOption());
         final UIContext uiContext = new UIContext(application);
         UIContext.setCurrent(uiContext);
         txn = Txn.get();

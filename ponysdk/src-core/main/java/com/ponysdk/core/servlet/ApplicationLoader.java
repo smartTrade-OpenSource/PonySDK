@@ -40,13 +40,19 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 
+    private String applicationID;
     private String applicationName;
     private String applicationDescription;
 
     @Override
     public void contextInitialized(final ServletContextEvent event) {
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
-        applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION);
+        applicationID = System.getProperty(SystemProperty.APPLICATION_ID, applicationID);
+        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME, applicationName);
+        applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
+
+        if (applicationID != null) System.setProperty(SystemProperty.APPLICATION_ID, applicationID);
+        if (applicationName != null) System.setProperty(SystemProperty.APPLICATION_NAME, applicationName);
+        if (applicationDescription != null) System.setProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
 
         printLicence();
     }
@@ -123,5 +129,17 @@ public class ApplicationLoader implements ServletContextListener, HttpSessionLis
         bannerPrinter.appendLineSeparator();
 
         log.info(bannerPrinter.toString());
+    }
+
+    public void setApplicationID(final String applicationID) {
+        this.applicationID = applicationID;
+    }
+
+    public void setApplicationName(final String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public void setApplicationDescription(final String applicationDescription) {
+        this.applicationDescription = applicationDescription;
     }
 }

@@ -69,12 +69,14 @@ public class BootstrapServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME, applicationName);
+
+        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
 
         final String styles = System.getProperty(SystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             stylesheets.addAll(Arrays.asList(styles.trim().split(";")));
         }
+
         final String scripts = System.getProperty(SystemProperty.JAVASCRIPTS);
         if (scripts != null && !scripts.isEmpty()) {
             javascripts.addAll(Arrays.asList(scripts.trim().split(";")));
@@ -273,10 +275,6 @@ public class BootstrapServlet extends HttpServlet {
 
     public void addAddOn(final String signature, final String factory) {
         addons.put(signature, factory);
-    }
-
-    public void setApplicationName(final String applicationName) {
-        this.applicationName = applicationName;
     }
 
     public void setCommunicationErrorFunction(final String communicationErrorFunction) {
