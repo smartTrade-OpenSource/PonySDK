@@ -87,6 +87,10 @@ public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
         }
     }
 
+    public void setDataProvider(final DataConverter<String, T> dataProvider) {
+        this.dataProvider = dataProvider;
+    }
+
     protected abstract String getStringValue();
 
     protected abstract void reset0();
