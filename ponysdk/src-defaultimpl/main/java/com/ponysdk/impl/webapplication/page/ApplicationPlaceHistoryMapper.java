@@ -30,4 +30,9 @@ public class ApplicationPlaceHistoryMapper extends DefaultPlaceHistoryMapper {
         this.pageProvider = pageProvider;
     }
 
+    @Override
+    public String getToken(final Place place) {
+        if (place instanceof PagePlace && ((PagePlace) place).getToken() != null) { return ((PagePlace) place).getToken(); }
+        return place.getClass().getSimpleName();
+    }
 }
