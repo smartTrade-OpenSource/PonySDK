@@ -4,7 +4,7 @@ package com.ponysdk.ui.server.form2.formfield;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
 import com.ponysdk.ui.server.form2.dataconverter.IdentityConverter;
 
-public class StringPasswordTextBoxFormField extends TextBoxFormField<String> {
+public class StringPasswordTextBoxFormField extends PasswordTextBoxFormField<String> {
 
     public StringPasswordTextBoxFormField() {
         this(new PPasswordTextBox());
