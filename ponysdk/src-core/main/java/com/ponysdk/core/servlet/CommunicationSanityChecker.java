@@ -66,7 +66,7 @@ public class CommunicationSanityChecker {
             currentState = CommunicationState.OK;
             sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
-            log.error("[" + uiContext + "] Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
+            log.info("[" + uiContext + "] Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
         }
     }
 
@@ -78,7 +78,7 @@ public class CommunicationSanityChecker {
                 sanityChecker = null;
             }
             started.set(false);
-            log.error("[" + uiContext + "] Stopped.");
+            log.info("[" + uiContext + "] Stopped.");
         }
     }
 
