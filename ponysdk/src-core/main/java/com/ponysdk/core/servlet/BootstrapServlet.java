@@ -189,6 +189,8 @@ public class BootstrapServlet extends HttpServlet {
             builder.append("    <meta " + m + ">");
         }
 
+        addToMeta(builder);
+
         builder.append("    <script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
 
         for (final String style : stylesheets) {
@@ -256,6 +258,8 @@ public class BootstrapServlet extends HttpServlet {
         builder.append("    </script>");
 
     }
+
+    protected void addToMeta(final StringBuilder builder) {}
 
     protected void addToHeader(final StringBuilder builder) {}
 
