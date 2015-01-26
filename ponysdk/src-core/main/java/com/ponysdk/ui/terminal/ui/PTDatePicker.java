@@ -29,6 +29,7 @@ import com.google.gwt.event.logical.shared.ShowRangeEvent;
 import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
@@ -38,6 +39,8 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
+
+    private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -78,10 +81,18 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final ValueChangeEvent<Date> event) {
 
         String date;
+        int year = -1;
+        int month = -1;
+        int day = -1;
+
         if (event.getValue() == null) {
             date = "";
         } else {
             date = Long.toString(event.getValue().getTime());
+            final String[] values = format.format(event.getValue()).split("-");
+            year = Integer.parseInt(values[0]);
+            month = Integer.parseInt(values[1]);
+            day = Integer.parseInt(values[2]);
         }
 
         final PTInstruction instruction = new PTInstruction();
@@ -89,6 +100,9 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
         instruction.put(HANDLER.KEY, HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
         instruction.put(PROPERTY.VALUE, date);
+        instruction.put(PROPERTY.YEAR, year);
+        instruction.put(PROPERTY.MONTH, month);
+        instruction.put(PROPERTY.DAY, day);
         uiService.sendDataToServer(instruction);
     }
 

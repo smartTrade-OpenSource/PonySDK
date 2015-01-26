@@ -260,6 +260,8 @@
 		"mask": [],
 		"visibility": [],
 		"maxLength": [],
-		"month": []
+		"year": [],
+		"month": [],
+		"day": []
 	}
 }
