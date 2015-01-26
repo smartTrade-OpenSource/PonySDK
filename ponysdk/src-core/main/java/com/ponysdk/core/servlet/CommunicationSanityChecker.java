@@ -59,34 +59,26 @@ public class CommunicationSanityChecker {
         return heartBeatPeriod > 0;
     }
 
-    protected void logInfo(final String message) {
-        log.info("[" + uiContext + "] " + message);
-    }
-
-    protected void logError(final String message, final Throwable t) {
-        log.error("[" + uiContext + "] " + message, t);
-    }
-
     public void start() {
         final long now = System.currentTimeMillis();
         lastReceivedTime = now;
         if (isSanityCheckEnabled() && !isStarted()) {
             currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleAtFixedRate(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
-            logInfo("Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
+            log.info("[" + uiContext + "] Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
         }
     }
 
     public void stop() {
         if (isSanityCheckEnabled() && isStarted()) {
             if (sanityChecker != null) {
-                sanityChecker.cancel(true);
+                sanityChecker.cancel(false);
                 sanityCheckerTimer.remove(sanityChecker);
                 sanityChecker = null;
             }
             started.set(false);
-            logInfo("Stopped.");
+            log.info("[" + uiContext + "] Stopped.");
         }
     }
 
@@ -139,7 +131,7 @@ public class CommunicationSanityChecker {
             try {
                 checkCommunicationState();
             } catch (final Throwable e) {
-                logError("Error while checking communication state", e);
+                log.error("[" + uiContext + "] Error while checking communication state", e);
             }
         }
     }
