@@ -23,9 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;

@@ -1,8 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
-sourceCompatibility = 1.6
-version = '0.7.0.20'
+sourceCompatibility = 1.7
+version = '0.7.0.21'
 
 ext{
     srcCore = "src-core/main/java"
@@ -24,7 +24,6 @@ ext{
     confResources = "src-spring/main/resources/conf"
     javadocResources = "src-core/main/javadoc"
 }
-
 
 sourceSets {
 	main {
@@ -84,7 +83,7 @@ configurations {
     jetty
 	
 	compile {
-		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson, jetty, log4j
+		extendsFrom jetty,commons,gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson, log4j
 	}
 
 	testCompile {
@@ -99,9 +98,9 @@ configurations {
 
 dependencies {
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.6.0'
-	gwt 'com.google.gwt:gwt-dev:2.6.0'
-	gwt 'com.google.gwt:gwt-codeserver:2.6.0'
+	gwt 'com.google.gwt:gwt-user:2.7.0'
+	gwt 'com.google.gwt:gwt-dev:2.7.0'
+	gwt 'com.google.gwt:gwt-codeserver:2.7.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
 	gwt 'org.json:json:20090211'
 	gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
@@ -121,14 +120,15 @@ dependencies {
 	selenium 'org.seleniumhq.selenium:selenium-java:2.33.0'
 	selenium 'junit:junit:4.10'
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
-    jetty 'org.eclipse.jetty:jetty-server:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-servlet:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-webapp:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-servlets:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-io:8.1.4.v20120524'
+    jetty 'org.eclipse.jetty:jetty-server:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-servlet:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-webapp:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-servlets:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
+    jetty 'org.eclipse.jetty:jetty-io:9.2.10.v20150310'
+    
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
 }
 

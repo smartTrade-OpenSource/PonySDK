@@ -50,6 +50,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     protected final List<D> rows = new ArrayList<D>();
     protected int dataCount = 0;
 
+    private final KeyProvider keyProvider = new DefaultKeyProvider();
+
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
         this.view.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
@@ -182,7 +184,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
                 @Override
                 public boolean hasNext() {
-
                     while (rowsIterator.hasNext()) {
                         next = rowsIterator.next();
                         if (next != null) return true;

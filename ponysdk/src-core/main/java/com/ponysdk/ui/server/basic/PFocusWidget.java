@@ -24,9 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
