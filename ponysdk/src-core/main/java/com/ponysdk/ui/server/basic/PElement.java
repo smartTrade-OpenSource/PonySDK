@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -39,9 +40,8 @@ public class PElement extends PComplexPanel {
     private String innerHTML;
 
     public PElement(final String tagName) {
-        super();
+        super(new EntryInstruction(PROPERTY.TAG, tagName));
         this.tagName = tagName;
-        this.create.put(PROPERTY.TAG, tagName);
     }
 
     @Override

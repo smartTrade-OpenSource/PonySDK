@@ -15,7 +15,7 @@ import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 public class TxnContextHttp implements TxnContext {
 
     private final Response response;
-    private List<Instruction> instructions = new ArrayList<Instruction>();
+    private final List<Instruction> instructions = new ArrayList<Instruction>();
     private final boolean startMode;
 
     public TxnContextHttp(final boolean startMode, final Request request, final Response response) {
@@ -38,13 +38,6 @@ public class TxnContextHttp implements TxnContext {
         response.write(data.toString());
         response.flush();
         instructions.clear();
-    }
-
-    @Override
-    public List<Instruction> setCurrentStacker(final List<Instruction> stacker) {
-        final List<Instruction> list = instructions;
-        instructions = stacker;
-        return list;
     }
 
     @Override

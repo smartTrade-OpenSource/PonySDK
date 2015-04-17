@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -34,10 +35,21 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PButton extends PButtonBase {
 
-    public PButton() {}
+    PButton(final String text, final EntryInstruction... entries) {
+        super(entries);
+        if (text != null) {
+            setText(text);
+        }
+    }
+
+    public PButton() {
+        super();
+    }
 
     public PButton(final String text) {
-        setText(text);
+        if (text != null) {
+            setText(text);
+        }
     }
 
     @Override

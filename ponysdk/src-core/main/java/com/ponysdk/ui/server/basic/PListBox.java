@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
@@ -80,6 +81,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public PListBox(final boolean containsEmptyItem, final boolean isMultipleSelect) {
+        super(new EntryInstruction(PROPERTY.MULTISELECT, isMultipleSelect));
+
         this.containsEmptyItem = containsEmptyItem;
         this.isMultipleSelect = isMultipleSelect;
 
@@ -89,8 +92,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
         Txn.get().getTxnContext().save(addHandler);
-
-        create.put(PROPERTY.MULTISELECT, isMultipleSelect);
     }
 
     @Override

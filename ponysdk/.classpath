@@ -10,7 +10,6 @@
 	<classpathentry kind="src" path="src-persistency/main/java"/>
 	<classpathentry kind="src" path="src-mongodb/main/java"/>
 	<classpathentry kind="src" path="src-core/test/java"/>
-	<classpathentry kind="src" path="src-jetty/test/java"/>
 	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/gwt/json.jar"/>

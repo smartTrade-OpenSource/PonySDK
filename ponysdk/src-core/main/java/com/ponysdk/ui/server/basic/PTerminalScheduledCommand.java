@@ -23,14 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.ponysdk.core.instruction.Instruction;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -43,17 +37,16 @@ public abstract class PTerminalScheduledCommand extends PObject {
     }
 
     public void schedule(final long delayMillis) {
-        final List<Instruction> stacker = new ArrayList<Instruction>();
-        final List<Instruction> mainStacker = Txn.get().getTxnContext().setCurrentStacker(stacker);
-        try {
-            run();
-        } finally {
-            Txn.get().getTxnContext().setCurrentStacker(mainStacker);
-        }
-        final Update update = new Update(ID);
-        update.put(PROPERTY.FIXDELAY, delayMillis);
-        update.put(PROPERTY.INSTRUCTIONS, stacker);
-        Txn.get().getTxnContext().save(update);
+        return;
+
+        //
+        // try {
+        // // TODO nciaravola put delay instruction
+        // run();
+        // } finally {}
+        // final Update update = new Update(ID);
+        // update.put(PROPERTY.FIXDELAY, delayMillis);
+        // Txn.get().getTxnContext().save(update);
     }
 
     protected abstract void run();

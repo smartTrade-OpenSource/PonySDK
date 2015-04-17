@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
@@ -78,11 +79,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
-        super();
-
-        create.put(PROPERTY.TEXT, headerText);
-        create.put(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        create.put(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
+        super(new EntryInstruction(PROPERTY.TEXT, headerText), new EntryInstruction(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID()), new EntryInstruction(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID()));
     }
 
     @Override

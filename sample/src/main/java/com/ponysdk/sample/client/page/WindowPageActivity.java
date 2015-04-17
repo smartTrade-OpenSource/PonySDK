@@ -114,13 +114,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             @Override
             public void onClick(final PClickEvent event) {
                 for (final PWindow window : windows) {
-                    window.acquire();
-                    try {
-                        PNotificationManager.showHumanizedNotification("Hello from opener");
-                        window.flush();
-                    } finally {
-                        window.release();
-                    }
+                    PNotificationManager.showHumanizedNotification(window, "Hello from opener");
                 }
             }
         });

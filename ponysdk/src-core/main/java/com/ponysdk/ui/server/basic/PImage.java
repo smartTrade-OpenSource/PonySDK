@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -71,14 +72,13 @@ public class PImage extends PFocusWidget {
 
     private int top;
 
-    public PImage() {}
+    public PImage() {
+        super();
+    }
 
     public PImage(final String url, final int left, final int top, final int width, final int height) {
-        create.put(PROPERTY.WIDGET_HEIGHT, width);
-        create.put(PROPERTY.WIDGET_WIDTH, height);
-        create.put(PROPERTY.IMAGE_URL, url);
-        create.put(PROPERTY.IMAGE_LEFT, left);
-        create.put(PROPERTY.IMAGE_TOP, top);
+        super(new EntryInstruction(PROPERTY.WIDGET_HEIGHT, height), new EntryInstruction(PROPERTY.WIDGET_WIDTH, width), new EntryInstruction(PROPERTY.IMAGE_URL, url), new EntryInstruction(PROPERTY.IMAGE_LEFT, left), new EntryInstruction(
+                PROPERTY.IMAGE_TOP, top));
     }
 
     public PImage(final String url) {

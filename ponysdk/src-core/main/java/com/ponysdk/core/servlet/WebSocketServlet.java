@@ -2,6 +2,7 @@
 package com.ponysdk.core.servlet;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +72,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public void send(final String msg) throws IOException {
             if ((session != null) && (session.isOpen())) {
                 // monitor ??
-                session.getRemote().sendString(msg, null); // callback needed ?
+                final ByteBuffer buffer = ByteBuffer.allocateDirect(1000000);
+                buffer.put(msg.getBytes("UTF8"));
+                buffer.flip();
+                session.getRemote().sendBytes(buffer); // callback needed ?
             } else {
 
             }

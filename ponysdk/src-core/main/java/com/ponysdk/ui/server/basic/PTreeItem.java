@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
@@ -34,19 +35,22 @@ public class PTreeItem extends PObject {
 
     private PWidget widget;
 
-    PTreeItem(final boolean isRoot) {
+    PTreeItem(final boolean isRoot, final String html) {
+        super(new EntryInstruction(PROPERTY.ROOT, isRoot), new EntryInstruction(PROPERTY.TEXT, html));
         this.isRoot = isRoot;
-        create.put(PROPERTY.ROOT, isRoot);
+        this.html = html;
+    }
+
+    PTreeItem(final boolean isRoot) {
+        this(isRoot, null);
     }
 
     public PTreeItem() {
-        this(false);
+        this(false, null);
     }
 
     public PTreeItem(final String html) {
-        this();
-        this.html = html;
-        create.put(PROPERTY.TEXT, html);
+        this(false, html);
     }
 
     public PTreeItem(final PWidget widget) {

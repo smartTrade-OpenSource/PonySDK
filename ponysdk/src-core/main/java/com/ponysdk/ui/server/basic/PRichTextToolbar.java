@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -31,8 +32,8 @@ public class PRichTextToolbar extends PWidget {
     private final PRichTextArea richTextArea;
 
     public PRichTextToolbar(final PRichTextArea richTextArea) {
+        super(new EntryInstruction(PROPERTY.WIDGET, richTextArea.getID()));
         this.richTextArea = richTextArea;
-        create.put(PROPERTY.WIDGET, richTextArea.getID());
     }
 
     @Override

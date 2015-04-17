@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.stm.Txn;
@@ -66,13 +67,9 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     private PPusher(final int pollingDelay, final int ping) {
-        super();
+        super(new EntryInstruction(PROPERTY.FIXDELAY, pollingDelay), new EntryInstruction(PROPERTY.PINGDELAY, ping));
 
         this.txnContext = new TxnSocketContext();
-
-        create.put(PROPERTY.FIXDELAY, pollingDelay);
-        create.put(PROPERTY.PINGDELAY, ping);
-
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();
     }

@@ -50,7 +50,6 @@ public class HttpServlet extends AbstractHttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-
         if (entryPointClassName == null || entryPointClassName.isEmpty()) entryPointClassName = getServletConfig().getInitParameter("entryPoint");
         if (entryPointClassName == null || entryPointClassName.isEmpty()) throw new ServletException("The entry point must be defined in your web.xml.");
     }

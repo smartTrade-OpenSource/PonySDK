@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -60,6 +61,10 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     private boolean focused = false;
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;
+
+    public PFocusWidget(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     @Override
     public Collection<PClickHandler> getClickHandlers() {

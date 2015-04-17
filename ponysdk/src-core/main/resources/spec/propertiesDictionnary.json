@@ -35,6 +35,7 @@
 	"property": {
 		"objectId": [],
 		"parentId": [],
+		"windowId": [],
 		"root": [],
 		"key": [],
 		"value": [],

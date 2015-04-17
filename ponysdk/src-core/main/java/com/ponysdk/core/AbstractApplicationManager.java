@@ -1,6 +1,7 @@
 
 package com.ponysdk.core;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -168,7 +169,11 @@ public abstract class AbstractApplicationManager {
                     return null;
                 }
             }
-            log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data + " (viewID #" + key + ")");
+
+            if (log.isDebugEnabled()) {
+                log.debug("Stacking incoming message #{}. Data #{} (viewID #{})", Arrays.asList(receivedSeqNum, data, key));
+            }
+
             return null;
         }
         return receivedSeqNum;

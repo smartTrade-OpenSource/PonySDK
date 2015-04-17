@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
@@ -35,6 +36,10 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     private String text;
     private String html;
+
+    public PButtonBase(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     @Override
     public void setText(final String text) {

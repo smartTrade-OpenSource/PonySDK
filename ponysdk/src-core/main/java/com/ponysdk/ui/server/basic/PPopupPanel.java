@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
@@ -94,25 +95,37 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private PPositionCallback positionCallback;
 
-    private final List<PCloseHandler> listeners = new ArrayList<PCloseHandler>();
+    private final List<PCloseHandler> listeners = new ArrayList<>();
 
-    public PPopupPanel() {
-        this(false);
-    }
-
-    public PPopupPanel(final boolean autoHide) {
-        super();
+    public PPopupPanel(final PWindow window, final boolean autoHide, final EntryInstruction... instructions) {
+        super(new EntryInstruction(PROPERTY.POPUP_AUTO_HIDE, autoHide));
         this.visible = false;
         this.autoHide = autoHide;
 
         removeFromParent();
 
-        final PRootPanel root = PRootPanel.get();
+        final PRootPanel root;
+        if (window != null) {
+            root = PRootPanel.get(window);
+        } else {
+            root = PRootPanel.get();
+        }
+
         final PWidgetCollection children = root.getChildren();
         children.insert(this, children.size());
         root.adopt(this);
+    }
 
-        create.put(PROPERTY.POPUP_AUTO_HIDE, autoHide);
+    public PPopupPanel(final boolean autoHide, final EntryInstruction... instructions) {
+        this(null, autoHide, instructions);
+    }
+
+    public PPopupPanel() {
+        this(false, (EntryInstruction) null);
+    }
+
+    public PPopupPanel(final boolean autoHide) {
+        this(autoHide, (EntryInstruction) null);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class LessPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PScript.get().execute("window.colors = {};");
+        PScript.execute("window.colors = {};");
 
         final PFlowPanel layout = new PFlowPanel();
         layout.add(new PLabel("Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
@@ -211,7 +211,8 @@ public class LessPageActivity extends SamplePageActivity {
         js.append("window.colors.grayLighter = \"#" + grayLighter.getValue() + "\";");
         js.append("window.colors.white = \"#" + white.getValue() + "\";");
         js.append("less.refresh();");
-        PScript.get().execute(js.toString(), new ExecutionCallback() {
+
+        PScript.execute(js.toString(), new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {}

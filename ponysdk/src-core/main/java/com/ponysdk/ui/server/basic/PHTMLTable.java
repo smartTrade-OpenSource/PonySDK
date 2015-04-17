@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
@@ -257,6 +258,12 @@ public abstract class PHTMLTable extends PPanel {
     private int borderWidth;
 
     private final PRowFormatter rowFormatter = new PRowFormatter();
+
+    public PHTMLTable() {}
+
+    public PHTMLTable(final EntryInstruction... instructions) {
+        super(instructions);
+    }
 
     public int getRowCount() {
         if (columnByRow.isEmpty()) return 0;

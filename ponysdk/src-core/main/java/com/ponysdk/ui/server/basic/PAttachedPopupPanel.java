@@ -23,14 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 public class PAttachedPopupPanel extends PPopupPanel {
 
     public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
-        super(autoHide);
-        create.put(PROPERTY.WIDGET, attached.getID());
+        super(autoHide, new EntryInstruction(PROPERTY.WIDGET, attached.getID()));
     }
 
     @Override

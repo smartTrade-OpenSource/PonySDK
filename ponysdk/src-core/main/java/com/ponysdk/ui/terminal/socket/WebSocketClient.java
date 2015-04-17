@@ -45,7 +45,11 @@ public class WebSocketClient {
 
                                               that._ws.onmessage = function(response) {
                                                   if (response.data) {
-                                                      that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( response.data );
+                                                       var reader = new FileReader();
+                                                       reader.onload = function() { 
+                                                           that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( reader.result );
+                                                       }
+                                                       reader.readAsText(response.data);
                                                   }
                                               };
 

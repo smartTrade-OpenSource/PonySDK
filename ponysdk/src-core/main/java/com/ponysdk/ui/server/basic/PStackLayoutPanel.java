@@ -30,6 +30,7 @@ import java.util.Iterator;
 
 import com.ponysdk.core.instruction.Add;
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
@@ -73,9 +74,8 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     private int animationDuration;
 
     public PStackLayoutPanel(final PUnit unit) {
-        super();
+        super(new EntryInstruction(PROPERTY.UNIT, unit.ordinal()));
         initWidget(new PLayoutPanel());
-        create.put(PROPERTY.UNIT, unit.ordinal());
     }
 
     @Override

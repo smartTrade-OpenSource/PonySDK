@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
@@ -75,15 +76,13 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
-
+        super(new EntryInstruction(PROPERTY.PICKER, picker.getID()));
         this.datePicker = picker;
-
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
 
         setDateFormat(dateFormat);
 
-        create.put(PROPERTY.PICKER, this.datePicker.getID());
+        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
+        Txn.get().getTxnContext().save(addHandler);
     }
 
     @Override

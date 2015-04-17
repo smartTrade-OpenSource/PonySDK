@@ -54,7 +54,6 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -83,15 +82,12 @@ public class UIContext {
 
     private final WeakHashMap weakReferences = new WeakHashMap();
 
-    // private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
-
     private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
 
     private Map<String, Permission> permissions = new HashMap<String, Permission>();
 
     private PHistory history;
     private EventBus rootEventBus;
-    private PWindow window;
 
     private final PCookies cookies = new PCookies();
 
@@ -185,11 +181,6 @@ public class UIContext {
         weakReferences.put(object.getID(), object);
     }
 
-    // public void unRegisterObject(final PObject object) {
-    // timers.remove(object.getID());
-    // weakReferences.remove(object.getID());
-    // }
-
     public void assignParentID(final long objectID, final long parentID) {
         weakReferences.assignParentID(objectID, parentID);
     }
@@ -229,14 +220,6 @@ public class UIContext {
 
     private EventBus getEventBus() {
         return rootEventBus;
-    }
-
-    private void setWindow(final PWindow window) {
-        this.window = window;
-    }
-
-    private PWindow getWindow() {
-        return window;
     }
 
     public PCookies getCookies() {
@@ -283,16 +266,8 @@ public class UIContext {
         get().getEventBus().addHandler(handler);
     }
 
-    public static void setCurrentWindow(final PWindow window) {
-        get().setWindow(window);
-    }
-
     public static EventBus getRootEventBus() {
         return get().getEventBus();
-    }
-
-    public static PWindow getCurrentWindow() {
-        return get().getWindow();
     }
 
     public void close() {
@@ -399,7 +374,10 @@ public class UIContext {
             lastReceived = expected;
             expected++;
         }
-        log.info("Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Message synchronized from #{} to #{}", receivedSeqNum, lastReceived);
+        }
         return datas;
     }
 

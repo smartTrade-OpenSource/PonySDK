@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -35,8 +36,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PPushButton extends PButton {
 
     public PPushButton(final PImage image) {
-        super();
-        create.put(PROPERTY.IMAGE, image.getID());
+        super(null, new EntryInstruction(PROPERTY.IMAGE, image.getID()));
     }
 
     @Override

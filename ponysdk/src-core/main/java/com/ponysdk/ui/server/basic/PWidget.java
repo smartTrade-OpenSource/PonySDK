@@ -42,6 +42,7 @@ import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.RemoveHandler;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
@@ -98,6 +99,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String styleName;
     private String stylePrimaryName;
     private String debugID;
+
+    public PWidget(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();

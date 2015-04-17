@@ -24,6 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -58,8 +59,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public PDockLayoutPanel(final PUnit unit) {
-        super();
-        create.put(PROPERTY.UNIT, unit.ordinal());
+        super(new EntryInstruction(PROPERTY.UNIT, unit.ordinal()));
     }
 
     @Override

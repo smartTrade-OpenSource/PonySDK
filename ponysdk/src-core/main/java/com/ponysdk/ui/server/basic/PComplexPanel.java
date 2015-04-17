@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Iterator;
 
 import com.ponysdk.core.instruction.Add;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Remove;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
@@ -36,6 +37,10 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 public abstract class PComplexPanel extends PPanel {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
+
+    public PComplexPanel(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {

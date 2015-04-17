@@ -28,12 +28,12 @@ import org.json.JSONObject;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
-import com.ponysdk.ui.server.extension.PAddOn;
 import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -42,36 +42,46 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public abstract class PObject {
 
-    protected long ID;
-    protected Create create;
+    protected final long ID = UIContext.get().nextID();
 
     private String nativeBindingFunction;
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    PObject() {
-        init(getWidgetType());
+    private long parentWindowID;
+
+    PObject(final EntryInstruction... entries) {
         UIContext.get().registerObject(this);
+        final Create create = createInstruction(entries);
+        enrichCreate(create);
+        Txn.get().getTxnContext().save(create);
+    }
+
+    protected void enrichCreate(final Create create) {}
+
+    protected Create createInstruction(final EntryInstruction... entries) {
+        final Create create = new Create(ID, getWidgetType());
+
+        if (this instanceof PAddOn) {
+            create.setAddOnSignature(((com.ponysdk.ui.server.extension.PAddOn) this).getSignature());
+        }
+
+        if (entries != null) {
+            for (final EntryInstruction entry : entries) {
+                if (entry.value == null) continue;
+                create.put(entry.key, entry.value);
+            }
+        }
+        return create;
     }
 
     protected abstract WidgetType getWidgetType();
-
-    protected void init(final WidgetType widgetType) {
-        if (widgetType == null) { return; }
-        ID = UIContext.get().nextID();
-        create = new Create(ID, widgetType);
-        if (this instanceof PAddOn) {
-            create.setAddOnSignature(((PAddOn) this).getSignature());
-        }
-        Txn.get().getTxnContext().save(create);
-    }
 
     public long getID() {
         return ID;
     }
 
     public void bindTerminalFunction(final String functionName) {
-
         if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
         final Update update = new Update(getID());
@@ -127,6 +137,14 @@ public abstract class PObject {
         final PObject other = (PObject) obj;
         if (ID != other.ID) return false;
         return true;
+    }
+
+    public long getParentWindowID() {
+        return parentWindowID;
+    }
+
+    void setParentWindowID(final long parentWindowID) {
+        this.parentWindowID = parentWindowID;
     }
 
     @Override

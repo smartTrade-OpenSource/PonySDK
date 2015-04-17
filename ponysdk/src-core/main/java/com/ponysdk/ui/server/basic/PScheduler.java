@@ -53,6 +53,10 @@ public abstract class PScheduler extends PObject {
         return WidgetType.SCHEDULER;
     }
 
+    public static PScheduler get() {
+        return get(PWindow.MAIN);
+    }
+
     private static PScheduler get(final long windowID) {
         final String rootID = SCHEDULER_KEY + "_" + windowID;
         PScheduler scheduler = UIContext.get().getAttribute(rootID);
@@ -61,11 +65,6 @@ public abstract class PScheduler extends PObject {
             UIContext.get().setAttribute(SCHEDULER_KEY, scheduler);
         }
         return scheduler;
-    }
-
-    public static PScheduler get() {
-        if (UIContext.getCurrentWindow() == null) return get(0);
-        return get(UIContext.getCurrentWindow().getID());
     }
 
     public void scheduleFixedRate(final RepeatingCommand cmd, final int delayMs) {

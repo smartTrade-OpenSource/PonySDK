@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 sourceCompatibility = 1.7
+targetCompatibility = 1.7
 version = '0.7.0.21'
 
 ext{
@@ -81,6 +82,7 @@ configurations {
 	selenium
 	json_jackson
     jetty
+    asm
 	
 	compile {
 		extendsFrom jetty,commons,gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson, log4j
@@ -91,7 +93,7 @@ configurations {
 	}
 	
 	runtime {
-		extendsFrom spring, sl4j, hibernate, mongodb, json_jackson
+		extendsFrom spring, sl4j, hibernate, mongodb, json_jackson, asm
 	}
     
 }
@@ -128,8 +130,8 @@ dependencies {
     jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
     jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
     jetty 'org.eclipse.jetty:jetty-io:9.2.10.v20150310'
-    
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
+    asm 'org.ow2.asm:asm:5.0.3'
 }
 
 
@@ -389,6 +391,7 @@ task copyAllLibs << {
 	copyLib(configurations.json_jackson, 'libs/json_jackson');
 	copyLib(configurations.jetty, 'libs/jetty');
 	copyLib(configurations.commons, 'libs/commons');
+	copyLib(configurations.asm, 'libs/asm');
 }
 
 task sendTo(type: Copy) {

@@ -32,6 +32,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ponysdk.core.instruction.AddHandler;
+import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
@@ -93,20 +95,23 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
+        super(new EntryInstruction(PROPERTY.ORACLE, suggestOracle.getID()));
 
         this.suggestOracle = suggestOracle;
 
         Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
         Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
-
-        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
-        create.put(PROPERTY.ORACLE, this.suggestOracle.getID());
     }
 
     @Override
-    protected void init(final WidgetType widgetType) {
-        this.textBox = new PTextBox();
-        super.init(widgetType);
+    protected void enrichCreate(final Create create) {
+        super.enrichCreate(create);
+
+        if (textBox == null) {
+            textBox = new PTextBox();
+        }
+
+        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
     }
 
     @Override

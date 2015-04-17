@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
@@ -53,16 +54,15 @@ public class PAddOn extends PObject implements PNativeHandler {
      *            optional parameters that will be passed to the create javascript function
      */
     public PAddOn(final String factory, final PWidget w, final JSONObject params) {
-        super();
+        super(new EntryInstruction(PROPERTY.FACTORY, factory), new EntryInstruction(PROPERTY.NATIVE, params), new EntryInstruction(PROPERTY.WIDGET, w != null ? w.ID : null));
+
         this.widget = w;
 
-        if (factory != null) create.put(PROPERTY.FACTORY, factory);
-        else create.put(PROPERTY.FACTORY, getClass().getName());
-
-        if (params != null) create.put(PROPERTY.NATIVE, params);
-        if (this.widget != null) create.put(PROPERTY.WIDGET, this.widget.ID);
-
         addNativeHandler(this);
+    }
+
+    public PAddOn(final PWidget w, final JSONObject params) {
+        this(PAddOn.class.getName(), w, params);
     }
 
     public void update(final JSONObject data) {

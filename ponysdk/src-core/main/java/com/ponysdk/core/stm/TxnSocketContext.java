@@ -15,7 +15,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     private WebSocket socket;
 
-    private List<Instruction> instructions = new ArrayList<Instruction>();
+    private final List<Instruction> instructions = new ArrayList<Instruction>();
 
     private boolean polling = false;
 
@@ -42,13 +42,6 @@ public class TxnSocketContext implements TxnContext, TxnListener {
         data.put(APPLICATION.SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
         socket.send(data.toString());
         instructions.clear();
-    }
-
-    @Override
-    public List<Instruction> setCurrentStacker(final List<Instruction> stacker) {
-        final List<Instruction> list = instructions;
-        instructions = stacker;
-        return list;
     }
 
     public void switchToPollingMode() {

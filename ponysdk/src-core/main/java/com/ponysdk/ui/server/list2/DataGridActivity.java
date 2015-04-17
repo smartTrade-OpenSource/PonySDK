@@ -50,8 +50,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     protected final List<D> rows = new ArrayList<D>();
     protected int dataCount = 0;
 
-    private final KeyProvider keyProvider = new DefaultKeyProvider();
-
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
         this.view.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);

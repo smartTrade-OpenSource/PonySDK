@@ -45,12 +45,21 @@ public class Instruction extends JSONObject {
     public Instruction() {}
 
     public Instruction(final long objectID) {
-        put(PROPERTY.OBJECT_ID, objectID);
+        this(objectID, null, null);
     }
 
     public Instruction(final long objectID, final long parentID) {
+        this(objectID, parentID, null);
+    }
+
+    public Instruction(final long objectID, final Long parentID, final Long windowID) {
         put(PROPERTY.OBJECT_ID, objectID);
-        put(PROPERTY.PARENT_ID, parentID);
+        if (parentID != null) put(PROPERTY.PARENT_ID, parentID);
+        if (windowID != null) put(PROPERTY.PARENT_ID, windowID);
+    }
+
+    public void setWindowID(final long windowID) {
+        put(PROPERTY.WINDOW_ID, windowID);
     }
 
     public long getObjectID() {

@@ -32,4 +32,9 @@ public class Update extends Instruction {
         put(TYPE.KEY, TYPE.KEY_.UPDATE);
     }
 
+    public Update(final long objectID, final Long windowID) {
+        super(objectID, null, windowID);
+        put(TYPE.KEY, TYPE.KEY_.UPDATE);
+    }
+
 }

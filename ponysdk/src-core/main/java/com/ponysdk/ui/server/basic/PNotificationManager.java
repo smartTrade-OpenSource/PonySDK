@@ -39,18 +39,22 @@ public class PNotificationManager {
     }
 
     public static void notify(final String message, final Notification notification) {
+        notify(null, message, notification);
+    }
+
+    public static void notify(final Long windowID, final String message, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(new PLabel(message));
+                showTrayNotification(windowID, new PLabel(message));
                 break;
             case HUMANIZED:
-                showHumanizedNotification(new PLabel(message));
+                showHumanizedNotification(windowID, new PLabel(message));
                 break;
             case WARNING_MESSAGE:
-                showWarningNotification(new PLabel(message));
+                showWarningNotification(windowID, new PLabel(message));
                 break;
             case ERROR_MESSAGE:
-                showErrorNotification(new PLabel(message));
+                showErrorNotification(windowID, new PLabel(message));
                 break;
             default:
                 break;
@@ -58,18 +62,22 @@ public class PNotificationManager {
     }
 
     public static void notify(final IsPWidget content, final Notification notification) {
+        notify(null, content, notification);
+    }
+
+    public static void notify(final Long windowID, final IsPWidget content, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(content);
+                showTrayNotification(windowID, content);
                 break;
             case HUMANIZED:
-                showHumanizedNotification(content);
+                showHumanizedNotification(windowID, content);
                 break;
             case WARNING_MESSAGE:
-                showWarningNotification(content);
+                showWarningNotification(windowID, content);
                 break;
             case ERROR_MESSAGE:
-                showErrorNotification(content);
+                showErrorNotification(windowID, content);
                 break;
             default:
                 break;
@@ -77,22 +85,42 @@ public class PNotificationManager {
     }
 
     public static void showHumanizedNotification(final String message) {
-        showHumanizedNotification(new PLabel(message));
+        showHumanizedNotification(null, new PLabel(message));
     }
 
     public static void showWarningNotification(final String message) {
-        showWarningNotification(new PLabel(message));
+        showWarningNotification(null, new PLabel(message));
     }
 
     public static void showErrorNotification(final String message) {
-        showErrorNotification(new PLabel(message));
+        showErrorNotification(null, new PLabel(message));
     }
 
     public static void showTrayNotification(final String message) {
-        showTrayNotification(new PLabel(message));
+        showTrayNotification(null, new PLabel(message));
     }
 
-    private static void showHumanizedNotification(final IsPWidget content) {
+    public static void showHumanizedNotification(final PWindow windowID, final String message) {
+        showHumanizedNotification(windowID.getID(), new PLabel(message));
+    }
+
+    public static void showHumanizedNotification(final Long windowID, final String message) {
+        showHumanizedNotification(windowID, new PLabel(message));
+    }
+
+    public static void showWarningNotification(final Long windowID, final String message) {
+        showWarningNotification(windowID, new PLabel(message));
+    }
+
+    public static void showErrorNotification(final Long windowID, final String message) {
+        showErrorNotification(windowID, new PLabel(message));
+    }
+
+    public static void showTrayNotification(final Long windowID, final String message) {
+        showTrayNotification(windowID, new PLabel(message));
+    }
+
+    private static void showHumanizedNotification(final Long windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_HUMANIZED);
@@ -110,7 +138,7 @@ public class PNotificationManager {
         addAutoCloseTimer(popupPanel, humanizedDuration);
     }
 
-    private static void showWarningNotification(final IsPWidget content) {
+    private static void showWarningNotification(final Long windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_WARNING);
@@ -127,7 +155,7 @@ public class PNotificationManager {
         addAutoCloseTimer(popupPanel, warningDuration);
     }
 
-    private static void showErrorNotification(final IsPWidget content) {
+    private static void showErrorNotification(final Long windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(false);
         popupPanel.setGlassEnabled(false);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
@@ -144,7 +172,7 @@ public class PNotificationManager {
         popupPanel.center();
     }
 
-    private static void showTrayNotification(final IsPWidget content) {
+    private static void showTrayNotification(final Long windowID, final IsPWidget content) {
         final PSimplePanel div2 = new PSimplePanel();
         div2.setWidget(content);
 
