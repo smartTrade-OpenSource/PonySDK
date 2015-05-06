@@ -11,11 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.stm.TxnSocketContext;
+import com.ponysdk.ui.server.basic.PPusher;
 
 public class CommunicationSanityChecker {
 
     protected static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
+    private static final int DEFAULT_INSTRUCTIONS_SIZE = 10000;
     private static final int CHECK_PERIOD = 1000;
     public static final String THREAD_COUNT_SYSTEM_PROPERTY = "communication.sanity.checker.thread.count";
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(System.getProperty(THREAD_COUNT_SYSTEM_PROPERTY, "" + Runtime.getRuntime().availableProcessors()));
@@ -35,6 +38,7 @@ public class CommunicationSanityChecker {
 
     protected final UIContext uiContext;
     protected long heartBeatPeriod; // In MilliSeconds
+    protected int instructionsSizeLimit = DEFAULT_INSTRUCTIONS_SIZE;
     protected long lastReceivedTime;
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private RunnableScheduledFuture<?> sanityChecker;
@@ -49,6 +53,7 @@ public class CommunicationSanityChecker {
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         setHeartBeatPeriod(uiContext.getApplication().getOptions().getHeartBeatPeriod());
+        setInstructionsSizeLimit(uiContext.getApplication().getOptions().getInstructionsSizeLimit());
     }
 
     private boolean isStarted() {
@@ -86,6 +91,10 @@ public class CommunicationSanityChecker {
         lastReceivedTime = System.currentTimeMillis();
     }
 
+    public void setInstructionsSizeLimit(final int instructionsSizeLimit) {
+        this.instructionsSizeLimit = instructionsSizeLimit;
+    }
+
     public void setHeartBeatPeriod(final long hearBeatInt) {
         heartBeatPeriod = TimeUnit.SECONDS.toMillis(hearBeatInt);
     }
@@ -102,7 +111,7 @@ public class CommunicationSanityChecker {
                 if (isCommunicationSuspectedToBeNonFunctional(now)) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
-                    // sanityCheckerTimer.schedule(new SendHeartBeatTask(), 0, TimeUnit.MILLISECONDS);
+                    log.info("[" + uiContext + "] No message have been received, communication suspected to be non functional.");
                 }
                 break;
             case SUSPECT:
@@ -110,6 +119,7 @@ public class CommunicationSanityChecker {
                     if ((now - suspectTime) >= heartBeatPeriod) {
                         // No message have been received since we suspected the communication to be non
                         // functional
+                        log.info("[" + uiContext + "] No message have been received since we suspected the communication to be non functional, context will be destroyed");
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();
@@ -121,6 +131,21 @@ public class CommunicationSanityChecker {
                 break;
             default:
                 break;
+        }
+
+        if (currentState != CommunicationState.KO) {
+            final PPusher pusher = uiContext.getPusher();
+            if (pusher != null) {
+                final TxnSocketContext context = pusher.getTxContext();
+                if (context != null) {
+                    if (context.getInstructionsSize() > instructionsSizeLimit) {
+                        log.info("[" + uiContext + "] Instructions size limit [" + instructionsSizeLimit + "] exceeded, context will be destroyed.");
+                        currentState = CommunicationState.KO;
+                        stop();
+                        uiContext.destroy();
+                    }
+                }
+            }
         }
     }
 
