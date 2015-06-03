@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 sourceCompatibility = 1.6
-version = '0.7.0.20'
+version = '0.7.0.22'
 
 ext{
     srcCore = "src-core/main/java"

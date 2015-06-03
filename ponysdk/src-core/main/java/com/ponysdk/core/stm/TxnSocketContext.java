@@ -84,4 +84,9 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void afterFlush(final TxnContext txnContext) {}
+
+    public int getInstructionsSize() {
+        return instructions.size();
+    }
+
 }
