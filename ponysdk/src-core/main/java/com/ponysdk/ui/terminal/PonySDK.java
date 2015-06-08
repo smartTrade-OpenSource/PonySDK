@@ -32,8 +32,6 @@ import org.timepedia.exporter.client.ExportConstructor;
 import org.timepedia.exporter.client.ExportPackage;
 import org.timepedia.exporter.client.Exportable;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -78,14 +76,6 @@ public class PonySDK implements Exportable {
     @Export
     public void start() {
         log("starting...");
-        GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
-            @Override
-            public void onUncaughtException(final Throwable e) {
-                log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-                Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
-            }
-        });
 
         try {
 
@@ -135,7 +125,6 @@ public class PonySDK implements Exportable {
 
                     } catch (final RuntimeException exception) {
                         log.log(Level.SEVERE, "Failed to process data with error #" + exception.getMessage() + ", data: " + data, exception);
-                        Window.alert("Failed to process data with error #" + exception.getMessage() + ", data: " + data);
                     }
                 }
 
@@ -151,7 +140,6 @@ public class PonySDK implements Exportable {
 
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
-            Window.alert("Loading application has failed #" + e);
         }
     }
 

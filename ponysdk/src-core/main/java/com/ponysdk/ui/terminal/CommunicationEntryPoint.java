@@ -31,7 +31,6 @@ import org.timepedia.exporter.client.ExporterUtil;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.user.client.Window;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
@@ -44,7 +43,6 @@ public class CommunicationEntryPoint implements EntryPoint {
             @Override
             public void onUncaughtException(final Throwable e) {
                 log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-                Window.alert("PonySDK has encountered an internal error : " + e.getMessage());
             }
         });
 

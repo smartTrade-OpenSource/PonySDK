@@ -9,7 +9,6 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
@@ -54,7 +53,6 @@ public class HttpRequestBuilder extends RequestBuilder {
 
         } catch (final RequestException e) {
             log.log(Level.SEVERE, "Error ", e);
-            Window.alert("Failed to send request #" + e);
         }
     }
 }
