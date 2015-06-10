@@ -61,9 +61,7 @@ public class PWindow extends PObject implements PNativeHandler {
     private final List<Runnable> postedCommands = new ArrayList<Runnable>();
     private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<PCloseHandler>();
 
-    private boolean loaded = false;
-
-    private boolean acquiring;
+    private int level = 0;
 
     public PWindow(final String url, final String name, final String features) {
         super();
@@ -127,7 +125,6 @@ public class PWindow extends PObject implements PNativeHandler {
             if (inputData.has(APPLICATION.KEY)) {
                 sendSeqNum = 0;
                 onLoad();
-                loaded = true;
                 out.put(APPLICATION.VIEW_ID, 0);
             } else {
                 process(context, inputData);
@@ -137,21 +134,15 @@ public class PWindow extends PObject implements PNativeHandler {
             log.error("", e);
         } finally {
             releaseOnNativeEvent();
-            acquiring = false;
         }
 
         if (!postedCommands.isEmpty()) executePostedCommand();
     }
 
     public void acquire() {
-        if (!isLoaded()) {
-            if (log.isWarnEnabled()) log.warn("Window is not loaded yet.");
-            return;
-        }
-        if (acquiring) {
-            if (log.isWarnEnabled()) log.warn("Window already acquired.");
-            return;
-        }
+        level++;
+
+        if (level > 1) { return; }
         out = new JSONObject();
         context = UIContext.get();
         popupstacker = new ArrayList<Instruction>();
@@ -160,7 +151,7 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     private void acquireOnNativeEvent() {
-        acquiring = true;
+        level++;
         out = new JSONObject();
         context = UIContext.get();
         popupstacker = new ArrayList<Instruction>();
@@ -169,6 +160,8 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void flushOnNativeEvent() {
+        if (level != 1) return;
+
         try {
             out.put(APPLICATION.INSTRUCTIONS, popupstacker);
             out.put(APPLICATION.SEQ_NUM, sendSeqNum);
@@ -179,11 +172,14 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void flush() {
-        if (acquiring) { return; }
         flushOnNativeEvent();
     }
 
     public void releaseOnNativeEvent() {
+        level--;
+
+        if (level != 0) return;
+
         try {
             Txn.get().getTxnContext().setCurrentStacker(mainStacker);
             final Update update = new Update(ID);
@@ -195,7 +191,6 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void release() {
-        if (acquiring) { return; }
         releaseOnNativeEvent();
     }
 
@@ -227,10 +222,6 @@ public class PWindow extends PObject implements PNativeHandler {
             }
         }
         postedCommands.clear();
-    }
-
-    public boolean isLoaded() {
-        return loaded;
     }
 
     protected void onLoad() {}
