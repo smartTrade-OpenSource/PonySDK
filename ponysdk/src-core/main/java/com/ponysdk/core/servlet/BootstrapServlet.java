@@ -36,13 +36,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.SystemProperty;
 
@@ -181,8 +174,21 @@ public class BootstrapServlet extends HttpServlet {
 
         builder.append("<!doctype html>");
         builder.append("<html>");
+        generateIndexHead(builder);
+        generateIndexBody(builder);
+        builder.append("</html>");
+
+        return builder;
+    }
+
+    protected void generateIndexHead(final StringBuilder builder) {
         builder.append("<head>");
         builder.append("    <!-- Powered by PonySDK http://www.ponysdk.com -->");
+        getHeadContent(builder);
+        builder.append("</head>");
+    }
+
+    protected void getHeadContent(final StringBuilder builder) {
         builder.append("    <title>" + applicationName + "</title>");
         builder.append("    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         for (final String m : meta) {
@@ -204,21 +210,20 @@ public class BootstrapServlet extends HttpServlet {
         }
 
         addToHeader(builder);
+    }
 
-        builder.append("</head>");
+    protected void generateIndexBody(final StringBuilder builder) {
         builder.append("<body>");
+        getBodyContent(builder);
+        builder.append("</body>");
+    }
 
+    protected void getBodyContent(final StringBuilder builder) {
         addHistoryIFrame(builder);
         addLoading(builder);
         addNoScript(builder);
         addOnLoad(builder);
-
         addToBody(builder);
-
-        builder.append("</body>");
-        builder.append("</html>");
-
-        return builder;
     }
 
     protected void addHistoryIFrame(final StringBuilder builder) {
