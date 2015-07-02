@@ -129,7 +129,7 @@ public class PNotificationManager {
 
     private static void showErrorNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(false);
-        popupPanel.setGlassEnabled(true);
+        popupPanel.setGlassEnabled(false);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION);
         popupPanel.addStyleName(PonySDKTheme.NOTIFICATION_ERROR);
         popupPanel.setWidget(content);

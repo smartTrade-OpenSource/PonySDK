@@ -23,16 +23,37 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.RichTextArea;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTRichTextArea extends PTFocusWidget<RichTextArea> {
+public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
+
+    private UIService uiService;
+
+    @Override
+    public void onBlur(final BlurEvent event) {
+        final PTInstruction eventInstruction = new PTInstruction();
+
+        eventInstruction.setObjectID(getObjectID());
+        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
+        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
+        eventInstruction.put(PROPERTY.HTML, uiObject.getHTML());
+
+        uiService.sendDataToServer(eventInstruction);
+    }
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new RichTextArea());
+        final RichTextArea richTextArea = new RichTextArea();
+        init(create, uiService, richTextArea);
+        this.uiService = uiService;
+        richTextArea.addBlurHandler(this);
     }
 
     @Override
@@ -100,4 +121,5 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> {
     public enum Justification {
         CENTER, FULL, LEFT, RIGHT;
     }
+
 }

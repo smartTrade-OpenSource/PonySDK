@@ -33,6 +33,8 @@ import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class RichTextAreaPageActivity extends SamplePageActivity {
 
@@ -47,6 +49,15 @@ public class RichTextAreaPageActivity extends SamplePageActivity {
         final PScrollPanel scroll = new PScrollPanel();
         final PRichTextArea richTextArea = new PRichTextArea();
         final PRichTextToolbar richTextToolbar = new PRichTextToolbar(richTextArea);
+
+        richTextArea.addValueChangeHandler(new PValueChangeHandler<String>() {
+
+            @Override
+            public void onValueChange(final PValueChangeEvent<String> event) {
+                System.err.println(richTextArea.getHTML());
+            }
+        });
+
         final PFlowPanel flow = new PFlowPanel();
         flow.add(new PLabel("Edit rich content"));
         flow.add(richTextToolbar);

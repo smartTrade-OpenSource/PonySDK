@@ -65,6 +65,9 @@ public class Main {
     private int sessionTimeout = 60;
     private String war;
     private String applicationContextName;
+    private String applicationID;
+    private String applicationName;
+    private String applicationDescription;
 
     private Servlet httpServlet;
     private Servlet bootstrapServlet;
@@ -85,6 +88,12 @@ public class Main {
                 main.setPort(Integer.valueOf(parameter[1]));
             } else if (parameter[0].equals("war")) {
                 main.setWar(parameter[1]);
+            } else if (parameter[0].equals("applicationName")) {
+                main.setApplicationName(parameter[1]);
+            } else if (parameter[0].equals("applicationID")) {
+                main.setApplicationID(parameter[1]);
+            } else if (parameter[0].equals("applicationDescription")) {
+                main.setApplicationDescription(parameter[1]);
             }
         }
 
@@ -116,6 +125,9 @@ public class Main {
         if (bootstrapServlet == null) bootstrapServlet = new BootstrapServlet();
         if (httpSessionListener == null && servletContextListener == null) {
             final SpringApplicationLoader applicationLoader = new SpringApplicationLoader();
+            applicationLoader.setApplicationID(applicationID);
+            applicationLoader.setApplicationName(applicationName);
+            applicationLoader.setApplicationDescription(applicationDescription);
             httpSessionListener = applicationLoader;
             servletContextListener = applicationLoader;
         }
@@ -168,6 +180,14 @@ public class Main {
         this.applicationContextName = applicationContextName;
     }
 
+    public void setApplicationID(final String applicationID) {
+        this.applicationID = applicationID;
+    }
+
+    public void setApplicationName(final String applicationName) {
+        this.applicationName = applicationName;
+    }
+
     public void setWar(final String war) {
         this.war = war;
     }
@@ -198,6 +218,10 @@ public class Main {
 
     public void setSessionTimeout(final int sessionTimeout) {
         this.sessionTimeout = sessionTimeout;
+    }
+
+    private void setApplicationDescription(final String applicationDescription) {
+        this.applicationDescription = applicationDescription;
     }
 
 }

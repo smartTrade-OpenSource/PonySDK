@@ -47,7 +47,13 @@ public class Application {
 
     private final ApplicationManagerOption options;
 
-    public Application(final Session session, final ApplicationManagerOption options) {
+    private final String ID;
+
+    private final String name;
+
+    public Application(final String ID, final String name, final Session session, final ApplicationManagerOption options) {
+        this.ID = ID;
+        this.name = name;
         this.session = session;
         this.options = options;
     }
@@ -89,4 +95,11 @@ public class Application {
         return options;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getID() {
+        return ID;
+    }
 }

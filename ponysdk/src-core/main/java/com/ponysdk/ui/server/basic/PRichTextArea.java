@@ -23,9 +23,20 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
+import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
+import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
@@ -40,11 +51,11 @@ import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
  * <dd>Applied to the rich text element.</dd>
  * </dl>
  */
-public class PRichTextArea extends PFocusWidget implements PHasHTML {
-
-    private String text;
+public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
 
     private String html;
+
+    private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
 
     private final Formatter formatter = new Formatter();
 
@@ -59,12 +70,12 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
     @Override
     public String getText() {
-        return text;
+        return html;
     }
 
     @Override
     public void setText(final String text) {
-        this.text = text;
+        this.html = text;
         final Update update = new Update(getID());
         update.put(PROPERTY.TEXT, text);
         Txn.get().getTxnContext().save(update);
@@ -85,6 +96,38 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML {
 
     public Formatter getFormatter() {
         return this.formatter;
+    }
+
+    @Override
+    public void onClientData(final JSONObject e) throws JSONException {
+        if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
+            final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, e.getString(PROPERTY.HTML));
+            fireOnValueChange(event);
+        } else {
+            super.onClientData(e);
+        }
+    }
+
+    protected void fireOnValueChange(final PValueChangeEvent<String> event) {
+        this.html = event.getValue();
+        for (final PValueChangeHandler<String> handler : handlers) {
+            handler.onValueChange(event);
+        }
+    }
+
+    @Override
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        handlers.add(handler);
+    }
+
+    @Override
+    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
+        handlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
+        return Collections.unmodifiableCollection(handlers);
     }
 
     public class Formatter {

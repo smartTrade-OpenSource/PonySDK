@@ -41,19 +41,19 @@ public class SimpleListActivity<T> extends AbstractActivity {
 
     protected SimpleListView listView;
 
-    private List<ListColumnDescriptor<T, ?>> listFields;
+    protected List<ListColumnDescriptor<T, ?>> listFields;
 
-    private final String ID;
+    protected final String ID;
 
-    private String debugID;
+    protected String debugID;
 
-    private List<T> data;
+    protected List<T> data;
 
-    private Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
+    protected Map<Integer, Integer> subListSizeByFather = new HashMap<Integer, Integer>();
 
-    private final EventBus eventBus;
+    protected final EventBus eventBus;
 
-    private int colCount;
+    protected int colCount;
 
     public SimpleListActivity(final SimpleListView listView, final List<ListColumnDescriptor<T, ?>> listFields, final EventBus eventBus) {
         this.ID = null;
@@ -100,7 +100,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         listView.addWidget(widget, colCount, 0);
     }
 
-    private void buildHeaders() {
+    protected void buildHeaders() {
         colCount = 0;
 
         listView.setColumns(listFields.size());
@@ -129,7 +129,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         if (data != null) setData(data);
     }
 
-    private void reset() {
+    protected void reset() {
         subListSizeByFather.clear();
         listView.clear(0);
         data = null;
@@ -215,7 +215,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         }
     }
 
-    private void updateSubListOnRowInserted(final int row, final int insertedRowCount) {
+    protected void updateSubListOnRowInserted(final int row, final int insertedRowCount) {
         final Map<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (final Map.Entry<Integer, Integer> entry : subListSizeByFather.entrySet()) {
             final int size = entry.getValue();
@@ -229,7 +229,7 @@ public class SimpleListActivity<T> extends AbstractActivity {
         subListSizeByFather.put(row, insertedRowCount);
     }
 
-    private void updateSubListOnRowDeleted(final int row, final int deletedRowCount) {
+    protected void updateSubListOnRowDeleted(final int row, final int deletedRowCount) {
         final Map<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (final Map.Entry<Integer, Integer> entry : subListSizeByFather.entrySet()) {
             final int size = entry.getValue();

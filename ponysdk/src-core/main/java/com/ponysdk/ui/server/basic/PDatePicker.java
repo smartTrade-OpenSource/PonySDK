@@ -52,6 +52,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     private Date date;
 
+    private int year = -1;
+    private int month = -1;
+    private int day = -1;
+
     public PDatePicker() {
         this(null);
     }
@@ -72,6 +76,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
             final String data = e.getString(PROPERTY.VALUE);
             Date date = null;
             if (data != null && !data.isEmpty()) date = new Date(Long.parseLong(data));
+
+            year = e.getInt(PROPERTY.YEAR);
+            month = e.getInt(PROPERTY.MONTH);
+            day = e.getInt(PROPERTY.DAY);
             onValueChange(new PValueChangeEvent<Date>(this, date));
         } else if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.SHOW_RANGE)) {
             final String start = e.getString(PROPERTY.START);
@@ -187,6 +195,22 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
             asString.add(Long.toString(d.getTime()));
         }
         return asString;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(final int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public int getDay() {
+        return day;
     }
 
 }

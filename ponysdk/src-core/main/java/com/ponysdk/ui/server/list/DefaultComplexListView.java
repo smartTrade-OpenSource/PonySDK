@@ -39,25 +39,25 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class DefaultComplexListView extends PVerticalPanel implements ComplexListView {
 
-    private final SimpleListView simpleListView = new DefaultSimpleListView();
+    protected final SimpleListView simpleListView = new DefaultSimpleListView();
 
-    private final PSimplePanel inputLayout = new PSimplePanel();
+    protected final PSimplePanel inputLayout = new PSimplePanel();
 
-    private final PToolbar toolbarLayout = new PToolbar();
+    protected final PToolbar toolbarLayout = new PToolbar();
 
-    private final PSimplePanel pagingLayout = new PSimplePanel();
+    protected final PSimplePanel pagingLayout = new PSimplePanel();
 
-    private final PSimplePanel positionPanel = new PSimplePanel();
+    protected final PSimplePanel positionPanel = new PSimplePanel();
 
-    private final PSimplePanel topListLayout = new PSimplePanel();
+    protected final PSimplePanel topListLayout = new PSimplePanel();
 
-    private final PSimplePanel bottomListLayout = new PSimplePanel();
+    protected final PSimplePanel bottomListLayout = new PSimplePanel();
 
-    private final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
+    protected final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
 
-    private final PSimplePanel preferencesLayout = new PSimplePanel();
+    protected final PSimplePanel preferencesLayout = new PSimplePanel();
 
-    private final PLabel searchResultTimeLabel = new PLabel();
+    protected final PLabel searchResultTimeLabel = new PLabel();
 
     public DefaultComplexListView() {
         setSizeFull();
