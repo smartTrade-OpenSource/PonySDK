@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.event;
 
-import java.util.Set;
+import java.util.Collection;
 
 import com.ponysdk.core.event.Event.Type;
 
@@ -31,13 +31,19 @@ public interface EventBus {
 
     public <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler);
 
+    public <H extends EventHandler> void removeHandler(Type<H> type, H handler);
+
     public <H extends EventHandler> HandlerRegistration addHandlerToSource(Type<H> type, Object source, H handler);
+
+    public <H extends EventHandler> void removeHandlerFromSource(Type<H> type, Object source, H handler);
+
+    public void addHandler(BroadcastEventHandler handler);
+
+    public void removeHandler(BroadcastEventHandler handler);
 
     public void fireEvent(Event<?> event);
 
     public void fireEventFromSource(Event<?> event, Object source);
 
-    public void addHandler(BroadcastEventHandler handler);
-
-    public <H extends EventHandler> Set<H> getHandlerSet(final Type<H> type, final Object source);
+    public <H extends EventHandler> Collection<H> getHandlers(final Type<H> type, final Object source);
 }

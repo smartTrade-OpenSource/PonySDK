@@ -267,8 +267,16 @@ public class UIContext {
         return get().getEventBus().addHandler(type, handler);
     }
 
+    public static <H extends EventHandler> void removeHandler(final Type<H> type, final H handler) {
+        get().getEventBus().removeHandler(type, handler);
+    }
+
     public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
         return get().getEventBus().addHandlerToSource(type, source, handler);
+    }
+
+    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
+        get().getEventBus().removeHandlerFromSource(type, source, handler);
     }
 
     public static void fireEvent(final Event<?> event) {
@@ -281,6 +289,10 @@ public class UIContext {
 
     public static void addHandler(final BroadcastEventHandler handler) {
         get().getEventBus().addHandler(handler);
+    }
+
+    public static void removeHandler(final BroadcastEventHandler handler) {
+        get().getEventBus().removeHandler(handler);
     }
 
     public static void setCurrentWindow(final PWindow window) {

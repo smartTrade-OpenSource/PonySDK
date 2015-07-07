@@ -1,6 +1,7 @@
 
 package com.ponysdk.core.concurrent;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.UIContextListener;
+import com.ponysdk.ui.server.basic.PPusher.PusherState;
 import com.ponysdk.ui.server.basic.PWindow;
 
 public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, UIContextListener {
@@ -131,14 +133,21 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         @Override
         public void run() {
-            if (cancelled) return;
-            if (!uiContext.getPusher().execute(runnable)) cancel();
+            try {
+                if (cancelled) return;
+                if (uiContext.getPusher().getPusherState() != PusherState.STOPPED) {
+                    if (!uiContext.getPusher().execute(runnable)) cancel();
+                }
+            } catch (final Throwable throwable) {
+                cancel();
+            }
         }
 
         public void cancel() {
             this.cancelled = true;
             this.future.cancel(true);
             executor.purge();
+            runnablesByUIContexts.get(uiContext).remove(this);
         }
 
         public void setFuture(final ScheduledFuture<?> future) {
@@ -156,7 +165,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         uiContext.addUIContextListener(this);
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
-            runnables = new HashSet<UIScheduledThreadPoolExecutor.UIRunnable>();
+            runnables = Collections.synchronizedSet(new HashSet<UIScheduledThreadPoolExecutor.UIRunnable>());
             runnablesByUIContexts.put(uiContext, runnables);
         }
         runnables.add(runnable);
@@ -164,11 +173,12 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
     @Override
     public void onUIContextDestroyed(final UIContext uiContext) {
-        final Set<UIRunnable> runnables = runnablesByUIContexts.remove(uiContext);
+        final Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables != null) {
             for (final UIRunnable runnable : runnables) {
                 runnable.cancel();
             }
+            runnablesByUIContexts.remove(uiContext);
         }
     }
 
