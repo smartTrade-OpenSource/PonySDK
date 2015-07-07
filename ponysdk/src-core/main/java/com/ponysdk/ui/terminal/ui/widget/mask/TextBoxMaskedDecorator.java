@@ -208,6 +208,8 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
                 }
             }
 
+            if (next == null) return -1;
+
             // if not assignable, return
             if (!next.match(charCode)) return -1;
 

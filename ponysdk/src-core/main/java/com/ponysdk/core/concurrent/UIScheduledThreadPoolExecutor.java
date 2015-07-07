@@ -1,11 +1,10 @@
 
 package com.ponysdk.core.concurrent;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -135,6 +134,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         public void run() {
             try {
                 if (cancelled) return;
+                if (uiContext.getPusher() == null) return;
                 if (uiContext.getPusher().getPusherState() != PusherState.STOPPED) {
                     if (!uiContext.getPusher().execute(runnable)) cancel();
                 }
@@ -165,7 +165,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         uiContext.addUIContextListener(this);
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
-            runnables = Collections.synchronizedSet(new HashSet<UIScheduledThreadPoolExecutor.UIRunnable>());
+            runnables = new CopyOnWriteArraySet<UIRunnable>();
             runnablesByUIContexts.put(uiContext, runnables);
         }
         runnables.add(runnable);
