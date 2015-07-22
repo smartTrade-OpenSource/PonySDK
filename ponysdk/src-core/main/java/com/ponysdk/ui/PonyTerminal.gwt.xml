@@ -2,7 +2,6 @@
 <module rename-to='ponyterminal'>
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.http.HTTP" />
-	<inherits name="com.ponysdk.ui.Generated" />
 	
 	<entry-point class='com.ponysdk.ui.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />

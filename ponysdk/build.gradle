@@ -104,7 +104,7 @@ dependencies {
 	gwt 'com.google.gwt:gwt-dev:2.7.0'
 	gwt 'com.google.gwt:gwt-codeserver:2.7.0'
 	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
-	gwt 'org.json:json:20090211'
+	gwt 'org.json:json:20140107'
 	gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
 	spring 'org.springframework:spring-core:3.2.3.RELEASE'
 	spring 'org.springframework:spring-web:3.2.3.RELEASE'
@@ -121,15 +121,16 @@ dependencies {
 	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
 	selenium 'org.seleniumhq.selenium:selenium-java:2.33.0'
 	selenium 'junit:junit:4.10'
-	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
-    jetty 'org.eclipse.jetty:jetty-server:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-servlet:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-webapp:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-servlets:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-client:9.2.10.v20150310'
-    jetty 'org.eclipse.jetty:jetty-io:9.2.10.v20150310'
+	
+	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.6.0'
+    jetty 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-servlet:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-servlets:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-io:9.2.12.v20150709'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
     asm 'org.ow2.asm:asm:5.0.3'
 }
@@ -214,28 +215,7 @@ task compileGenerator(type: JavaCompile, dependsOn: compileDatamodel) {
 	inputs.files fileTree(srcGenerator)
 }
 
-task generateDictionnary(dependsOn: compileGenerator) {
-	description = 'Dictionnary generation'
-	inputs.file file('src-core/main/resources/spec/propertiesDictionnary.json')
-    outputs.files fileTree('src-generated/main/java/com/ponysdk/ui')
-    doLast {
-    	javaexec {
-			main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
-			classpath {
-				[
-					file("$buildDir/classes/main"),
-					configurations.sl4j,
-					configurations.gwt
-				]
-			}
-			args = [
-					'verbose=false'
-			]
-    	}
-    }
-}
-
-task generate(dependsOn: generateDictionnary) {
+task generate(dependsOn: compileGenerator) {
 	doLast {
 		println 'generation done'
 	}
