@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +43,11 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.event.Event.Type;
 import com.ponysdk.core.exception.UmbrellaException;
 
-public class SimpleEventBus implements EventBus {
+public class RootEventBus implements EventBus {
 
-    private static final Logger log = LoggerFactory.getLogger(SimpleEventBus.class);
+    private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
 
-    private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<Type<?>, Map<Object, Set<?>>>();
+    private final Map<Type<?>, Map<Object, Map<?, Boolean>>> map = new HashMap<Type<?>, Map<Object, Map<?, Boolean>>>();
 
     private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<BroadcastEventHandler>();
 
@@ -54,7 +55,7 @@ public class SimpleEventBus implements EventBus {
 
     private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<Event<? extends EventHandler>>();
 
-    private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<SimpleEventBus.HandlerContext<? extends EventHandler>>();
+    private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<HandlerContext<? extends EventHandler>>();
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
@@ -115,10 +116,10 @@ public class SimpleEventBus implements EventBus {
     }
 
     private void doRemoveNow(final Type<? extends EventHandler> type, final Object source, final EventHandler handler) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) { return; }
 
-        final Set<?> handlers = sourceMap.get(source);
+        final Map<?, Boolean> handlers = sourceMap.get(source);
         if (handlers == null) { return; }
 
         final boolean removed = handlers.remove(handler);
@@ -168,7 +169,7 @@ public class SimpleEventBus implements EventBus {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void doAddNow(final Type type, final Object source, final Object handler) {
-        ensureHandlerSet(type, source).add(handler);
+        ensureHandlerSet(type, source).put(handler, true);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -224,18 +225,18 @@ public class SimpleEventBus implements EventBus {
         }
     }
 
-    private <H extends EventHandler> Set<H> ensureHandlerSet(final Type<H> type, final Object source) {
-        Map<Object, Set<?>> sourceMap = map.get(type);
+    private <H extends EventHandler> Map<H, Boolean> ensureHandlerSet(final Type<H> type, final Object source) {
+        Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) {
-            sourceMap = new HashMap<Object, Set<?>>();
+            sourceMap = new HashMap<Object, Map<?, Boolean>>();
             map.put(type, sourceMap);
         }
 
         // safe, we control the puts.
         @SuppressWarnings("unchecked")
-        Set<H> handlers = (Set<H>) sourceMap.get(source);
+        Map<H, Boolean> handlers = (Map<H, Boolean>) sourceMap.get(source);
         if (handlers == null) {
-            handlers = new LinkedHashSet<H>();
+            handlers = new WeakHashMap();
             sourceMap.put(source, handlers);
         }
 
@@ -255,21 +256,21 @@ public class SimpleEventBus implements EventBus {
 
     @Override
     public <H extends EventHandler> Collection<H> getHandlers(final Type<H> type, final Object source) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) { return Collections.emptySet(); }
 
         // safe, we control the puts.
         @SuppressWarnings("unchecked")
-        final Set<H> handlers = (Set<H>) sourceMap.get(source);
+        final Map<H, Boolean> handlers = (Map<H, Boolean>) sourceMap.get(source);
         if (handlers == null) { return Collections.emptySet(); }
 
-        return new HashSet<H>(handlers);
+        return handlers.keySet();
     }
 
     private void prune(final Type<?> type, final Object source) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
 
-        final Set<?> pruned = sourceMap.remove(source);
+        final Map<?, Boolean> pruned = sourceMap.remove(source);
 
         assert pruned != null : "Can't prune what wasn't there";
         assert pruned.isEmpty() : "Pruned unempty list!";
@@ -318,8 +319,8 @@ public class SimpleEventBus implements EventBus {
             return true;
         }
 
-        private SimpleEventBus getOuterType() {
-            return SimpleEventBus.this;
+        private RootEventBus getOuterType() {
+            return RootEventBus.this;
         }
 
     }

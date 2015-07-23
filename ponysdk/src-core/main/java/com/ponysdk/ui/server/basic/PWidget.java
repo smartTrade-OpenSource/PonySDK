@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -356,9 +357,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @SuppressWarnings("unchecked")
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final Set<H> handlerSet = ensureDomHandler().getHandlerSet(type, this);
+        final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
-        if (handlerSet.isEmpty()) {
+        if (handlerIterator.isEmpty()) {
             final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
             addHandler.put(PROPERTY.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
             if (handler instanceof JSONObject) {
@@ -452,8 +453,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return domHandler;
     }
 
-    protected <H extends EventHandler> Set<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
-        return ensureDomHandler().getHandlerSet(type, null);
+    protected <H extends EventHandler> Collection<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
+        return ensureDomHandler().getHandlers(type, null);
     }
 
     public void fireMouseEvent(final JSONObject instruction, final PMouseEvent<?> event) throws JSONException {

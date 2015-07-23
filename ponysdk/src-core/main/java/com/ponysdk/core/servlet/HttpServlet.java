@@ -29,7 +29,7 @@ import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.SimpleEventBus;
+import com.ponysdk.core.event.RootEventBus;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.server.basic.PHistory;
 
@@ -71,7 +71,7 @@ public class HttpServlet extends AbstractHttpServlet {
                     throw new ServletException("Failed to instantiate the entry point #" + entryPointClassName, e);
                 }
 
-                final EventBus rootEventBus = new SimpleEventBus();
+                final EventBus rootEventBus = new RootEventBus();
 
                 final PHistory history = new PHistory();
 

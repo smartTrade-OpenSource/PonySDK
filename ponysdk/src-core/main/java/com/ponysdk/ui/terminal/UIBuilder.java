@@ -150,7 +150,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         // hide loading component
         final Widget w = RootPanel.get("loading");
         if (w == null) {
-            Window.alert("Include splash screen html element into your index.html with id=\"loading\"");
+            log.log(Level.WARNING, "Include splash screen html element into your index.html with id=\"loading\"");
         } else {
             w.setSize("0px", "0px");
             w.setVisible(false);
@@ -170,7 +170,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 final StatusCodeException codeException = (StatusCodeException) exception;
                 if (codeException.getStatusCode() == 0) return;
             }
-            Window.alert("Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application");
+            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application", exception);
             return;
         }
 
@@ -186,7 +186,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
                 showCommunicationErrorMessage(statusCodeException);
             } else {
-                Window.alert("An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.");
+                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.", exception);
             }
         }
     }
@@ -197,7 +197,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         final long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
         if ((lastReceived + 1) != receivedSeqNum) {
             incomingMessageQueue.put(receivedSeqNum, data);
-            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
+            log.log(Level.INFO, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
             return;
         }
         lastReceived = receivedSeqNum;
@@ -219,7 +219,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 lastReceived = expected;
                 expected++;
             }
-            log.log(Level.SEVERE, "Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
+            log.log(Level.INFO, "Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
         }
 
         updateMode = true;
@@ -237,7 +237,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 }
             }
         } catch (final Throwable e) {
-            Window.alert("PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived);
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         } finally {
             flushEvents();

@@ -113,7 +113,11 @@ public abstract class AbstractCriteriaDecorator<T> implements CriteriaDecorator 
                     } else if (value instanceof Object[]) {
                         criteria.add(Restrictions.in(associationPath, (Object[]) value));
                     } else {
-                        log.warn("Type not allowed for IN clause: " + value.getClass() + ", value: " + value);
+                        if (value != null) {
+                            log.warn("Type not allowed for IN clause: " + value.getClass() + ", value: " + value);
+                        } else {
+                            log.warn("Type not allowed for IN clause" + ", value: " + value);
+                        }
                     }
                     break;
 

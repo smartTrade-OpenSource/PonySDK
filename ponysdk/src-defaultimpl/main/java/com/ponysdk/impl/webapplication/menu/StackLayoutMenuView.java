@@ -231,9 +231,11 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
                 final PComplexPanel categoryPanel = categoriesByNode.get(current);
                 if (categoryPanel != null) layoutPanel.showWidget(categoryPanel);
             } else {
-                current = current.getChild(category);
                 if (current != null) {
-                    if (!current.open) expandNode(current);
+                    current = current.getChild(category);
+                    if (current != null) {
+                        if (!current.open) expandNode(current);
+                    }
                 }
             }
             i++;

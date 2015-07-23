@@ -115,7 +115,7 @@ public class PPusher extends PObject implements ConnectionListener {
         return uiContext;
     }
 
-    TxnSocketContext getTxContext() {
+    public TxnSocketContext getTxContext() {
         return txnContext;
     }
 
