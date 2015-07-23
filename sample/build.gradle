@@ -1,7 +1,3 @@
-apply plugin: 'java'
-
-sourceCompatibility = 1.6
-
 ext{
 	srcSample = 'src/main/java'
 	srcGenerated = 'src-generated/main/java'
@@ -114,10 +110,7 @@ task copyAllLibs << {
 	project(':ponysdk').copyLib(configurations.java2html, 'libs/java2html');
 }
 
-task createWrapper(type: Wrapper) {
-    gradleVersion = '1.7'
-}
-
+/**
 task createPackage << {
 
 	project.ext.ponysdkWarResourcesPath = ponysdkPath + '/' + project(':ponysdk').warResources
@@ -163,11 +156,12 @@ task createPackage << {
 	writer.write("java -server -cp .:etc/:lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
 	writer.close()
 }
+**/
 
 jar {
-	doLast {
+	/*doLast {
 		tasks.createPackage.execute()
-	}
+	}*/
 }
 
 assemble.dependsOn(copyAllLibs)
