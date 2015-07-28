@@ -19,8 +19,8 @@ subprojects{
 	    publications {
 	        maven(MavenPublication) {
 	        	groupId 'com.ponysdk'
-	            artifactId 'ponysdk'
-	            version '1.0.0-SNAPSHOT'
+	            artifactId project.name
+	            version version
 	            
 	            from components.java
 	        }

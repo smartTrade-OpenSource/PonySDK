@@ -14,7 +14,6 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,6 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
@@ -39,7 +37,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.setCreator(new MySessionSocketCreator());
     }
 
-    public static class MySessionSocketCreator implements WebSocketCreator {
+    public class MySessionSocketCreator implements WebSocketCreator {
 
         @Override
         public Object createWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
@@ -47,7 +45,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
     }
 
-    public static class JettyWebSocket implements WebSocketListener, com.ponysdk.core.socket.WebSocket {
+    public class JettyWebSocket implements WebSocketListener, com.ponysdk.core.socket.WebSocket {
 
         private Session session;
 
@@ -70,15 +68,21 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void send(final String msg) throws IOException {
-            if ((session != null) && (session.isOpen())) {
-                // monitor ??
-                final ByteBuffer buffer = ByteBuffer.allocateDirect(1000000);
-                buffer.put(msg.getBytes("UTF8"));
-                buffer.flip();
-                session.getRemote().sendBytes(buffer); // callback needed ?
-            } else {
-
+            onBeforeSendMessage(msg);
+            try {
+                if ((session != null) && (session.isOpen())) {
+                    // monitor ??
+                    final ByteBuffer buffer = ByteBuffer.allocateDirect(1000000);
+                    buffer.put(msg.getBytes("UTF8"));
+                    buffer.flip();
+                    session.getRemote().sendBytes(buffer); // callback needed ?
+                } else {
+                    // ??
+                }
+            } finally {
+                onAfterMessageSent(msg);
             }
+
         }
 
         @Override
@@ -119,16 +123,24 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void onWebSocketText(final String text) {
+            onBeforeMessageReceived(text);
             try {
                 uiContext.notifyMessageReceived();
-
-                final JSONObject jso = new JSONObject();
-                jso.put(Dictionnary.APPLICATION.PING, (int) (System.currentTimeMillis() * .001));
-                // connection.sendMessage(jso.toString());
             } catch (final Throwable e) {
                 log.error("", e);
+            } finally {
+                onAfterMessageProcessed(text);
             }
         }
+
+        protected void onBeforeSendMessage(final String msg) {}
+
+        protected void onAfterMessageSent(final String msg) {}
+
+        protected void onBeforeMessageReceived(final String text) {}
+
+        protected void onAfterMessageProcessed(final String text) {}
+
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {

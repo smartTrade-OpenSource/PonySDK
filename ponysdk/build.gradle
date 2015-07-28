@@ -116,15 +116,14 @@ dependencies {
 	selenium 'junit:junit:4.10'
 	
 	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.6.0'
-    jetty 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-servlet:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-servlets:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-io:9.2.12.v20150709'
-    jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
+	    jetty 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty:jetty-servlet:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty:jetty-servlets:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
+	    jetty 'org.eclipse.jetty:jetty-io:9.2.12.v20150709'
+	    jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
     asm 'org.ow2.asm:asm:5.0.3'
 }
 

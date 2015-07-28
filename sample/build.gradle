@@ -27,7 +27,7 @@ configurations {
 }
 
 dependencies {
-	java2html 'de.java2html:java2html:1.0'
+	java2html 'de.java2html:java2html:5.0'
 	compile project(':ponysdk')
 	compile fileTree (dir: 'libs', includes: ['*.jar']) 
 	runtime project(':ponysdk')
