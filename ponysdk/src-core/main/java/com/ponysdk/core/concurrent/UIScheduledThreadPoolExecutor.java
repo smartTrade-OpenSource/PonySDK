@@ -139,6 +139,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
                     if (!uiContext.getPusher().execute(runnable)) cancel();
                 }
             } catch (final Throwable throwable) {
+                log.error("Error occurred", throwable);
                 cancel();
             }
         }
