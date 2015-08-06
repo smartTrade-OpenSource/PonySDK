@@ -95,7 +95,7 @@ public class PTWindow extends AbstractPTObject {
         instruction.setObjectID(id);
         instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
         instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
-        uiService.sendDataToServer(instruction);
+        uiService.sendDataToServer(window, instruction);
     }
 
     private native void onDataReceived(Element win, final String text) /*-{win.onDataReceived(text);}-*/;

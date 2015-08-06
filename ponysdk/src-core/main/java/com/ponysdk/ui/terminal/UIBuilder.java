@@ -34,6 +34,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -231,8 +232,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 try {
                     processInstruction(instruction);
                 } catch (final Throwable e) {
-                    log.log(Level.SEVERE, "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: "
-                            + lastReceived, e);
+                    log.log(Level.SEVERE,
+                            "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived, e);
                     stackError(currentInstruction, e);
                 }
             }
@@ -386,6 +387,31 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         stackedInstructions.clear();
     }
 
+    @Override
+    public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
+        if (widget == null) {
+            sendDataToServer(instruction);
+        } else {
+            sendDataToServer(widget.getElement(), instruction);
+        }
+    }
+
+    @Override
+    public void sendDataToServer(final PTInstruction instruction) {
+        sendDataToServer((Element) null, instruction);
+    }
+
+    @Override
+    public void sendDataToServer(final Element source, final PTInstruction instruction) {
+        if (source != null) {
+            log.info("Action triggered, Instruction [" + instruction + "] , " + source.toString());
+        }
+
+        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        instructions.add(instruction);
+        sendDataToServer(instructions);
+    }
+
     private void sendDataToServer(final List<PTInstruction> instructions) {
 
         final PTInstruction requestData = new PTInstruction();
@@ -410,13 +436,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         requestData.put(APPLICATION.SEQ_NUM, nextSent++);
 
         requestBuilder.send(requestData.toString());
-    }
-
-    @Override
-    public void sendDataToServer(final PTInstruction instruction) {
-        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
-        instructions.add(instruction);
-        sendDataToServer(instructions);
     }
 
     private Timer scheduleLoadingMessageBox() {

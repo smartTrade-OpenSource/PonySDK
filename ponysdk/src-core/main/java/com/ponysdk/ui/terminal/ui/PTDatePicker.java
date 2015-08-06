@@ -55,7 +55,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<Date> event) {
-                    triggerEvent(addHandler, uiService, event);
+                    triggerEvent(addHandler, picker, uiService, event);
                 }
             });
         } else if (HANDLER.KEY_.SHOW_RANGE.equals(addHandler.getString(HANDLER.KEY))) {
@@ -70,7 +70,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                     instruction.put(HANDLER.KEY, HANDLER.KEY_.SHOW_RANGE);
                     instruction.put(PROPERTY.START, Long.toString(event.getStart().getTime()));
                     instruction.put(PROPERTY.END, Long.toString(event.getEnd().getTime()));
-                    uiService.sendDataToServer(instruction);
+                    uiService.sendDataToServer(picker, instruction);
                 }
             });
         } else {
@@ -78,8 +78,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
     }
 
-    protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final ValueChangeEvent<Date> event) {
-
+    protected void triggerEvent(final PTInstruction addHandler, final DatePicker picker, final UIService uiService, final ValueChangeEvent<Date> event) {
         String date;
         int year = -1;
         int month = -1;
@@ -103,7 +102,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         instruction.put(PROPERTY.YEAR, year);
         instruction.put(PROPERTY.MONTH, month);
         instruction.put(PROPERTY.DAY, day);
-        uiService.sendDataToServer(instruction);
+        uiService.sendDataToServer(picker, instruction);
     }
 
     @Override

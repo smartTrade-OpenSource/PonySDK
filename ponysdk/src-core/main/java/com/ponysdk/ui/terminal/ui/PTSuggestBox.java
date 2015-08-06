@@ -81,7 +81,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                     eventInstruction.setObjectID(addHandler.getObjectID());
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(PROPERTY.TEXT, event.getValue());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handler)) {
@@ -95,7 +95,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
                     eventInstruction.put(PROPERTY.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {

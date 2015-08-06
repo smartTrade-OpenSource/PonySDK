@@ -25,8 +25,10 @@ package com.ponysdk.ui.terminal;
 
 import java.util.Map;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTObject;
 
@@ -37,6 +39,10 @@ public interface UIService {
     public void stackInstrution(PTInstruction instruction);
 
     public void sendDataToServer(PTInstruction instruction);
+
+    public void sendDataToServer(Element source, PTInstruction instruction);
+
+    public void sendDataToServer(Widget source, PTInstruction instruction);
 
     public PTObject getPTObject(Long ID);
 

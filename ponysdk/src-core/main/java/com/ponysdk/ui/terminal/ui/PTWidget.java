@@ -132,7 +132,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     // return uiObject;
     // }
 
-    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(PROPERTY.CLIENT_X, event.getClientX());
         eventInstruction.put(PROPERTY.CLIENT_Y, event.getClientY());
@@ -143,26 +143,26 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
         eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
         eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
-        uiService.sendDataToServer(eventInstruction);
+        uiService.sendDataToServer(widget, eventInstruction);
         preventOrStopEvent(event);
     }
 
-    protected void triggerDomEvent(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final DomEvent<?> event) {
+    protected void triggerDomEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        uiService.sendDataToServer(eventInstruction);
+        uiService.sendDataToServer(widget, eventInstruction);
         preventOrStopEvent(event);
     }
 
-    private PTInstruction buildEventInstruction(final PTInstruction addHandler, final int domHandlerType) {
+    private PTInstruction buildEventInstruction(final PTInstruction addHandler, final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
         eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
         eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.DOM_HANDLER);
-        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType);
+        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType.ordinal());
         return eventInstruction;
     }
 
-    protected void triggerOnKeyPress(final PTInstruction addHandler, final int domHandlerType, final UIService uiService, final KeyPressEvent event) {
+    protected void triggerOnKeyPress(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final KeyPressEvent event) {
 
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
@@ -172,7 +172,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             for (int i = 0; i < jsonArray.size(); i++) {
                 final JSONNumber keyCode = jsonArray.get(i).isNumber();
                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(widget, eventInstruction);
                     break;
                 }
             }
@@ -180,7 +180,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
             // final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(),
             // addHandler.getType());
             // eventInstruction.setMainProperty(main);
-            uiService.sendDataToServer(eventInstruction);
+            uiService.sendDataToServer(widget, eventInstruction);
         }
 
         preventOrStopEvent(event);
@@ -195,7 +195,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onClick(final ClickEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, ClickEvent.getType());
@@ -205,7 +205,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDoubleClick(final DoubleClickEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
                 }, DoubleClickEvent.getType());
                 break;
@@ -214,7 +214,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseOver(final MouseOverEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, MouseOverEvent.getType());
@@ -224,7 +224,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseOut(final MouseOutEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, MouseOutEvent.getType());
@@ -234,7 +234,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseDown(final MouseDownEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, MouseDownEvent.getType());
@@ -244,7 +244,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onMouseUp(final MouseUpEvent event) {
-                        triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+                        triggerMouseEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, MouseUpEvent.getType());
@@ -254,7 +254,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onBlur(final BlurEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, BlurEvent.getType());
@@ -264,7 +264,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onFocus(final FocusEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
 
                 }, FocusEvent.getType());
@@ -274,7 +274,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onKeyPress(final KeyPressEvent event) {
-                        triggerOnKeyPress(addHandler, domHandlerType, uiService, event);
+                        triggerOnKeyPress(addHandler, widget, h, uiService, event);
                     }
 
                 }, KeyPressEvent.getType());
@@ -293,7 +293,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                             changeHandlerInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(PROPERTY.VALUE, textBox.getText());
 
-                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
@@ -320,7 +320,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
                             eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
@@ -328,13 +328,13 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.sendDataToServer(eventInstruction);
+                                        uiService.sendDataToServer(widget, eventInstruction);
                                         uiService.flushEvents();
                                         break;
                                     }
                                 }
                             } else {
-                                uiService.sendDataToServer(eventInstruction);
+                                uiService.sendDataToServer(widget, eventInstruction);
                                 uiService.flushEvents();
                             }
                             preventOrStopEvent(event);
@@ -350,7 +350,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     public void onDragStart(final DragStartEvent event) {
                         event.setData("text", Long.toString(addHandler.getObjectID()));
                         event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
                 }, DragStartEvent.getType());
                 break;
@@ -359,7 +359,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragEnd(final DragEndEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
                 }, DragEndEvent.getType());
                 break;
@@ -368,7 +368,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragEnter(final DragEnterEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
                 }, DragEnterEvent.getType());
                 break;
@@ -377,7 +377,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onDragLeave(final DragLeaveEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
                 }, DragLeaveEvent.getType());
                 break;
@@ -397,9 +397,9 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                     public void onDrop(final DropEvent event) {
                         event.preventDefault();
                         final String dragWidgetID = event.getData("text");
-                        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+                        final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
                         if (dragWidgetID != null) eventInstruction.put(PROPERTY.DRAG_SRC, Long.parseLong(dragWidgetID));
-                        uiService.sendDataToServer(eventInstruction);
+                        uiService.sendDataToServer(widget, eventInstruction);
                     }
                 }, DropEvent.getType());
                 break;
@@ -408,7 +408,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
                     @Override
                     public void onContextMenu(final ContextMenuEvent event) {
-                        triggerDomEvent(addHandler, domHandlerType, uiService, event);
+                        triggerDomEvent(addHandler, widget, h, uiService, event);
                     }
                 }, ContextMenuEvent.getType());
                 break;

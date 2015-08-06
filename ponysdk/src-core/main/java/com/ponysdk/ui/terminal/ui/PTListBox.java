@@ -57,7 +57,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                         eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                         eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
                         eventInstruction.put(PROPERTY.VALUE, "-1");
-                        uiService.sendDataToServer(eventInstruction);
+                        uiService.sendDataToServer(uiObject, eventInstruction);
                     } else {
                         String selectedIndexes = selectedIndex + "";
                         for (int i = 0; i < uiObject.getItemCount(); i++) {
@@ -72,7 +72,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                         eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                         eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
                         eventInstruction.put(PROPERTY.VALUE, selectedIndexes);
-                        uiService.sendDataToServer(eventInstruction);
+                        uiService.sendDataToServer(uiObject, eventInstruction);
                     }
                 }
             });

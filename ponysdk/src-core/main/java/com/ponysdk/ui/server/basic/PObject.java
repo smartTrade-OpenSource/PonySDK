@@ -131,7 +131,11 @@ public abstract class PObject {
 
     @Override
     public String toString() {
-        return "PObject [ID=" + ID + ", widgetType=" + getWidgetType().name() + "]";
+        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + "]";
+    }
+
+    public String toString(final String append) {
+        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + ", " + append + "]";
     }
 
 }

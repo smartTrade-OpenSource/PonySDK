@@ -75,7 +75,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.INDEX, event.getSelectedItem());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else if (HANDLER.KEY_.BEFORE_SELECTION_HANDLER.equals(handler)) {
@@ -88,7 +88,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.INDEX, event.getItem());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {

@@ -67,7 +67,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                 eventInstruction.setObjectID(create.getObjectID());
                 eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                 eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SUBMIT_COMPLETE_HANDLER);
-                uiService.sendDataToServer(eventInstruction);
+                uiService.sendDataToServer(wrappedFormPanel, eventInstruction);
             }
         });
     }
@@ -86,7 +86,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
                     eventInstruction.put(PROPERTY.FILE_NAME, fileUpload.getFilename());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(fileUpload, eventInstruction);
                 }
             });
         } else if (HANDLER.KEY_.STREAM_REQUEST_HANDLER.equals(handler)) {
