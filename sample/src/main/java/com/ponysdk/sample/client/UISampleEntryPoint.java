@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.client;
 
+import org.json.JSONObject;
+
+import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.socket.ConnectionListener;
@@ -31,6 +34,7 @@ import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.spring.client.SpringEntryPoint;
+import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
 
 public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity, ConnectionListener {
@@ -39,6 +43,14 @@ public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, 
 
     @Override
     public void start(final UIContext uiContext) {
+        uiContext.setClientDataOutput(new ClientDataOutput() {
+
+            @Override
+            public void onClientData(final PObject object, final JSONObject instruction) {
+                System.err.println(object + "" + instruction);
+            }
+        });
+
         if (uiContext.getApplicationAttribute(USER) == null) uiContext.getHistory().newItem("", false);
         script();
     }

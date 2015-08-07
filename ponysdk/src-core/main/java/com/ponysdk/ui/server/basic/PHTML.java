@@ -36,9 +36,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * as it disallows the use of HTML, which can lead to potential security issues if not used properly.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-HTML { }</li>
- * </ul>
+ * <ul class='css'> <li>.gwt-HTML { }</li> </ul>
  */
 public class PHTML extends PLabel implements PHasHTML {
 
@@ -83,4 +81,8 @@ public class PHTML extends PLabel implements PHasHTML {
         saveUpdate(PROPERTY.WORD_WRAP, this.wordWrap);
     }
 
+    @Override
+    public String toString() {
+        return toString("text=" + text + ", html=" + html);
+    }
 }

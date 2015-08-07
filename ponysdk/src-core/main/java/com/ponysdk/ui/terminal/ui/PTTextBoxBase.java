@@ -49,7 +49,7 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getValue());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {

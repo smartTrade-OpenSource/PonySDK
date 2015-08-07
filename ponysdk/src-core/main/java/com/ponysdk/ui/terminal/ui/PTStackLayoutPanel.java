@@ -59,8 +59,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
         final String handlerType = addHandler.getString(HANDLER.KEY);
 
         if (handlerType.equals(HANDLER.KEY_.SELECTION_HANDLER)) {
-            final StackLayoutPanel stackLayoutPanel = uiObject;
-            stackLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
@@ -69,7 +68,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getSelectedItem());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;
@@ -85,7 +84,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                     eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(PROPERTY.VALUE, event.getItem());
-                    uiService.sendDataToServer(eventInstruction);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;

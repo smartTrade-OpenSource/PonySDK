@@ -114,6 +114,8 @@ public class UIContext {
 
     private final List<UIContextListener> uiContextListeners = new ArrayList<UIContextListener>();
 
+    private ClientDataOutput clientDataOutput;
+
     public UIContext(final Application application) {
         this.application = application;
         this.uiContextID = ponyUIContextIDcount.incrementAndGet();
@@ -156,9 +158,16 @@ public class UIContext {
         }
         if (instruction.has(TYPE.KEY)) {
             if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.EVENT)) {
+                if (clientDataOutput != null) {
+                    clientDataOutput.onClientData(object, instruction);
+                }
                 object.onClientData(instruction);
             }
         }
+    }
+
+    public void setClientDataOutput(final ClientDataOutput clientDataOutput) {
+        this.clientDataOutput = clientDataOutput;
     }
 
     public void acquire() {

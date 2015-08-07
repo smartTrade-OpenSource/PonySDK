@@ -132,4 +132,9 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         }
     }
 
+    @Override
+    public String toString() {
+        return toString("text=" + text);
+    }
+
 }

@@ -63,7 +63,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
                 instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                 instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
 
-                uiService.sendDataToServer(instruction);
+                uiService.sendDataToServer(uiObject, instruction);
             }
         });
 
@@ -76,7 +76,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
                 instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
                 instruction.put(HANDLER.KEY, HANDLER.KEY_.OPEN_HANDLER);
 
-                uiService.sendDataToServer(instruction);
+                uiService.sendDataToServer(uiObject, instruction);
             }
         });
     }

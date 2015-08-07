@@ -60,4 +60,9 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public String getText() {
         return text;
     }
+
+    @Override
+    public String toString() {
+        return toString("text=" + text + ", html=" + html);
+    }
 }

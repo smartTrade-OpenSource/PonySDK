@@ -32,7 +32,7 @@ import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
-public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
+public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHandler {
 
     private UIService uiService;
 
@@ -45,7 +45,7 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
         eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
         eventInstruction.put(PROPERTY.HTML, uiObject.getHTML());
 
-        uiService.sendDataToServer(eventInstruction);
+        uiService.sendDataToServer(uiObject, eventInstruction);
     }
 
     @Override

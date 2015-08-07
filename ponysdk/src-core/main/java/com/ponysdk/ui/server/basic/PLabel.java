@@ -52,14 +52,13 @@ import com.ponysdk.ui.terminal.WidgetType;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;
- * element, causing it to be displayed with block layout. <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Label { }</li>
- * </ul>
+ * element, causing it to be displayed with block layout.
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'> <li>.gwt-Label { }</li> </ul>
  */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
-    private String text;
+    String text;
 
     public PLabel() {
         super();
@@ -136,6 +135,11 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     @Override
     public HandlerRegistration addDropHandler(final PDropHandler handler) {
         return addDomHandler(handler, PDropEvent.TYPE);
+    }
+
+    @Override
+    public String toString() {
+        return toString("text=" + text);
     }
 
 }
