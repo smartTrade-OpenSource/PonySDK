@@ -53,37 +53,38 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     }
 
     @Override
-    public ScheduledFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
+    public UIRunnable schedule(final Runnable runnable, final long delay, final TimeUnit unit) {
         checkUIState();
-        final UIRunnable runnable = new UIRunnable(command);
-        final ScheduledFuture<?> future = executor.schedule(runnable, delay, unit);
-        runnable.setFuture(future);
-        registerTask(runnable);
+        final UIRunnable uiRunnable = new UIRunnable(runnable, false);
+        final ScheduledFuture<?> future = executor.schedule(uiRunnable, delay, unit);
+        uiRunnable.setFuture(future);
 
-        return future;
+        registerTask(uiRunnable);
+
+        return uiRunnable;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
+    public UIRunnable scheduleAtFixedRate(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
         checkUIState();
-        final UIRunnable runnable = new UIRunnable(command);
-        final ScheduledFuture<?> future = executor.scheduleAtFixedRate(runnable, initialDelay, period, unit);
-        runnable.setFuture(future);
-        registerTask(runnable);
+        final UIRunnable uiRunnable = new UIRunnable(runnable, true);
+        final ScheduledFuture<?> future = executor.scheduleAtFixedRate(uiRunnable, initialDelay, period, unit);
+        uiRunnable.setFuture(future);
+        registerTask(uiRunnable);
 
-        return future;
+        return uiRunnable;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
+    public UIRunnable scheduleWithFixedDelay(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
         checkUIState();
 
-        final UIRunnable runnable = new UIRunnable(command);
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
-        runnable.setFuture(future);
-        registerTask(runnable);
+        final UIRunnable uiRunnable = new UIRunnable(runnable, true);
+        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, initialDelay, delay, unit);
+        uiRunnable.setFuture(future);
+        registerTask(uiRunnable);
 
-        return future;
+        return uiRunnable;
     }
 
     static class WindowUIRunnable implements Runnable {
@@ -110,7 +111,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         }
     }
 
-    protected class UIRunnable implements Runnable {
+    public class UIRunnable implements Runnable {
 
         private final Runnable runnable;
         private final UIContext uiContext;
@@ -118,8 +119,9 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         private boolean cancelled;
         private ScheduledFuture<?> future;
         private final PWindow window;
+        private final boolean repeated;
 
-        public UIRunnable(final Runnable runnable) {
+        public UIRunnable(final Runnable runnable, final boolean repeated) {
             this.uiContext = UIContext.get();
 
             this.window = UIContext.getCurrentWindow();
@@ -128,6 +130,8 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
             } else {
                 this.runnable = runnable;
             }
+
+            this.repeated = repeated;
         }
 
         @Override
@@ -141,12 +145,20 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
             } catch (final Throwable throwable) {
                 log.error("Error occurred", throwable);
                 cancel();
+            } finally {
+                if (!repeated) {
+                    purge();
+                }
             }
         }
 
         public void cancel() {
             this.cancelled = true;
-            this.future.cancel(true);
+            this.future.cancel(false);
+            purge();
+        }
+
+        public void purge() {
             executor.purge();
             runnablesByUIContexts.get(uiContext).remove(this);
         }

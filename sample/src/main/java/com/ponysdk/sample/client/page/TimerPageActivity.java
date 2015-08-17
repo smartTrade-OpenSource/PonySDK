@@ -25,11 +25,11 @@ package com.ponysdk.sample.client.page;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
+import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor.UIRunnable;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHTML;
@@ -53,7 +53,7 @@ public class TimerPageActivity extends SamplePageActivity {
 
     private final PTextBox textBox = new PTextBox("1000");
     private final PVerticalPanel panel = new PVerticalPanel();
-    private ScheduledFuture<?> scheduleAtFixedRate;
+    private UIRunnable scheduleAtFixedRate;
     private PLabel labelScheduler;
     private PLabel label;
 
@@ -175,7 +175,7 @@ public class TimerPageActivity extends SamplePageActivity {
     protected void onLeavingPage() {
         super.onLeavingPage();
         timer.cancel();
-        scheduleAtFixedRate.cancel(true);
+        scheduleAtFixedRate.cancel();
     }
 
 }
