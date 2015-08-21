@@ -59,7 +59,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-
         applicationManager = createApplicationManager();
     }
 
@@ -74,7 +73,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     }
 
     protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-
         resp.setContentType("application/json; charset=utf-8");
 
         final Session session = SessionManager.get().getSession(req.getSession().getId());

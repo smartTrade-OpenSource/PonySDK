@@ -4,7 +4,6 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.Date;
 
 import com.google.gwt.user.client.Cookies;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 

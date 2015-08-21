@@ -24,9 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.HasPDoubleClickHandlers;
@@ -47,8 +47,8 @@ import com.ponysdk.ui.server.basic.event.PDragStartHandler;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;
@@ -84,7 +84,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
         if (Objects.equals(this.text, text)) return;
 
         this.text = text;
-        saveUpdate(PROPERTY.TEXT, this.text);
+        saveUpdate(Model.TEXT, this.text);
     }
 
     @Override

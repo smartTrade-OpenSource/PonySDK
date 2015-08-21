@@ -38,7 +38,7 @@ public class Query {
 
     private QueryMode queryMode = QueryMode.PAGINATION;
 
-    private final List<Criterion> criteria = new ArrayList<Criterion>();
+    private final List<Criterion> criteria = new ArrayList<>();
 
     public Query() {
         super();

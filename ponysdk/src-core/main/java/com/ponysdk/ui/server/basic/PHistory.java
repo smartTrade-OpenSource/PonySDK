@@ -26,11 +26,11 @@ package com.ponysdk.ui.server.basic;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ponysdk.core.instruction.History;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented
@@ -58,7 +58,7 @@ import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
  */
 public class PHistory {
 
-    private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<PValueChangeHandler<String>>();
+    private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<>();
 
     private String token;
 
@@ -72,15 +72,18 @@ public class PHistory {
 
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
-        final History history = new History(token);
-        history.put(HISTORY.FIRE_EVENTS, fireEvents);
 
-        Txn.get().getTxnContext().save(history);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_HISTORY);
+        parser.parse(Model.HISTORY_TOKEN, token);
+        parser.parse(Model.HISTORY_FIRE_EVENTS, fireEvents);
+        parser.endObject();
     }
 
     public void fireHistoryChanged(final String token) {
         this.token = token;
-        final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, token);
+        final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, token);
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
         }

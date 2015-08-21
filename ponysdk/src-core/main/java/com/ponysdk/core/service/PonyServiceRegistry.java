@@ -13,11 +13,11 @@ public class PonyServiceRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(PonyServiceRegistry.class);
 
-    private static Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<Class<?>, PonyService>();
+    private static Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
     public static void registerPonyService(final PonyService service) {
 
-        final Set<Class<?>> classes = new HashSet<Class<?>>();
+        final Set<Class<?>> classes = new HashSet<>();
 
         getGeneralizations(service.getClass(), classes);
 

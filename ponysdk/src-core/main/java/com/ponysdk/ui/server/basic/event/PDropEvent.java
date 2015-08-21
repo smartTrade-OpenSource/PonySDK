@@ -6,7 +6,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PDropEvent extends PDomEvent<PDropHandler> {
 
-    public static final PDomEvent.Type<PDropHandler> TYPE = new PDomEvent.Type<PDropHandler>(DomHandlerType.DROP);
+    public static final PDomEvent.Type<PDropHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DROP);
 
     private PWidget dragSource;
 

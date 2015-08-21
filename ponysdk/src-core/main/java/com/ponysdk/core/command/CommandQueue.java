@@ -18,26 +18,26 @@ public class CommandQueue<T> {
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    private final List<Callable<CommandResult<T>>> queue = new ArrayList<Callable<CommandResult<T>>>();
+    private final List<Callable<CommandResult<T>>> queue = new ArrayList<>();
 
     public CommandQueue() {}
 
     public void addCommand(final Command<T> command) {
-        queue.add(new CallableCommand<T>(command));
+        queue.add(new CallableCommand<>(command));
     }
 
     public List<CommandResult<T>> execute() {
 
-        List<CommandResult<T>> results = new ArrayList<CommandResult<T>>();
+        final List<CommandResult<T>> results = new ArrayList<>();
         List<Future<CommandResult<T>>> all;
         try {
             all = executorService.invokeAll(queue);
-            for (Future<CommandResult<T>> future : all) {
+            for (final Future<CommandResult<T>> future : all) {
                 results.add(future.get());
             }
-        } catch (InterruptedException e1) {
+        } catch (final InterruptedException e1) {
             log.error("", e1);
-        } catch (ExecutionException e1) {
+        } catch (final ExecutionException e1) {
             log.error("", e1);
         }
 
@@ -56,10 +56,10 @@ public class CommandQueue<T> {
         public CommandResult<R> call() throws Exception {
             CommandResult<R> asyncResult = null;
             try {
-                R result = command.execute();
-                asyncResult = new CommandResult<R>(result);
-            } catch (Throwable e) {
-                asyncResult = new CommandResult<R>(e);
+                final R result = command.execute();
+                asyncResult = new CommandResult<>(result);
+            } catch (final Throwable e) {
+                asyncResult = new CommandResult<>(e);
             }
             return asyncResult;
         }

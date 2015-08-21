@@ -27,7 +27,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PBlurEvent extends PMouseEvent<PBlurHandler> {
 
-    public static final PDomEvent.Type<PBlurHandler> TYPE = new PDomEvent.Type<PBlurHandler>(DomHandlerType.BLUR);
+    public static final PDomEvent.Type<PBlurHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.BLUR);
 
     public PBlurEvent(final Object sourceComponent) {
         super(sourceComponent);

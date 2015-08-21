@@ -23,16 +23,16 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
+import java.util.Objects;
+
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that represents a simple &lt;a&gt; element. <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Anchor { }</li>
- * </ul>
+ * A widget that represents a simple &lt;a&gt; element.
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'> <li>.gwt-Anchor { }</li> </ul>
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
@@ -90,7 +90,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
-        saveUpdate(PROPERTY.HREF, this.href);
+        saveUpdate(Model.HREF, this.href);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
 
         this.text = text;
-        saveUpdate(PROPERTY.TEXT, this.text);
+        saveUpdate(Model.TEXT, this.text);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
 
         this.html = html;
-        saveUpdate(PROPERTY.HTML, this.html);
+        saveUpdate(Model.HTML, this.html);
     }
 
 }

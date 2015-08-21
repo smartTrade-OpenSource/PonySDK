@@ -1,10 +1,4 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-
-sourceCompatibility = 1.6
-version = '0.7.0.29'
-
-ext{
+ext {
     srcCore = "src-core/main/java"
     srcTerminal = "src-core/main/java/com/ponysdk/ui/terminal"
     srcDefaultimpl = "src-defaultimpl/main/java"
@@ -12,10 +6,6 @@ ext{
     srcGenerated = "src-generated/main/java"
     srcJetty = "src-jetty/main/java"
     srcSpring = "src-spring/main/java"
-    srcPersistency = "src-persistency/main/java"
-    srcHibernate = "src-hibernate/main/java"
-    srcMongoDB = "src-mongodb/main/java"
-    srcJasper = "src-jasper/main/java"
     resourcesCoreTest = "src-core/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
@@ -25,32 +15,27 @@ ext{
     javadocResources = "src-core/main/javadoc"
 }
 
-
 sourceSets {
-	main {
-		java {
-			srcDir srcCore
-			srcDir srcDefaultimpl
-			srcDir srcGenerator
-			srcDir srcGenerated
-			srcDir srcJetty
-			srcDir srcSpring
-			srcDir srcPersistency
-			srcDir srcHibernate
-			srcDir srcMongoDB
-			srcDir srcJasper
-		}
-	}
-	test {
-		java {
-			srcDir "src-core/test/java"
-			srcDir "src-jetty/test/java"
-		}
-	}
+    main {
+        java {
+            srcDir srcCore
+            srcDir srcDefaultimpl
+            srcDir srcGenerator
+            srcDir srcGenerated
+            srcDir srcJetty
+            srcDir srcSpring
+        }
+    }
+    test {
+        java {
+            srcDir "src-core/test/java"
+            srcDir "src-jetty/test/java"
+        }
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
     maven {
         url "https://github.com/PonySDK/Maven/raw/master/ext"
     }
@@ -70,76 +55,73 @@ uploadArchives {
 }
 
 configurations {
-	xjc
-	gwt
-	spring
-	sl4j
-	log4j
-	commons
-	hibernate
-	jasper
-	mongodb
-	selenium
-	json_jackson
+    xjc
+    gwt
+    spring
+    sl4j
+    log4j
+    commons
+    selenium
     jetty
-	
-	compile {
-		extendsFrom gwt, spring, sl4j, hibernate, jasper, mongodb, json_jackson, jetty, log4j
-	}
+    asm
+    json
 
-	testCompile {
-		extendsFrom selenium
-	}
-	
-	runtime {
-		extendsFrom spring, sl4j, hibernate, mongodb, json_jackson
-	}
-    
+    compile {
+        extendsFrom jetty, commons, gwt, spring, sl4j, log4j, json
+    }
+
+    testCompile {
+        extendsFrom selenium
+    }
+
+    runtime {
+        extendsFrom spring, sl4j, asm
+    }
+
 }
 
 dependencies {
-	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-	gwt 'com.google.gwt:gwt-user:2.6.0'
-	gwt 'com.google.gwt:gwt-dev:2.6.0'
-	gwt 'com.google.gwt:gwt-codeserver:2.6.0'
-	gwt 'javax.validation:validation-api:1.0.0.GA@jar'
-	gwt 'org.json:json:20090211'
-	gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
-	spring 'org.springframework:spring-core:3.2.3.RELEASE'
-	spring 'org.springframework:spring-web:3.2.3.RELEASE'
-	sl4j 'org.slf4j:slf4j-api:1.6.2'
-	sl4j 'org.slf4j:log4j-over-slf4j:1.6.4'
-	sl4j 'ch.qos.logback:logback-classic:1.0.0'
-	sl4j 'org.slf4j:jcl-over-slf4j:1.6.4'
-	log4j 'log4j:log4j:1.2.16'
-	log4j 'commons-io:commons-io:20030203.000550'
-	commons 'commons-beanutils:commons-beanutils:1.8.3'
-	commons 'commons-lang:commons-lang:2.6'
-	hibernate 'org.hibernate:hibernate-core:3.6.7.Final'
-	jasper 'ar.com.fdvs:DynamicJasper:3.0.13'
-	mongodb 'org.mongodb:mongo-java-driver:2.7.3'
-	selenium 'org.seleniumhq.selenium:selenium-java:2.33.0'
-	selenium 'junit:junit:4.10'
-	json_jackson 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
-    jetty 'org.eclipse.jetty:jetty-server:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-servlet:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-webapp:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-servlets:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-websocket:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-client:8.1.4.v20120524'
-    jetty 'org.eclipse.jetty:jetty-io:8.1.4.v20120524'
+    xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
+    gwt 'com.google.gwt:gwt-user:2.7.0'
+    gwt 'com.google.gwt:gwt-dev:2.7.0'
+    gwt 'com.google.gwt:gwt-codeserver:2.7.0'
+    gwt 'javax.validation:validation-api:1.0.0.GA@jar'
+    gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
+    spring 'org.springframework:spring-core:3.2.3.RELEASE'
+    spring 'org.springframework:spring-web:3.2.3.RELEASE'
+    sl4j 'org.slf4j:slf4j-api:1.6.2'
+    sl4j 'org.slf4j:log4j-over-slf4j:1.6.4'
+    sl4j 'ch.qos.logback:logback-classic:1.0.0'
+    sl4j 'org.slf4j:jcl-over-slf4j:1.6.4'
+    log4j 'log4j:log4j:1.2.16'
+    log4j 'commons-io:commons-io:20030203.000550'
+    commons 'commons-beanutils:commons-beanutils:1.8.3'
+    commons 'commons-lang:commons-lang:2.6'
+    selenium 'org.seleniumhq.selenium:selenium-java:2.33.0'
+    selenium 'junit:junit:4.10'
+
+    jetty 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-servlet:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-servlets:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
+    jetty 'org.eclipse.jetty:jetty-io:9.2.12.v20150709'
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
+    asm 'org.ow2.asm:asm:5.0.3'
+    
+    json 'javax.json:javax.json-api:1.0'
+
 }
 
 
 jar {
-	baseName = 'ponysdk'
+    baseName = 'ponysdk'
     from sourceSets.main.output
     from sourceSets.test.output
     from gwtOutputDirName
     from warResources
-    
+
     metaInf {
         from 'src-core/main/resources/META-INF'
         from buildInfoOutputDirName
@@ -148,255 +130,226 @@ jar {
     into('conf') {
         from confResources
     }
-    
+
     manifest {
-		def cmd = "git rev-parse HEAD"
-	    def proc = cmd.execute()
-	    ext.revision = proc.text.trim()
-	    ext.timestamp = (int)(new Date().getTime()/1000)
-	    
-		attributes("Manifest-Version": "1.0")
-		attributes("Created-By": "PonySDK")
-		attributes("Built-By": "PonySDK")
-		attributes("License-Title": "Apache License 2.0")
-		attributes("Specification-Title": "PonySDK")
-	    attributes("Specification-Version": version)
-	    attributes("Specification-Vendor": "PonySDK")
-	    attributes("Implementation-Title": "PonySDK")
-	    attributes("Implementation-Version": version)
-	    attributes("Implementation-Vendor-Id": "com.ponysdk")
-		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Revision": revision)
-	    attributes("Date": timestamp + " / " + new Date().toGMTString())
-	}
+        def cmd = "git rev-parse HEAD"
+        def proc = cmd.execute()
+        ext.revision = proc.text.trim()
+        ext.timestamp = (int) (new Date().getTime() / 1000)
+
+        attributes("Manifest-Version": "1.0")
+        attributes("Created-By": "PonySDK")
+        attributes("Built-By": "PonySDK")
+        attributes("License-Title": "Apache License 2.0")
+        attributes("Specification-Title": "PonySDK")
+        attributes("Specification-Version": version)
+        attributes("Specification-Vendor": "PonySDK")
+        attributes("Implementation-Title": "PonySDK")
+        attributes("Implementation-Version": version)
+        attributes("Implementation-Vendor-Id": "com.ponysdk")
+        attributes("Implementation-Vendor": "PonySDK")
+        attributes("Revision": revision)
+        attributes("Date": timestamp + " / " + new Date().toGMTString())
+    }
 }
 
 
 javadoc {
-	failOnError false
+    failOnError false
 }
 
 
 task cleanGenerated(type: Delete) {
-	delete srcGenerated
+    delete srcGenerated
 }
 
 task generateDatamodel {
-	description = 'Model generation'
-	inputs.file file('src-core/main/resources/spec/project_schema.xsd')
-	outputs.dir fileTree('src-generated/main/java/com/ponysdk/generator')
-	doLast {
-		file(srcGenerated).mkdirs();
-		ant {
-			taskdef(name: 'xjc',
-			classname: 'com.sun.tools.xjc.XJCTask',
-			classpath: configurations.xjc.asPath)
-			xjc(destdir:srcGenerated, package:'com.ponysdk.generator') {
-				schema(dir:'src-core/main/resources/spec', includes: 'project_schema.xsd')
-			}
-		}
-	}
+    description = 'Model generation'
+    inputs.file file('src-core/main/resources/spec/project_schema.xsd')
+    outputs.dir fileTree('src-generated/main/java/com/ponysdk/generator')
+    doLast {
+        file(srcGenerated).mkdirs();
+        ant {
+            taskdef(name: 'xjc',
+                    classname: 'com.sun.tools.xjc.XJCTask',
+                    classpath: configurations.xjc.asPath)
+            xjc(destdir: srcGenerated, package: 'com.ponysdk.generator') {
+                schema(dir: 'src-core/main/resources/spec', includes: 'project_schema.xsd')
+            }
+        }
+    }
 }
 
 task compileDatamodel(type: JavaCompile, dependsOn: generateDatamodel) {
-	classpath = configurations.xjc
-	source = file(srcGenerated)
-	destinationDir = file("$buildDir/classes/main")
-	inputs.files fileTree('src-generated/main/java/com/ponysdk/generator')
+    classpath = configurations.xjc
+    source = file(srcGenerated)
+    destinationDir = file("$buildDir/classes/main")
+    inputs.files fileTree('src-generated/main/java/com/ponysdk/generator')
 }
 
 task compileGenerator(type: JavaCompile, dependsOn: compileDatamodel) {
-	classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
-	source = srcGenerator
-	destinationDir = file("$buildDir/classes/main")
-	inputs.files fileTree(srcGenerator)
+    classpath = files("$buildDir/classes/main") + configurations.gwt + configurations.sl4j
+    source = srcGenerator
+    destinationDir = file("$buildDir/classes/main")
+    inputs.files fileTree(srcGenerator)
 }
 
-task generateDictionnary(dependsOn: compileGenerator) {
-	description = 'Dictionnary generation'
-	inputs.file file('src-core/main/resources/spec/propertiesDictionnary.json')
-    outputs.files fileTree('src-generated/main/java/com/ponysdk/ui')
+task generate(dependsOn: compileGenerator) {
     doLast {
-    	javaexec {
-			main = 'com.ponysdk.generator.PropertiesDictionnaryGenerator'
-			classpath {
-				[
-					file("$buildDir/classes/main"),
-					configurations.sl4j,
-					configurations.gwt
-				]
-			}
-			args = [
-					'verbose=false'
-			]
-    	}
+        println 'generation done'
     }
-}
-
-task generate(dependsOn: generateDictionnary) {
-	doLast {
-		println 'generation done'
-	}
 }
 
 task compileTerminal << {
-	def result = System.getProperty('gwtc', 'true')
-	println('gwtc ? ' + result)
-	if(result == 'false') {
-		println('[WARN] terminal compilation disabled');
-	} else {
-		tasks.gwtc.execute();
-	}
+    def result = System.getProperty('gwtc', 'true')
+    println('gwtc ? ' + result)
+    if (result == 'false') {
+        println('[WARN] terminal compilation disabled');
+    } else {
+        tasks.gwtc.execute();
+    }
 }
 
 task gwtc {
-	description = 'GWT compile'
-	inputs.files fileTree(srcTerminal)
+    description = 'GWT compile'
+    inputs.files fileTree(srcTerminal)
     outputs.files fileTree(gwtOutputDirName)
     doLast {
-    	javaexec {
-			main = 'com.google.gwt.dev.Compiler'
-			maxHeapSize = '512M'
-			workingDir = buildDir
-			classpath {
-				[
-					sourceSets.main.java.srcDirs,
-					sourceSets.main.output,
-					configurations.gwt
-				]
-			}
-			args = [
-				'-war',
-				'gwt',
-				'-localWorkers',
-				Runtime.getRuntime().availableProcessors(),
-				'com.ponysdk.ui.PonyTerminal'
-			]
-    	}
-    }
-}
-
-
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn:classes) {
-    classifier = 'sources'
-	from sourceSets.main.allJava
-	from sourceSets.test.allJava
-	from(srcCore) {
-		include '**/*.xml'
-	}
-	from(srcGenerated) {
-		include '**/*.xml'
-	}
-	from(specResources) {
-		into 'spec'
-	}
-	
-    manifest {
-		def cmd = "git rev-parse HEAD"
-	    def proc = cmd.execute()
-	    ext.revision = proc.text.trim()
-	    ext.timestamp = (int)(new Date().getTime()/1000)
-	    
-		attributes("Manifest-Version": "1.0")
-		attributes("Created-By": "PonySDK")
-		attributes("Built-By": "PonySDK")
-		attributes("License-Title": "Apache License 2.0")
-		attributes("Specification-Title": "PonySDK")
-	    attributes("Specification-Version": version)
-	    attributes("Specification-Vendor": "PonySDK")
-	    attributes("Implementation-Title": "PonySDK")
-	    attributes("Implementation-Version": version)
-	    attributes("Implementation-Vendor-Id": "com.ponysdk")
-		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Revision": revision)
-	    attributes("Classifier": "sources")
-	    attributes("Date": timestamp + " / " + new Date().toGMTString())
-	}
-}
-
-task javadocJar(type: Jar, dependsOn:javadoc) {
-     classifier = 'javadoc'
-     from javadoc.destinationDir
-     /**
-     title = 'PonySDK javadoc'
-    excludes = ['com.ponysdk.ui.terminal']
-    doLast {
-        copy {
-            from javadocResources
-            into buildDir.name + '/docs/javadoc';
+        javaexec {
+            main = 'com.google.gwt.dev.Compiler'
+            maxHeapSize = '512M'
+            workingDir = buildDir
+            classpath {
+                [
+                        sourceSets.main.java.srcDirs,
+                        sourceSets.main.output,
+                        configurations.gwt
+                ]
+            }
+            args = [
+                    '-war',
+                    'gwt',
+                    '-localWorkers',
+                    Runtime.getRuntime().availableProcessors(),
+                    'com.ponysdk.ui.PonyTerminal'
+            ]
         }
     }
-     **/
-    
-	manifest {
-		def cmd = "git rev-parse HEAD"
-	    def proc = cmd.execute()
-	    ext.revision = proc.text.trim()
-	    ext.timestamp = (int)(new Date().getTime()/1000)
-	    
-		attributes("Manifest-Version": "1.0")
-		attributes("Created-By": "PonySDK")
-		attributes("Built-By": "PonySDK")
-		attributes("License-Title": "Apache License 2.0")
-		attributes("Specification-Title": "PonySDK")
-	    attributes("Specification-Version": version)
-	    attributes("Specification-Vendor": "PonySDK")
-	    attributes("Implementation-Title": "PonySDK")
-	    attributes("Implementation-Version": version)
-	    attributes("Implementation-Vendor-Id": "com.ponysdk")
-		attributes("Implementation-Vendor": "PonySDK")
-	    attributes("Revision": revision)
-	    attributes("Classifier": "javadocs")
-	    attributes("Date": timestamp + " / " + new Date().toGMTString())
-	}
+}
+
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+    from sourceSets.test.allJava
+    from(srcCore) {
+        include '**/*.xml'
+    }
+    from(srcGenerated) {
+        include '**/*.xml'
+    }
+    from(specResources) {
+        into 'spec'
+    }
+
+    manifest {
+        def cmd = "git rev-parse HEAD"
+        def proc = cmd.execute()
+        ext.revision = proc.text.trim()
+        ext.timestamp = (int) (new Date().getTime() / 1000)
+
+        attributes("Manifest-Version": "1.0")
+        attributes("Created-By": "PonySDK")
+        attributes("Built-By": "PonySDK")
+        attributes("License-Title": "Apache License 2.0")
+        attributes("Specification-Title": "PonySDK")
+        attributes("Specification-Version": version)
+        attributes("Specification-Vendor": "PonySDK")
+        attributes("Implementation-Title": "PonySDK")
+        attributes("Implementation-Version": version)
+        attributes("Implementation-Vendor-Id": "com.ponysdk")
+        attributes("Implementation-Vendor": "PonySDK")
+        attributes("Revision": revision)
+        attributes("Classifier": "sources")
+        attributes("Date": timestamp + " / " + new Date().toGMTString())
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+    /**
+     title = 'PonySDK javadoc'
+     excludes = ['com.ponysdk.ui.terminal']
+     doLast {copy {from javadocResources
+     into buildDir.name + '/docs/javadoc';}}**/
+
+    manifest {
+        def cmd = "git rev-parse HEAD"
+        def proc = cmd.execute()
+        ext.revision = proc.text.trim()
+        ext.timestamp = (int) (new Date().getTime() / 1000)
+
+        attributes("Manifest-Version": "1.0")
+        attributes("Created-By": "PonySDK")
+        attributes("Built-By": "PonySDK")
+        attributes("License-Title": "Apache License 2.0")
+        attributes("Specification-Title": "PonySDK")
+        attributes("Specification-Version": version)
+        attributes("Specification-Vendor": "PonySDK")
+        attributes("Implementation-Title": "PonySDK")
+        attributes("Implementation-Version": version)
+        attributes("Implementation-Vendor-Id": "com.ponysdk")
+        attributes("Implementation-Vendor": "PonySDK")
+        attributes("Revision": revision)
+        attributes("Classifier": "javadocs")
+        attributes("Date": timestamp + " / " + new Date().toGMTString())
+    }
 }
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
-    afterSuite { desc, result -> 
-    	if (!desc.parent) {
-    		println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-    	}
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+        }
     }
 }
 
 // add javadoc/source jar tasks as artifacts
 artifacts {
-     archives sourcesJar
-     archives javadocJar
+    archives sourcesJar
+    archives javadocJar
 }
 
 
-def copyLib(configurations, dest) { 
-	println 'copying libs to #' + dest
-	copy {
-		from configurations
-		into dest
-		rename '(.*)-(.*).jar', '$1.jar'
-	}
+def copyLib(configurations, dest) {
+    println 'copying libs to #' + dest
+    copy {
+        from configurations
+        into dest
+        rename '(.*)-(.*).jar', '$1.jar'
+    }
 }
 
 task copyAllLibs << {
-	copyLib(configurations.gwt, 'libs/gwt');
-	copyLib(configurations.spring, 'libs/spring');
-	copyLib(configurations.sl4j, 'libs/logging');
-	copyLib(configurations.log4j, 'libs/logging');
-	copyLib(configurations.hibernate, 'libs/hibernate');
-	copyLib(configurations.jasper, 'libs/jasper');
-	copyLib(configurations.mongodb, 'libs/mongodb');
-	copyLib(configurations.selenium, 'libs/tests');
-	copyLib(configurations.json_jackson, 'libs/json_jackson');
-	copyLib(configurations.jetty, 'libs/jetty');
-	copyLib(configurations.commons, 'libs/commons');
+    copyLib(configurations.gwt, 'libs/gwt');
+    copyLib(configurations.spring, 'libs/spring');
+    copyLib(configurations.sl4j, 'libs/logging');
+    copyLib(configurations.log4j, 'libs/logging');
+    copyLib(configurations.selenium, 'libs/tests');
+    copyLib(configurations.jetty, 'libs/jetty');
+    copyLib(configurations.commons, 'libs/commons');
+    copyLib(configurations.asm, 'libs/asm');
+    copyLib(configurations.json, 'libs/json');
 }
 
 task sendTo(type: Copy) {
-	def outputdir = System.getProperty("jar.destination", ".");
-	println('copying jars to: ' + outputdir)
-	
-	from file("$buildDir/libs")
-	into file(outputdir)
+    def outputdir = System.getProperty("jar.destination", ".");
+    println('copying jars to: ' + outputdir)
+
+    from file("$buildDir/libs")
+    into file(outputdir)
 }
 
 clean.dependsOn(cleanGenerated)

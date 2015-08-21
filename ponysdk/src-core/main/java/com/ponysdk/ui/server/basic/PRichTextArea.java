@@ -28,24 +28,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 /**
  * A rich text editor that allows complex styling and formatting.there is a formatter interface, accessed via
  * {@link #getFormatter()}.A browser that does not support rich text editing at all will return
  * <code>null</code> for both of these, while one that supports only the basic functionality will return
- * <code>null</code> for the latter. <h3>CSS Style Rules</h3>
+ * <code>null</code> for the latter.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
  * <dd>Applied to the rich text element.</dd>
@@ -55,7 +50,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     private String html;
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
+    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
 
     private final Formatter formatter = new Formatter();
 
@@ -76,9 +71,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void setText(final String text) {
         this.html = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.TEXT, text);
     }
 
     @Override
@@ -89,9 +82,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void setHTML(final String html) {
         this.html = html;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.HTML, html);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.HTML, html);
     }
 
     public Formatter getFormatter() {
@@ -101,7 +92,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void onClientData(final JSONObject e) throws JSONException {
         if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, e.getString(PROPERTY.HTML));
+            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, e.getString(PROPERTY.HTML));
             fireOnValueChange(event);
         } else {
             super.onClientData(e);
@@ -133,129 +124,87 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public class Formatter {
 
         public void createLink(final String url) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.CREATE_LINK, url);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.CREATE_LINK, url);
         }
 
         public void insertHorizontalRule() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.INSERT_HORIZONTAL_RULE);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.INSERT_HORIZONTAL_RULE);
         }
 
         public void insertHTML(final String html) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.INSERT_HTML, html);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.INSERT_HTML, html);
         }
 
         public void insertImage(final String url) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.IMAGE, url);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.IMAGE, url);
         }
 
         public void insertOrderedList() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.ORDERED);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.ORDERED);
         }
 
         public void insertUnorderedList() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.UNORDERED);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.UNORDERED);
         }
 
         public void setBackColor(final String color) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.BACK_COLOR, color);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.BACK_COLOR, color);
         }
 
         public void setFontName(final String name) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.FONT_NAME, name);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.FONT_NAME, name);
         }
 
         public void setFontSize(final String fontSize) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.FONT_SIZE, fontSize);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.FONT_SIZE, fontSize);
         }
 
         public void setForeColor(final String color) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.FONT_COLOR, color);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.FONT_COLOR, color);
         }
 
         public void setJustification(final Justification justification) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.JUSTIFICATION, justification.name());
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.JUSTIFICATION, justification.name());
         }
 
         public void toggleBold() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_BOLD);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.TOGGLE_BOLD);
         }
 
         public void toggleItalic() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_ITALIC);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.TOGGLE_ITALIC);
         }
 
         public void toggleSubscript() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_SUBSCRIPT);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.TOGGLE_SUBSCRIPT);
         }
 
         public void toggleUnderline() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_UNDERLINE);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.TOGGLE_UNDERLINE);
         }
 
         public void leftIndent() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.LEFT_INDENT);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.LEFT_INDENT);
         }
 
         public void redo() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.REDO);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.REDO);
         }
 
         public void removeFormat() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.REMOVE_FORMAT);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.REMOVE_FORMAT);
         }
 
         public void removeLink() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.REMOVE_LINK);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.REMOVE_LINK);
         }
 
         public void rightIndent() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_RIGHT_INDENT);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.TOGGLE_RIGHT_INDENT);
         }
 
         public void selectAll() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.SELECT_ALL);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.SELECT_ALL);
         }
     }
 

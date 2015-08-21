@@ -28,7 +28,7 @@ import com.ponysdk.core.event.Event;
 
 public class ServiceFailedEvent extends BusinessEvent<ServiceFailedHandler> {
 
-    public static final Event.Type<ServiceFailedHandler> TYPE = new Event.Type<ServiceFailedHandler>();
+    public static final Event.Type<ServiceFailedHandler> TYPE = new Event.Type<>();
 
     private final Throwable throwable;
 

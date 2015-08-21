@@ -29,17 +29,17 @@ import com.ponysdk.core.export.Exporter;
 
 public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
 
-    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<DataExportedHandler>();
+    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<>();
 
     private final Exporter<?> exporter;
 
-    public DataExportedEvent(Object sourceComponent, Exporter<?> exportModule) {
+    public DataExportedEvent(final Object sourceComponent, final Exporter<?> exportModule) {
         super(sourceComponent);
         this.exporter = exportModule;
     }
 
     @Override
-    protected void dispatch(DataExportedHandler handler) {
+    protected void dispatch(final DataExportedHandler handler) {
         handler.onDataExported(this);
     }
 

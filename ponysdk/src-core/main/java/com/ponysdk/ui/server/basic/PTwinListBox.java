@@ -49,7 +49,7 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
     private PButton switchButton;
 
-    private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
+    private final List<PChangeHandler> handlers = new ArrayList<>();
 
     public PTwinListBox() {
         this(null, null, false);
@@ -77,10 +77,12 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
             getFlexCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_CENTER);
         }
 
-        leftListBox = new PListBox(containsEmptyItem, true);
+        leftListBox = new PListBox(containsEmptyItem);
+        leftListBox.setMultipleSelect(true);
         leftListBox.addStyleName(PonySDKTheme.TWIN_LISTBOX_LEFT_LISTBOX);
 
-        rightListBox = new PListBox(containsEmptyItem, true);
+        rightListBox = new PListBox(containsEmptyItem);
+        rightListBox.setMultipleSelect(true);
         rightListBox.addStyleName(PonySDKTheme.TWIN_LISTBOX_RIGHT_LISTBOX);
 
         setWidget(1, 0, leftListBox);
@@ -92,14 +94,14 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final List<ListItem> leftRemovedItems = new ArrayList<ListItem>();
+                final List<ListItem> leftRemovedItems = new ArrayList<>();
                 for (int i = leftListBox.getItemCount(); i > 0; i--) {
                     if (leftListBox.isItemSelected(i - 1)) {
                         leftRemovedItems.add(leftListBox.removeItem(i - 1));
                     }
                 }
 
-                final List<ListItem> rightRemovedItems = new ArrayList<ListItem>();
+                final List<ListItem> rightRemovedItems = new ArrayList<>();
                 for (int i = rightListBox.getItemCount(); i > 0; i--) {
                     if (rightListBox.isItemSelected(i - 1)) {
                         rightRemovedItems.add(rightListBox.removeItem(i - 1));

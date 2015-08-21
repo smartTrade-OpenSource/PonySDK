@@ -35,8 +35,9 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     }
 
     @Override
-    public void addWidget(final IsPWidget widget, final int column, final int row) {
+    public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
         setWidget(row, column, widget.asWidget());
+        if (colspan > 1) getFlexCellFormatter().setColSpan(row, column, colspan);
     }
 
     @Override
@@ -47,19 +48,19 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     @Override
     public void clear(final int from) {
         final int rowCount = getRowCount();
-        for (int i = rowCount - 1; i > from; i--) {
+        for (int i = rowCount; i >= from; i--) {
             removeRow(i);
         }
     }
 
     @Override
     public void selectRow(final int row) {
-        getRowFormatter().addStyleName(row, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        getRowFormatter().addStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override
     public void unSelectRow(final int row) {
-        getRowFormatter().removeStyleName(row, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        getRowFormatter().removeStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override
@@ -107,5 +108,11 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     public void setColumnWidth(final int column, final String width) {
         getColumnFormatter().setWidth(column, width);
     }
+
+    @Override
+    public void moveRow(final int index, final int beforeIndex) {}
+
+    @Override
+    public void moveColumn(final int index, final int beforeIndex) {}
 
 }

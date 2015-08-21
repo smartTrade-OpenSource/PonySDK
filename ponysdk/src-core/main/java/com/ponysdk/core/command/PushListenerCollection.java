@@ -9,7 +9,7 @@ import com.ponysdk.core.event.HandlerRegistration;
 
 public class PushListenerCollection<T> implements Iterable<PusherListener<T>> {
 
-    private final Collection<PusherListener<T>> listeners = new CopyOnWriteArrayList<PusherListener<T>>();
+    private final Collection<PusherListener<T>> listeners = new CopyOnWriteArrayList<>();
 
     public HandlerRegistration register(final PusherListener<T> listener) {
         listeners.add(listener);

@@ -29,9 +29,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 

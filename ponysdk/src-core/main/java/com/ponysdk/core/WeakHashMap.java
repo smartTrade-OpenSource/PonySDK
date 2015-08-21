@@ -12,22 +12,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.instruction.GC;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class WeakHashMap implements Map<Long, PObject> {
 
     private final Logger log = LoggerFactory.getLogger(WeakHashMap.class);
 
-    private final ReferenceQueue<PObject> queue = new ReferenceQueue<PObject>();
+    private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
-    private final Map<Long, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<Long, WeakReference<PObject>>();
+    private final Map<Long, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
 
-    private final Map<WeakReference<PObject>, Long> objectIDByReferences = new ConcurrentHashMap<WeakReference<PObject>, Long>();
+    private final Map<WeakReference<PObject>, Long> objectIDByReferences = new ConcurrentHashMap<>();
 
-    private final Map<WeakReference<PObject>, Long> parentObjectIDByReferences = new ConcurrentHashMap<WeakReference<PObject>, Long>();
+    private final Map<WeakReference<PObject>, Long> parentObjectIDByReferences = new ConcurrentHashMap<>();
 
     @Override
     public int size() {
@@ -50,7 +51,7 @@ public class WeakHashMap implements Map<Long, PObject> {
     @Override
     public boolean containsValue(final Object value) {
         expungeStaleEntries();
-        return referenceByObjectID.containsValue(new WeakReference<Object>(value));
+        return referenceByObjectID.containsValue(new WeakReference<>(value));
     }
 
     @Override
@@ -64,7 +65,7 @@ public class WeakHashMap implements Map<Long, PObject> {
     @Override
     public PObject put(final Long objectID, final PObject value) {
         expungeStaleEntries();
-        final WeakReference<PObject> weakReference = new WeakReference<PObject>(value, queue);
+        final WeakReference<PObject> weakReference = new WeakReference<>(value, queue);
         referenceByObjectID.put(objectID, weakReference);
         objectIDByReferences.put(weakReference, objectID);
 
@@ -141,7 +142,12 @@ public class WeakHashMap implements Map<Long, PObject> {
             if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
 
             if (parentObjectID != null) {
-                Txn.get().getTxnContext().save(new GC(objectID, parentObjectID));
+                final Parser parser = Txn.get().getTxnContext().getParser();
+                parser.beginObject();
+                parser.parse(Model.TYPE_GC);
+                parser.parse(Model.OBJECT_ID, objectID);
+                parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+                parser.endObject();
             }
         }
     }

@@ -27,7 +27,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PChangeEvent extends PDomEvent<PChangeHandler> {
 
-    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<PChangeHandler>(DomHandlerType.CHANGE_HANDLER);
+    public static final PDomEvent.Type<PChangeHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.CHANGE_HANDLER);
 
     public PChangeEvent(final Object sourceComponent) {
         super(sourceComponent);

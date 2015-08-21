@@ -38,8 +38,9 @@ public enum PEvent {
     ONCONTEXTMENU(0x40000);
 
     private static Map<Integer, PEvent> eventsByCode;
+
     static {
-        eventsByCode = new HashMap<Integer, PEvent>();
+        eventsByCode = new HashMap<>();
         for (final PEvent code : PEvent.values()) {
             eventsByCode.put(code.getCode(), code);
         }

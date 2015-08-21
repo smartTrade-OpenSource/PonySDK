@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.place.AbstractPlace;
+import com.ponysdk.core.place.Place;
 
-public class PagePlace extends AbstractPlace implements HasPageName {
+public class PagePlace implements Place, HasPageName {
 
     private final String pageName;
 

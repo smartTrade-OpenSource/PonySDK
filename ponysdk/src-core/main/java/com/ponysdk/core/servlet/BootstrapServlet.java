@@ -58,10 +58,10 @@ public class BootstrapServlet extends HttpServlet {
 
     protected String applicationName = "";
 
-    protected final List<String> meta = new ArrayList<String>();
-    protected final List<String> stylesheets = new ArrayList<String>();
-    protected final List<String> javascripts = new ArrayList<String>();
-    protected final Map<String, String> addons = new LinkedHashMap<String, String>();
+    protected final List<String> meta = new ArrayList<>();
+    protected final List<String> stylesheets = new ArrayList<>();
+    protected final List<String> javascripts = new ArrayList<>();
+    protected final Map<String, String> addons = new LinkedHashMap<>();
     protected String communicationErrorFunction;
 
     public BootstrapServlet() {}

@@ -26,18 +26,19 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can either fire
- * a {@link PCommand} or open a cascaded menu bar. <h3>CSS Style Rules</h3>
+ * a {@link PCommand} or open a cascaded menu bar.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-MenuBar</dt>
  * <dd>the menu bar itself</dd>
@@ -99,7 +100,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PMenuBar extends PWidget implements HasPAnimation {
 
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
-    private final List<PWidget> items = new ArrayList<PWidget>();
+    private final List<PWidget> items = new ArrayList<>();
 
     private boolean animationEnabled = false;
     private final boolean vertical;
@@ -109,10 +110,9 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public PMenuBar(final boolean vertical) {
-        super();
+        super(new EntryInstruction(Model.MENU_BAR_IS_VERTICAL, vertical));
         this.vertical = vertical;
         addStyleName(PonySDKTheme.MENUBAR); // TODO nciaravola must be moved terminal side
-        create.put(PROPERTY.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override
@@ -150,24 +150,30 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, item);
-        final Add add = new Add(item.getID(), getID());
-        add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        Txn.get().getTxnContext().save(add);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, item.getID());
+        parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.endObject();
+
+        UIContext.get().assignParentID(item.getID(), ID);
+
         return item;
     }
 
     public boolean removeItem(final int index) {
         final PWidget item = items.remove(index);
-        final Remove remove = new Remove(item.getID(), getID());
-        Txn.get().getTxnContext().save(remove);
+        saveRemove(item.getID(), ID);
         return true;
     }
 
     public boolean removeItem(final PMenuItem item) {
         final boolean removed = items.remove(item);
         if (removed) {
-            final Remove remove = new Remove(item.getID(), getID());
-            Txn.get().getTxnContext().save(remove);
+            saveRemove(item.getID(), ID);
         }
         return removed;
     }
@@ -175,8 +181,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     public boolean removeItem(final PMenuItemSeparator item) {
         final boolean removed = items.remove(item);
         if (removed) {
-            final Remove remove = new Remove(item.getID(), getID());
-            Txn.get().getTxnContext().save(remove);
+            saveRemove(item.getID(), ID);
         }
         return removed;
     }
@@ -191,17 +196,21 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, itemSeparator);
-        final Add add = new Add(itemSeparator.getID(), getID());
-        add.put(PROPERTY.BEFORE_INDEX, beforeIndex);
-        Txn.get().getTxnContext().save(add);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, itemSeparator.getID());
+        parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.endObject();
+
+        UIContext.get().assignParentID(itemSeparator.getID(), ID);
         return itemSeparator;
     }
 
     public void clearItems() {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CLEAR, true);
-        Txn.get().getTxnContext().save(update);
-        // clear
+        saveUpdate(Model.CLEAR, true);
         items.clear();
     }
 
@@ -217,9 +226,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ANIMATION, animationEnabled);
     }
 
 }

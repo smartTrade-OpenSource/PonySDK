@@ -38,7 +38,7 @@ public class PEventsListener implements PValueChangeHandler, PCloseHandler, POpe
 
     private static Logger log = LoggerFactory.getLogger(PEventsListener.class);
 
-    private final BlockingQueue<Event<?>> eventQueue = new ArrayBlockingQueue<Event<?>>(1000);
+    private final BlockingQueue<Event<?>> eventQueue = new ArrayBlockingQueue<>(1000);
 
     @Override
     public void onValueChange(final PValueChangeEvent event) {

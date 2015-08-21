@@ -95,7 +95,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         commands.add(js);
         history.add(new PLabel("> " + js));
         inputTextBox.setText("");
-        PScript.get().execute(js, new ExecutionCallback() {
+        PScript.execute(js, new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {

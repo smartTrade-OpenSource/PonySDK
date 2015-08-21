@@ -15,8 +15,6 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -84,6 +82,8 @@ import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
+import junit.framework.Assert;
+
 public class UiBuilderTest {
 
     @SuppressWarnings("rawtypes")
@@ -126,7 +126,7 @@ public class UiBuilderTest {
     private static WebDriver webDriver;
     private static PEventsListener eventsListener;
 
-    private final Map<String, PWidget> widgetByDebugID = new HashMap<String, PWidget>();
+    private final Map<String, PWidget> widgetByDebugID = new HashMap<>();
 
     @Rule
     public TestName name = new TestName();
@@ -1194,7 +1194,8 @@ public class UiBuilderTest {
 
             @Override
             public void onRequest() {
-                final PListBox listBox2 = new PListBox(false, true);
+                final PListBox listBox2 = new PListBox(false);
+                listBox2.setMultipleSelect(true);
                 listBox2.ensureDebugId("listBox2");
                 listBox2.addItem("Item 1", new Long(1));
                 listBox2.addItem("Item 2", new Long(2));
@@ -1505,7 +1506,7 @@ public class UiBuilderTest {
 
             @Override
             public void onRequest() {
-                PScript.get().execute("var i = 5; i + 2;", new ExecutionCallback() {
+                PScript.execute("var i = 5; i + 2;", new ExecutionCallback() {
 
                     @Override
                     public void onSuccess(final String msg) {
@@ -1528,7 +1529,7 @@ public class UiBuilderTest {
 
             @Override
             public void onRequest() {
-                PScript.get().execute("j + 2;", new ExecutionCallback() {
+                PScript.execute("j + 2;", new ExecutionCallback() {
 
                     @Override
                     public void onSuccess(final String msg) {

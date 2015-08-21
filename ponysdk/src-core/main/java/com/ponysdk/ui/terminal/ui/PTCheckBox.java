@@ -26,9 +26,6 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 

@@ -27,22 +27,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A standard check box widget. This class also serves as a base class for {@link PRadioButton}. <h3>CSS Style
- * Rules</h3>
+ * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
  * <dd>the outer element</dd>
@@ -52,7 +48,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
-    private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<PValueChangeHandler<Boolean>>();
+    private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<>();
 
     private Boolean value = Boolean.FALSE;
 
@@ -71,8 +67,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     public PCheckBox(final String label) {
         setText(label);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+
+        saveAddHandler(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -115,7 +111,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setValue(final Boolean value) {
         if (Objects.equals(this.value, value)) return;
         this.value = value;
-        saveUpdate(PROPERTY.VALUE, this.value);
+        saveUpdate(Model.VALUE, this.value);
     }
 
     @Override
@@ -127,11 +123,11 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    public void onClientData(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER)) {
-            onValueChange(new PValueChangeEvent<Boolean>(this, e.getBoolean(PROPERTY.VALUE)));
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.getKey())) {
+            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE.getKey())));
         } else {
-            super.onClientData(e);
+            super.onClientData(jsonObject);
         }
     }
 

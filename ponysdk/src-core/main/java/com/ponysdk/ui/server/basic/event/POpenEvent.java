@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class POpenEvent extends Event<POpenHandler> {
 
-    public static final Type<POpenHandler> TYPE = new Type<POpenHandler>();
+    public static final Type<POpenHandler> TYPE = new Type<>();
 
     public POpenEvent(final Object sourceComponent) {
         super(sourceComponent);

@@ -27,7 +27,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PDoubleClickEvent extends PMouseEvent<PDoubleClickHandler> {
 
-    public static final PDomEvent.Type<PDoubleClickHandler> TYPE = new PDomEvent.Type<PDoubleClickHandler>(DomHandlerType.DOUBLE_CLICK);
+    public static final PDomEvent.Type<PDoubleClickHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DOUBLE_CLICK);
 
     public PDoubleClickEvent(final Object sourceComponent) {
         super(sourceComponent);

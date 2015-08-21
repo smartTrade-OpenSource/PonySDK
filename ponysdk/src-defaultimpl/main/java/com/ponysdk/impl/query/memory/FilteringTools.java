@@ -66,7 +66,7 @@ public final class FilteringTools {
     private static final String KEYWORD_VALUES = "values";
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> sortByPropertyName(List<T> data, String propertyName) {
+    public static <T> List<T> sortByPropertyName(final List<T> data, final String propertyName) {
         if (data == null) return null;
         try {
             Collections.sort(data, getPropertyComparator(propertyName));
@@ -77,7 +77,7 @@ public final class FilteringTools {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> sortByPropertyName(List<T> data, String propertyName, Comparator<T> comparator) {
+    public static <T> List<T> sortByPropertyName(final List<T> data, final String propertyName, final Comparator<T> comparator) {
         if (data == null) return null;
         try {
             Collections.sort(data, getPropertyComparator(propertyName, comparator));
@@ -87,18 +87,18 @@ public final class FilteringTools {
         return data;
     }
 
-    public static final BeanComparator getPropertyComparator(String propertyName) {
+    public static final BeanComparator getPropertyComparator(final String propertyName) {
         return new BeanComparator((null != propertyName) ? propertyName : "name");
     }
 
-    public static <U> BeanComparator getPropertyComparator(String propertyName, Comparator<U> comparator) {
+    public static <U> BeanComparator getPropertyComparator(final String propertyName, final Comparator<U> comparator) {
         return new BeanComparator((null != propertyName) ? propertyName : "name", comparator) {
 
             private static final long serialVersionUID = 5957817419869265091L;
 
             @SuppressWarnings("unchecked")
             @Override
-            public int compare(Object o1, Object o2) {
+            public int compare(final Object o1, final Object o2) {
                 final String property = getProperty();
                 if (property == null) { return getComparator().compare(o1, o2); }
 
@@ -113,13 +113,13 @@ public final class FilteringTools {
         };
     }
 
-    public static String emptyIfNull(String str) {
+    public static String emptyIfNull(final String str) {
         return (str != null) ? str : EMPTY;
     }
 
-    public static List<String> filter(List<String> datas, String patternMatching) {
+    public static List<String> filter(final List<String> datas, final String patternMatching) {
         if (patternMatching == null || datas == null) { return datas; }
-        final List<String> validData = new ArrayList<String>();
+        final List<String> validData = new ArrayList<>();
         try {
             for (final String data : datas) {
                 if (data == null) continue;
@@ -151,9 +151,9 @@ public final class FilteringTools {
         return validData;
     }
 
-    public static <T> List<T> filter(List<T> datas, String fieldKey, Object value) {
+    public static <T> List<T> filter(final List<T> datas, final String fieldKey, final Object value) {
         if (value == null || datas == null || fieldKey.equals(EMPTY)) { return datas; }
-        final List<T> validData = new ArrayList<T>();
+        final List<T> validData = new ArrayList<>();
         try {
             final String[] pathDetails = fieldKey.split(DOT_REGEX);
             for (final T data : datas) {
@@ -223,9 +223,9 @@ public final class FilteringTools {
      *            a string used to filter data
      * @return the list of filtered data
      */
-    public static <T> List<T> filter(List<T> datas, String propertyPath, String patternName) {
+    public static <T> List<T> filter(final List<T> datas, final String propertyPath, final String patternName) {
         if (datas == null || patternName.equals(EMPTY) || propertyPath.equals(EMPTY)) { return datas; }
-        final List<T> validData = new ArrayList<T>();
+        final List<T> validData = new ArrayList<>();
         try {
             final String[] pathDetails = propertyPath.split(DOT_REGEX);
             for (final T data : datas) {
@@ -273,7 +273,7 @@ public final class FilteringTools {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Object getValue(T currentData, String[] pathDetails) throws Exception {
+    public static <T> Object getValue(final T currentData, final String[] pathDetails) throws Exception {
         final int lastIndex = pathDetails.length - 1;
         int curIndex = 0;
         Object val = null;
@@ -295,7 +295,7 @@ public final class FilteringTools {
                             value = entry.getValue();
                         }
                     } else {
-                        if (value == null) value = new ArrayList<Object>();
+                        if (value == null) value = new ArrayList<>();
                         ((ArrayList<Object>) value).add(PropertyUtils.getProperty(o, pathDetails[curIndex]));
                     }
                 }
@@ -310,14 +310,14 @@ public final class FilteringTools {
         return val;
     }
 
-    public static <T> List<T> filter(List<T> datas, Map<String, String> fields) {
+    public static <T> List<T> filter(List<T> datas, final Map<String, String> fields) {
         for (final Map.Entry<String, String> entry : fields.entrySet()) {
             datas = filter(datas, entry.getKey(), entry.getValue());
         }
         return datas;
     }
 
-    public static <T> List<T> filter(List<T> datas, List<Criterion> criteria) {
+    public static <T> List<T> filter(List<T> datas, final List<Criterion> criteria) {
         if (criteria == null) return datas;
 
         for (final Criterion criterion : criteria) {
@@ -326,7 +326,7 @@ public final class FilteringTools {
         return datas;
     }
 
-    public static List<String> filterStringCollection(List<String> datas, List<Criterion> criteria) {
+    public static List<String> filterStringCollection(List<String> datas, final List<Criterion> criteria) {
         if (criteria == null) return datas;
 
         for (final Criterion criterion : criteria) {
@@ -336,17 +336,17 @@ public final class FilteringTools {
     }
 
     // TODO nciaravola must be a criterion into SmartCC Criteria
-    public static <T> List<T> filterByDisjunction(List<T> datas, List<Criterion> criteria) {
+    public static <T> List<T> filterByDisjunction(final List<T> datas, final List<Criterion> criteria) {
         if (criteria == null || criteria.isEmpty()) return datas;
 
-        final List<T> result = new ArrayList<T>();
+        final List<T> result = new ArrayList<>();
         for (final Criterion criterion : criteria) {
             result.addAll(filter(datas, criterion.getPojoProperty(), criterion.getValue()));
         }
         return result;
     }
 
-    public static <T> List<T> sort(List<T> datas, List<Criterion> criteria) {
+    public static <T> List<T> sort(List<T> datas, final List<Criterion> criteria) {
         if (criteria == null) return datas;
 
         for (final Criterion criterion : criteria) {
@@ -355,7 +355,7 @@ public final class FilteringTools {
                 final Comparator<T> comparator = new Comparator<T>() {
 
                     @Override
-                    public int compare(T o1, T o2) {
+                    public int compare(final T o1, final T o2) {
                         if (o1 == null && o2 == null) return 0;
                         if (o1 == null) {
                             if (sortingType == SortingType.ASCENDING) return -1;
@@ -377,7 +377,7 @@ public final class FilteringTools {
         return datas;
     }
 
-    public static List<String> sortStringCollection(List<String> datas, List<Criterion> criteria) {
+    public static List<String> sortStringCollection(final List<String> datas, final List<Criterion> criteria) {
         if (criteria == null) return datas;
 
         for (final Criterion criterion : criteria) {
@@ -386,7 +386,7 @@ public final class FilteringTools {
                 final Comparator<String> comparator = new Comparator<String>() {
 
                     @Override
-                    public int compare(String o1, String o2) {
+                    public int compare(final String o1, final String o2) {
                         if (o1 == null && o2 == null) return 0;
                         if (o1 == null) {
                             if (sortingType == SortingType.ASCENDING) return -1;
@@ -408,7 +408,7 @@ public final class FilteringTools {
         return datas;
     }
 
-    public static <T> List<T> getPage(int pageSize, int page, List<T> result) {
+    public static <T> List<T> getPage(final int pageSize, final int page, final List<T> result) {
         if ((result == null) || (result.size() == 0)) { return result; }
         if (result.size() < pageSize) return result;
         if ((page * pageSize) > result.size()) {
@@ -416,10 +416,10 @@ public final class FilteringTools {
             final int lastPage = result.size() / pageSize;
             return result.subList(lastPage * pageSize, result.size());
         }
-        return new ArrayList<T>(result.subList(page * pageSize, Math.min(result.size(), page * pageSize + pageSize)));
+        return new ArrayList<>(result.subList(page * pageSize, Math.min(result.size(), page * pageSize + pageSize)));
     }
 
-    public static <T> Result<List<T>> select(Query query, List<T> data) {
+    public static <T> Result<List<T>> select(final Query query, List<T> data) {
         data = FilteringTools.filter(data, query.getCriteria());
         data = FilteringTools.sort(data, query.getCriteria());
 
@@ -429,7 +429,7 @@ public final class FilteringTools {
             data = FilteringTools.getPage(query.getPageSize(), query.getPageNum(), data);
         }
 
-        final Result<List<T>> result = new Result<List<T>>(data);
+        final Result<List<T>> result = new Result<>(data);
         result.setFullSize(count);
         return result;
     }
@@ -437,7 +437,7 @@ public final class FilteringTools {
     /**
      * $ => //$
      */
-    private static String normalisePattern(String pattern) {
+    private static String normalisePattern(final String pattern) {
         return pattern.replaceAll("\\$", "\\\\\\$").replaceAll(REGEX_DATABASE_SYNTAXE, REGEX_MEMORY_SYNTAXE);
     }
 }

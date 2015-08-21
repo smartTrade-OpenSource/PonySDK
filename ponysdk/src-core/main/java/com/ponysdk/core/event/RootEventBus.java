@@ -47,15 +47,15 @@ public class RootEventBus implements EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
 
-    private final Map<Type<?>, Map<Object, Map<?, Boolean>>> map = new HashMap<Type<?>, Map<Object, Map<?, Boolean>>>();
+    private final Map<Type<?>, Map<Object, Map<?, Boolean>>> map = new HashMap<>();
 
-    private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<BroadcastEventHandler>();
+    private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
 
     private boolean firing = false;
 
-    private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<Event<? extends EventHandler>>();
+    private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
 
-    private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<HandlerContext<? extends EventHandler>>();
+    private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<>();
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
@@ -130,7 +130,7 @@ public class RootEventBus implements EventBus {
     }
 
     private <H extends EventHandler> void defferedRemove(final Type<H> type, final Object source, final H handler) {
-        final HandlerContext<H> context = new HandlerContext<H>();
+        final HandlerContext<H> context = new HandlerContext<>();
         context.type = type;
         context.source = source;
         context.handler = handler;
@@ -158,7 +158,7 @@ public class RootEventBus implements EventBus {
     }
 
     private <H extends EventHandler> void defferedAdd(final Type<H> type, final Object source, final H handler) {
-        final HandlerContext<H> context = new HandlerContext<H>();
+        final HandlerContext<H> context = new HandlerContext<>();
         context.type = type;
         context.source = source;
         context.handler = handler;
@@ -199,7 +199,7 @@ public class RootEventBus implements EventBus {
                     } catch (final Throwable t) {
                         log.error("Cannot process fired event #" + e.getAssociatedType(), t);
                         if (causes == null) {
-                            causes = new HashSet<Throwable>();
+                            causes = new HashSet<>();
                         }
                         causes.add(t);
                     }
@@ -228,7 +228,7 @@ public class RootEventBus implements EventBus {
     private <H extends EventHandler> Map<H, Boolean> ensureHandlerSet(final Type<H> type, final Object source) {
         Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) {
-            sourceMap = new HashMap<Object, Map<?, Boolean>>();
+            sourceMap = new HashMap<>();
             map.put(type, sourceMap);
         }
 
@@ -236,7 +236,7 @@ public class RootEventBus implements EventBus {
         @SuppressWarnings("unchecked")
         Map<H, Boolean> handlers = (Map<H, Boolean>) sourceMap.get(source);
         if (handlers == null) {
-            handlers = new WeakHashMap();
+            handlers = new WeakHashMap<>();
             sourceMap.put(source, handlers);
         }
 
@@ -249,7 +249,7 @@ public class RootEventBus implements EventBus {
 
         final Collection<H> globalHandlers = getHandlers(type, null);
 
-        final Set<H> rtn = new LinkedHashSet<H>(directHandlers);
+        final Set<H> rtn = new LinkedHashSet<>(directHandlers);
         rtn.addAll(globalHandlers);
         return rtn;
     }

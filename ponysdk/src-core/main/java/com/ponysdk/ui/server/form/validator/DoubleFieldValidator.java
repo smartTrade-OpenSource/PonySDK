@@ -23,25 +23,22 @@
 
 package com.ponysdk.ui.server.form.validator;
 
-import com.ponysdk.ui.server.form.FormField;
+import com.ponysdk.core.internalization.PString;
 
 public class DoubleFieldValidator implements FieldValidator {
 
-    private static final String ERROR_MESSAGE = "Not a double";
-
-    @Override
-    public ValidationResult isValid(FormField field) {
-        final String value = (String) field.getValue();
-        if (value == null || value.isEmpty()) { return ValidationResult.newOKValidationResult(); }
-        return isADouble(value);
-    }
-
-    private static ValidationResult isADouble(String value) {
+    private static ValidationResult isADouble(final String value) {
         try {
             Double.parseDouble(value);
             return ValidationResult.newOKValidationResult();
         } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(ERROR_MESSAGE);
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.double"));
         }
+    }
+
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
+        return isADouble(value);
     }
 }

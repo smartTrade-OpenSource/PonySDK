@@ -1,9 +1,6 @@
 
 package com.ponysdk.sample.client.page.addon;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.ponysdk.ui.server.addon.DefaultAddOn;
 import com.ponysdk.ui.server.addon.JSONBuilder;
 

@@ -23,21 +23,16 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A standard single-line text box.
  * <p>
- * <img class='gallery' src='/resources/images/pony.png'/>
- * </p>
- * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TextBox { primary style }</li>
- * <li>.gwt-TextBox-readonly { dependent style set when the text box is read-only }</li>
- * </ul>
- * <p>
+ * <img class='gallery' src='/resources/images/pony.png'/> </p> <h3>CSS Style Rules</h3> <ul class='css'>
+ * <li>.gwt-TextBox { primary style }</li> <li>.gwt-TextBox-readonly { dependent style set when the text box
+ * is read-only }</li> </ul> <p>
  */
 public class PTextBox extends PTextBoxBase {
 
@@ -78,7 +73,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setMaxLength(final int length) {
         this.maxLength = length;
-        saveUpdate(PROPERTY.MAX_LENGTH, length);
+        saveUpdate(Model.MAX_LENGTH, length);
     }
 
     /**
@@ -89,7 +84,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setVisibleLength(final int length) {
         this.visibleLength = length;
-        saveUpdate(PROPERTY.VISIBLE_LENGTH, visibleLength);
+        saveUpdate(Model.VISIBLE_LENGTH, visibleLength);
     }
 
     public void applyMask(final String mask) {
@@ -108,11 +103,14 @@ public class PTextBox extends PTextBoxBase {
      *            replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.MASK, pattern);
-        update.put(PROPERTY.VISIBILITY, showMask);
-        update.put(PROPERTY.REPLACEMENT_STRING, freeSymbol);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.MASK, pattern);
+        parser.parse(Model.VISIBILITY, showMask);
+        parser.parse(Model.REPLACEMENT_STRING, freeSymbol);
+        parser.endObject();
     }
 
 }

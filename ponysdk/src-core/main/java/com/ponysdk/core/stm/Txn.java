@@ -14,7 +14,7 @@ public class Txn {
 
     private static final Logger log = LoggerFactory.getLogger(Txn.class);
 
-    private static ThreadLocal<Txn> transactions = new ThreadLocal<Txn>();
+    private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
     private final Set<TxnListener> txnListnener = Collections.newSetFromMap(new ConcurrentHashMap<TxnListener, Boolean>());
     private final Set<ClientLoopListener> clientLoopListnener = Collections.newSetFromMap(new ConcurrentHashMap<ClientLoopListener, Boolean>());
@@ -49,7 +49,6 @@ public class Txn {
         flush();
         fireAfterFlush();
         transactions.remove();
-        txnContext.clear();
     }
 
     public void rollback() {
@@ -57,7 +56,6 @@ public class Txn {
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
         transactions.remove();
-        txnContext.clear();
     }
 
     public void flush() {

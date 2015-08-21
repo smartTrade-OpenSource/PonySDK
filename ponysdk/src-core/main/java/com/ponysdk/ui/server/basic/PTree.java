@@ -28,25 +28,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.RemoveHandler;
-import com.ponysdk.core.instruction.Update;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of {@link PTreeItem TreeItems} that the
- * user can open, close, and select. <h3>CSS Style Rules</h3>
+ * user can open, close, and select.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Tree</dt>
  * <dd>the tree itself</dd>
@@ -61,9 +55,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation {
 
-    private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<PSelectionHandler<PTreeItem>>();
+    private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
 
-    private final Map<PWidget, PTreeItem> childWidgets = new HashMap<PWidget, PTreeItem>();
+    private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
 
     private boolean animationEnabled = false;
     private final PTreeItem root;
@@ -118,13 +112,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     void orphan(final PWidget widget) {
-        assert (widget.getParent() == this);
+        assert(widget.getParent() == this);
         widget.setParent(null);
         childWidgets.remove(widget);
     }
 
     void adopt(final PWidget widget, final PTreeItem item) {
-        assert (!childWidgets.containsKey(widget));
+        assert(!childWidgets.containsKey(widget));
         childWidgets.put(widget, item);
         widget.setParent(this);
     }
@@ -132,15 +126,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
-        final RemoveHandler removeHandler = new RemoveHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        Txn.get().getTxnContext().save(removeHandler);
+        saveRemoveHandler(Model.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
@@ -152,7 +144,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     public void onClientData(final JSONObject event) throws JSONException {
         if (HANDLER.KEY_.SELECTION_HANDLER.equals(event.getString(HANDLER.KEY))) {
             final PTreeItem treeItem = UIContext.get().getObject(event.getLong(HANDLER.KEY_.SELECTION_HANDLER));
-            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<PTreeItem>(this, treeItem);
+            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);
             }

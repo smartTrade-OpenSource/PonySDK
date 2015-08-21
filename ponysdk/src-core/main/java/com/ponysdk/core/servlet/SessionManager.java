@@ -12,10 +12,10 @@ import com.ponysdk.core.tools.ListenerCollection;
 
 public class SessionManager {
 
-    private final Map<String, Session> sessionsById = new ConcurrentHashMap<String, Session>();
+    private final Map<String, Session> sessionsById = new ConcurrentHashMap<>();
 
     private static SessionManager INSTANCE = new SessionManager();
-    private final ListenerCollection<SessionListener> sessionListeners = new ListenerCollection<SessionListener>();
+    private final ListenerCollection<SessionListener> sessionListeners = new ListenerCollection<>();
 
     public static SessionManager get() {
         return INSTANCE;
@@ -30,7 +30,7 @@ public class SessionManager {
     }
 
     public Collection<Application> getApplications() {
-        final List<Application> applications = new ArrayList<Application>();
+        final List<Application> applications = new ArrayList<>();
         for (final Session session : sessionsById.values()) {
             final Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
             if (application != null) applications.add(application);

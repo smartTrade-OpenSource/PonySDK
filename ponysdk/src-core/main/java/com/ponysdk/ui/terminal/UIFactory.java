@@ -24,7 +24,6 @@
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
-import com.ponysdk.ui.terminal.Dictionnary.WIDGETTYPE;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;

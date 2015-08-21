@@ -26,12 +26,12 @@ package com.ponysdk.ui.server.list.renderer.cell;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class EmptyCellRenderer<D, V> implements CellRenderer<D, V> {
+public class EmptyCellRenderer<V> implements CellRenderer<V> {
 
     private static final String EMPTY_VALUE = "";
 
     @Override
-    public IsPWidget render(int row, D data, V value) {
+    public IsPWidget render(final int row, final V value) {
         return new PLabel(EMPTY_VALUE);
     }
 

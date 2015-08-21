@@ -2,6 +2,7 @@
 package com.ponysdk.core.servlet;
 
 import java.io.IOException;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,12 +22,21 @@ public class HttpResponse implements Response {
     @Override
     public void write(final String s) throws IOException {
         if (log.isDebugEnabled()) log.debug("Sending: " + s);
-        this.response.getWriter().write(s);
+        response.getWriter().write(s);
     }
 
     @Override
-    public void flush() throws IOException {
-        this.response.getWriter().flush();
+    public void flush() {
+        try {
+            response.getWriter().flush();
+        } catch (final Throwable t) {
+            log.error("Cannot flush to HTTP response", t);
+        }
+    }
+
+    @Override
+    public Writer getWriter() throws IOException {
+        return response.getWriter();
     }
 
 }

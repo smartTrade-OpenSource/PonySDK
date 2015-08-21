@@ -8,8 +8,8 @@ public class HTTPServletContext {
 
     private static final HTTPServletContext instance = new HTTPServletContext();
 
-    private final ThreadLocal<HttpServletRequest> servletRequests = new ThreadLocal<HttpServletRequest>();
-    private final ThreadLocal<HttpServletResponse> servletResponses = new ThreadLocal<HttpServletResponse>();
+    private final ThreadLocal<HttpServletRequest> servletRequests = new ThreadLocal<>();
+    private final ThreadLocal<HttpServletResponse> servletResponses = new ThreadLocal<>();
 
     private HTTPServletContext() {}
 

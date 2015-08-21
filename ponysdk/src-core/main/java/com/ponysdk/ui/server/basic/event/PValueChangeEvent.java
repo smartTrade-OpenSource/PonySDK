@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
 
-    public static final Type<PValueChangeHandler<?>> TYPE = new Type<PValueChangeHandler<?>>();
+    public static final Type<PValueChangeHandler<?>> TYPE = new Type<>();
 
     private final T value;
 

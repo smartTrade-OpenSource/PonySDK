@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PSelectionEvent<T> extends Event<PSelectionHandler<T>> {
 
-    public static final Type<PSelectionHandler<?>> TYPE = new Type<PSelectionHandler<?>>();
+    public static final Type<PSelectionHandler<?>> TYPE = new Type<>();
 
     public PSelectionEvent(final Object source, final T selectedItem) {
         super(source);

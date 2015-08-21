@@ -23,22 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand} when they are clicked, or
  * open a cascading sub-menu. Each menu item is assigned a unique DOM id in order to support ARIA. See
- * {@link com.google.gwt.user.client.ui.Accessibility} for more information.
+ * {com.google.gwt.user.client.ui.Accessibility} for more information.
  */
 public class PMenuItem extends PWidget implements PHasHTML {
 
@@ -94,9 +86,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.TEXT, text);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.TEXT, text);
     }
 
     @Override
@@ -107,28 +97,22 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     public void setHTML(final String html) {
         this.html = html;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.HTML, html);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.HTML, html);
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ENABLED, enabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ENABLED, enabled);
     }
 
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
-        final Add add = new Add(subMenu.getID(), getID());
-        Txn.get().getTxnContext().save(add);
+        saveAdd(subMenu.getID(), ID);
     }
 
     public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.COMMAND);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_COMMAND);
     }
 
     @Override

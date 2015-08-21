@@ -31,9 +31,9 @@ import com.ponysdk.ui.server.basic.PWidget;
 
 public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
 
-    public static final Type<PLayoutResizeHandler> TYPE = new Type<PLayoutResizeHandler>();
+    public static final Type<PLayoutResizeHandler> TYPE = new Type<>();
 
-    private final List<LayoutResizeData> layoutResizeData = new ArrayList<PLayoutResizeEvent.LayoutResizeData>();
+    private final List<LayoutResizeData> layoutResizeData = new ArrayList<>();
 
     public PLayoutResizeEvent(final Object sourceComponent) {
         super(sourceComponent);

@@ -1,17 +1,11 @@
 
 package com.ponysdk.core.stm;
 
-import java.util.List;
-
-import com.ponysdk.core.instruction.Instruction;
+import com.ponysdk.core.instruction.Parser;
 
 public interface TxnContext {
 
-    void save(Instruction instruction);
+    void flush();
 
-    void flush() throws Exception;
-
-    List<Instruction> setCurrentStacker(List<Instruction> instructions);
-
-    void clear();
+    Parser getParser();
 }

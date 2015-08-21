@@ -28,11 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Create;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -40,9 +37,8 @@ import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of selections that
@@ -65,7 +61,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  * 
  * Using the example above, if the user types "C" into the text widget, the oracle will configure the
  * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key into the
- * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>. <h3>CSS Style Rules</h3>
+ * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-SuggestBox</dt>
  * <dd>the suggest box itself</dd>
@@ -78,7 +75,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
-    private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<PSelectionHandler<PSuggestion>>();
+    private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<>();
 
     private final PSuggestOracle suggestOracle;
     private PTextBox textBox;
@@ -93,20 +90,23 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
+        super(new EntryInstruction(Model.ORACLE, suggestOracle.getID()));
 
         this.suggestOracle = suggestOracle;
 
-        Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER));
-        Txn.get().getTxnContext().save(new AddHandler(getID(), HANDLER.KEY_.STRING_SELECTION_HANDLER));
-
-        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
-        create.put(PROPERTY.ORACLE, this.suggestOracle.getID());
+        saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+        saveAddHandler(Model.HANDLER_STRING_SELECTION_HANDLER);
     }
 
     @Override
-    protected void init(final WidgetType widgetType) {
-        this.textBox = new PTextBox();
-        super.init(widgetType);
+    protected void enrichCreate(final Create create) {
+        super.enrichCreate(create);
+
+        if (textBox == null) {
+            textBox = new PTextBox();
+        }
+
+        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
@@ -117,7 +117,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
         if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
             final String text = event.getString(PROPERTY.TEXT);
-            textBox.fireOnValueChange(new PValueChangeEvent<String>(this, text));
+            textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
         } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handlerKey)) {
             this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
             this.displayString = event.getString(PROPERTY.DISPLAY_STRING);

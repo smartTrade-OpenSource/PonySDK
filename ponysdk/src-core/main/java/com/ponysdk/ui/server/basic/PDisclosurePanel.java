@@ -28,25 +28,22 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that consists of a header and a content panel that discloses the content when a user clicks on the
- * header. <h3>CSS Style Rules</h3>
+ * header.
+ * <h3>CSS Style Rules</h3>
  * <dl class="css">
  * <dt>.gwt-DisclosurePanel
  * <dd>the panel's primary style
@@ -70,37 +67,31 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     private PWidget content;
     private boolean isOpen;
 
-    private final List<PCloseHandler> closeHandlers = new ArrayList<PCloseHandler>();
-    private final List<POpenHandler> openHandlers = new ArrayList<POpenHandler>();
+    private final List<PCloseHandler> closeHandlers = new ArrayList<>();
+    private final List<POpenHandler> openHandlers = new ArrayList<>();
 
     public PDisclosurePanel(final String headerText) {
         this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
     }
 
     public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
-        super();
-
-        create.put(PROPERTY.TEXT, headerText);
-        create.put(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        create.put(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
+        super(new EntryInstruction(Model.TEXT, headerText), new EntryInstruction(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID()), new EntryInstruction(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID()));
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
-        final String handler = event.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.CLOSE_HANDLER.equals(handler)) {
-            this.isOpen = false;
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.HANDLER_CLOSE_HANDLER)) {
+            isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
                 closeHandler.onClose(new PCloseEvent(this));
             }
-        } else if (HANDLER.KEY_.OPEN_HANDLER.equals(handler)) {
-            this.isOpen = true;
+        } else if (jsonObject.containsKey(Model.HANDLER_OPEN_HANDLER)) {
+            isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
                 openHandler.onOpen(new POpenEvent(this));
             }
         } else {
-            super.onClientData(event);
+            super.onClientData(jsonObject);
         }
     }
 
@@ -128,9 +119,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
         if (w != null) {
             // Physical attach.
-            final Add add = new Add(w.getID(), getID());
-            Txn.get().getTxnContext().save(add);
-
+            saveAdd(w.getID(), getID());
             adopt(w);
         }
     }
@@ -173,16 +162,14 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     private final void adopt(final PWidget child) {
-        assert (child.getParent() == null);
+        assert(child.getParent() == null);
         child.setParent(this);
     }
 
     public void setOpen(final boolean isOpen) {
         if (this.isOpen != isOpen) {
             this.isOpen = isOpen;
-            final Update update = new Update(getID());
-            update.put(PROPERTY.OPEN, isOpen);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.OPEN, isOpen);
         }
     }
 
@@ -206,8 +193,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ANIMATION, animationEnabled);
     }
 }

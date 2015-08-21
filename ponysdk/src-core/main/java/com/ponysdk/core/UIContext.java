@@ -32,8 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,7 @@ import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Close;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.servlet.Session;
@@ -54,11 +53,7 @@ import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * <p>
@@ -73,7 +68,7 @@ import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 
 public class UIContext {
 
-    private static ThreadLocal<UIContext> currentContext = new ThreadLocal<UIContext>();
+    private static ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
 
     private final Logger log = LoggerFactory.getLogger(UIContext.class);
 
@@ -83,36 +78,33 @@ public class UIContext {
 
     private final WeakHashMap weakReferences = new WeakHashMap();
 
-    // private final Map<Long, PTimer> timers = new ConcurrentHashMap<Long, PTimer>();
+    private final Map<Long, StreamHandler> streamListenerByID = new HashMap<>();
 
-    private final Map<Long, StreamHandler> streamListenerByID = new HashMap<Long, StreamHandler>();
-
-    private Map<String, Permission> permissions = new HashMap<String, Permission>();
+    private Map<String, Permission> permissions = new HashMap<>();
 
     private PHistory history;
     private EventBus rootEventBus;
-    private PWindow window;
 
     private final PCookies cookies = new PCookies();
 
     private final Application application;
 
-    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<String, Object>(); // pourkoi
-                                                                                                       // ?
+    // TODO nicolas must be removed
+    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<>();
 
     private final ReentrantLock lock = new ReentrantLock();
 
     private long lastReceived = -1;
     private long lastSyncErrorTimestamp = 0;
     private long nextSent = 0;
-    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
+    private final Map<Long, JsonObject> incomingMessageQueue = new HashMap<>();
 
     private final long uiContextID;
     private static final AtomicLong ponyUIContextIDcount = new AtomicLong();
 
     private final CommunicationSanityChecker communicationSanityChecker;
 
-    private final List<UIContextListener> uiContextListeners = new ArrayList<UIContextListener>();
+    private final List<UIContextListener> uiContextListeners = new ArrayList<>();
 
     private ClientDataOutput clientDataOutput;
 
@@ -128,40 +120,35 @@ public class UIContext {
         return uiContextID;
     }
 
-    public void fireClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.has(TYPE.KEY)) {
-            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.CLOSE)) {
-                UIContext.get().destroy();
+    public void fireClientData(final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.TYPE_CLOSE.getKey())) {
+            UIContext.get().destroy();
+        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getKey())) {
+            if (history != null) {
+                history.fireHistoryChanged(jsonObject.getString(Model.HISTORY_TOKEN.getKey()));
+            }
+        } else {
+            final Long objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getKey()).longValue();
+
+            final PObject object = weakReferences.get(objectID);
+
+            if (object == null) {
+                log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+
+                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getKey())) {
+                    final Long parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getKey()).longValue();
+                    final PObject gcObject = weakReferences.get(parentObjectID);
+                    log.warn("" + gcObject);
+                }
+
                 return;
             }
 
-            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.HISTORY)) {
-                if (history != null) {
-                    history.fireHistoryChanged(instruction.getString(HISTORY.TOKEN));
-                }
-                return;
-            }
-        }
-
-        final PObject object = weakReferences.get(instruction.getLong(PROPERTY.OBJECT_ID));
-
-        if (object == null) {
-            log.warn("unknown reference from the browser. Unable to execute instruction: " + instruction);
-            try {
-                if (instruction.has(PROPERTY.PARENT_ID)) {
-                    final PObject parentOfGarbageObject = weakReferences.get(instruction.getLong(PROPERTY.PARENT_ID));
-                    log.warn("parent: " + parentOfGarbageObject);
-                }
-            } catch (final Exception e) {}
-
-            return;
-        }
-        if (instruction.has(TYPE.KEY)) {
-            if (instruction.get(TYPE.KEY).equals(TYPE.KEY_.EVENT)) {
+            if (jsonObject.containsKey(Model.TYPE_EVENT)) {
                 if (clientDataOutput != null) {
-                    clientDataOutput.onClientData(object, instruction);
+                    clientDataOutput.onClientData(object, jsonObject);
                 }
-                object.onClientData(instruction);
+                object.onClientData(jsonObject);
             }
         }
     }
@@ -194,11 +181,6 @@ public class UIContext {
         weakReferences.put(object.getID(), object);
     }
 
-    // public void unRegisterObject(final PObject object) {
-    // timers.remove(object.getID());
-    // weakReferences.remove(object.getID());
-    // }
-
     public void assignParentID(final long objectID, final long parentID) {
         weakReferences.assignParentID(objectID, parentID);
     }
@@ -217,18 +199,30 @@ public class UIContext {
     }
 
     public void stackStreamRequest(final StreamHandler streamListener) {
-        final AddHandler addHandler = new AddHandler(0, HANDLER.KEY_.STREAM_REQUEST_HANDLER);
         final long streamRequestID = UIContext.get().nextStreamRequestID();
-        addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
-        Txn.get().getTxnContext().save(addHandler);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.parse(Model.HANDLER_STREAM_REQUEST_HANDLER);
+        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.parse(Model.OBJECT_ID, 0);
+        parser.endObject();
+
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final long objectID) {
-        final AddHandler addHandler = new AddHandler(objectID, HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER);
         final long streamRequestID = UIContext.get().nextStreamRequestID();
-        addHandler.put(PROPERTY.STREAM_REQUEST_ID, streamRequestID);
-        Txn.get().getTxnContext().save(addHandler);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.parse(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER);
+        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.parse(Model.OBJECT_ID, 0);
+        parser.endObject();
+
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
@@ -238,14 +232,6 @@ public class UIContext {
 
     private EventBus getEventBus() {
         return rootEventBus;
-    }
-
-    private void setWindow(final PWindow window) {
-        this.window = window;
-    }
-
-    private PWindow getWindow() {
-        return window;
     }
 
     public PCookies getCookies() {
@@ -304,20 +290,15 @@ public class UIContext {
         get().getEventBus().removeHandler(handler);
     }
 
-    public static void setCurrentWindow(final PWindow window) {
-        get().setWindow(window);
-    }
-
     public static EventBus getRootEventBus() {
         return get().getEventBus();
     }
 
-    public static PWindow getCurrentWindow() {
-        return get().getWindow();
-    }
-
     public void close() {
-        Txn.get().getTxnContext().save(new Close());
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_CLOSE);
+        parser.endObject();
     }
 
     public boolean hasPermission(final String key) {
@@ -406,21 +387,24 @@ public class UIContext {
         return n;
     }
 
-    public void stackIncomingMessage(final Long receivedSeqNum, final JSONObject data) {
+    public void stackIncomingMessage(final Long receivedSeqNum, final JsonObject data) {
         incomingMessageQueue.put(receivedSeqNum, data);
     }
 
-    public List<JSONObject> expungeIncomingMessageQueue(final Long receivedSeqNum) {
+    public List<JsonObject> expungeIncomingMessageQueue(final Long receivedSeqNum) {
         if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
 
-        final List<JSONObject> datas = new ArrayList<JSONObject>();
+        final List<JsonObject> datas = new ArrayList<>();
         long expected = receivedSeqNum + 1;
         while (incomingMessageQueue.containsKey(expected)) {
             datas.add(incomingMessageQueue.remove(expected));
             lastReceived = expected;
             expected++;
         }
-        log.info("Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Message synchronized from #{} to #{}", receivedSeqNum, lastReceived);
+        }
         return datas;
     }
 

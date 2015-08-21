@@ -8,7 +8,7 @@ import com.ponysdk.core.event.EventBus;
 
 public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
 
-    protected final Map<String, Place> placeContextByToken = new HashMap<String, Place>();
+    protected final Map<String, Place> placeContextByToken = new HashMap<>();
 
     protected PlaceTokenizer<Place> placeTokenizer;
 

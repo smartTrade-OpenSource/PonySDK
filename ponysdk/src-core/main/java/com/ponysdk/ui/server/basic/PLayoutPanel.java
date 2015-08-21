@@ -23,12 +23,12 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PAlignment;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that lays its children
@@ -46,70 +46,84 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-        final Update update = new Update(getID());
-        update.put(PROPERTY.HORIZONTAL_ALIGNMENT, position.ordinal());
-        update.put(PROPERTY.WIDGET, child.getID());
-        Txn.get().getTxnContext().save(update);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Type.UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
+        parser.parse(Model.WIDGET, child.getID());
+        parser.endObject();
     }
 
     public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VERTICAL_ALIGNMENT, position.ordinal());
-        update.put(PROPERTY.WIDGET, child.getID());
-        Txn.get().getTxnContext().save(update);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Type.UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WIDGET, child.getID());
+        parser.parse(Model.VERTICAL_ALIGNMENT, position.ordinal());
+        parser.endObject();
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         assertIsChild(widget);
-        final Update update = new Update(getID());
-        update.put(PROPERTY.WIDGET_HIDDEN, hidden);
-        update.put(PROPERTY.WIDGET, widget.getID());
-        Txn.get().getTxnContext().save(update);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Type.UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WIDGET_HIDDEN, hidden);
+        parser.parse(Model.WIDGET, widget.getID());
+        parser.endObject();
     }
 
     public void setWidgetLeftRight(final PWidget child, final double left, final double right, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.LEFT, left, PROPERTY.RIGHT, right, unit);
+        sendUpdate(child, Model.LEFT, left, Model.RIGHT, right, unit);
     }
 
     public void setWidgetLeftWidth(final PWidget child, final double left, final double width, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.LEFT, left, PROPERTY.WIDTH, width, unit);
+        sendUpdate(child, Model.LEFT, left, Model.WIDTH, width, unit);
     }
 
     public void setWidgetRightWidth(final PWidget child, final double right, final double width, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.RIGHT, right, PROPERTY.WIDTH, width, unit);
+        sendUpdate(child, Model.RIGHT, right, Model.WIDTH, width, unit);
     }
 
     public void setWidgetTopBottom(final PWidget child, final double top, final double bottom, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.TOP, top, PROPERTY.BOTTOM, bottom, unit);
+        sendUpdate(child, Model.TOP, top, Model.BOTTOM, bottom, unit);
     }
 
     public void setWidgetTopHeight(final PWidget child, final double top, final double height, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.TOP, top, PROPERTY.HEIGHT, height, unit);
+        sendUpdate(child, Model.TOP, top, Model.HEIGHT, height, unit);
     }
 
     public void setWidgetBottomHeight(final PWidget child, final double bottom, final double height, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, PROPERTY.BOTTOM, bottom, PROPERTY.HEIGHT, height, unit);
+        sendUpdate(child, Model.BOTTOM, bottom, Model.HEIGHT, height, unit);
     }
 
-    private void sendUpdate(final PWidget child, final String key1, final double v1, final String key2, final double v2, final PUnit unit) {
-        final Update u = new Update(getID());
-        u.put(PROPERTY.UNIT, unit.ordinal());
-        u.put(PROPERTY.WIDGET, child.getID());
-        u.put(key1, v1);
-        u.put(key2, v2);
-
-        Txn.get().getTxnContext().save(u);
+    private void sendUpdate(final PWidget child, final Model key1, final double v1, final Model key2, final double v2, final PUnit unit) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Type.UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.UNIT, unit.ordinal());
+        parser.parse(Model.WIDGET, child.getID());
+        parser.parse(key1, v1);
+        parser.parse(key2, v2);
+        parser.endObject();
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(PROPERTY.ANIMATE, duration);
+        saveUpdate(Model.ANIMATE, duration);
     }
 }

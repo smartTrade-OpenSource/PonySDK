@@ -23,16 +23,16 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
 import com.ponysdk.core.event.Event;
 
 public class PNativeEvent extends Event<PNativeHandler> {
 
-    public static final Type<PNativeHandler> TYPE = new Type<PNativeHandler>();
-    private final JSONObject jsonObject;
+    public static final Type<PNativeHandler> TYPE = new Type<>();
+    private final JsonObject jsonObject;
 
-    public PNativeEvent(final Object sourceComponent, final JSONObject jsonObject) {
+    public PNativeEvent(final Object sourceComponent, final JsonObject jsonObject) {
         super(sourceComponent);
         this.jsonObject = jsonObject;
     }
@@ -47,7 +47,7 @@ public class PNativeEvent extends Event<PNativeHandler> {
         handler.onNativeEvent(this);
     }
 
-    public JSONObject getJsonObject() {
+    public JsonObject getJsonObject() {
         return jsonObject;
     }
 }

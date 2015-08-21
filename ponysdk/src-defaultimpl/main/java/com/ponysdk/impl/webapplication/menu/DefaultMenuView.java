@@ -27,14 +27,14 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
-    private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<String, PTreeItem>();
+    private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<>();
 
-    protected final Map<PTreeItem, MenuItem> itemsByTree = new LinkedHashMap<PTreeItem, MenuItem>();
-    protected final Map<MenuItem, PTreeItem> treeByMenuItem = new LinkedHashMap<MenuItem, PTreeItem>();
+    protected final Map<PTreeItem, MenuItem> itemsByTree = new LinkedHashMap<>();
+    protected final Map<MenuItem, PTreeItem> treeByMenuItem = new LinkedHashMap<>();
 
     protected final PTree tree;
 
-    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<PSelectionHandler<MenuItem>>();
+    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
 
     public DefaultMenuView() {
         tree = new PTree();
@@ -46,7 +46,7 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
             @Override
             public void onSelection(final PSelectionEvent<PTreeItem> event) {
                 final MenuItem menuItem = itemsByTree.get(event.getSelectedItem());
-                final PSelectionEvent<MenuItem> e = new PSelectionEvent<MenuItem>(this, menuItem);
+                final PSelectionEvent<MenuItem> e = new PSelectionEvent<>(this, menuItem);
                 for (final PSelectionHandler<MenuItem> handler : selectionHandlers) {
                     handler.onSelection(e);
                 }

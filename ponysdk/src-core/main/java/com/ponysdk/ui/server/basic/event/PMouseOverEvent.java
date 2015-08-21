@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PMouseOverEvent extends PMouseEvent<PMouseOverHandler> {
 
-    public static final PDomEvent.Type<PMouseOverHandler> TYPE = new PDomEvent.Type<PMouseOverHandler>(DomHandlerType.MOUSE_OVER);
+    public static final PDomEvent.Type<PMouseOverHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.MOUSE_OVER);
 
     public PMouseOverEvent(final Object sourceComponent) {
         super(sourceComponent);

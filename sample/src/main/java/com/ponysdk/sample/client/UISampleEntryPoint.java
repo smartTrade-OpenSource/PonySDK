@@ -23,8 +23,6 @@
 
 package com.ponysdk.sample.client;
 
-import org.json.JSONObject;
-
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;

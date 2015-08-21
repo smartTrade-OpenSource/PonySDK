@@ -75,7 +75,7 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         final PHorizontalPanel panel = new PHorizontalPanel();
         panel.setSpacing(10);
 
-        final PListBox styleListBox = new PListBox(false, false);
+        final PListBox styleListBox = new PListBox(false);
 
         styleListBox.addItem(PonySDKTheme.BUTTON_WHITE);
         styleListBox.addItem(PonySDKTheme.BUTTON_BLACK);

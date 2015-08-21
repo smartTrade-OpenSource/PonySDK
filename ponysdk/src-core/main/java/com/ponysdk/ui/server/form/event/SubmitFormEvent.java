@@ -24,20 +24,17 @@
 package com.ponysdk.ui.server.form.event;
 
 import com.ponysdk.core.event.SystemEvent;
-import com.ponysdk.ui.server.form.FormActivity;
 
 public class SubmitFormEvent extends SystemEvent<SubmitFormHandler> {
 
-    public static final Type<SubmitFormHandler> TYPE = new Type<SubmitFormHandler>();
+    public static final Type<SubmitFormHandler> TYPE = new Type<>();
 
-    public FormActivity formField;
-
-    public SubmitFormEvent(Object sourceComponent) {
+    public SubmitFormEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    protected void dispatch(SubmitFormHandler handler) {
+    protected void dispatch(final SubmitFormHandler handler) {
         handler.onSubmitForm(this);
     }
 

@@ -23,11 +23,13 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A normal push button with custom styling. <h3>CSS Style Rules</h3>
+ * A normal push button with custom styling.
+ * <h3>CSS Style Rules</h3>
  * <ul class="css">
  * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-disabled {.html-face}</li>
  * </ul>
@@ -35,8 +37,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PPushButton extends PButton {
 
     public PPushButton(final PImage image) {
-        super();
-        create.put(PROPERTY.IMAGE, image.getID());
+        super(null, new EntryInstruction(Model.IMAGE, image.getID()));
     }
 
     @Override

@@ -23,12 +23,13 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up
@@ -58,8 +59,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public PDockLayoutPanel(final PUnit unit) {
-        super();
-        create.put(PROPERTY.UNIT, unit.ordinal());
+        super(new EntryInstruction(Model.UNIT, unit.ordinal()));
     }
 
     @Override
@@ -97,17 +97,22 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public void setWidgetSize(final PWidget widget, final double size) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.WIDGET_SIZE, size);
-        update.put(PROPERTY.WIDGET, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WIDGET_SIZE, size);
+        parser.parse(Model.WIDGET, widget.getID());
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.WIDGET_HIDDEN, hidden);
-        update.put(PROPERTY.WIDGET, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WIDGET_HIDDEN, hidden);
+        parser.parse(Model.WIDGET, widget.getID());
+        parser.endObject();
     }
 
     public void add(final PWidget child, final Direction direction, final double size) {
@@ -118,15 +123,19 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Adopt.
         adopt(child);
 
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.DIRECTION, direction.ordinal());
-        add.put(PROPERTY.SIZE, size);
-
-        Txn.get().getTxnContext().save(add);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, child.getID());
+        parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.parse(Model.DIRECTION, direction.ordinal());
+        parser.parse(Model.SIZE, size);
+        parser.endObject();
+        UIContext.get().assignParentID(child.getID(), ID);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(PROPERTY.ANIMATE, duration);
+        saveUpdate(Model.ANIMATE, duration);
     }
 }

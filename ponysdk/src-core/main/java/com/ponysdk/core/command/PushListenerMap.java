@@ -11,11 +11,11 @@ import com.ponysdk.core.event.HandlerRegistration;
 
 public class PushListenerMap<K, V> implements Iterable<PusherListener<V>> {
 
-    private final ConcurrentHashMap<K, List<PusherListener<V>>> listeners = new ConcurrentHashMap<K, List<PusherListener<V>>>();
+    private final ConcurrentHashMap<K, List<PusherListener<V>>> listeners = new ConcurrentHashMap<>();
 
     public HandlerRegistration register(final K key, final PusherListener<V> listener) {
 
-        List<PusherListener<V>> nlist = new CopyOnWriteArrayList<PusherListener<V>>();
+        List<PusherListener<V>> nlist = new CopyOnWriteArrayList<>();
         final List<PusherListener<V>> l = listeners.putIfAbsent(key, nlist);
         if (l != null) {
             nlist = l;
@@ -33,7 +33,7 @@ public class PushListenerMap<K, V> implements Iterable<PusherListener<V>> {
 
     @Override
     public Iterator<PusherListener<V>> iterator() {
-        final List<PusherListener<V>> snapshot = new ArrayList<PusherListener<V>>();
+        final List<PusherListener<V>> snapshot = new ArrayList<>();
         for (final List<PusherListener<V>> l : listeners.values()) {
             snapshot.addAll(l);
         }

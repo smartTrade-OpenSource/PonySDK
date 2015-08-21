@@ -60,6 +60,7 @@ public class SpringApplicationLoader extends ApplicationLoader {
         } catch (final Exception e) {
             log.error("Failure during Spring context closure", e);
         }
+
         super.contextDestroyed(event);
     }
 

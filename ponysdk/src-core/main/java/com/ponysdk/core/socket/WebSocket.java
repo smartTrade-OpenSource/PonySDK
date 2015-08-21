@@ -1,14 +1,16 @@
 
 package com.ponysdk.core.socket;
 
-import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public interface WebSocket {
 
     void close();
 
-    void send(String msg) throws IOException;
+    void flush();
 
     void addConnectionListener(ConnectionListener listener);
+
+    ByteBuffer getByteBuffer();
 
 }

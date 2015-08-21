@@ -59,7 +59,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             }
         });
 
-        final PListBox multiListBox = new PListBox(true, true);
+        final PListBox multiListBox = new PListBox(true);
+        multiListBox.setMultipleSelect(true);
         multiListBox.setVisibleItemCount(10);
         multiListBox.addItem("Altai horseBengin");
         multiListBox.addItem("American Warmblood");

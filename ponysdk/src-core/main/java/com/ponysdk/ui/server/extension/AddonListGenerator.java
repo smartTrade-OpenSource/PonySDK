@@ -43,10 +43,10 @@ public class AddonListGenerator extends Generator {
     @Override
     public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
 
-        final List<JClassType> ponyAddons = new ArrayList<JClassType>();
+        final List<JClassType> ponyAddons = new ArrayList<>();
 
         final TypeOracle typeOracle = context.getTypeOracle();
-        assert (typeOracle != null);
+        assert(typeOracle != null);
 
         JClassType classType = null;
         try {

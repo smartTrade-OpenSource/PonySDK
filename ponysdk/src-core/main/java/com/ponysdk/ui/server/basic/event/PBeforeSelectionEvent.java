@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> {
 
-    public static final Type<PBeforeSelectionHandler<?>> TYPE = new Type<PBeforeSelectionHandler<?>>();
+    public static final Type<PBeforeSelectionHandler<?>> TYPE = new Type<>();
 
     public PBeforeSelectionEvent(final Object source, final T selectedItem) {
         super(source);

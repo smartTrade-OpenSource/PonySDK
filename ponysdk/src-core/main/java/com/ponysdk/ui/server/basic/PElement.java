@@ -23,9 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import java.util.Objects;
+
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native HTML component.
@@ -38,9 +40,8 @@ public class PElement extends PComplexPanel {
     private String innerHTML;
 
     public PElement(final String tagName) {
-        super();
+        super(new EntryInstruction(Model.TAG, tagName));
         this.tagName = tagName;
-        this.create.put(PROPERTY.TAG, tagName);
     }
 
     @Override
@@ -55,13 +56,13 @@ public class PElement extends PComplexPanel {
     public void setInnerHTML(final String innerHTML) {
         if (Objects.equals(this.innerHTML, innerHTML)) return;
         this.innerHTML = innerHTML;
-        saveUpdate(PROPERTY.INNER_HTML, this.innerHTML);
+        saveUpdate(Model.INNER_HTML, this.innerHTML);
     }
 
     public void setInnerText(final String innerText) {
         if (Objects.equals(this.innerText, innerText)) return;
         this.innerText = innerText;
-        saveUpdate(PROPERTY.INNER_TEXT, this.innerText);
+        saveUpdate(Model.INNER_TEXT, this.innerText);
     }
 
     public String getInnerText() {

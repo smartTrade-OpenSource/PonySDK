@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -37,6 +38,10 @@ import com.ponysdk.ui.terminal.WidgetType;
  * </p>
  */
 public class PAbsolutePanel extends PComplexPanel {
+
+    public PAbsolutePanel(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     @Override
     protected WidgetType getWidgetType() {

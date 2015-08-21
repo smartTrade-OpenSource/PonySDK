@@ -1,54 +1,38 @@
 
 package com.ponysdk.core.stm;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONObject;
+import java.io.IOException;
 
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Instruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class TxnContextHttp implements TxnContext {
 
     private final Response response;
-    private List<Instruction> instructions = new ArrayList<Instruction>();
     private final boolean startMode;
 
-    public TxnContextHttp(final boolean startMode, final Request request, final Response response) {
+    private final Parser parser;
+
+    public TxnContextHttp(final boolean startMode, final Request request, final Response response) throws IOException {
         this.response = response;
         this.startMode = startMode;
+        this.parser = new Parser(response.getWriter());
     }
 
     @Override
-    public void save(final Instruction instruction) {
-        instructions.add(instruction);
-    }
+    public void flush() {
+        if (startMode) {
+            parser.parse(Model.APPLICATION_VIEW_ID, UIContext.get().getUiContextID());
+        }
 
-    @Override
-    public void flush() throws Exception {
-        if (instructions.isEmpty()) return;
-        final JSONObject data = new JSONObject();
-        if (startMode) data.put(APPLICATION.VIEW_ID, UIContext.get().getUiContextID());
-        data.put(APPLICATION.INSTRUCTIONS, instructions);
-        data.put(APPLICATION.SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-        response.write(data.toString());
         response.flush();
-        instructions.clear();
     }
 
     @Override
-    public List<Instruction> setCurrentStacker(final List<Instruction> stacker) {
-        final List<Instruction> list = instructions;
-        instructions = stacker;
-        return list;
-    }
-
-    @Override
-    public void clear() {
-        instructions.clear();
+    public Parser getParser() {
+        return parser;
     }
 }

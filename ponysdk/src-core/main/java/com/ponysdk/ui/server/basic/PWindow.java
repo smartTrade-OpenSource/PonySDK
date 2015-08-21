@@ -26,50 +26,24 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Instruction;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.server.basic.event.PNativeEvent;
-import com.ponysdk.ui.server.basic.event.PNativeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
-public class PWindow extends PObject implements PNativeHandler {
+public class PWindow extends PObject {
 
-    private static Logger log = LoggerFactory.getLogger(PWindow.class);
+    public static final long MAIN = -1L;
 
-    private long sendSeqNum = 0;
+    private final List<Runnable> postedCommands = new ArrayList<>();
+    private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<>();
 
-    private JSONObject out;
-    private UIContext context;
-    private List<Instruction> popupstacker;
-    private List<Instruction> mainStacker;
-
-    private final List<Runnable> postedCommands = new ArrayList<Runnable>();
-    private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<PCloseHandler>();
-
-    private int level = 0;
+    private final boolean loaded = false;
 
     public PWindow(final String url, final String name, final String features) {
-        super();
-        if (url != null && !url.isEmpty()) create.put(PROPERTY.URL, url);
-        if (name != null && !name.isEmpty()) create.put(PROPERTY.NAME, name);
-        if (features != null && !features.isEmpty()) create.put(PROPERTY.FEATURES, features);
-
-        addNativeHandler(this);
+        super(new EntryInstruction(PROPERTY.URL, url), new EntryInstruction(PROPERTY.NAME, name), new EntryInstruction(PROPERTY.FEATURES, features));
     }
 
     public void open() {
@@ -116,112 +90,43 @@ public class PWindow extends PObject implements PNativeHandler {
         }
     }
 
-    @Override
-    public void onNativeEvent(final PNativeEvent event) {
-        acquireOnNativeEvent();
-        try {
-            final String in = event.getJsonObject().getString(PROPERTY.DATA);
-            final JSONObject inputData = new JSONObject(new JSONTokener(in));
-            if (inputData.has(APPLICATION.KEY)) {
-                sendSeqNum = 0;
-                onLoad();
-                out.put(APPLICATION.VIEW_ID, 0);
-            } else {
-                process(context, inputData);
-            }
-            flushOnNativeEvent();
-        } catch (final Throwable e) {
-            log.error("", e);
-        } finally {
-            releaseOnNativeEvent();
-        }
-
-        if (!postedCommands.isEmpty()) executePostedCommand();
-    }
-
-    public void acquire() {
-        level++;
-
-        if (level > 1) { return; }
-        out = new JSONObject();
-        context = UIContext.get();
-        popupstacker = new ArrayList<Instruction>();
-        mainStacker = Txn.get().getTxnContext().setCurrentStacker(popupstacker);
-        UIContext.setCurrentWindow(this);
-    }
-
-    private void acquireOnNativeEvent() {
-        level++;
-        out = new JSONObject();
-        context = UIContext.get();
-        popupstacker = new ArrayList<Instruction>();
-        mainStacker = Txn.get().getTxnContext().setCurrentStacker(popupstacker);
-        UIContext.setCurrentWindow(this);
-    }
-
-    public void flushOnNativeEvent() {
-        if (level != 1) return;
-
-        try {
-            out.put(APPLICATION.INSTRUCTIONS, popupstacker);
-            out.put(APPLICATION.SEQ_NUM, sendSeqNum);
-            sendSeqNum++;
-        } catch (final JSONException e) {
-            log.error("Cannot flush window", e);
-        }
-    }
-
-    public void flush() {
-        flushOnNativeEvent();
-    }
-
-    public void releaseOnNativeEvent() {
-        level--;
-
-        if (level != 0) return;
-
-        try {
-            Txn.get().getTxnContext().setCurrentStacker(mainStacker);
-            final Update update = new Update(ID);
-            update.put(PROPERTY.TEXT, out.toString());
-            Txn.get().getTxnContext().save(update);
-        } finally {
-            UIContext.setCurrentWindow(null);
-        }
-    }
-
-    public void release() {
-        releaseOnNativeEvent();
-    }
-
-    private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
-        if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
-            final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
-            for (int i = 0; i < instructions.length(); i++) {
-                JSONObject jsonObject = null;
-                try {
-                    jsonObject = instructions.getJSONObject(i);
-                    uiContext.fireClientData(jsonObject);
-                } catch (final Throwable e) {
-                    log.error("Failed to process instruction: " + jsonObject, e);
-                }
-            }
-        }
-    }
+    // private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
+    // if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
+    // final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
+    // for (int i = 0; i < instructions.length(); i++) {
+    // JSONObject jsonObject = null;
+    // try {
+    // jsonObject = instructions.getJSONObject(i);
+    // uiContext.fireClientData(jsonObject);
+    // } catch (final Throwable e) {
+    // log.error("Failed to process instruction: " + jsonObject, e);
+    // }
+    // }
+    // }
+    // }
 
     protected void postOpenerCommand(final Runnable runnable) {
         postedCommands.add(runnable);
     }
 
-    private void executePostedCommand() {
-        for (final Runnable r : postedCommands) {
-            try {
-                r.run();
-            } catch (final Throwable e) {
-                log.error("Failed to execute command: " + r, e);
-            }
-        }
-        postedCommands.clear();
+    //
+    // private void executePostedCommand() {
+    // for (final Runnable r : postedCommands) {
+    // try {
+    // r.run();
+    // } catch (final Throwable e) {
+    // log.error("Failed to execute command: " + r, e);
+    // }
+    // }
+    // postedCommands.clear();
+    // }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void addWidget(final IsPWidget widget) {
+        PRootLayoutPanel.get().add(widget);
     }
 
     protected void onLoad() {}

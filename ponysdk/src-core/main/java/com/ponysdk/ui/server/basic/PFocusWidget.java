@@ -24,9 +24,10 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import com.ponysdk.core.event.HandlerRegistration;
-import com.ponysdk.core.tools.Objects;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -47,7 +48,7 @@ import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
@@ -60,6 +61,10 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     private boolean focused = false;
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;
+
+    public PFocusWidget(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     @Override
     public Collection<PClickHandler> getClickHandlers() {
@@ -109,32 +114,32 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(PROPERTY.ENABLED, enabled);
+        saveUpdate(Model.ENABLED, enabled);
     }
 
     public void setTabindex(final int tabindex) {
         if (this.tabindex == tabindex) return;
         this.tabindex = tabindex;
-        saveUpdate(PROPERTY.TABINDEX, tabindex);
+        saveUpdate(Model.TABINDEX, tabindex);
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
-        saveUpdate(PROPERTY.ENABLED_ON_REQUEST, this.enabledOnRequest);
+        saveUpdate(Model.ENABLED_ON_REQUEST, enabledOnRequest);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
-        saveUpdate(PROPERTY.LOADING_ON_REQUEST, showLoadingOnRequest);
+        saveUpdate(Model.LOADING_ON_REQUEST, showLoadingOnRequest);
     }
 
     @Override
     public void setFocus(final boolean focused) {
         if (Objects.equals(this.focused, focused)) return;
         this.focused = focused;
-        saveUpdate(PROPERTY.FOCUSED, focused);
+        saveUpdate(Model.FOCUSED, focused);
     }
 
     public boolean isEnabled() {
@@ -165,7 +170,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
                 @Override
                 public void onClick(final PClickEvent event) {
                     handler.onClick(event);
-                    saveUpdate(PROPERTY.END_OF_PROCESSING, true);
+                    saveUpdate(Model.END_OF_PROCESSING, true);
                 }
             };
 
@@ -183,7 +188,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
                 @Override
                 public void onDoubleClick(final PDoubleClickEvent event) {
                     handler.onDoubleClick(event);
-                    saveUpdate(PROPERTY.END_OF_PROCESSING, true);
+                    saveUpdate(Model.END_OF_PROCESSING, true);
                 }
             };
 

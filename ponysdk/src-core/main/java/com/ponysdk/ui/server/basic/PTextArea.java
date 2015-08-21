@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import java.util.Objects;
+
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**

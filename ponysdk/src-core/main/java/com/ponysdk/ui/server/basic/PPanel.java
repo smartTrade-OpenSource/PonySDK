@@ -25,12 +25,17 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other widgets.
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
+
+    public PPanel(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     @Override
     public abstract boolean remove(PWidget child);

@@ -27,31 +27,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
 public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
-    private final List<PChangeHandler> changeHandlers = new ArrayList<PChangeHandler>();
+    private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
-    private final List<PSubmitCompleteHandler> submitCompleteHandlers = new ArrayList<PSubmitCompleteHandler>();
+    private final List<PSubmitCompleteHandler> submitCompleteHandlers = new ArrayList<>();
 
     private StreamHandler streamHandler;
 
@@ -62,8 +57,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     private boolean enabled = true;
 
     public PFileUpload() {
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_CHANGE_HANDLER);
     }
 
     @Override
@@ -72,19 +66,17 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        final String handler = instruction.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.CHANGE_HANDLER.equals(handler)) {
-            final String fileName = instruction.getString(PROPERTY.FILE_NAME);
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.HANDLER_CHANGE_HANDLER.getKey())) {
+            final String fileName = jsonObject.getString(Model.FILE_NAME.getKey());
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (HANDLER.KEY_.SUBMIT_COMPLETE_HANDLER.equals(handler)) {
+        } else if (jsonObject.containsKey(Model.HANDLER_SUBMIT_COMPLETE_HANDLER.getKey())) {
             onSubmitComplete();
         } else {
-            super.onClientData(instruction);
+            super.onClientData(jsonObject);
         }
     }
 
@@ -95,9 +87,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public void setName(final String name) {
         this.name = name;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.NAME, this.name);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.NAME, name);
     }
 
     public void submit() {
@@ -119,9 +109,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ENABLED, this.enabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ENABLED, enabled);
     }
 
     public String getFileName() {

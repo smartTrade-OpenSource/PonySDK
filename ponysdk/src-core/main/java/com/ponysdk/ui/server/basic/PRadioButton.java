@@ -23,17 +23,19 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
+import java.util.Objects;
+
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires {@link PClickEvent}s when the radio button is
  * clicked, and {@link PValueChangeEvent}s when the button becomes checked. Note, however, that browser
  * limitations prevent PValueChangeEvents from being sent when the radio button is cleared as a side effect of
- * another in the group being clicked. <h3>CSS Style Rules</h3>
+ * another in the group being clicked.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RadioButton</dt>
  * <dd>the outer element</dd>
@@ -60,7 +62,7 @@ public class PRadioButton extends PCheckBox {
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(PROPERTY.NAME, this.name);
+        saveUpdate(Model.NAME, this.name);
     }
 
     public String getName() {

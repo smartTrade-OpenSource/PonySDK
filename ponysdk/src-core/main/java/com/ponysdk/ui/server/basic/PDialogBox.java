@@ -23,15 +23,14 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a PPopupPanel,
  * calls to {@link #setWidth(String)} and {@link #setHeight(String)} will set the width and height of the
- * dialog box itself, even if a widget has not been added as yet. <h3>CSS Style Rules</h3>
+ * dialog box itself, even if a widget has not been added as yet.
+ * <h3>CSS Style Rules</h3>
  * <ul>
  * <li>.gwt-DialogBox { the outside of the dialog }</li>
  * <li>.gwt-DialogBox .Caption { the caption }</li>
@@ -75,9 +74,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
 
     public void setCaption(final String caption) {
         this.caption = caption;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_CAPTION, caption);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.POPUP_CAPTION, caption);
     }
 
     public String getCaption() {

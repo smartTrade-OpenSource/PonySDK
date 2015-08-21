@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PCloseEvent extends Event<PCloseHandler> {
 
-    public static final Type<PCloseHandler> TYPE = new Type<PCloseHandler>();
+    public static final Type<PCloseHandler> TYPE = new Type<>();
 
     public PCloseEvent(final Object sourceComponent) {
         super(sourceComponent);

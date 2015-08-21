@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PMouseOutEvent extends PMouseEvent<PMouseOutHandler> {
 
-    public static final PDomEvent.Type<PMouseOutHandler> TYPE = new PDomEvent.Type<PMouseOutHandler>(DomHandlerType.MOUSE_OUT);
+    public static final PDomEvent.Type<PMouseOutHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.MOUSE_OUT);
 
     public PMouseOutEvent(final Object sourceComponent) {
         super(sourceComponent);

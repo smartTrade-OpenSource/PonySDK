@@ -27,13 +27,13 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PCookies {
 
-    private final Map<String, String> cachedCookies = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> cachedCookies = new ConcurrentHashMap<>();
     private final long objectID = 0; // reserved
 
     public PCookies() {}
@@ -47,11 +47,13 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
-
-        final Update update = new Update(objectID);
-        update.put(PROPERTY.REMOVE, Boolean.TRUE);
-        update.put(PROPERTY.NAME, name);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.parse(Model.REMOVE, true);
+        parser.parse(Model.NAME, name);
+        parser.endObject();
 
         return cachedCookies.remove(name);
     }
@@ -63,14 +65,17 @@ public class PCookies {
     public void setCookie(final String name, final String value, final Date expires) {
         cachedCookies.put(name, value);
 
-        final Update update = new Update(objectID);
-        update.put(PROPERTY.ADD, Boolean.TRUE);
-        update.put(PROPERTY.NAME, name);
-        update.put(PROPERTY.VALUE, value);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.parse(Model.ADD, true);
+        parser.parse(Model.NAME, name);
+        parser.parse(Model.VALUE, value);
         if (expires != null) {
-            update.put(PROPERTY.COOKIE_EXPIRE, expires.getTime());
+            parser.parse(Model.COOKIE_EXPIRE, expires.getTime());
         }
-        Txn.get().getTxnContext().save(update);
+        parser.endObject();
     }
 
 }

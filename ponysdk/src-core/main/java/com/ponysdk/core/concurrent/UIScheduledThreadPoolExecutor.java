@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.UIContextListener;
 import com.ponysdk.ui.server.basic.PPusher.PusherState;
-import com.ponysdk.ui.server.basic.PWindow;
 
 public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, UIContextListener {
 
@@ -24,7 +23,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
     private static UIScheduledThreadPoolExecutor INSTANCE;
 
     protected final ScheduledThreadPoolExecutor executor;
-    protected Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<UIContext, Set<UIRunnable>>();
+    protected Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
 
     private UIScheduledThreadPoolExecutor(final ScheduledThreadPoolExecutor executor) {
         log.info("Initializing UIScheduledThreadPoolExecutor");
@@ -87,30 +86,6 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         return uiRunnable;
     }
 
-    static class WindowUIRunnable implements Runnable {
-
-        private final Runnable runnable;
-        private final PWindow window;
-
-        public WindowUIRunnable(final PWindow window, final Runnable runnable) {
-            this.runnable = runnable;
-            this.window = window;
-        }
-
-        @Override
-        public void run() {
-            window.acquire();
-            try {
-                runnable.run();
-                window.flush();
-            } catch (final Exception e) {
-                log.error("Cannot run UIRunnable", e);
-            } finally {
-                window.release();
-            }
-        }
-    }
-
     public class UIRunnable implements Runnable {
 
         private final Runnable runnable;
@@ -118,18 +93,11 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
 
         private boolean cancelled;
         private ScheduledFuture<?> future;
-        private final PWindow window;
         private final boolean repeated;
 
         public UIRunnable(final Runnable runnable, final boolean repeated) {
             this.uiContext = UIContext.get();
-
-            this.window = UIContext.getCurrentWindow();
-            if (window != null) {
-                this.runnable = new WindowUIRunnable(window, runnable);
-            } else {
-                this.runnable = runnable;
-            }
+            this.runnable = runnable;
 
             this.repeated = repeated;
         }
@@ -178,7 +146,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         uiContext.addUIContextListener(this);
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
-            runnables = new CopyOnWriteArraySet<UIRunnable>();
+            runnables = new CopyOnWriteArraySet<>();
             runnablesByUIContexts.put(uiContext, runnables);
         }
         runnables.add(runnable);

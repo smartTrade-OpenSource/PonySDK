@@ -24,10 +24,19 @@
 package com.ponysdk.ui.server.list.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.list.DataGridActivity;
+import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
 
+/**
+ * <p>
+ * Way to display a the column Header of a {@link DataGridActivity}
+ * </p>
+ * <p>
+ * Defined in a {@link DataGridColumnDescriptor}
+ * </p>
+ */
 public interface HeaderCellRenderer {
 
     public IsPWidget render();
 
-    public String getCaption();// TODO nciaravol => must be removed
 }

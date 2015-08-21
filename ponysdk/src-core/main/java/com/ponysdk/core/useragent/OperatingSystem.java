@@ -75,8 +75,7 @@ public enum OperatingSystem {
     /**
      * PalmOS, exact version unkown
      */
-    WEBOS(Manufacturer.HP, null, 11, "WebOS", new String[] { "webOS" }, null, DeviceType.MOBILE, null),
-    PALM(Manufacturer.HP, null, 10, "PalmOS", new String[] { "Palm" }, null, DeviceType.MOBILE, null),
+    WEBOS(Manufacturer.HP, null, 11, "WebOS", new String[] { "webOS" }, null, DeviceType.MOBILE, null), PALM(Manufacturer.HP, null, 10, "PalmOS", new String[] { "Palm" }, null, DeviceType.MOBILE, null),
 
     /**
      * iOS4, with the release of the iPhone 4, Apple renamed the OS to iOS.
@@ -207,8 +206,7 @@ public enum OperatingSystem {
 
     BLACKBERRY_TABLET(Manufacturer.BLACKBERRY, null, 100, "BlackBerry Tablet OS", new String[] { "RIM Tablet OS" }, null, DeviceType.TABLET, null),
 
-    ROKU(Manufacturer.ROKU, null, 1, "Roku OS", new String[] { "Roku" }, null, DeviceType.DMR, null),
-    UNKNOWN(Manufacturer.OTHER, null, 1, "Unknown", new String[0], null, DeviceType.UNKNOWN, null);
+    ROKU(Manufacturer.ROKU, null, 1, "Roku OS", new String[] { "Roku" }, null, DeviceType.DMR, null), UNKNOWN(Manufacturer.OTHER, null, 1, "Unknown", new String[0], null, DeviceType.UNKNOWN, null);
 
     private final short id;
     private final String name;
@@ -219,10 +217,11 @@ public enum OperatingSystem {
     private final OperatingSystem parent;
     private List<OperatingSystem> children;
 
-    private OperatingSystem(final Manufacturer manufacturer, final OperatingSystem parent, final int versionId, final String name, final String[] aliases, final String[] exclude, final DeviceType deviceType, final String versionRegexString) {
+    private OperatingSystem(final Manufacturer manufacturer, final OperatingSystem parent, final int versionId, final String name, final String[] aliases, final String[] exclude, final DeviceType deviceType,
+            final String versionRegexString) {
         this.manufacturer = manufacturer;
         this.parent = parent;
-        this.children = new ArrayList<OperatingSystem>();
+        this.children = new ArrayList<>();
         if (this.parent != null) {
             this.parent.children.add(this);
         }

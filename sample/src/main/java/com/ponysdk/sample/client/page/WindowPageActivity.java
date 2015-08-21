@@ -114,13 +114,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             @Override
             public void onClick(final PClickEvent event) {
                 for (final PWindow window : windows) {
-                    window.acquire();
-                    try {
-                        PNotificationManager.showHumanizedNotification("Hello from opener");
-                        window.flush();
-                    } finally {
-                        window.release();
-                    }
+                    PNotificationManager.showHumanizedNotification(window, "Hello from opener");
                 }
             }
         });
@@ -152,7 +146,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
     private static class MyWindow extends PWindow {
 
         private int count = 1;
-        private PScript script;
         private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
@@ -161,7 +154,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
         @Override
         protected void onLoad() {
-            script = PScript.get();
             rootLayoutPanel = PRootLayoutPanel.get();
 
             final PFlowPanel flow = new PFlowPanel();
@@ -196,7 +188,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    script.execute("alert('from the popup');");
+                    PScript.execute("alert('from the popup');");
                 }
             });
             flow.add(addMessage);
@@ -212,7 +204,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             public void run() {
                 PNotificationManager.showHumanizedNotification("Hello from popup");
             }
-
         }
 
     }

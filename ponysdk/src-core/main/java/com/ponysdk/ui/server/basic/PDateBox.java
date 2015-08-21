@@ -31,22 +31,20 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A text box that shows a {@link PDatePicker} when the user focuses on it. <h3>CSS Style Rules</h3>
+ * A text box that shows a {@link PDatePicker} when the user focuses on it.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-DateBox</dt>
  * <dd>default style name</dd>
@@ -60,7 +58,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
-    private final List<PValueChangeHandler<Date>> handlers = new ArrayList<PValueChangeHandler<Date>>();
+    private final List<PValueChangeHandler<Date>> handlers = new ArrayList<>();
 
     private final PDatePicker datePicker;
     private Date date;
@@ -75,15 +73,12 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
-
+        super(new EntryInstruction(Model.PICKER, picker.getID()));
         this.datePicker = picker;
-
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
 
         setDateFormat(dateFormat);
 
-        create.put(PROPERTY.PICKER, this.datePicker.getID());
+        saveAddHandler(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -92,9 +87,9 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     @Override
-    public void onClientData(final JSONObject e) throws JSONException {
-        if (e.getString(HANDLER.KEY).equals(HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER)) {
-            final String data = e.getString(PROPERTY.VALUE);
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER.getKey())) {
+            final String data = jsonObject.getString(Model.VALUE.getKey());
             Date date = null;
             if (data != null && !data.isEmpty()) {
                 try {
@@ -103,9 +98,9 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
                     if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", data);
                 }
             }
-            onValueChange(new PValueChangeEvent<Date>(this, date));
+            onValueChange(new PValueChangeEvent<>(this, date));
         } else {
-            super.onClientData(e);
+            super.onClientData(jsonObject);
         }
     }
 
@@ -130,15 +125,11 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         for (final PValueChangeHandler<Date> handler : handlers) {
             handler.onValueChange(event);
         }
-
     }
 
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
-
-        final Update update = new Update(getID());
-        update.put(PROPERTY.DATE_FORMAT_PATTERN, dateFormat.toPattern());
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     public SimpleDateFormat getDateFormat() {
@@ -158,15 +149,11 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : "");
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.VALUE, date != null ? dateFormat.format(date) : "");
     }
 
     public void setDefaultMonth(final Date date) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.MONTH, Long.toString(date.getTime()));
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.MONTH, Long.toString(date.getTime()));
     }
 
     public PDatePicker getDatePicker() {

@@ -23,10 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A type of widget that can wrap another widget, hiding the wrapped widget's methods. When added to a panel,
@@ -40,6 +39,10 @@ public abstract class PComposite extends PWidget {
 
     private PWidget widget;
 
+    public PComposite(final EntryInstruction... instructions) {
+        super(instructions);
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.COMPOSITE;
@@ -52,9 +55,7 @@ public abstract class PComposite extends PWidget {
         this.widget = child;
         child.setParent(this);
 
-        final Update update = new Update(ID);
-        update.put(PROPERTY.WIDGET, child.getID());
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.WIDGET, child.getID());
     }
 
 }

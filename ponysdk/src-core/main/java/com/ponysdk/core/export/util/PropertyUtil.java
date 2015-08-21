@@ -32,7 +32,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 
 public class PropertyUtil {
 
-    public static String getProperty(Object bean, String property) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public static String getProperty(final Object bean, final String property) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         final String propertyPath = property;
         Object propertyValue = "NA";
         if (propertyPath != null) {
@@ -47,7 +47,7 @@ public class PropertyUtil {
                 } else {
                     if (propertyValue instanceof List<?>) {
                         final List<?> propertyList = (List<?>) propertyValue;
-                        final List<Object> values = new ArrayList<Object>();
+                        final List<Object> values = new ArrayList<>();
                         for (final Object object : propertyList) {
                             values.add(getPropertyValue(object, tokens[i]));
                         }
@@ -55,7 +55,7 @@ public class PropertyUtil {
                         else propertyValue = values;
                     } else if (propertyValue instanceof Map<?, ?>) {
                         final Map<?, ?> propertyMap = (Map<?, ?>) propertyValue;
-                        final List<Object> values = new ArrayList<Object>();
+                        final List<Object> values = new ArrayList<>();
                         for (final Object object : propertyMap.values()) {
                             values.add(getPropertyValue(object, tokens[i]));
                         }
@@ -69,7 +69,7 @@ public class PropertyUtil {
         return String.valueOf(propertyValue == null ? "NA" : propertyValue);
     }
 
-    public static Object getPropertyValue(Object bean, final String propertyName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public static Object getPropertyValue(final Object bean, final String propertyName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Object propertyValue;
         if (PropertyUtils.isReadable(bean, propertyName)) {
             propertyValue = PropertyUtils.getProperty(bean, propertyName);

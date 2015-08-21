@@ -28,8 +28,8 @@ import java.util.List;
 import com.ponysdk.core.command.AbstractServiceCommand;
 import com.ponysdk.core.export.ExportContext;
 import com.ponysdk.core.query.Result;
-import com.ponysdk.ui.server.list.SelectionMode;
-import com.ponysdk.ui.server.list.SelectionResult;
+import com.ponysdk.ui.server.list.selector.SelectionMode;
+import com.ponysdk.ui.server.list.selector.SelectionResult;
 
 public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportCommand<T> {
 
@@ -43,9 +43,9 @@ public class ExternalExportCommand<T, U extends Result<List<T>>> extends ExportC
     @Override
     public String execute() {
         if (exportContext.getSelectionResult().getSelectionMode() == SelectionMode.FULL) {
-            U findResult = findCommand.execute();
+            final U findResult = findCommand.execute();
             if (findCommand.isSuccessfull()) {
-                exportContext.setSelectionResult(new SelectionResult<T>(SelectionMode.FULL, findResult.getData()));
+                exportContext.setSelectionResult(new SelectionResult<>(SelectionMode.FULL, findResult.getData()));
                 return super.execute();
             } else {
                 super.onFailure(findCommand.getCaught());

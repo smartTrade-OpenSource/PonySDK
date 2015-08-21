@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,7 @@ public class JSONBuilder {
     public JSONBuilder addChild(final String key) {
         final JSONBuilder child = new JSONBuilder();
 
-        if (childs == null) childs = new HashMap<String, JSONBuilder>();
+        if (childs == null) childs = new HashMap<>();
         childs.put(key, child);
 
         return child;

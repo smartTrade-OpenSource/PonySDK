@@ -24,9 +24,9 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DialogBox;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
@@ -35,7 +35,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         boolean autoHide = false;
         boolean modal = false;
 
-        if (create.containsKey(PROPERTY.POPUP_AUTO_HIDE)) {
+        if (create.containsKey(Model.POPUP_AUTO_HIDE.getKey())) {
             autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
         }
         if (create.containsKey(PROPERTY.POPUP_MODAL)) {

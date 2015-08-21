@@ -25,10 +25,8 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.
@@ -36,6 +34,10 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 public abstract class PComplexPanel extends PPanel {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
+
+    public PComplexPanel(final EntryInstruction... entries) {
+        super(entries);
+    }
 
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {
@@ -55,9 +57,8 @@ public abstract class PComplexPanel extends PPanel {
         getChildren().insert(child, beforeIndex);
         adopt(child);
 
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.INDEX, beforeIndex);
-        Txn.get().getTxnContext().save(add);
+        saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
+
     }
 
     @Override
@@ -65,8 +66,7 @@ public abstract class PComplexPanel extends PPanel {
         if (w.getParent() != this) return false;
         orphan(w);
         if (getChildren().remove(w)) {
-            final Remove remove = new Remove(w.getID(), getID());
-            Txn.get().getTxnContext().save(remove);
+            saveRemove(w.getID(), ID);
             return true;
         } else {
             return false;

@@ -25,7 +25,6 @@
 	<xs:element name="service">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="dao" minOccurs="0" maxOccurs="1" />
 				<xs:element ref="crudmethod" minOccurs="0" maxOccurs="1" />
 				<xs:element ref="method" minOccurs="0" maxOccurs="unbounded" />
 				<xs:element ref="pushmethod" minOccurs="0" maxOccurs="unbounded" />
@@ -46,15 +45,6 @@
 			<xs:sequence>
 				<xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded" />
 			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="dao">
-		<xs:complexType>
-			<xs:sequence>
-			</xs:sequence>
-			<xs:attribute name="class" use="required" type="xs:string" />
-			<xs:attribute name="daoLayer" use="optional" type="daoLayer" default="hibernate" />
 		</xs:complexType>
 	</xs:element>
 
@@ -105,15 +95,6 @@
 			<xs:enumeration value="single" />
 			<xs:enumeration value="list" />
 			<xs:enumeration value="set" />
-		</xs:restriction>
-	</xs:simpleType>
-
-	<xs:simpleType name="daoLayer">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="memory" />
-			<xs:enumeration value="hibernate" />
-			<xs:enumeration value="mongodb" />
-			<xs:enumeration value="mybatis" />
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

@@ -35,7 +35,7 @@ import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.celltable.SimpleTableView;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGrid;
+import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
 
 public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity implements DataListener {
 

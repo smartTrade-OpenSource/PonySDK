@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.ponysdk.core.query.Query;
-import com.ponysdk.ui.server.list.SelectionResult;
+import com.ponysdk.ui.server.list.selector.SelectionResult;
 
 public class ExportContext<T> implements Serializable {
 
@@ -43,7 +43,7 @@ public class ExportContext<T> implements Serializable {
 
     public ExportContext() {}
 
-    public ExportContext(Query query, List<ExportableField> exportableFields, SelectionResult<T> selectionResult) {
+    public ExportContext(final Query query, final List<ExportableField> exportableFields, final SelectionResult<T> selectionResult) {
         this.query = query;
         this.exportableFields = exportableFields;
         this.selectionResult = selectionResult;
@@ -57,11 +57,11 @@ public class ExportContext<T> implements Serializable {
         return exportableFields;
     }
 
-    public void setQuery(Query query) {
+    public void setQuery(final Query query) {
         this.query = query;
     }
 
-    public void setExportableFields(List<ExportableField> exportableFields) {
+    public void setExportableFields(final List<ExportableField> exportableFields) {
         this.exportableFields = exportableFields;
     }
 
@@ -69,7 +69,7 @@ public class ExportContext<T> implements Serializable {
         return exporter;
     }
 
-    public void setExporter(Exporter<T> exportModule) {
+    public void setExporter(final Exporter<T> exportModule) {
         this.exporter = exportModule;
     }
 
@@ -77,7 +77,7 @@ public class ExportContext<T> implements Serializable {
         return selectionResult;
     }
 
-    public void setSelectionResult(SelectionResult<T> selectionResult) {
+    public void setSelectionResult(final SelectionResult<T> selectionResult) {
         this.selectionResult = selectionResult;
     }
 }

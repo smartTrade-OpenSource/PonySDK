@@ -61,10 +61,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
@@ -85,14 +81,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private static EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
-    private final Map<String, AddonFactory> addonByKey = new HashMap<String, AddonFactory>();
-    private final Map<Long, PTObject> objectByID = new HashMap<Long, PTObject>();
-    private final Map<UIObject, Long> objectIDByWidget = new HashMap<UIObject, Long>();
-    private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<Long, UIObject>();
-    private final List<PTInstruction> stackedInstructions = new ArrayList<PTInstruction>();
-    private final List<JSONObject> stackedErrors = new ArrayList<JSONObject>();
+    private final Map<String, AddonFactory> addonByKey = new HashMap<>();
+    private final Map<Long, PTObject> objectByID = new HashMap<>();
+    private final Map<UIObject, Long> objectIDByWidget = new HashMap<>();
+    private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<>();
+    private final List<PTInstruction> stackedInstructions = new ArrayList<>();
+    private final List<JSONObject> stackedErrors = new ArrayList<>();
 
-    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<Long, JSONObject>();
+    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<>();
 
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
@@ -110,7 +106,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public static long sessionID;
 
     private CommunicationErrorHandler communicationErrorHandler;
-    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<String, JavascriptAddOnFactory>();
+    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     public UIBuilder() {
         History.addValueChangeHandler(this);
@@ -203,7 +199,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
         lastReceived = receivedSeqNum;
 
-        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        final List<PTInstruction> instructions = new ArrayList<>();
         final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
         for (int i = 0; i < jsonArray.size(); i++) {
             instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
@@ -407,7 +403,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             log.info("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
         }
 
-        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        final List<PTInstruction> instructions = new ArrayList<>();
         instructions.add(instruction);
         sendDataToServer(instructions);
     }

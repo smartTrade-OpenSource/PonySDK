@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONArray;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
@@ -66,7 +65,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     protected void executeInstruction(final PTInstruction update, final UIService uiService) {
         final JSONArray jsonArray = update.get(PROPERTY.INSTRUCTIONS).isArray();
-        final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
+        final List<PTInstruction> instructions = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
         }

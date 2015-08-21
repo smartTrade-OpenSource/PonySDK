@@ -33,13 +33,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and {@link PFlexTable}.
@@ -87,21 +86,24 @@ public abstract class PHTMLTable extends PPanel {
 
     public class PRowFormatter {
 
-        private Map<Integer, Set<String>> styleNames = new HashMap<Integer, Set<String>>();
+        private Map<Integer, Set<String>> styleNames = new HashMap<>();
 
         public void addStyleName(final int row, final String styleName) {
             Set<String> styles = styleNames.get(row);
             if (styles == null) {
-                styles = new HashSet<String>();
+                styles = new HashSet<>();
                 styleNames.put(row, styles);
             }
 
             if (styles.add(styleName)) {
-                final Update update = new Update(ID);
-                update.put(PROPERTY.ROW, row);
-                update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
-                update.put(PROPERTY.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
-                Txn.get().getTxnContext().save(update);
+                final Parser parser = Txn.get().getTxnContext().getParser();
+                parser.beginObject();
+                parser.parse(Model.TYPE_UPDATE);
+                parser.parse(Model.OBJECT_ID, ID);
+                parser.parse(Model.ROW, row);
+                parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.parse(Model.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
+                parser.endObject();
             }
         }
 
@@ -111,33 +113,39 @@ public abstract class PHTMLTable extends PPanel {
             if (styles == null) return;
 
             if (styles.remove(styleName)) {
-                final Update update = new Update(ID);
-                update.put(PROPERTY.ROW, row);
-                update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
-                update.put(PROPERTY.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                Txn.get().getTxnContext().save(update);
+                final Parser parser = Txn.get().getTxnContext().getParser();
+                parser.beginObject();
+                parser.parse(Model.TYPE_UPDATE);
+                parser.parse(Model.OBJECT_ID, ID);
+                parser.parse(Model.ROW, row);
+                parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.parse(Model.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                parser.endObject();
             }
         }
 
         public void setStyleName(final int row, final String styleName) {
             Set<String> styles = styleNames.get(row);
             if (styles == null) {
-                styles = new HashSet<String>();
+                styles = new HashSet<>();
                 styleNames.put(row, styles);
             }
 
             styles.clear();
             styles.add(styleName);
 
-            final Update update = new Update(ID);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.HTMLTABLE_ROW_STYLE, true);
-            update.put(PROPERTY.ROW_FORMATTER_SET_STYLE_NAME, styleName);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+            parser.parse(Model.ROW_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.endObject();
         }
 
         protected void insertRowStyle(final int row) {
-            final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
+            final Map<Integer, Set<String>> temp = new HashMap<>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() >= row) {
                     temp.put(entry.getKey() + 1, entry.getValue());
@@ -149,7 +157,7 @@ public abstract class PHTMLTable extends PPanel {
 
         protected void removeRowStyle(final int row) {
             styleNames.remove(row);
-            final Map<Integer, Set<String>> temp = new HashMap<Integer, Set<String>>();
+            final Map<Integer, Set<String>> temp = new HashMap<>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() > row) {
                     temp.put(entry.getKey() - 1, entry.getValue());
@@ -162,89 +170,116 @@ public abstract class PHTMLTable extends PPanel {
     public class PCellFormatter {
 
         public void addStyleName(final int row, final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
-            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.endObject();
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.endObject();
         }
 
         public void setStyleName(final int row, final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.CELL_FORMATTER_SET_STYLE_NAME, styleName);
-            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.CELL_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.endObject();
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, align.ordinal());
-            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.CELL_VERTICAL_ALIGNMENT, align.ordinal());
+            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.endObject();
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
-            update.put(PROPERTY.HTMLTABLE_CELL_STYLE, true);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
+            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.endObject();
         }
     }
 
     public class PColumnFormatter {
 
         public void setWidth(final int column, final String width) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
-            update.put(PROPERTY.COLUMN_FORMATTER_COLUMN_WIDTH, width);
-            update.put(PROPERTY.COLUMN, column);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.COLUMN_FORMATTER_COLUMN_WIDTH, width);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.endObject();
         }
 
         public void addStyleName(final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
-            update.put(PROPERTY.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
-            update.put(PROPERTY.COLUMN, column);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.parse(Model.COLUMN, column);
+            parser.endObject();
         }
 
         public void removeStyleName(final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
-            update.put(PROPERTY.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            update.put(PROPERTY.COLUMN, column);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.parse(Model.COLUMN, column);
+            parser.endObject();
         }
 
         public void setStyleName(final int column, final String styleName) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.HTMLTABLE_COLUMN_STYLE, true);
-            update.put(PROPERTY.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
-            update.put(PROPERTY.COLUMN, column);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.parse(Model.COLUMN, column);
+            parser.endObject();
         }
     }
 
-    private final TreeMap<Row, TreeMap<Integer, PWidget>> columnByRow = new TreeMap<Row, TreeMap<Integer, PWidget>>();
+    private final TreeMap<Row, TreeMap<Integer, PWidget>> columnByRow = new TreeMap<>();
 
-    private final Map<PWidget, Cell> cellByWidget = new HashMap<PWidget, PHTMLTable.Cell>();
+    private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
 
     private PCellFormatter cellFormatter;
 
@@ -257,6 +292,12 @@ public abstract class PHTMLTable extends PPanel {
     private int borderWidth;
 
     private final PRowFormatter rowFormatter = new PRowFormatter();
+
+    public PHTMLTable() {}
+
+    public PHTMLTable(final EntryInstruction... instructions) {
+        super(instructions);
+    }
 
     public int getRowCount() {
         if (columnByRow.isEmpty()) return 0;
@@ -302,7 +343,7 @@ public abstract class PHTMLTable extends PPanel {
 
     @Override
     public void clear() {
-        final List<PWidget> values = new ArrayList<PWidget>();
+        final List<PWidget> values = new ArrayList<>();
         for (final TreeMap<Integer, PWidget> widgetByColumn : columnByRow.values()) {
             values.addAll(widgetByColumn.values());
         }
@@ -311,7 +352,7 @@ public abstract class PHTMLTable extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate(PROPERTY.CLEAR, "");
+        saveUpdate(Model.CLEAR, "");
     }
 
     public void removeRow(final int row) {
@@ -319,7 +360,7 @@ public abstract class PHTMLTable extends PPanel {
         if (widgetByColumn == null) return;
         getRowFormatter().removeRowStyle(row);
 
-        final List<PWidget> values = new ArrayList<PWidget>(widgetByColumn.values());
+        final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
         for (final PWidget w : values) {
             remove(w, false);
         }
@@ -335,7 +376,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        saveUpdate(PROPERTY.CLEAR_ROW, row);
+        saveUpdate(Model.CLEAR_ROW, row);
 
     }
 
@@ -351,7 +392,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        saveUpdate(PROPERTY.INSERT_ROW, row);
+        saveUpdate(Model.INSERT_ROW, row);
     }
 
     @Override
@@ -371,8 +412,7 @@ public abstract class PHTMLTable extends PPanel {
             if (removeWidgetFromMap(widget) != null) {
                 // Physical detach.
                 if (physicalDetach) {
-                    final Remove remove = new Remove(widget.getID(), getID());
-                    Txn.get().getTxnContext().save(remove);
+                    saveRemove(widget.getID(), ID);
                 }
             }
         }
@@ -381,17 +421,17 @@ public abstract class PHTMLTable extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        saveUpdate(PROPERTY.BORDER_WIDTH, width);
+        saveUpdate(Model.BORDER_WIDTH, width);
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        saveUpdate(PROPERTY.CELL_PADDING, padding);
+        saveUpdate(Model.CELL_PADDING, padding);
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        saveUpdate(PROPERTY.CELL_SPACING, spacing);
+        saveUpdate(Model.CELL_SPACING, spacing);
     }
 
     protected void setCellFormatter(final PCellFormatter cellFormatter) {
@@ -409,10 +449,15 @@ public abstract class PHTMLTable extends PPanel {
             addWidgetToMap(row, column, widget);
 
             // Physical attach.
-            final Add add = new Add(widget.getID(), getID());
-            add.put(PROPERTY.ROW, row);
-            add.put(PROPERTY.CELL, column);
-            Txn.get().getTxnContext().save(add);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_ADD);
+            parser.parse(Model.OBJECT_ID, widget.getID());
+            parser.parse(Model.PARENT_OBJECT_ID, ID);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.CELL, column);
+            parser.endObject();
+
             adopt(widget);
         }
     }
@@ -444,7 +489,7 @@ public abstract class PHTMLTable extends PPanel {
         cellByWidget.put(widget, cell);
         TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(irow);
         if (cellByColumn == null) {
-            cellByColumn = new TreeMap<Integer, PWidget>();
+            cellByColumn = new TreeMap<>();
             columnByRow.put(irow, cellByColumn);
         }
         cellByColumn.put(column, widget);

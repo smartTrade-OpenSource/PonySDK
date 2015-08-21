@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
@@ -34,7 +34,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
      * not hidden.
      */
     public void selectAll() {
-        saveUpdate(PROPERTY.SELECT_ALL, true);
+        saveUpdate(Model.SELECT_ALL, true);
     }
 
 }

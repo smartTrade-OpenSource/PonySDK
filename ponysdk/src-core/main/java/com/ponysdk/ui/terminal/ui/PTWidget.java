@@ -69,9 +69,6 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -80,8 +77,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
-    private final Set<Integer> preventedEvents = new HashSet<Integer>();
-    private final Set<Integer> stoppedEvents = new HashSet<Integer>();
+    private final Set<Integer> preventedEvents = new HashSet<>();
+    private final Set<Integer> stoppedEvents = new HashSet<>();
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {

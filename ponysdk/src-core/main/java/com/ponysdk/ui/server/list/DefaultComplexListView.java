@@ -39,25 +39,25 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class DefaultComplexListView extends PVerticalPanel implements ComplexListView {
 
-    protected final SimpleListView simpleListView = new DefaultSimpleListView();
+    private final SimpleListView simpleListView = new DefaultSimpleListView();
 
-    protected final PSimplePanel inputLayout = new PSimplePanel();
+    private final PSimplePanel inputLayout = new PSimplePanel();
 
-    protected final PToolbar toolbarLayout = new PToolbar();
+    private final PToolbar toolbarLayout = new PToolbar();
 
-    protected final PSimplePanel pagingLayout = new PSimplePanel();
+    private final PSimplePanel pagingLayout = new PSimplePanel();
 
-    protected final PSimplePanel positionPanel = new PSimplePanel();
+    private final PSimplePanel positionPanel = new PSimplePanel();
 
-    protected final PSimplePanel topListLayout = new PSimplePanel();
+    private final PSimplePanel topListLayout = new PSimplePanel();
 
-    protected final PSimplePanel bottomListLayout = new PSimplePanel();
+    private final PSimplePanel bottomListLayout = new PSimplePanel();
 
-    protected final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
+    private final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
 
-    protected final PSimplePanel preferencesLayout = new PSimplePanel();
+    private final PSimplePanel preferencesLayout = new PSimplePanel();
 
-    protected final PLabel searchResultTimeLabel = new PLabel();
+    private final PLabel searchResultTimeLabel = new PLabel();
 
     public DefaultComplexListView() {
         setSizeFull();
@@ -143,8 +143,8 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     }
 
     @Override
-    public void addWidget(final IsPWidget component, final int column, final int row) {
-        simpleListView.addWidget(component, column, row);
+    public void addWidget(final IsPWidget component, final int column, final int row, final int colspan) {
+        simpleListView.addWidget(component, column, row, colspan);
     }
 
     @Override
@@ -231,6 +231,16 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
     @Override
     public PSimplePanel getPreferencesLayout() {
         return preferencesLayout;
+    }
+
+    @Override
+    public void moveRow(final int index, final int beforeIndex) {
+        simpleListView.moveRow(index, beforeIndex);
+    }
+
+    @Override
+    public void moveColumn(final int index, final int beforeIndex) {
+        simpleListView.moveColumn(index, beforeIndex);
     }
 
 }

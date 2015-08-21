@@ -26,21 +26,21 @@ package com.ponysdk.ui.server.list.renderer.cell;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public abstract class AbstractCellRenderer<D, V> implements CellRenderer<D, V> {
+public abstract class AbstractCellRenderer<V> implements CellRenderer<V> {
 
     private static String DASH = "-";
 
     protected String nullDisplay = DASH;
 
     @Override
-    public final IsPWidget render(int row, D data, V value) {
+    public final IsPWidget render(final int row, final V value) {
         if (value == null) return new PLabel(nullDisplay);
-        return render0(row, data, value);
+        return render0(row, value);
     }
 
-    public abstract IsPWidget render0(int row, D data, V value);
+    public abstract IsPWidget render0(int row, V value);
 
-    public void setNullDisplay(String nullDisPlay) {
+    public void setNullDisplay(final String nullDisPlay) {
         this.nullDisplay = nullDisPlay;
     }
 

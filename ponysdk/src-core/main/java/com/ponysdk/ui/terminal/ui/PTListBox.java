@@ -30,9 +30,6 @@ import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
@@ -40,7 +37,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new ListBox(create.getBoolean(PROPERTY.MULTISELECT)));
+        init(create, uiService, new ListBox());
     }
 
     @Override
@@ -95,19 +92,6 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             final String groupName = update.getString(PROPERTY.ITEM_GROUP);
             final SelectElement select = uiObject.getElement().cast();
 
-            // final NodeList<Element> elementsByTagName = select.getElementsByTagName("optgroup");
-            // OptGroupElement groupElement = Document.get().createOptGroupElement();
-            // for (int i = 0; i < elementsByTagName.getLength(); i++) {
-            // final OptGroupElement group = OptGroupElement.as(elementsByTagName.getItem(i));
-            // if (group.getLabel().equals(groupName)) {
-            // groupElement = group;
-            // break;
-            // }
-            // }
-            // if (groupElement == null) {
-            // final OptGroupElement groupElement = Document.get().createOptGroupElement();
-            // }
-
             final OptGroupElement groupElement = Document.get().createOptGroupElement();
             groupElement.setLabel(groupName);
 
@@ -132,6 +116,8 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             else uiObject.setItemSelected(index, selected);
         } else if (update.containsKey(PROPERTY.VISIBLE_ITEM_COUNT)) {
             uiObject.setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
+        } else if (update.containsKey(PROPERTY.MULTISELECT)) {
+            uiObject.setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
         } else {
             super.update(update, uiService);
         }

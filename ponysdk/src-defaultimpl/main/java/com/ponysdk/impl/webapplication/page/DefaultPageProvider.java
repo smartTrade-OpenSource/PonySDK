@@ -35,7 +35,7 @@ public class DefaultPageProvider implements PageProvider {
 
     private final Logger log = LoggerFactory.getLogger(DefaultPageProvider.class);
 
-    private final Map<String, PageActivity> allPageActivitiesDeclared = new LinkedHashMap<String, PageActivity>();
+    private final Map<String, PageActivity> allPageActivitiesDeclared = new LinkedHashMap<>();
 
     private Map<String, PageActivity> allActivePageActivities;
 
@@ -56,7 +56,7 @@ public class DefaultPageProvider implements PageProvider {
     }
 
     private void initPagePermissions() {
-        allActivePageActivities = new LinkedHashMap<String, PageActivity>();
+        allActivePageActivities = new LinkedHashMap<>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
             if (com.ponysdk.core.security.SecurityManager.checkPermission(entry.getValue().getPermission())) {
                 allActivePageActivities.put(entry.getKey(), entry.getValue());

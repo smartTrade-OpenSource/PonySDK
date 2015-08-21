@@ -23,9 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
+import java.util.Objects;
+
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
@@ -35,12 +37,16 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     private String text;
     private String html;
 
+    public PButtonBase(final EntryInstruction... entries) {
+        super(entries);
+    }
+
     @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
 
         this.text = text;
-        saveUpdate(PROPERTY.TEXT, this.text);
+        saveUpdate(Model.TEXT, this.text);
     }
 
     @Override
@@ -53,7 +59,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
 
         this.html = html;
-        saveUpdate(PROPERTY.HTML, this.html);
+        saveUpdate(Model.HTML, this.html);
     }
 
     @Override

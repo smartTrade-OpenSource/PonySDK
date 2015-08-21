@@ -1,8 +1,6 @@
 
 package com.ponysdk.core.instruction;
 
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-
 public abstract class Handler extends Instruction {
 
     public Handler(final long objectID, final String type) {

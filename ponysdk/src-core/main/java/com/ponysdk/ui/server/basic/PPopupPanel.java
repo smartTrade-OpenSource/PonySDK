@@ -26,18 +26,14 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
@@ -94,25 +90,37 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private PPositionCallback positionCallback;
 
-    private final List<PCloseHandler> listeners = new ArrayList<PCloseHandler>();
+    private final List<PCloseHandler> listeners = new ArrayList<>();
 
-    public PPopupPanel() {
-        this(false);
-    }
-
-    public PPopupPanel(final boolean autoHide) {
-        super();
+    public PPopupPanel(final PWindow window, final boolean autoHide, final EntryInstruction... instructions) {
+        super(new EntryInstruction(Model.POPUP_AUTO_HIDE, autoHide));
         this.visible = false;
         this.autoHide = autoHide;
 
         removeFromParent();
 
-        final PRootPanel root = PRootPanel.get();
+        final PRootPanel root;
+        if (window != null) {
+            root = PRootPanel.get(window);
+        } else {
+            root = PRootPanel.get();
+        }
+
         final PWidgetCollection children = root.getChildren();
         children.insert(this, children.size());
         root.adopt(this);
+    }
 
-        create.put(PROPERTY.POPUP_AUTO_HIDE, autoHide);
+    public PPopupPanel(final boolean autoHide, final EntryInstruction... instructions) {
+        this(null, autoHide, instructions);
+    }
+
+    public PPopupPanel() {
+        this(false, (EntryInstruction) null);
+    }
+
+    public PPopupPanel(final boolean autoHide) {
+        this(autoHide, (EntryInstruction) null);
     }
 
     @Override
@@ -121,66 +129,49 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_MODAL, modal);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.POPUP_MODAL, modal);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_GLASS_ENABLED, glassEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.POPUP_GLASS_ENABLED, glassEnabled);
     }
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.POPUP_DRAGGABLE, true);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.POPUP_DRAGGABLE, true);
         }
     }
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ANIMATION, animationEnabled);
     }
 
     public void center() {
         this.center = true;
         this.showing = true;
-
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_CENTER, center);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.POPUP_CENTER, center);
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            final Update update = new Update(ID);
-            update.put(PROPERTY.POPUP_SHOW, showing);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.POPUP_SHOW, showing);
         }
     }
 
     public void hide() {
         if (showing) {
             this.showing = false;
-            final Update update = new Update(ID);
-            update.put(PROPERTY.POPUP_HIDE, showing);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.POPUP_HIDE, showing);
         }
     }
 
     public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_GLASS_STYLE_NAME, glassStyleName);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.POPUP_GLASS_STYLE_NAME, glassStyleName);
     }
 
     @Override
@@ -200,20 +191,20 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         leftPosition = left;
         topPosition = top;
 
-        final Update update = new Update(ID);
-        update.put(PROPERTY.POPUP_POSITION);
-        update.put(PROPERTY.POPUP_POSITION_LEFT, leftPosition);
-        update.put(PROPERTY.POPUP_POSITION_TOP, topPosition);
-
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.POPUP_POSITION);
+        parser.parse(Model.POPUP_POSITION_LEFT, leftPosition);
+        parser.parse(Model.POPUP_POSITION_TOP, topPosition);
+        parser.endObject();
     }
 
     public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-
-        final AddHandler handler = new AddHandler(ID, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
-        Txn.get().getTxnContext().save(handler);
+        saveAddHandler(Model.HANDLER_POPUP_POSITION_CALLBACK);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {

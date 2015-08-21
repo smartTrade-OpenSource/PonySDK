@@ -27,9 +27,9 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PClickEvent extends PMouseEvent<PClickHandler> {
 
-    public static final PDomEvent.Type<PClickHandler> TYPE = new PDomEvent.Type<PClickHandler>(DomHandlerType.CLICK);
+    public static final PDomEvent.Type<PClickHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.CLICK);
 
-    public PClickEvent(Object sourceComponent) {
+    public PClickEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
@@ -39,7 +39,7 @@ public class PClickEvent extends PMouseEvent<PClickHandler> {
     }
 
     @Override
-    protected void dispatch(PClickHandler handler) {
+    protected void dispatch(final PClickHandler handler) {
         handler.onClick(this);
     }
 

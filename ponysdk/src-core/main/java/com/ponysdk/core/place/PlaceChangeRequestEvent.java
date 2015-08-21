@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PlaceChangeRequestEvent extends Event<PlaceChangeRequestHandler> {
 
-    public static final Type<PlaceChangeRequestHandler> TYPE = new Type<PlaceChangeRequestHandler>();
+    public static final Type<PlaceChangeRequestHandler> TYPE = new Type<>();
 
     private final Place place;
 

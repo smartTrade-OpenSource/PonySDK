@@ -23,6 +23,9 @@
 
 package com.ponysdk.ui.server.form.validator;
 
+/**
+ * Returned by a {@link FieldValidator}
+ */
 public class ValidationResult {
 
     public static ValidationResult newOKValidationResult() {
@@ -31,7 +34,7 @@ public class ValidationResult {
         return validationResult;
     }
 
-    public static ValidationResult newFailedValidationResult(String errorMessage) {
+    public static ValidationResult newFailedValidationResult(final String errorMessage) {
         final ValidationResult validationResult = new ValidationResult();
         validationResult.setValid(false);
         validationResult.setErrorMessage(errorMessage);
@@ -42,7 +45,7 @@ public class ValidationResult {
 
     private String errorMessage;
 
-    public void setErrorMessage(String errorMessage) {
+    public void setErrorMessage(final String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
@@ -50,7 +53,7 @@ public class ValidationResult {
         return errorMessage;
     }
 
-    public void setValid(boolean valid) {
+    public void setValid(final boolean valid) {
         this.valid = valid;
     }
 

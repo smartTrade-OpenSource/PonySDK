@@ -38,7 +38,7 @@ public abstract class AbstractServiceCommand<T> implements AsyncCallback<T>, Com
 
     private static final Logger log = LoggerFactory.getLogger(AbstractServiceCommand.class.getName());
 
-    private final Set<AsyncCallback<T>> callbacks = new HashSet<AsyncCallback<T>>();
+    private final Set<AsyncCallback<T>> callbacks = new HashSet<>();
 
     private final EventBus eventBus;
 

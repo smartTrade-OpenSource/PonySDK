@@ -37,15 +37,12 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    public static Map<Long, SuggestOracle> oracleByID = new HashMap<Long, SuggestOracle>();
+    public static Map<Long, SuggestOracle> oracleByID = new HashMap<>();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -125,7 +122,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                     oracle.add(jsonArray.get(i).isString().stringValue());
                 }
             } else if (update.containsKey(PROPERTY.DEFAULT_SUGGESTIONS)) {
-                final List<String> defaultSuggestions = new ArrayList<String>();
+                final List<String> defaultSuggestions = new ArrayList<>();
                 final JSONArray jsonArray = update.get(PROPERTY.DEFAULT_SUGGESTIONS).isArray();
                 for (int i = 0; i < jsonArray.size(); i++) {
                     defaultSuggestions.add(jsonArray.get(i).isString().stringValue());

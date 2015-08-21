@@ -297,7 +297,7 @@ public enum Browser {
         this.id = (short) ((manufacturer.getId() << 8) + (byte) versionId);
         this.name = name;
         this.parent = parent;
-        this.children = new ArrayList<Browser>();
+        this.children = new ArrayList<>();
         if (this.parent != null) {
             this.parent.children.add(this);
         }

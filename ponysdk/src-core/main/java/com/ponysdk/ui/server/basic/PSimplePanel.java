@@ -29,9 +29,7 @@ import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -42,6 +40,12 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     private static final Logger log = LoggerFactory.getLogger(PSimplePanel.class);
 
     private PWidget widget;
+
+    public PSimplePanel() {}
+
+    public PSimplePanel(final EntryInstruction... instructions) {
+        super(instructions);
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -68,9 +72,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
             orphan(w);
         } finally {
             // Physical detach.
-            final Remove remove = new Remove(w.getID(), getID());
-            Txn.get().getTxnContext().save(remove);
-
+            saveRemove(w.getID(), ID);
             // Logical detach.
             widget = null;
         }
@@ -98,9 +100,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
         if (w != null) {
             // Physical attach.
-            final Add add = new Add(w.getID(), getID());
-            Txn.get().getTxnContext().save(add);
-
+            saveAdd(w.getID(), ID);
             adopt(w);
         }
     }

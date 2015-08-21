@@ -26,15 +26,11 @@ package com.ponysdk.ui.server.basic;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * This class provides low-level task scheduling primitives.
@@ -43,14 +39,18 @@ public abstract class PScheduler extends PObject {
 
     private static final String SCHEDULER_KEY = PScheduler.class.getCanonicalName();
 
-    private final Map<Long, RepeatingCommand> commandByID = new HashMap<Long, RepeatingCommand>();
-    private final Map<RepeatingCommand, Long> IDByCommand = new HashMap<RepeatingCommand, Long>();
+    private final Map<Long, RepeatingCommand> commandByID = new HashMap<>();
+    private final Map<RepeatingCommand, Long> IDByCommand = new HashMap<>();
 
     private PScheduler() {}
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SCHEDULER;
+    }
+
+    public static PScheduler get() {
+        return get(PWindow.MAIN);
     }
 
     private static PScheduler get(final long windowID) {
@@ -61,11 +61,6 @@ public abstract class PScheduler extends PObject {
             UIContext.get().setAttribute(SCHEDULER_KEY, scheduler);
         }
         return scheduler;
-    }
-
-    public static PScheduler get() {
-        if (UIContext.getCurrentWindow() == null) return get(0);
-        return get(UIContext.getCurrentWindow().getID());
     }
 
     public void scheduleFixedRate(final RepeatingCommand cmd, final int delayMs) {
@@ -92,26 +87,35 @@ public abstract class PScheduler extends PObject {
     }
 
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.START, true);
-        update.put(PROPERTY.COMMAND_ID, cmdID);
-        update.put(PROPERTY.FIXRATE, delayMs);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.START, true);
+        parser.parse(Model.COMMAND_ID, cmdID);
+        parser.parse(Model.FIXRATE, delayMs);
+        parser.endObject();
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.START, true);
-        update.put(PROPERTY.COMMAND_ID, cmdID);
-        update.put(PROPERTY.FIXDELAY, delayMs);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.START, true);
+        parser.parse(Model.COMMAND_ID, cmdID);
+        parser.parse(Model.FIXDELAY, delayMs);
+        parser.endObject();
     }
 
     private void cancelScheduleCommand(final long cmdID) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STOP, true);
-        update.put(PROPERTY.COMMAND_ID, cmdID);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.STOP, true);
+        parser.parse(Model.COMMAND_ID, cmdID);
+        parser.endObject();
 
         final RepeatingCommand command = commandByID.remove(cmdID);
         IDByCommand.remove(command);

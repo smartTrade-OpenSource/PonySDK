@@ -4,12 +4,9 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id in order
@@ -26,7 +23,7 @@ public class PTreeItem extends PObject {
 
     private String html;
 
-    private final List<PTreeItem> children = new ArrayList<PTreeItem>();
+    private final List<PTreeItem> children = new ArrayList<>();
 
     private boolean selected;
 
@@ -34,19 +31,22 @@ public class PTreeItem extends PObject {
 
     private PWidget widget;
 
-    PTreeItem(final boolean isRoot) {
+    PTreeItem(final boolean isRoot, final String html) {
+        super(new EntryInstruction(Model.ROOT, isRoot), new EntryInstruction(Model.TEXT, html));
         this.isRoot = isRoot;
-        create.put(PROPERTY.ROOT, isRoot);
+        this.html = html;
+    }
+
+    PTreeItem(final boolean isRoot) {
+        this(isRoot, null);
     }
 
     public PTreeItem() {
-        this(false);
+        this(false, null);
     }
 
     public PTreeItem(final String html) {
-        this();
-        this.html = html;
-        create.put(PROPERTY.TEXT, html);
+        this(false, html);
     }
 
     public PTreeItem(final PWidget widget) {
@@ -63,15 +63,12 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.orphan(widget);
-            final Remove remove = new Remove(widget.getID(), tree.getID());
-            Txn.get().getTxnContext().save(remove);
+            saveRemove(widget.getID(), tree.getID());
         }
 
         if (tree != null) {
             tree.adopt(widget, this);
-            final Add add = new Add(widget.getID(), getID());
-            add.put(PROPERTY.WIDGET, true);
-            Txn.get().getTxnContext().save(add);
+            saveAdd(widget.getID(), ID, Model.WIDGET, true);
         }
     }
 
@@ -90,18 +87,13 @@ public class PTreeItem extends PObject {
 
     public void setHTML(final String html) {
         this.html = html;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.TEXT, html);
-
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.TEXT, html);
     }
 
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot) {
-            final Add add = new Add(tree.getID(), getID());
-            add.put(PROPERTY.ROOT, true);
-            Txn.get().getTxnContext().save(add);
+            saveAdd(tree.getID(), ID, Model.ROOT, true);
         }
         setWidget();
     }
@@ -117,9 +109,7 @@ public class PTreeItem extends PObject {
     public PTreeItem insertItem(final int beforeIndex, final PTreeItem item) {
         children.add(beforeIndex, item);
         item.setTree(tree);
-        final Add add = new Add(item.getID(), getID());
-        add.put(PROPERTY.INDEX, beforeIndex);
-        Txn.get().getTxnContext().save(add);
+        saveAdd(item.getID(), ID, Model.INDEX, beforeIndex);
         return item;
     }
 
@@ -132,16 +122,13 @@ public class PTreeItem extends PObject {
     }
 
     public boolean removeItem(final PTreeItem item) {
-        final Remove add = new Remove(tree.getID(), getID());
-        Txn.get().getTxnContext().save(add);
+        saveRemove(tree.getID(), ID);
         return children.remove(item);
     }
 
     public void setSelected(final boolean selected) {
         this.selected = selected;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.SELECTED, selected);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.SELECTED, selected);
     }
 
     public boolean isSelected() {
@@ -150,9 +137,7 @@ public class PTreeItem extends PObject {
 
     public void setState(final boolean open) {
         this.open = open;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.STATE, open);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.STATE, open);
     }
 
     public boolean getState() {

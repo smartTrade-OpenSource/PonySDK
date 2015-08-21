@@ -23,50 +23,61 @@
 
 package com.ponysdk.ui.server.basic;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.instruction.Create;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.server.extension.PAddOn;
-import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * The superclass for all PonySDK objects.
  */
 public abstract class PObject {
 
-    protected long ID;
-    protected Create create;
+    protected final long ID = UIContext.get().nextID();
 
     private String nativeBindingFunction;
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    PObject() {
-        init(getWidgetType());
+    private long parentWindowID;
+
+    PObject(final EntryInstruction... entries) {
         UIContext.get().registerObject(this);
+        final Create create = createInstruction(entries);
+        enrichCreate(create);
+        Txn.get().getTxnContext().save(create);
+    }
+
+    protected void enrichCreate(final Create create) {}
+
+    protected Create createInstruction(final EntryInstruction... entries) {
+        final Create create = new Create(ID, getWidgetType());
+
+        if (this instanceof PAddOn) {
+            create.setAddOnSignature(((com.ponysdk.ui.server.extension.PAddOn) this).getSignature());
+        }
+
+        if (entries != null) {
+            for (final EntryInstruction entry : entries) {
+                if (entry.value == null) continue;
+                create.put(entry.key, entry.value);
+            }
+        }
+        return create;
     }
 
     protected abstract WidgetType getWidgetType();
 
-    protected void init(final WidgetType widgetType) {
-        if (widgetType == null) { return; }
-        ID = UIContext.get().nextID();
-        create = new Create(ID, widgetType);
-        if (this instanceof PAddOn) {
-            create.setAddOnSignature(((PAddOn) this).getSignature());
-        }
-        Txn.get().getTxnContext().save(create);
-    }
-
-    public long getID() {
+    public final long getID() {
         return ID;
     }
 
@@ -74,31 +85,27 @@ public abstract class PObject {
 
         if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
-        final Update update = new Update(getID());
-        update.put(Dictionnary.PROPERTY.BIND, functionName);
-        Txn.get().getTxnContext().save(update);
-
         nativeBindingFunction = functionName;
+
+        saveUpdate(Model.BIND, functionName);
     }
 
     public void sendToNative(final JSONObject data) {
 
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
-        final Update update = new Update(getID());
-        update.put(Dictionnary.PROPERTY.NATIVE, data);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.NATIVE, data);
     }
 
     public void addNativeHandler(final PNativeHandler handler) {
-        if (nativeHandlers == null) nativeHandlers = new ListenerCollection<PNativeHandler>();
+        if (nativeHandlers == null) nativeHandlers = new ListenerCollection<>();
 
         nativeHandlers.register(handler);
     }
 
-    public void onClientData(final JSONObject event) throws JSONException {
+    public void onClientData(final JsonObject event) {
         if (event.has(Dictionnary.PROPERTY.NATIVE)) {
-            final JSONObject jsonObject = event.getJSONObject(Dictionnary.PROPERTY.NATIVE);
+            final JsonObject jsonObject = event.getJSONObject(Dictionnary.PROPERTY.NATIVE);
             if (nativeHandlers != null) {
                 for (final PNativeHandler handler : nativeHandlers) {
                     handler.onNativeEvent(new PNativeEvent(this, jsonObject));
@@ -127,6 +134,150 @@ public abstract class PObject {
         final PObject other = (PObject) obj;
         if (ID != other.ID) return false;
         return true;
+    }
+
+    public long getParentWindowID() {
+        return parentWindowID;
+    }
+
+    void setParentWindowID(final long parentWindowID) {
+        this.parentWindowID = parentWindowID;
+    }
+
+    protected void saveAddHandler(final Model type) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.parse(type);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.endObject();
+    }
+
+    protected void saveRemoveHandler(final Model type) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_REMOVE_HANDLER);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.endObject();
+    }
+
+    protected void saveRemoveHandler(final Model type, final Model model, final String value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_REMOVE_HANDLER);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveRemove(final long objectID, final long parentObjectID) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_REMOVE);
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.endObject();
+    }
+
+    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final boolean value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.parse(model, value);
+        parser.endObject();
+
+        UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveAdd(final long objectID, final long parentObjectID) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.endObject();
+
+        UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final int value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.parse(model, value);
+        parser.endObject();
+
+        UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final String value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.parse(model, value);
+        parser.endObject();
+
+        UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveUpdate(final Model model, final JsonObject json) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, json);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model, final boolean value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model, final int value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model, final long value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model, final String value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model);
+        parser.endObject();
     }
 
     @Override

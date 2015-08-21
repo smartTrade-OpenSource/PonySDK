@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
 
-    public static final PDomEvent.Type<PKeyUpHandler> TYPE = new PDomEvent.Type<PKeyUpHandler>(DomHandlerType.KEY_UP);
+    public static final PDomEvent.Type<PKeyUpHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.KEY_UP);
 
     private final int keyCode;
 

@@ -27,7 +27,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PFocusEvent extends PDomEvent<PFocusHandler> {
 
-    public static final PDomEvent.Type<PFocusHandler> TYPE = new PDomEvent.Type<PFocusHandler>(DomHandlerType.FOCUS);
+    public static final PDomEvent.Type<PFocusHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.FOCUS);
 
     public PFocusEvent(final Object sourceComponent) {
         super(sourceComponent);

@@ -35,7 +35,7 @@ public class HttpResponseReceivedEvent extends GwtEvent<HttpResponseReceivedEven
         void onHttpResponseReceivedEvent(HttpResponseReceivedEvent event);
     }
 
-    public static final Type<Handler> TYPE = new Type<Handler>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     public HttpResponseReceivedEvent() {
         this(null);

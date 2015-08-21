@@ -1,17 +1,17 @@
 
 package com.ponysdk.core;
 
+import java.util.Arrays;
 import java.util.List;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.thirdparty.json.JSONTokener;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
@@ -19,10 +19,8 @@ import com.ponysdk.core.servlet.Session;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContextHttp;
 import com.ponysdk.ui.server.basic.PCookies;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.exception.ServerException;
+import com.ponysdk.ui.terminal.model.Model;
 
 public abstract class AbstractApplicationManager {
 
@@ -40,7 +38,17 @@ public abstract class AbstractApplicationManager {
     }
 
     public void process(final Request request, final Response response) throws Exception {
-        final JSONObject data = new JSONObject(new JSONTokener(request.getReader()));
+        // final JsonBuilderFactory factory = Json.createBuilderFactory();
+        // final JsonArray value = factory.createArrayBuilder()
+        // .add(factory.createObjectBuilder()
+        // .add("type", "home")
+        // .add("number", "212 555-1234"))
+        // .add(factory.createObjectBuilder()
+        // .add("type", "fax")
+        // .add("number", "646 555-4567"))
+        // .build();
+
+        final JsonObject data = new JSONObject(new JSONTokener(request.getReader()));
         if (data.has(APPLICATION.KEY)) {
             startApplication(data, request, response);
         } else {
@@ -48,7 +56,7 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    public void startApplication(final JSONObject data, final Request request, final Response response) throws Exception {
+    public void startApplication(final JsonObject data, final Request request, final Response response) throws Exception {
 
         final Session session = request.getSession();
 
@@ -115,7 +123,7 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    protected void fireInstructions(final JSONObject data, final Request request, final Response response) throws Exception {
+    protected void fireInstructions(final JsonObject data, final Request request, final Response response) throws Exception {
         final long key = data.getLong(APPLICATION.VIEW_ID);
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
@@ -137,7 +145,7 @@ public abstract class AbstractApplicationManager {
                 if (receivedSeqNum != null) {
                     process(uiContext, data);
 
-                    final List<JSONObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+                    final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
                     for (final JSONObject jsoObject : datas) {
                         process(uiContext, jsoObject);
                     }
@@ -154,13 +162,13 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private Long checkClientMessage(final Session session, final JSONObject data, final UIContext uiContext) throws JSONException {
-        printClientErrorMessage(data);
+    private Long checkClientMessage(final Session session, final JsonObject jsonObject, final UIContext uiContext) {
+        printClientErrorMessage(jsonObject);
 
-        final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+        final long receivedSeqNum = jsonObject.getLong(APPLICATION.SEQ_NUM);
         if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
-            final long key = data.getLong(APPLICATION.VIEW_ID);
-            uiContext.stackIncomingMessage(receivedSeqNum, data);
+            final long key = jsonObject.getLong(APPLICATION.VIEW_ID);
+            uiContext.stackIncomingMessage(receivedSeqNum, jsonObject);
             if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
                 if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {
                     log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
@@ -168,18 +176,22 @@ public abstract class AbstractApplicationManager {
                     return null;
                 }
             }
-            log.info("Stacking incoming message #" + receivedSeqNum + ". Data #" + data + " (viewID #" + key + ")");
+
+            if (log.isDebugEnabled()) {
+                log.debug("Stacking incoming message #{}. Data #{} (viewID #{})", Arrays.asList(receivedSeqNum, jsonObject, key));
+            }
+
             return null;
         }
         return receivedSeqNum;
 
     }
 
-    private void printClientErrorMessage(final JSONObject data) {
+    private void printClientErrorMessage(final JsonObject data) {
         try {
-            final JSONArray errors = data.getJSONArray(APPLICATION.ERRORS);
-            for (int i = 0; i < errors.length(); i++) {
-                final JSONObject jsoObject = errors.getJSONObject(i);
+            final JsonArray errors = data.getJsonArray(Model.APPLICATION_ERRORS.getKey());
+            for (int i = 0; i < errors.size(); i++) {
+                final JsonObject jsoObject = errors.getJsonObject(i);
                 final String message = jsoObject.getString("message");
                 final String details = jsoObject.getString("details");
                 log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
@@ -189,17 +201,13 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
-        if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
-            final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
-            for (int i = 0; i < instructions.length(); i++) {
-                JSONObject jsonObject = null;
-                try {
-                    jsonObject = instructions.getJSONObject(i);
-                    uiContext.fireClientData(jsonObject);
-                } catch (final Throwable e) {
-                    log.error("Failed to process instruction: " + jsonObject, e);
-                }
+    private void process(final UIContext uiContext, final JsonObject jsonObject) {
+        if (jsonObject.containsKey(Model.APPLICATION_INSTRUCTIONS.getKey())) {
+            final JsonArray array = jsonObject.getJsonArray(Model.APPLICATION_INSTRUCTIONS.getKey());
+
+            for (int i = 0; i < array.size(); i++) {
+                final JsonObject item = array.getJsonObject(i);
+                uiContext.fireClientData(item);
             }
         }
     }

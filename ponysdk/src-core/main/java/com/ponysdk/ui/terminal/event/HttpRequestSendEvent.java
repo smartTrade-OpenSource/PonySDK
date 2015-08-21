@@ -33,7 +33,7 @@ public class HttpRequestSendEvent extends GwtEvent<HttpRequestSendEvent.Handler>
         void onHttpRequestSend(HttpRequestSendEvent event);
     }
 
-    public static final Type<Handler> TYPE = new Type<Handler>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     public HttpRequestSendEvent() {}
 

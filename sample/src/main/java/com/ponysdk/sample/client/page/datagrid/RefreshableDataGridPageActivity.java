@@ -34,11 +34,11 @@ import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.list2.refreshable.Cell;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableCellRenderer;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGridColumnDescriptor;
-import com.ponysdk.ui.server.list2.renderer.header.StringHeaderCellRenderer;
-import com.ponysdk.ui.server.list2.valueprovider.IdentityValueProvider;
+import com.ponysdk.ui.server.list.refreshable.Cell;
+import com.ponysdk.ui.server.list.refreshable.RefreshableCellRenderer;
+import com.ponysdk.ui.server.list.refreshable.RefreshableDataGridColumnDescriptor;
+import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.ui.server.list.valueprovider.IdentityValueProvider;
 
 public class RefreshableDataGridPageActivity extends SamplePageActivity implements DataListener {
 

@@ -23,11 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are
@@ -37,10 +35,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  * {@link PTabLayoutPanel} instead.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TabPanel { the tab panel itself }</li>
- * <li>.gwt-TabPanelBottom { the bottom section of the tab panel (the deck containing the widget) }</li>
- * </ul>
+ * <ul class='css'> <li>.gwt-TabPanel { the tab panel itself }</li> <li>.gwt-TabPanelBottom { the bottom
+ * section of the tab panel (the deck containing the widget) }</li> </ul>
  * 
  * @see PTabLayoutPanel
  */
@@ -61,9 +57,7 @@ public class PTabPanel extends PTabLayoutPanel implements HasPAnimation {
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ANIMATION, animationEnabled);
     }
 
 }

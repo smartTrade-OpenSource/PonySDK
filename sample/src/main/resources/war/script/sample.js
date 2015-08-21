@@ -45,3 +45,5 @@ ReverseTextAddon.prototype = {
 		if(attached) console.log('Widget #' + this.widgetID + ' attached');
 	}
 }
+
+

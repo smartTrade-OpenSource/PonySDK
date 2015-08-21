@@ -30,7 +30,6 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIService;

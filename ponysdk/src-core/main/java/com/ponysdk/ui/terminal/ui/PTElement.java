@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 

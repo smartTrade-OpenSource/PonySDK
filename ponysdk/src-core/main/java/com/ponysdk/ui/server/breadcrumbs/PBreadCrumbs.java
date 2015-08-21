@@ -16,9 +16,9 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class PBreadCrumbs extends PElement {
 
-    private final Map<String, ItemLevel> elementsByItems = new HashMap<String, ItemLevel>();
+    private final Map<String, ItemLevel> elementsByItems = new HashMap<>();
 
-    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<PSelectionHandler<ItemLevel>>();
+    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<>();
 
     private ItemLevel current;
 
@@ -63,7 +63,7 @@ public class PBreadCrumbs extends PElement {
     }
 
     void fireOnClick(final ItemLevel itemLevel) {
-        final PSelectionEvent<ItemLevel> event = new PSelectionEvent<PBreadCrumbs.ItemLevel>(this, itemLevel);
+        final PSelectionEvent<ItemLevel> event = new PSelectionEvent<>(this, itemLevel);
 
         for (final PSelectionHandler<ItemLevel> handler : handlers) {
             handler.onSelection(event);

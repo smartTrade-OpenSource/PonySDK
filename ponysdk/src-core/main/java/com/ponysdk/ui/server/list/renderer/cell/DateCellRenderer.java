@@ -30,7 +30,7 @@ import java.util.Date;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
+public class DateCellRenderer extends AbstractCellRenderer<Date> {
 
     private final DateFormat dateFormat;
 
@@ -43,7 +43,7 @@ public class DateCellRenderer<T> extends AbstractCellRenderer<T, Date> {
     }
 
     @Override
-    public IsPWidget render0(final int rowCount, final T data, final Date value) {
+    public IsPWidget render0(final int rowCount, final Date value) {
         return new PLabel(dateFormat.format(value));
     }
 }

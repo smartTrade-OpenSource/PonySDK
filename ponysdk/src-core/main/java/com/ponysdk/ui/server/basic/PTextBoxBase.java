@@ -27,25 +27,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     private static final String EMPTY = "";
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<PValueChangeHandler<String>>();
+    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
 
     private String text = EMPTY;
     private String placeholder = EMPTY;
@@ -57,8 +53,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
     public PTextBoxBase(final String text) {
         super();
         setText(text);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -76,7 +71,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(PROPERTY.TEXT, this.text);
+        saveUpdate(Model.TEXT, this.text);
     }
 
     @Override
@@ -93,7 +88,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(PROPERTY.PLACEHOLDER, this.placeholder);
+        saveUpdate(Model.PLACEHOLDER, this.placeholder);
     }
 
     public String getPlaceholder() {
@@ -116,12 +111,12 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
     }
 
     @Override
-    public void onClientData(final JSONObject e) throws JSONException {
-        if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<String>(this, e.getString(PROPERTY.VALUE));
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.has(HANDLER.KEY) && jsonObject.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
+            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, e.getString(PROPERTY.VALUE));
             fireOnValueChange(event);
         } else {
-            super.onClientData(e);
+            super.onClientData(jsonObject);
         }
     }
 

@@ -32,14 +32,11 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.ponysdk.ui.terminal.Dictionnary;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
@@ -118,8 +115,8 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
                     public boolean execute() {
                         final int timeStamp = (int) (new Date().getTime() * .001);
                         final JSONObject jso = new JSONObject();
-                        jso.put(Dictionnary.APPLICATION.PING, new JSONNumber(timeStamp));
-                        jso.put(Dictionnary.APPLICATION.VIEW_ID, new JSONNumber(UIBuilder.sessionID));
+                        jso.put(Model.APPLICATION_PING, new JSONNumber(timeStamp));
+                        jso.put(Model.APPLICATION_VIEW_ID, new JSONNumber(UIBuilder.sessionID));
                         socketClient.send(jso.toString());
                         return !hasCommunicationError;
                     }

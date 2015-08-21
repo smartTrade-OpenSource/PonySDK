@@ -5,7 +5,7 @@ import com.ponysdk.core.export.Exporter;
 
 public class CSVExporterFactory {
 
-    public static <T> Exporter<T> newCSVExporter(String fileName) {
-        return new CSVExporter<T>(fileName);
+    public static <T> Exporter<T> newCSVExporter(final String fileName) {
+        return new CSVExporter<>(fileName);
     }
 }

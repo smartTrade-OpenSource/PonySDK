@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PDragEnterEvent extends PDomEvent<PDragEnterHandler> {
 
-    public static final PDomEvent.Type<PDragEnterHandler> TYPE = new PDomEvent.Type<PDragEnterHandler>(DomHandlerType.DRAG_ENTER);
+    public static final PDomEvent.Type<PDragEnterHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DRAG_ENTER);
 
     public PDragEnterEvent(final Object sourceComponent) {
         super(sourceComponent);

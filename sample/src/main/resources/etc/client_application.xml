@@ -123,12 +123,10 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.WindowPageActivity" />
 	
 	<!-- Rich components pages -->
-	<bean class="com.ponysdk.sample.client.page.ComplexListPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DataGridPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.datagrid.SimpleRefreshableDataGridPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.datagrid.SortableRefreshableDataGridPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.Form2PageActivity" />
 	<bean class="com.ponysdk.sample.client.page.BreadCrumbsPageActivity" />
 
 	<!-- Timer pages -->
@@ -137,9 +135,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 	<bean class="com.ponysdk.sample.client.page.JavascriptPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.LessPageActivity" />
 	<bean class="com.ponysdk.sample.client.page.DragAndDropPageActivity" />
-	<!-- <bean class="com.ponysdk.sample.client.page.OraclePageActivity" /> -->
-	<!-- <bean class="com.ponysdk.sample.client.page.CookiePageActivity" /> -->
 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
+
 
 
 </beans>

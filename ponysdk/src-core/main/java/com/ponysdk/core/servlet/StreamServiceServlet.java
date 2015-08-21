@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * The server side implementation of the RPC service.
@@ -62,7 +62,7 @@ public class StreamServiceServlet extends HttpServlet {
             final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
             final Long ponySessionID = Long.parseLong(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(PROPERTY.STREAM_REQUEST_ID)));
+            final StreamHandler streamHandler = ponySession.removeStreamListener(Long.parseLong(req.getParameter(Model.STREAM_REQUEST_ID.getKey())));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

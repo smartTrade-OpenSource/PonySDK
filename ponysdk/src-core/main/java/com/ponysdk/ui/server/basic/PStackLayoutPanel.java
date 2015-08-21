@@ -28,20 +28,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time, with a header for each child
@@ -66,16 +64,15 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
-    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<PBeforeSelectionHandler<Integer>>();
+    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
 
-    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<PSelectionHandler<Integer>>();
+    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
     private int animationDuration;
 
     public PStackLayoutPanel(final PUnit unit) {
-        super();
+        super(new EntryInstruction(Model.UNIT, unit.ordinal()));
         initWidget(new PLayoutPanel());
-        create.put(PROPERTY.UNIT, unit.ordinal());
     }
 
     @Override
@@ -88,21 +85,24 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         children.add(child);
         adopt(child);
 
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.HTML, header);
-        add.put(PROPERTY.SIZE, headerSize);
-        Txn.get().getTxnContext().save(add);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.OBJECT_ID, child.getID());
+        parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.parse(Model.HTML, header);
+        parser.parse(Model.SIZE, headerSize);
+        parser.endObject();
+
+        UIContext.get().assignParentID(child.getID(), ID);
     }
 
     @Override
     public boolean remove(final PWidget child) {
         if (child.getParent() != this) { return false; }
         orphan(child);
-
         children.remove(child);
-
-        final Remove remove = new Remove(child.getID(), getID());
-        Txn.get().getTxnContext().save(remove);
+        saveRemove(child.getID(), ID);
         return true;
     }
 
@@ -131,20 +131,19 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     }
 
     private void adopt(final PWidget child) {
-        assert (child.getParent() == null);
+        assert(child.getParent() == null);
         child.setParent(this);
     }
 
     private void orphan(final PWidget child) {
-        assert (child.getParent() == this);
+        assert(child.getParent() == this);
         child.setParent(null);
     }
 
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_BEFORE_SELECTION_HANDLER);
     }
 
     @Override
@@ -160,8 +159,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.SELECTION_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
+        saveAddHandler(Model.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
@@ -175,9 +173,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     }
 
     public void showWidget(final PWidget widget) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.OPEN, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.OPEN, widget.getID());
+        parser.endObject();
     }
 
     /**
@@ -188,12 +189,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(PROPERTY.ANIMATION_DURATION, duration);
+        saveUpdate(Model.ANIMATION_DURATION, duration);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(PROPERTY.ANIMATE, duration);
+        saveUpdate(Model.ANIMATE, duration);
     }
 
     public int getAnimationDuration() {

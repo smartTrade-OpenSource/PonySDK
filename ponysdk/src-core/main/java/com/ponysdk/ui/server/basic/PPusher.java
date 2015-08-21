@@ -27,22 +27,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnSocketContext;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * Push data to clients using WebSocket.
+ * Push data to terminal using the WebSocket.
  */
 public class PPusher extends PObject implements ConnectionListener {
 
@@ -54,8 +53,8 @@ public class PPusher extends PObject implements ConnectionListener {
 
     private final UIContext uiContext;
 
-    private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
-    private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<DataListener>();
+    private final List<ConnectionListener> connectionListeners = new ArrayList<>();
+    private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<>();
 
     private PusherState pusherState = PusherState.STOPPED;
 
@@ -66,13 +65,9 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     private PPusher(final int pollingDelay, final int ping) {
-        super();
+        super(new EntryInstruction(Model.FIXDELAY, pollingDelay), new EntryInstruction(Model.PINGDELAY, ping));
 
         this.txnContext = new TxnSocketContext();
-
-        create.put(PROPERTY.FIXDELAY, pollingDelay);
-        create.put(PROPERTY.PINGDELAY, ping);
-
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();
     }

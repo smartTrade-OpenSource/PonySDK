@@ -27,7 +27,7 @@ import com.ponysdk.core.event.Event;
 
 public class PShowRangeEvent<T> extends Event<PShowRangeHandler<T>> {
 
-    public static final Type<PShowRangeHandler<?>> TYPE = new Type<PShowRangeHandler<?>>();
+    public static final Type<PShowRangeHandler<?>> TYPE = new Type<>();
 
     private final T start;
     private final T end;

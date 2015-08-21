@@ -23,6 +23,22 @@
 
 package com.ponysdk.ui.server.list.valueprovider;
 
+import com.ponysdk.ui.server.list.DataGridActivity;
+import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
+
+/**
+ * <p>
+ * Way to provide data to a {@link DataGridActivity} for a given cell
+ * </p>
+ * <p>
+ * Defined in a {@link DataGridColumnDescriptor}
+ * </p>
+ * 
+ * @param <D>
+ *            type of data managed by a given {@link DataGridActivity}
+ * @param <V>
+ *            type of the rendered object for a given cell
+ */
 public interface ValueProvider<D, V> {
 
     public V getValue(D data);

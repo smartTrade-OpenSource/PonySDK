@@ -33,10 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the default) or
@@ -71,14 +70,13 @@ public class PImage extends PFocusWidget {
 
     private int top;
 
-    public PImage() {}
+    public PImage() {
+        super();
+    }
 
     public PImage(final String url, final int left, final int top, final int width, final int height) {
-        create.put(PROPERTY.WIDGET_HEIGHT, width);
-        create.put(PROPERTY.WIDGET_WIDTH, height);
-        create.put(PROPERTY.IMAGE_URL, url);
-        create.put(PROPERTY.IMAGE_LEFT, left);
-        create.put(PROPERTY.IMAGE_TOP, top);
+        super(new EntryInstruction(Model.WIDGET_HEIGHT, height), new EntryInstruction(Model.WIDGET_WIDTH, width), new EntryInstruction(Model.IMAGE_URL, url), new EntryInstruction(Model.IMAGE_LEFT, left),
+                new EntryInstruction(Model.IMAGE_TOP, top));
     }
 
     public PImage(final String url) {
@@ -115,9 +113,7 @@ public class PImage extends PFocusWidget {
 
         final String extension = classpathURL.getUrl().getFile().substring(classpathURL.getUrl().getFile().lastIndexOf('.') + 1);
 
-        final Update update = new Update(getID());
-        update.put(PROPERTY.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
     }
 
     @Override
@@ -131,9 +127,7 @@ public class PImage extends PFocusWidget {
 
     public void setUrl(final String url) {
         this.url = url;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.IMAGE_URL, url);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.IMAGE_URL, url);
     }
 
     public void setStream(final StreamHandler streamListener) {

@@ -26,21 +26,17 @@ package com.ponysdk.ui.server.basic.event;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 
 public abstract class PKeyUpFilterHandler extends JSONObject implements PKeyUpHandler {
 
     private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
 
     public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
-        final List<Integer> codes = new ArrayList<Integer>(keyCodes.length);
+        final List<Integer> codes = new ArrayList<>(keyCodes.length);
 
         for (final PKeyCodes code : keyCodes) {
             codes.add(code.getCode());

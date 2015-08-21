@@ -426,7 +426,7 @@ public enum PKeyCodes {
 
     private static Map<Integer, PKeyCodes> codesByKey;
     static {
-        codesByKey = new HashMap<Integer, PKeyCodes>();
+        codesByKey = new HashMap<>();
         for (final PKeyCodes code : PKeyCodes.values()) {
             codesByKey.put(code.getCode(), code);
         }

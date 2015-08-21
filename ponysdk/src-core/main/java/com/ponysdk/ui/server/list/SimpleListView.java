@@ -29,7 +29,7 @@ public interface SimpleListView extends IsPWidget {
 
     void clearList();
 
-    void addWidget(IsPWidget widget, int column, int row);
+    void addWidget(IsPWidget widget, int column, int row, int colspan);
 
     void insertRow(int row);
 
@@ -56,6 +56,10 @@ public interface SimpleListView extends IsPWidget {
     void addCellStyle(int row, int col, String styleName);
 
     void removeCellStyle(int row, int column, String styleName);
+
+    void moveRow(final int index, final int beforeIndex);
+
+    void moveColumn(final int index, final int beforeIndex);
 
     void clear(int from);
 

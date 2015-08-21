@@ -29,68 +29,55 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.tools.Objects;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that presents a list of choices to the user, either as a list box or as a drop-down list. <h3>CSS
- * Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-ListBox { }</li>
- * </ul>
+ * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'> <li>.gwt-ListBox { }</li> </ul>
  */
 public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
 
     private static final String COMMA = ",";
 
-    private final List<PChangeHandler> handlers = new ArrayList<PChangeHandler>();
+    private final List<PChangeHandler> handlers = new ArrayList<>();
 
-    private final List<ListItem> items = new ArrayList<ListItem>();
+    private final List<ListItem> items = new ArrayList<>();
 
-    private final Set<Integer> selectedIndexes = new TreeSet<Integer>();
+    private final Set<Integer> selectedIndexes = new TreeSet<>();
 
     protected int selectedIndex = -1;
 
-    private final boolean isMultipleSelect;
+    private boolean isMultipleSelect;
 
     private final boolean containsEmptyItem;
 
     private int visibleItemCount;
 
     public PListBox() {
-        this(false, false);
+        this(false);
     }
 
     public PListBox(final boolean containsEmptyItem) {
-        this(containsEmptyItem, false);
-    }
-
-    public PListBox(final boolean containsEmptyItem, final boolean isMultipleSelect) {
         this.containsEmptyItem = containsEmptyItem;
-        this.isMultipleSelect = isMultipleSelect;
 
         if (containsEmptyItem) {
             addItem("", null);
         }
 
-        final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.CHANGE_HANDLER);
-        Txn.get().getTxnContext().save(addHandler);
-
-        create.put(PROPERTY.MULTISELECT, isMultipleSelect);
+        saveAddHandler(Model.HANDLER_CHANGE_HANDLER);
     }
 
     @Override
@@ -99,11 +86,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).contains(HANDLER.KEY_.CHANGE_HANDLER)) {
-            final String data = instruction.getString(PROPERTY.VALUE);
+    public void onClientData(final JsonObject jsonObject) {
+        if (jsonObject.getString(HANDLER.KEY).contains(HANDLER.KEY_.CHANGE_HANDLER)) {
+            final String data = jsonObject.getString(PROPERTY.VALUE);
             final String[] tokens = data.split(COMMA);
-            final List<Integer> selectedItems = new ArrayList<Integer>();
+            final List<Integer> selectedItems = new ArrayList<>();
 
             this.selectedIndex = Integer.parseInt(tokens[0]);
 
@@ -116,7 +103,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
             onChange(new PChangeEvent(PListBox.this));
         } else {
-            super.onClientData(instruction);
+            super.onClientData(jsonObject);
         }
     }
 
@@ -130,12 +117,17 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         for (final String i : items) {
             this.items.add(new ListItem(i, i));
         }
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ITEM_ADD);
+
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.parse(Model.ITEM_ADD);
+        parser.parse(Model.OBJECT_ID, ID);
         final String s = items.toString();
-        update.put(PROPERTY.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", ""));
-        update.put(PROPERTY.ITEM_GROUP, group);
-        Txn.get().getTxnContext().save(update);
+        parser.parse(Model.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", ""));
+        parser.parse(Model.ITEM_GROUP, group);
+        parser.endObject();
+
     }
 
     public void addItem(final String item) {
@@ -162,11 +154,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.add(index, item);
 
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ITEM_INSERTED);
-        update.put(PROPERTY.INDEX, index);
-        update.put(PROPERTY.ITEM_TEXT, label);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.ITEM_INSERTED);
+        parser.parse(Model.INDEX, index);
+        parser.parse(Model.ITEM_TEXT, label);
+        parser.endObject();
     }
 
     public void setItemText(final int index, final String text) {
@@ -174,12 +169,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.get(index).label = text;
 
-        final Update update = new Update(getID());
-        update.put(PROPERTY.ITEM_UPDATED);
-        update.put(PROPERTY.INDEX, index);
-        update.put(PROPERTY.ITEM_TEXT, text);
-
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.ITEM_UPDATED);
+        parser.parse(Model.INDEX, index);
+        parser.parse(Model.ITEM_TEXT, text);
+        parser.endObject();
     }
 
     public void setValue(final int index, final Object value) {
@@ -225,11 +222,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void sendRemoveItemInstruction(final int index) {
-        final Update update = new Update(getID());
-
-        update.put(PROPERTY.ITEM_REMOVED);
-        update.put(PROPERTY.INDEX, index);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.ITEM_REMOVED);
+        parser.parse(Model.INDEX, index);
+        parser.endObject();
 
         if (selectedIndex >= index) setSelectedIndex((selectedIndex - 1));
     }
@@ -243,9 +242,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         selectedIndex = -1;
         items.clear();
         selectedIndexes.clear();
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CLEAR, true);
-        Txn.get().getTxnContext().save(update);
+
+        saveUpdate(Model.CLEAR, true);
 
         if (containsEmptyItem) {
             addItem("", null);
@@ -266,10 +264,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             selectedIndexes.remove(index);
         }
 
-        final Update update = new Update(getID());
-        update.put(PROPERTY.SELECTED, selected);
-        update.put(PROPERTY.SELECTED_INDEX, index);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.SELECTED, selected);
+        parser.parse(Model.SELECTED_INDEX, index);
+        parser.endObject();
     }
 
     public void setSelectedIndex(final int index) {
@@ -341,10 +342,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         return containsEmptyItem;
     }
 
-    public boolean isMultipleSelect() {
-        return isMultipleSelect;
-    }
-
     public boolean isItemSelected(final int index) {
         return selectedIndexes.contains(index);
     }
@@ -362,11 +359,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public List<Integer> getSelectedIndexes() {
-        return new ArrayList<Integer>(selectedIndexes);
+        return new ArrayList<>(selectedIndexes);
     }
 
     public List<String> getSelectedItems() {
-        final List<String> items = new ArrayList<String>();
+        final List<String> items = new ArrayList<>();
         for (final Integer index : selectedIndexes) {
             items.add(this.items.get(index).label);
         }
@@ -374,7 +371,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public List<Object> getSelectedValues() {
-        final List<Object> values = new ArrayList<Object>();
+        final List<Object> values = new ArrayList<>();
         for (final Integer index : selectedIndexes) {
             values.add(this.items.get(index).value);
         }
@@ -383,13 +380,20 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setVisibleItemCount(final int visibleItemCount) {
         this.visibleItemCount = visibleItemCount;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.VISIBLE_ITEM_COUNT, visibleItemCount);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.VISIBLE_ITEM_COUNT, visibleItemCount);
     }
 
     public int getVisibleItemCount() {
         return visibleItemCount;
+    }
+
+    public boolean isMultipleSelect() {
+        return isMultipleSelect;
+    }
+
+    public void setMultipleSelect(final boolean isMultipleSelect) {
+        this.isMultipleSelect = isMultipleSelect;
+        saveUpdate(Model.MULTISELECT, isMultipleSelect);
     }
 
     public class ListItem {

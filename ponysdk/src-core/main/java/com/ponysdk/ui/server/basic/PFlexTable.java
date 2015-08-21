@@ -23,10 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A flexible table that creates cells on demand. It can be jagged (that is, each row can contain a different
@@ -50,22 +50,27 @@ public class PFlexTable extends PHTMLTable {
     public class PFlexCellFormatter extends PCellFormatter {
 
         public void setColSpan(final int row, final int column, final int colSpan) {
-            final Update update = new Update(ID);
-            // TODO lbroussal decide what value put if key mandatory but no value tested on the terminal side
-            update.put(PROPERTY.FLEXTABLE_CELL_FORMATTER, -1);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.SET_COL_SPAN, colSpan);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.SET_COL_SPAN, colSpan);
+            parser.endObject();
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
-            final Update update = new Update(ID);
-            update.put(PROPERTY.FLEXTABLE_CELL_FORMATTER, -1);
-            update.put(PROPERTY.ROW, row);
-            update.put(PROPERTY.COLUMN, column);
-            update.put(PROPERTY.SET_ROW_SPAN, rowSpan);
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
+            parser.parse(Model.SET_ROW_SPAN, rowSpan);
+            parser.endObject();
         }
     }
 }

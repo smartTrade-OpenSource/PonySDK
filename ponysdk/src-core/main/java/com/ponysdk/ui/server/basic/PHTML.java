@@ -23,10 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.tools.Objects;
+import java.util.Objects;
+
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt; element, causing it to be
@@ -68,7 +69,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(PROPERTY.HTML, this.html);
+        saveUpdate(Model.HTML, this.html);
     }
 
     public boolean isWordWrap() {
@@ -78,7 +79,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setWordWrap(final boolean wordWrap) {
         if (Objects.equals(this.wordWrap, wordWrap)) return;
         this.wordWrap = wordWrap;
-        saveUpdate(PROPERTY.WORD_WRAP, this.wordWrap);
+        saveUpdate(Model.WORD_WRAP, this.wordWrap);
     }
 
     @Override

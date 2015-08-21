@@ -28,9 +28,6 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
@@ -38,7 +35,7 @@ import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTScheduler extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
-    private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<Long, PTScheduler.SchedulerCommand>();
+    private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<>();
     private boolean hasCommunicationError = false;
 
     public PTScheduler() {

@@ -27,12 +27,12 @@ public class BooleanValueProvider<D> implements ValueProvider<D, Boolean> {
 
     private final boolean value;
 
-    public BooleanValueProvider(boolean value) {
+    public BooleanValueProvider(final boolean value) {
         this.value = value;
     }
 
     @Override
-    public Boolean getValue(D data) {
+    public Boolean getValue(final D data) {
         return value;
     }
 

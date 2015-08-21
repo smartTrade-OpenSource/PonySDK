@@ -25,8 +25,6 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;

@@ -27,21 +27,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.ponysdk.core.instruction.AddHandler;
-import com.ponysdk.core.instruction.Update;
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets.
@@ -55,11 +49,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  * have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li>
- * </ul>
+ * <ul class='css'> <li>.gwt-SplitLayoutPanel { the panel itself }</li> <li>.gwt-SplitLayoutPanel
+ * .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li> <li>.gwt-SplitLayoutPanel
+ * .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li> </ul>
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
@@ -70,8 +62,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         private boolean toggleDisplayAllowed = false;
     }
 
-    private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<PLayoutResizeHandler>();
-    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<PWidget, PSplitLayoutPanel.SplitInfoHolder>();
+    private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<>();
+    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
 
     public PSplitLayoutPanel() {
         super(PUnit.PX);
@@ -103,10 +95,14 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.MIN_SIZE, minSize);
-            update.put(PROPERTY.WIDGET, child.getID());
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.MIN_SIZE, minSize);
+            parser.parse(Model.WIDGET, child.getID());
+            parser.endObject();
+
             ensureWidgetInfo(child).minSize = minSize;
         }
     }
@@ -127,10 +123,15 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.SNAP_CLOSED_SIZE, snapClosedSize);
-            update.put(PROPERTY.WIDGET, child.getID());
-            Txn.get().getTxnContext().save(update);
+
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
+            parser.parse(Model.WIDGET, child.getID());
+            parser.endObject();
+
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
         }
     }
@@ -146,10 +147,14 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.TOGGLE_DISPLAY_ALLOWED, allowed);
-            update.put(PROPERTY.WIDGET, child.getID());
-            Txn.get().getTxnContext().save(update);
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_UPDATE);
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
+            parser.parse(Model.WIDGET, child.getID());
+            parser.endObject();
+
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
         }
     }
@@ -190,8 +195,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     public void addLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
         if (handlers.isEmpty()) {
-            final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.RESIZE_HANDLER);
-            Txn.get().getTxnContext().save(addHandler);
+            saveAddHandler(Model.HANDLER_RESIZE_HANDLER);
         }
         handlers.add(resizeHandler);
     }

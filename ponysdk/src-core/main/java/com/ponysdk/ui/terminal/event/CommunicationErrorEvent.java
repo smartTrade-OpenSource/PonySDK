@@ -33,7 +33,7 @@ public class CommunicationErrorEvent extends GwtEvent<CommunicationErrorEvent.Ha
         void onCommunicationError(CommunicationErrorEvent event);
     }
 
-    public static final Type<Handler> TYPE = new Type<Handler>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     private final Throwable throwable;
 

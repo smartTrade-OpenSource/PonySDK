@@ -2,13 +2,18 @@
 package com.ponysdk.core.servlet;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,100 +21,137 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.terminal.Dictionnary;
-import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
+import com.ponysdk.ui.terminal.model.Model;
 
-public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServlet {
+public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
     protected static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
 
-    public int maxIdleTime = -1;
+    public int maxIdleTime = 1000;
 
     @Override
-    public WebSocket doWebSocketConnect(final HttpServletRequest req, final String arg1) {
-        final long key = Long.parseLong(req.getParameter(APPLICATION.VIEW_ID));
-
-        final Application applicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
-        if (applicationSession == null) throw new RuntimeException("Invalid session, please reload your application");
-
-        JettyWebSocket jettyWebSocket;
-
-        final UIContext uiContext = applicationSession.getUIContext(key);
-        uiContext.acquire();
-        try {
-            UIContext.setCurrent(uiContext);
-            jettyWebSocket = newJettyWebsocket();
-            PPusher.get().initialize(jettyWebSocket);
-        } finally {
-            UIContext.remove();
-            uiContext.release();
-        }
-
-        return jettyWebSocket;
+    public void configure(final WebSocketServletFactory factory) {
+        factory.getPolicy().setIdleTimeout(maxIdleTime);
+        factory.setCreator(new MySessionSocketCreator());
     }
 
-    protected JettyWebSocket newJettyWebsocket() {
-        return new JettyWebSocket(maxIdleTime);
+    public class MySessionSocketCreator implements WebSocketCreator {
+
+        @Override
+        public Object createWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
+            return new JettyWebSocket(req, resp);
+        }
     }
 
-    public static class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
+    public class JettyWebSocket implements WebSocketListener, com.ponysdk.core.socket.WebSocket {
 
-        protected Connection connection;
-        protected ConnectionListener connectionListener;
-        protected UIContext uiContext;
-        private final int maxIdleTime;
+        private Session session;
 
-        public JettyWebSocket(final int maxIdleTime) {
-            this.maxIdleTime = maxIdleTime;
-            this.uiContext = UIContext.get();
+        private final long key;
+
+        private final HttpSession httpSession;
+
+        private UIContext uiContext;
+
+        private ConnectionListener listener;
+
+        private final ByteBuffer buffer = ByteBuffer.allocateDirect(1000000);
+
+        public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
+            final Map<String, List<String>> parameterMap = req.getParameterMap();
+            this.key = Long.parseLong(parameterMap.get(Model.APPLICATION_VIEW_ID.getKey()).get(0));
+            this.httpSession = req.getSession();
         }
 
         @Override
-        public void onOpen(final Connection connection) {
-            log.info("Connection received from: " + connection.toString());
-            this.connection = connection;
-            this.connection.setMaxIdleTime(maxIdleTime);
-            this.connectionListener.onOpen();
-        }
+        public void close() {}
 
         @Override
-        public void send(final String msg) throws IOException {
-            connection.sendMessage(msg);
-        }
-
-        @Override
-        public void addConnectionListener(final ConnectionListener connectionListener) {
-            this.connectionListener = connectionListener;
-        }
-
-        @Override
-        public void onClose(final int closeCode, final String message) {
-            log.info("Connection lost from: " + connection.toString() + ". Code: " + closeCode + ". Message: " + message);
-            connectionListener.onClose();
-            uiContext.destroy();
-        }
-
-        @Override
-        public void onMessage(final String message) {
+        public void flush() {
+            // onBeforeSendMessage();
             try {
-                uiContext.notifyMessageReceived();
-
-                final JSONObject jso = new JSONObject();
-                jso.put(Dictionnary.APPLICATION.PING, (int) (System.currentTimeMillis() * .001));
-                connection.sendMessage(jso.toString());
-            } catch (final JSONException e) {
-                log.error("", e);
-            } catch (final IOException e) {
-                log.error("", e);
+                if ((session != null) && (session.isOpen())) {
+                    session.getRemote().sendBytes(buffer); // callback needed ?
+                } else {
+                    // ??
+                }
+            } catch (final Throwable t) {
+                log.error("Cannot flush to WebSocket", t);
+            } finally {
+                // onAfterMessageSent();
             }
         }
 
         @Override
-        public void close() {
-            if (connection != null) connection.close();
+        public void addConnectionListener(final ConnectionListener listener) {
+            this.listener = listener;
         }
+
+        @Override
+        public void onWebSocketClose(final int arg0, final String arg1) {
+            listener.onClose();
+        }
+
+        @Override
+        public void onWebSocketConnect(final Session session) {
+            this.session = session;
+
+            final Application applicationSession = (Application) httpSession.getAttribute(Application.class.getCanonicalName());
+            if (applicationSession == null) throw new RuntimeException("Invalid session, please reload your application");
+
+            uiContext = applicationSession.getUIContext(key);
+            uiContext.acquire();
+            try {
+                UIContext.setCurrent(uiContext);
+
+                session.getRemote().sendBytes(buffer);
+
+                PPusher.get().initialize(this);
+            } catch (final IOException e) {
+                log.error("Cannot initializing Web Socket", e);
+            } finally {
+                UIContext.remove();
+                uiContext.release();
+            }
+
+            listener.onOpen();
+        }
+
+        @Override
+        public void onWebSocketError(final Throwable throwable) {
+            log.error("WebSoket Error", throwable);
+        }
+
+        @Override
+        public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {}
+
+        @Override
+        public void onWebSocketText(final String text) {
+            onBeforeMessageReceived(text);
+            try {
+                uiContext.notifyMessageReceived();
+            } catch (final Throwable e) {
+                log.error("", e);
+            } finally {
+                onAfterMessageProcessed(text);
+            }
+        }
+
+        protected void onBeforeSendMessage(final String msg) {}
+
+        protected void onAfterMessageSent(final String msg) {}
+
+        protected void onBeforeMessageReceived(final String text) {}
+
+        protected void onAfterMessageProcessed(final String text) {}
+
+        @Override
+        public ByteBuffer getByteBuffer() {
+            return buffer;
+        }
+
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {

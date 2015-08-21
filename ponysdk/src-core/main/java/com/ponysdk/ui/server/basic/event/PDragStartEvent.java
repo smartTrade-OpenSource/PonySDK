@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PDragStartEvent extends PDomEvent<PDragStartHandler> {
 
-    public static final PDomEvent.Type<PDragStartHandler> TYPE = new PDomEvent.Type<PDragStartHandler>(DomHandlerType.DRAG_START);
+    public static final PDomEvent.Type<PDragStartHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DRAG_START);
 
     public PDragStartEvent(final Object sourceComponent) {
         super(sourceComponent);

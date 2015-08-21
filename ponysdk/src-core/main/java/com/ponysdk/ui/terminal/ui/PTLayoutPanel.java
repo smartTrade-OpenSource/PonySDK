@@ -27,7 +27,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PAlignment;

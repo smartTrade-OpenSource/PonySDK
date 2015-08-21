@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -42,42 +42,46 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PRootPanel extends PAbsolutePanel {
 
     private static final String ROOTID = "PRootPanel";
-    private static final String DEFAULTID = "DEFAULT";
 
     private PRootPanel() {}
 
     private PRootPanel(final String id) {
-        super();
-        create.put(PROPERTY.ID, id);
+        super(new EntryInstruction(PROPERTY.ID, id));
+    }
+
+    public static PRootPanel get(final PWindow window) {
+        return get(window.getID(), ROOTID);
     }
 
     public static PRootPanel get() {
-        if (UIContext.getCurrentWindow() == null) return get(0, DEFAULTID);
-        return get(UIContext.getCurrentWindow().getID(), DEFAULTID);
+        return get(PWindow.MAIN, ROOTID);
     }
 
     public static PRootPanel get(final String id) {
-        if (UIContext.getCurrentWindow() == null) return get(0, id);
-        return get(UIContext.getCurrentWindow().getID(), id);
+        return get(PWindow.MAIN, id);
     }
 
-    private static PRootPanel get(final long windowID, final String id) {
+    public static PRootPanel get(final PWindow window, final String id) {
+        return get(window.getID(), id);
+    }
+
+    public static PRootPanel get(final long windowID, final String id) {
         final Map<String, PRootPanel> childs = ensureChilds(windowID);
         PRootPanel defaultRoot = childs.get(id);
         if (defaultRoot == null) {
-            if (id.equals(DEFAULTID)) defaultRoot = new PRootPanel();
+            if (id.equals(PWindow.MAIN)) defaultRoot = new PRootPanel();
             else defaultRoot = new PRootPanel(id);
             childs.put(id, defaultRoot);
         }
         return defaultRoot;
     }
 
-    private static Map<String, PRootPanel> ensureChilds(final long windowID) {
+    private static Map<String, PRootPanel> ensureChilds(final Long windowID) {
         final String rootID = ROOTID + "_" + windowID;
         final UIContext session = UIContext.get();
         Map<String, PRootPanel> rootByIDs = session.getAttribute(rootID);
         if (rootByIDs == null) {
-            rootByIDs = new HashMap<String, PRootPanel>();
+            rootByIDs = new HashMap<>();
             session.setAttribute(rootID, rootByIDs);
         }
         return rootByIDs;

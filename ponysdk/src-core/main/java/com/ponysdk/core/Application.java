@@ -43,7 +43,7 @@ public class Application {
 
     private final Session session;
 
-    private final Map<Long, UIContext> uiContexts = new ConcurrentHashMap<Long, UIContext>();
+    private final Map<Long, UIContext> uiContexts = new ConcurrentHashMap<>();
 
     private final ApplicationManagerOption options;
 

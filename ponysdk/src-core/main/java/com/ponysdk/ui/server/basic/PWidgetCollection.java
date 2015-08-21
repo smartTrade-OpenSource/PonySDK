@@ -29,12 +29,12 @@ import java.util.NoSuchElementException;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 
 /**
- * A simple collection of widgets to be used by {@link com.google.gwt.user.client.ui.Panel panels} and
- * {@link com.google.gwt.user.client.ui.Composite composites}.
+ * A simple collection of widgets to be used by {com.google.gwt.user.client.ui.Panel panels} and
+ * {com.google.gwt.user.client.ui.Composite composites}.
  * <p>
  * The main purpose of this specialized collection is to implement {@link java.util.Iterator#remove()} in a
  * way that delegates removal to its panel. This makes it much easier for the panel to implement an
- * {@link com.google.gwt.user.client.ui.HasWidgets#iterator() iterator} that supports removal of widgets.
+ * {com.google.gwt.user.client.ui.HasWidgets#iterator() iterator} that supports removal of widgets.
  * </p>
  */
 public class PWidgetCollection implements Iterable<PWidget> {

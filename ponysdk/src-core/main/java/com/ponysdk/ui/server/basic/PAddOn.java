@@ -23,18 +23,16 @@
 
 package com.ponysdk.ui.server.basic;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
-import com.ponysdk.ui.terminal.Dictionnary;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * AddOn are used to bind server side object with javascript object
@@ -52,23 +50,20 @@ public class PAddOn extends PObject implements PNativeHandler {
      * @param params
      *            optional parameters that will be passed to the create javascript function
      */
-    public PAddOn(final String factory, final PWidget w, final JSONObject params) {
-        super();
+    public PAddOn(final String factory, final PWidget w, final JsonObject params) {
+        super(new EntryInstruction(Model.FACTORY, factory), new EntryInstruction(Model.NATIVE, params), new EntryInstruction(Model.WIDGET, w != null ? w.ID : null));
+
         this.widget = w;
-
-        if (factory != null) create.put(PROPERTY.FACTORY, factory);
-        else create.put(PROPERTY.FACTORY, getClass().getName());
-
-        if (params != null) create.put(PROPERTY.NATIVE, params);
-        if (this.widget != null) create.put(PROPERTY.WIDGET, this.widget.ID);
 
         addNativeHandler(this);
     }
 
-    public void update(final JSONObject data) {
-        final Update update = new Update(getID());
-        update.put(Dictionnary.PROPERTY.NATIVE, data);
-        Txn.get().getTxnContext().save(update);
+    public PAddOn(final PWidget w, final JsonObject params) {
+        this(PAddOn.class.getName(), w, params);
+    }
+
+    public void update(final JsonObject data) {
+        saveUpdate(Model.NATIVE, data);
     }
 
     @Override
@@ -78,19 +73,15 @@ public class PAddOn extends PObject implements PNativeHandler {
 
     @Override
     public void onNativeEvent(final PNativeEvent event) {
-        final JSONObject jsonObject = event.getJsonObject();
-        try {
-            restate(jsonObject);
-        } catch (final JSONException e) {
-            log.error("Failed to read json value in #" + jsonObject, e);
-        }
+        final JsonObject jsonObject = event.getJsonObject();
+        restate(jsonObject);
     }
 
-    protected void restate(final JSONObject jsonObject) throws JSONException {}
+    protected void restate(final JsonObject jsonObject) {}
 
     public void update(final String key1, final Object o1) {
         try {
-            final JSONObject jso = new JSONObject();
+            final JsonObject jso = new JsonObject();
             jso.put(key1, o1);
             update(jso);
         } catch (final JSONException e) {

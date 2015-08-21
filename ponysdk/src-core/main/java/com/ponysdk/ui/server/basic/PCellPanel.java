@@ -23,12 +23,13 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Update;
+import java.util.Objects;
+
+import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.tools.Objects;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set
@@ -42,41 +43,53 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(PROPERTY.BORDER_WIDTH, this.borderWidth);
+        saveUpdate(Model.BORDER_WIDTH, this.borderWidth);
     }
 
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(PROPERTY.SPACING, this.spacing);
+        saveUpdate(Model.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        update.put(PROPERTY.CELL, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
+        parser.parse(Model.CELL, widget.getID());
+        parser.endObject();
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        update.put(PROPERTY.CELL, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
+        parser.parse(Model.CELL, widget.getID());
+        parser.endObject();
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CELL_HEIGHT, height);
-        update.put(PROPERTY.CELL, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.CELL_HEIGHT, height);
+        parser.parse(Model.CELL, widget.getID());
+        parser.endObject();
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CELL_WIDTH, width);
-        update.put(PROPERTY.CELL, widget.getID());
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.CELL_WIDTH, width);
+        parser.parse(Model.CELL, widget.getID());
+        parser.endObject();
     }
 
     public Integer getBorderWidth() {

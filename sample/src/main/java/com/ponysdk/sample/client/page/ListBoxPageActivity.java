@@ -56,7 +56,8 @@ public class ListBoxPageActivity extends SamplePageActivity {
         table.setWidth("100%");
         table.setWidget(0, 0, listBoxCategory);
 
-        final PListBox roleListBox = new PListBox(false, true);
+        final PListBox roleListBox = new PListBox(false);
+        roleListBox.setMultipleSelect(true);
         roleListBox.setVisibleItemCount(5);
         for (int i = 0; i < 10; i++) {
             roleListBox.addItem("Role" + i, i);

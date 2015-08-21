@@ -27,7 +27,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PContextMenuEvent extends PDomEvent<PContextMenuHandler> {
 
-    public static final PDomEvent.Type<PContextMenuHandler> TYPE = new PDomEvent.Type<PContextMenuHandler>(DomHandlerType.CONTEXT_MENU);
+    public static final PDomEvent.Type<PContextMenuHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.CONTEXT_MENU);
 
     public PContextMenuEvent(final Object sourceComponent) {
         super(sourceComponent);

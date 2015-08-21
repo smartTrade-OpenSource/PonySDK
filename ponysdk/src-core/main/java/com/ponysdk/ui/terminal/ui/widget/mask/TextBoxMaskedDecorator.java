@@ -284,7 +284,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
     public void setMask(final String mask, final boolean showMask, final char freeSymbol) {
 
-        final List<Flag> flags = new ArrayList<Flag>();
+        final List<Flag> flags = new ArrayList<>();
 
         int current = 0;
         MatchResult matchResult = regExp.exec(mask);

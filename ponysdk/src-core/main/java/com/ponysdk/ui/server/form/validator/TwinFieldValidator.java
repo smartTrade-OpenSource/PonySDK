@@ -23,29 +23,30 @@
 
 package com.ponysdk.ui.server.form.validator;
 
-import com.ponysdk.ui.server.form.FormField;
+import com.ponysdk.ui.server.form.formfield.FormField;
 
 public class TwinFieldValidator implements FieldValidator {
 
-    private final FormField twinFormField;
+    private final FormField<String> twinFormField;
 
     private final String errorMessage;
 
-    public TwinFieldValidator(String errorMessage, FormField twinFormField) {
+    public TwinFieldValidator(final String errorMessage, final FormField<String> twinFormField) {
         this.errorMessage = errorMessage;
         this.twinFormField = twinFormField;
     }
 
     @Override
-    public ValidationResult isValid(FormField field) {
-        final Object twinFormFieldText = twinFormField.getValue();
-        final Object formFieldText = field.getValue();
+    public ValidationResult isValid(String value) {
+        String twinText = twinFormField.getValue();
 
-        if (twinFormFieldText == null && formFieldText == null) { return ValidationResult.newOKValidationResult(); }
+        if ("".equals(twinText)) twinText = null;
+        if ("".equals(value)) value = null;
 
-        if (twinFormFieldText == null || formFieldText == null) { return ValidationResult.newFailedValidationResult(errorMessage); }
+        if (twinText == null && value == null) { return ValidationResult.newOKValidationResult(); }
+        if (twinText == null || value == null) { return ValidationResult.newFailedValidationResult(errorMessage); }
+        if (!twinText.equals(value)) { return ValidationResult.newFailedValidationResult(errorMessage); }
 
-        if (!twinFormFieldText.equals(formFieldText)) { return ValidationResult.newFailedValidationResult(errorMessage); }
         return ValidationResult.newOKValidationResult();
     }
 }

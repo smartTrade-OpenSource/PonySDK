@@ -5,7 +5,7 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 
 public class PMouseDownEvent extends PMouseEvent<PMouseDownHandler> {
 
-    public static final PDomEvent.Type<PMouseDownHandler> TYPE = new PDomEvent.Type<PMouseDownHandler>(DomHandlerType.MOUSE_DOWN);
+    public static final PDomEvent.Type<PMouseDownHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.MOUSE_DOWN);
 
     public PMouseDownEvent(final Object sourceComponent) {
         super(sourceComponent);

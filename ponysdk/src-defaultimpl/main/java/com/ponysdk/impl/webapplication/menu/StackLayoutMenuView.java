@@ -56,7 +56,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         public Node(final Node parent, final String name) {
             this.parent = parent;
             this.name = name;
-            this.children = new ArrayList<Node>();
+            this.children = new ArrayList<>();
 
             if (parent != null) {
                 this.parent.children.add(this);
@@ -83,9 +83,9 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private final double headerWidth = 2;// em
     private final double paddingLeft = 16;// px
 
-    private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<Node, PComplexPanel>();
-    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<PSelectionHandler<MenuItem>>();
-    private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<MenuItem, PAnchor>();
+    private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<>();
+    private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
+    private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<>();
     private PAnchor selectedItem;
 
     public StackLayoutMenuView() {
@@ -186,7 +186,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PSelectionEvent<MenuItem> event = new PSelectionEvent<MenuItem>(this, menuItem);
+                final PSelectionEvent<MenuItem> event = new PSelectionEvent<>(this, menuItem);
                 for (final PSelectionHandler<MenuItem> handler : selectionHandlers) {
                     handler.onSelection(event);
                 }

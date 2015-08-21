@@ -5,7 +5,7 @@ import com.ponysdk.core.export.Exporter;
 
 public class XMLExporterFactory {
 
-    public static <T> Exporter<T> newXMLExporter(String rootName, String fileName) {
-        return new XMLExporter<T>(rootName, fileName);
+    public static <T> Exporter<T> newXMLExporter(final String rootName, final String fileName) {
+        return new XMLExporter<>(rootName, fileName);
     }
 }

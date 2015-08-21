@@ -20,13 +20,13 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.list2.DefaultSimpleListView;
-import com.ponysdk.ui.server.list2.refreshable.Cell;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableCellRenderer;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGrid;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGridColumnDescriptor;
-import com.ponysdk.ui.server.list2.renderer.header.HeaderCellRenderer;
-import com.ponysdk.ui.server.list2.valueprovider.IdentityValueProvider;
+import com.ponysdk.ui.server.list.DefaultSimpleListView;
+import com.ponysdk.ui.server.list.refreshable.Cell;
+import com.ponysdk.ui.server.list.refreshable.RefreshableCellRenderer;
+import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.ui.server.list.refreshable.RefreshableDataGridColumnDescriptor;
+import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
+import com.ponysdk.ui.server.list.valueprovider.IdentityValueProvider;
 
 public class RefreshableDataGridTest {
 
@@ -50,7 +50,7 @@ public class RefreshableDataGridTest {
         txn.begin(new EmptyTxnContext());
         PPusher.initialize();
 
-        final RefreshableDataGridColumnDescriptor<Data, Data, PHTML> descriptor = new RefreshableDataGridColumnDescriptor<Data, Data, PHTML>();
+        final RefreshableDataGridColumnDescriptor<Data, Data, PHTML> descriptor = new RefreshableDataGridColumnDescriptor<>();
         descriptor.setValueProvider(new IdentityValueProvider<Data>());
         descriptor.setHeaderCellRenderer(new HeaderCellRenderer() {
 
@@ -72,7 +72,7 @@ public class RefreshableDataGridTest {
             }
         });
 
-        datagrid = new RefreshableDataGrid<String, Data>(new DefaultSimpleListView());
+        datagrid = new RefreshableDataGrid<>(new DefaultSimpleListView());
         datagrid.addDataGridColumnDescriptor(descriptor);
     }
 

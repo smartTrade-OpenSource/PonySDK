@@ -29,15 +29,12 @@ import java.util.Map;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
-import com.ponysdk.ui.terminal.Dictionnary.TYPE;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTRadioButton extends PTCheckBox {
 
-    private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<String, PTRadioButton>();
+    private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<>();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {

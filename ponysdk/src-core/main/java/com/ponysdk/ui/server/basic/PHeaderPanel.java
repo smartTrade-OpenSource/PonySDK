@@ -27,12 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.ponysdk.core.instruction.Add;
-import com.ponysdk.core.instruction.Remove;
-import com.ponysdk.core.instruction.Update;
-import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A panel that includes a header (top), footer (bottom), and content (middle) area. The header and footer
@@ -46,9 +42,7 @@ public class PHeaderPanel extends PPanel {
     private PWidget footer;
 
     public void resize() {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.RESIZE, true);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.RESIZE, true);
     }
 
     @Override
@@ -72,30 +66,21 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         header = child;
-
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.INDEX, 0);
-        Txn.get().getTxnContext().save(add);
+        saveAdd(child.getID(), ID, Model.INDEX, 0);
     }
 
     public void setContentWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         content = child;
-
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.INDEX, 1);
-        Txn.get().getTxnContext().save(add);
+        saveAdd(child.getID(), ID, Model.INDEX, 1);
     }
 
     public void setFooterWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         footer = child;
-
-        final Add add = new Add(child.getID(), getID());
-        add.put(PROPERTY.INDEX, 2);
-        Txn.get().getTxnContext().save(add);
+        saveAdd(child.getID(), ID, Model.INDEX, 2);
     }
 
     @Override
@@ -123,8 +108,7 @@ public class PHeaderPanel extends PPanel {
     }
 
     private void sendRemove(final PWidget child) {
-        final Remove remove = new Remove(child.getID(), getID());
-        Txn.get().getTxnContext().save(remove);
+        saveRemove(child.getID(), ID);
     }
 
     @Override
@@ -143,7 +127,7 @@ public class PHeaderPanel extends PPanel {
 
     @Override
     public Iterator<PWidget> iterator() {
-        final List<PWidget> widgets = new ArrayList<PWidget>();
+        final List<PWidget> widgets = new ArrayList<>();
         if (header != null) widgets.add(header);
         if (content != null) widgets.add(content);
         if (footer != null) widgets.add(footer);
