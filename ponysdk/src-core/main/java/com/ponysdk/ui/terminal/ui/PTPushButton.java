@@ -26,12 +26,13 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.PushButton;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTPushButton extends PTCustomButton<PushButton> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTImage image = (PTImage) uiService.getPTObject(create.getLong(PROPERTY.IMAGE));
+        final PTImage image = (PTImage) uiService.getPTObject(create.getLong(Model.IMAGE));
         init(create, uiService, new PushButton(image.cast()));
     }
 }

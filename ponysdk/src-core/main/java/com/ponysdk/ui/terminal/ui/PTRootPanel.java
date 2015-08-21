@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
@@ -33,7 +34,7 @@ public class PTRootPanel extends PTAbsolutePanel {
     public void create(final PTInstruction create, final UIService uiService) {
         String id = null;
 
-        if (create.containsKey(PROPERTY.ID)) id = create.getString(PROPERTY.ID);
+        if (create.containsKey(Model.ID)) id = create.getString(Model.ID);
         if (id == null) {
             init(create, uiService, RootPanel.get());
         } else {

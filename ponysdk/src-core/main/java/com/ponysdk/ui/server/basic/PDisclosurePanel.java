@@ -30,7 +30,7 @@ import java.util.List;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
@@ -70,12 +70,27 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
 
+    private final String headerText;
+    private final PImage openImage;
+    private final PImage closeImage;
+
     public PDisclosurePanel(final String headerText) {
         this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
     }
 
     public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
-        super(new EntryInstruction(Model.TEXT, headerText), new EntryInstruction(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID()), new EntryInstruction(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID()));
+        this.headerText = headerText;
+        this.openImage = openImage;
+        this.closeImage = closeImage;
+
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.TEXT, headerText);
+        parser.parse(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
+        parser.parse(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
     @Override

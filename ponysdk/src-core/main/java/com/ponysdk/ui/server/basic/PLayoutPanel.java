@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -49,7 +49,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Type.UPDATE);
+        parser.parse(Model.TYPE_UPDATE);
         parser.parse(Model.OBJECT_ID, ID);
         parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
         parser.parse(Model.WIDGET, child.getID());
@@ -61,7 +61,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Type.UPDATE);
+        parser.parse(Model.TYPE_UPDATE);
         parser.parse(Model.OBJECT_ID, ID);
         parser.parse(Model.WIDGET, child.getID());
         parser.parse(Model.VERTICAL_ALIGNMENT, position.ordinal());
@@ -73,7 +73,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Type.UPDATE);
+        parser.parse(Model.TYPE_UPDATE);
         parser.parse(Model.OBJECT_ID, ID);
         parser.parse(Model.WIDGET_HIDDEN, hidden);
         parser.parse(Model.WIDGET, widget.getID());
@@ -113,7 +113,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     private void sendUpdate(final PWidget child, final Model key1, final double v1, final Model key2, final double v2, final PUnit unit) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Type.UPDATE);
+        parser.parse(Model.TYPE_UPDATE);
         parser.parse(Model.OBJECT_ID, ID);
         parser.parse(Model.UNIT, unit.ordinal());
         parser.parse(Model.WIDGET, child.getID());

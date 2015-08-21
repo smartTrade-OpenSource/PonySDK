@@ -27,7 +27,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ponysdk.core.instruction.Parser;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
@@ -160,23 +163,22 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
-        final String handler = event.getString(HANDLER.KEY);
-        if (HANDLER.KEY_.RESIZE_HANDLER.equals(handler)) {
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_KEY_RESIZE_HANDLER.getKey())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
-            final JSONArray array = event.getJSONArray(PROPERTY.VALUE);
-            for (int i = 0; i < array.length(); i++) {
-                final JSONObject ws = array.getJSONObject(i);
-                final long objectID = ws.getLong(PROPERTY.OBJECT_ID);
+            final JsonArray array = instruction.getJsonArray(Model.VALUE.getKey());
+            for (int i = 0; i < array.size(); i++) {
+                final JsonObject ws = array.getJsonObject(i);
+                final long objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).longValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getDouble(PROPERTY.SIZE);
+                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).longValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }
             fireLayoutResize(resizeEvent);
         } else {
-            super.onClientData(event);
+            super.onClientData(instruction);
         }
     }
 

@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTextArea extends PTTextBoxBase<TextArea> {
 
@@ -36,10 +37,10 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.VISIBLE_LINES)) {
-            uiObject.setVisibleLines(update.getInt(PROPERTY.VISIBLE_LINES));
-        } else if (update.containsKey(PROPERTY.CHARACTER_WIDTH)) {
-            uiObject.setCharacterWidth(update.getInt(PROPERTY.CHARACTER_WIDTH));
+        if (update.containsKey(Model.VISIBLE_LINES)) {
+            uiObject.setVisibleLines(update.getInt(Model.VISIBLE_LINES));
+        } else if (update.containsKey(Model.CHARACTER_WIDTH)) {
+            uiObject.setCharacterWidth(update.getInt(Model.CHARACTER_WIDTH));
         } else {
             super.update(update, uiService);
         }

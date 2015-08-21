@@ -28,9 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -70,9 +69,17 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
 
     private int animationDuration;
 
+    private final PUnit unit;
+
     public PStackLayoutPanel(final PUnit unit) {
-        super(new EntryInstruction(Model.UNIT, unit.ordinal()));
+        this.unit = unit;
+        init();
         initWidget(new PLayoutPanel());
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.UNIT, unit.ordinal());
     }
 
     @Override

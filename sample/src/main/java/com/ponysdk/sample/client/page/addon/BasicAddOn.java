@@ -2,7 +2,6 @@
 package com.ponysdk.sample.client.page.addon;
 
 import com.ponysdk.ui.server.addon.DefaultAddOn;
-import com.ponysdk.ui.server.addon.JSONBuilder;
 
 public class BasicAddOn extends DefaultAddOn {
 
@@ -13,7 +12,7 @@ public class BasicAddOn extends DefaultAddOn {
     }
 
     @Override
-    protected void restate(final JSONObject jsonObject) throws JSONException {
+    protected void restate(final JsonO jsonObject) {
         final String msg = jsonObject.getString("message");
 
         System.out.println("Received message: " + msg);

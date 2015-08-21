@@ -28,8 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -141,15 +142,15 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
-        if (HANDLER.KEY_.SELECTION_HANDLER.equals(event.getString(HANDLER.KEY))) {
-            final PTreeItem treeItem = UIContext.get().getObject(event.getLong(HANDLER.KEY_.SELECTION_HANDLER));
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
+            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(Model.HANDLER_SELECTION_HANDLER.getKey()).longValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);
             }
         } else {
-            super.onClientData(event);
+            super.onClientData(instruction);
         }
     }
 
@@ -165,8 +166,6 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        final Update update = new Update(ID);
-        update.put(PROPERTY.ANIMATION, animationEnabled);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.ANIMATION, animationEnabled);
     }
 }

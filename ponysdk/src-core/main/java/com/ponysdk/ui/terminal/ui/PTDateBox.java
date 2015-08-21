@@ -35,6 +35,7 @@ import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTDateBox.MyDateBox;
 
 public class PTDateBox extends PTWidget<MyDateBox> {
@@ -43,23 +44,20 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-
-        final PTDatePicker datePicker = (PTDatePicker) uiService.getPTObject(create.getLong(PROPERTY.PICKER));
-
+        final PTDatePicker datePicker = (PTDatePicker) uiService.getPTObject(create.getLong(Model.PICKER));
         init(create, uiService, new MyDateBox(datePicker.cast(), null, DEFAULT_FORMAT));
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-
-        if (HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER)) {
             final DateBox dateBox = cast();
             final TextBox textBox = dateBox.getTextBox();
             dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<Date> event) {
-                    triggerEvent(addHandler, uiService, dateBox);
+                    triggerEvent(instruction, uiService, dateBox);
                 }
 
             });
@@ -67,21 +65,20 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
-                    triggerEvent(addHandler, uiService, dateBox);
+                    triggerEvent(instruction, uiService, dateBox);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
     protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(addHandler.getObjectID());
-        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        instruction.put(HANDLER.KEY, HANDLER.KEY_.DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(PROPERTY.VALUE, dateBox.getTextBox().getText());
-
+        instruction.put(Model.TYPE_EVENT);
+        instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+        instruction.put(Model.VALUE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);
     }
 
@@ -89,17 +86,17 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     public void update(final PTInstruction update, final UIService uiService) {
         final MyDateBox dateBox = cast();
 
-        if (update.containsKey(PROPERTY.VALUE)) {
-            dateBox.getTextBox().setText(update.getString(PROPERTY.VALUE));
-        } else if (update.containsKey(PROPERTY.DATE_FORMAT)) {
-            final DefaultFormat format = new DefaultFormat(DateTimeFormat.getFormat(update.getString(PROPERTY.DATE_FORMAT)));
+        if (update.containsKey(Model.VALUE)) {
+            dateBox.getTextBox().setText(update.getString(Model.VALUE));
+        } else if (update.containsKey(Model.DATE_FORMAT)) {
+            final DefaultFormat format = new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT)));
             dateBox.setFormat(format);
-        } else if (update.containsKey(PROPERTY.DATE_FORMAT_PATTERN)) {
-            dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(PROPERTY.DATE_FORMAT_PATTERN))));
-        } else if (update.containsKey(PROPERTY.ENABLED)) {
-            dateBox.setEnabled(update.getBoolean(PROPERTY.ENABLED));
-        } else if (update.containsKey(PROPERTY.MONTH)) {
-            dateBox.setDefaultMonth(update.getString(PROPERTY.MONTH));
+        } else if (update.containsKey(Model.DATE_FORMAT_PATTERN)) {
+            dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT_PATTERN))));
+        } else if (update.containsKey(Model.ENABLED)) {
+            dateBox.setEnabled(update.getBoolean(Model.ENABLED));
+        } else if (update.containsKey(Model.MONTH)) {
+            dateBox.setDefaultMonth(update.getString(Model.MONTH));
         } else {
             super.update(update, uiService);
         }

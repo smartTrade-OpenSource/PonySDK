@@ -23,12 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -39,8 +38,9 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PAddOn extends PObject implements PNativeHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
     private final PWidget widget;
+    private final String factory;
+    private final JsonObject params;
 
     /**
      * @param factory
@@ -51,9 +51,11 @@ public class PAddOn extends PObject implements PNativeHandler {
      *            optional parameters that will be passed to the create javascript function
      */
     public PAddOn(final String factory, final PWidget w, final JsonObject params) {
-        super(new EntryInstruction(Model.FACTORY, factory), new EntryInstruction(Model.NATIVE, params), new EntryInstruction(Model.WIDGET, w != null ? w.ID : null));
-
         this.widget = w;
+        this.factory = factory;
+        this.params = params;
+
+        init();
 
         addNativeHandler(this);
     }
@@ -62,8 +64,16 @@ public class PAddOn extends PObject implements PNativeHandler {
         this(PAddOn.class.getName(), w, params);
     }
 
-    public void update(final JsonObject data) {
-        saveUpdate(Model.NATIVE, data);
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        // parser.parse(Model.addOnSignature, getSignature());
+        parser.parse(Model.FACTORY, factory);
+        parser.parse(Model.NATIVE, params);
+        parser.parse(Model.WIDGET, widget != null ? widget.ID : null);
+    }
+
+    public void update(final JsonObjectBuilder builder) {
+        saveUpdate(Model.NATIVE, builder);
     }
 
     @Override
@@ -79,14 +89,10 @@ public class PAddOn extends PObject implements PNativeHandler {
 
     protected void restate(final JsonObject jsonObject) {}
 
-    public void update(final String key1, final Object o1) {
-        try {
-            final JsonObject jso = new JsonObject();
-            jso.put(key1, o1);
-            update(jso);
-        } catch (final JSONException e) {
-            log.error("Failed to encode json", e);
-        }
+    public void update(final String key, final JsonObject object) {
+        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        objectBuilder.add(key, object);
+        update(objectBuilder);
     }
 
     public PWidget getWidget() {

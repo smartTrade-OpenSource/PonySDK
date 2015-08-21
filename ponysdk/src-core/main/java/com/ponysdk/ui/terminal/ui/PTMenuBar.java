@@ -26,12 +26,13 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new MenuBar(create.getBoolean(PROPERTY.MENU_BAR_IS_VERTICAL)));
+        init(create, uiService, new MenuBar(create.getBoolean(Model.MENU_BAR_IS_VERTICAL)));
     }
 
     @Override
@@ -42,8 +43,8 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
         if (child instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) child;
-            if (add.containsKey(PROPERTY.BEFORE_INDEX)) {
-                menuBar.insertItem(menuItem.cast(), add.getInt(PROPERTY.BEFORE_INDEX));
+            if (add.containsKey(Model.BEFORE_INDEX)) {
+                menuBar.insertItem(menuItem.cast(), add.getInt(Model.BEFORE_INDEX));
             } else {
                 menuBar.addItem(menuItem.cast());
             }
@@ -67,10 +68,10 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.CLEAR)) {
+        if (update.containsKey(Model.CLEAR)) {
             uiObject.clearItems();
-        } else if (update.containsKey(PROPERTY.ANIMATION)) {
-            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
+        } else if (update.containsKey(Model.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
         } else {
             super.update(update, uiService);
         }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -36,17 +36,23 @@ public class PGrid extends PHTMLTable {
     private final int columns;
     private final int rows;
 
-    public PGrid(final int rows, final int columns) {
-        super(new EntryInstruction(Model.ROW, rows), new EntryInstruction(Model.COLUMN, columns));
+    public PGrid() {
+        this(0, 0);
+    }
 
+    public PGrid(final int rows, final int columns) {
         this.rows = rows;
         this.columns = columns;
+
+        init();
 
         setCellFormatter(new PCellFormatter());
     }
 
-    public PGrid() {
-        this(0, 0);
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.ROW, rows);
+        parser.parse(Model.COLUMN, columns);
     }
 
     @Override

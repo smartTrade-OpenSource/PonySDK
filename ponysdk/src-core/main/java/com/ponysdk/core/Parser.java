@@ -1,5 +1,5 @@
 
-package com.ponysdk.core.instruction;
+package com.ponysdk.core;
 
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,15 @@ public class Parser {
             buffer.put(value.getBytes("UTF8"));
         } catch (final UnsupportedEncodingException e) {
             log.error("Cannot encode value " + value, e);
+        }
+    }
+
+    public void parse(final Model type, final JsonObjectBuilder builder) {
+        buffer.put(type.getBytesKey());
+        try {
+            buffer.put(builder.build().toString().getBytes("UTF8"));
+        } catch (final UnsupportedEncodingException e) {
+            log.error("Cannot encode value " + builder.toString(), e);
         }
     }
 

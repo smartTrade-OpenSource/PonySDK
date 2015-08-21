@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
@@ -116,12 +118,13 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
+    public void onClientData(final JsonObject event) {
         String handlerKey = null;
-        if (event.has(HANDLER.KEY)) {
-            handlerKey = event.getString(HANDLER.KEY);
+        if (event.containsKey(Model.HANDLER_KEY.getKey())) {
+            handlerKey = event.getString(Model.HANDLER_KEY.getKey());
         }
-        if (HANDLER.KEY_.COMMAND.equals(handlerKey)) {
+
+        if (Model.HANDLER_KEY_COMMAND.getKey().equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onClientData(event);

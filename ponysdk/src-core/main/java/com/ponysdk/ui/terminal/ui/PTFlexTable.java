@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTFlexTable extends PTHTMLTable {
 
@@ -39,18 +40,18 @@ public class PTFlexTable extends PTHTMLTable {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
-        if (update.containsKey(PROPERTY.CLEAR_ROW)) {
-            cast().removeRow(update.getInt(PROPERTY.CLEAR_ROW));
-        } else if (update.containsKey(PROPERTY.INSERT_ROW)) {
-            cast().insertRow(update.getInt(PROPERTY.INSERT_ROW));
-        } else if (update.containsKey(PROPERTY.FLEXTABLE_CELL_FORMATTER)) {
-            final int cellFormatterRow = update.getInt(PROPERTY.ROW);
-            final int cellFormatterColumn = update.getInt(PROPERTY.COLUMN);
-            if (update.containsKey(PROPERTY.SET_COL_SPAN)) {
-                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, update.getInt(PROPERTY.SET_COL_SPAN));
+        if (update.containsKey(Model.CLEAR_ROW)) {
+            cast().removeRow(update.getInt(Model.CLEAR_ROW));
+        } else if (update.containsKey(Model.INSERT_ROW)) {
+            cast().insertRow(update.getInt(Model.INSERT_ROW));
+        } else if (update.containsKey(Model.FLEXTABLE_CELL_FORMATTER)) {
+            final int cellFormatterRow = update.getInt(Model.ROW);
+            final int cellFormatterColumn = update.getInt(Model.COLUMN);
+            if (update.containsKey(Model.SET_COL_SPAN)) {
+                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, update.getInt(Model.SET_COL_SPAN));
             }
-            if (update.containsKey(PROPERTY.SET_ROW_SPAN)) {
-                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, update.getInt(PROPERTY.SET_ROW_SPAN));
+            if (update.containsKey(Model.SET_ROW_SPAN)) {
+                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, update.getInt(Model.SET_ROW_SPAN));
             }
         } else {
             super.update(update, uiService);

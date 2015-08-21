@@ -28,6 +28,7 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHandler {
 
@@ -35,14 +36,12 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHa
 
     @Override
     public void onBlur(final BlurEvent event) {
-        final PTInstruction eventInstruction = new PTInstruction();
-
-        eventInstruction.setObjectID(getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-        eventInstruction.put(PROPERTY.HTML, uiObject.getHTML());
-
-        uiService.sendDataToServer(uiObject, eventInstruction);
+        final PTInstruction instruction = new PTInstruction();
+        instruction.setObjectID(getObjectID());
+        instruction.put(Model.TYPE_EVENT);
+        instruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+        instruction.put(Model.HTML, uiObject.getHTML());
+        uiService.sendDataToServer(uiObject, instruction);
     }
 
     @Override
@@ -55,29 +54,28 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHa
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
-        if (update.containsKey(PROPERTY.HTML)) {
-            uiObject.setHTML(update.getString(PROPERTY.HTML));
-        } else if (update.containsKey(PROPERTY.CREATE_LINK)) {
-            uiObject.getFormatter().createLink(update.getString(PROPERTY.CREATE_LINK));
-        } else if (update.containsKey(PROPERTY.INSERT_HORIZONTAL_RULE)) {
+        if (update.containsKey(Model.HTML)) {
+            uiObject.setHTML(update.getString(Model.HTML));
+        } else if (update.containsKey(Model.CREATE_LINK)) {
+            uiObject.getFormatter().createLink(update.getString(Model.CREATE_LINK));
+        } else if (update.containsKey(Model.INSERT_HORIZONTAL_RULE)) {
             uiObject.getFormatter().insertHorizontalRule();
-        } else if (update.containsKey(PROPERTY.INSERT_HTML)) {
-            uiObject.getFormatter().insertHTML(update.getString(PROPERTY.INSERT_HTML));
-        } else if (update.containsKey(PROPERTY.IMAGE)) {
-            uiObject.getFormatter().insertImage(update.getString(PROPERTY.IMAGE));
-        } else if (update.containsKey(PROPERTY.ORDERED)) {
+        } else if (update.containsKey(Model.INSERT_HTML)) {
+            uiObject.getFormatter().insertHTML(update.getString(Model.INSERT_HTML));
+        } else if (update.containsKey(Model.IMAGE)) {
+            uiObject.getFormatter().insertImage(update.getString(Model.IMAGE));
+        } else if (update.containsKey(Model.ORDERED)) {
             uiObject.getFormatter().insertOrderedList();
-        } else if (update.containsKey(PROPERTY.UNORDERED)) {
+        } else if (update.containsKey(Model.UNORDERED)) {
             uiObject.getFormatter().insertUnorderedList();
-        } else if (update.containsKey(PROPERTY.BACK_COLOR)) {
-            uiObject.getFormatter().setBackColor(update.getString(PROPERTY.BACK_COLOR));
-        } else if (update.containsKey(PROPERTY.FONT_COLOR)) {
-            uiObject.getFormatter().setForeColor(update.getString(PROPERTY.FONT_COLOR));
-        } else if (update.containsKey(PROPERTY.FONT_NAME)) {
-            uiObject.getFormatter().setFontName(update.getString(PROPERTY.FONT_NAME));
-        } else if (update.containsKey(PROPERTY.FONT_SIZE)) {
-            final FontSize fontSize = FontSize.valueOf(update.getString(PROPERTY.FONT_SIZE));
+        } else if (update.containsKey(Model.BACK_COLOR)) {
+            uiObject.getFormatter().setBackColor(update.getString(Model.BACK_COLOR));
+        } else if (update.containsKey(Model.FONT_COLOR)) {
+            uiObject.getFormatter().setForeColor(update.getString(Model.FONT_COLOR));
+        } else if (update.containsKey(Model.FONT_NAME)) {
+            uiObject.getFormatter().setFontName(update.getString(Model.FONT_NAME));
+        } else if (update.containsKey(Model.FONT_SIZE)) {
+            final FontSize fontSize = FontSize.valueOf(update.getString(Model.FONT_SIZE));
             switch (fontSize) {
                 case LARGE:
                     uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);

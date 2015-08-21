@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
@@ -46,49 +47,46 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final TabLayoutPanel tabPanel = uiObject;
 
-        final int beforeIndex = add.getInt(PROPERTY.BEFORE_INDEX);
+        final int beforeIndex = add.getInt(Model.BEFORE_INDEX);
 
-        if (add.containsKey(PROPERTY.TAB_TEXT)) {
-            tabPanel.insert(w, add.getString(PROPERTY.TAB_TEXT), beforeIndex);
-        } else if (add.containsKey(PROPERTY.TAB_WIDGET)) {
-            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(PROPERTY.TAB_WIDGET));
+        if (add.containsKey(Model.TAB_TEXT)) {
+            tabPanel.insert(w, add.getString(Model.TAB_TEXT), beforeIndex);
+        } else if (add.containsKey(Model.TAB_WIDGET)) {
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(Model.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handler)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.INDEX, uiObject.getSelectedIndex());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(Model.INDEX, uiObject.getSelectedIndex());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
-        } else if (HANDLER.KEY_.BEFORE_SELECTION_HANDLER.equals(handler)) {
+        } else if (instruction.containsKey(Model.HANDLER_BEFORE_SELECTION_HANDLER)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.INDEX, event.getItem());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(Model.INDEX, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
 
     }
@@ -101,14 +99,14 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.ANIMATE)) {
-            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
-        } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
-            uiObject.setAnimationVertical(update.getBoolean(PROPERTY.VERTICAL_ALIGNMENT));
-        } else if (update.containsKey(PROPERTY.ANIMATION_DURATION)) {
-            uiObject.setAnimationDuration(update.getInt(PROPERTY.ANIMATION_DURATION));
-        } else if (update.containsKey(PROPERTY.SELECTED_INDEX)) {
-            uiObject.selectTab(update.getInt(PROPERTY.SELECTED_INDEX));
+        if (update.containsKey(Model.ANIMATE)) {
+            uiObject.animate(update.getInt(Model.ANIMATE));
+        } else if (update.containsKey(Model.VERTICAL_ALIGNMENT)) {
+            uiObject.setAnimationVertical(update.getBoolean(Model.VERTICAL_ALIGNMENT));
+        } else if (update.containsKey(Model.ANIMATION_DURATION)) {
+            uiObject.setAnimationDuration(update.getInt(Model.ANIMATION_DURATION));
+        } else if (update.containsKey(Model.SELECTED_INDEX)) {
+            uiObject.selectTab(update.getInt(Model.SELECTED_INDEX));
         } else {
             super.update(update, uiService);
         }

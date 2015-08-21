@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
@@ -40,17 +41,17 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.MIN_SIZE)) {
-            final int minSize = update.getInt(PROPERTY.MIN_SIZE);
-            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+        if (update.containsKey(Model.MIN_SIZE)) {
+            final int minSize = update.getInt(Model.MIN_SIZE);
+            final Widget w = asWidget(update.getLong(Model.WIDGET), uiService);
             cast().setWidgetMinSize(w, minSize);
-        } else if (update.containsKey(PROPERTY.SNAP_CLOSED_SIZE)) {
-            final int snapClosedSize = update.getInt(PROPERTY.SNAP_CLOSED_SIZE);
-            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+        } else if (update.containsKey(Model.SNAP_CLOSED_SIZE)) {
+            final int snapClosedSize = update.getInt(Model.SNAP_CLOSED_SIZE);
+            final Widget w = asWidget(update.getLong(Model.WIDGET), uiService);
             cast().setWidgetSnapClosedSize(w, snapClosedSize);
-        } else if (update.containsKey(PROPERTY.TOGGLE_DISPLAY_ALLOWED)) {
-            final boolean enable = update.getBoolean(PROPERTY.TOGGLE_DISPLAY_ALLOWED);
-            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+        } else if (update.containsKey(Model.TOGGLE_DISPLAY_ALLOWED)) {
+            final boolean enable = update.getBoolean(Model.TOGGLE_DISPLAY_ALLOWED);
+            final Widget w = asWidget(update.getLong(Model.WIDGET), uiService);
             cast().setWidgetToggleDisplayAllowed(w, enable);
         } else {
             super.update(update, uiService);
@@ -58,13 +59,13 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.KEY_.RESIZE_HANDLER)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_RESIZE_HANDLER)) {
             cast().resizeHandler = true;
-            cast().addInstruction = addHandler;
+            cast().addInstruction = instruction;
             cast().uiService = uiService;
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
@@ -110,7 +111,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                         final Double wSize = getWidgetSize(w);
                         final PTInstruction ws = new PTInstruction();
                         ws.setObjectID(ptObject.getObjectID());
-                        ws.put(PROPERTY.SIZE, wSize);
+                        ws.put(Model.SIZE, wSize);
                         jsonArray.set(i, ws);
                         i++;
                     }
@@ -118,9 +119,9 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addInstruction.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.RESIZE_HANDLER);
-                    eventInstruction.put(PROPERTY.VALUE, jsonArray);
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_RESIZE_HANDLER);
+                    eventInstruction.put(Model.VALUE.getKey(), jsonArray);
                     uiService.sendDataToServer(eventInstruction);
                 }
 

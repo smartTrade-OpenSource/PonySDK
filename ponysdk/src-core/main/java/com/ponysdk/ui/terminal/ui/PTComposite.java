@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public abstract class PTComposite extends PTWidget<Composite> {
 
@@ -37,9 +38,8 @@ public abstract class PTComposite extends PTWidget<Composite> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
-        if (update.containsKey(PROPERTY.WIDGET)) {
-            cast().initWidget(asWidget(update.getLong(PROPERTY.WIDGET), uiService));
+        if (update.containsKey(Model.WIDGET)) {
+            cast().initWidget(asWidget(update.getLong(Model.WIDGET), uiService));
         } else {
             super.update(update, uiService);
         }

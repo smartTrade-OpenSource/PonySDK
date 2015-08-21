@@ -23,9 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -54,12 +53,20 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
+    private final PUnit unit;
+
     public enum Direction {
         NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END
     }
 
     public PDockLayoutPanel(final PUnit unit) {
-        super(new EntryInstruction(Model.UNIT, unit.ordinal()));
+        this.unit = unit;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.UNIT, unit.ordinal());
     }
 
     @Override
@@ -137,5 +144,9 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     @Override
     public void animate(final int duration) {
         saveUpdate(Model.ANIMATE, duration);
+    }
+
+    public PUnit getUnit() {
+        return unit;
     }
 }

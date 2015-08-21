@@ -26,10 +26,11 @@ package com.ponysdk.ui.server.basic;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created directly.
@@ -43,10 +44,17 @@ public class PRootPanel extends PAbsolutePanel {
 
     private static final String ROOTID = "PRootPanel";
 
+    private String id;
+
     private PRootPanel() {}
 
     private PRootPanel(final String id) {
-        super(new EntryInstruction(PROPERTY.ID, id));
+        this.id = id;
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.ID, id);
     }
 
     public static PRootPanel get(final PWindow window) {

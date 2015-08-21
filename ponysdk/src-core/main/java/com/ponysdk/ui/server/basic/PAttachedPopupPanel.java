@@ -23,14 +23,23 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PAttachedPopupPanel extends PPopupPanel {
 
+    private final long attachedID;
+
     public PAttachedPopupPanel(final boolean autoHide, final PWidget attached) {
-        super(autoHide, new EntryInstruction(Model.WIDGET, attached.getID()));
+        super(autoHide);
+        attachedID = attached.getID();
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.WIDGET, attachedID);
     }
 
     @Override

@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAddOn;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
@@ -86,7 +87,7 @@ import com.ponysdk.ui.terminal.ui.PTWindow;
 public class UIFactory {
 
     public PTObject newUIObject(final UIService uiService, final PTInstruction create) {
-        final WidgetType widgetType = WidgetType.values()[create.getInt(WIDGETTYPE.KEY)];
+        final WidgetType widgetType = WidgetType.values()[create.getInt(Model.WIDGETTYPE)];
 
         if (WidgetType.BUTTON.equals(widgetType)) { return new PTButton(); }
         if (WidgetType.ANCHOR.equals(widgetType)) { return new PTAnchor(); }

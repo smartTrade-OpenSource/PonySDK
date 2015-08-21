@@ -111,12 +111,12 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
     }
 
     @Override
-    public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.has(HANDLER.KEY) && jsonObject.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, e.getString(PROPERTY.VALUE));
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
+            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, instruction.getString(Model.VALUE.getKey()));
             fireOnValueChange(event);
         } else {
-            super.onClientData(jsonObject);
+            super.onClientData(instruction);
         }
     }
 

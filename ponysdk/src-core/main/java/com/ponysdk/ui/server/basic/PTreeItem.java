@@ -4,7 +4,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -32,9 +32,9 @@ public class PTreeItem extends PObject {
     private PWidget widget;
 
     PTreeItem(final boolean isRoot, final String html) {
-        super(new EntryInstruction(Model.ROOT, isRoot), new EntryInstruction(Model.TEXT, html));
         this.isRoot = isRoot;
         this.html = html;
+        init();
     }
 
     PTreeItem(final boolean isRoot) {
@@ -52,6 +52,12 @@ public class PTreeItem extends PObject {
     public PTreeItem(final PWidget widget) {
         this();
         this.widget = widget;
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.ROOT, isRoot);
+        parser.parse(Model.TEXT, html);
     }
 
     private void setWidget() {

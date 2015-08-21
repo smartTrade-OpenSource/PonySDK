@@ -25,13 +25,14 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.widget.richtexttoolbar.RichTextToolbar;
 
 public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTObject child = uiService.getPTObject(create.getLong(PROPERTY.WIDGET));
+        final PTObject child = uiService.getPTObject(create.getLong(Model.WIDGET));
         final PTRichTextArea richTextArea = (PTRichTextArea) child;
         init(create, uiService, new RichTextToolbar(richTextArea.cast()));
     }

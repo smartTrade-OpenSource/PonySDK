@@ -26,15 +26,16 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Grid;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTGrid extends PTHTMLTable {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         Grid grid;
-        if (create.containsKey(PROPERTY.ROW)) {
-            final int rows = create.getInt(PROPERTY.ROW);
-            final int columns = create.getInt(PROPERTY.COLUMN);
+        if (create.containsKey(Model.ROW)) {
+            final int rows = create.getInt(Model.ROW);
+            final int columns = create.getInt(Model.COLUMN);
             grid = new Grid(rows, columns);
             init(create, uiService, grid);
         } else {
@@ -47,10 +48,10 @@ public class PTGrid extends PTHTMLTable {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.CLEAR_ROW)) {
-            cast().removeRow(update.getInt(PROPERTY.CLEAR_ROW));
-        } else if (update.containsKey(PROPERTY.INSERT_ROW)) {
-            cast().insertRow(update.getInt(PROPERTY.INSERT_ROW));
+        if (update.containsKey(Model.CLEAR_ROW)) {
+            cast().removeRow(update.getInt(Model.CLEAR_ROW));
+        } else if (update.containsKey(Model.INSERT_ROW)) {
+            cast().insertRow(update.getInt(Model.INSERT_ROW));
         } else {
             super.update(update, uiService);
         }

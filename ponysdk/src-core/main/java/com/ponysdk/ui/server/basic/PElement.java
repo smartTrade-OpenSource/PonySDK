@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -40,8 +40,13 @@ public class PElement extends PComplexPanel {
     private String innerHTML;
 
     public PElement(final String tagName) {
-        super(new EntryInstruction(Model.TAG, tagName));
         this.tagName = tagName;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.TAG, tagName);
     }
 
     @Override

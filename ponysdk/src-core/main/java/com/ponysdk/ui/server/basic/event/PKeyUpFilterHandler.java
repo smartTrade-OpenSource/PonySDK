@@ -23,30 +23,32 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
+import com.ponysdk.ui.terminal.model.Model;
 
-public abstract class PKeyUpFilterHandler extends JSONObject implements PKeyUpHandler {
+public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
 
-    private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
+    private final JsonObject jsonObject;
 
     public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
-        final List<Integer> codes = new ArrayList<>(keyCodes.length);
+        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
         for (final PKeyCodes code : keyCodes) {
-            codes.add(code.getCode());
+            arrayBuilder.add(code.getCode());
         }
 
-        try {
-            put(PROPERTY.KEY_FILTER, new JSONArray(codes));
-        } catch (final JSONException e) {
-            log.error("Cannot set Key Filter", e);
-        }
+        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        objectBuilder.add(Model.KEY_FILTER.getKey(), arrayBuilder.build());
+        jsonObject = objectBuilder.build();
+    }
+
+    public JsonObject asJsonObject() {
+        return jsonObject;
     }
 
 }

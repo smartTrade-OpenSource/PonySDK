@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -36,8 +36,16 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PPushButton extends PButton {
 
+    private final PImage image;
+
     public PPushButton(final PImage image) {
-        super(null, new EntryInstruction(Model.IMAGE, image.getID()));
+        this.image = image;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.IMAGE, image.getID());
     }
 
     @Override

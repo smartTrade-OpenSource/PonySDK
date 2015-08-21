@@ -26,13 +26,13 @@ package com.ponysdk.ui.server.basic;
 import java.util.Objects;
 
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A text box that allows multiple lines of text to be entered.<h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TextArea { primary style }</li>
- * <li>.gwt-TextArea-readonly { dependent style set when the text area is read-only }</li>
- * </ul>
+ * A text box that allows multiple lines of text to be entered.
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'> <li>.gwt-TextArea { primary style }</li> <li>.gwt-TextArea-readonly { dependent style set
+ * when the text area is read-only }</li> </ul>
  */
 public class PTextArea extends PTextBoxBase {
 
@@ -59,7 +59,7 @@ public class PTextArea extends PTextBoxBase {
     public void setVisibleLines(final int visibleLines) {
         if (Objects.equals(this.visibleLines, visibleLines)) return;
         this.visibleLines = visibleLines;
-        saveUpdate(PROPERTY.VISIBLE_LINES, this.visibleLines);
+        saveUpdate(Model.VISIBLE_LINES, visibleLines);
     }
 
     public int getCharacterWidth() {
@@ -69,7 +69,7 @@ public class PTextArea extends PTextBoxBase {
     public void setCharacterWidth(final int characterWidth) {
         if (Objects.equals(this.characterWidth, characterWidth)) return;
         this.characterWidth = characterWidth;
-        saveUpdate(PROPERTY.CHARACTER_WIDTH, this.characterWidth);
+        saveUpdate(Model.CHARACTER_WIDTH, characterWidth);
     }
 
 }

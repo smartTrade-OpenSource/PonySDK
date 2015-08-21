@@ -27,6 +27,7 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTUIObject;
 
@@ -37,14 +38,14 @@ public class PTAttachedPopupPanel extends PTPopupPanel {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
 
-        attached = (PTUIObject<?>) uiService.getPTObject(create.getLong(PROPERTY.WIDGET));
+        attached = (PTUIObject<?>) uiService.getPTObject(create.getLong(Model.WIDGET));
 
         super.create(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.REPAINT)) {
+        if (update.containsKey(Model.REPAINT)) {
             cast().setPopupPosition(attached.cast().getAbsoluteLeft(), attached.cast().getAbsoluteTop() + attached.cast().getOffsetHeight());
             cast().setWidth(attached.cast().getOffsetWidth() + "px");
         } else {

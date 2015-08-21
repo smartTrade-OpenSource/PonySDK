@@ -32,6 +32,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTListBox extends PTFocusWidget<ListBox> {
 
@@ -41,8 +42,8 @@ public class PTListBox extends PTFocusWidget<ListBox> {
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.KEY_.CHANGE_HANDLER)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_CHANGE_HANDLER)) {
             uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
@@ -50,10 +51,10 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                     final int selectedIndex = uiObject.getSelectedIndex();
                     if (selectedIndex == -1) {
                         final PTInstruction eventInstruction = new PTInstruction();
-                        eventInstruction.setObjectID(addHandler.getObjectID());
-                        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
-                        eventInstruction.put(PROPERTY.VALUE, "-1");
+                        eventInstruction.setObjectID(instruction.getObjectID());
+                        eventInstruction.put(Model.TYPE_EVENT);
+                        eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
+                        eventInstruction.put(Model.VALUE, "-1");
                         uiService.sendDataToServer(uiObject, eventInstruction);
                     } else {
                         String selectedIndexes = selectedIndex + "";
@@ -65,10 +66,10 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                             }
                         }
                         final PTInstruction eventInstruction = new PTInstruction();
-                        eventInstruction.setObjectID(addHandler.getObjectID());
-                        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
-                        eventInstruction.put(PROPERTY.VALUE, selectedIndexes);
+                        eventInstruction.setObjectID(instruction.getObjectID());
+                        eventInstruction.put(Model.TYPE_EVENT);
+                        eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
+                        eventInstruction.put(Model.VALUE, selectedIndexes);
                         uiService.sendDataToServer(uiObject, eventInstruction);
                     }
                 }
@@ -76,20 +77,20 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             return;
         }
 
-        super.addHandler(addHandler, uiService);
+        super.addHandler(instruction, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.CLEAR)) {
+        if (update.containsKey(Model.CLEAR)) {
             uiObject.clear();
-        } else if (update.containsKey(PROPERTY.ITEM_INSERTED)) {
-            final int index = update.getInt(PROPERTY.INDEX);
-            final String item = update.getString(PROPERTY.ITEM_TEXT);
+        } else if (update.containsKey(Model.ITEM_INSERTED)) {
+            final int index = update.getInt(Model.INDEX);
+            final String item = update.getString(Model.ITEM_TEXT);
             uiObject.insertItem(item, index);
-        } else if (update.containsKey(PROPERTY.ITEM_ADD)) {
-            final String items = update.getString(PROPERTY.ITEM_TEXT);
-            final String groupName = update.getString(PROPERTY.ITEM_GROUP);
+        } else if (update.containsKey(Model.ITEM_ADD)) {
+            final String items = update.getString(Model.ITEM_TEXT);
+            final String groupName = update.getString(Model.ITEM_GROUP);
             final SelectElement select = uiObject.getElement().cast();
 
             final OptGroupElement groupElement = Document.get().createOptGroupElement();
@@ -103,21 +104,21 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 groupElement.appendChild(optElement);
             }
             select.appendChild(groupElement);
-        } else if (update.containsKey(PROPERTY.ITEM_UPDATED)) {
-            final int index = update.getInt(PROPERTY.INDEX);
-            final String item = update.getString(PROPERTY.ITEM_TEXT);
+        } else if (update.containsKey(Model.ITEM_UPDATED)) {
+            final int index = update.getInt(Model.INDEX);
+            final String item = update.getString(Model.ITEM_TEXT);
             uiObject.setItemText(index, item);
-        } else if (update.containsKey(PROPERTY.ITEM_REMOVED)) {
-            uiObject.removeItem(update.getInt(PROPERTY.INDEX));
-        } else if (update.containsKey(PROPERTY.SELECTED)) {
-            final boolean selected = update.getBoolean(PROPERTY.SELECTED);
-            final int index = update.getInt(PROPERTY.SELECTED_INDEX);
+        } else if (update.containsKey(Model.ITEM_REMOVED)) {
+            uiObject.removeItem(update.getInt(Model.INDEX));
+        } else if (update.containsKey(Model.SELECTED)) {
+            final boolean selected = update.getBoolean(Model.SELECTED);
+            final int index = update.getInt(Model.SELECTED_INDEX);
             if (index == -1) uiObject.setSelectedIndex(index);
             else uiObject.setItemSelected(index, selected);
-        } else if (update.containsKey(PROPERTY.VISIBLE_ITEM_COUNT)) {
-            uiObject.setVisibleItemCount(update.getInt(PROPERTY.VISIBLE_ITEM_COUNT));
-        } else if (update.containsKey(PROPERTY.MULTISELECT)) {
-            uiObject.setMultipleSelect(update.getBoolean(PROPERTY.MULTISELECT));
+        } else if (update.containsKey(Model.VISIBLE_ITEM_COUNT)) {
+            uiObject.setVisibleItemCount(update.getInt(Model.VISIBLE_ITEM_COUNT));
+        } else if (update.containsKey(Model.MULTISELECT)) {
+            uiObject.setMultipleSelect(update.getBoolean(Model.MULTISELECT));
         } else {
             super.update(update, uiService);
         }

@@ -26,15 +26,16 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.get(PROPERTY.TEXT).isString().stringValue());
-        } else if (update.containsKey(PROPERTY.HTML)) {
-            uiObject.setHTML(update.get(PROPERTY.HTML).isString().stringValue());
+        if (update.containsKey(Model.TEXT)) {
+            uiObject.setText(update.get(Model.TEXT).isString().stringValue());
+        } else if (update.containsKey(Model.HTML)) {
+            uiObject.setHTML(update.get(Model.HTML).isString().stringValue());
         } else {
             super.update(update, uiService);
         }

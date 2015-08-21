@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.stm.Txn;
@@ -60,16 +62,29 @@ public class PPusher extends PObject implements ConnectionListener {
 
     private final TxnSocketContext txnContext;
 
+    private final int pollingDelay;
+
+    private final int ping;
+
     public enum PusherState {
         STOPPED, INITIALIZING, STARTED
     }
 
     private PPusher(final int pollingDelay, final int ping) {
-        super(new EntryInstruction(Model.FIXDELAY, pollingDelay), new EntryInstruction(Model.PINGDELAY, ping));
+        this.pollingDelay = pollingDelay;
+        this.ping = ping;
 
         this.txnContext = new TxnSocketContext();
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();
+
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.FIXDELAY, pollingDelay);
+        parser.parse(Model.PINGDELAY, ping);
     }
 
     public void initialize(final WebSocket websocket) {
@@ -128,12 +143,12 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
-        if (event.has(PROPERTY.ERROR_MSG)) {
+    public void onClientData(final JsonObject event) {
+        if (event.containsKey(Model.ERROR_MSG)) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             txnContext.switchToPollingMode();
             doOpen();
-        } else if (event.has(PROPERTY.POLL)) {
+        } else if (event.containsKey(Model.POLL)) {
             txnContext.flushNow();
         }
     }

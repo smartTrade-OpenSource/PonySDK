@@ -31,6 +31,7 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Element;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTWindow extends AbstractPTObject {
 
@@ -50,26 +51,26 @@ public class PTWindow extends AbstractPTObject {
         this.id = create.getObjectID();
         this.uiService = uiService;
 
-        if (create.containsKey(PROPERTY.URL)) url = create.getString(PROPERTY.URL);
+        if (create.containsKey(Model.URL)) url = create.getString(Model.URL);
         else url = GWT.getHostPageBaseURL() + "?wid=" + create.getObjectID();
 
-        if (create.containsKey(PROPERTY.NAME)) name = create.getString(PROPERTY.NAME);
+        if (create.containsKey(Model.NAME)) name = create.getString(Model.NAME);
         else name = "";
 
-        if (create.containsKey(PROPERTY.FEATURES)) features = create.getString(PROPERTY.FEATURES);
+        if (create.containsKey(Model.FEATURES)) features = create.getString(Model.FEATURES);
         else features = "";
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.OPEN)) {
+        if (update.containsKey(Model.OPEN)) {
             window = open(url, name, features);
             if (window != null) {
                 checkWindowAlive();
             }
-        } else if (update.containsKey(PROPERTY.TEXT)) {
-            onDataReceived(window, update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.CLOSE)) {
+        } else if (update.containsKey(Model.TEXT)) {
+            onDataReceived(window, update.getString(Model.TEXT));
+        } else if (update.containsKey(Model.CLOSE)) {
             close(window);
         }
     }
@@ -90,8 +91,8 @@ public class PTWindow extends AbstractPTObject {
     public void onClose() {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(id);
-        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
+        instruction.put(Model.TYPE_EVENT);
+        instruction.put(Model.HANDLER_CLOSE_HANDLER);
         uiService.sendDataToServer(window, instruction);
     }
 

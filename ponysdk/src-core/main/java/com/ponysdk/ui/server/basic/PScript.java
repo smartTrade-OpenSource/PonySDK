@@ -27,15 +27,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * This class allows to execute native Javascript code.
+ * This class allows to execute native Java-script code.
  */
 public abstract class PScript extends PObject {
 
@@ -85,13 +89,15 @@ public abstract class PScript extends PObject {
         get().executeScriptDeffered(windowID, js, callback, delay, unit);
     }
 
-    // //
-
     public void executeScript(final Long windowID, final String js) {
-        final Update update = new Update(ID, windowID);
-        update.put(PROPERTY.EVAL, js);
-        update.put(PROPERTY.ID, (executionID++));
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WINDOW_ID, windowID);
+        parser.parse(Model.EVAL, js);
+        parser.parse(Model.ID, (executionID++));
+        parser.endObject();
     }
 
     public void executeScript(final String js) {
@@ -102,11 +108,15 @@ public abstract class PScript extends PObject {
         final long id = executionID++;
         callbacksByID.put(id, callback);
 
-        final Update update = new Update(ID, windowID);
-        update.put(PROPERTY.EVAL, js);
-        update.put(PROPERTY.ID, id);
-        update.put(PROPERTY.CALLBACK, true);
-        Txn.get().getTxnContext().save(update);
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.WINDOW_ID, windowID);
+        parser.parse(Model.EVAL, js);
+        parser.parse(Model.ID, (executionID++));
+        parser.parse(Model.CALLBACK, true);
+        parser.endObject();
     }
 
     public void executeScript(final String js, final ExecutionCallback callback) {
@@ -144,13 +154,17 @@ public abstract class PScript extends PObject {
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.has(PROPERTY.ERROR_MSG)) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getLong(PROPERTY.ID));
-            if (callback != null) callback.onFailure(instruction.getString(PROPERTY.ERROR_MSG));
-        } else if (instruction.has(PROPERTY.RESULT)) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getLong(PROPERTY.ID));
-            if (callback != null) callback.onSuccess(instruction.getString(PROPERTY.RESULT));
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.ERROR_MSG.getKey())) {
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            if (callback != null) {
+                callback.onFailure(instruction.getString(Model.ERROR_MSG.getKey()));
+            }
+        } else if (instruction.containsKey(Model.RESULT)) {
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            if (callback != null) {
+                callback.onSuccess(instruction.getString(Model.RESULT.getKey()));
+            }
         } else {
             super.onClientData(instruction);
         }

@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Anchor;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTAnchor extends PTFocusWidget<Anchor> {
 
@@ -36,12 +37,12 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.get(PROPERTY.TEXT).isString().stringValue());
-        } else if (update.containsKey(PROPERTY.HTML)) {
-            uiObject.setHTML(update.get(PROPERTY.HTML).isString().stringValue());
-        } else if (update.containsKey(PROPERTY.HREF)) {
-            uiObject.setHref(update.get(PROPERTY.HREF).isString().stringValue());
+        if (update.containsKey(Model.TEXT.getKey())) {
+            uiObject.setText(update.get(Model.TEXT.getKey()).isString().stringValue());
+        } else if (update.containsKey(Model.HTML.getKey())) {
+            uiObject.setHTML(update.get(Model.HTML.getKey()).isString().stringValue());
+        } else if (update.containsKey(Model.HREF.getKey())) {
+            uiObject.setHref(update.get(Model.HREF.getKey()).isString().stringValue());
         } else {
             super.update(update, uiService);
         }

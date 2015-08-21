@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
@@ -46,8 +47,8 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getLong(PROPERTY.TEXTBOX_ID));
-        final long oracleID = create.getLong(PROPERTY.ORACLE);
+        final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getLong(Model.TEXTBOX_ID));
+        final long oracleID = create.getLong(Model.ORACLE);
         final SuggestOracle oracle = oracleByID.get(oracleID);
         if (oracle == null) throw new RuntimeException("Oracle #" + oracleID + " not registered");
 
@@ -56,47 +57,44 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.LIMIT)) {
-            uiObject.setLimit(update.getInt(PROPERTY.LIMIT));
+        if (update.containsKey(Model.LIMIT)) {
+            uiObject.setLimit(update.getInt(Model.LIMIT));
         } else {
             super.update(update, uiService);
         }
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
+    public void addHandler(final PTInstruction instrcution, final UIService uiService) {
+        if (instrcution.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.put(PROPERTY.TEXT, event.getValue());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.setObjectID(instrcution.getObjectID());
+                    eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.put(Model.TEXT, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
-        } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handler)) {
+        } else if (instrcution.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER)) {
             uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
-                    eventInstruction.put(PROPERTY.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
+                    eventInstruction.setObjectID(instrcution.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_STRING_SELECTION_HANDLER);
+                    eventInstruction.put(Model.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
+                    eventInstruction.put(Model.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instrcution, uiService);
         }
     }
 
@@ -114,21 +112,21 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
         @Override
         public void update(final PTInstruction update, final UIService uiService) {
-            if (update.containsKey(PROPERTY.SUGGESTION)) {
-                oracle.add(update.getString(PROPERTY.SUGGESTION));
-            } else if (update.containsKey(PROPERTY.SUGGESTIONS)) {
-                final JSONArray jsonArray = update.get(PROPERTY.SUGGESTIONS).isArray();
+            if (update.containsKey(Model.SUGGESTION)) {
+                oracle.add(update.getString(Model.SUGGESTION));
+            } else if (update.containsKey(Model.SUGGESTIONS)) {
+                final JSONArray jsonArray = update.get(Model.SUGGESTIONS).isArray();
                 for (int i = 0; i < jsonArray.size(); i++) {
                     oracle.add(jsonArray.get(i).isString().stringValue());
                 }
-            } else if (update.containsKey(PROPERTY.DEFAULT_SUGGESTIONS)) {
+            } else if (update.containsKey(Model.DEFAULT_SUGGESTIONS)) {
                 final List<String> defaultSuggestions = new ArrayList<>();
-                final JSONArray jsonArray = update.get(PROPERTY.DEFAULT_SUGGESTIONS).isArray();
+                final JSONArray jsonArray = update.get(Model.DEFAULT_SUGGESTIONS).isArray();
                 for (int i = 0; i < jsonArray.size(); i++) {
                     defaultSuggestions.add(jsonArray.get(i).isString().stringValue());
                 }
                 oracle.setDefaultSuggestionsFromText(defaultSuggestions);
-            } else if (update.containsKey(PROPERTY.CLEAR)) {
+            } else if (update.containsKey(Model.CLEAR)) {
                 oracle.clear();
             } else {
                 super.update(update, uiService);

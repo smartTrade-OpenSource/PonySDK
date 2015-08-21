@@ -28,6 +28,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTCheckBox extends PTButtonBase<CheckBox> {
 
@@ -38,12 +39,11 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER.equals(addHandler.getString(HANDLER.KEY))) {
+        if (addHandler.containsKey(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER)) {
             addValueChangeHandler(addHandler, uiService);
         } else {
             super.addHandler(addHandler, uiService);
         }
-
     }
 
     protected void addValueChangeHandler(final PTInstruction addHandler, final UIService uiService) {
@@ -53,9 +53,9 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(addHandler.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
-                instruction.put(PROPERTY.VALUE, event.getValue());
+                instruction.put(Model.TYPE_EVENT);
+                instruction.put(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
+                instruction.put(Model.VALUE, event.getValue());
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -63,8 +63,8 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.VALUE)) {
-            uiObject.setValue(update.getBoolean(PROPERTY.VALUE));
+        if (update.containsKey(Model.VALUE)) {
+            uiObject.setValue(update.getBoolean(Model.VALUE));
         } else {
             super.update(update, uiService);
         }

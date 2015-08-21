@@ -26,12 +26,14 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.stm.Txn;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PWindow extends PObject {
 
@@ -42,20 +44,33 @@ public class PWindow extends PObject {
 
     private final boolean loaded = false;
 
+    private final String url;
+
+    private final String name;
+
+    private final String features;
+
     public PWindow(final String url, final String name, final String features) {
-        super(new EntryInstruction(PROPERTY.URL, url), new EntryInstruction(PROPERTY.NAME, name), new EntryInstruction(PROPERTY.FEATURES, features));
+        this.url = url;
+        this.name = name;
+        this.features = features;
+
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.URL, url);
+        parser.parse(Model.NAME, name);
+        parser.parse(Model.FEATURES, features);
     }
 
     public void open() {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.OPEN, true);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.OPEN, true);
     }
 
     public void close() {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.CLOSE, true);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.CLOSE, true);
     }
 
     @Override
@@ -64,12 +79,10 @@ public class PWindow extends PObject {
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.has(HANDLER.KEY)) {
-            if (HANDLER.KEY_.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
-                fireClose();
-                return;
-            }
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
+            fireClose();
+            return;
         }
 
         super.onClientData(instruction);
@@ -90,36 +103,9 @@ public class PWindow extends PObject {
         }
     }
 
-    // private void process(final UIContext uiContext, final JSONObject jsoObject) throws JSONException {
-    // if (jsoObject.has(APPLICATION.INSTRUCTIONS)) {
-    // final JSONArray instructions = jsoObject.getJSONArray(APPLICATION.INSTRUCTIONS);
-    // for (int i = 0; i < instructions.length(); i++) {
-    // JSONObject jsonObject = null;
-    // try {
-    // jsonObject = instructions.getJSONObject(i);
-    // uiContext.fireClientData(jsonObject);
-    // } catch (final Throwable e) {
-    // log.error("Failed to process instruction: " + jsonObject, e);
-    // }
-    // }
-    // }
-    // }
-
     protected void postOpenerCommand(final Runnable runnable) {
         postedCommands.add(runnable);
     }
-
-    //
-    // private void executePostedCommand() {
-    // for (final Runnable r : postedCommands) {
-    // try {
-    // r.run();
-    // } catch (final Throwable e) {
-    // log.error("Failed to execute command: " + r, e);
-    // }
-    // }
-    // postedCommands.clear();
-    // }
 
     public boolean isLoaded() {
         return loaded;

@@ -25,31 +25,32 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTScript extends AbstractPTObject {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
-        final String scriptToEval = update.getString(PROPERTY.EVAL);
+        final String scriptToEval = update.getString(Model.EVAL);
         try {
             final Object result = eval(scriptToEval);
 
-            if (update.containsKey(PROPERTY.CALLBACK)) {
+            if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
-                eventInstruction.put(PROPERTY.RESULT, result == null ? "" : result.toString());
+                eventInstruction.put(Model.TYPE_EVENT);
+                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
             }
         } catch (final Throwable e) {
-            if (update.containsKey(PROPERTY.CALLBACK)) {
+            if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                eventInstruction.put(PROPERTY.ID, update.getLong(PROPERTY.ID));
-                eventInstruction.put(PROPERTY.ERROR_MSG, e.getMessage());
+                eventInstruction.put(Model.TYPE_EVENT);
+                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.ERROR_MSG, e.getMessage());
                 uiService.sendDataToServer(eventInstruction);
             }
         }

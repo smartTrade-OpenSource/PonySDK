@@ -44,34 +44,25 @@ import com.ponysdk.ui.terminal.WidgetType;
  * </pre>
  * 
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-DecoratedPopupPanel { the outside of the popup }</li>
+ * <ul class='css'> <li>.gwt-DecoratedPopupPanel { the outside of the popup }</li>
  * <li>.gwt-DecoratedPopupPanel .popupContent { the wrapper around the content }</li>
- * <li>.gwt-DecoratedPopupPanel .popupTopLeft { the top left cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupTopLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupTopCenter { the top center cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupTopCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupTopRight { the top right cell }</li>
+ * <li>.gwt-DecoratedPopupPanel .popupTopLeft { the top left cell }</li> <li>.gwt-DecoratedPopupPanel
+ * .popupTopLeftInner { the inner element of the cell }</li> <li>.gwt-DecoratedPopupPanel .popupTopCenter {
+ * the top center cell }</li> <li>.gwt-DecoratedPopupPanel .popupTopCenterInner { the inner element of the
+ * cell }</li> <li>.gwt-DecoratedPopupPanel .popupTopRight { the top right cell }</li>
  * <li>.gwt-DecoratedPopupPanel .popupTopRightInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleLeft { the middle left cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleCenter { the middle center cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleRight { the middle right cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupMiddleRightInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomLeft { the bottom left cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomCenter { the bottom center cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomRight { the bottom right cell }</li>
- * <li>.gwt-DecoratedPopupPanel .popupBottomRightInner { the inner element of the cell }</li>
- * </ul>
+ * <li>.gwt-DecoratedPopupPanel .popupMiddleLeft { the middle left cell }</li> <li>.gwt-DecoratedPopupPanel
+ * .popupMiddleLeftInner { the inner element of the cell }</li> <li>.gwt-DecoratedPopupPanel
+ * .popupMiddleCenter { the middle center cell }</li> <li>.gwt-DecoratedPopupPanel .popupMiddleCenterInner {
+ * the inner element of the cell }</li> <li>.gwt-DecoratedPopupPanel .popupMiddleRight { the middle right cell
+ * }</li> <li>.gwt-DecoratedPopupPanel .popupMiddleRightInner { the inner element of the cell }</li>
+ * <li>.gwt-DecoratedPopupPanel .popupBottomLeft { the bottom left cell }</li> <li>.gwt-DecoratedPopupPanel
+ * .popupBottomLeftInner { the inner element of the cell }</li> <li>.gwt-DecoratedPopupPanel
+ * .popupBottomCenter { the bottom center cell }</li> <li>.gwt-DecoratedPopupPanel .popupBottomCenterInner {
+ * the inner element of the cell }</li> <li>.gwt-DecoratedPopupPanel .popupBottomRight { the bottom right cell
+ * }</li> <li>.gwt-DecoratedPopupPanel .popupBottomRightInner { the inner element of the cell }</li> </ul>
  */
 public class PDecoratedPopupPanel extends PPopupPanel {
-
-    public PDecoratedPopupPanel() {
-        super();
-    }
 
     public PDecoratedPopupPanel(final boolean autoHide) {
         super(autoHide);

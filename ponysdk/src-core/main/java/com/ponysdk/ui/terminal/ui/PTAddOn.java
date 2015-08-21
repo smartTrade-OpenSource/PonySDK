@@ -34,6 +34,7 @@ import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -41,7 +42,7 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final String signature = create.getString(PROPERTY.FACTORY);
+        final String signature = create.getString(Model.FACTORY);
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
         if (factory == null) throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
@@ -49,13 +50,13 @@ public class PTAddOn extends AbstractPTObject {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONString(create.getObjectID().toString()));
 
-        if (create.containsKey(PROPERTY.NATIVE)) {
-            final JSONObject data = create.getObject(PROPERTY.NATIVE);
+        if (create.containsKey(Model.NATIVE)) {
+            final JSONObject data = create.getObject(Model.NATIVE);
             params.put("data", data);
         }
 
-        if (create.containsKey(PROPERTY.WIDGET)) {
-            final long widgetID = create.getLong(PROPERTY.WIDGET);
+        if (create.containsKey(Model.WIDGET)) {
+            final long widgetID = create.getLong(Model.WIDGET);
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
             final Element element = cast.getElement();
@@ -79,7 +80,7 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        final JSONObject data = update.getObject(PROPERTY.NATIVE);
+        final JSONObject data = update.getObject(Model.NATIVE);
         addOn.update(data.getJavaScriptObject());
     }
 }

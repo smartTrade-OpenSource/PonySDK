@@ -32,12 +32,13 @@ import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new StackLayoutPanel(Unit.values()[create.getInt(PROPERTY.UNIT)]));
+        init(create, uiService, new StackLayoutPanel(Unit.values()[create.getInt(Model.UNIT)]));
     }
 
     @Override
@@ -45,59 +46,55 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
         super.add(add, uiService);
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final String header = add.getString(PROPERTY.HTML);
-        final double headerSize = add.getDouble(PROPERTY.SIZE);
+        final String header = add.getString(Model.HTML);
+        final double headerSize = add.getDouble(Model.SIZE);
 
         uiObject.add(w, header, true, headerSize);
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handlerType = addHandler.getString(HANDLER.KEY);
-
-        if (handlerType.equals(HANDLER.KEY_.SELECTION_HANDLER)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.VALUE, event.getSelectedItem());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(Model.VALUE, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;
-        }
-
-        if (handlerType.equals(HANDLER.KEY_.BEFORE_SELECTION_HANDLER)) {
+        } else if (instruction.containsKey(Model.HANDLER_BEFORE_SELECTION_HANDLER)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BEFORE_SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.VALUE, event.getItem());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(Model.VALUE, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;
         }
 
-        super.addHandler(addHandler, uiService);
+        super.addHandler(instruction, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.OPEN)) {
-            uiObject.showWidget(asWidget(update.getLong(PROPERTY.OPEN), uiService));
-        } else if (update.containsKey(PROPERTY.ANIMATE)) {
-            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
-        } else if (update.containsKey(PROPERTY.ANIMATION_DURATION)) {
-            uiObject.setAnimationDuration(update.getInt(PROPERTY.ANIMATION_DURATION));
+        if (update.containsKey(Model.OPEN)) {
+            uiObject.showWidget(asWidget(update.getLong(Model.OPEN), uiService));
+        } else if (update.containsKey(Model.ANIMATE)) {
+            uiObject.animate(update.getInt(Model.ANIMATE));
+        } else if (update.containsKey(Model.ANIMATION_DURATION)) {
+            uiObject.setAnimationDuration(update.getInt(Model.ANIMATION_DURATION));
         } else {
             super.update(update, uiService);
         }

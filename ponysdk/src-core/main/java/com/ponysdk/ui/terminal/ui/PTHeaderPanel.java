@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
@@ -38,8 +39,8 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
         final Widget w = asWidget(add.getObjectID(), uiService);
-        if (add.containsKey(Dictionnary.PROPERTY.INDEX)) {
-            final int index = add.getInt(Dictionnary.PROPERTY.INDEX);
+        if (add.containsKey(Model.INDEX)) {
+            final int index = add.getInt(Model.INDEX);
             if (index == 0) {
                 cast().setHeaderWidget(w);
                 // Wait GWT fix :
@@ -62,7 +63,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.RESIZE)) {
+        if (update.containsKey(Model.RESIZE)) {
             uiObject.onResize();
         } else {
             super.update(update, uiService);

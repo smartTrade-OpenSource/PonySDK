@@ -23,17 +23,17 @@
 
 package com.ponysdk.ui.server.basic;
 
-import javax.json.JsonObject;
+import java.util.Collection;
 
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Create;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
-import com.ponysdk.ui.server.extension.PAddOn;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -50,29 +50,29 @@ public abstract class PObject {
 
     private long parentWindowID;
 
-    PObject(final EntryInstruction... entries) {
+    private boolean initialized = true;
+
+    PObject() {
         UIContext.get().registerObject(this);
-        final Create create = createInstruction(entries);
-        enrichCreate(create);
-        Txn.get().getTxnContext().save(create);
     }
 
-    protected void enrichCreate(final Create create) {}
+    protected void init() {
+        if (initialized) return;
 
-    protected Create createInstruction(final EntryInstruction... entries) {
-        final Create create = new Create(ID, getWidgetType());
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_CREATE);
+        parser.parse(Model.OBJECT_ID, ID);
 
-        if (this instanceof PAddOn) {
-            create.setAddOnSignature(((com.ponysdk.ui.server.extension.PAddOn) this).getSignature());
-        }
+        enrichOnInit(parser);
 
-        if (entries != null) {
-            for (final EntryInstruction entry : entries) {
-                if (entry.value == null) continue;
-                create.put(entry.key, entry.value);
-            }
-        }
-        return create;
+        parser.endObject();
+
+        initialized = true;
+    }
+
+    protected void enrichOnInit(final Parser parser) {
+
     }
 
     protected abstract WidgetType getWidgetType();
@@ -90,7 +90,7 @@ public abstract class PObject {
         saveUpdate(Model.BIND, functionName);
     }
 
-    public void sendToNative(final JSONObject data) {
+    public void sendToNative(final JsonObject data) {
 
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
@@ -104,8 +104,8 @@ public abstract class PObject {
     }
 
     public void onClientData(final JsonObject event) {
-        if (event.has(Dictionnary.PROPERTY.NATIVE)) {
-            final JsonObject jsonObject = event.getJSONObject(Dictionnary.PROPERTY.NATIVE);
+        if (event.containsKey(Model.NATIVE.getKey())) {
+            final JsonObject jsonObject = event.getJsonObject(Model.NATIVE.getKey());
             if (nativeHandlers != null) {
                 for (final PNativeHandler handler : nativeHandlers) {
                     handler.onNativeEvent(new PNativeEvent(this, jsonObject));
@@ -226,6 +226,15 @@ public abstract class PObject {
         UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
+    protected void saveUpdate(final Model model, final JsonObjectBuilder builder) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, builder);
+        parser.endObject();
+    }
+
     protected void saveUpdate(final Model model, final JsonObject json) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -236,6 +245,15 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final Model model, final boolean value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_UPDATE);
+        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(model, value);
+        parser.endObject();
+    }
+
+    protected void saveUpdate(final Model model, final Collection<String> value) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);

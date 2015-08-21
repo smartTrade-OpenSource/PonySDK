@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTFileUpload extends PTWidget<FormPanel> {
 
@@ -60,50 +61,48 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
             @Override
             public void onSubmitComplete(final SubmitCompleteEvent event) {
-                final PTInstruction eventInstruction = new PTInstruction();
-                eventInstruction.setObjectID(create.getObjectID());
-                eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SUBMIT_COMPLETE_HANDLER);
-                uiService.sendDataToServer(wrappedFormPanel, eventInstruction);
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(create.getObjectID());
+                instruction.put(Model.TYPE_EVENT);
+                instruction.put(Model.HANDLER_SUBMIT_COMPLETE_HANDLER);
+                uiService.sendDataToServer(wrappedFormPanel, instruction);
             }
         });
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.CHANGE_HANDLER.equals(handler)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_CHANGE_HANDLER)) {
             fileUpload.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
-                    eventInstruction.put(PROPERTY.FILE_NAME, fileUpload.getFilename());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
+                    eventInstruction.put(Model.FILE_NAME, fileUpload.getFilename());
                     uiService.sendDataToServer(fileUpload, eventInstruction);
                 }
             });
-        } else if (HANDLER.KEY_.STREAM_REQUEST_HANDLER.equals(handler)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+        } else if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID + "=" + instruction.getLong(Model.STREAM_REQUEST_ID);
             getFrame().setUrl(action);
-        } else if (HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER.equals(handler)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getLong(PROPERTY.STREAM_REQUEST_ID);
+        } else if (instruction.containsKey(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER)) {
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID + "=" + instruction.getLong(Model.STREAM_REQUEST_ID);
             wrappedFormPanel.setAction(action);
             wrappedFormPanel.submit();
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.NAME)) {
-            fileUpload.setName(update.getString(PROPERTY.NAME));
-        } else if (update.containsKey(PROPERTY.ENABLED)) {
-            fileUpload.setEnabled(update.getBoolean(PROPERTY.ENABLED));
+        if (update.containsKey(Model.NAME)) {
+            fileUpload.setName(update.getString(Model.NAME));
+        } else if (update.containsKey(Model.ENABLED)) {
+            fileUpload.setEnabled(update.getBoolean(Model.ENABLED));
         } else {
             super.update(update, uiService);
         }
@@ -113,7 +112,6 @@ public class PTFileUpload extends PTWidget<FormPanel> {
         /* Frame for stream resource handling */
         if (frame == null) {
             frame = new Frame();
-
             frame.setWidth("0px");
             frame.setHeight("0px");
             frame.getElement().getStyle().setProperty("visibility", "hidden");

@@ -25,18 +25,19 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTElement extends PTComplexPanel<MyWidget> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new MyWidget(create.getString(PROPERTY.TAG)));
+        init(create, uiService, new MyWidget(create.getString(Model.TAG)));
     }
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        if (add.containsKey(PROPERTY.INDEX)) {
-            final int beforeIndex = add.getInt(PROPERTY.INDEX);
+        if (add.containsKey(Model.INDEX)) {
+            final int beforeIndex = add.getInt(Model.INDEX);
             uiObject.insert(asWidget(add.getObjectID(), uiService), uiObject.getElement(), beforeIndex, true);
         } else {
             super.add(add, uiService);
@@ -45,12 +46,11 @@ public class PTElement extends PTComplexPanel<MyWidget> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.INNER_HTML)) {
-            uiObject.getElement().setInnerHTML(update.getString(PROPERTY.INNER_HTML));
-        } else if (update.containsKey(PROPERTY.INNER_TEXT)) {
-            uiObject.getElement().setInnerText(update.getString(PROPERTY.INNER_TEXT));
-        } else if (update.containsKey(PROPERTY.CLEAR_INNER_TEXT)) {// ? if null setInnerText of null do
-                                                                   // nothing ? must be removed ?
+        if (update.containsKey(Model.INNER_HTML)) {
+            uiObject.getElement().setInnerHTML(update.getString(Model.INNER_HTML));
+        } else if (update.containsKey(Model.INNER_TEXT)) {
+            uiObject.getElement().setInnerText(update.getString(Model.INNER_TEXT));
+        } else if (update.containsKey(Model.CLEAR_INNER_TEXT)) {// ? if null setInnerText of null do
             uiObject.getElement().setInnerText(null);
         } else {
             super.update(update, uiService);

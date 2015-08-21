@@ -28,17 +28,18 @@ import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTImage extends PTWidget<Image> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        if (create.containsKey(PROPERTY.IMAGE_URL)) {
-            final String url = create.getString(PROPERTY.IMAGE_URL);
-            final int left = create.getInt(PROPERTY.IMAGE_LEFT);
-            final int top = create.getInt(PROPERTY.IMAGE_TOP);
-            final int width = create.getInt(PROPERTY.WIDGET_WIDTH);
-            final int height = create.getInt(PROPERTY.WIDGET_HEIGHT);
+        if (create.containsKey(Model.IMAGE_URL)) {
+            final String url = create.getString(Model.IMAGE_URL);
+            final int left = create.getInt(Model.IMAGE_LEFT);
+            final int top = create.getInt(Model.IMAGE_TOP);
+            final int width = create.getInt(Model.WIDGET_WIDTH);
+            final int height = create.getInt(Model.WIDGET_HEIGHT);
 
             init(create, uiService, new Image(url, left, top, width, height));
         } else {
@@ -48,18 +49,17 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.containsKey(HANDLER.KEY_.EMBEDED_STREAM_REQUEST_HANDLER)) {
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + PROPERTY.STREAM_REQUEST_ID + "=" + addHandler.getString(PROPERTY.STREAM_REQUEST_ID));
+        if (addHandler.containsKey(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER)) {
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID + "=" + addHandler.getString(Model.STREAM_REQUEST_ID));
         } else {
             super.addHandler(addHandler, uiService);
         }
-
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.IMAGE_URL)) {
-            cast().setUrl(update.getString(PROPERTY.IMAGE_URL));
+        if (update.containsKey(Model.IMAGE_URL)) {
+            cast().setUrl(update.getString(Model.IMAGE_URL));
         } else {
             super.update(update, uiService);
         }

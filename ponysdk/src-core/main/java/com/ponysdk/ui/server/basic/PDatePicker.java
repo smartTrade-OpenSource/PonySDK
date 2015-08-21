@@ -32,7 +32,7 @@ import java.util.TimeZone;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PShowRangeEvent;

@@ -36,10 +36,10 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         boolean modal = false;
 
         if (create.containsKey(Model.POPUP_AUTO_HIDE.getKey())) {
-            autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
+            autoHide = create.getBoolean(Model.POPUP_AUTO_HIDE);
         }
-        if (create.containsKey(PROPERTY.POPUP_MODAL)) {
-            modal = create.getBoolean(PROPERTY.POPUP_MODAL);
+        if (create.containsKey(Model.POPUP_MODAL)) {
+            modal = create.getBoolean(Model.POPUP_MODAL);
         }
 
         init(create, uiService, new DialogBox(autoHide, modal));
@@ -50,8 +50,8 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
     public void update(final PTInstruction update, final UIService uiService) {
         final DialogBox dialogBox = cast();
 
-        if (update.containsKey(PROPERTY.POPUP_CAPTION)) {
-            dialogBox.setHTML(update.getString(PROPERTY.POPUP_CAPTION));
+        if (update.containsKey(Model.POPUP_CAPTION)) {
+            dialogBox.setHTML(update.getString(Model.POPUP_CAPTION));
         } else {
             super.update(update, uiService);
         }

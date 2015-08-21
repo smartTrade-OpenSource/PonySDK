@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -90,12 +92,11 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     }
 
     @Override
-    public void onClientData(final JSONObject e) throws JSONException {
-        if (e.has(HANDLER.KEY) && e.getString(HANDLER.KEY).equals(HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER)) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, e.getString(PROPERTY.HTML));
-            fireOnValueChange(event);
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
+            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.getKey())));
         } else {
-            super.onClientData(e);
+            super.onClientData(instruction);
         }
     }
 

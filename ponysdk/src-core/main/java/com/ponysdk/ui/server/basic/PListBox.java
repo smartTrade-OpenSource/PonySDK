@@ -35,7 +35,7 @@ import java.util.TreeSet;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
@@ -87,8 +87,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.getString(HANDLER.KEY).contains(HANDLER.KEY_.CHANGE_HANDLER)) {
-            final String data = jsonObject.getString(PROPERTY.VALUE);
+        if (jsonObject.containsKey(Model.HANDLER_CHANGE_HANDLER.getKey())) {
+            final String data = jsonObject.getString(Model.VALUE.getKey());
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<>();
 

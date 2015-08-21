@@ -26,9 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
@@ -110,9 +109,15 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public PMenuBar(final boolean vertical) {
-        super(new EntryInstruction(Model.MENU_BAR_IS_VERTICAL, vertical));
         this.vertical = vertical;
+        init();
+
         addStyleName(PonySDKTheme.MENUBAR); // TODO nciaravola must be moved terminal side
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override

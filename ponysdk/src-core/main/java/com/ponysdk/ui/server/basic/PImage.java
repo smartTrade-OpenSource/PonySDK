@@ -31,9 +31,9 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -70,50 +70,59 @@ public class PImage extends PFocusWidget {
 
     private int top;
 
+    private int imageWidth;
+
+    private int imageHeight;
+
     public PImage() {
-        super();
+        init();
     }
 
     public PImage(final String url, final int left, final int top, final int width, final int height) {
-        super(new EntryInstruction(Model.WIDGET_HEIGHT, height), new EntryInstruction(Model.WIDGET_WIDTH, width), new EntryInstruction(Model.IMAGE_URL, url), new EntryInstruction(Model.IMAGE_LEFT, left),
-                new EntryInstruction(Model.IMAGE_TOP, top));
+        this.url = url;
+        this.left = left;
+        this.top = top;
+
+        this.imageWidth = width; // TODO nicolas reuse widget width
+        this.imageHeight = height;// TODO nicolas reuse widget height;
+
+        init();
     }
 
     public PImage(final String url) {
+        init();
         setUrl(url);
     }
 
     public PImage(final ClassPathURL classpathURL) {
-
-        InputStream in = null;
-        ByteArrayOutputStream out = null;
+        init();
 
         String imageToBase64 = null;
 
-        try {
-            in = classpathURL.getUrl().openStream();
+        try (InputStream in = classpathURL.getUrl().openStream()) {
             final byte[] buffer = new byte[1024];
-            out = new ByteArrayOutputStream();
-            while (in.read(buffer) != -1) {
-                out.write(buffer);
+            try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                while (in.read(buffer) != -1) {
+                    out.write(buffer);
+                }
+                imageToBase64 = new String(out.toByteArray(), "UTF-8");
             }
-
-            imageToBase64 = new String(out.toByteArray(), "UTF-8");
-
         } catch (final IOException e) {
             log.error("Cannot load resource from " + classpathURL, e);
-        } finally {
-            try {
-                if (in != null) in.close();
-            } catch (final Exception e) {}
-            try {
-                if (out != null) out.close();
-            } catch (final Exception e) {}
         }
 
         final String extension = classpathURL.getUrl().getFile().substring(classpathURL.getUrl().getFile().lastIndexOf('.') + 1);
 
         saveUpdate(Model.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.IMAGE_URL, url);
+        parser.parse(Model.IMAGE_TOP, top);
+        parser.parse(Model.IMAGE_LEFT, left);
+        parser.parse(Model.WIDGET_HEIGHT, imageHeight);
+        parser.parse(Model.WIDGET_WIDTH, imageWidth);
     }
 
     @Override

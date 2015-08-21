@@ -5,6 +5,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class ParentWindowRequest extends RequestBuilder {
 
@@ -20,7 +21,7 @@ public class ParentWindowRequest extends RequestBuilder {
     @Override
     public void send(final String s) {
         final JSONObject jsoObject = new JSONObject();
-        jsoObject.put(PROPERTY.DATA, new JSONString(s));
+        jsoObject.put(Model.DATA.getKey(), new JSONString(s));
         sendToParent(windowID, jsoObject.getJavaScriptObject());
     }
 

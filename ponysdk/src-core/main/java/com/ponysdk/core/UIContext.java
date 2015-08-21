@@ -44,7 +44,6 @@ import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.servlet.Session;

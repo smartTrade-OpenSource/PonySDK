@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
 public class PTTextBox extends PTTextBoxBase<TextBox> {
@@ -39,18 +40,18 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.VALUE)) {
-            uiObject.setValue(update.getString(PROPERTY.VALUE));
-        } else if (update.containsKey(PROPERTY.VISIBLE_LENGTH)) {
-            uiObject.setVisibleLength(update.getInt(PROPERTY.VISIBLE_LENGTH));
-        } else if (update.containsKey(PROPERTY.MAX_LENGTH)) {
-            uiObject.setMaxLength(update.getInt(PROPERTY.MAX_LENGTH));
-        } else if (update.containsKey(PROPERTY.MASK)) {
-            final boolean showMask = update.getBoolean(PROPERTY.VISIBILITY);
-            final String mask = update.getString(PROPERTY.MASK);
-            final String replace = update.getString(PROPERTY.REPLACEMENT_STRING);
+        if (update.containsKey(Model.TEXT)) {
+            uiObject.setText(update.getString(Model.TEXT));
+        } else if (update.containsKey(Model.VALUE)) {
+            uiObject.setValue(update.getString(Model.VALUE));
+        } else if (update.containsKey(Model.VISIBLE_LENGTH)) {
+            uiObject.setVisibleLength(update.getInt(Model.VISIBLE_LENGTH));
+        } else if (update.containsKey(Model.MAX_LENGTH)) {
+            uiObject.setMaxLength(update.getInt(Model.MAX_LENGTH));
+        } else if (update.containsKey(Model.MASK)) {
+            final boolean showMask = update.getBoolean(Model.VISIBILITY);
+            final String mask = update.getString(Model.MASK);
+            final String replace = update.getString(Model.REPLACEMENT_STRING);
             if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
         } else {

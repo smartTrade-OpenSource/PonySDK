@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;

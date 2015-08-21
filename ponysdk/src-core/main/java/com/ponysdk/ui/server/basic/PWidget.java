@@ -26,7 +26,6 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -36,14 +35,13 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.Event;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
@@ -97,10 +95,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String styleName;
     private String stylePrimaryName;
     private String debugID;
-
-    public PWidget(final EntryInstruction... entries) {
-        super(entries);
-    }
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
@@ -351,63 +345,57 @@ public abstract class PWidget extends PObject implements IsPWidget {
         setHeight(Size.HUNDRED_PERCENT);
     }
 
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-
-        if (handler instanceof JsonObject) {
-            saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE, handler);
-        } else {
-            saveRemoveHandler(Model.HANDLER_DOM_HANDLER);
-        }
-
-        return handlerRegistration;
-    }
+    // public <H extends EventHandler> HandlerRegistration removeDomHandler(final JsonObject handler, final
+    // PDomEvent.Type<H> type) {
+    // final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
+    //
+    // saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE, handler);
+    //
+    // return handlerRegistration;
+    // }
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-
-        if (handler instanceof JsonObject) {
-            saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE, handler);
-        } else {
-            saveRemoveHandler(Model.HANDLER_DOM_HANDLER);
-        }
-
+        saveRemoveHandler(Model.HANDLER_DOM_HANDLER);
         return handlerRegistration;
     }
 
-    @SuppressWarnings("unchecked")
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
-            final AddHandler addHandler = new AddHandler(getID(), HANDLER.KEY_.DOM_HANDLER);
-            addHandler.put(Model.DOM_HANDLER_CODE, Model.TYPE_getDomHandlerType().ordinal());
-            if (handler instanceof JsonObject) {
-                try {
-                    final JsonObject jso = (JsonObject) handler;
-                    for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
-                        final String key = iterator.next();
-                        addHandler.put(key, jso.get(key));
-                    }
-                } catch (final JSONException e) {
-                    log.error("Failed to copy value", e);
-                }
-            }
-            Txn.get().getTxnContext().save(addHandler);
+
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_ADD_HANDLER);
+            parser.parse(Model.HANDLER_DOM_HANDLER);
+            parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.endObject();
+
+            // TODO nicolas check ???????
+            // if (handler instanceof JsonObject) {
+            // final JsonObject jso = (JsonObject) handler;
+            // for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
+            // final String key = iterator.next();
+            // addHandler.put(key, jso.get(key));
+            // }
+            // }
         }
         return handlerRegistration;
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) {
-        if (instruction.has(HANDLER.KEY) && instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.DOM_HANDLER)) {
-            final DomHandlerType domHandler = DomHandlerModel.TYPE_values()[instruction.getInt(Model.DOM_HANDLER_TYPE)];
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_KEY_DOM_HANDLER)) {
+
+            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(Model.DOM_HANDLER_TYPE.getKey())];
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE)));
+                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE.getKey())));
                     break;
                 case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE)));
+                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE.getKey())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -450,8 +438,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
-                    if (instruction.has(Model.DRAG_SRC)) {
-                        final PWidget source = UIContext.get().getObject(instruction.getLong(Model.DRAG_SRC));
+                    if (instruction.containsKey(Model.DRAG_SRC.getKey())) {
+                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).longValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -477,16 +465,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return ensureDomHandler().getHandlers(type, null);
     }
 
-    public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) throws JSONException {
-        event.setX(instruction.getInt(Model.X));
-        event.setY(instruction.getInt(Model.Y));
-        event.setNativeButton(instruction.getInt(Model.NATIVE_BUTTON));
-        event.setClientX(instruction.getInt(Model.CLIENT_X));
-        event.setClientY(instruction.getInt(Model.CLIENT_Y));
-        event.setSourceAbsoluteLeft((int) instruction.getDouble(Model.SOURCE_ABSOLUTE_LEFT));
-        event.setSourceAbsoluteTop((int) instruction.getDouble(Model.SOURCE_ABSOLUTE_TOP));
-        event.setSourceOffsetHeight((int) instruction.getDouble(Model.SOURCE_OFFSET_HEIGHT));
-        event.setSourceOffsetWidth((int) instruction.getDouble(Model.SOURCE_OFFSET_WIDTH));
+    public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
+        event.setX(instruction.getInt(Model.X.getKey()));
+        event.setY(instruction.getInt(Model.Y.getKey()));
+        event.setNativeButton(instruction.getInt(Model.NATIVE_BUTTON.getKey()));
+        event.setClientX(instruction.getInt(Model.CLIENT_X.getKey()));
+        event.setClientY(instruction.getInt(Model.CLIENT_Y.getKey()));
+        event.setSourceAbsoluteLeft((int) instruction.getJsonNumber(Model.SOURCE_ABSOLUTE_LEFT.getKey()).doubleValue());
+        event.setSourceAbsoluteTop((int) instruction.getJsonNumber(Model.SOURCE_ABSOLUTE_TOP.getKey()).doubleValue());
+        event.setSourceOffsetHeight((int) instruction.getJsonNumber(Model.SOURCE_OFFSET_HEIGHT.getKey()).doubleValue());
+        event.setSourceOffsetWidth((int) instruction.getJsonNumber(Model.SOURCE_OFFSET_WIDTH.getKey()).doubleValue());
 
         fireEvent(event);
     }

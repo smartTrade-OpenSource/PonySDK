@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.
@@ -37,9 +37,7 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     public void setHorizontalScrollPosition(final int position) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.HORIZONTAL_SCROLL_POSITION, position);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.HORIZONTAL_SCROLL_POSITION, position);
     }
 
     public void scrollToBottom() {
@@ -59,8 +57,6 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     private void scrollTo(final int type) {
-        final Update update = new Update(ID);
-        update.put(PROPERTY.SCROLL_TO, type);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.SCROLL_TO, type);
     }
 }

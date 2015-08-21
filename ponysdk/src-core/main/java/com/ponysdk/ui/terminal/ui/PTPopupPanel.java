@@ -40,6 +40,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
@@ -51,7 +52,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final boolean autoHide = create.getBoolean(PROPERTY.POPUP_AUTO_HIDE);
+        final boolean autoHide = create.getBoolean(Model.POPUP_AUTO_HIDE);
 
         init(create, uiService, createPopupPanel(autoHide));
 
@@ -79,18 +80,16 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                instruction.put(HANDLER.KEY, Dictionnary.HANDLER.KEY_.CLOSE_HANDLER);
+                instruction.put(Model.TYPE_EVENT);
+                instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }
         });
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.POPUP_POSITION_CALLBACK.equals(handler)) {
+    public void addHandler(final PTInstruction instrcution, final UIService uiService) {
+        if (instrcution.containsKey(Model.HANDLER_POPUP_POSITION_CALLBACK)) {
             final PopupPanel popup = cast();
             popup.setVisible(true);
             popup.show();
@@ -99,13 +98,13 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 @Override
                 public void execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.POPUP_POSITION_CALLBACK);
-                    eventInstruction.put(PROPERTY.OFFSETWIDTH, popup.getOffsetWidth());
-                    eventInstruction.put(PROPERTY.OFFSETHEIGHT, popup.getOffsetHeight());
-                    eventInstruction.put(PROPERTY.CLIENT_WIDTH, Window.getClientWidth());
-                    eventInstruction.put(PROPERTY.CLIENT_HEIGHT, Window.getClientHeight());
+                    eventInstruction.setObjectID(instrcution.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_POPUP_POSITION_CALLBACK);
+                    eventInstruction.put(Model.OFFSETWIDTH, popup.getOffsetWidth());
+                    eventInstruction.put(Model.OFFSETHEIGHT, popup.getOffsetHeight());
+                    eventInstruction.put(Model.CLIENT_WIDTH, Window.getClientWidth());
+                    eventInstruction.put(Model.CLIENT_HEIGHT, Window.getClientHeight());
                     uiService.sendDataToServer(cast(), eventInstruction);
                 }
             });
@@ -113,34 +112,34 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             return;
         }
 
-        super.addHandler(addHandler, uiService);
+        super.addHandler(instrcution, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         final PopupPanel popup = cast();
 
-        if (update.containsKey(PROPERTY.ANIMATION)) {
-            popup.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
-        } else if (update.containsKey(PROPERTY.POPUP_CENTER)) {
+        if (update.containsKey(Model.ANIMATION)) {
+            popup.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
+        } else if (update.containsKey(Model.POPUP_CENTER)) {
             popup.show();
             popup.center();
-        } else if (update.containsKey(PROPERTY.POPUP_SHOW)) {
+        } else if (update.containsKey(Model.POPUP_SHOW)) {
             popup.show();
-        } else if (update.containsKey(PROPERTY.POPUP_POSITION_AND_SHOW)) {
+        } else if (update.containsKey(Model.POPUP_POSITION_AND_SHOW)) {
             popup.setVisible(true);
-        } else if (update.containsKey(PROPERTY.POPUP_HIDE)) {
+        } else if (update.containsKey(Model.POPUP_HIDE)) {
             popup.hide();
-        } else if (update.containsKey(PROPERTY.POPUP_GLASS_ENABLED)) {
-            popup.setGlassEnabled(update.getBoolean(PROPERTY.POPUP_GLASS_ENABLED));
-        } else if (update.containsKey(PROPERTY.POPUP_MODAL)) {
-            popup.setModal(update.getBoolean(PROPERTY.POPUP_MODAL));
-        } else if (update.containsKey(PROPERTY.POPUP_POSITION)) {
-            final int left = update.getInt(PROPERTY.POPUP_POSITION_LEFT);
-            final int top = update.getInt(PROPERTY.POPUP_POSITION_TOP);
+        } else if (update.containsKey(Model.POPUP_GLASS_ENABLED)) {
+            popup.setGlassEnabled(update.getBoolean(Model.POPUP_GLASS_ENABLED));
+        } else if (update.containsKey(Model.POPUP_MODAL)) {
+            popup.setModal(update.getBoolean(Model.POPUP_MODAL));
+        } else if (update.containsKey(Model.POPUP_POSITION)) {
+            final int left = update.getInt(Model.POPUP_POSITION_LEFT);
+            final int top = update.getInt(Model.POPUP_POSITION_TOP);
             popup.setPopupPosition(left, top);
-        } else if (update.containsKey(PROPERTY.POPUP_DRAGGABLE)) {
-            final boolean draggable = update.containsKey(PROPERTY.POPUP_DRAGGABLE);
+        } else if (update.containsKey(Model.POPUP_DRAGGABLE)) {
+            final boolean draggable = update.containsKey(Model.POPUP_DRAGGABLE);
             if (draggable) {
                 popup.addDomHandler(this, MouseDownEvent.getType());
                 popup.addDomHandler(this, MouseUpEvent.getType());

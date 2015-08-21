@@ -29,26 +29,27 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new DockLayoutPanel(Unit.values()[create.getInt(PROPERTY.UNIT)]));
+        init(create, uiService, new DockLayoutPanel(Unit.values()[create.getInt(Model.UNIT)]));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.WIDGET_SIZE)) {
-            final double newSize = update.getDouble(PROPERTY.WIDGET_SIZE);
-            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+        if (update.containsKey(Model.WIDGET_SIZE)) {
+            final double newSize = update.getDouble(Model.WIDGET_SIZE);
+            final Widget w = asWidget(update.getLong(Model.WIDGET), uiService);
             uiObject.setWidgetSize(w, newSize);
-        } else if (update.containsKey(PROPERTY.WIDGET_HIDDEN)) {
-            final boolean hidden = update.getBoolean(PROPERTY.WIDGET_HIDDEN);
-            final Widget w = asWidget(update.getLong(PROPERTY.WIDGET), uiService);
+        } else if (update.containsKey(Model.WIDGET_HIDDEN)) {
+            final boolean hidden = update.getBoolean(Model.WIDGET_HIDDEN);
+            final Widget w = asWidget(update.getLong(Model.WIDGET), uiService);
             uiObject.setWidgetHidden(w, hidden);
-        } else if (update.containsKey(PROPERTY.ANIMATE)) {
-            uiObject.animate(update.getInt(PROPERTY.ANIMATE));
+        } else if (update.containsKey(Model.ANIMATE)) {
+            uiObject.animate(update.getInt(Model.ANIMATE));
         } else {
             super.update(update, uiService);
         }
@@ -58,8 +59,8 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     public void add(final PTInstruction add, final UIService uiService) {
 
         final Widget w = asWidget(add.getObjectID(), uiService);
-        final Direction direction = Direction.values()[add.getInt(PROPERTY.DIRECTION)];
-        final double size = add.getDouble(PROPERTY.SIZE);
+        final Direction direction = Direction.values()[add.getInt(Model.DIRECTION)];
+        final double size = add.getDouble(Model.SIZE);
 
         switch (direction) {
             case CENTER: {

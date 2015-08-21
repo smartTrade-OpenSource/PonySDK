@@ -31,6 +31,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTRadioButton extends PTCheckBox {
 
@@ -44,9 +45,9 @@ public class PTRadioButton extends PTCheckBox {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
-        if (update.containsKey(PROPERTY.NAME)) {
-            cast().setName(update.getString(PROPERTY.NAME));
-        } else if (cast().getName() != null && update.containsKey(PROPERTY.VALUE) && update.getBoolean(PROPERTY.VALUE)) {
+        if (update.containsKey(Model.NAME)) {
+            cast().setName(update.getString(Model.NAME));
+        } else if (cast().getName() != null && update.containsKey(Model.VALUE) && update.getBoolean(Model.VALUE)) {
             cast().setValue(true);
             lastSelectedRadioButtonByGroup.put(cast().getName(), this);
         } else {
@@ -76,12 +77,12 @@ public class PTRadioButton extends PTCheckBox {
     }
 
     protected void fireInstruction(final long objectID, final UIService uiService, final boolean value) {
-        final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(objectID);
-        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.BOOLEAN_VALUE_CHANGE_HANDLER);
-        eventInstruction.put(PROPERTY.VALUE, value);
-        uiService.sendDataToServer(cast(), eventInstruction);
+        final PTInstruction instruction = new PTInstruction();
+        instruction.setObjectID(objectID);
+        instruction.put(Model.TYPE_EVENT);
+        instruction.put(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
+        instruction.put(Model.VALUE, value);
+        uiService.sendDataToServer(cast(), instruction);
     }
 
     @Override

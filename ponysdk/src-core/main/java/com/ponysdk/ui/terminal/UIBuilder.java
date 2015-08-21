@@ -69,6 +69,7 @@ import com.ponysdk.ui.terminal.extension.AddonFactory;
 import com.ponysdk.ui.terminal.extension.AddonList;
 import com.ponysdk.ui.terminal.extension.PonyAddonList;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
@@ -191,7 +192,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void update(final JSONObject data) {
 
-        final long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
+        final long receivedSeqNum = (long) data.get(Model.APPLICATION_SEQ_NUM.getKey()).isNumber().doubleValue();
         if ((lastReceived + 1) != receivedSeqNum) {
             incomingMessageQueue.put(receivedSeqNum, data);
             log.log(Level.INFO, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
@@ -200,7 +201,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         lastReceived = receivedSeqNum;
 
         final List<PTInstruction> instructions = new ArrayList<>();
-        final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
+        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
         for (int i = 0; i < jsonArray.size(); i++) {
             instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
         }
@@ -209,7 +210,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             long expected = receivedSeqNum + 1;
             while (incomingMessageQueue.containsKey(expected)) {
                 final JSONObject jsonObject = incomingMessageQueue.remove(expected);
-                final JSONArray jsonArray2 = jsonObject.get(APPLICATION.INSTRUCTIONS).isArray();
+                final JSONArray jsonArray2 = jsonObject.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
                 for (int i = 0; i < jsonArray2.size(); i++) {
                     instructions.add(new PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject()));
                 }
@@ -255,10 +256,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void processInstruction(final PTInstruction instruction) throws Exception {
-
-        final String type = instruction.getString(TYPE.KEY);
-
-        if (TYPE.KEY_.CLOSE.equals(type)) {
+        if (instruction.containsKey(Model.TYPE_CLOSE)) {
             pendingClose = true;
             sendDataToServer(instruction);
 
@@ -271,7 +269,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             };
 
             Scheduler.get().scheduleDeferred(command);
-        } else if (TYPE.KEY_.CREATE.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_CREATE)) {
             PTObject ptObject;
             final boolean isAddon = instruction.containsKey("addOnSignature");
             if (isAddon) {
@@ -289,7 +287,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
             objectByID.put(instruction.getObjectID(), ptObject);
 
-        } else if (TYPE.KEY_.ADD.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_ADD)) {
             final PTObject uiObject = objectByID.get(instruction.getParentID());
             if (uiObject == null) {
                 log.info("Cannot add object to an garbaged parent object #" + instruction.getObjectID());
@@ -297,19 +295,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             }
             uiObject.add(instruction, this);
 
-        } else if (TYPE.KEY_.ADD_HANDLER.equals(type)) {
-            final String handler = instruction.getString(HANDLER.KEY);
-            if (HANDLER.KEY_.STREAM_REQUEST_HANDLER.equals(handler)) {
+        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) {
+            if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
                 new PTStreamResource().addHandler(instruction, this);
             } else {
                 final PTObject uiObject = objectByID.get(instruction.getObjectID());
                 uiObject.addHandler(instruction, this);
             }
-        } else if (TYPE.KEY_.REMOVE_HANDLER.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) {
             final PTObject uiObject = objectByID.get(instruction.getObjectID());
             uiObject.removeHandler(instruction, this);
-
-        } else if (TYPE.KEY_.REMOVE.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_REMOVE)) {
             PTObject ptObject;
             if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
             else {
@@ -320,33 +316,35 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 return;
             }
             ptObject.remove(instruction, this);
-        } else if (TYPE.KEY_.GC.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_GC)) {
             final PTObject unRegisterObject = unRegisterObject(instruction.getObjectID());
             if (unRegisterObject == null) {
                 log.info("Cannot GC an garbaged object #" + instruction.getObjectID());
                 return;
             }
             unRegisterObject.gc(this);
-        } else if (TYPE.KEY_.UPDATE.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_UPDATE)) {
             final PTObject ptObject = objectByID.get(instruction.getObjectID());
             if (ptObject == null) {
                 log.info("Cannot update an garbaged object #" + instruction.getObjectID());
                 return;
             }
             ptObject.update(instruction, this);
-        } else if (TYPE.KEY_.HISTORY.equals(type)) {
+        } else if (instruction.containsKey(Model.TYPE_HISTORY)) {
             final String oldToken = History.getToken();
 
             String token = null;
 
-            if (instruction.containsKey(HISTORY.TOKEN)) {
-                token = instruction.getString(HISTORY.TOKEN);
+            if (instruction.containsKey(Model.HISTORY_TOKEN)) {
+                token = instruction.getString(Model.HISTORY_TOKEN);
             }
 
             if (oldToken != null && oldToken.equals(token)) {
-                if (instruction.getBoolean(HISTORY.FIRE_EVENTS)) History.fireCurrentHistoryState();
+                if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) {
+                    History.fireCurrentHistoryState();
+                }
             } else {
-                History.newItem(token, instruction.getBoolean(HISTORY.FIRE_EVENTS));
+                History.newItem(token, instruction.getBoolean(Model.HISTORY_FIRE_EVENTS));
             }
         }
 
@@ -411,7 +409,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private void sendDataToServer(final List<PTInstruction> instructions) {
 
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(APPLICATION.VIEW_ID, sessionID);
+        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
 
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < instructions.size(); i++) {
@@ -427,9 +425,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             stackedErrors.clear();
         }
 
-        requestData.put(APPLICATION.INSTRUCTIONS, jsonArray);
-        requestData.put(APPLICATION.ERRORS, errors);
-        requestData.put(APPLICATION.SEQ_NUM, nextSent++);
+        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
+        requestData.put(Model.APPLICATION_ERRORS, errors);
+        requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
 
         requestBuilder.send(requestData.toString());
     }
@@ -503,8 +501,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(TYPE.KEY, TYPE.KEY_.HISTORY);
-            eventInstruction.put(HISTORY.TOKEN, event.getValue());
+            eventInstruction.put(Model.TYPE_HISTORY);
+            eventInstruction.put(Model.HISTORY_TOKEN, event.getValue());
             stackInstrution(eventInstruction);
         }
     }

@@ -36,7 +36,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.instruction.EntryInstruction;
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -73,12 +73,16 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
-        super(new EntryInstruction(Model.PICKER, picker.getID()));
         this.datePicker = picker;
+        init();
 
         setDateFormat(dateFormat);
-
         saveAddHandler(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.PICKER, datePicker.getID());
     }
 
     @Override

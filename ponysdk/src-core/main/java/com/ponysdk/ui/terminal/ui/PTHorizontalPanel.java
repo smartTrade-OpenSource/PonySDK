@@ -30,6 +30,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
 
@@ -40,17 +41,17 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        uiObject.insert(asWidget(add.getObjectID(), uiService), add.getInt(PROPERTY.INDEX));
+        uiObject.insert(asWidget(add.getObjectID(), uiService), add.getInt(Model.INDEX));
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.BORDER_WIDTH)) {
-            uiObject.setBorderWidth(update.getInt(PROPERTY.BORDER_WIDTH));
-        } else if (update.containsKey(PROPERTY.SPACING)) {
-            uiObject.setSpacing(update.getInt(PROPERTY.SPACING));
-        } else if (update.containsKey(PROPERTY.HORIZONTAL_ALIGNMENT)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(PROPERTY.HORIZONTAL_ALIGNMENT)];
+        if (update.containsKey(Model.BORDER_WIDTH)) {
+            uiObject.setBorderWidth(update.getInt(Model.BORDER_WIDTH));
+        } else if (update.containsKey(Model.SPACING)) {
+            uiObject.setSpacing(update.getInt(Model.SPACING));
+        } else if (update.containsKey(Model.HORIZONTAL_ALIGNMENT)) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(Model.HORIZONTAL_ALIGNMENT)];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -64,8 +65,8 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
                 default:
                     break;
             }
-        } else if (update.containsKey(PROPERTY.VERTICAL_ALIGNMENT)) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(PROPERTY.VERTICAL_ALIGNMENT)];
+        } else if (update.containsKey(Model.VERTICAL_ALIGNMENT)) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(Model.VERTICAL_ALIGNMENT)];
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);

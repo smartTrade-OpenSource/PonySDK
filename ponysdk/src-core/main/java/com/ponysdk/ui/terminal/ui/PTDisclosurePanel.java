@@ -30,14 +30,15 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final Long openImg = create.getLong(PROPERTY.DISCLOSURE_PANEL_OPEN_IMG);
-        final Long closeImg = create.getLong(PROPERTY.DISCLOSURE_PANEL_CLOSE_IMG);
-        final String headerText = create.getString(PROPERTY.TEXT);
+        final Long openImg = create.getLong(Model.DISCLOSURE_PANEL_OPEN_IMG);
+        final Long closeImg = create.getLong(Model.DISCLOSURE_PANEL_CLOSE_IMG);
+        final String headerText = create.getString(Model.TEXT);
 
         final PTImage open = (PTImage) uiService.getPTObject(openImg);
         final PTImage close = (PTImage) uiService.getPTObject(closeImg);
@@ -57,9 +58,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.KEY_.CLOSE_HANDLER);
-
+                instruction.put(Model.TYPE_EVENT);
+                instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -70,9 +70,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                instruction.put(HANDLER.KEY, HANDLER.KEY_.OPEN_HANDLER);
-
+                instruction.put(Model.TYPE_EVENT);
+                instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -85,10 +84,10 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.OPEN)) {
-            uiObject.setOpen(update.getBoolean(PROPERTY.OPEN));
-        } else if (update.containsKey(PROPERTY.ANIMATION)) {
-            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
+        if (update.containsKey(Model.OPEN)) {
+            uiObject.setOpen(update.getBoolean(Model.OPEN));
+        } else if (update.containsKey(Model.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
         } else {
             super.update(update, uiService);
         }

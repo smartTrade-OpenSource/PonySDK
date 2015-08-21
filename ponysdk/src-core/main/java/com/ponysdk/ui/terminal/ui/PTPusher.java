@@ -55,12 +55,12 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
 
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(create.getObjectID());
-            eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            eventInstruction.put(PROPERTY.ERROR_MSG, "WebSocket not supported");
+            eventInstruction.put(Model.TYPE_EVENT);
+            eventInstruction.put(Model.ERROR_MSG, "WebSocket not supported");
             uiService.sendDataToServer(eventInstruction);
 
             int delay = 1000;
-            if (create.containsKey(PROPERTY.FIXDELAY)) delay = create.getInt(PROPERTY.FIXDELAY);
+            if (create.containsKey(Model.FIXDELAY)) delay = create.getInt(Model.FIXDELAY);
 
             Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 
@@ -68,8 +68,8 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
                 public boolean execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(create.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(PROPERTY.POLL, true);
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.POLL, true);
                     uiService.sendDataToServer(eventInstruction);
                     return !hasCommunicationError;
                 }
@@ -77,14 +77,14 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
         } else {
             super.create(create, uiService);
 
-            final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws" + "?" + APPLICATION.VIEW_ID + "=" + UIBuilder.sessionID;
+            final String wsServerURL = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws" + "?" + Model.APPLICATION_VIEW_ID + "=" + UIBuilder.sessionID;
 
             socketClient = new WebSocketClient(new WebSocketCallback() {
 
                 @Override
                 public void message(final String message) {
                     final JSONObject data = JSONParser.parseStrict(message).isObject();
-                    if (data.containsKey(Dictionnary.APPLICATION.PING)) return;
+                    if (data.containsKey(Model.APPLICATION_PING.getKey())) return;
 
                     uiService.update(data);
                 }
@@ -106,7 +106,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
             socketClient.connect(wsServerURL);
 
             int ping = 1000;
-            if (create.containsKey(PROPERTY.PINGDELAY)) ping = create.getInt(PROPERTY.PINGDELAY);
+            if (create.containsKey(Model.PINGDELAY)) ping = create.getInt(Model.PINGDELAY);
 
             if (ping > 0) {
                 Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
@@ -115,8 +115,8 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
                     public boolean execute() {
                         final int timeStamp = (int) (new Date().getTime() * .001);
                         final JSONObject jso = new JSONObject();
-                        jso.put(Model.APPLICATION_PING, new JSONNumber(timeStamp));
-                        jso.put(Model.APPLICATION_VIEW_ID, new JSONNumber(UIBuilder.sessionID));
+                        jso.put(Model.APPLICATION_PING.getKey(), new JSONNumber(timeStamp));
+                        jso.put(Model.APPLICATION_VIEW_ID.getKey(), new JSONNumber(UIBuilder.sessionID));
                         socketClient.send(jso.toString());
                         return !hasCommunicationError;
                     }

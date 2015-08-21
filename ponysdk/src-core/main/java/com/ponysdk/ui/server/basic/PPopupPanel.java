@@ -26,8 +26,9 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.instruction.Parser;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
@@ -92,10 +93,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private final List<PCloseHandler> listeners = new ArrayList<>();
 
-    public PPopupPanel(final PWindow window, final boolean autoHide, final EntryInstruction... instructions) {
-        super(new EntryInstruction(Model.POPUP_AUTO_HIDE, autoHide));
+    public PPopupPanel(final boolean autoHide, final PWindow window) {
         this.visible = false;
         this.autoHide = autoHide;
+
+        init();
 
         removeFromParent();
 
@@ -111,16 +113,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         root.adopt(this);
     }
 
-    public PPopupPanel(final boolean autoHide, final EntryInstruction... instructions) {
-        this(null, autoHide, instructions);
-    }
-
-    public PPopupPanel() {
-        this(false, (EntryInstruction) null);
-    }
-
     public PPopupPanel(final boolean autoHide) {
-        this(autoHide, (EntryInstruction) null);
+        this(autoHide, null);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override
@@ -212,17 +211,16 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.POPUP_POSITION_CALLBACK)) {
-            final Integer windowWidth = instruction.getInt(PROPERTY.OFFSETWIDTH);
-            final Integer windowHeight = instruction.getInt(PROPERTY.OFFSETHEIGHT);
-            final Integer clientWith = instruction.getInt(PROPERTY.CLIENT_WIDTH);
-            final Integer clientHeight = instruction.getInt(PROPERTY.CLIENT_HEIGHT);
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_POPUP_POSITION_CALLBACK.getKey())) {
+            final Integer windowWidth = instruction.getInt(Model.OFFSETWIDTH.getKey());
+            final Integer windowHeight = instruction.getInt(Model.OFFSETHEIGHT.getKey());
+            final Integer clientWith = instruction.getInt(Model.CLIENT_WIDTH.getKey());
+            final Integer clientHeight = instruction.getInt(Model.CLIENT_HEIGHT.getKey());
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
-            final Update update = new Update(ID);
-            update.put(PROPERTY.POPUP_POSITION_AND_SHOW);
-            Txn.get().getTxnContext().save(update);
-        } else if (HANDLER.KEY_.CLOSE_HANDLER.equals(instruction.getString(HANDLER.KEY))) {
+
+            saveUpdate(Model.POPUP_POSITION_AND_SHOW);
+        } else if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
             this.showing = false;
             fireOnClose();
         } else {

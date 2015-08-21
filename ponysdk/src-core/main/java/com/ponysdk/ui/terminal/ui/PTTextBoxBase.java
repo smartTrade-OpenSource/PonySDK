@@ -28,38 +28,37 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, String> {
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handler)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
 
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.put(PROPERTY.VALUE, event.getValue());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.put(Model.VALUE, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.PLACEHOLDER)) {
-            uiObject.getElement().setAttribute("placeholder", update.getString(PROPERTY.PLACEHOLDER));
+        if (update.containsKey(Model.TEXT)) {
+            uiObject.setText(update.getString(Model.TEXT));
+        } else if (update.containsKey(Model.PLACEHOLDER)) {
+            uiObject.getElement().setAttribute("placeholder", update.getString(Model.PLACEHOLDER));
         } else {
             super.update(update, uiService);
         }

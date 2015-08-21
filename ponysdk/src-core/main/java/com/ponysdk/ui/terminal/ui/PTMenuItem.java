@@ -28,6 +28,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTMenuItem extends PTUIObject<MenuItem> {
 
@@ -46,34 +47,33 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
-        } else if (update.containsKey(PROPERTY.HTML)) {
-            uiObject.setHTML(update.getString(PROPERTY.HTML));
-        } else if (update.containsKey(PROPERTY.ENABLED)) {
-            uiObject.setEnabled(update.getBoolean(PROPERTY.ENABLED));
+        if (update.containsKey(Model.TEXT)) {
+            uiObject.setText(update.getString(Model.TEXT));
+        } else if (update.containsKey(Model.HTML)) {
+            uiObject.setHTML(update.getString(Model.HTML));
+        } else if (update.containsKey(Model.ENABLED)) {
+            uiObject.setEnabled(update.getBoolean(Model.ENABLED));
         } else {
             super.update(update, uiService);
         }
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handler = addHandler.getString(HANDLER.KEY);
-        if (HANDLER.KEY_.COMMAND.equals(handler)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_COMMAND)) {
             uiObject.setScheduledCommand(new ScheduledCommand() {
 
                 @Override
                 public void execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.COMMAND);
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_COMMAND);
                     uiService.sendDataToServer(eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 }

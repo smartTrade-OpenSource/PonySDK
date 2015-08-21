@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTree extends PTWidget<Tree> {
 
@@ -39,26 +40,23 @@ public class PTTree extends PTWidget<Tree> {
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handler = addHandler.getString(HANDLER.KEY);
-
-        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handler)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
             uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
                     final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(TYPE.KEY_.EVENT, TYPE.KEY_.EVENT);
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.SELECTION_HANDLER);
-                    eventInstruction.put(PROPERTY.WIDGET, ptObject.getObjectID());
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(Model.WIDGET, ptObject.getObjectID());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
 
     }
@@ -70,8 +68,8 @@ public class PTTree extends PTWidget<Tree> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.ANIMATION)) {
-            uiObject.setAnimationEnabled(update.getBoolean(PROPERTY.ANIMATION));
+        if (update.containsKey(Model.ANIMATION)) {
+            uiObject.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
         } else {
             super.update(update, uiService);
         }

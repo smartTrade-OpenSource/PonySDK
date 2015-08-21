@@ -1,6 +1,8 @@
 
 package com.ponysdk.ui.server.addon;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.ui.server.basic.PAddOn;
 
 public class DefaultAddOn extends PAddOn {
@@ -9,7 +11,7 @@ public class DefaultAddOn extends PAddOn {
         super(null, null, null);
     }
 
-    public DefaultAddOn(final JSONObject params) {
+    public DefaultAddOn(final JsonObject params) {
         super(null, null, params);
     }
 

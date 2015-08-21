@@ -32,6 +32,7 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTScheduler extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
@@ -47,24 +48,24 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        final long commandID = update.getLong(PROPERTY.COMMAND_ID);
-        if (update.containsKey(PROPERTY.STOP)) {
+        final long commandID = update.getLong(Model.COMMAND_ID);
+        if (update.containsKey(Model.STOP)) {
             // Stop the command
             commandByIDs.remove(commandID).cancel();
-        } else if (update.containsKey(PROPERTY.FIXDELAY)) {
+        } else if (update.containsKey(Model.FIXDELAY)) {
             // Fix-delay
             // Wait for execution terminated before scheduling again
             final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
             if (previousCmd != null) previousCmd.cancel();
-            final int delay = update.getInt(PROPERTY.FIXDELAY);
+            final int delay = update.getInt(Model.FIXDELAY);
             final FixDelayCommand command = new FixDelayCommand(uiService, update.getObjectID(), commandID, delay);
             Scheduler.get().scheduleFixedDelay(command, delay);
             commandByIDs.put(commandID, command);
-        } else if (update.containsKey(PROPERTY.FIXRATE)) {
+        } else if (update.containsKey(Model.FIXRATE)) {
             // Fix-rate
             final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
             if (previousCmd != null) previousCmd.cancel();
-            final int delay = update.getInt(PROPERTY.FIXRATE);
+            final int delay = update.getInt(Model.FIXRATE);
             final FixRateCommand command = new FixRateCommand(uiService, update.getObjectID(), commandID, delay);
             Scheduler.get().scheduleFixedDelay(command, delay);
             commandByIDs.put(commandID, command);
@@ -112,10 +113,10 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            instruction.put(HANDLER.KEY, HANDLER.KEY_.SCHEDULER);
-            instruction.put(PROPERTY.ID, commandID);
-            instruction.put(PROPERTY.FIXRATE, delay);
+            instruction.put(Model.TYPE_EVENT);
+            instruction.put(Model.HANDLER_SCHEDULER);
+            instruction.put(Model.ID, commandID);
+            instruction.put(Model.FIXRATE, delay);
 
             uiService.sendDataToServer(instruction);
 
@@ -137,10 +138,10 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-            instruction.put(HANDLER.KEY, HANDLER.KEY_.SCHEDULER);
-            instruction.put(PROPERTY.ID, commandID);
-            instruction.put(PROPERTY.FIXDELAY, delay);
+            instruction.put(Model.TYPE_EVENT);
+            instruction.put(Model.HANDLER_SCHEDULER);
+            instruction.put(Model.ID, commandID);
+            instruction.put(Model.FIXDELAY, delay);
 
             uiService.sendDataToServer(instruction);
 

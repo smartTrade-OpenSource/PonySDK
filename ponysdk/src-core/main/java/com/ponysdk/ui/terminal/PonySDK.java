@@ -41,6 +41,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.HttpRequestBuilder;
 import com.ponysdk.ui.terminal.request.ParentWindowRequest;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
@@ -78,7 +79,7 @@ public class PonySDK implements Exportable {
             Long viewID = null;
             final Storage storage = Storage.getSessionStorageIfSupported();
             if (storage != null) {
-                final String v = storage.getItem(APPLICATION.VIEW_ID);
+                final String v = storage.getItem(Model.APPLICATION_VIEW_ID.getKey());
                 if (v != null && !v.isEmpty()) viewID = Long.parseLong(v);
             }
             final PTInstruction requestData = new PTInstruction();
@@ -91,28 +92,28 @@ public class PonySDK implements Exportable {
                 int i = 0;
                 for (final String cookie : cookieNames) {
                     final JSONObject jsoObject = new JSONObject();
-                    jsoObject.put(PROPERTY.KEY, new JSONString(cookie));
-                    jsoObject.put(PROPERTY.VALUE, new JSONString(Cookies.getCookie(cookie)));
+                    jsoObject.put(Model.KEY.getKey(), new JSONString(cookie));
+                    jsoObject.put(Model.VALUE.getKey(), new JSONString(Cookies.getCookie(cookie)));
                     cookies.set(i++, jsoObject);
                 }
             }
 
-            requestData.put(APPLICATION.KEY, APPLICATION.KEY_.START);
-            requestData.put(APPLICATION.SEQ_NUM, 0);
-            requestData.put(HISTORY.TOKEN, History.getToken());
-            requestData.put(PROPERTY.COOKIES, cookies);
+            requestData.put(Model.APPLICATION_START);
+            requestData.put(Model.APPLICATION_SEQ_NUM, 0);
+            requestData.put(Model.HISTORY_TOKEN, History.getToken());
+            requestData.put(Model.COOKIES, cookies);
 
-            if (viewID != null) requestData.put(APPLICATION.VIEW_ID, viewID);
+            if (viewID != null) requestData.put(Model.APPLICATION_VIEW_ID, viewID);
 
             final RequestCallback requestCallback = new RequestCallback() {
 
                 @Override
                 public void onDataReceived(final JSONObject data) {
                     try {
-                        if (data.containsKey(APPLICATION.VIEW_ID)) {
-                            applicationViewID = (long) data.get(APPLICATION.VIEW_ID).isNumber().doubleValue();
+                        if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
+                            applicationViewID = (long) data.get(Model.APPLICATION_VIEW_ID.getKey()).isNumber().doubleValue();
 
-                            if (storage != null) storage.setItem(APPLICATION.VIEW_ID, Long.toString(applicationViewID));
+                            if (storage != null) storage.setItem(Model.APPLICATION_VIEW_ID.getKey(), Long.toString(applicationViewID));
 
                             uiBuilder.init(applicationViewID, requestBuilder);
                         }
@@ -150,8 +151,8 @@ public class PonySDK implements Exportable {
     public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(Long.parseLong(objectID));
-        instruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        instruction.put(PROPERTY.NATIVE, jsObject);
+        instruction.put(Model.TYPE_EVENT);
+        instruction.put(Model.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
     }
 

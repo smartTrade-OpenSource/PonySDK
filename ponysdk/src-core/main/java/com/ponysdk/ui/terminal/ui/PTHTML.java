@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.HTML;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTHTML extends PTLabel {
 
@@ -36,10 +37,10 @@ public class PTHTML extends PTLabel {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.HTML)) {
-            cast().setHTML(update.getString(PROPERTY.HTML));
-        } else if (update.containsKey(PROPERTY.WORD_WRAP)) {
-            cast().setWordWrap(update.getBoolean(PROPERTY.WORD_WRAP));
+        if (update.containsKey(Model.HTML)) {
+            cast().setHTML(update.getString(Model.HTML));
+        } else if (update.containsKey(Model.WORD_WRAP)) {
+            cast().setWordWrap(update.getBoolean(Model.WORD_WRAP));
         } else {
             super.update(update, uiService);
         }

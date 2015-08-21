@@ -27,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -61,7 +63,7 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>applied to all child content widgets
  * </dl>
  * A TabLayoutPanel must have a <code>barHeight</code> attribute with a double value, and may have a
- * <code>barUnit</code> attribute with a {@link com.google.gwt.dom.client.Style.Unit Style.Unit} value.
+ * <code>barUnit</code> attribute with a {com.google.gwt.dom.client.Style.Unit Style.Unit} value.
  * <code>barUnit</code> defaults to PX.
  * <p>
  * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements. Each tab can have one widget
@@ -194,22 +196,17 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     @Override
-    public void onClientData(final JSONObject eventInstruction) throws JSONException {
-        String handlerKey = null;
-        if (eventInstruction.has(HANDLER.KEY)) {
-            handlerKey = eventInstruction.getString(HANDLER.KEY);
-        }
-
-        if (HANDLER.KEY_.SELECTION_HANDLER.equals(handlerKey)) {
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER.getKey())) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
-                handler.onSelection(new PSelectionEvent<>(this, eventInstruction.getInt(PROPERTY.INDEX)));
+                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(Model.INDEX.getKey())));
             }
-        } else if (HANDLER.KEY_.BEFORE_SELECTION_HANDLER.equals(handlerKey)) {
+        } else if (instruction.containsKey(Model.HANDLER_BEFORE_SELECTION_HANDLER.getKey())) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
-                handler.onBeforeSelection(new PBeforeSelectionEvent<>(this, eventInstruction.getInt(PROPERTY.INDEX)));
+                handler.onBeforeSelection(new PBeforeSelectionEvent<>(this, instruction.getInt(Model.INDEX.getKey())));
             }
         } else {
-            super.onClientData(eventInstruction);
+            super.onClientData(instruction);
         }
     }
 

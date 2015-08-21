@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.stm;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.socket.WebSocket;
 
 public class TxnSocketContext implements TxnContext, TxnListener {

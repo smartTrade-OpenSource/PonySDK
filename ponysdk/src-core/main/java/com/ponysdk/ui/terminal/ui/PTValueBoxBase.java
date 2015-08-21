@@ -28,30 +28,31 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<W> {
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.getString(HANDLER.KEY).equals(HANDLER.KEY_.CHANGE_HANDLER)) {
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_CHANGE_HANDLER)) {
             uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addHandler.getObjectID());
-                    eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.CHANGE_HANDLER);
+                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.SELECT_ALL)) {
+        if (update.containsKey(Model.SELECT_ALL)) {
             uiObject.selectAll();
         } else {
             super.update(update, uiService);

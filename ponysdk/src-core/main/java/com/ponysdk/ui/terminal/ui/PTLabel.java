@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTLabel extends PTWidget<Label> {
 
@@ -36,8 +37,8 @@ public class PTLabel extends PTWidget<Label> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.TEXT)) {
-            uiObject.setText(update.getString(PROPERTY.TEXT));
+        if (update.containsKey(Model.TEXT)) {
+            uiObject.setText(update.getString(Model.TEXT));
         } else {
             super.update(update, uiService);
         }

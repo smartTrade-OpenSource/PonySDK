@@ -25,7 +25,6 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
-import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
@@ -34,10 +33,6 @@ import com.ponysdk.ui.terminal.model.Model;
 public abstract class PComplexPanel extends PPanel {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
-
-    public PComplexPanel(final EntryInstruction... entries) {
-        super(entries);
-    }
 
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {

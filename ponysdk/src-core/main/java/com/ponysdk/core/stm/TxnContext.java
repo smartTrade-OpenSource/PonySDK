@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.stm;
 
-import com.ponysdk.core.instruction.Parser;
+import com.ponysdk.core.Parser;
 
 public interface TxnContext {
 

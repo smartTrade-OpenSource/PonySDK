@@ -28,9 +28,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.ponysdk.core.instruction.Create;
-import com.ponysdk.core.instruction.EntryInstruction;
-import com.ponysdk.core.stm.Txn;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
@@ -90,42 +90,39 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
-        super(new EntryInstruction(Model.ORACLE, suggestOracle.getID()));
-
         this.suggestOracle = suggestOracle;
 
+        init();
+
+        // TODO nciaravola
+
+        // if (textBox == null) {
+        // textBox = new PTextBox();
+        // }
+        //
+        // create.put(Model.TEXTBOX_ID, textBox.getID());
         saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
         saveAddHandler(Model.HANDLER_STRING_SELECTION_HANDLER);
     }
 
     @Override
-    protected void enrichCreate(final Create create) {
-        super.enrichCreate(create);
-
-        if (textBox == null) {
-            textBox = new PTextBox();
-        }
-
-        create.put(PROPERTY.TEXTBOX_ID, textBox.getID());
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(Model.ORACLE, suggestOracle.getID());
     }
 
     @Override
-    public void onClientData(final JSONObject event) throws JSONException {
-        String handlerKey = null;
-        if (event.has(HANDLER.KEY)) {
-            handlerKey = event.getString(HANDLER.KEY);
-        }
-        if (HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER.equals(handlerKey)) {
-            final String text = event.getString(PROPERTY.TEXT);
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
+            final String text = instruction.getString(Model.TEXT.getKey());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
-        } else if (HANDLER.KEY_.STRING_SELECTION_HANDLER.equals(handlerKey)) {
-            this.replacementString = event.getString(PROPERTY.REPLACEMENT_STRING);
-            this.displayString = event.getString(PROPERTY.DISPLAY_STRING);
+        } else if (instruction.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER)) {
+            this.replacementString = instruction.getString(Model.REPLACEMENT_STRING.getKey());
+            this.displayString = instruction.getString(Model.DISPLAY_STRING.getKey());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
         } else {
-            super.onClientData(event);
+            super.onClientData(instruction);
         }
     }
 
@@ -152,9 +149,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public void setLimit(final int limit) {
         this.limit = limit;
-        final Update update = new Update(getID());
-        update.put(PROPERTY.LIMIT, limit);
-        Txn.get().getTxnContext().save(update);
+        saveUpdate(Model.LIMIT, limit);
     }
 
     public void setText(final String text) {
@@ -229,28 +224,20 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
         @Override
         public void add(final String suggestion) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.SUGGESTION, suggestion);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.SUGGESTION, suggestion);
         }
 
         @Override
         public void addAll(final Collection<String> collection) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.SUGGESTIONS, collection);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.SUGGESTIONS, collection);
         }
 
         public void setDefaultSuggestions(final Collection<String> collection) {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.DEFAULT_SUGGESTIONS, collection);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
         }
 
         public void clear() {
-            final Update update = new Update(getID());
-            update.put(PROPERTY.CLEAR, true);
-            Txn.get().getTxnContext().save(update);
+            saveUpdate(Model.CLEAR, true);
         }
 
         @Override

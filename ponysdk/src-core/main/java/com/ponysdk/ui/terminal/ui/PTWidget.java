@@ -72,6 +72,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
@@ -81,22 +82,20 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private final Set<Integer> stoppedEvents = new HashSet<>();
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        final String handlerType = addHandler.getString(HANDLER.KEY);
-
-        if (handlerType.equals(HANDLER.KEY_.DOM_HANDLER)) {
-            final int domHandlerType = addHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
-            final Widget w = asWidget(addHandler.getObjectID(), uiService);
-            addDomHandler(addHandler, w, domHandlerType, uiService);
+    public void addHandler(final PTInstruction instruction, final UIService uiService) {
+        if (instruction.containsKey(Model.HANDLER_DOM_HANDLER)) {
+            final int domHandlerType = instruction.getInt(Model.DOM_HANDLER_CODE);
+            final Widget w = asWidget(instruction.getObjectID(), uiService);
+            addDomHandler(instruction, w, domHandlerType, uiService);
         } else {
-            super.addHandler(addHandler, uiService);
+            super.addHandler(instruction, uiService);
         }
     }
 
     @Override
     public void removeHandler(final PTInstruction removeHandler, final UIService uiService) {
-        if (removeHandler.containsKey(HANDLER.KEY_.DOM_HANDLER)) {
-            // final int domHandlerType = removeHandler.getInt(PROPERTY.DOM_HANDLER_CODE);
+        if (removeHandler.containsKey(Model.HANDLER_DOM_HANDLER)) {
+            // final int domHandlerType = removeHandler.getInt(Model.DOM_HANDLER_CODE);
             // final Widget w = asWidget(removeHandler.getObjectID(), uiService);
             // final HandlerRegistration handlerRegistration;
             // handlerRegistration.removeHandler()
@@ -109,10 +108,10 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.PREVENT_EVENT)) {
-            preventedEvents.add(update.getInt(PROPERTY.PREVENT_EVENT));
-        } else if (update.containsKey(PROPERTY.STOP_EVENT)) {
-            stoppedEvents.add(update.getInt(PROPERTY.STOP_EVENT));
+        if (update.containsKey(Model.PREVENT_EVENT)) {
+            preventedEvents.add(update.getInt(Model.PREVENT_EVENT));
+        } else if (update.containsKey(Model.STOP_EVENT)) {
+            stoppedEvents.add(update.getInt(Model.STOP_EVENT));
         } else {
             super.update(update, uiService);
         }
@@ -131,15 +130,15 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        eventInstruction.put(PROPERTY.CLIENT_X, event.getClientX());
-        eventInstruction.put(PROPERTY.CLIENT_Y, event.getClientY());
-        eventInstruction.put(PROPERTY.X, event.getX());
-        eventInstruction.put(PROPERTY.Y, event.getY());
-        eventInstruction.put(PROPERTY.NATIVE_BUTTON, event.getNativeButton());
-        eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
-        eventInstruction.put(PROPERTY.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
-        eventInstruction.put(PROPERTY.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
-        eventInstruction.put(PROPERTY.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
+        eventInstruction.put(Model.CLIENT_X, event.getClientX());
+        eventInstruction.put(Model.CLIENT_Y, event.getClientY());
+        eventInstruction.put(Model.X, event.getX());
+        eventInstruction.put(Model.Y, event.getY());
+        eventInstruction.put(Model.NATIVE_BUTTON, event.getNativeButton());
+        eventInstruction.put(Model.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
+        eventInstruction.put(Model.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
+        eventInstruction.put(Model.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
+        eventInstruction.put(Model.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
         uiService.sendDataToServer(widget, eventInstruction);
         preventOrStopEvent(event);
     }
@@ -153,19 +152,19 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-        eventInstruction.put(HANDLER.KEY, HANDLER.KEY_.DOM_HANDLER);
-        eventInstruction.put(PROPERTY.DOM_HANDLER_TYPE, domHandlerType.ordinal());
+        eventInstruction.put(Model.TYPE_EVENT);
+        eventInstruction.put(Model.HANDLER_KEY_DOM_HANDLER);
+        eventInstruction.put(Model.DOM_HANDLER_TYPE, domHandlerType.ordinal());
         return eventInstruction;
     }
 
     protected void triggerOnKeyPress(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final KeyPressEvent event) {
 
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+        eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
 
-        if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
-            final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+        if (addHandler.containsKey(Model.KEY_FILTER)) {
+            final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
                 final JSONNumber keyCode = jsonArray.get(i).isNumber();
                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -174,9 +173,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                 }
             }
         } else {
-            // final EventInstruction eventInstruction = new EventInstruction(addHandler.getObjectID(),
-            // addHandler.getType());
-            // eventInstruction.setMainProperty(main);
             uiService.sendDataToServer(widget, eventInstruction);
         }
 
@@ -286,15 +282,15 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction();
                             changeHandlerInstruction.setObjectID(addHandler.getObjectID());
-                            changeHandlerInstruction.put(TYPE.KEY, TYPE.KEY_.EVENT);
-                            changeHandlerInstruction.put(HANDLER.KEY, HANDLER.KEY_.STRING_VALUE_CHANGE_HANDLER);
-                            changeHandlerInstruction.put(PROPERTY.VALUE, textBox.getText());
+                            changeHandlerInstruction.put(Model.TYPE_EVENT);
+                            changeHandlerInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.put(Model.VALUE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
 
-                            if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
-                                final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+                            if (addHandler.containsKey(Model.KEY_FILTER)) {
+                                final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -318,10 +314,10 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                            eventInstruction.put(PROPERTY.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
 
-                            if (addHandler.containsKey(PROPERTY.KEY_FILTER)) {
-                                final JSONArray jsonArray = addHandler.get(PROPERTY.KEY_FILTER).isArray();
+                            if (addHandler.containsKey(Model.KEY_FILTER)) {
+                                final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -395,7 +391,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         event.preventDefault();
                         final String dragWidgetID = event.getData("text");
                         final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                        if (dragWidgetID != null) eventInstruction.put(PROPERTY.DRAG_SRC, Long.parseLong(dragWidgetID));
+                        if (dragWidgetID != null) eventInstruction.put(Model.DRAG_SRC, Long.parseLong(dragWidgetID));
                         uiService.sendDataToServer(widget, eventInstruction);
                     }
                 }, DropEvent.getType());

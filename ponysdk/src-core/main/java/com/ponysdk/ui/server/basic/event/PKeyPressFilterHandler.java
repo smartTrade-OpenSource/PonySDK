@@ -23,30 +23,23 @@
 
 package com.ponysdk.ui.server.basic.event;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
+import com.ponysdk.ui.terminal.model.Model;
 
-public abstract class PKeyPressFilterHandler extends JSONObject implements PKeyPressHandler {
-
-    private final Logger log = LoggerFactory.getLogger(PKeyUpFilterHandler.class);
+public abstract class PKeyPressFilterHandler implements PKeyPressHandler, JsonObject {
 
     public PKeyPressFilterHandler(final PKeyCodes... keyCodes) {
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
 
-        final List<Integer> codes = new ArrayList<>(keyCodes.length);
         for (final PKeyCodes code : keyCodes) {
-            codes.add(code.getCode());
+            builder.add(code.getCode());
         }
 
-        try {
-            put(PROPERTY.KEY_FILTER, new JSONArray(codes));
-        } catch (final JSONException e) {
-            log.error("Cannot update key codes : " + keyCodes, e);
-        }
+        put(Model.KEY_FILTER.getKey(), builder.build());
     }
 
 }

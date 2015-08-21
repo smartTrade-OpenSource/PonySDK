@@ -3,8 +3,8 @@ package com.ponysdk.core.stm;
 
 import java.io.IOException;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
 import com.ponysdk.ui.terminal.model.Model;

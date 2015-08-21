@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
 
@@ -41,20 +42,20 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
 
-        if (update.containsKey(PROPERTY.LOADING_ON_REQUEST)) {
-            showLoadingOnRequest = update.getBoolean(PROPERTY.LOADING_ON_REQUEST);
-        } else if (update.containsKey(PROPERTY.ENABLED_ON_REQUEST)) {
-            enabledOnRequest = update.getBoolean(PROPERTY.ENABLED_ON_REQUEST);
-        } else if (update.containsKey(PROPERTY.END_OF_PROCESSING)) {
+        if (update.containsKey(Model.LOADING_ON_REQUEST)) {
+            showLoadingOnRequest = update.getBoolean(Model.LOADING_ON_REQUEST);
+        } else if (update.containsKey(Model.ENABLED_ON_REQUEST)) {
+            enabledOnRequest = update.getBoolean(Model.ENABLED_ON_REQUEST);
+        } else if (update.containsKey(Model.END_OF_PROCESSING)) {
             if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
             if (!enabledOnRequest) uiObject.setEnabled(enabled);
-        } else if (update.containsKey(PROPERTY.ENABLED)) {
-            this.enabled = update.getBoolean(PROPERTY.ENABLED);
+        } else if (update.containsKey(Model.ENABLED)) {
+            this.enabled = update.getBoolean(Model.ENABLED);
             uiObject.setEnabled(enabled);
-        } else if (update.containsKey(PROPERTY.TABINDEX)) {
-            uiObject.setTabIndex(update.getInt(PROPERTY.TABINDEX));
-        } else if (update.containsKey(PROPERTY.FOCUSED)) {
-            uiObject.setFocus(update.getBoolean(PROPERTY.FOCUSED));
+        } else if (update.containsKey(Model.TABINDEX)) {
+            uiObject.setTabIndex(update.getInt(Model.TABINDEX));
+        } else if (update.containsKey(Model.FOCUSED)) {
+            uiObject.setFocus(update.getBoolean(Model.FOCUSED));
         } else {
             super.update(update, uiService);
         }

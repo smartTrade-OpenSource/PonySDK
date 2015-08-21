@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTreeItem extends PTUIObject<TreeItem> {
 
@@ -39,10 +40,10 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        this.isRoot = create.getBoolean(PROPERTY.ROOT);
+        this.isRoot = create.getBoolean(Model.ROOT);
 
-        if (create.containsKey(PROPERTY.TEXT)) {
-            init(create, uiService, new TreeItem(SafeHtmlUtils.fromString(create.getString(PROPERTY.TEXT))));
+        if (create.containsKey(Model.TEXT)) {
+            init(create, uiService, new TreeItem(SafeHtmlUtils.fromString(create.getString(Model.TEXT))));
         } else {
             init(create, uiService, new TreeItem());
         }
@@ -55,11 +56,11 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         if (widget instanceof Tree) {
             this.tree = (Tree) widget;
         } else {
-            if (add.containsKey(PROPERTY.WIDGET)) {
+            if (add.containsKey(Model.WIDGET)) {
                 uiObject.setWidget((Widget) widget);
             } else {
                 final TreeItem w = (TreeItem) widget;
-                final int index = add.getInt(PROPERTY.INDEX);
+                final int index = add.getInt(Model.INDEX);
                 if (isRoot) {
                     tree.insertItem(index, w);
                 } else {
@@ -71,10 +72,10 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.SELECTED)) {
-            uiObject.setSelected(update.getBoolean(PROPERTY.SELECTED));
-        } else if (update.containsKey(PROPERTY.STATE)) {
-            uiObject.setState(update.getBoolean(PROPERTY.STATE));
+        if (update.containsKey(Model.SELECTED)) {
+            uiObject.setSelected(update.getBoolean(Model.SELECTED));
+        } else if (update.containsKey(Model.STATE)) {
+            uiObject.setState(update.getBoolean(Model.STATE));
         } else {
             super.update(update, uiService);
         }

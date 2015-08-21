@@ -4,14 +4,16 @@ package com.ponysdk.core;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.thirdparty.json.JSONTokener;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
@@ -28,28 +30,27 @@ public abstract class AbstractApplicationManager {
 
     private final ApplicationManagerOption options;
 
+    private final String applicationID;
+
+    private final String applicationName;
+
     public AbstractApplicationManager() {
         this(new ApplicationManagerOption());
     }
 
     public AbstractApplicationManager(final ApplicationManagerOption options) {
         this.options = options;
+
+        this.applicationID = System.getProperty(SystemProperty.APPLICATION_ID);
+        this.applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
+
         log.info("ApplicationManagerOption: " + options);
     }
 
     public void process(final Request request, final Response response) throws Exception {
-        // final JsonBuilderFactory factory = Json.createBuilderFactory();
-        // final JsonArray value = factory.createArrayBuilder()
-        // .add(factory.createObjectBuilder()
-        // .add("type", "home")
-        // .add("number", "212 555-1234"))
-        // .add(factory.createObjectBuilder()
-        // .add("type", "fax")
-        // .add("number", "646 555-4567"))
-        // .build();
-
-        final JsonObject data = new JSONObject(new JSONTokener(request.getReader()));
-        if (data.has(APPLICATION.KEY)) {
+        final JsonReader reader = Json.createReader(request.getReader());
+        final JsonObject data = reader.readObject();
+        if (data.containsKey(Model.APPLICATION_KEY)) {
             startApplication(data, request, response);
         } else {
             fireInstructions(data, request, response);
@@ -66,14 +67,16 @@ public abstract class AbstractApplicationManager {
             Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
             if (application == null) {
                 log.info("Creating a new application ... Session ID #" + session.getId() + " - " + request.getHeader("User-Agent") + " - " + request.getRemoteAddr());
-                final String applicationID = System.getProperty(SystemProperty.APPLICATION_ID);
-                final String applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
+
                 application = new Application(applicationID, applicationName, session, options);
                 session.setUserAgent(request.getHeader("User-Agent"));
                 session.setAttribute(Application.class.getCanonicalName(), application);
                 isNewHttpSession = true;
             } else {
-                if (data.has(APPLICATION.VIEW_ID)) reloadedViewID = data.getLong(APPLICATION.VIEW_ID);
+                if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
+                    final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                    reloadedViewID = jsonNumber.longValue();
+                }
                 log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
             }
 
@@ -89,21 +92,24 @@ public abstract class AbstractApplicationManager {
                 final Txn txn = Txn.get();
                 txn.begin(new TxnContextHttp(true, request, response));
                 try {
-
-                    final long receivedSeqNum = data.getLong(APPLICATION.SEQ_NUM);
+                    final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey());
+                    final long receivedSeqNum = jsonNumber.longValue();
                     uiContext.updateIncomingSeqNum(receivedSeqNum);
 
                     final EntryPoint entryPoint = initializePonySession(uiContext);
 
-                    final String historyToken = data.getString(HISTORY.TOKEN);
-                    if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
+                    final String historyToken = data.getString(Model.HISTORY_TOKEN.getKey());
+                    if (historyToken != null && !historyToken.isEmpty()) {
+                        uiContext.getHistory().newItem(historyToken, false);
+                    }
 
                     final PCookies pCookies = uiContext.getCookies();
-                    final JSONArray cookies = data.getJSONArray(PROPERTY.COOKIES);
-                    for (int i = 0; i < cookies.length(); i++) {
-                        final JSONObject jsoObject = cookies.getJSONObject(i);
-                        final String name = jsoObject.getString(PROPERTY.KEY);
-                        final String value = jsoObject.getString(PROPERTY.VALUE);
+                    final JsonArray cookies = data.getJsonArray(Model.COOKIES.getKey());
+
+                    for (int i = 0; i < cookies.size(); i++) {
+                        final JsonObject cookie = cookies.getJsonObject(i);
+                        final String name = cookie.getString(Model.KEY.getKey());
+                        final String value = cookie.getString(Model.VALUE.getKey());
                         pCookies.cacheCookie(name, value);
                     }
 
@@ -112,6 +118,7 @@ public abstract class AbstractApplicationManager {
                     } else {
                         entryPoint.restart(uiContext);
                     }
+
                     txn.commit();
                 } catch (final Throwable e) {
                     log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
@@ -124,7 +131,7 @@ public abstract class AbstractApplicationManager {
     }
 
     protected void fireInstructions(final JsonObject data, final Request request, final Response response) throws Exception {
-        final long key = data.getLong(APPLICATION.VIEW_ID);
+        final long key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
         final Session session = request.getSession();
         final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
 
@@ -146,7 +153,7 @@ public abstract class AbstractApplicationManager {
                     process(uiContext, data);
 
                     final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
-                    for (final JSONObject jsoObject : datas) {
+                    for (final JsonObject jsoObject : datas) {
                         process(uiContext, jsoObject);
                     }
                 }
@@ -165,9 +172,9 @@ public abstract class AbstractApplicationManager {
     private Long checkClientMessage(final Session session, final JsonObject jsonObject, final UIContext uiContext) {
         printClientErrorMessage(jsonObject);
 
-        final long receivedSeqNum = jsonObject.getLong(APPLICATION.SEQ_NUM);
+        final long receivedSeqNum = jsonObject.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey()).longValue();
         if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
-            final long key = jsonObject.getLong(APPLICATION.VIEW_ID);
+            final long key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
             uiContext.stackIncomingMessage(receivedSeqNum, jsonObject);
             if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
                 if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {

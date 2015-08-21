@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class PTScrollPanel extends PTSimplePanel {
 
@@ -43,10 +44,10 @@ public class PTScrollPanel extends PTSimplePanel {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(PROPERTY.HORIZONTAL_SCROLL_POSITION)) {
-            cast().setHorizontalScrollPosition(update.getInt(PROPERTY.HORIZONTAL_SCROLL_POSITION));
-        } else if (update.containsKey(PROPERTY.SCROLL_TO)) {
-            final long scrollTo = update.getLong(PROPERTY.SCROLL_TO);
+        if (update.containsKey(Model.HORIZONTAL_SCROLL_POSITION)) {
+            cast().setHorizontalScrollPosition(update.getInt(Model.HORIZONTAL_SCROLL_POSITION));
+        } else if (update.containsKey(Model.SCROLL_TO)) {
+            final long scrollTo = update.getLong(Model.SCROLL_TO);
             if (scrollTo == 0) cast().scrollToBottom();
             else if (scrollTo == 1) cast().scrollToLeft();
             else if (scrollTo == 2) cast().scrollToRight();

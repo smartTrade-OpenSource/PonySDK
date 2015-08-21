@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.instruction.EntryInstruction;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -38,10 +37,6 @@ import com.ponysdk.ui.terminal.model.Model;
 public abstract class PComposite extends PWidget {
 
     private PWidget widget;
-
-    public PComposite(final EntryInstruction... instructions) {
-        super(instructions);
-    }
 
     @Override
     protected WidgetType getWidgetType() {

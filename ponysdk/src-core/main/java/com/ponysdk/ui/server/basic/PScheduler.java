@@ -26,8 +26,10 @@ package com.ponysdk.ui.server.basic;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.instruction.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
@@ -122,9 +124,9 @@ public abstract class PScheduler extends PObject {
     }
 
     @Override
-    public void onClientData(final JSONObject instruction) throws JSONException {
-        if (instruction.getString(HANDLER.KEY).equals(HANDLER.KEY_.SCHEDULER)) {
-            final long cmdID = instruction.getLong(PROPERTY.ID);
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(Model.HANDLER_KEY_SCHEDULER.getKey())) {
+            final long cmdID = instruction.getJsonNumber(Model.ID.getKey()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null) return;
 
@@ -133,8 +135,8 @@ public abstract class PScheduler extends PObject {
                 cancelScheduleCommand(cmdID);
             } else {
                 // Re-schedule in fixed delay mode
-                if (instruction.has(PROPERTY.FIXDELAY)) {
-                    scheduleFixedDelayCommand(cmdID, instruction.getInt(PROPERTY.FIXDELAY));
+                if (instruction.containsKey(Model.FIXDELAY.getKey())) {
+                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.getKey()));
                 }
             }
         } else {
