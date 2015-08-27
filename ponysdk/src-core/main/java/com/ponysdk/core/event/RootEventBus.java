@@ -123,7 +123,6 @@ public class RootEventBus implements EventBus {
         if (handlers == null) { return; }
 
         final boolean removed = handlers.remove(handler);
-        assert removed : "redundant remove call";
         if (removed && handlers.isEmpty()) {
             prune(type, source);
         }

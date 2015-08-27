@@ -22,6 +22,7 @@ public class HttpRequestBuilder extends RequestBuilder {
 
     public HttpRequestBuilder(final RequestCallback callback) {
         super(callback);
+        requestBuilder.setTimeoutMillis(5000); // 5secs
     }
 
     @Override
