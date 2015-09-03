@@ -33,6 +33,7 @@ import org.timepedia.exporter.client.ExportPackage;
 import org.timepedia.exporter.client.Exportable;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.http.client.RequestTimeoutException;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -131,6 +132,11 @@ public class PonySDK implements Exportable {
                 @Override
                 public void onError(final Throwable exception) {
                     uiBuilder.onCommunicationError(exception);
+                    if (exception instanceof RequestTimeoutException) {
+                        log.log(Level.SEVERE, "Request timeout");
+                        Window.alert("Technical incident. Application will reload");
+                        reload();
+                    }
                 }
 
             };
