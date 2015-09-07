@@ -36,15 +36,16 @@ public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
     private final JsonObject jsonObject;
 
     public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
-        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
 
         for (final PKeyCodes code : keyCodes) {
-            arrayBuilder.add(code.getCode());
+            builder.add(code.getCode());
         }
 
-        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add(Model.KEY_FILTER.getKey(), arrayBuilder.build());
-        jsonObject = objectBuilder.build();
+        final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        jsonObjectBuilder.add(Model.KEY_FILTER.getKey(), builder.build());
+
+        jsonObject = jsonObjectBuilder.build();
     }
 
     public JsonObject asJsonObject() {

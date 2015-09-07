@@ -144,7 +144,9 @@ public class WeakHashMap implements Map<Long, PObject> {
                 final Parser parser = Txn.get().getTxnContext().getParser();
                 parser.beginObject();
                 parser.parse(Model.TYPE_GC);
+                parser.comma();
                 parser.parse(Model.OBJECT_ID, objectID);
+                parser.comma();
                 parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
                 parser.endObject();
             }

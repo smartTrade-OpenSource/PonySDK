@@ -1,129 +1,47 @@
 
 package com.ponysdk.core;
 
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.ui.terminal.model.Model;
 
-public class Parser {
+public interface Parser {
 
-    private static final Logger log = LoggerFactory.getLogger(Parser.class);
+    void beginObject();
 
-    private static final byte CURVE_LEFT = '{';
-    private static final byte CURVE_RIGHT = '}';
-    private static final byte BRACKET_LEFT = '[';
-    private static final byte BRACKET_RIGHT = ']';
-    private static final byte COMMA = ',';
+    void endObject();
 
-    private final byte ZERO = 0;
-    private final byte ONE = 1;
+    void beginArray();
 
-    private ByteBuffer buffer = null;
-    private Writer writer = null;
+    void endArray();
 
-    public Parser(final ByteBuffer buffer) {
-        this.buffer = buffer;
-    }
+    void comma();
 
-    public Parser(final Writer writer) {
-        this.writer = writer;
-    }
+    void quote();
 
-    public void beginObject() {
-        buffer.put(CURVE_LEFT);
-    }
+    void parseKey(byte[] key);
 
-    public void endObject() {
-        buffer.put(CURVE_RIGHT);
-    }
+    void parse(JsonObject jsonObject);
 
-    public void comma() {
-        buffer.put(COMMA);
-    }
+    void parse(Model model);
 
-    public void beginArray() {
-        buffer.put(BRACKET_LEFT);
-    }
+    void parse(Model model, String value);
 
-    public void endArray() {
-        buffer.put(BRACKET_RIGHT);
-    }
+    void parse(Model model, JsonObjectBuilder builder);
 
-    public void parse(final Model type) {
-        buffer.put(Model.TYPE.getBytesKey());
-        buffer.put(type.getBytesKey());
-    }
+    void parse(Model model, boolean value);
 
-    public void parse(final Model type, final String value) {
-        buffer.put(type.getBytesKey());
-        try {
-            buffer.put(value.getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + value, e);
-        }
-    }
+    void parse(Model model, long value);
 
-    public void parse(final Model type, final JsonObjectBuilder builder) {
-        buffer.put(type.getBytesKey());
-        try {
-            buffer.put(builder.build().toString().getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + builder.toString(), e);
-        }
-    }
+    void parse(Model model, int value);
 
-    public void parse(final Model type, final boolean value) {
-        buffer.put(type.getBytesKey());
-        if (value) {
-            buffer.put(ZERO);
-        } else {
-            buffer.put(ONE);
-        }
-    }
+    void parse(Model model, double value);
 
-    public void parse(final Model type, final long value) {
-        buffer.put(type.getBytesKey());
-        buffer.putLong(value);
-    }
+    void parse(Model model, Collection<String> collection);
 
-    public void parse(final Model type, final int value) {
-        buffer.put(type.getBytesKey());
-        buffer.putInt(value);
-    }
-
-    public void parse(final Model type, final double value) {
-        buffer.put(type.getBytesKey());
-        buffer.putDouble(value);
-    }
-
-    public void parse(final Model type, final Collection<String> collection) {
-        buffer.put(type.getBytesKey());
-
-        beginArray();
-
-        for (final String s : collection) {
-            try {
-                buffer.put(s.getBytes("UTF8"));
-            } catch (final UnsupportedEncodingException e) {
-                log.error("Cannot encode value " + s, e);
-            }
-        }
-
-        endArray();
-    }
-
-    public void parse(final Model model, final JsonObject json) {
-        // TODO Auto-generated method stub
-
-    }
+    void parse(Model model, JsonObject jsonObject);
 
 }

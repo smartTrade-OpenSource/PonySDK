@@ -62,22 +62,20 @@ public abstract class Event<H extends EventHandler> {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(final Object data) {
         this.data = data;
     }
 
-    protected Event(Object source) {
+    protected Event(final Object source) {
         this.source = source;
         eventID = count++;
     }
 
-    protected Event(Object source, UUID uuid) {
+    protected Event(final Object source, final UUID uuid) {
         this.source = source;
         this.uuid = uuid;
         eventID = count++;
     }
-
-    public abstract Type<H> getAssociatedType();
 
     public Object getSource() {
         return source;
@@ -94,8 +92,6 @@ public abstract class Event<H extends EventHandler> {
         return "An event type";
     }
 
-    protected abstract void dispatch(H handler);
-
     public long getEventID() {
         return eventID;
     }
@@ -104,11 +100,15 @@ public abstract class Event<H extends EventHandler> {
         return uuid;
     }
 
-    public void setUUID(UUID uuid) {
+    public void setUUID(final UUID uuid) {
         this.uuid = uuid;
     }
 
-    void setSource(Object source) {
+    void setSource(final Object source) {
         this.source = source;
     }
+
+    public abstract Type<H> getAssociatedType();
+
+    protected abstract void dispatch(H handler);
 }

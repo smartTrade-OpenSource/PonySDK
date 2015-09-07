@@ -75,7 +75,7 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
-    private final List<PSelectionHandler<PSuggestion>> selectionHandler = new ArrayList<>();
+    private List<PSelectionHandler<PSuggestion>> selectionHandler;
 
     private final PSuggestOracle suggestOracle;
     private PTextBox textBox;
@@ -128,8 +128,10 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     public void onSelection(final PSelectionEvent<PSuggestion> event) {
-        for (final PSelectionHandler<PSuggestion> handler : selectionHandler) {
-            handler.onSelection(event);
+        if (selectionHandler != null) {
+            for (final PSelectionHandler<PSuggestion> handler : selectionHandler) {
+                handler.onSelection(event);
+            }
         }
     }
 
@@ -170,8 +172,12 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        textBox.removeValueChangeHandler(handler);
+    public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handler != null) {
+            return false;
+        } else {
+            return textBox.removeValueChangeHandler(handler);
+        }
     }
 
     @Override
@@ -185,17 +191,26 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     public void addSelectionHandler(final PSelectionHandler<PSuggestion> handler) {
+        if (selectionHandler == null) {
+            selectionHandler = new ArrayList<>(0);
+        }
         this.selectionHandler.add(handler);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PSuggestion> handler) {
-        this.selectionHandler.remove(handler);
+        if (selectionHandler != null) {
+            this.selectionHandler.remove(handler);
+        }
     }
 
     @Override
     public Collection<PSelectionHandler<PSuggestion>> getSelectionHandlers() {
-        return Collections.unmodifiableCollection(selectionHandler);
+        if (selectionHandler == null) {
+            return Collections.emptyList();
+        } else {
+            return Collections.unmodifiableCollection(selectionHandler);
+        }
     }
 
     public static class MultiWordSuggestion implements PSuggestion {

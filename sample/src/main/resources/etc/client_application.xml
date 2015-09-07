@@ -76,66 +76,66 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 	<!-- Widgets pages -->
 	<bean class="com.ponysdk.sample.client.page.CheckBoxPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.BasicButtonPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.CustomButtonPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.DatePickerPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.ElementPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.RadioButtonPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.BasicButtonPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.CustomButtonPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.FileUploadPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.HyperlinkPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.DatePickerPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.HTMLPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.ElementPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.ImagePageActivity" /> -->
 
 	<!-- Lists and Menus pages -->
-	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.ListBoxContainsEmptyItemPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.TreePageActivity" />
-	<bean class="com.ponysdk.sample.client.page.MenuBarPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.TwinListBoxPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.ListBoxPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.ListBoxContainsEmptyItemPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.SuggestBoxPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.TreePageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.MenuBarPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.StackLayoutPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.TwinListBoxPageActivity" /> -->
 	
 	<!-- Text input pages -->
-	<bean class="com.ponysdk.sample.client.page.BasicTextBoxPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.RichTextAreaPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.BasicTextBoxPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.RichTextAreaPageActivity" /> -->
 	
 	<!-- Panels pages -->
-	<bean class="com.ponysdk.sample.client.page.DecoratorPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.DisclosurePanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.FlowPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.VerticalPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.HorizontalPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.TabLayoutPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.DockPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.LayoutPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.SplitPanelPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.HeaderPanelPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.DecoratorPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.DisclosurePanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.FlowPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.VerticalPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.HorizontalPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.TabPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.TabLayoutPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.DockPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.LayoutPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.SplitPanelPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.HeaderPanelPageActivity" /> -->
 	
 	
 	<!-- Table pages -->
-	<bean class="com.ponysdk.sample.client.page.FlexTablePageActivity" />
-	<bean class="com.ponysdk.sample.client.page.GridPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.FlexTablePageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.GridPageActivity" /> -->
 
 	<!-- Popup pages -->
-	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.EventPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.WindowPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.DialogBoxPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.EventPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.WindowPageActivity" /> -->
 	
 	<!-- Rich components pages -->
-	<bean class="com.ponysdk.sample.client.page.DataGridPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.datagrid.SimpleRefreshableDataGridPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.datagrid.SortableRefreshableDataGridPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.FormPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.BreadCrumbsPageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.DataGridPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.datagrid.SimpleRefreshableDataGridPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.datagrid.SortableRefreshableDataGridPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.FormPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.BreadCrumbsPageActivity" /> -->
 
 	<!-- Timer pages -->
-	<bean class="com.ponysdk.sample.client.page.CookiesPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.JavascriptPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.LessPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.DragAndDropPageActivity" />
-	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" />
+<!-- 	<bean class="com.ponysdk.sample.client.page.CookiesPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.TimerPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.JavascriptPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.LessPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.DragAndDropPageActivity" /> -->
+<!-- 	<bean class="com.ponysdk.sample.client.page.StreamResourcePageActivity" /> -->
 
 
 

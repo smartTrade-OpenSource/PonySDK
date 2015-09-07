@@ -73,7 +73,6 @@ public class PPusher extends PObject implements ConnectionListener {
     private PPusher(final int pollingDelay, final int ping) {
         this.pollingDelay = pollingDelay;
         this.ping = ping;
-
         this.txnContext = new TxnSocketContext();
         this.pusherState = PusherState.INITIALIZING;
         this.uiContext = UIContext.get();

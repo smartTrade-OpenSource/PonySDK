@@ -92,9 +92,13 @@ public abstract class PScheduler extends PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.START, true);
+        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
+        parser.comma();
         parser.parse(Model.FIXRATE, delayMs);
         parser.endObject();
     }
@@ -103,9 +107,13 @@ public abstract class PScheduler extends PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.START, true);
+        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
+        parser.comma();
         parser.parse(Model.FIXDELAY, delayMs);
         parser.endObject();
     }
@@ -114,8 +122,11 @@ public abstract class PScheduler extends PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.STOP, true);
+        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
         parser.endObject();
 

@@ -113,6 +113,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         root.adopt(this);
     }
 
+    public PPopupPanel() {
+        this(false, null);
+    }
+
     public PPopupPanel(final boolean autoHide) {
         this(autoHide, null);
     }
@@ -193,9 +197,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.POPUP_POSITION);
+        parser.comma();
         parser.parse(Model.POPUP_POSITION_LEFT, leftPosition);
+        parser.comma();
         parser.parse(Model.POPUP_POSITION_TOP, topPosition);
         parser.endObject();
     }

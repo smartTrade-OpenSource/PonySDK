@@ -14,7 +14,6 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.test.server.mock.EmptySession;
 import com.ponysdk.test.server.mock.EmptyTxnContext;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PHTML;
@@ -43,7 +42,7 @@ public class RefreshableDataGridTest {
     public void beforeTest() {
         log.info("Running #" + name.getMethodName());
 
-        final Application application = new Application("test", "Test", new EmptySession(), new ApplicationManagerOption());
+        final Application application = new Application("test", "Test", new EmptyTxnContext(), new ApplicationManagerOption());
         final UIContext uiContext = new UIContext(application);
         UIContext.setCurrent(uiContext);
         txn = Txn.get();

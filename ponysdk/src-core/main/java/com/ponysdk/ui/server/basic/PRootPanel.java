@@ -54,7 +54,10 @@ public class PRootPanel extends PAbsolutePanel {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        parser.parse(Model.ID, id);
+        if (id != null) {
+            parser.comma();
+            parser.parse(Model.ID, id);
+        }
     }
 
     public static PRootPanel get(final PWindow window) {
@@ -100,4 +103,20 @@ public class PRootPanel extends PAbsolutePanel {
         return WidgetType.ROOT_PANEL;
     }
 
+    /**
+     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not widgets.
+     * <p>
+     * By default {@link #clear()} will only remove children that are widgets. This method also provides the
+     * option to remove all children including the non-widget DOM elements that are directly added.
+     *
+     * @param clearDom
+     *            if {@code true} this method will also remove any DOM elements that are not widgets.
+     */
+    public void clear(final boolean clearDom) {
+        clear();
+
+        if (clearDom) {
+            saveUpdate(Model.CLEAR_DOM, clearDom);
+        }
+    }
 }

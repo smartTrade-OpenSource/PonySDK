@@ -15,4 +15,9 @@ public class ApplicationManagerOption {
     public long getHeartBeatPeriod() {
         return heartBeatPeriod;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationManagerOption [maxOutOfSyncDuration=" + maxOutOfSyncDuration + ", heartBeatPeriod=" + heartBeatPeriod + "]";
+    }
 }

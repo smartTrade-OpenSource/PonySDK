@@ -41,4 +41,14 @@ public class PTRootPanel extends PTAbsolutePanel {
             init(create, uiService, com.google.gwt.user.client.ui.RootPanel.get(id));
         }
     }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        if (update.containsKey(Model.CLEAR_DOM)) {
+            RootPanel.get().clear(true);
+        } else {
+            super.update(update, uiService);
+        }
+    }
+
 }

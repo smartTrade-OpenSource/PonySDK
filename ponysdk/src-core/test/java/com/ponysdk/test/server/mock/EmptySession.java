@@ -2,38 +2,16 @@
 package com.ponysdk.test.server.mock;
 
 import com.ponysdk.core.servlet.Session;
-import com.ponysdk.core.servlet.SessionType;
-import com.ponysdk.core.useragent.Browser;
-import com.ponysdk.core.useragent.OperatingSystem;
-import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.stm.TxnContextHttp;
+import com.ponysdk.core.stm.TxnSocketContext;
 
 public class EmptySession implements Session {
-
-    UserAgent userAgent = new UserAgent(OperatingSystem.WINDOWS_7, Browser.CHROME);
-
-    @Override
-    public void setUserAgent(final String attribute) {}
 
     @Override
     public void setAttribute(final String name, final Object value) {}
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public void invalidate() {}
-
-    @Override
-    public UserAgent getUserAgent() {
-        return userAgent;
-    }
-
-    @Override
-    public SessionType getSessionType() {
-        return SessionType.WEBSOCKET;
-    }
 
     @Override
     public String getId() {
@@ -42,6 +20,24 @@ public class EmptySession implements Session {
 
     @Override
     public Object getAttribute(final String name) {
+        return null;
+    }
+
+    @Override
+    public void setHttpContext(final TxnContextHttp context) {
+
+    }
+
+    @Override
+    public TxnContextHttp getHttpContext() {
+        return null;
+    }
+
+    @Override
+    public void setSocketContext(final TxnSocketContext context) {}
+
+    @Override
+    public TxnSocketContext getSocketContext() {
         return null;
     }
 

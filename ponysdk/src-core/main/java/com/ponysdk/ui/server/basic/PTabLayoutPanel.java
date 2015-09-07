@@ -107,9 +107,13 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, widget.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.comma();
         parser.parse(Model.TAB_WIDGET, tabWidget.getID());
         parser.endObject();
 
@@ -128,9 +132,13 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, widget.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.comma();
         parser.parse(Model.TAB_TEXT, tabText);
         parser.endObject();
 

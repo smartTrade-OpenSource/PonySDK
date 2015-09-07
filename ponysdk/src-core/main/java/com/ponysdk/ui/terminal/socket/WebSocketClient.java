@@ -33,26 +33,37 @@ public class WebSocketClient {
                                                   alert("WebSocket connections not supported by this browser");
                                                   return;
                                               }
-
+                                              
                                               that._ws = new $wnd.WebSocket(server);
-
+                                              
+                                              var queue = [];
+                                              
+                                              var _fileReader = new FileReader();
+                                              
+                                              _fileReader.onload = function() { 
+                                                 that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( _fileReader.result );
+                                                  if(queue.length != 0){
+                                                      _fileReader.readAsText(queue.shift());
+                                                  }
+                                              }
+                                              
                                               that._ws.onopen = function() {
                                                   if(!that._ws) {
                                                       return;
                                                   }
                                                   that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onopen()();
                                               };
-
+                                              
                                               that._ws.onmessage = function(response) {
                                                   if (response.data) {
-                                                       var reader = new FileReader();
-                                                       reader.onload = function() { 
-                                                           that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( reader.result );
-                                                       }
-                                                       reader.readAsText(response.data);
+                                                      if( _fileReader.readyState !== 1 ){
+                                                          _fileReader.readAsText(response.data);
+                                                      }else{
+                                                          queue.push(response.data);
+                                                      }
                                                   }
                                               };
-
+                                              
                                               that._ws.onclose = function(m) {
                                                   that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onclose()();
                                               };

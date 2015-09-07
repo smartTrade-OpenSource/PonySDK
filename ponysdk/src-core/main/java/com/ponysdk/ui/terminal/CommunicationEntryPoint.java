@@ -23,14 +23,11 @@
 
 package com.ponysdk.ui.terminal;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.timepedia.exporter.client.ExporterUtil;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
@@ -38,16 +35,7 @@ public class CommunicationEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
-            @Override
-            public void onUncaughtException(final Throwable e) {
-                log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-            }
-        });
-
         ExporterUtil.exportAll();
-
         onLoadImpl();
     }
 

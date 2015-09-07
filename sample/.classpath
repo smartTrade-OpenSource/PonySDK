@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-core.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/java2html/java2html.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/jetty/javax.servlet-api.jar"/>
+	<classpathentry kind="lib" path="/ponysdk/libs/json/javax.json-api.jar"/>
 	<classpathentry kind="output" path="bin/classes/main"/>
 </classpath>

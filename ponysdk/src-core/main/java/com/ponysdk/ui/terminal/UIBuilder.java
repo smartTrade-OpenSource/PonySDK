@@ -102,9 +102,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private RequestBuilder requestBuilder;
 
     private long lastReceived = -1;
-    private long nextSent = 1;
+    // private final long nextSent = 1;
 
-    public static long sessionID;
+    public static int sessionID;
 
     private CommunicationErrorHandler communicationErrorHandler;
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
@@ -124,7 +124,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
     }
 
-    public void init(final long ID, final RequestBuilder requestBuilder) {
+    public void init(final int ID, final RequestBuilder requestBuilder) {
+        log.info("Init request builder");
+
         this.requestBuilder = requestBuilder;
         UIBuilder.sessionID = ID;
 
@@ -191,55 +193,37 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void update(final JSONObject data) {
-
-        final long receivedSeqNum = (long) data.get(Model.APPLICATION_SEQ_NUM.getKey()).isNumber().doubleValue();
-        if ((lastReceived + 1) != receivedSeqNum) {
-            incomingMessageQueue.put(receivedSeqNum, data);
-            log.log(Level.INFO, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
-            return;
-        }
-        lastReceived = receivedSeqNum;
-
-        final List<PTInstruction> instructions = new ArrayList<>();
         final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+
         for (int i = 0; i < jsonArray.size(); i++) {
-            instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+            final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
+            processInstruction(instruction);
         }
 
-        if (!incomingMessageQueue.isEmpty()) {
-            long expected = receivedSeqNum + 1;
-            while (incomingMessageQueue.containsKey(expected)) {
-                final JSONObject jsonObject = incomingMessageQueue.remove(expected);
-                final JSONArray jsonArray2 = jsonObject.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
-                for (int i = 0; i < jsonArray2.size(); i++) {
-                    instructions.add(new PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject()));
-                }
-                lastReceived = expected;
-                expected++;
-            }
-            log.log(Level.INFO, "Message synchronized from #" + receivedSeqNum + " to #" + lastReceived);
-        }
+        /**
+         * final long receivedSeqNum = (long)
+         * data.get(Model.APPLICATION_SEQ_NUM.getKey()).isNumber().doubleValue(); if ((lastReceived + 1) !=
+         * receivedSeqNum) { incomingMessageQueue.put(receivedSeqNum, data); log.log(Level.INFO,
+         * "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
+         * return; } lastReceived = receivedSeqNum; final List<PTInstruction> instructions = new ArrayList
+         * <>(); final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray(); for
+         * (int i = 0; i < jsonArray.size(); i++) { instructions.add( } if (!incomingMessageQueue.isEmpty()) {
+         * long expected = receivedSeqNum + 1; while (incomingMessageQueue.containsKey(expected)) { final
+         * JSONObject jsonObject = incomingMessageQueue.remove(expected); final JSONArray jsonArray2 =
+         * jsonObject.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray(); for (int i = 0; i <
+         * jsonArray2.size(); i++) { instructions.add(new
+         * PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject())); } lastReceived = expected;
+         * expected++; } log.log(Level.INFO, "Message synchronized from #" + receivedSeqNum + " to #" +
+         * lastReceived); } updateMode = true; PTInstruction currentInstruction = null; try { for (final
+         * PTInstruction instruction : instructions) { currentInstruction = instruction; try {
+         * processInstruction(instruction); } catch (final Throwable e) { log.log(Level.SEVERE,
+         * "PonySDK has encountered an internal error on instruction : " + currentInstruction +
+         * " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum +
+         * " LastProcessSeqNum: " + lastReceived, e); stackError(currentInstruction, e); } } } catch (final
+         * Throwable e) { log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e); } finally
+         * { flushEvents(); updateMode = false; }
+         **/
 
-        updateMode = true;
-        PTInstruction currentInstruction = null;
-        try {
-
-            for (final PTInstruction instruction : instructions) {
-                currentInstruction = instruction;
-                try {
-                    processInstruction(instruction);
-                } catch (final Throwable e) {
-                    log.log(Level.SEVERE,
-                            "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived, e);
-                    stackError(currentInstruction, e);
-                }
-            }
-        } catch (final Throwable e) {
-            log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-        } finally {
-            flushEvents();
-            updateMode = false;
-        }
     }
 
     @Override
@@ -255,7 +239,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     @Override
-    public void processInstruction(final PTInstruction instruction) throws Exception {
+    public void processInstruction(final PTInstruction instruction) {
+        PTObject ptObject;
+
         if (instruction.containsKey(Model.TYPE_CLOSE)) {
             pendingClose = true;
             sendDataToServer(instruction);
@@ -269,16 +255,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             };
 
             Scheduler.get().scheduleDeferred(command);
-        } else if (instruction.containsKey(Model.TYPE_CREATE)) {
-            PTObject ptObject;
+        } else if (instruction.containsKey(Model.TYPE_CREATE))
+
+        {
             final boolean isAddon = instruction.containsKey("addOnSignature");
             if (isAddon) {
                 final String addOnSignature = instruction.getString("addOnSignature");
                 final AddonFactory addonFactory = addonByKey.get(addOnSignature);
-                if (addonFactory == null) { throw new Exception("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
+                if (addonFactory == null) { throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
 
                 ptObject = addonFactory.newAddon();
-                if (ptObject == null) { throw new Exception("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
+                if (ptObject == null) { throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
                 ptObject.create(instruction, this);
             } else {
                 ptObject = uiFactory.newUIObject(this, instruction);
@@ -287,26 +274,33 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
             objectByID.put(instruction.getObjectID(), ptObject);
 
-        } else if (instruction.containsKey(Model.TYPE_ADD)) {
-            final PTObject uiObject = objectByID.get(instruction.getParentID());
-            if (uiObject == null) {
+        } else if (instruction.containsKey(Model.TYPE_ADD))
+
+        {
+            ptObject = objectByID.get(instruction.getParentID());
+            if (ptObject == null) {
                 log.info("Cannot add object to an garbaged parent object #" + instruction.getObjectID());
                 return;
             }
-            uiObject.add(instruction, this);
+            ptObject.add(instruction, this);
 
-        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) {
+        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER))
+
+        {
             if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
                 new PTStreamResource().addHandler(instruction, this);
             } else {
-                final PTObject uiObject = objectByID.get(instruction.getObjectID());
-                uiObject.addHandler(instruction, this);
+                ptObject = objectByID.get(instruction.getObjectID());
+                ptObject.addHandler(instruction, this);
             }
-        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) {
-            final PTObject uiObject = objectByID.get(instruction.getObjectID());
-            uiObject.removeHandler(instruction, this);
-        } else if (instruction.containsKey(Model.TYPE_REMOVE)) {
-            PTObject ptObject;
+        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER))
+
+        {
+            ptObject = objectByID.get(instruction.getObjectID());
+            ptObject.removeHandler(instruction, this);
+        } else if (instruction.containsKey(Model.TYPE_REMOVE))
+
+        {
             if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
             else {
                 ptObject = objectByID.get(instruction.getParentID());
@@ -316,21 +310,28 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 return;
             }
             ptObject.remove(instruction, this);
-        } else if (instruction.containsKey(Model.TYPE_GC)) {
-            final PTObject unRegisterObject = unRegisterObject(instruction.getObjectID());
-            if (unRegisterObject == null) {
+        } else if (instruction.containsKey(Model.TYPE_GC))
+
+        {
+            ptObject = unRegisterObject(instruction.getObjectID());
+            if (ptObject == null) {
                 log.info("Cannot GC an garbaged object #" + instruction.getObjectID());
                 return;
             }
-            unRegisterObject.gc(this);
-        } else if (instruction.containsKey(Model.TYPE_UPDATE)) {
-            final PTObject ptObject = objectByID.get(instruction.getObjectID());
+            ptObject.gc(this);
+        } else if (instruction.containsKey(Model.TYPE_UPDATE))
+
+        {
+            ptObject = objectByID.get(instruction.getObjectID());
             if (ptObject == null) {
                 log.info("Cannot update an garbaged object #" + instruction.getObjectID());
                 return;
             }
+
             ptObject.update(instruction, this);
-        } else if (instruction.containsKey(Model.TYPE_HISTORY)) {
+        } else if (instruction.containsKey(Model.TYPE_HISTORY))
+
+        {
             final String oldToken = History.getToken();
 
             String token = null;
@@ -407,7 +408,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void sendDataToServer(final List<PTInstruction> instructions) {
-
         final PTInstruction requestData = new PTInstruction();
         requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
 
@@ -427,7 +427,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
         requestData.put(Model.APPLICATION_ERRORS, errors);
-        requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
+        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
+
+        log.info("Data to send" + requestData.toString());
+        log.info("Request Builder" + requestBuilder);
 
         requestBuilder.send(requestData.toString());
     }

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.core.event.EventHandler;
-import com.ponysdk.core.main.Main;
+import com.ponysdk.impl.main.Main;
 import com.ponysdk.test.UiBuilderTestEntryPoint.RequestHandler;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PButton;

@@ -39,6 +39,10 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
+    public PLayoutPanel() {
+        init();
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.LAYOUT_PANEL;
@@ -50,8 +54,11 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
+        parser.comma();
         parser.parse(Model.WIDGET, child.getID());
         parser.endObject();
     }
@@ -62,8 +69,11 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.WIDGET, child.getID());
+        parser.comma();
         parser.parse(Model.VERTICAL_ALIGNMENT, position.ordinal());
         parser.endObject();
     }
@@ -74,8 +84,11 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
+        parser.comma();
         parser.parse(Model.WIDGET, widget.getID());
         parser.endObject();
     }
@@ -114,10 +127,15 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
+        parser.comma();
         parser.parse(Model.WIDGET, child.getID());
+        parser.comma();
         parser.parse(key1, v1);
+        parser.comma();
         parser.parse(key2, v2);
         parser.endObject();
     }

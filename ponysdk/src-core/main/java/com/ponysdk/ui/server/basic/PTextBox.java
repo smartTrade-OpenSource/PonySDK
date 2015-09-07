@@ -106,9 +106,13 @@ public class PTextBox extends PTextBoxBase {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.MASK, pattern);
+        parser.comma();
         parser.parse(Model.VISIBILITY, showMask);
+        parser.comma();
         parser.parse(Model.REPLACEMENT_STRING, freeSymbol);
         parser.endObject();
     }

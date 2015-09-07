@@ -48,7 +48,9 @@ public abstract class PScript extends PObject {
     private long executionID = 0;
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
-    private PScript() {}
+    private PScript() {
+        init();
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -93,9 +95,17 @@ public abstract class PScript extends PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
-        parser.parse(Model.WINDOW_ID, windowID);
+        parser.comma();
+
+        if (windowID != null) {
+            parser.parse(Model.WINDOW_ID, windowID);
+            parser.comma();
+        }
+
         parser.parse(Model.EVAL, js);
+        parser.comma();
         parser.parse(Model.ID, (executionID++));
         parser.endObject();
     }
@@ -111,10 +121,19 @@ public abstract class PScript extends PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
-        parser.parse(Model.WINDOW_ID, windowID);
+        parser.comma();
+
+        if (windowID != null) {
+            parser.parse(Model.WINDOW_ID, windowID);
+            parser.comma();
+        }
+
         parser.parse(Model.EVAL, js);
+        parser.comma();
         parser.parse(Model.ID, (executionID++));
+        parser.comma();
         parser.parse(Model.CALLBACK, true);
         parser.endObject();
     }

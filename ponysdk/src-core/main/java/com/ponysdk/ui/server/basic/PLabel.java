@@ -62,6 +62,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
 
     public PLabel() {
         super();
+        init();
     }
 
     public PLabel(final String text) {

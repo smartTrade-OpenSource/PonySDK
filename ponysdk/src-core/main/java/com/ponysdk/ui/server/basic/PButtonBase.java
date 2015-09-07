@@ -36,6 +36,10 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     private String text;
     private String html;
 
+    public PButtonBase() {
+        init();
+    }
+
     @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;

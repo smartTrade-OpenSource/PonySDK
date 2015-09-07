@@ -159,8 +159,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, item.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
@@ -205,8 +208,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, itemSeparator.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 

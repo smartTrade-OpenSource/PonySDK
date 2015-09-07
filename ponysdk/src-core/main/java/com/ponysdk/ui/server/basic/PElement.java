@@ -46,6 +46,7 @@ public class PElement extends PComplexPanel {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        parser.comma();
         parser.parse(Model.TAG, tagName);
     }
 

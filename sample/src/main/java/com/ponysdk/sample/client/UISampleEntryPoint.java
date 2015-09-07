@@ -23,64 +23,45 @@
 
 package com.ponysdk.sample.client;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.socket.ConnectionListener;
-import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.spring.client.SpringEntryPoint;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PPusher;
+import com.ponysdk.ui.server.basic.PRootPanel;
 
-public class UISampleEntryPoint extends SpringEntryPoint implements EntryPoint, UserLoggedOutHandler, InitializingActivity, ConnectionListener {
-
-    public static final String USER = "user";
+public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput(new ClientDataOutput() {
 
             @Override
-            public void onClientData(final PObject object, final JSONObject instruction) {
+            public void onClientData(final PObject object, final JsonObject instruction) {
                 System.err.println(object + "" + instruction);
             }
         });
 
-        if (uiContext.getApplicationAttribute(USER) == null) uiContext.getHistory().newItem("", false);
-        script();
-    }
+        PRootPanel.get().clear(true);
 
-    private void script() {
-        PPusher.initialize();
-        PPusher.get().addConnectionListener(this);
+        PRootPanel.get().add(new PLabel("Coucou"));
+
+        // uiContext.getHistory().newItem("", false);
     }
 
     @Override
-    public void restart(final UIContext session) {
-        if (session.getApplicationAttribute(USER) == null) session.getHistory().newItem("", false);
-        script();
+    public void restart(final UIContext uiContext) {
+        start(uiContext);
+        // session.getHistory().newItem("", false);
     }
 
     @Override
     public void onUserLoggedOut(final UserLoggedOutEvent event) {
         UIContext.get().close();
     }
-
-    @Override
-    public void afterContextInitialized() {
-        eventBus.addHandler(UserLoggedOutEvent.TYPE, this);
-    }
-
-    @Override
-    public void onOpen() {
-        // PScript.get().execute("less.watch();");
-        start(new LoginPlace());
-    }
-
-    @Override
-    public void onClose() {}
 
 }

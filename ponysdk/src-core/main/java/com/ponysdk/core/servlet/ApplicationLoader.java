@@ -23,123 +23,71 @@
 
 package com.ponysdk.core.servlet;
 
-import java.util.Calendar;
-
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.core.ApplicationManagerOption;
+import com.ponysdk.core.UIContext;
+import com.ponysdk.core.event.EventBus;
+import com.ponysdk.core.event.RootEventBus;
+import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.ui.server.basic.PHistory;
 
-import com.ponysdk.core.SystemProperty;
-import com.ponysdk.core.tools.BannerPrinter;
+public class ApplicationLoader extends AbstractApplicationLoader {
 
-public class ApplicationLoader implements ServletContextListener, HttpSessionListener {
+    private Class<? extends EntryPoint> entryPointClass;
 
-    private static final Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
+    public ApplicationLoader(final ApplicationManagerOption option) {
+        super(option);
+    }
 
-    private String applicationID;
-    private String applicationName;
-    private String applicationDescription;
+    @Override
+    protected AbstractApplicationManager createApplicationManager(final ApplicationManagerOption option) {
+        return new AbstractApplicationManager(option) {
+
+            @Override
+            protected EntryPoint initializePonySession(final UIContext ponySession) throws ServletException {
+                EntryPoint entryPoint = null;
+                try {
+                    entryPoint = entryPointClass.newInstance();
+                } catch (final Exception e) {
+                    throw new ServletException("Failed to instantiate the EntryPoint #" + entryPointClass, e);
+                }
+
+                final EventBus rootEventBus = new RootEventBus();
+
+                final PHistory history = new PHistory();
+
+                ponySession.setRootEventBus(rootEventBus);
+                ponySession.setHistory(history);
+
+                return entryPoint;
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setEntryPointClassName(final String entryPointClassName) throws ClassNotFoundException {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        this.entryPointClass = (Class<? extends EntryPoint>) classLoader.loadClass(entryPointClassName);
+    }
+
+    public void setEntryPointClass(final Class<? extends EntryPoint> entryPointClass) {
+        this.entryPointClass = entryPointClass;
+    }
 
     @Override
     public void contextInitialized(final ServletContextEvent event) {
-        applicationID = System.getProperty(SystemProperty.APPLICATION_ID, applicationID);
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME, applicationName);
-        applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
+        super.contextInitialized(event);
 
-        if (applicationID != null) System.setProperty(SystemProperty.APPLICATION_ID, applicationID);
-        if (applicationName != null) System.setProperty(SystemProperty.APPLICATION_NAME, applicationName);
-        if (applicationDescription != null) System.setProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
-
-        printLicence();
-    }
-
-    @Override
-    public void contextDestroyed(final ServletContextEvent event) {
-        printDestroyedBanner();
-    }
-
-    @Override
-    public void sessionCreated(final HttpSessionEvent httpSessionEvent) {
-        if (log.isDebugEnabled()) {
-            log.debug("Session created #" + httpSessionEvent.getSession().getId());
+        if (entryPointClass == null) {
+            try {
+                setEntryPointClassName(event.getServletContext().getInitParameter("entryPoint"));
+            } catch (final ClassNotFoundException e) {
+                log.error("Cannot initialize EntryPoint", e);
+            }
         }
-
-        SessionManager.get().registerSession(new HttpSession(httpSessionEvent.getSession()));
-    }
-
-    @Override
-    public void sessionDestroyed(final HttpSessionEvent httpSessionEvent) {
-        if (log.isInfoEnabled()) {
-            log.info("Session Destroyed #" + httpSessionEvent.getSession().getId());
-        }
-
-        SessionManager.get().unregisterSession(httpSessionEvent.getSession().getId());
-    }
-
-    private void printDestroyedBanner() {
-        String title;
-
-        if (applicationName == null) {
-            title = "Pony Application - Context Destroyed";
-        } else {
-            title = applicationName + " - Context Destroyed";
-        }
-
-        final int columnCount = title.length() + 5;
-
-        final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
-        bannerPrinter.appendNewEmptyLine(2);
-        bannerPrinter.appendLineSeparator();
-        bannerPrinter.appendNewLine(2);
-        bannerPrinter.appendCenteredLine(title);
-        bannerPrinter.appendNewLine(2);
-        bannerPrinter.appendLineSeparator();
-
-        log.info(bannerPrinter.toString());
-    }
-
-    private void printLicence() {
-        String title = "";
-        if (applicationName == null && applicationDescription == null) {
-            title = "Powered by PonySDK http://www.ponysdk.com";
-        } else if (applicationName == null && applicationDescription != null) {
-            title = applicationDescription;
-        } else if (applicationName == null && applicationDescription != null) {
-            title = applicationName;
-        } else {
-            title = applicationName + " - " + applicationDescription;
-        }
-
-        final int columnCount = title.length() + 30;
-
-        final BannerPrinter bannerPrinter = new BannerPrinter(columnCount);
-        bannerPrinter.appendNewEmptyLine();
-        bannerPrinter.appendLineSeparator();
-        bannerPrinter.appendNewLine();
-        bannerPrinter.appendCenteredLine(title);
-        bannerPrinter.appendNewLine();
-        bannerPrinter.appendCenteredLine("WEB  APPLICATION");
-        bannerPrinter.appendNewLine();
-        bannerPrinter.appendCenteredLine("(c) " + Calendar.getInstance().get(Calendar.YEAR) + " PonySDK");
-        bannerPrinter.appendNewLine();
-        bannerPrinter.appendLineSeparator();
-
-        log.info(bannerPrinter.toString());
-    }
-
-    public void setApplicationID(final String applicationID) {
-        this.applicationID = applicationID;
-    }
-
-    public void setApplicationName(final String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public void setApplicationDescription(final String applicationDescription) {
-        this.applicationDescription = applicationDescription;
+        if (entryPointClass == null) { throw new IllegalArgumentException("The entry point must be defined in the ServletContext."); }
     }
 }

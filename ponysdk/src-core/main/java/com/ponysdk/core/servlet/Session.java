@@ -1,7 +1,8 @@
 
 package com.ponysdk.core.servlet;
 
-import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.stm.TxnContextHttp;
+import com.ponysdk.core.stm.TxnSocketContext;
 
 public interface Session {
 
@@ -13,11 +14,12 @@ public interface Session {
 
     public void invalidate();
 
-    public UserAgent getUserAgent();
+    public void setHttpContext(TxnContextHttp context);
 
-    public SessionType getSessionType();
+    public TxnContextHttp getHttpContext();
 
-    public boolean isValid();
+    public void setSocketContext(TxnSocketContext context);
 
-    public void setUserAgent(String attribute);
+    public TxnSocketContext getSocketContext();
+
 }

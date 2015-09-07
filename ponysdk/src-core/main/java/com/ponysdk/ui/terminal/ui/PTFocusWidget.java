@@ -41,7 +41,6 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
         if (update.containsKey(Model.LOADING_ON_REQUEST)) {
             showLoadingOnRequest = update.getBoolean(Model.LOADING_ON_REQUEST);
         } else if (update.containsKey(Model.ENABLED_ON_REQUEST)) {

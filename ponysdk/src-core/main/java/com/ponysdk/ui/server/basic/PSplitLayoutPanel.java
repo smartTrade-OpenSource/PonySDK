@@ -101,8 +101,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.MIN_SIZE, minSize);
+            parser.comma();
             parser.parse(Model.WIDGET, child.getID());
             parser.endObject();
 
@@ -130,8 +133,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
+            parser.comma();
             parser.parse(Model.WIDGET, child.getID());
             parser.endObject();
 
@@ -153,8 +159,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
+            parser.comma();
             parser.parse(Model.WIDGET, child.getID());
             parser.endObject();
 

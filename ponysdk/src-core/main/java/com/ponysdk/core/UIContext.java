@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.json.JsonObject;
@@ -46,7 +46,6 @@ import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
-import com.ponysdk.core.servlet.Session;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
@@ -71,9 +70,9 @@ public class UIContext {
 
     private final Logger log = LoggerFactory.getLogger(UIContext.class);
 
-    private long objectCounter = 1;
+    private int objectCounter = 1;
 
-    private long streamRequestCounter = 0;
+    private int streamRequestCounter = 0;
 
     private final WeakHashMap weakReferences = new WeakHashMap();
 
@@ -88,8 +87,7 @@ public class UIContext {
 
     private final Application application;
 
-    // TODO nicolas must be removed
-    private final Map<String, Object> ponySessionAttributes = new ConcurrentHashMap<>();
+    private final Map<String, Object> uiContextAttributes = new ConcurrentHashMap<>();
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -98,8 +96,9 @@ public class UIContext {
     private long nextSent = 0;
     private final Map<Long, JsonObject> incomingMessageQueue = new HashMap<>();
 
-    private final long uiContextID;
-    private static final AtomicLong ponyUIContextIDcount = new AtomicLong();
+    private static final AtomicInteger ponyUIContextIDcount = new AtomicInteger();
+
+    private final int uiContextID;
 
     private final CommunicationSanityChecker communicationSanityChecker;
 
@@ -115,7 +114,7 @@ public class UIContext {
         this.communicationSanityChecker.start();
     }
 
-    public long getUiContextID() {
+    public int getUiContextID() {
         return uiContextID;
     }
 
@@ -143,7 +142,7 @@ public class UIContext {
                 return;
             }
 
-            if (jsonObject.containsKey(Model.TYPE_EVENT)) {
+            if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
                 if (clientDataOutput != null) {
                     clientDataOutput.onClientData(object, jsonObject);
                 }
@@ -164,7 +163,7 @@ public class UIContext {
         lock.unlock();
     }
 
-    public long nextID() {
+    public int nextID() {
         return objectCounter++;
     }
 
@@ -189,9 +188,9 @@ public class UIContext {
         return (T) weakReferences.get(objectID);
     }
 
-    public Session getSession() {
-        return application.getSession();
-    }
+    // public Session getSession() {
+    // return application.getSession();
+    // }
 
     public StreamHandler removeStreamListener(final Long streamID) {
         return streamListenerByID.remove(streamID);
@@ -203,8 +202,11 @@ public class UIContext {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.comma();
         parser.parse(Model.HANDLER_STREAM_REQUEST_HANDLER);
+        parser.comma();
         parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, 0);
         parser.endObject();
 
@@ -217,8 +219,11 @@ public class UIContext {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.comma();
         parser.parse(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER);
+        parser.comma();
         parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, 0);
         parser.endObject();
 
@@ -321,7 +326,7 @@ public class UIContext {
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
-        else ponySessionAttributes.put(name, value);
+        else uiContextAttributes.put(name, value);
     }
 
     /**
@@ -333,7 +338,7 @@ public class UIContext {
      */
 
     public Object removeAttribute(final String name) {
-        return ponySessionAttributes.remove(name);
+        return uiContextAttributes.remove(name);
     }
 
     /**
@@ -346,7 +351,7 @@ public class UIContext {
      */
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
-        return (T) ponySessionAttributes.get(name);
+        return (T) uiContextAttributes.get(name);
     }
 
     public void setApplicationAttribute(final String name, final Object value) {
@@ -412,7 +417,8 @@ public class UIContext {
     }
 
     public void destroy() {
-        log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
+        // log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID,
+        // application.getSession().getId());
         communicationSanityChecker.stop();
         application.unregisterUIContext(uiContextID);
 
@@ -420,7 +426,8 @@ public class UIContext {
             listener.onUIContextDestroyed(this);
         }
 
-        log.info("UIContext destroyed ViewID #{} from the Session #{}", uiContextID, application.getSession().getId());
+        // log.info("UIContext destroyed ViewID #{} from the Session #{}", uiContextID,
+        // application.getSession().getId());
     }
 
     public void addUIContextListener(final UIContextListener listener) {
@@ -431,7 +438,7 @@ public class UIContext {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (uiContextID ^ (uiContextID >>> 32));
+        result = prime * result + (uiContextID ^ (uiContextID >>> 32));
         return result;
     }
 

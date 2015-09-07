@@ -26,11 +26,14 @@ package com.ponysdk.ui.server.basic.event;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.terminal.model.Model;
 
-public abstract class PKeyPressFilterHandler implements PKeyPressHandler, JsonObject {
+public abstract class PKeyPressFilterHandler implements PKeyPressHandler {
+
+    private final JsonObject jsonObject;
 
     public PKeyPressFilterHandler(final PKeyCodes... keyCodes) {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
@@ -39,7 +42,14 @@ public abstract class PKeyPressFilterHandler implements PKeyPressHandler, JsonOb
             builder.add(code.getCode());
         }
 
-        put(Model.KEY_FILTER.getKey(), builder.build());
+        final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        jsonObjectBuilder.add(Model.KEY_FILTER.getKey(), builder.build());
+
+        jsonObject = jsonObjectBuilder.build();
+    }
+
+    public JsonObject asJsonObject() {
+        return jsonObject;
     }
 
 }

@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src-core/main/java"/>
 	<classpathentry kind="src" path="src-defaultimpl/main/java"/>
-	<classpathentry kind="src" path="src-jetty/main/java"/>
 	<classpathentry kind="src" path="src-spring/main/java"/>
 	<classpathentry kind="src" path="src-core/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -43,5 +42,6 @@
 	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
 	<classpathentry kind="lib" path="libs/json/javax.json-api.jar"/>
+	<classpathentry kind="lib" path="libs/gwt/gwt-elemental.jar"/>
 	<classpathentry kind="output" path="bin/classes/main"/>
 </classpath>

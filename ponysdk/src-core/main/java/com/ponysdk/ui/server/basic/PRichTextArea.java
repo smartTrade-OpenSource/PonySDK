@@ -52,12 +52,13 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     private String html;
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
 
     private final Formatter formatter = new Formatter();
 
     public PRichTextArea() {
         super();
+        init();
     }
 
     @Override
@@ -102,19 +103,31 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
         this.html = event.getValue();
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
+
+        if (handlers != null) {
+            for (final PValueChangeHandler<String> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
+
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
-        handlers.add(handler);
+        if (handlers == null) {
+            handlers = new ArrayList<>(1);
+        } else {
+            handlers.add(handler);
+        }
     }
 
     @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        handlers.remove(handler);
+    public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) {
+            return false;
+        } else {
+            return handlers.remove(handler);
+        }
     }
 
     @Override

@@ -67,8 +67,11 @@ public class PAddOn extends PObject implements PNativeHandler {
     @Override
     protected void enrichOnInit(final Parser parser) {
         // parser.parse(Model.addOnSignature, getSignature());
+        parser.comma();
         parser.parse(Model.FACTORY, factory);
+        parser.comma();
         parser.parse(Model.NATIVE, params);
+        parser.comma();
         parser.parse(Model.WIDGET, widget != null ? widget.ID : null);
     }
 

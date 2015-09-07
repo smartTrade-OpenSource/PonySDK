@@ -58,7 +58,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
-    private final List<PValueChangeHandler<Date>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<Date>> handlers;
 
     private final PDatePicker datePicker;
     private Date date;
@@ -110,12 +110,20 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        handlers.add(handler);
+        if (handlers == null) {
+            handlers = new ArrayList<>(1);
+        } else {
+            handlers.add(handler);
+        }
     }
 
     @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        handlers.remove(handler);
+    public boolean removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
+        if (handlers == null) {
+            return false;
+        } else {
+            return handlers.remove(handler);
+        }
     }
 
     @Override

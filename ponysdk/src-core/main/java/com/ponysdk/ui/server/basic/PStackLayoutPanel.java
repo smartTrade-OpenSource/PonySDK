@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
@@ -95,9 +96,13 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, child.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.HTML, header);
+        parser.comma();
         parser.parse(Model.SIZE, headerSize);
         parser.endObject();
 
@@ -183,7 +188,9 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.OPEN, widget.getID());
         parser.endObject();
     }

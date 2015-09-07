@@ -6,8 +6,6 @@ import java.io.Reader;
 
 public interface Request {
 
-    Session getSession();
-
     String getHeader(String header);
 
     Reader getReader() throws IOException;

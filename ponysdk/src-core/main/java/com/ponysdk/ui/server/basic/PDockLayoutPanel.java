@@ -66,6 +66,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
     }
 
@@ -107,17 +108,24 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.WIDGET_SIZE, size);
+        parser.comma();
         parser.parse(Model.WIDGET, widget.getID());
+        parser.endObject();
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
+        parser.comma();
         parser.parse(Model.WIDGET, widget.getID());
         parser.endObject();
     }
@@ -126,16 +134,20 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Detach new child.
         child.removeFromParent();
         // Logical attach.
-        getChildren().add(child);
+        getOrBuildChildrenCollection().add(child);
         // Adopt.
         adopt(child);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, child.getID());
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.DIRECTION, direction.ordinal());
+        parser.comma();
         parser.parse(Model.SIZE, size);
         parser.endObject();
         UIContext.get().assignParentID(child.getID(), ID);

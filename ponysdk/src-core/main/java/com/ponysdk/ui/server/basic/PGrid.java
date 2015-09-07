@@ -51,7 +51,9 @@ public class PGrid extends PHTMLTable {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        parser.comma();
         parser.parse(Model.ROW, rows);
+        parser.comma();
         parser.parse(Model.COLUMN, columns);
     }
 

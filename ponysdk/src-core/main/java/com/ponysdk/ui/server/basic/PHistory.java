@@ -76,7 +76,9 @@ public class PHistory {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_HISTORY);
+        parser.comma();
         parser.parse(Model.HISTORY_TOKEN, token);
+        parser.comma();
         parser.parse(Model.HISTORY_FIRE_EVENTS, fireEvents);
         parser.endObject();
     }

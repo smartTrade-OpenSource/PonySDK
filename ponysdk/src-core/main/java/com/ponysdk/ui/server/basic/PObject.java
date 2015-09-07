@@ -42,15 +42,15 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public abstract class PObject {
 
-    protected final long ID = UIContext.get().nextID();
+    protected final int ID = UIContext.get().nextID();
 
     private String nativeBindingFunction;
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    private long parentWindowID;
+    private int parentWindowID;
 
-    private boolean initialized = true;
+    private boolean initialized = false;
 
     PObject() {
         UIContext.get().registerObject(this);
@@ -62,7 +62,10 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_CREATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
+        parser.parse(Model.WIDGET_TYPE, getWidgetType().ordinal());
 
         enrichOnInit(parser);
 
@@ -122,7 +125,7 @@ public abstract class PObject {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (ID ^ (ID >>> 32));
+        result = prime * result + (ID ^ (ID >>> 32));
         return result;
     }
 
@@ -140,7 +143,7 @@ public abstract class PObject {
         return parentWindowID;
     }
 
-    void setParentWindowID(final long parentWindowID) {
+    void setParentWindowID(final int parentWindowID) {
         this.parentWindowID = parentWindowID;
     }
 
@@ -148,7 +151,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD_HANDLER);
+        parser.comma();
         parser.parse(type);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
         parser.endObject();
     }
@@ -157,6 +162,7 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_REMOVE_HANDLER);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
         parser.endObject();
     }
@@ -165,7 +171,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_REMOVE_HANDLER);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -174,7 +182,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_REMOVE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
     }
@@ -183,8 +193,11 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
 
@@ -195,7 +208,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
 
@@ -206,8 +221,11 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
 
@@ -218,8 +236,11 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
+        parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
 
@@ -230,7 +251,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, builder);
         parser.endObject();
     }
@@ -239,7 +262,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, json);
         parser.endObject();
     }
@@ -248,7 +273,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -257,7 +284,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -266,7 +295,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -275,7 +306,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -284,7 +317,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model, value);
         parser.endObject();
     }
@@ -293,7 +328,9 @@ public abstract class PObject {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(model);
         parser.endObject();
     }

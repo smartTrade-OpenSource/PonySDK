@@ -53,10 +53,15 @@ public class PFlexTable extends PHTMLTable {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.SET_COL_SPAN, colSpan);
             parser.endObject();
         }
@@ -65,10 +70,15 @@ public class PFlexTable extends PHTMLTable {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.SET_ROW_SPAN, rowSpan);
             parser.endObject();
         }

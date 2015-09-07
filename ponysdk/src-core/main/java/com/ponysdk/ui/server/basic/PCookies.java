@@ -50,8 +50,11 @@ public class PCookies {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.REMOVE, true);
+        parser.comma();
         parser.parse(Model.NAME, name);
         parser.endObject();
 
@@ -68,9 +71,13 @@ public class PCookies {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        parser.comma();
         parser.parse(Model.ADD, true);
+        parser.comma();
         parser.parse(Model.NAME, name);
+        parser.comma();
         parser.parse(Model.VALUE, value);
         if (expires != null) {
             parser.parse(Model.COOKIE_EXPIRE, expires.getTime());

@@ -63,7 +63,6 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-
                 final PPopupPanel popupPanel = new PPopupPanel();
                 final PVerticalPanel content = new PVerticalPanel();
                 final PButton closeButton = new PButton("Close");

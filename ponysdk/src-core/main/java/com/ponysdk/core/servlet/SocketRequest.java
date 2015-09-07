@@ -3,27 +3,23 @@ package com.ponysdk.core.servlet;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
-import javax.servlet.http.HttpServletRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 public class SocketRequest implements Request {
 
-    private final HttpServletRequest request;
-    private final Session session;
+    private final ServletUpgradeRequest request;
 
-    public SocketRequest(final Session session, final HttpServletRequest request) {
+    private StringReader reader;
+
+    public SocketRequest(final ServletUpgradeRequest request) {
         this.request = request;
-        this.session = session;
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
     }
 
     @Override
     public Reader getReader() throws IOException {
-        return request.getReader();
+        return reader;
     }
 
     @Override
@@ -33,7 +29,11 @@ public class SocketRequest implements Request {
 
     @Override
     public String getRemoteAddr() {
-        return request.getRemoteAddr();
+        return request.getRemoteAddress();
+    }
+
+    public void setText(final String text) {
+        reader = new StringReader(text);
     }
 
 }

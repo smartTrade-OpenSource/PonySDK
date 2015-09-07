@@ -23,22 +23,25 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
-public class PTElement extends PTComplexPanel<MyWidget> {
+public class PTElement extends PTComplexPanel<HTMLPanel> {
+
+    private static final String EMPTY = "";
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new MyWidget(create.getString(Model.TAG)));
+        init(create, uiService, new HTMLPanel(create.getString(Model.TAG), EMPTY));
     }
 
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
         if (add.containsKey(Model.INDEX)) {
             final int beforeIndex = add.getInt(Model.INDEX);
-            uiObject.insert(asWidget(add.getObjectID(), uiService), uiObject.getElement(), beforeIndex, true);
+            uiObject.add(asWidget(add.getObjectID(), uiService), uiObject.getElement());
         } else {
             super.add(add, uiService);
         }

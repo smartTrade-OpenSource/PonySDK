@@ -56,8 +56,11 @@ public abstract class PCellPanel extends PComplexPanel {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
+        parser.comma();
         parser.parse(Model.CELL, widget.getID());
         parser.endObject();
     }
@@ -66,8 +69,11 @@ public abstract class PCellPanel extends PComplexPanel {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
+        parser.comma();
         parser.parse(Model.CELL, widget.getID());
         parser.endObject();
     }
@@ -76,8 +82,11 @@ public abstract class PCellPanel extends PComplexPanel {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.CELL_HEIGHT, height);
+        parser.comma();
         parser.parse(Model.CELL, widget.getID());
         parser.endObject();
     }
@@ -86,8 +95,11 @@ public abstract class PCellPanel extends PComplexPanel {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.CELL_WIDTH, width);
+        parser.comma();
         parser.parse(Model.CELL, widget.getID());
         parser.endObject();
     }

@@ -57,7 +57,11 @@ import com.ponysdk.ui.server.basic.event.PDragStartEvent;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
+import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseDownEvent;
 import com.ponysdk.ui.server.basic.event.PMouseEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
@@ -218,10 +222,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeStyleProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.PUT_STYLE_KEY, name);
+            parser.comma();
             parser.parse(Model.STYLE_VALUE, value);
+            parser.endObject();
         }
     }
 
@@ -229,9 +238,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeStyleProperties().remove(name);
         if (previous != null) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.REMOVE_STYLE_KEY, name);
+            parser.endObject();
         }
     }
 
@@ -239,10 +252,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeElementProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.PUT_PROPERTY_KEY, name);
+            parser.comma();
             parser.parse(Model.PROPERTY_VALUE, value);
+            parser.endObject();
         }
     }
 
@@ -250,10 +268,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeElementAttributes().put(name, value);
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.PUT_ATTRIBUTE_KEY, name);
+            parser.comma();
             parser.parse(Model.ATTRIBUTE_VALUE, value);
+            parser.endObject();
         }
     }
 
@@ -261,9 +284,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String previous = safeElementAttributes().remove(name);
         if (previous != null) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.REMOVE_ATTRIBUTE_KEY, name);
+            parser.endObject();
         }
     }
 
@@ -280,27 +307,39 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void preventEvent(final PEvent e) {
         if (safePreventEvents().add(e)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.PREVENT_EVENT, e.getCode());
+            parser.endObject();
         }
     }
 
     public void stopEvent(final PEvent e) {
         if (safeStopEvents().add(e)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.STOP_EVENT, e.getCode());
+            parser.endObject();
         }
     }
 
     public void addStyleName(final String styleName) {
         if (safeStyleName().add(styleName)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ADD_STYLE_NAME, styleName);
+            parser.endObject();
         }
     }
 
@@ -313,9 +352,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private void removeStyle(final String styleName) {
         final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
+        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        parser.comma();
         parser.parse(Model.REMOVE_STYLE_NAME, styleName);
+        parser.endObject();
     }
 
     public boolean hasStyleName(final String styleName) {
@@ -360,34 +403,68 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return handlerRegistration;
     }
 
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
-        final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
-        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
+    public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
+        final Collection<PKeyPressHandler> handlerIterator = ensureDomHandler().getHandlers(PKeyPressEvent.TYPE, this);
+        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(PKeyPressEvent.TYPE, this, handler);
         if (handlerIterator.isEmpty()) {
 
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_ADD_HANDLER);
+            parser.comma();
             parser.parse(Model.HANDLER_DOM_HANDLER);
+            parser.comma();
+            parser.parse(Model.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().ordinal());
+            parser.comma();
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
+            parser.parse(handler.asJsonObject());
+            parser.endObject();
+        }
+        return handlerRegistration;
+    }
+
+    public HandlerRegistration addDomHandler(final PKeyUpFilterHandler handler) {
+        final Collection<PKeyUpHandler> handlerIterator = ensureDomHandler().getHandlers(PKeyUpEvent.TYPE, this);
+        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(PKeyUpEvent.TYPE, this, handler);
+        if (handlerIterator.isEmpty()) {
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_ADD_HANDLER);
+            parser.comma();
+            parser.parse(Model.HANDLER_DOM_HANDLER);
+            parser.comma();
+            parser.parse(Model.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().ordinal());
+            parser.comma();
+            parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
+            parser.parse(handler.asJsonObject());
+            parser.endObject();
+        }
+        return handlerRegistration;
+    }
+
+    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
+        final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
+        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
+        if (handlerIterator.isEmpty()) {
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_ADD_HANDLER);
+            parser.comma();
+            parser.parse(Model.HANDLER_DOM_HANDLER);
+            parser.comma();
             parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             parser.endObject();
-
-            // TODO nicolas check ???????
-            // if (handler instanceof JsonObject) {
-            // final JsonObject jso = (JsonObject) handler;
-            // for (final Iterator<String> iterator = jso.keys(); iterator.hasNext();) {
-            // final String key = iterator.next();
-            // addHandler.put(key, jso.get(key));
-            // }
-            // }
         }
         return handlerRegistration;
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_KEY_DOM_HANDLER)) {
+        if (instruction.containsKey(Model.HANDLER_KEY_DOM_HANDLER.getKey())) {
 
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(Model.DOM_HANDLER_TYPE.getKey())];
             switch (domHandler) {

@@ -2,7 +2,6 @@
 package com.ponysdk.ui.terminal.model;
 
 public enum Model {
-    TYPE("1"), //
     APPLICATION_VIEW_ID("2"),
     OBJECT_ID("3"),
     PARENT_OBJECT_ID("4"),
@@ -214,7 +213,6 @@ public enum Model {
     SET_ROW_SPAN("200"),
     HANDLER_STREAM_REQUEST_HANDLER("201"),
     HANDLER_EMBEDED_STREAM_REQUEST_HANDLER("202"),
-    APPLICATION_KEY("203"),
     APPLICATION_SEQ_NUM("204"),
     COOKIES("205"),
     KEY("206"),
@@ -265,7 +263,8 @@ public enum Model {
     DATE_FORMAT("250"),
     WIDGET_FONT_SIZE("251"),
     APPLICATION_START("252"),
-    WIDGETTYPE("253");// TMP
+    WIDGET_TYPE("253"),
+    CLEAR_DOM("254");// TMP
 
     String key;
     byte[] bytesKey;

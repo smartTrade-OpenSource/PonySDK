@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
@@ -80,8 +79,6 @@ public class LoginActivity extends AbstractActivity {
         user.setLogin(loginPageView.getLogin());
         user.setName(loginPageView.getLogin());
         user.setPassword(loginPageView.getPassword());
-
-        UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");

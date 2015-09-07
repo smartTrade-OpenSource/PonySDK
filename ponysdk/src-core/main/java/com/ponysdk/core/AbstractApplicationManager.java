@@ -4,9 +4,7 @@ package com.ponysdk.core;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.servlet.ServletException;
@@ -16,10 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
-import com.ponysdk.core.servlet.Response;
-import com.ponysdk.core.servlet.Session;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.core.stm.TxnContextHttp;
+import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.model.Model;
@@ -44,44 +40,42 @@ public abstract class AbstractApplicationManager {
         this.applicationID = System.getProperty(SystemProperty.APPLICATION_ID);
         this.applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
 
-        log.info("ApplicationManagerOption: " + options);
+        log.info(options.toString());
     }
 
-    public void process(final Request request, final Response response) throws Exception {
-        final JsonReader reader = Json.createReader(request.getReader());
-        final JsonObject data = reader.readObject();
-        if (data.containsKey(Model.APPLICATION_KEY)) {
-            startApplication(data, request, response);
+    public void process(final TxnContext context) throws Exception {
+        if (context.getApplication() == null) {
+            startApplication(context);
         } else {
-            fireInstructions(data, request, response);
+            final JsonReader reader = context.getReader();
+            final JsonObject data = reader.readObject();
+            fireInstructions(data, context);
         }
     }
 
-    public void startApplication(final JsonObject data, final Request request, final Response response) throws Exception {
-
-        final Session session = request.getSession();
-
-        synchronized (session) {
-            Long reloadedViewID = null;
+    public void startApplication(final TxnContext context) throws Exception {
+        synchronized (context) {
+            final Integer reloadedViewID = null;
             boolean isNewHttpSession = false;
-            Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
+            Application application = context.getApplication();
             if (application == null) {
-                log.info("Creating a new application ... Session ID #" + session.getId() + " - " + request.getHeader("User-Agent") + " - " + request.getRemoteAddr());
+                log.info("Creating a new application, {}", context.toString());
 
-                application = new Application(applicationID, applicationName, session, options);
-                session.setUserAgent(request.getHeader("User-Agent"));
-                session.setAttribute(Application.class.getCanonicalName(), application);
+                application = new Application(applicationID, applicationName, context, options);
+                context.setApplication(application);
                 isNewHttpSession = true;
             } else {
-                if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
-                    final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
-                    reloadedViewID = jsonNumber.longValue();
-                }
-                log.info("Reloading application " + reloadedViewID + " on session #" + session.getId());
+                // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
+                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                // reloadedViewID = jsonNumber.longValue();
+                // }
+                // log.info("Reloading application {} {}", reloadedViewID, context);
             }
 
             final UIContext uiContext = new UIContext(application);
             UIContext.setCurrent(uiContext);
+
+            context.setUIContext(uiContext);
 
             if (reloadedViewID != null) {
                 final UIContext previousUIContext = application.getUIContext(reloadedViewID);
@@ -90,28 +84,37 @@ public abstract class AbstractApplicationManager {
 
             try {
                 final Txn txn = Txn.get();
-                txn.begin(new TxnContextHttp(true, request, response));
+                txn.begin(context);
                 try {
-                    final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey());
-                    final long receivedSeqNum = jsonNumber.longValue();
-                    uiContext.updateIncomingSeqNum(receivedSeqNum);
+
+                    final long receivedSeqNum = context.getSeqNum();
+                    uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
+
+                    // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey());
 
                     final EntryPoint entryPoint = initializePonySession(uiContext);
 
-                    final String historyToken = data.getString(Model.HISTORY_TOKEN.getKey());
+                    // final String historyToken = data.getString(Model.HISTORY_TOKEN.getKey());
+
+                    final String historyToken = context.getHistoryToken();
+
                     if (historyToken != null && !historyToken.isEmpty()) {
                         uiContext.getHistory().newItem(historyToken, false);
                     }
 
                     final PCookies pCookies = uiContext.getCookies();
-                    final JsonArray cookies = data.getJsonArray(Model.COOKIES.getKey());
 
-                    for (int i = 0; i < cookies.size(); i++) {
-                        final JsonObject cookie = cookies.getJsonObject(i);
-                        final String name = cookie.getString(Model.KEY.getKey());
-                        final String value = cookie.getString(Model.VALUE.getKey());
-                        pCookies.cacheCookie(name, value);
-                    }
+                    final Request request = context.getRequest();
+
+                    // final Map<String, String> cookies = request.getCookies();
+                    //
+                    // for (final Entry<String, String> entry : cookies.entrySet()) {
+                    // pCookies.cacheCookie(entry.getKey(), entry.getValue());
+                    // }
+
+                    // final JsonArray cookies = data.getJsonArray(Model.COOKIES.getKey());
+
+                    // for (int i = 0; i < cookies.size(); i++) {}
 
                     if (isNewHttpSession) {
                         entryPoint.start(uiContext);
@@ -121,7 +124,7 @@ public abstract class AbstractApplicationManager {
 
                     txn.commit();
                 } catch (final Throwable e) {
-                    log.error("Cannot send instructions to the browser, Session ID #" + session.getId(), e);
+                    log.error("Cannot send instructions to the browser " + context, e);
                     txn.rollback();
                 }
             } finally {
@@ -130,14 +133,16 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    protected void fireInstructions(final JsonObject data, final Request request, final Response response) throws Exception {
-        final long key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
-        final Session session = request.getSession();
-        final Application applicationSession = (Application) session.getAttribute(Application.class.getCanonicalName());
+    protected void fireInstructions(final JsonObject data, final TxnContext context) throws Exception {
+        final int key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).intValue();
+
+        final Application applicationSession = context.getApplication();
 
         if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application (viewID #" + key + ")."); }
 
-        final UIContext uiContext = applicationSession.getUIContext(key);
+        final UIContext uiContext = context.getUIContext();
+
+        // final UIContext uiContext = applicationSession.getUIContext(key);
 
         if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
 
@@ -145,9 +150,9 @@ public abstract class AbstractApplicationManager {
         UIContext.setCurrent(uiContext);
         try {
             final Txn txn = Txn.get();
-            txn.begin(new TxnContextHttp(false, request, response));
+            txn.begin(context);
             try {
-                final Long receivedSeqNum = checkClientMessage(request.getSession(), data, uiContext);
+                final Long receivedSeqNum = checkClientMessage(data, uiContext);
 
                 if (receivedSeqNum != null) {
                     process(uiContext, data);
@@ -169,7 +174,7 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private Long checkClientMessage(final Session session, final JsonObject jsonObject, final UIContext uiContext) {
+    private Long checkClientMessage(final JsonObject jsonObject, final UIContext uiContext) {
         printClientErrorMessage(jsonObject);
 
         final long receivedSeqNum = jsonObject.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey()).longValue();

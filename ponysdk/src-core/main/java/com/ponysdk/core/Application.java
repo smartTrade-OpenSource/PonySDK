@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.servlet.Session;
+import com.ponysdk.core.stm.TxnContext;
 
 /**
  * <p>
@@ -41,9 +41,7 @@ public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private final Session session;
-
-    private final Map<Long, UIContext> uiContexts = new ConcurrentHashMap<>();
+    private final Map<Integer, UIContext> uiContexts = new ConcurrentHashMap<>();
 
     private final ApplicationManagerOption options;
 
@@ -51,10 +49,12 @@ public class Application {
 
     private final String name;
 
-    public Application(final String ID, final String name, final Session session, final ApplicationManagerOption options) {
+    private final TxnContext context;
+
+    public Application(final String ID, final String name, final TxnContext context, final ApplicationManagerOption options) {
         this.ID = ID;
         this.name = name;
-        this.session = session;
+        this.context = context;
         this.options = options;
     }
 
@@ -66,11 +66,11 @@ public class Application {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
             log.info("Invalidate session, all ui contexts have been destroyed");
-            session.invalidate();
+            // session.invalidate();
         }
     }
 
-    public UIContext getUIContext(final long uiContextID) {
+    public UIContext getUIContext(final int uiContextID) {
         return uiContexts.get(uiContextID);
     }
 
@@ -78,17 +78,13 @@ public class Application {
         return uiContexts.values();
     }
 
-    public Session getSession() {
-        return session;
-    }
-
     public void setAttribute(final String name, final Object value) {
-        session.setAttribute(name, value);
+        context.setAttribute(name, value);
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
-        return (T) session.getAttribute(name);
+        return (T) context.getAttribute(name);
     }
 
     public ApplicationManagerOption getOptions() {

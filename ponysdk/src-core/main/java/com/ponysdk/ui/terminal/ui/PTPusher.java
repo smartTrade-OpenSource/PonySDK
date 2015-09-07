@@ -50,7 +50,6 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         if (!WebSocketClient.isSupported()) {
-
             UIBuilder.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
 
             final PTInstruction eventInstruction = new PTInstruction();

@@ -48,7 +48,7 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
-    private final List<PValueChangeHandler<Boolean>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<Boolean>> handlers;
 
     private Boolean value = Boolean.FALSE;
 
@@ -78,12 +78,20 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        handlers.add(handler);
+        if (handlers == null) {
+            handlers = new ArrayList<>(1);
+        } else {
+            handlers.add(handler);
+        }
     }
 
     @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        handlers.remove(handler);
+    public boolean removeValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
+        if (handlers == null) {
+            return false;
+        } else {
+            return handlers.remove(handler);
+        }
     }
 
     @Override

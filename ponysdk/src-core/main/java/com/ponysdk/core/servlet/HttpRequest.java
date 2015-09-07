@@ -14,17 +14,10 @@ public class HttpRequest implements Request {
     private static Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final HttpServletRequest request;
-    private final Session session;
 
     public HttpRequest(final Session session, final HttpServletRequest request) {
         this.request = request;
-        this.session = session;
         if (log.isDebugEnabled()) outputIncomingRequest();
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
     }
 
     @Override

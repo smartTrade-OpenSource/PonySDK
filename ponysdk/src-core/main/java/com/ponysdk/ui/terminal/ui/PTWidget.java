@@ -122,12 +122,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
         return ((PTWidget<?>) uiService.getPTObject(objectID)).cast();
     }
 
-    //
-    // @Override
-    // public W cast() {
-    // return uiObject;
-    // }
-
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         eventInstruction.put(Model.CLIENT_X, event.getClientX());

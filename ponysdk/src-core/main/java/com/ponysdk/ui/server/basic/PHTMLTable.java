@@ -98,9 +98,13 @@ public abstract class PHTMLTable extends PPanel {
                 final Parser parser = Txn.get().getTxnContext().getParser();
                 parser.beginObject();
                 parser.parse(Model.TYPE_UPDATE);
+                parser.comma();
                 parser.parse(Model.OBJECT_ID, ID);
+                parser.comma();
                 parser.parse(Model.ROW, row);
+                parser.comma();
                 parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.comma();
                 parser.parse(Model.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
                 parser.endObject();
             }
@@ -115,9 +119,13 @@ public abstract class PHTMLTable extends PPanel {
                 final Parser parser = Txn.get().getTxnContext().getParser();
                 parser.beginObject();
                 parser.parse(Model.TYPE_UPDATE);
+                parser.comma();
                 parser.parse(Model.OBJECT_ID, ID);
+                parser.comma();
                 parser.parse(Model.ROW, row);
+                parser.comma();
                 parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.comma();
                 parser.parse(Model.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 parser.endObject();
             }
@@ -136,9 +144,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+            parser.comma();
             parser.parse(Model.ROW_FORMATTER_SET_STYLE_NAME, styleName);
             parser.endObject();
         }
@@ -172,10 +184,15 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
             parser.endObject();
         }
@@ -184,10 +201,15 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
             parser.endObject();
         }
@@ -196,10 +218,15 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.CELL_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
             parser.endObject();
         }
@@ -208,10 +235,15 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.CELL_VERTICAL_ALIGNMENT, align.ordinal());
+            parser.comma();
             parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
             parser.endObject();
         }
@@ -220,10 +252,15 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
+            parser.comma();
             parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
             parser.endObject();
         }
@@ -235,9 +272,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
+            parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_COLUMN_WIDTH, width);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
             parser.endObject();
         }
@@ -246,9 +287,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
             parser.endObject();
         }
@@ -257,9 +302,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
             parser.endObject();
         }
@@ -268,9 +317,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.comma();
             parser.parse(Model.COLUMN, column);
             parser.endObject();
         }
@@ -445,9 +498,13 @@ public abstract class PHTMLTable extends PPanel {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_ADD);
+            parser.comma();
             parser.parse(Model.OBJECT_ID, widget.getID());
+            parser.comma();
             parser.parse(Model.PARENT_OBJECT_ID, ID);
+            parser.comma();
             parser.parse(Model.ROW, row);
+            parser.comma();
             parser.parse(Model.CELL, column);
             parser.endObject();
 

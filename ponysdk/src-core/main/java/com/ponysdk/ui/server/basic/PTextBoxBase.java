@@ -41,7 +41,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     private static final String EMPTY = "";
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
 
     private String text = EMPTY;
     private String placeholder = EMPTY;
@@ -52,6 +52,8 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     public PTextBoxBase(final String text) {
         super();
+        init();
+
         setText(text);
         saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
@@ -97,17 +99,28 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) {
+            handlers = new ArrayList<>(1);
+        }
         handlers.add(handler);
     }
 
     @Override
-    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        handlers.remove(handler);
+    public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) {
+            return false;
+        } else {
+            return handlers.remove(handler);
+        }
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        if (handlers != null) {
+            return Collections.emptyList();
+        } else {
+            return Collections.unmodifiableCollection(handlers);
+        }
     }
 
     @Override
@@ -122,8 +135,11 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
         this.text = event.getValue();
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
+
+        if (handlers != null) {
+            for (final PValueChangeHandler<String> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
     }
 

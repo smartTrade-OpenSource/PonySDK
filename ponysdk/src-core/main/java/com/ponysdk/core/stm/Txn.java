@@ -62,9 +62,11 @@ public class Txn {
         try {
             txnContext.flush();
         } catch (final Exception e) {
-            final String msg = "Cannot send instructions to the browser, Session ID #" + uiContext.getSession().getId();
-            log.error(msg, e);
-            throw new RuntimeException(msg);
+            // final String msg = "Cannot send instructions to the browser, Session ID #" +
+            // uiContext.getSession().getId();
+            // log.error(msg, e);
+            // throw new RuntimeException(msg);
+            throw new RuntimeException("TMP");
         }
     }
 

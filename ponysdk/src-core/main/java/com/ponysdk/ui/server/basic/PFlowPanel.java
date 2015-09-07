@@ -30,6 +30,10 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PFlowPanel extends PComplexPanel {
 
+    public PFlowPanel() {
+        init();
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.FLOW_PANEL;

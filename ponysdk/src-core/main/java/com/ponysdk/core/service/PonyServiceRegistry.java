@@ -30,7 +30,6 @@ public class PonyServiceRegistry {
     }
 
     public static void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
-
         final Class<?> superClass = classObject.getSuperclass();
 
         if (superClass != null) getGeneralizations(superClass, generalizations);

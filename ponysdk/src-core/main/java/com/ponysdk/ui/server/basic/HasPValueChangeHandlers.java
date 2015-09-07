@@ -38,7 +38,7 @@ public interface HasPValueChangeHandlers<T> {
 
     void addValueChangeHandler(PValueChangeHandler<T> handler);
 
-    void removeValueChangeHandler(PValueChangeHandler<T> handler);
+    boolean removeValueChangeHandler(PValueChangeHandler<T> handler);
 
     Collection<PValueChangeHandler<T>> getValueChangeHandlers();
 }
