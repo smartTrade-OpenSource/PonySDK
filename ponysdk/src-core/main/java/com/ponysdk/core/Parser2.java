@@ -278,4 +278,10 @@ public class Parser2 implements Parser {
         }
     }
 
+    @Override
+    public void reset() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

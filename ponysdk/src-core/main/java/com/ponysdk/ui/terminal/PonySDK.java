@@ -224,6 +224,8 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     @Override
     public void disconnected() {
         log.info("WebSoket disconnected");
+
+        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
     }
 
     @Override

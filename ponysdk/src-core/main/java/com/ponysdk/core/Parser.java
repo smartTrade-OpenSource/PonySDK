@@ -10,6 +10,8 @@ import com.ponysdk.ui.terminal.model.Model;
 
 public interface Parser {
 
+    void reset();
+
     void beginObject();
 
     void endObject();

@@ -72,7 +72,7 @@ public class BasicEntryPoint implements EntryPoint {
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    System.err.println("Click " + event.toString());
+                    button.setText("" + System.currentTimeMillis());
                 }
             });
 

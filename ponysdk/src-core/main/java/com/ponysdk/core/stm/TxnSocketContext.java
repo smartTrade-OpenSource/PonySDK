@@ -51,6 +51,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
         if (polling) return;
         parser.endOfParsing();
         socket.flush();
+        parser.reset();
     }
 
     public void switchToPollingMode() {

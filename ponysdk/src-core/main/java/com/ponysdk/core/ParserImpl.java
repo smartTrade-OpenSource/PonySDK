@@ -51,6 +51,11 @@ public class ParserImpl implements Parser {
     }
 
     @Override
+    public void reset() {
+        buffer = null;
+    }
+
+    @Override
     public void beginObject() {
         if (buffer == null) {
             buffer = socket.getByteBuffer();
@@ -76,7 +81,6 @@ public class ParserImpl implements Parser {
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
             buffer.put(CURVE_RIGHT);
             socket.flush();
-            buffer = null;
         }
     }
 

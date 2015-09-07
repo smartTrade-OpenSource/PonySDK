@@ -2,7 +2,6 @@
 package com.ponysdk.core;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -152,16 +151,16 @@ public abstract class AbstractApplicationManager {
             final Txn txn = Txn.get();
             txn.begin(context);
             try {
-                final Long receivedSeqNum = checkClientMessage(data, uiContext);
+                // final Long receivedSeqNum = checkClientMessage(data, uiContext);
 
-                if (receivedSeqNum != null) {
-                    process(uiContext, data);
+                // if (receivedSeqNum != null) {
+                process(uiContext, data);
 
-                    final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
-                    for (final JsonObject jsoObject : datas) {
-                        process(uiContext, jsoObject);
-                    }
-                }
+                // final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+                // for (final JsonObject jsoObject : datas) {
+                // process(uiContext, jsoObject);
+                // }
+                // }
 
                 txn.commit();
             } catch (final Throwable e) {

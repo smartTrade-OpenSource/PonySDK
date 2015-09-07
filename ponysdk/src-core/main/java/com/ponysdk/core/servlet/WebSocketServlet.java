@@ -100,8 +100,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void flush() {
-            System.err.println("Flush");
-
             // onBeforeSendMessage();
             try {
                 // iF ((SESSION != NULL) && (SESSION.ISOPEN())) {
@@ -180,8 +178,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public void onWebSocketText(final String text) {
             onBeforeMessageReceived(text);
             try {
-                System.err.println("Text received : " + text);
-
                 request.setText(text);
                 applicationManager.process(context);
                 // uiContext.notifyMessageReceived();

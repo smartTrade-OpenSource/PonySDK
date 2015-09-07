@@ -159,7 +159,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void onCommunicationError(final Throwable exception) {
-
         rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
         if (pendingClose) return;
