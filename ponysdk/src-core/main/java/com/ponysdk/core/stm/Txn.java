@@ -66,7 +66,7 @@ public class Txn {
             // uiContext.getSession().getId();
             // log.error(msg, e);
             // throw new RuntimeException(msg);
-            throw new RuntimeException("TMP");
+            throw new RuntimeException("TMP", e);
         }
     }
 

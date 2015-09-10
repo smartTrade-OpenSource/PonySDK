@@ -42,7 +42,7 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
                     final PTInstruction eventInstruction = new PTInstruction();
 
                     eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(Model.VALUE, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);

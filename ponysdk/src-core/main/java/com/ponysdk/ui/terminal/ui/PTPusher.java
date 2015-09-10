@@ -54,7 +54,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
 
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.setObjectID(create.getObjectID());
-            eventInstruction.put(Model.TYPE_EVENT);
+            // eventInstruction.put(Model.TYPE_EVENT);
             eventInstruction.put(Model.ERROR_MSG, "WebSocket not supported");
             uiService.sendDataToServer(eventInstruction);
 
@@ -67,7 +67,7 @@ public class PTPusher extends AbstractPTObject implements CommunicationErrorEven
                 public boolean execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(create.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.POLL, true);
                     uiService.sendDataToServer(eventInstruction);
                     return !hasCommunicationError;

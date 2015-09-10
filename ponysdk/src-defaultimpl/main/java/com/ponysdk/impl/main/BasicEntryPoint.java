@@ -23,16 +23,17 @@
 
 package com.ponysdk.impl.main;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.json.JsonObject;
 
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class BasicEntryPoint implements EntryPoint {
 
@@ -60,32 +61,48 @@ public class BasicEntryPoint implements EntryPoint {
         // grid.setWidget(i, j, new PLabel(i + "-" + j));
         // }
         // }
-        for (int k = 0; k < 1; k++) {
+
+        final Map<Integer, PLabel> labels = new HashMap<>();
+
+        for (int k = 0; k < 100; k++) {
 
             // final PElement child = new PElement("div");
             // child.setInnerText(i + " => Element ");
             // child.setStyleProperty("border", "1px solid red");
 
-            final PButton button = new PButton(k + " => Button");
-
-            button.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    button.setText("" + System.currentTimeMillis());
-                }
-            });
-
-            PRootPanel.get().add(button);
+            // final PButton button = new PButton(k + " => Button");
+            //
+            // button.addClickHandler(new PClickHandler() {
+            //
+            // @Override
+            // public void onClick(final PClickEvent event) {
+            // button.setText("" + System.currentTimeMillis());
+            // }
+            // });
+            //
+            // PRootPanel.get().add(button);
             // final PTextBox textBox = new PTextBox(k + " => Button");
+            //
+            // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
+            //
+            // @Override
+            // public void onValueChange(final PValueChangeEvent<String> event) {
+            // System.err.println("On value Changed : " + event.getValue());
+            // }
+            // });
+
             // PRootPanel.get().add(textBox);
 
-            // final PLabel label = new PLabel(i + " => Label");
-            // PRootPanel.get().add(label);
+            final PLabel label = new PLabel(k + " => Label");
+
+            labels.put(k, label);
+
+            PRootPanel.get().add(label);
             //
             // final PCheckBox checkBox = new PCheckBox("Check");
             // checkBox.setEnabled(false);
             // checkBox.setValue(true);
+            // PRootPanel.get().add(checkBox);
             //
             // final PListBox listBox = new PListBox();
             // listBox.setWidth("150px");
@@ -97,6 +114,14 @@ public class BasicEntryPoint implements EntryPoint {
             // PRootPanel.get().add(listBox);
 
         }
+
+        while (true) {
+            final String currentTimeMillis = Long.toString(System.currentTimeMillis());
+            for (int k = 0; k < 100; k++) {
+                labels.get(k).setText(currentTimeMillis);
+            }
+        }
+
         // PScript.execute("window.alert('coucoucou' + (1 + 6));", new ExecutionCallback() {
         //
         // @Override
@@ -139,9 +164,9 @@ public class BasicEntryPoint implements EntryPoint {
         //
         // PRootLayoutPanel.get().add(dockLayoutPanel);
 
-        final long stop = System.currentTimeMillis();
-
-        System.err.println("Time to flush : " + (stop - start));
+        // final long stop = System.currentTimeMillis();
+        //
+        // System.err.println("Time to flush : " + (stop - start));
 
         // uiContext.getHistory().newItem("", false);
     }

@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
@@ -464,7 +466,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_KEY_DOM_HANDLER.getKey())) {
+        if (instruction.containsKey(Model.DOM_HANDLER_TYPE.getKey())) {
 
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(Model.DOM_HANDLER_TYPE.getKey())];
             switch (domHandler) {
@@ -543,15 +545,24 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
-        event.setX(instruction.getInt(Model.X.getKey()));
-        event.setY(instruction.getInt(Model.Y.getKey()));
-        event.setNativeButton(instruction.getInt(Model.NATIVE_BUTTON.getKey()));
-        event.setClientX(instruction.getInt(Model.CLIENT_X.getKey()));
-        event.setClientY(instruction.getInt(Model.CLIENT_Y.getKey()));
-        event.setSourceAbsoluteLeft((int) instruction.getJsonNumber(Model.SOURCE_ABSOLUTE_LEFT.getKey()).doubleValue());
-        event.setSourceAbsoluteTop((int) instruction.getJsonNumber(Model.SOURCE_ABSOLUTE_TOP.getKey()).doubleValue());
-        event.setSourceOffsetHeight((int) instruction.getJsonNumber(Model.SOURCE_OFFSET_HEIGHT.getKey()).doubleValue());
-        event.setSourceOffsetWidth((int) instruction.getJsonNumber(Model.SOURCE_OFFSET_WIDTH.getKey()).doubleValue());
+        if (instruction.containsKey(Model.EVENT_INFO.getKey())) {
+            final JsonArray eventInfo = instruction.getJsonArray(Model.EVENT_INFO.getKey());
+
+            event.setX(((JsonNumber) eventInfo.get(0)).intValue());
+            event.setY(((JsonNumber) eventInfo.get(1)).intValue());
+            event.setClientX(((JsonNumber) eventInfo.get(2)).intValue());
+            event.setClientY(((JsonNumber) eventInfo.get(3)).intValue());
+            event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
+        }
+
+        if (instruction.containsKey(Model.WIDGET_POSITION.getKey())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getKey());
+
+            event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
+            event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());
+            event.setSourceOffsetHeight(((JsonNumber) widgetInfo.get(2)).intValue());
+            event.setSourceOffsetWidth(((JsonNumber) widgetInfo.get(3)).intValue());
+        }
 
         fireEvent(event);
     }

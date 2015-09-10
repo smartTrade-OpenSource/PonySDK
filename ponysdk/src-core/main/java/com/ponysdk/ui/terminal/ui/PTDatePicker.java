@@ -64,7 +64,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 public void onShowRange(final ShowRangeEvent<Date> event) {
                     final PTInstruction instruction = new PTInstruction();
                     instruction.setObjectID(instruction.getObjectID());
-                    instruction.put(Model.TYPE_EVENT);
+                    // instruction.put(Model.TYPE_EVENT);
                     instruction.put(Model.HANDLER_SHOW_RANGE);
                     instruction.put(Model.START, Long.toString(event.getStart().getTime()));
                     instruction.put(Model.END, Long.toString(event.getEnd().getTime()));
@@ -94,7 +94,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(addHandler.getObjectID());
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
         instruction.put(Model.VALUE, date);
         instruction.put(Model.YEAR, year);

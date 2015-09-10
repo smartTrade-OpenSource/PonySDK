@@ -26,6 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
@@ -221,10 +223,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.HANDLER_POPUP_POSITION_CALLBACK.getKey())) {
-            final Integer windowWidth = instruction.getInt(Model.OFFSETWIDTH.getKey());
-            final Integer windowHeight = instruction.getInt(Model.OFFSETHEIGHT.getKey());
-            final Integer clientWith = instruction.getInt(Model.CLIENT_WIDTH.getKey());
-            final Integer clientHeight = instruction.getInt(Model.CLIENT_HEIGHT.getKey());
+            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getKey());
+
+            final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();
+            final Integer windowHeight = ((JsonNumber) widgetInfo.get(1)).intValue();
+            final Integer clientWith = ((JsonNumber) widgetInfo.get(2)).intValue();
+            final Integer clientHeight = ((JsonNumber) widgetInfo.get(3)).intValue();
+
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
             saveUpdate(Model.POPUP_POSITION_AND_SHOW);

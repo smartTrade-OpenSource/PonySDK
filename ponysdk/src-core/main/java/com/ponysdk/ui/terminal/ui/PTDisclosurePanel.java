@@ -58,7 +58,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(Model.TYPE_EVENT);
+                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
@@ -70,7 +70,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(Model.TYPE_EVENT);
+                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }

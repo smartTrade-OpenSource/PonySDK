@@ -142,12 +142,12 @@ public class UIContext {
                 return;
             }
 
-            if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
-                if (clientDataOutput != null) {
-                    clientDataOutput.onClientData(object, jsonObject);
-                }
-                object.onClientData(jsonObject);
+            // if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
+            if (clientDataOutput != null) {
+                clientDataOutput.onClientData(object, jsonObject);
             }
+            object.onClientData(jsonObject);
+            // }
         }
     }
 

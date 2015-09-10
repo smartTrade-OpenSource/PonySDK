@@ -119,7 +119,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(addInstruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_RESIZE_HANDLER);
                     eventInstruction.put(Model.VALUE.getKey(), jsonArray);
                     uiService.sendDataToServer(eventInstruction);

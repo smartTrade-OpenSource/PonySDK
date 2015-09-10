@@ -190,14 +190,38 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    // private final List<JSONObject> instructions = new ArrayList<>();
+
     @Override
     public void update(final JSONObject data) {
-        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        // instructions.add(data);
 
+        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
             processInstruction(instruction);
         }
+
+        // final elemental.html.Window window = Browser.getWindow();
+        //
+        // window.webkitRequestAnimationFrame(new RequestAnimationFrameCallback() {
+        //
+        // @Override
+        // public boolean onRequestAnimationFrameCallback(final double time) {
+        // if (instructions.isEmpty()) return true;
+        //
+        // for (final JSONObject json : instructions) {
+        // final JSONArray jsonArray = json.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        // for (int i = 0; i < jsonArray.size(); i++) {
+        // final PTInstruction instruction = new
+        // PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
+        // processInstruction(instruction);
+        // }
+        // }
+        // instructions.clear();
+        // return true;
+        // }
+        // });
 
         /**
          * final long receivedSeqNum = (long)
@@ -377,7 +401,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void flushEvents() {
         if (stackedInstructions.isEmpty()) return;
+
         sendDataToServer(stackedInstructions);
+
         stackedInstructions.clear();
     }
 
@@ -390,9 +416,60 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    public void sendDataToServer(final List<PTInstruction> instructions) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
+
+        final JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < instructions.size(); i++) {
+            jsonArray.set(0, instructions.get(0));
+        }
+
+        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
+
+        if (!stackedErrors.isEmpty()) {
+            final JSONArray errors = new JSONArray();
+            int i = 0;
+            for (final JSONObject jsoObject : stackedErrors) {
+                errors.set(i++, jsoObject);
+            }
+            stackedErrors.clear();
+            requestData.put(Model.APPLICATION_ERRORS, errors);
+        }
+
+        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
+
+        log.info("Data to send" + requestData.toString());
+        log.info("Request Builder" + requestBuilder);
+
+        requestBuilder.send(requestData.toString());
+    }
+
     @Override
     public void sendDataToServer(final PTInstruction instruction) {
-        sendDataToServer((Element) null, instruction);
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
+
+        final JSONArray jsonArray = new JSONArray();
+        jsonArray.set(0, instruction);
+        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
+
+        if (!stackedErrors.isEmpty()) {
+            final JSONArray errors = new JSONArray();
+            int i = 0;
+            for (final JSONObject jsoObject : stackedErrors) {
+                errors.set(i++, jsoObject);
+            }
+            stackedErrors.clear();
+            requestData.put(Model.APPLICATION_ERRORS, errors);
+        }
+
+        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
+
+        log.info("Data to send" + requestData.toString());
+        log.info("Request Builder" + requestBuilder);
+
+        requestBuilder.send(requestData.toString());
     }
 
     @Override
@@ -401,37 +478,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             log.info("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
         }
 
-        final List<PTInstruction> instructions = new ArrayList<>();
-        instructions.add(instruction);
-        sendDataToServer(instructions);
-    }
-
-    private void sendDataToServer(final List<PTInstruction> instructions) {
-        final PTInstruction requestData = new PTInstruction();
-        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
-
-        final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < instructions.size(); i++) {
-            jsonArray.set(i, instructions.get(i));
-        }
-
-        final JSONArray errors = new JSONArray();
-        if (!stackedErrors.isEmpty()) {
-            int i = 0;
-            for (final JSONObject jsoObject : stackedErrors) {
-                errors.set(i++, jsoObject);
-            }
-            stackedErrors.clear();
-        }
-
-        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
-        requestData.put(Model.APPLICATION_ERRORS, errors);
-        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
-
-        log.info("Data to send" + requestData.toString());
-        log.info("Request Builder" + requestBuilder);
-
-        requestBuilder.send(requestData.toString());
+        sendDataToServer(instruction);
     }
 
     private Timer scheduleLoadingMessageBox() {

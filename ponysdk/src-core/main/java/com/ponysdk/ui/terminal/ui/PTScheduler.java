@@ -113,7 +113,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(Model.TYPE_EVENT);
+            // instruction.put(Model.TYPE_EVENT);
             instruction.put(Model.HANDLER_SCHEDULER);
             instruction.put(Model.ID, commandID);
             instruction.put(Model.FIXRATE, delay);
@@ -138,7 +138,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(Model.TYPE_EVENT);
+            // instruction.put(Model.TYPE_EVENT);
             instruction.put(Model.HANDLER_SCHEDULER);
             instruction.put(Model.ID, commandID);
             instruction.put(Model.FIXDELAY, delay);

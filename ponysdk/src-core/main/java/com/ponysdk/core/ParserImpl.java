@@ -3,6 +3,10 @@ package com.ponysdk.core;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -26,6 +30,10 @@ public class ParserImpl implements Parser {
     private static final byte COLON = (byte) ':';
     private static final byte COMMA = (byte) ',';
     private static final byte QUOTE = (byte) '\"';
+    private static final byte[] COMMA_CURVE_LEFT = { COMMA, CURVE_LEFT };
+    private static final byte[] CURVE_RIGHT_BRACKET_RIGHT_COMMA = { CURVE_RIGHT, BRACKET_RIGHT, COMMA };
+
+    private static final byte[] BRACKET_RIGHT_COMMA = { BRACKET_RIGHT, COMMA };
 
     private static byte[] TRUE;
     private static byte[] FALSE;
@@ -42,9 +50,46 @@ public class ParserImpl implements Parser {
         }
     }
 
+    private static final byte[] COLON_NULL;
+
+    static {
+        COLON_NULL = new byte[NULL.length + 1];
+
+        COLON_NULL[0] = COLON;
+
+        for (int i = 0; i < NULL.length; i++) {
+            COLON_NULL[1 + i] = NULL[i];
+        }
+    }
+
+    private static byte[] BEGIN_OBJECT;
+
+    static {
+        final byte[] bytesKey = Model.APPLICATION_INSTRUCTIONS.getBytesKey();
+
+        BEGIN_OBJECT = new byte[bytesKey.length + 6];
+
+        BEGIN_OBJECT[0] = CURVE_LEFT;
+        BEGIN_OBJECT[1] = QUOTE;
+
+        for (int i = 0; i < bytesKey.length; i++) {
+            BEGIN_OBJECT[2 + i] = bytesKey[i];
+        }
+
+        BEGIN_OBJECT[BEGIN_OBJECT.length - 4] = QUOTE;
+        BEGIN_OBJECT[BEGIN_OBJECT.length - 3] = COLON;
+        BEGIN_OBJECT[BEGIN_OBJECT.length - 2] = BRACKET_LEFT;
+        BEGIN_OBJECT[BEGIN_OBJECT.length - 1] = CURVE_LEFT;
+    }
+
     private final WebSocket socket;
 
     private ByteBuffer buffer;
+
+    private final CharsetEncoder UTF8Encoder = Charset.forName("UTF8").newEncoder();
+    private final CharsetEncoder ACSIIEncoder = Charset.forName("US-ASCII").newEncoder();
+
+    private final CharBuffer charBuffer = CharBuffer.allocate(10000);
 
     public ParserImpl(final WebSocket socket) {
         this.socket = socket;
@@ -55,6 +100,34 @@ public class ParserImpl implements Parser {
         buffer = null;
     }
 
+    private ByteBuffer UTF8StringToByteBuffer(final String value) {
+        try {
+            charBuffer.clear();
+            for (int i = 0; i < value.length(); i++) {
+                charBuffer.put(value.charAt(i));
+            }
+            charBuffer.flip();
+            return UTF8Encoder.encode(charBuffer);
+        } catch (final CharacterCodingException e) {
+            log.error("Cannot convert string");
+        }
+        return null;
+    }
+
+    private ByteBuffer ASCIIStringToByteBuffer(final String value) {
+        try {
+            charBuffer.clear();
+            for (int i = 0; i < value.length(); i++) {
+                charBuffer.put(value.charAt(i));
+            }
+            charBuffer.flip();
+            return ACSIIEncoder.encode(charBuffer);
+        } catch (final CharacterCodingException e) {
+            log.error("Cannot convert string");
+        }
+        return null;
+    }
+
     @Override
     public void beginObject() {
         if (buffer == null) {
@@ -62,25 +135,22 @@ public class ParserImpl implements Parser {
         }
 
         if (buffer.position() == 0) {
-            buffer.put(CURVE_LEFT);
-            parseKey(Model.APPLICATION_INSTRUCTIONS.getBytesKey());
-            buffer.put(COLON);
-            buffer.put(BRACKET_LEFT);
+            buffer.put(BEGIN_OBJECT);
         } else {
-            buffer.put(COMMA);
+            buffer.put(COMMA_CURVE_LEFT);
         }
-        buffer.put(CURVE_LEFT);
     }
 
     @Override
     public void endObject() {
-        buffer.put(CURVE_RIGHT);
         if (buffer.position() >= 1024) {
-            buffer.put(BRACKET_RIGHT);
-            buffer.put(COMMA);
+            buffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
             buffer.put(CURVE_RIGHT);
             socket.flush();
+            buffer = null;
+        } else {
+            buffer.put(CURVE_RIGHT);
         }
     }
 
@@ -113,18 +183,14 @@ public class ParserImpl implements Parser {
 
     @Override
     public void parse(final JsonObject jsonObject) {
-        try {
-            buffer.put(jsonObject.toString().getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + jsonObject, e);
-        }
+        buffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
     @Override
     public void parse(final Model model) {
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
-        buffer.put(NULL);
+
+        buffer.put(COLON_NULL);
     }
 
     @Override
@@ -132,24 +198,16 @@ public class ParserImpl implements Parser {
         parseKey(model.getBytesKey());
 
         buffer.put(COLON);
-        try {
-            buffer.put(QUOTE);
-            buffer.put(value.getBytes("UTF8"));
-            buffer.put(QUOTE);
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + value, e);
-        }
+        buffer.put(QUOTE);
+        buffer.put(UTF8StringToByteBuffer(value));
+        buffer.put(QUOTE);
     }
 
     @Override
     public void parse(final Model model, final JsonObjectBuilder builder) {
         parseKey(model.getBytesKey());
         buffer.put(COLON);
-        try {
-            buffer.put(builder.build().toString().getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + builder.toString(), e);
-        }
+        buffer.put(UTF8StringToByteBuffer(builder.build().toString()));
     }
 
     @Override
@@ -170,11 +228,7 @@ public class ParserImpl implements Parser {
 
         buffer.put(COLON);
         // buffer.putLong(value);//FIXME JS decoder
-        try {
-            buffer.put(String.valueOf(value).getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
@@ -182,11 +236,7 @@ public class ParserImpl implements Parser {
         parseKey(model.getBytesKey());
         buffer.put(COLON);
         // buffer.putInt(value);//FIXME JS decoder
-        try {
-            buffer.put(String.valueOf(value).getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
@@ -194,11 +244,7 @@ public class ParserImpl implements Parser {
         parseKey(model.getBytesKey());
         buffer.put(COLON);
         // buffer.putDouble(value);//FIXME JS decoder
-        try {
-            buffer.put(String.valueOf(value).getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + value, e);
-        }
+        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
@@ -211,14 +257,10 @@ public class ParserImpl implements Parser {
 
         while (iterator.hasNext()) {
             final String value = iterator.next();
-            try {
-                buffer.put(QUOTE);
-                buffer.put(value.getBytes("UTF8"));
-                buffer.put(QUOTE);
-                if (iterator.hasNext()) buffer.put(COMMA);
-            } catch (final UnsupportedEncodingException e) {
-                log.error("Cannot encode value " + value, e);
-            }
+            buffer.put(QUOTE);
+            buffer.put(UTF8StringToByteBuffer(value));
+            buffer.put(QUOTE);
+            if (iterator.hasNext()) buffer.put(COMMA);
         }
         endArray();
     }
@@ -227,17 +269,14 @@ public class ParserImpl implements Parser {
     public void parse(final Model model, final JsonObject jsonObject) {
         parseKey(model.getBytesKey());
         buffer.put(COLON);
-        try {
-            buffer.put(jsonObject.toString().getBytes("UTF8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot encode value " + jsonObject, e);
-        }
+        buffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
     public void endOfParsing() {
+        if (buffer == null) return;
+
         if (buffer.position() != 0) {
-            buffer.put(BRACKET_RIGHT);
-            buffer.put(COMMA);
+            buffer.put(BRACKET_RIGHT_COMMA);
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
             buffer.put(CURVE_RIGHT);
         }

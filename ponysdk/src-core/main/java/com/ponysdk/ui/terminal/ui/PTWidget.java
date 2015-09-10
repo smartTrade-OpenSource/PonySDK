@@ -124,16 +124,24 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        eventInstruction.put(Model.CLIENT_X, event.getClientX());
-        eventInstruction.put(Model.CLIENT_Y, event.getClientY());
-        eventInstruction.put(Model.X, event.getX());
-        eventInstruction.put(Model.Y, event.getY());
-        eventInstruction.put(Model.NATIVE_BUTTON, event.getNativeButton());
-        eventInstruction.put(Model.SOURCE_ABSOLUTE_LEFT, widget.getAbsoluteLeft());
-        eventInstruction.put(Model.SOURCE_ABSOLUTE_TOP, widget.getAbsoluteTop());
-        eventInstruction.put(Model.SOURCE_OFFSET_HEIGHT, widget.getOffsetHeight());
-        eventInstruction.put(Model.SOURCE_OFFSET_WIDTH, widget.getOffsetWidth());
+
+        final JSONArray eventInfo = new JSONArray();
+        eventInfo.set(0, new JSONNumber(event.getClientX()));
+        eventInfo.set(1, new JSONNumber(event.getClientY()));
+        eventInfo.set(2, new JSONNumber(event.getX()));
+        eventInfo.set(3, new JSONNumber(event.getY()));
+        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+        eventInstruction.put(Model.EVENT_INFO, eventInfo);
+
+        final JSONArray widgetInfo = new JSONArray();
+        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
+        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
+        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
+        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
+        eventInstruction.put(Model.WIDGET_POSITION, widgetInfo);
+
         uiService.sendDataToServer(widget, eventInstruction);
+
         preventOrStopEvent(event);
     }
 
@@ -146,8 +154,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(Model.TYPE_EVENT);
-        eventInstruction.put(Model.HANDLER_KEY_DOM_HANDLER);
+        // eventInstruction.put(Model.TYPE_EVENT);
+        // eventInstruction.put(Model.HANDLER_KEY_DOM_HANDLER);
         eventInstruction.put(Model.DOM_HANDLER_TYPE, domHandlerType.ordinal());
         return eventInstruction;
     }
@@ -276,7 +284,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction();
                             changeHandlerInstruction.setObjectID(addHandler.getObjectID());
-                            changeHandlerInstruction.put(Model.TYPE_EVENT);
+                            // changeHandlerInstruction.put(Model.TYPE_EVENT);
                             changeHandlerInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(Model.VALUE, textBox.getText());
 

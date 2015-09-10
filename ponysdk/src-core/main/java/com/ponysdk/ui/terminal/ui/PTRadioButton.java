@@ -79,7 +79,7 @@ public class PTRadioButton extends PTCheckBox {
     protected void fireInstruction(final long objectID, final UIService uiService, final boolean value) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(objectID);
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
         instruction.put(Model.VALUE, value);
         uiService.sendDataToServer(cast(), instruction);

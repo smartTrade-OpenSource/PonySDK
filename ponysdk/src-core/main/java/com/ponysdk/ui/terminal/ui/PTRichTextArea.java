@@ -38,7 +38,7 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHa
     public void onBlur(final BlurEvent event) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(getObjectID());
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
         instruction.put(Model.HTML, uiObject.getHTML());
         uiService.sendDataToServer(uiObject, instruction);

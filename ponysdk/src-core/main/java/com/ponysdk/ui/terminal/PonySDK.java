@@ -180,7 +180,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(Long.parseLong(objectID));
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
     }
@@ -208,7 +208,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
         if (uiBuilder != null) {
             final PTInstruction instruction = new PTInstruction();
-            instruction.put(Model.TYPE_EVENT);
+            // instruction.put(Model.TYPE_EVENT);
             instruction.put(Model.ERROR_MSG, e.getMessage());
             uiBuilder.sendDataToServer(instruction);
             log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);

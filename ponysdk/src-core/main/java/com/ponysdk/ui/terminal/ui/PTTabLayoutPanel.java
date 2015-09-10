@@ -66,7 +66,7 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(Model.INDEX, uiObject.getSelectedIndex());
                     uiService.sendDataToServer(uiObject, eventInstruction);
@@ -79,7 +79,7 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(Model.INDEX, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);

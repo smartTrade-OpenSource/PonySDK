@@ -91,7 +91,7 @@ public class PTWindow extends AbstractPTObject {
     public void onClose() {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(id);
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.HANDLER_CLOSE_HANDLER);
         uiService.sendDataToServer(window, instruction);
     }

@@ -67,7 +67,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
                 public void execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_COMMAND);
                     uiService.sendDataToServer(eventInstruction);
                 }

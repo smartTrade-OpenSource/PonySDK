@@ -1,6 +1,7 @@
 
 package com.ponysdk.core.servlet;
 
+import java.io.EOFException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -100,30 +101,38 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void flush() {
-            // onBeforeSendMessage();
-            try {
-                // iF ((SESSION != NULL) && (SESSION.ISOPEN())) {
-                // SESSION.GETREMOTE().SENDBYTES(BUFFER); // CALLBACK NEEDED ?
-                // } ELSE {
-                // // ??
-                // }
-                flush(buffer);
+            if (session == null || !session.isOpen()) {
+                log.info("Session is down");
+            } else {
+                // onBeforeSendMessage();
+                try {
+                    flush(buffer);
 
-            } catch (final Throwable t) {
-                log.error("Cannot flush to WebSocket", t);
-            } finally {
-                // onAfterMessageSent();
+                    buffer = null;
+                } catch (final Throwable t) {
+                    log.error("Cannot flush to WebSocket", t);
+                } finally {
+                    // onAfterMessageSent();
+                }
             }
+
         }
 
         private void flush(final ByteBuffer buffer) {
+            if (buffer == null) { return; }
+
             if (buffer.position() != 0) {
                 buffer.flip();
                 final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(buffer);
                 try {
-                    sendBytesByFuture.get(5, TimeUnit.SECONDS);
+                    sendBytesByFuture.get(25, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    e.printStackTrace();
+                    if (e instanceof EOFException) {
+                        log.info("Remote Connection is closed");
+                    } else {
+                        log.error("Cannot stream data");
+                    }
+
                 }
                 buffer.clear();
             }
@@ -199,6 +208,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public ByteBuffer getByteBuffer() {
             try {
+                // System.err.println("Poll buffer");
                 buffer = bufferQueue.poll(5, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 e.printStackTrace();

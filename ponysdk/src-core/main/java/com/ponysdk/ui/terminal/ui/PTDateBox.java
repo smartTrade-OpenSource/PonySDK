@@ -76,7 +76,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     protected void triggerEvent(final PTInstruction addHandler, final UIService uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(addHandler.getObjectID());
-        instruction.put(Model.TYPE_EVENT);
+        // instruction.put(Model.TYPE_EVENT);
         instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
         instruction.put(Model.VALUE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);

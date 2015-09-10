@@ -34,6 +34,8 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
@@ -80,7 +82,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                instruction.put(Model.TYPE_EVENT);
+                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }
@@ -99,12 +101,15 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 public void execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(instrcution.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_POPUP_POSITION_CALLBACK);
-                    eventInstruction.put(Model.OFFSETWIDTH, popup.getOffsetWidth());
-                    eventInstruction.put(Model.OFFSETHEIGHT, popup.getOffsetHeight());
-                    eventInstruction.put(Model.CLIENT_WIDTH, Window.getClientWidth());
-                    eventInstruction.put(Model.CLIENT_HEIGHT, Window.getClientHeight());
+
+                    final JSONArray widgetInfo = new JSONArray();
+                    widgetInfo.set(0, new JSONNumber(popup.getOffsetWidth()));
+                    widgetInfo.set(1, new JSONNumber(popup.getOffsetHeight()));
+                    widgetInfo.set(3, new JSONNumber(Window.getClientWidth()));
+                    widgetInfo.set(4, new JSONNumber(Window.getClientHeight()));
+
+                    eventInstruction.put(Model.HANDLER_POPUP_POSITION_CALLBACK, widgetInfo);
+
                     uiService.sendDataToServer(cast(), eventInstruction);
                 }
             });

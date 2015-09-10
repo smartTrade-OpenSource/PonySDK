@@ -49,7 +49,7 @@ public class PTTree extends PTWidget<Tree> {
                     final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.TYPE_EVENT);
+                    // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(Model.WIDGET, ptObject.getObjectID());
                     uiService.sendDataToServer(uiObject, eventInstruction);
