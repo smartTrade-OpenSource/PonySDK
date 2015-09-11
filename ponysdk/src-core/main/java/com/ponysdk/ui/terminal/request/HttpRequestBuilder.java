@@ -22,18 +22,17 @@ public class HttpRequestBuilder extends RequestBuilder {
 
     public HttpRequestBuilder(final RequestCallback callback) {
         super(callback);
-        requestBuilder.setTimeoutMillis(5000); // 5secs
     }
 
     @Override
     public void send(final String s) {
+        log.log(Level.INFO, "Sending request " + s);
         try {
             UIBuilder.getRootEventBus().fireEvent(new HttpRequestSendEvent());
             requestBuilder.sendRequest(s, new com.google.gwt.http.client.RequestCallback() {
 
                 @Override
                 public void onResponseReceived(final Request request, final Response response) {
-
                     UIBuilder.getRootEventBus().fireEvent(new HttpResponseReceivedEvent());
 
                     if (response.getStatusCode() != 200) {

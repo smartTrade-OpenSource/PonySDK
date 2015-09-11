@@ -82,6 +82,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
+    private static final long maxOutOfSyncDuration = 10000;
+
     private static EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
@@ -106,6 +108,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     private long lastReceived = -1;
     private long nextSent = 1;
+    private long lastSyncErrorTimestamp = -1;
+    private boolean outOfSync = false;
 
     public static long sessionID;
 
@@ -194,14 +198,29 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void update(final JSONObject data) {
+        if (outOfSync) return;
 
         final long receivedSeqNum = (long) data.get(APPLICATION.SEQ_NUM).isNumber().doubleValue();
         if ((lastReceived + 1) != receivedSeqNum) {
             incomingMessageQueue.put(receivedSeqNum, data);
             log.log(Level.INFO, "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
+            if (lastSyncErrorTimestamp > 0) {
+                final long now = System.currentTimeMillis();
+                final long outOfSyncDuration = now - lastSyncErrorTimestamp;
+                if (outOfSyncDuration > maxOutOfSyncDuration) {
+                    log.info("Unable to sync message for " + outOfSyncDuration + " ms. Reloading application.");
+                    outOfSync = true;
+                    Window.alert("Technical incident: Application out of sync. Click OK to reload.");
+                    PonySDK.reload();
+                    return;
+                }
+            } else {
+                lastSyncErrorTimestamp = System.currentTimeMillis();
+            }
             return;
         }
         lastReceived = receivedSeqNum;
+        lastSyncErrorTimestamp = -1;
 
         final List<PTInstruction> instructions = new ArrayList<PTInstruction>();
         final JSONArray jsonArray = data.get(APPLICATION.INSTRUCTIONS).isArray();
@@ -232,8 +251,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 try {
                     processInstruction(instruction);
                 } catch (final Throwable e) {
-                    log.log(Level.SEVERE,
-                            "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived, e);
+                    log.log(Level.SEVERE, "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: "
+                            + lastReceived, e);
                     stackError(currentInstruction, e);
                 }
             }
