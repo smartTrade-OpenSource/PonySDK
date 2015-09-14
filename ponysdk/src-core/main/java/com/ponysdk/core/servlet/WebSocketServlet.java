@@ -72,10 +72,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     public class JettyWebSocket implements WebSocketListener, com.ponysdk.core.socket.WebSocket {
 
-        // private final long key;
-
-        private UIContext uiContext;
-
         private ConnectionListener listener;
 
         private TxnSocketContext context;
@@ -101,6 +97,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void flush() {
+            final UIContext uiContext = context.getUIContext();
+
+            if (uiContext.isDestroyed()) { throw new IllegalStateException("UI Context has been destroyed"); }
+
             if (session == null || !session.isOpen()) {
                 log.info("Session is down");
             } else {
@@ -156,9 +156,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void onWebSocketConnect(final Session session) {
-            this.session = session;
+            log.info("WebSocket connected from {}", session.getRemoteAddress());
 
-            log.info("Websocket opened");
+            this.session = session;
 
             context = new TxnSocketContext();
             context.setRequest(request);
@@ -179,21 +179,23 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
 
         @Override
-        public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {
-            System.err.println("TonWebSocketBinary");
-        }
+        public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {}
 
         @Override
         public void onWebSocketText(final String text) {
-            onBeforeMessageReceived(text);
-            try {
-                request.setText(text);
-                applicationManager.process(context);
-                // uiContext.notifyMessageReceived();
-            } catch (final Throwable e) {
-                log.error("", e);
-            } finally {
-                onAfterMessageProcessed(text);
+            if (context.getUIContext().isDestroyed()) {
+                log.info("Message dropped, ui context is destroyed");
+            } else {
+                onBeforeMessageReceived(text);
+                try {
+                    context.getUIContext().notifyMessageReceived();
+                    request.setText(text);
+                    applicationManager.process(context);
+                } catch (final Throwable e) {
+                    log.error("Cannot process message from the browser: {}", text, e);
+                } finally {
+                    onAfterMessageProcessed(text);
+                }
             }
         }
 
@@ -208,10 +210,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public ByteBuffer getByteBuffer() {
             try {
-                // System.err.println("Poll buffer");
                 buffer = bufferQueue.poll(5, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
-                e.printStackTrace();
+                log.error("Cannot poll buffer", e);
             }
             return buffer;
         }

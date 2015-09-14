@@ -11,4 +11,6 @@ public abstract class RequestBuilder {
 
     public abstract void send(String s);
 
+    public abstract void sendHeartbeat();
+
 }

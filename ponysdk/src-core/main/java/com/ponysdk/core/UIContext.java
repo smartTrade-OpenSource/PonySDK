@@ -47,6 +47,7 @@ import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
@@ -106,11 +107,19 @@ public class UIContext {
 
     private ClientDataOutput clientDataOutput;
 
-    public UIContext(final Application application) {
+    private boolean destroyed = false;
+
+    private final TxnContext context;
+
+    public UIContext(final Application application, final TxnContext context) {
         this.application = application;
         this.uiContextID = ponyUIContextIDcount.incrementAndGet();
-        this.communicationSanityChecker = new CommunicationSanityChecker(this);
+        this.context = context;
+
+        this.context.setUIContext(this);
         this.application.registerUIContext(this);
+
+        this.communicationSanityChecker = new CommunicationSanityChecker(this);
         this.communicationSanityChecker.start();
     }
 
@@ -419,6 +428,8 @@ public class UIContext {
     public void destroy() {
         // log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID,
         // application.getSession().getId());
+        destroyed = true;
+
         communicationSanityChecker.stop();
         application.unregisterUIContext(uiContextID);
 
@@ -430,8 +441,36 @@ public class UIContext {
         // application.getSession().getId());
     }
 
+    public void sendHeartBeat() {
+        acquire();
+        UIContext.setCurrent(this);
+        try {
+            final Txn txn = Txn.get();
+            txn.begin(context);
+            try {
+                context.sendHeartBeat();
+                txn.commit();
+            } catch (final Throwable e) {
+                log.error("Cannot process client instruction", e);
+                txn.rollback();
+            }
+        } finally {
+            UIContext.remove();
+            release();
+        }
+
+    }
+
     public void addUIContextListener(final UIContextListener listener) {
         uiContextListeners.add(listener);
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public TxnContext getContext() {
+        return context;
     }
 
     @Override
@@ -450,6 +489,11 @@ public class UIContext {
         final UIContext other = (UIContext) obj;
         if (uiContextID != other.uiContextID) return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UIContext [" + application + ", uiContextID=" + uiContextID + ", destroyed=" + destroyed + "]";
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -14,13 +15,29 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.UIContextListener;
-import com.ponysdk.ui.server.basic.PPusher.PusherState;
+import com.ponysdk.core.stm.Txn;
 
-public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService, UIContextListener {
+public class UIScheduledThreadPoolExecutor implements UIContextListener {
 
     private static Logger log = LoggerFactory.getLogger(UIScheduledThreadPoolExecutor.class);
 
     private static UIScheduledThreadPoolExecutor INSTANCE;
+
+    static {
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
+
+            private int i = 0;
+
+            @Override
+            public Thread newThread(final Runnable r) {
+                final Thread t = new Thread(r);
+                t.setName(UIScheduledThreadPoolExecutor.class.getName() + "-" + i++);
+                t.setDaemon(true);
+                return t;
+            }
+        });
+        INSTANCE = new UIScheduledThreadPoolExecutor(executor);
+    }
 
     protected final ScheduledThreadPoolExecutor executor;
     protected Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
@@ -30,29 +47,16 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         this.executor = executor;
     }
 
-    public static UIScheduledThreadPoolExecutor initDefault() {
-        if (INSTANCE != null) throw new IllegalAccessError("Already initialized");
-        INSTANCE = new UIScheduledThreadPoolExecutor(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
-        return INSTANCE;
-    }
-
-    public static UIScheduledThreadPoolExecutor init(final ScheduledThreadPoolExecutor executor) {
-        if (INSTANCE != null) throw new IllegalAccessError("Already initialized");
-        INSTANCE = new UIScheduledThreadPoolExecutor(executor);
-        return INSTANCE;
-    }
-
-    public static UIScheduledThreadPoolExecutor get() {
-        return INSTANCE;
-    }
-
     private void checkUIState() {
         if (UIContext.get() == null) throw new IllegalAccessError("UIScheduledThreadPoolExecutor must be called from UI client code");
-        if (UIContext.get().getPusher() == null) throw new IllegalAccessError("PPusher not initialized");
+        // if (UIContext.get().getPusher() == null) throw new IllegalAccessError("PPusher not initialized");
     }
 
-    @Override
-    public UIRunnable schedule(final Runnable runnable, final long delay, final TimeUnit unit) {
+    public static UIRunnable schedule(final Runnable runnable, final long delay, final TimeUnit unit) {
+        return INSTANCE.schedule0(runnable, delay, unit);
+    }
+
+    public UIRunnable schedule0(final Runnable runnable, final long delay, final TimeUnit unit) {
         checkUIState();
         final UIRunnable uiRunnable = new UIRunnable(runnable, false);
         final ScheduledFuture<?> future = executor.schedule(uiRunnable, delay, unit);
@@ -63,8 +67,11 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         return uiRunnable;
     }
 
-    @Override
-    public UIRunnable scheduleAtFixedRate(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
+    public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
+        return INSTANCE.scheduleAtFixedRate0(runnable, initialDelay, period, unit);
+    }
+
+    public UIRunnable scheduleAtFixedRate0(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
         checkUIState();
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
         final ScheduledFuture<?> future = executor.scheduleAtFixedRate(uiRunnable, initialDelay, period, unit);
@@ -74,8 +81,11 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         return uiRunnable;
     }
 
-    @Override
-    public UIRunnable scheduleWithFixedDelay(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
+    public static UIRunnable scheduleWithFixedDelay(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
+        return INSTANCE.scheduleWithFixedDelay0(runnable, initialDelay, delay, unit);
+    }
+
+    public UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
         checkUIState();
 
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
@@ -106,10 +116,7 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
         public void run() {
             try {
                 if (cancelled) return;
-                if (uiContext.getPusher() == null) return;
-                if (uiContext.getPusher().getPusherState() != PusherState.STOPPED) {
-                    if (!uiContext.getPusher().execute(runnable)) cancel();
-                }
+                if (!execute()) cancel();
             } catch (final Throwable throwable) {
                 log.error("Error occurred", throwable);
                 cancel();
@@ -118,6 +125,40 @@ public class UIScheduledThreadPoolExecutor implements UIScheduledExecutorService
                     purge();
                 }
             }
+        }
+
+        public void begin() {
+            uiContext.acquire();
+            UIContext.setCurrent(uiContext);
+        }
+
+        public void end() {
+            UIContext.remove();
+            uiContext.release();
+        }
+
+        public boolean execute() {
+            try {
+                begin();
+                try {
+                    final Txn txn = Txn.get();
+                    txn.begin(uiContext.getContext());
+                    try {
+                        runnable.run();
+                        txn.commit();
+                    } catch (final Throwable e) {
+                        log.error("Cannot process commmand", e);
+                        txn.rollback();
+                        return false;
+                    }
+                } finally {
+                    end();
+                }
+            } catch (final Throwable e) {
+                log.error("Cannot execute command : " + runnable, e);
+                return false;
+            }
+            return true;
         }
 
         public void cancel() {

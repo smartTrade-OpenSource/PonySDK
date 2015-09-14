@@ -65,7 +65,15 @@ public abstract class PScheduler extends PObject {
         return scheduler;
     }
 
-    public void scheduleFixedRate(final RepeatingCommand cmd, final int delayMs) {
+    public static void scheduleFixedRate(final RepeatingCommand cmd, final int delayMs) {
+        get().scheduleFixedRate0(cmd, delayMs);
+    }
+
+    public static void scheduleFixedDelay(final RepeatingCommand cmd, final int delayMs) {
+        get().scheduleFixedDelay0(cmd, delayMs);
+    }
+
+    private void scheduleFixedRate0(final RepeatingCommand cmd, final int delayMs) {
         final Long existingCommandID = IDByCommand.get(cmd);
         if (existingCommandID != null) {
             scheduleFixedRateCommand(existingCommandID, delayMs);
@@ -77,7 +85,7 @@ public abstract class PScheduler extends PObject {
         }
     }
 
-    public void scheduleFixedDelay(final RepeatingCommand cmd, final int delayMs) {
+    private void scheduleFixedDelay0(final RepeatingCommand cmd, final int delayMs) {
         final Long existingCommandID = IDByCommand.get(cmd);
         if (existingCommandID != null) cancelScheduleCommand(existingCommandID);
 
@@ -85,7 +93,6 @@ public abstract class PScheduler extends PObject {
         scheduleFixedDelayCommand(cmdID, delayMs);
         commandByID.put(cmdID, cmd);
         IDByCommand.put(cmd, cmdID);
-
     }
 
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {

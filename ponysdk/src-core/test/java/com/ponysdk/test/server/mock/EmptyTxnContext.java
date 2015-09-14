@@ -83,4 +83,10 @@ public class EmptyTxnContext implements TxnContext {
     @Override
     public void setUIContext(final UIContext uiContext) {}
 
+    @Override
+    public void sendHeartBeat() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

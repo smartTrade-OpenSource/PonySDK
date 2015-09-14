@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -75,7 +77,7 @@ import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
-public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
+public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler, AnimationCallback {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
@@ -109,6 +111,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private CommunicationErrorHandler communicationErrorHandler;
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
+    private final List<JSONObject> instructions = new ArrayList<>();
+
     public UIBuilder() {
         History.addValueChangeHandler(this);
 
@@ -122,6 +126,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
+
     }
 
     public void init(final int ID, final RequestBuilder requestBuilder) {
@@ -190,38 +195,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    // private final List<JSONObject> instructions = new ArrayList<>();
-
     @Override
     public void update(final JSONObject data) {
-        // instructions.add(data);
+        instructions.add(data);
 
-        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-            processInstruction(instruction);
-        }
+        AnimationScheduler.get().requestAnimationFrame(this);
 
-        // final elemental.html.Window window = Browser.getWindow();
         //
-        // window.webkitRequestAnimationFrame(new RequestAnimationFrameCallback() {
-        //
-        // @Override
-        // public boolean onRequestAnimationFrameCallback(final double time) {
-        // if (instructions.isEmpty()) return true;
-        //
-        // for (final JSONObject json : instructions) {
-        // final JSONArray jsonArray = json.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        // final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
         // for (int i = 0; i < jsonArray.size(); i++) {
         // final PTInstruction instruction = new
         // PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
         // processInstruction(instruction);
         // }
-        // }
-        // instructions.clear();
-        // return true;
-        // }
-        // });
 
         /**
          * final long receivedSeqNum = (long)
@@ -620,6 +606,20 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
+    }
+
+    @Override
+    public void execute(final double timestamp) {
+        if (instructions.isEmpty()) return;
+
+        for (final JSONObject json : instructions) {
+            final JSONArray jsonArray = json.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+            for (int i = 0; i < jsonArray.size(); i++) {
+                final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
+                processInstruction(instruction);
+            }
+        }
+        instructions.clear();
     }
 
 }

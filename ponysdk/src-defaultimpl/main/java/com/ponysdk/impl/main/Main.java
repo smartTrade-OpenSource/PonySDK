@@ -125,10 +125,11 @@ public class Main {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
         if (applicationLoader == null) {
-            applicationLoader = new SpringApplicationLoader(new ApplicationManagerOption());
-            applicationLoader.setApplicationID(applicationID);
-            applicationLoader.setApplicationName(applicationName);
-            applicationLoader.setApplicationDescription(applicationDescription);
+            final ApplicationManagerOption option = new ApplicationManagerOption();
+            option.setApplicationID(applicationID);
+            option.setApplicationName(applicationName);
+            option.setApplicationDescription(applicationDescription);
+            applicationLoader = new SpringApplicationLoader(option);
         }
 
         if (servletConextFilter == null) {

@@ -1,8 +1,6 @@
 
 package com.ponysdk.core;
 
-import java.util.Arrays;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -25,20 +23,12 @@ public abstract class AbstractApplicationManager {
 
     private final ApplicationManagerOption options;
 
-    private final String applicationID;
-
-    private final String applicationName;
-
     public AbstractApplicationManager() {
         this(new ApplicationManagerOption());
     }
 
     public AbstractApplicationManager(final ApplicationManagerOption options) {
         this.options = options;
-
-        this.applicationID = System.getProperty(SystemProperty.APPLICATION_ID);
-        this.applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
-
         log.info(options.toString());
     }
 
@@ -58,11 +48,10 @@ public abstract class AbstractApplicationManager {
             boolean isNewHttpSession = false;
             Application application = context.getApplication();
             if (application == null) {
-                log.info("Creating a new application, {}", context.toString());
-
-                application = new Application(applicationID, applicationName, context, options);
+                application = new Application(context, options);
                 context.setApplication(application);
                 isNewHttpSession = true;
+                log.info("Creating a new application, {}", application.toString());
             } else {
                 // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
                 // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
@@ -71,10 +60,8 @@ public abstract class AbstractApplicationManager {
                 // log.info("Reloading application {} {}", reloadedViewID, context);
             }
 
-            final UIContext uiContext = new UIContext(application);
+            final UIContext uiContext = new UIContext(application, context);
             UIContext.setCurrent(uiContext);
-
-            context.setUIContext(uiContext);
 
             if (reloadedViewID != null) {
                 final UIContext previousUIContext = application.getUIContext(reloadedViewID);
@@ -172,31 +159,34 @@ public abstract class AbstractApplicationManager {
             uiContext.release();
         }
     }
-
-    private Long checkClientMessage(final JsonObject jsonObject, final UIContext uiContext) {
-        printClientErrorMessage(jsonObject);
-
-        final long receivedSeqNum = jsonObject.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey()).longValue();
-        if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
-            final long key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
-            uiContext.stackIncomingMessage(receivedSeqNum, jsonObject);
-            if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
-                if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration) {
-                    log.info("Unable to sync message for " + (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
-                    uiContext.destroy();
-                    return null;
-                }
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Stacking incoming message #{}. Data #{} (viewID #{})", Arrays.asList(receivedSeqNum, jsonObject, key));
-            }
-
-            return null;
-        }
-        return receivedSeqNum;
-
-    }
+    //
+    // private Long checkClientMessage(final JsonObject jsonObject, final UIContext uiContext) {
+    // printClientErrorMessage(jsonObject);
+    //
+    // final long receivedSeqNum = jsonObject.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey()).longValue();
+    // if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
+    // final long key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
+    // uiContext.stackIncomingMessage(receivedSeqNum, jsonObject);
+    // if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
+    // if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration)
+    // {
+    // log.info("Unable to sync message for " + (System.currentTimeMillis() -
+    // uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
+    // uiContext.destroy();
+    // return null;
+    // }
+    // }
+    //
+    // if (log.isDebugEnabled()) {
+    // log.debug("Stacking incoming message #{}. Data #{} (viewID #{})", Arrays.asList(receivedSeqNum,
+    // jsonObject, key));
+    // }
+    //
+    // return null;
+    // }
+    // return receivedSeqNum;
+    //
+    // }
 
     private void printClientErrorMessage(final JsonObject data) {
         try {

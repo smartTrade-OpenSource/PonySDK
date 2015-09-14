@@ -39,6 +39,8 @@ public class ParserImpl implements Parser {
     private static byte[] FALSE;
     private static byte[] NULL;
 
+    private static byte[] HEARTBEAT;
+
     static {
         try {
             TRUE = "true".getBytes("UTF8"); // FIXME JS decoder
@@ -48,6 +50,32 @@ public class ParserImpl implements Parser {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    static {
+
+        final byte[] bytesKey = Model.HEARTBEAT.getBytesKey();
+
+        int index = 0;
+
+        HEARTBEAT = new byte[bytesKey.length + NULL.length + 5];
+
+        HEARTBEAT[index++] = CURVE_LEFT;
+        HEARTBEAT[index++] = QUOTE;
+
+        for (int i = 0; i < bytesKey.length; i++) {
+            HEARTBEAT[index++] = bytesKey[i];
+        }
+
+        HEARTBEAT[index++] = QUOTE;
+        HEARTBEAT[index++] = COLON;
+
+        for (int i = 0; i < NULL.length; i++) {
+            HEARTBEAT[index++] = NULL[i];
+        }
+
+        HEARTBEAT[index] = CURVE_RIGHT;
+
     }
 
     private static final byte[] COLON_NULL;
@@ -67,19 +95,21 @@ public class ParserImpl implements Parser {
     static {
         final byte[] bytesKey = Model.APPLICATION_INSTRUCTIONS.getBytesKey();
 
+        int index = 0;
+
         BEGIN_OBJECT = new byte[bytesKey.length + 6];
 
-        BEGIN_OBJECT[0] = CURVE_LEFT;
-        BEGIN_OBJECT[1] = QUOTE;
+        BEGIN_OBJECT[index++] = CURVE_LEFT;
+        BEGIN_OBJECT[index++] = QUOTE;
 
         for (int i = 0; i < bytesKey.length; i++) {
-            BEGIN_OBJECT[2 + i] = bytesKey[i];
+            BEGIN_OBJECT[index++] = bytesKey[i];
         }
 
-        BEGIN_OBJECT[BEGIN_OBJECT.length - 4] = QUOTE;
-        BEGIN_OBJECT[BEGIN_OBJECT.length - 3] = COLON;
-        BEGIN_OBJECT[BEGIN_OBJECT.length - 2] = BRACKET_LEFT;
-        BEGIN_OBJECT[BEGIN_OBJECT.length - 1] = CURVE_LEFT;
+        BEGIN_OBJECT[index++] = QUOTE;
+        BEGIN_OBJECT[index++] = COLON;
+        BEGIN_OBJECT[index++] = BRACKET_LEFT;
+        BEGIN_OBJECT[index] = CURVE_LEFT;
     }
 
     private final WebSocket socket;
@@ -126,6 +156,18 @@ public class ParserImpl implements Parser {
             log.error("Cannot convert string");
         }
         return null;
+    }
+
+    @Override
+    public void parseAndFlushHeartBeat() {
+        // endOfParsing();
+        // socket.flush();
+        // reset();
+        buffer = socket.getByteBuffer();
+        buffer.put(HEARTBEAT);
+        buffer = null; // avoid end of parsing call
+        // socket.flush();
+        // reset();
     }
 
     @Override

@@ -24,6 +24,8 @@ public interface Parser {
 
     void quote();
 
+    void parseAndFlushHeartBeat();
+
     void parseKey(byte[] key);
 
     void parse(JsonObject jsonObject);

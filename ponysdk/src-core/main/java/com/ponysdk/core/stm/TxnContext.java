@@ -44,4 +44,6 @@ public interface TxnContext {
 
     void setUIContext(UIContext uiContext);
 
+    void sendHeartBeat();
+
 }

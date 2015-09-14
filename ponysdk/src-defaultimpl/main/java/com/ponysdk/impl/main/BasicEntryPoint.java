@@ -25,11 +25,14 @@ package com.ponysdk.impl.main;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
@@ -115,12 +118,18 @@ public class BasicEntryPoint implements EntryPoint {
 
         }
 
-        while (true) {
-            final String currentTimeMillis = Long.toString(System.currentTimeMillis());
-            for (int k = 0; k < 100; k++) {
-                labels.get(k).setText(currentTimeMillis);
+        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                final Random random = new Random();
+
+                final String currentTimeMillis = Long.toString(random.nextInt(500000));
+                for (int k = 0; k < 100; k++) {
+                    labels.get(k).setText(currentTimeMillis);
+                }
             }
-        }
+        }, 0, 200, TimeUnit.MILLISECONDS);
 
         // PScript.execute("window.alert('coucoucou' + (1 + 6));", new ExecutionCallback() {
         //

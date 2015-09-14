@@ -157,4 +157,9 @@ public class TxnSocketContext implements TxnContext, TxnListener {
         this.uiContext = uiContext;
     }
 
+    @Override
+    public void sendHeartBeat() {
+        parser.parseAndFlushHeartBeat();
+    }
+
 }

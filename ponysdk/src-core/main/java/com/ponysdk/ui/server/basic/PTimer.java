@@ -48,12 +48,12 @@ public abstract class PTimer {
 
     public void scheduleRepeating(final int delayMillis) {
         repeat = true;
-        PScheduler.get().scheduleFixedDelay(cmd, delayMillis);
+        PScheduler.scheduleFixedDelay(cmd, delayMillis);
     }
 
     public void schedule(final int delayMillis) {
         repeat = false;
-        PScheduler.get().scheduleFixedDelay(cmd, delayMillis);
+        PScheduler.scheduleFixedDelay(cmd, delayMillis);
     }
 
     public void cancel() {

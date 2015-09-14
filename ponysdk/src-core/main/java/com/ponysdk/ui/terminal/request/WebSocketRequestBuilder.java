@@ -45,4 +45,9 @@ public class WebSocketRequestBuilder extends RequestBuilder {
         // log.log(Level.SEVERE, "Error ", e);
         // }
     }
+
+    @Override
+    public void sendHeartbeat() {
+        webSocketClient.sendHeartbeat();
+    }
 }

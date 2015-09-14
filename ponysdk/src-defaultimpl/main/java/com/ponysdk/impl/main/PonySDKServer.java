@@ -33,11 +33,13 @@ public class PonySDKServer {
     public static void main(final String[] args) throws Exception {
         final Server server = new Server(8081);
 
-        final ApplicationLoader applicationLoader = new ApplicationLoader(new ApplicationManagerOption());
+        final ApplicationManagerOption option = new ApplicationManagerOption();
+        option.setApplicationID("ID");
+        option.setApplicationName("NAME");
+        option.setApplicationDescription("DESCRIPTION");
+
+        final ApplicationLoader applicationLoader = new ApplicationLoader(option);
         applicationLoader.setEntryPointClass(BasicEntryPoint.class);
-        applicationLoader.setApplicationID("ID");
-        applicationLoader.setApplicationName("NAME");
-        applicationLoader.setApplicationDescription("DESCRIPTION");
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + "sample");

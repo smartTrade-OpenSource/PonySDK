@@ -45,15 +45,9 @@ public class Application {
 
     private final ApplicationManagerOption options;
 
-    private final String ID;
-
-    private final String name;
-
     private final TxnContext context;
 
-    public Application(final String ID, final String name, final TxnContext context, final ApplicationManagerOption options) {
-        this.ID = ID;
-        this.name = name;
+    public Application(final TxnContext context, final ApplicationManagerOption options) {
         this.context = context;
         this.options = options;
     }
@@ -92,10 +86,15 @@ public class Application {
     }
 
     public String getName() {
-        return name;
+        return options.getApplicationName();
     }
 
     public String getID() {
-        return ID;
+        return options.getApplicationID();
+    }
+
+    @Override
+    public String toString() {
+        return "Application [" + options + ", ID=" + getID() + ", name=" + getName() + "]";
     }
 }

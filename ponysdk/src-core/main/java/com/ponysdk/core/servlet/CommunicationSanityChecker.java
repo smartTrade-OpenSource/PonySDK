@@ -17,8 +17,17 @@ public class CommunicationSanityChecker {
     protected static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
-    public static final String THREAD_COUNT_SYSTEM_PROPERTY = "communication.sanity.checker.thread.count";
-    private static final int MAX_THREAD_CHECKER = Integer.parseInt(System.getProperty(THREAD_COUNT_SYSTEM_PROPERTY, "" + Runtime.getRuntime().availableProcessors()));
+    private static final int MAX_THREAD_CHECKER = Integer.parseInt(System.getProperty("communication.sanity.checker.thread.count", "" + Runtime.getRuntime().availableProcessors()));
+
+    private final UIContext uiContext;
+
+    private long heartBeatPeriod;
+    private long lastReceivedTime;
+    private RunnableScheduledFuture<?> sanityChecker;
+    private CommunicationState currentState;
+    private long suspectTime = -1;
+
+    protected final AtomicBoolean started = new AtomicBoolean(false);
 
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER, new ThreadFactory() {
 
@@ -33,52 +42,38 @@ public class CommunicationSanityChecker {
         }
     });
 
-    protected final UIContext uiContext;
-    protected long heartBeatPeriod; // In MilliSeconds
-    protected long lastReceivedTime;
-    protected final AtomicBoolean started = new AtomicBoolean(false);
-    private RunnableScheduledFuture<?> sanityChecker;
-
     protected enum CommunicationState {
         OK, SUSPECT, KO
     }
 
-    protected CommunicationState currentState;
-    protected long suspectTime = -1;
-
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
-        setHeartBeatPeriod(uiContext.getApplication().getOptions().getHeartBeatPeriod());
+        setHeartBeatPeriod(uiContext.getApplication().getOptions().getHeartBeatPeriod(), uiContext.getApplication().getOptions().getHeartBeatPeriodTimeUnit());
     }
 
     private boolean isStarted() {
         return started.get();
     }
 
-    private boolean isSanityCheckEnabled() {
-        return heartBeatPeriod > 0;
-    }
-
     public void start() {
-        final long now = System.currentTimeMillis();
-        lastReceivedTime = now;
-        if (isSanityCheckEnabled() && !isStarted()) {
+        lastReceivedTime = System.currentTimeMillis();
+        if (!isStarted()) {
             currentState = CommunicationState.OK;
             sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(new SanityChecker(), 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
-            log.info("[" + uiContext + "] Started. HeartbeatPeriod: " + heartBeatPeriod + " ms.");
+            log.info("Started. HeartbeatPeriod: {} ms, {}", uiContext, heartBeatPeriod);
         }
     }
 
     public void stop() {
-        if (isSanityCheckEnabled() && isStarted()) {
+        if (isStarted()) {
             if (sanityChecker != null) {
                 sanityChecker.cancel(false);
                 sanityCheckerTimer.remove(sanityChecker);
                 sanityChecker = null;
             }
             started.set(false);
-            log.info("[" + uiContext + "] Stopped.");
+            log.info("[{}] Stopped.", uiContext);
         }
     }
 
@@ -86,8 +81,10 @@ public class CommunicationSanityChecker {
         lastReceivedTime = System.currentTimeMillis();
     }
 
-    public void setHeartBeatPeriod(final long hearBeatInt) {
-        heartBeatPeriod = TimeUnit.SECONDS.toMillis(hearBeatInt);
+    public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
+        heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
+
+        if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
@@ -102,7 +99,8 @@ public class CommunicationSanityChecker {
                 if (isCommunicationSuspectedToBeNonFunctional(now)) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
-                    log.info("[" + uiContext + "] No message have been received, communication suspected to be non functional.");
+                    log.info("[{}] No message have been received, communication suspected to be non functional, sending heartbeat...", uiContext);
+                    uiContext.sendHeartBeat();
                 }
                 break;
             case SUSPECT:
@@ -110,7 +108,7 @@ public class CommunicationSanityChecker {
                     if ((now - suspectTime) >= heartBeatPeriod) {
                         // No message have been received since we suspected the communication to be non
                         // functional
-                        log.info("[" + uiContext + "] No message have been received since we suspected the communication to be non functional, context will be destroyed");
+                        log.info("[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed", uiContext);
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();
@@ -132,7 +130,7 @@ public class CommunicationSanityChecker {
             try {
                 checkCommunicationState();
             } catch (final Throwable e) {
-                log.error("[" + uiContext + "] Error while checking communication state", e);
+                log.error("[{}] Error while checking communication state", uiContext, e);
             }
         }
     }

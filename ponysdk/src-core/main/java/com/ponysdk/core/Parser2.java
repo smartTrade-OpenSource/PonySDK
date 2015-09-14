@@ -284,4 +284,10 @@ public class Parser2 implements Parser {
 
     }
 
+    @Override
+    public void parseAndFlushHeartBeat() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

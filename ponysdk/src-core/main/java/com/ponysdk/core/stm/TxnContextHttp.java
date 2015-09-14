@@ -132,4 +132,10 @@ public class TxnContextHttp implements TxnContext {
         this.uiContext = uiContext;
     }
 
+    @Override
+    public void sendHeartBeat() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

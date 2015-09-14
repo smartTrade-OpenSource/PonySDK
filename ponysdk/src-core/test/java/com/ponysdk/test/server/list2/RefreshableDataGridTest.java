@@ -42,11 +42,16 @@ public class RefreshableDataGridTest {
     public void beforeTest() {
         log.info("Running #" + name.getMethodName());
 
-        final Application application = new Application("test", "Test", new EmptyTxnContext(), new ApplicationManagerOption());
-        final UIContext uiContext = new UIContext(application);
+        final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
+        applicationManagerOption.setApplicationID("TEST");
+        applicationManagerOption.setApplicationName("TEST");
+
+        final EmptyTxnContext context = new EmptyTxnContext();
+        final Application application = new Application(context, applicationManagerOption);
+        final UIContext uiContext = new UIContext(application, context);
         UIContext.setCurrent(uiContext);
         txn = Txn.get();
-        txn.begin(new EmptyTxnContext());
+        txn.begin(context);
         PPusher.initialize();
 
         final RefreshableDataGridColumnDescriptor<Data, Data, PHTML> descriptor = new RefreshableDataGridColumnDescriptor<>();

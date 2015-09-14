@@ -55,4 +55,7 @@ public class HttpRequestBuilder extends RequestBuilder {
             log.log(Level.SEVERE, "Error ", e);
         }
     }
+
+    @Override
+    public void sendHeartbeat() {}
 }

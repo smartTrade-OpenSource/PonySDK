@@ -2,6 +2,7 @@
 package com.ponysdk.ui.terminal.model;
 
 public enum Model {
+    HEARTBEAT("-1"),
     APPLICATION_VIEW_ID("2"),
     OBJECT_ID("3"),
     PARENT_OBJECT_ID("4"),

@@ -38,4 +38,10 @@ public class ParentWindowRequest extends RequestBuilder {
                                               }
                                               }-*/;
 
+    @Override
+    public void sendHeartbeat() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

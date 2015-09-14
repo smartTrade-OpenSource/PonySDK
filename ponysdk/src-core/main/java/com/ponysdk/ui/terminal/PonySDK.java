@@ -231,11 +231,17 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     @Override
     public void message(final String message) {
         try {
-            // GWT.log(message);
+            GWT.log(message);
             final JSONObject data = JSONParser.parseStrict(message).isObject();
-            uiBuilder.update(data);
+
+            if (data.containsKey(Model.HEARTBEAT.getKey())) {
+                socketClient.getRequestBuilder().sendHeartbeat();
+            } else {
+                uiBuilder.update(data);
+            }
+
         } catch (final Exception e) {
-            GWT.log("Cannot parse " + message + " dlskqjlkdjqs", e);
+            GWT.log("Cannot parse " + message, e);
         }
     }
 
