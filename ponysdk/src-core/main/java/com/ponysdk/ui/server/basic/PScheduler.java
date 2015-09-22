@@ -52,11 +52,16 @@ public abstract class PScheduler extends PObject {
     }
 
     public static PScheduler get() {
-        return get(PWindow.MAIN);
+        return get(null);
     }
 
-    private static PScheduler get(final long windowID) {
-        final String rootID = SCHEDULER_KEY + "_" + windowID;
+    private static PScheduler get(final PWindow window) {
+        String rootID = SCHEDULER_KEY;
+
+        if (window != null) {
+            rootID += window.getID();
+        }
+
         PScheduler scheduler = UIContext.get().getAttribute(rootID);
         if (scheduler == null) {
             scheduler = new PScheduler() {};
