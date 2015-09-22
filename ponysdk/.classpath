@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src-core/main/java"/>
 	<classpathentry kind="src" path="src-defaultimpl/main/java"/>
 	<classpathentry kind="src" path="src-spring/main/java"/>
-	<classpathentry kind="src" path="src-core/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/logging/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="libs/tests/junit.jar"/>
