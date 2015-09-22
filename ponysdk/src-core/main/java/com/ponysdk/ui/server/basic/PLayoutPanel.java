@@ -39,8 +39,13 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
-    public PLayoutPanel() {
+    public PLayoutPanel(final PWindow window) {
+        super(window);
         init();
+    }
+
+    public PLayoutPanel() {
+        this(null);
     }
 
     @Override
@@ -56,6 +61,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
         parser.comma();
@@ -71,6 +80,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.WIDGET, child.getID());
         parser.comma();
@@ -86,6 +99,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
         parser.comma();
@@ -129,6 +146,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
         parser.comma();

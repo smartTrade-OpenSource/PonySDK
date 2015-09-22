@@ -70,7 +70,7 @@ task generateSkeleton(type: JavaExec) {
 		srcGenerated
 		]
 }
-
+/**
 task generateProxyBuilder(type: JavaExec) {
 	description = 'Generate spring proxybuilder'
 	main = 'com.ponysdk.spring.ProxyBuilderGenerator'
@@ -88,6 +88,7 @@ task generateProxyBuilder(type: JavaExec) {
 		srcGenerated
 		]
 }
+**/
 
 task generateSkeleton2(type: JavaExec) {
 	description = 'Generate skeletons trading sample'
@@ -165,8 +166,12 @@ jar {
 }
 
 assemble.dependsOn(copyAllLibs)
+
+/**
 generateServices.dependsOn(generateSkeleton)
 generateServices.dependsOn(generateSkeleton2)
 generateServices.dependsOn(generateProxyBuilder)
+**/
+
 compileJava.dependsOn(generateServices)
 generateServices.dependsOn(cleanGenerated)

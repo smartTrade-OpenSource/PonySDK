@@ -23,6 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.terminal.WidgetType;
 
@@ -36,23 +39,55 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PRootLayoutPanel extends PLayoutPanel {
 
-    private static final String ROOT = "PRootLayoutPanel";
+    private static final String KEY = PRootLayoutPanel.class.getSimpleName();
 
-    private PRootLayoutPanel() {}
-
-    public static PRootLayoutPanel get() {
-        return get(PWindow.MAIN);
+    private PRootLayoutPanel(final PWindow window) {
+        super(window);
     }
 
-    private static PRootLayoutPanel get(final Long windowID) {
-        final String rootID = ROOT + "_" + windowID;
-        final UIContext session = UIContext.get();
-        PRootLayoutPanel root = session.getAttribute(rootID);
-        if (root == null) {
-            root = new PRootLayoutPanel();
-            session.setAttribute(rootID, root);
+    private PRootLayoutPanel(final PWindow window, final String id) {
+        super(window);
+        // TODO
+    }
+
+    public static PRootLayoutPanel get(final PWindow window) {
+        return get(window, null);
+    }
+
+    public static PRootLayoutPanel get() {
+        return get(null, null);
+    }
+
+    public static PRootLayoutPanel get(final String id) {
+        return get(null, id);
+    }
+
+    public static PRootLayoutPanel get(final PWindow window, final String id) {
+        final Map<String, PRootLayoutPanel> childs = ensureChilds(window);
+        PRootLayoutPanel defaultRoot = childs.get(id);
+        if (defaultRoot == null) {
+            defaultRoot = new PRootLayoutPanel(window, id);
+            childs.put(id, defaultRoot);
         }
-        return root;
+        return defaultRoot;
+    }
+
+    private static Map<String, PRootLayoutPanel> ensureChilds(final PWindow window) {
+        final UIContext session = UIContext.get();
+
+        String key = KEY;
+
+        if (window != null) {
+            key = key + window.getID();
+        }
+
+        Map<String, PRootLayoutPanel> rootByIDs = session.getAttribute(key);
+        if (rootByIDs == null) {
+            rootByIDs = new HashMap<>();
+            session.setAttribute(key, rootByIDs);
+        }
+
+        return rootByIDs;
     }
 
     @Override

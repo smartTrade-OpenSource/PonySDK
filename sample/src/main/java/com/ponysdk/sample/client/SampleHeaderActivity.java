@@ -52,7 +52,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     @Override
     public IsPWidget buildView() {
         final HeaderView view = getHeaderView();
-        view.addActionWidget(createUserAccountMenu(user));
+        // view.addActionWidget(createUserAccountMenu(user));
         return view;
     }
 

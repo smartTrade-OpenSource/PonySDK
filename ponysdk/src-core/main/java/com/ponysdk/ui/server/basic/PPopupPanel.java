@@ -201,6 +201,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.POPUP_POSITION);
         parser.comma();

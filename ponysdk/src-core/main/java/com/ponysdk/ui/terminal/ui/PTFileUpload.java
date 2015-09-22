@@ -63,7 +63,6 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             public void onSubmitComplete(final SubmitCompleteEvent event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_SUBMIT_COMPLETE_HANDLER);
                 uiService.sendDataToServer(wrappedFormPanel, instruction);
             }

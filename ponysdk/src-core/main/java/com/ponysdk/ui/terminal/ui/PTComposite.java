@@ -39,7 +39,7 @@ public abstract class PTComposite extends PTWidget<Composite> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.WIDGET)) {
-            cast().initWidget(asWidget(update.getLong(Model.WIDGET), uiService));
+            cast().initWidget(asWidget(update.getInt(Model.WIDGET), uiService));
         } else {
             super.update(update, uiService);
         }

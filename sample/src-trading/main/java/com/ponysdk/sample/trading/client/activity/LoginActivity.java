@@ -26,12 +26,10 @@ package com.ponysdk.sample.trading.client.activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
-import com.ponysdk.sample.client.UISampleEntryPoint;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
@@ -90,7 +88,7 @@ public class LoginActivity extends AbstractActivity {
         user.setName(loginPageView.getLogin());
         user.setPassword(loginPageView.getPassword());
 
-        UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
+        // UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");

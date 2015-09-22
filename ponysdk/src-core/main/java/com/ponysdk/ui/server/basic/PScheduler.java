@@ -101,6 +101,10 @@ public abstract class PScheduler extends PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.START, true);
         parser.comma();
@@ -116,6 +120,10 @@ public abstract class PScheduler extends PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.START, true);
         parser.comma();
@@ -131,6 +139,10 @@ public abstract class PScheduler extends PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.STOP, true);
         parser.comma();

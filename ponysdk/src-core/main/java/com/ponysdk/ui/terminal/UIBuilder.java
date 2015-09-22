@@ -85,13 +85,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     private final UIFactory uiFactory = new UIFactory();
     private final Map<String, AddonFactory> addonByKey = new HashMap<>();
-    private final Map<Long, PTObject> objectByID = new HashMap<>();
-    private final Map<UIObject, Long> objectIDByWidget = new HashMap<>();
-    private final Map<Long, UIObject> widgetIDByObjectID = new HashMap<>();
+    private final Map<Integer, PTObject> objectByID = new HashMap<>();
+    private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
+    private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
     private final List<PTInstruction> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
-    private final Map<Long, JSONObject> incomingMessageQueue = new HashMap<>();
+    // private final Map<Integer, JSONObject> incomingMessageQueue = new HashMap<>();
 
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
@@ -112,6 +112,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     private final List<JSONObject> instructions = new ArrayList<>();
+
+    private final Map<Integer, List<PTInstruction>> instructionsByObjectID = new HashMap<>();
 
     public UIBuilder() {
         History.addValueChangeHandler(this);
@@ -150,7 +152,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         final PTCookies cookies = new PTCookies();
         cookies.create(null, null);
-        objectByID.put(0l, cookies);
+        objectByID.put(0, cookies);
 
         // hide loading component
         final Widget w = RootPanel.get("loading");
@@ -198,41 +200,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public void update(final JSONObject data) {
         instructions.add(data);
-
         AnimationScheduler.get().requestAnimationFrame(this);
-
-        //
-        // final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
-        // for (int i = 0; i < jsonArray.size(); i++) {
-        // final PTInstruction instruction = new
-        // PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-        // processInstruction(instruction);
-        // }
-
-        /**
-         * final long receivedSeqNum = (long)
-         * data.get(Model.APPLICATION_SEQ_NUM.getKey()).isNumber().doubleValue(); if ((lastReceived + 1) !=
-         * receivedSeqNum) { incomingMessageQueue.put(receivedSeqNum, data); log.log(Level.INFO,
-         * "Wrong seqnum received. Expecting #" + (lastReceived + 1) + " but received #" + receivedSeqNum);
-         * return; } lastReceived = receivedSeqNum; final List<PTInstruction> instructions = new ArrayList
-         * <>(); final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray(); for
-         * (int i = 0; i < jsonArray.size(); i++) { instructions.add( } if (!incomingMessageQueue.isEmpty()) {
-         * long expected = receivedSeqNum + 1; while (incomingMessageQueue.containsKey(expected)) { final
-         * JSONObject jsonObject = incomingMessageQueue.remove(expected); final JSONArray jsonArray2 =
-         * jsonObject.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray(); for (int i = 0; i <
-         * jsonArray2.size(); i++) { instructions.add(new
-         * PTInstruction(jsonArray2.get(i).isObject().getJavaScriptObject())); } lastReceived = expected;
-         * expected++; } log.log(Level.INFO, "Message synchronized from #" + receivedSeqNum + " to #" +
-         * lastReceived); } updateMode = true; PTInstruction currentInstruction = null; try { for (final
-         * PTInstruction instruction : instructions) { currentInstruction = instruction; try {
-         * processInstruction(instruction); } catch (final Throwable e) { log.log(Level.SEVERE,
-         * "PonySDK has encountered an internal error on instruction : " + currentInstruction +
-         * " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum +
-         * " LastProcessSeqNum: " + lastReceived, e); stackError(currentInstruction, e); } } } catch (final
-         * Throwable e) { log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e); } finally
-         * { flushEvents(); updateMode = false; }
-         **/
-
     }
 
     @Override
@@ -252,40 +220,34 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         PTObject ptObject;
 
         if (instruction.containsKey(Model.TYPE_CLOSE)) {
-            pendingClose = true;
-            sendDataToServer(instruction);
-
-            final ScheduledCommand command = new ScheduledCommand() {
-
-                @Override
-                public void execute() {
-                    PonySDK.reload();
+            processClose(instruction);
+        } else if (instruction.containsKey(Model.TYPE_CREATE)) {
+            processCreate(instruction);
+        } else if (instruction.containsKey(Model.TYPE_ADD)) {
+            if (instruction.containsKey(Model.WINDOW_ID)) {
+                final List<PTInstruction> waitingInstructions = instructionsByObjectID.remove(instruction.getObjectID());
+                if (waitingInstructions != null) {
+                    for (final PTInstruction ptInstruction : waitingInstructions) {
+                        ptObject = uiFactory.newUIObject(this, ptInstruction);
+                        ptObject.create(ptInstruction, this);
+                        objectByID.put(ptInstruction.getObjectID(), ptObject);
+                    }
                 }
-            };
-
-            Scheduler.get().scheduleDeferred(command);
-        } else if (instruction.containsKey(Model.TYPE_CREATE))
-
-        {
-            final boolean isAddon = instruction.containsKey("addOnSignature");
-            if (isAddon) {
-                final String addOnSignature = instruction.getString("addOnSignature");
-                final AddonFactory addonFactory = addonByKey.get(addOnSignature);
-                if (addonFactory == null) { throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
-
-                ptObject = addonFactory.newAddon();
-                if (ptObject == null) { throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
-                ptObject.create(instruction, this);
-            } else {
-                ptObject = uiFactory.newUIObject(this, instruction);
-                ptObject.create(instruction, this);
             }
 
-            objectByID.put(instruction.getObjectID(), ptObject);
+            if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
+                stackInstruction(instruction);
+            } else {
+                ptObject = objectByID.get(instruction.getObjectID());
 
-        } else if (instruction.containsKey(Model.TYPE_ADD))
+                if (ptObject == null) {
+                    log.info("Cannot update a garbaged object #" + instruction.getObjectID());
+                    return;
+                }
 
-        {
+                ptObject.update(instruction, this);
+            }
+
             ptObject = objectByID.get(instruction.getParentID());
             if (ptObject == null) {
                 log.info("Cannot add object to an garbaged parent object #" + instruction.getObjectID());
@@ -293,20 +255,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             }
             ptObject.add(instruction, this);
 
-        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER))
-
-        {
-            if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
-                new PTStreamResource().addHandler(instruction, this);
-            } else {
-                ptObject = objectByID.get(instruction.getObjectID());
-                ptObject.addHandler(instruction, this);
-            }
-        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER))
-
-        {
-            ptObject = objectByID.get(instruction.getObjectID());
-            ptObject.removeHandler(instruction, this);
+        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) {
+            processAddHandler(instruction);
+        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) {
+            processRemoveHandler(instruction);
         } else if (instruction.containsKey(Model.TYPE_REMOVE))
 
         {
@@ -315,7 +267,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 ptObject = objectByID.get(instruction.getParentID());
             }
             if (ptObject == null) {
-                log.info("Cannot remove an garbaged object #" + instruction.getObjectID());
+                log.info("Cannot remove a garbaged object #" + instruction.getObjectID());
                 return;
             }
             ptObject.remove(instruction, this);
@@ -324,20 +276,37 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         {
             ptObject = unRegisterObject(instruction.getObjectID());
             if (ptObject == null) {
-                log.info("Cannot GC an garbaged object #" + instruction.getObjectID());
+                log.info("Cannot GC a garbaged object #" + instruction.getObjectID());
                 return;
             }
             ptObject.gc(this);
         } else if (instruction.containsKey(Model.TYPE_UPDATE))
 
         {
-            ptObject = objectByID.get(instruction.getObjectID());
-            if (ptObject == null) {
-                log.info("Cannot update an garbaged object #" + instruction.getObjectID());
-                return;
+            if (instruction.containsKey(Model.WINDOW_ID)) {
+                final List<PTInstruction> waitingInstructions = instructionsByObjectID.remove(instruction.getObjectID());
+                if (waitingInstructions != null) {
+                    for (final PTInstruction ptInstruction : waitingInstructions) {
+                        ptObject = uiFactory.newUIObject(this, ptInstruction);
+                        ptObject.create(ptInstruction, this);
+                        objectByID.put(ptInstruction.getObjectID(), ptObject);
+                    }
+                }
             }
 
-            ptObject.update(instruction, this);
+            if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
+                stackInstruction(instruction);
+            } else {
+                ptObject = objectByID.get(instruction.getObjectID());
+
+                if (ptObject == null) {
+                    log.info("Cannot update a garbaged object #" + instruction.getObjectID());
+                    return;
+                }
+
+                ptObject.update(instruction, this);
+            }
+
         } else if (instruction.containsKey(Model.TYPE_HISTORY))
 
         {
@@ -360,6 +329,69 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     }
 
+    private void processRemoveHandler(final PTInstruction instruction) {
+        PTObject ptObject;
+        ptObject = objectByID.get(instruction.getObjectID());
+        ptObject.removeHandler(instruction, this);
+    }
+
+    private void processAddHandler(final PTInstruction instruction) {
+        PTObject ptObject;
+        if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
+            new PTStreamResource().addHandler(instruction, this);
+        } else {
+            ptObject = objectByID.get(instruction.getObjectID());
+            ptObject.addHandler(instruction, this);
+        }
+    }
+
+    private void processCreate(final PTInstruction instruction) {
+        PTObject ptObject;
+        final boolean isAddon = instruction.containsKey("addOnSignature");
+        if (isAddon) {
+            final String addOnSignature = instruction.getString("addOnSignature");
+            final AddonFactory addonFactory = addonByKey.get(addOnSignature);
+            if (addonFactory == null) { throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
+
+            ptObject = addonFactory.newAddon();
+            if (ptObject == null) { throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
+            ptObject.create(instruction, this);
+            objectByID.put(instruction.getObjectID(), ptObject);
+        } else {
+            stackInstruction(instruction);
+        }
+    }
+
+    /**
+     * Stack instruction until window information is not done
+     * 
+     * @param instruction
+     */
+    private void stackInstruction(final PTInstruction instruction) {
+        List<PTInstruction> instructions = instructionsByObjectID.get(instruction.getObjectID());
+        if (instructions == null) {
+            instructions = new ArrayList<>();
+            instructionsByObjectID.put(instruction.getObjectID(), instructions);
+        }
+
+        instructions.add(instruction); // wait window information
+    }
+
+    private void processClose(final PTInstruction instruction) {
+        pendingClose = true;
+        sendDataToServer(instruction);
+
+        // TODO nciaravola no need
+
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                PonySDK.reload();
+            }
+        });
+    }
+
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
@@ -369,7 +401,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     @Override
-    public PTObject unRegisterObject(final Long objectId) {
+    public PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
         if (uiObject != null) {
@@ -422,8 +454,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             stackedErrors.clear();
             requestData.put(Model.APPLICATION_ERRORS, errors);
         }
-
-        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
 
         log.info("Data to send" + requestData.toString());
         log.info("Request Builder" + requestBuilder);
@@ -543,19 +573,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     @Override
-    public PTObject getPTObject(final Long ID) {
+    public PTObject getPTObject(final int ID) {
         return objectByID.get(ID);
     }
 
     @Override
     public PTObject getPTObject(final UIObject uiObject) {
-        final Long objectID = objectIDByWidget.get(uiObject);
+        final Integer objectID = objectIDByWidget.get(uiObject);
         if (objectID != null) return objectByID.get(objectID);
         return null;
     }
 
     @Override
-    public void registerUIObject(final Long ID, final UIObject uiObject) {
+    public void registerUIObject(final int ID, final UIObject uiObject) {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
     }

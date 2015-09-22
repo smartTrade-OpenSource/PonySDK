@@ -48,7 +48,7 @@ public class PTAddOn extends AbstractPTObject {
         if (factory == null) throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
 
         final JSONObject params = new JSONObject();
-        params.put("id", new JSONString(create.getObjectID().toString()));
+        params.put("id", new JSONString(String.valueOf(create.getObjectID())));
 
         if (create.containsKey(Model.NATIVE)) {
             final JSONObject data = create.getObject(Model.NATIVE);
@@ -56,7 +56,7 @@ public class PTAddOn extends AbstractPTObject {
         }
 
         if (create.containsKey(Model.WIDGET)) {
-            final long widgetID = create.getLong(Model.WIDGET);
+            final int widgetID = create.getInt(Model.WIDGET);
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
             final Element element = cast.getElement();

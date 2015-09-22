@@ -33,7 +33,6 @@ import java.util.TimeZone;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PShowRangeEvent;
@@ -178,6 +177,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.DATE_ENABLED, asString);
         parser.comma();
@@ -196,6 +199,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.ADD_DATE_STYLE, asString);
         parser.comma();
@@ -214,6 +221,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.REMOVE_DATE_STYLE, asString);
         parser.comma();

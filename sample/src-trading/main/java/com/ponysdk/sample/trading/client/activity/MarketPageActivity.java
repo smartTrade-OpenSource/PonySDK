@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.sample.trading.command.trading.FindCurrenciesCommand;
 import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;
@@ -47,12 +46,12 @@ public class MarketPageActivity extends PageActivity {
     @Override
     protected void onFirstShowPage() {
         log.info("Showing market page");
-
-        final FindCurrenciesCommand currenciesCommand = new FindCurrenciesCommand();
-
-        for (final MarketData md : currenciesCommand.execute()) {
-            boxContainer.add(buildFXBox(md.currency));
-        }
+        //
+        // final FindCurrenciesCommand currenciesCommand = new FindCurrenciesCommand();
+        //
+        // for (final MarketData md : currenciesCommand.execute()) {
+        // boxContainer.add(buildFXBox(md.currency));
+        // }
 
         final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setWidget(boxContainer);

@@ -29,8 +29,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -98,6 +96,10 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, child.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
@@ -106,7 +108,7 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         parser.parse(Model.SIZE, headerSize);
         parser.endObject();
 
-        UIContext.get().assignParentID(child.getID(), ID);
+        // UIContext.get().assignParentID(child.getID(), ID);
     }
 
     @Override
@@ -190,6 +192,10 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.OPEN, widget.getID());
         parser.endObject();

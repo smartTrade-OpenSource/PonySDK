@@ -108,6 +108,10 @@ public class PTextBox extends PTextBoxBase {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.MASK, pattern);
         parser.comma();

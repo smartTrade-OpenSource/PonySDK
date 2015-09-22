@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
@@ -161,13 +160,17 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, item.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
-        UIContext.get().assignParentID(item.getID(), ID);
+        // UIContext.get().assignParentID(item.getID(), ID);
 
         return item;
     }
@@ -210,13 +213,17 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, itemSeparator.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
-        UIContext.get().assignParentID(itemSeparator.getID(), ID);
+        // UIContext.get().assignParentID(itemSeparator.getID(), ID);
         return itemSeparator;
     }
 

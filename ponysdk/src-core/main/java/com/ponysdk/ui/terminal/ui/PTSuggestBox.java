@@ -43,12 +43,12 @@ import com.ponysdk.ui.terminal.model.Model;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    public static Map<Long, SuggestOracle> oracleByID = new HashMap<>();
+    public static Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getLong(Model.TEXTBOX_ID));
-        final long oracleID = create.getLong(Model.ORACLE);
+        final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getInt(Model.TEXTBOX_ID));
+        final int oracleID = create.getInt(Model.ORACLE);
         final SuggestOracle oracle = oracleByID.get(oracleID);
         if (oracle == null) throw new RuntimeException("Oracle #" + oracleID + " not registered");
 

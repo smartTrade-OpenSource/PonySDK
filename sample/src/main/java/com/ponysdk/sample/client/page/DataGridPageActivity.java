@@ -27,12 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.command.pony.CreatePonyCommand;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.sample.event.pony.PonyCreatedEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
@@ -155,19 +151,21 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
             @Override
             protected List<Pony> getData(final Query query) {
-                final Result<List<Pony>> result = new FindPonysCommand(query).execute();
-                final List<Pony> data = result.getData();
-                final int fullSize = result.getFullSize();
-                pager.process(fullSize);
-                selector.reset();
-                selector.setPageSize(data.size());
-                selector.setFullSize(fullSize);
-                return data;
+                // final Result<List<Pony>> result = new FindPonysCommand(query).execute();
+                // final List<Pony> data = result.getData();
+                // final int fullSize = result.getFullSize();
+                // pager.process(fullSize);
+                // selector.reset();
+                // selector.setPageSize(data.size());
+                // selector.setFullSize(fullSize);
+                // return data;
+                return null;
             }
 
             @Override
             protected List<Pony> getFullData(final Query query) {
-                return new FindPonysCommand(query).execute().getData();
+                return null;
+                // return new FindPonysCommand(query).execute().getData();
             }
 
         };
@@ -305,14 +303,15 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             public boolean onOK(final PDialogBox p) {
                 if (createPony.isValid()) {
-                    final Pony pony = new Pony(null, nameFormField.getValue(), ageFormField.getValue(), raceFormField.getValue());
-                    final CreatePonyCommand command = new CreatePonyCommand(pony);
-                    final Pony newPony = command.execute();
-                    if (command.isSuccessfull()) {
-                        final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
-                        event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
-                        fireEvent(event);
-                    }
+                    // final Pony pony = new Pony(null, nameFormField.getValue(), ageFormField.getValue(),
+                    // raceFormField.getValue());
+                    // final CreatePonyCommand command = new CreatePonyCommand(pony);
+                    // final Pony newPony = command.execute();
+                    // if (command.isSuccessfull()) {
+                    // final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
+                    // event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
+                    // fireEvent(event);
+                    // }
                     return true;
                 }
                 return false;

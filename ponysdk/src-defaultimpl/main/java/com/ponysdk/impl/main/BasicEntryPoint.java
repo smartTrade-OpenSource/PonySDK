@@ -23,20 +23,18 @@
 
 package com.ponysdk.impl.main;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 import javax.json.JsonObject;
 
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PRootPanel;
+import com.ponysdk.ui.server.basic.PWindow;
+import com.ponysdk.ui.server.basic.event.PCloseEvent;
+import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.basic.event.POpenEvent;
+import com.ponysdk.ui.server.basic.event.POpenHandler;
 
 public class BasicEntryPoint implements EntryPoint {
 
@@ -52,7 +50,7 @@ public class BasicEntryPoint implements EntryPoint {
 
         // PRootPanel.get().clear(true);
 
-        final long start = System.currentTimeMillis();
+        // final long start = System.currentTimeMillis();
 
         // final PFlowPanel flowPanel = new PFlowPanel();
         //
@@ -65,71 +63,92 @@ public class BasicEntryPoint implements EntryPoint {
         // }
         // }
 
-        final Map<Integer, PLabel> labels = new HashMap<>();
+        // final Map<Integer, PLabel> labels = new HashMap<>();
+        //
+        // for (int k = 0; k < 100; k++) {
 
-        for (int k = 0; k < 100; k++) {
+        // final PElement child = new PElement("div");
+        // child.setInnerText(i + " => Element ");
+        // child.setStyleProperty("border", "1px solid red");
 
-            // final PElement child = new PElement("div");
-            // child.setInnerText(i + " => Element ");
-            // child.setStyleProperty("border", "1px solid red");
+        // final PButton button = new PButton(k + " => Button");
+        //
+        // button.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent event) {
+        // button.setText("" + System.currentTimeMillis());
+        // }
+        // });
+        //
+        // PRootPanel.get().add(button);
+        // final PTextBox textBox = new PTextBox(k + " => Button");
+        //
+        // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
+        //
+        // @Override
+        // public void onValueChange(final PValueChangeEvent<String> event) {
+        // System.err.println("On value Changed : " + event.getValue());
+        // }
+        // });
 
-            // final PButton button = new PButton(k + " => Button");
-            //
-            // button.addClickHandler(new PClickHandler() {
-            //
-            // @Override
-            // public void onClick(final PClickEvent event) {
-            // button.setText("" + System.currentTimeMillis());
-            // }
-            // });
-            //
-            // PRootPanel.get().add(button);
-            // final PTextBox textBox = new PTextBox(k + " => Button");
-            //
-            // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
-            //
-            // @Override
-            // public void onValueChange(final PValueChangeEvent<String> event) {
-            // System.err.println("On value Changed : " + event.getValue());
-            // }
-            // });
+        // PRootPanel.get().add(textBox);
 
-            // PRootPanel.get().add(textBox);
+        // final PLabel label = new PLabel(k + " => Label");
+        //
+        // labels.put(k, label);
+        //
+        // PRootPanel.get().add(label);
 
-            final PLabel label = new PLabel(k + " => Label");
+        //
+        // final PCheckBox checkBox = new PCheckBox("Check");
+        // checkBox.setEnabled(false);
+        // checkBox.setValue(true);
+        // PRootPanel.get().add(checkBox);
+        //
+        // final PListBox listBox = new PListBox();
+        // listBox.setWidth("150px");
+        // listBox.setVisibleItemCount(50);
+        // for (int j = 0; j < 50; j++) {
+        // listBox.addItem("Item " + j);
+        // }
+        //
+        // PRootPanel.get().add(listBox);
 
-            labels.put(k, label);
+        // }
 
-            PRootPanel.get().add(label);
-            //
-            // final PCheckBox checkBox = new PCheckBox("Check");
-            // checkBox.setEnabled(false);
-            // checkBox.setValue(true);
-            // PRootPanel.get().add(checkBox);
-            //
-            // final PListBox listBox = new PListBox();
-            // listBox.setWidth("150px");
-            // listBox.setVisibleItemCount(50);
-            // for (int j = 0; j < 50; j++) {
-            // listBox.addItem("Item " + j);
-            // }
-            //
-            // PRootPanel.get().add(listBox);
+        final PWindow window = new PWindow(null, "_blank", "");
+        window.open();
 
-        }
-
-        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
+        window.addCloseHandler(new PCloseHandler() {
 
             @Override
-            public void run() {
-                final Random random = new Random();
-
-                final String currentTimeMillis = Long.toString(random.nextInt(500000));
-                for (int k = 0; k < 100; k++) {
-                    labels.get(k).setText(currentTimeMillis);
-                }
+            public void onClose(final PCloseEvent closeEvent) {
+                System.err.println("On Close");
             }
-        }, 0, 200, TimeUnit.MILLISECONDS);
+        });
+        window.addOpenHandler(new POpenHandler() {
+
+            @Override
+            public void onOpen(final POpenEvent openEvent) {
+                System.err.println("On Open");
+            }
+        });
+
+        final PLabel label = new PLabel("Dans La window");
+        window.getPRootPanel().add(label);
+        // UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
+        //
+        // @Override
+        // public void run() {
+        // final Random random = new Random();
+        //
+        // final String currentTimeMillis = Long.toString(random.nextInt(500000));
+        // for (int k = 0; k < 100; k++) {
+        // labels.get(k).setText(currentTimeMillis);
+        // }
+        // }
+        // }, 0, 200, TimeUnit.MILLISECONDS);
 
         // PScript.execute("window.alert('coucoucou' + (1 + 6));", new ExecutionCallback() {
         //

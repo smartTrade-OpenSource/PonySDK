@@ -40,7 +40,7 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
         if (update.containsKey(Model.CELL_HORIZONTAL_ALIGNMENT)) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(Model.CELL_HORIZONTAL_ALIGNMENT)];
-            final Widget w = asWidget(update.getLong(Model.CELL), uiService);
+            final Widget w = asWidget(update.getInt(Model.CELL), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
@@ -56,7 +56,7 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
             }
         } else if (update.containsKey(Model.CELL_VERTICAL_ALIGNMENT)) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(Model.CELL_VERTICAL_ALIGNMENT)];
-            final Widget w = asWidget(update.getLong(Model.CELL), uiService);
+            final Widget w = asWidget(update.getInt(Model.CELL), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
@@ -71,9 +71,9 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
                     break;
             }
         } else if (update.containsKey(Model.CELL_WIDTH)) {
-            uiObject.setCellWidth(asWidget(update.getLong(Model.CELL), uiService), update.get(Model.CELL_WIDTH).isString().stringValue());
+            uiObject.setCellWidth(asWidget(update.getInt(Model.CELL), uiService), update.get(Model.CELL_WIDTH).isString().stringValue());
         } else if (update.containsKey(Model.CELL_HEIGHT)) {
-            uiObject.setCellHeight(asWidget(update.getLong(Model.CELL), uiService), update.get(Model.CELL_HEIGHT).isString().stringValue());
+            uiObject.setCellHeight(asWidget(update.getInt(Model.CELL), uiService), update.get(Model.CELL_HEIGHT).isString().stringValue());
         } else {
             super.update(update, uiService);
         }

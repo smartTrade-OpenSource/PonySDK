@@ -82,7 +82,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }

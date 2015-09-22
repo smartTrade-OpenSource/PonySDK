@@ -118,7 +118,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     }
 
     @Override
-    public Widget asWidget(final Long objectID, final UIService uiService) {
+    public Widget asWidget(final int objectID, final UIService uiService) {
         return ((PTWidget<?>) uiService.getPTObject(objectID)).cast();
     }
 
@@ -154,8 +154,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     private PTInstruction buildEventInstruction(final PTInstruction addHandler, final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
         eventInstruction.setObjectID(addHandler.getObjectID());
-        // eventInstruction.put(Model.TYPE_EVENT);
-        // eventInstruction.put(Model.HANDLER_KEY_DOM_HANDLER);
         eventInstruction.put(Model.DOM_HANDLER_TYPE, domHandlerType.ordinal());
         return eventInstruction;
     }
@@ -284,7 +282,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction();
                             changeHandlerInstruction.setObjectID(addHandler.getObjectID());
-                            // changeHandlerInstruction.put(Model.TYPE_EVENT);
                             changeHandlerInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(Model.VALUE, textBox.getText());
 

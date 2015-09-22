@@ -37,19 +37,23 @@ public class PTInstruction extends JSONObject {
         return get(key.getKey());
     }
 
-    public Long getObjectID() {
+    public int getObjectID() {
         final JSONValue jsonValue = get(Model.OBJECT_ID.getKey());
-        return (long) jsonValue.isNumber().doubleValue();
+        return (int) jsonValue.isNumber().doubleValue();
     }
 
-    public void setObjectID(final long objectID) {
+    public void setObjectID(final int objectID) {
         put(Model.OBJECT_ID.getKey(), objectID);
     }
 
-    public Long getParentID() {
+    public void setObjectID(final String objectID) {
+        setObjectID(Integer.parseInt(objectID));
+    }
+
+    public Integer getParentID() {
         if (containsKey(Model.PARENT_OBJECT_ID.getKey())) {
             final JSONValue jsonValue = get(Model.PARENT_OBJECT_ID.getKey());
-            return (long) jsonValue.isNumber().doubleValue();
+            return (int) jsonValue.isNumber().doubleValue();
         } else {
             return null;
         }

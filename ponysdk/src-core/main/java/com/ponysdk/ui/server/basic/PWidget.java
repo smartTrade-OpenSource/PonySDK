@@ -102,6 +102,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String stylePrimaryName;
     private String debugID;
 
+    public PWidget() {}
+
+    public PWidget(final PWindow window) {
+        super(window);
+    }
+
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
@@ -218,6 +224,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void setParent(final PWidget parent) {
         this.parent = parent;
+
+        if (parent != null) {
+            if (parent.getWindow() != null) {
+                // assert if parent window != child window
+                this.window = parent.getWindow();
+            }
+        }
     }
 
     public void setStyleProperty(final String name, final String value) {
@@ -228,6 +241,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.PUT_STYLE_KEY, name);
             parser.comma();
@@ -244,6 +261,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.REMOVE_STYLE_KEY, name);
             parser.endObject();
@@ -258,6 +279,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.PUT_PROPERTY_KEY, name);
             parser.comma();
@@ -274,6 +299,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.PUT_ATTRIBUTE_KEY, name);
             parser.comma();
@@ -290,6 +319,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.REMOVE_ATTRIBUTE_KEY, name);
             parser.endObject();
@@ -313,6 +346,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.PREVENT_EVENT, e.getCode());
             parser.endObject();
@@ -326,6 +363,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.STOP_EVENT, e.getCode());
             parser.endObject();
@@ -339,6 +380,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ADD_STYLE_NAME, styleName);
             parser.endObject();
@@ -358,6 +403,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.REMOVE_STYLE_NAME, styleName);
         parser.endObject();
@@ -419,6 +468,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().ordinal());
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(handler.asJsonObject());
             parser.endObject();
@@ -439,6 +492,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().ordinal());
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(handler.asJsonObject());
             parser.endObject();
@@ -459,6 +516,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.endObject();
         }
         return handlerRegistration;
@@ -518,7 +579,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
                     if (instruction.containsKey(Model.DRAG_SRC.getKey())) {
-                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).longValue());
+                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);

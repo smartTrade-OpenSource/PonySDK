@@ -83,12 +83,12 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
     protected abstract class SchedulerCommand implements RepeatingCommand {
 
         protected final UIService uiService;
-        protected final long schedulerID;
+        protected final int schedulerID;
         protected final long commandID;
         protected final int delay;
         protected boolean cancelled = false;
 
-        public SchedulerCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
+        public SchedulerCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
             this.uiService = uiService;
             this.schedulerID = schedulerID;
             this.commandID = commandID;
@@ -102,7 +102,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected class FixRateCommand extends SchedulerCommand {
 
-        public FixRateCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
+        public FixRateCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
             super(uiService, schedulerID, commandID, delay);
         }
 
@@ -113,7 +113,6 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            // instruction.put(Model.TYPE_EVENT);
             instruction.put(Model.HANDLER_SCHEDULER);
             instruction.put(Model.ID, commandID);
             instruction.put(Model.FIXRATE, delay);
@@ -127,7 +126,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected class FixDelayCommand extends SchedulerCommand {
 
-        public FixDelayCommand(final UIService uiService, final long schedulerID, final long commandID, final int delay) {
+        public FixDelayCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
             super(uiService, schedulerID, commandID, delay);
         }
 
@@ -138,7 +137,6 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            // instruction.put(Model.TYPE_EVENT);
             instruction.put(Model.HANDLER_SCHEDULER);
             instruction.put(Model.ID, commandID);
             instruction.put(Model.FIXDELAY, delay);

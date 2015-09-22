@@ -32,7 +32,7 @@ public class PTPushButton extends PTCustomButton<PushButton> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTImage image = (PTImage) uiService.getPTObject(create.getLong(Model.IMAGE));
+        final PTImage image = (PTImage) uiService.getPTObject(create.getInt(Model.IMAGE));
         init(create, uiService, new PushButton(image.cast()));
     }
 }

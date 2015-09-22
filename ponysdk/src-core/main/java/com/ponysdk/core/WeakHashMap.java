@@ -15,19 +15,18 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.terminal.model.Model;
 
-public class WeakHashMap implements Map<Long, PObject> {
+public class WeakHashMap implements Map<Integer, PObject> {
 
     private final Logger log = LoggerFactory.getLogger(WeakHashMap.class);
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
-    private final Map<Long, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
+    private final Map<Integer, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
 
-    private final Map<WeakReference<PObject>, Long> objectIDByReferences = new ConcurrentHashMap<>();
-
-    private final Map<WeakReference<PObject>, Long> parentObjectIDByReferences = new ConcurrentHashMap<>();
+    private final Map<WeakReference<PObject>, Integer> objectIDByReferences = new ConcurrentHashMap<>();
 
     @Override
     public int size() {
@@ -62,7 +61,7 @@ public class WeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public PObject put(final Long objectID, final PObject value) {
+    public PObject put(final Integer objectID, final PObject value) {
         expungeStaleEntries();
         final WeakReference<PObject> weakReference = new WeakReference<>(value, queue);
         referenceByObjectID.put(objectID, weakReference);
@@ -70,13 +69,13 @@ public class WeakHashMap implements Map<Long, PObject> {
 
         if (log.isDebugEnabled()) log.debug("Registering object: " + value);
 
-        if (value instanceof PWidget) {
-            final PWidget widget = (PWidget) value;
-            if (widget.getParent() != null) {
-                if (log.isDebugEnabled()) log.debug("Attaching object #" + objectID + " to parent: " + widget);
-                parentObjectIDByReferences.put(weakReference, widget.getParent().getID());
-            }
-        }
+        // if (value instanceof PWidget) {
+        // final PWidget widget = (PWidget) value;
+        // if (widget.getParent() != null) {
+        // if (log.isDebugEnabled()) log.debug("Attaching object #" + objectID + " to parent: " + widget);
+        // parentObjectIDByReferences.put(weakReference, widget.getParent().getID());
+        // }
+        // }
 
         return value;
     }
@@ -90,13 +89,13 @@ public class WeakHashMap implements Map<Long, PObject> {
         if (reference == null) return null;
 
         objectIDByReferences.remove(reference);
-        parentObjectIDByReferences.remove(reference);
+        // parentObjectIDByReferences.remove(reference);
 
         return reference.get();
     }
 
     @Override
-    public void putAll(final Map<? extends Long, ? extends PObject> m) {
+    public void putAll(final Map<? extends Integer, ? extends PObject> m) {
         expungeStaleEntries();
     }
 
@@ -106,7 +105,7 @@ public class WeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public Set<Long> keySet() {
+    public Set<Integer> keySet() {
         expungeStaleEntries();
         return null;
     }
@@ -118,38 +117,47 @@ public class WeakHashMap implements Map<Long, PObject> {
     }
 
     @Override
-    public Set<java.util.Map.Entry<Long, PObject>> entrySet() {
+    public Set<java.util.Map.Entry<Integer, PObject>> entrySet() {
         expungeStaleEntries();
         return null;
     }
 
-    public void assignParentID(final Long objectID, final Long parentObjectID) {
-        if (referenceByObjectID.get(objectID) == null) {
-            log.warn("Unkwnown reference to object: " + objectID);
-            return;
-        }
-        parentObjectIDByReferences.put(referenceByObjectID.get(objectID), parentObjectID);
-    }
+    // public void assignParentID(final Integer objectID, final Integer parentObjectID) {
+    // if (referenceByObjectID.get(objectID) == null) {
+    // log.warn("Unkwnown reference to object: " + objectID);
+    // return;
+    // }
+    // parentObjectIDByReferences.put(referenceByObjectID.get(objectID), parentObjectID);
+    // }
 
     private void expungeStaleEntries() {
         Reference<? extends PObject> reference = null;
 
         while ((reference = queue.poll()) != null) {
-            final Long objectID = objectIDByReferences.remove(reference);
-            final Long parentObjectID = parentObjectIDByReferences.remove(reference);
-            referenceByObjectID.remove(objectID);
+            final Integer objectID = objectIDByReferences.remove(reference);
+            // final Integer parentObjectID = parentObjectIDByReferences.remove(reference);
+            final WeakReference<PObject> removedObject = referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
 
-            if (parentObjectID != null) {
-                final Parser parser = Txn.get().getTxnContext().getParser();
-                parser.beginObject();
-                parser.parse(Model.TYPE_GC);
+            // if (parentObjectID != null) {
+            final Parser parser = Txn.get().getTxnContext().getParser();
+            parser.beginObject();
+            parser.parse(Model.TYPE_GC);
+            parser.comma();
+            parser.parse(Model.OBJECT_ID, objectID);
+
+            if (removedObject.get() instanceof PWidget) {
+                System.err.println("GC object ");
+                final PWidget widget = (PWidget) removedObject.get();
+                final PWindow window = widget.getWindow();
                 parser.comma();
-                parser.parse(Model.OBJECT_ID, objectID);
-                parser.comma();
-                parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-                parser.endObject();
+                parser.parse(Model.WINDOW_ID, window.getID());
             }
+
+            // parser.comma();
+            // parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+            parser.endObject();
+            // }
         }
     }
 

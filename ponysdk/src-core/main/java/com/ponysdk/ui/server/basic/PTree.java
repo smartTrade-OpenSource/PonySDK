@@ -144,7 +144,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
-            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(Model.HANDLER_SELECTION_HANDLER.getKey()).longValue());
+            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(Model.HANDLER_SELECTION_HANDLER.getKey()).intValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);

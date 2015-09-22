@@ -36,8 +36,8 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final Long openImg = create.getLong(Model.DISCLOSURE_PANEL_OPEN_IMG);
-        final Long closeImg = create.getLong(Model.DISCLOSURE_PANEL_CLOSE_IMG);
+        final int openImg = create.getInt(Model.DISCLOSURE_PANEL_OPEN_IMG);
+        final int closeImg = create.getInt(Model.DISCLOSURE_PANEL_CLOSE_IMG);
         final String headerText = create.getString(Model.TEXT);
 
         final PTImage open = (PTImage) uiService.getPTObject(openImg);
@@ -58,7 +58,6 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
@@ -70,7 +69,6 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(create.getObjectID());
-                // instruction.put(Model.TYPE_EVENT);
                 instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }

@@ -73,7 +73,7 @@ public abstract class AbstractApplicationManager {
                 txn.begin(context);
                 try {
 
-                    final long receivedSeqNum = context.getSeqNum();
+                    final int receivedSeqNum = context.getSeqNum();
                     uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
 
                     // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey());

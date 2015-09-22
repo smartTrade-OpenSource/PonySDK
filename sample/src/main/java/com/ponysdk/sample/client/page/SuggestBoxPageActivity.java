@@ -23,15 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PListBox;
@@ -74,15 +68,15 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         });
 
         final Query query = new Query();
-        final FindPonysCommand command = new FindPonysCommand(query);
-        final Result<List<Pony>> ponys = command.execute();
+        // final FindPonysCommand command = new FindPonysCommand(query);
+        // final Result<List<Pony>> ponys = command.execute();
 
-        final List<String> datas = new ArrayList<String>();
-        for (final Pony pony : ponys.getData()) {
-            datas.add(pony.getName());
-        }
-        suggestOracle.addAll(datas);
-        suggestOracle.setDefaultSuggestions(datas.subList(0, 5));
+        // final List<String> datas = new ArrayList<String>();
+        // for (final Pony pony : ponys.getData()) {
+        // datas.add(pony.getName());
+        // }
+        // suggestOracle.addAll(datas);
+        // suggestOracle.setDefaultSuggestions(datas.subList(0, 5));
 
         panel.add(suggestBox);
 
@@ -113,10 +107,10 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
                     oracle.clear();
                 } else if (item.equals(4)) {
                     current++;
-                    final Result<List<Pony>> ponys = command.execute();
-                    for (final Pony pony : ponys.getData()) {
-                        suggestOracle.add(pony.getName() + " " + current);
-                    }
+                    // final Result<List<Pony>> ponys = command.execute();
+                    // for (final Pony pony : ponys.getData()) {
+                    // suggestOracle.add(pony.getName() + " " + current);
+                    // }
                 }
             }
         });

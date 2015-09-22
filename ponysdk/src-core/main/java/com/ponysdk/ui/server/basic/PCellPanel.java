@@ -58,6 +58,10 @@ public abstract class PCellPanel extends PComplexPanel {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
         parser.comma();
@@ -71,6 +75,10 @@ public abstract class PCellPanel extends PComplexPanel {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
         parser.comma();
@@ -84,6 +92,10 @@ public abstract class PCellPanel extends PComplexPanel {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.CELL_HEIGHT, height);
         parser.comma();
@@ -97,6 +109,10 @@ public abstract class PCellPanel extends PComplexPanel {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.CELL_WIDTH, width);
         parser.comma();

@@ -35,6 +35,12 @@ public abstract class PComplexPanel extends PPanel {
 
     private PWidgetCollection children;
 
+    public PComplexPanel() {}
+
+    public PComplexPanel(final PWindow window) {
+        super(window);
+    }
+
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {
             add(w);

@@ -32,15 +32,16 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.basic.event.POpenEvent;
+import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PWindow extends PObject {
 
-    public static final long MAIN = -1L;
-
     private final List<Runnable> postedCommands = new ArrayList<>();
     private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<>();
+    private final ListenerCollection<POpenHandler> openHandlers = new ListenerCollection<>();
 
     private final boolean loaded = false;
 
@@ -50,23 +51,40 @@ public class PWindow extends PObject {
 
     private final String features;
 
+    private boolean opened = false;
+
     public PWindow(final String url, final String name, final String features) {
+        super();
+
         this.url = url;
         this.name = name;
         this.features = features;
 
         init();
+
+        System.err.println("Window id : " + getID());
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        parser.parse(Model.URL, url);
+        parser.comma();
+        if (url != null) {
+            parser.parse(Model.URL, url);
+            parser.comma();
+        }
         parser.parse(Model.NAME, name);
-        parser.parse(Model.FEATURES, features);
+        if (features != null) {
+            parser.comma();
+            parser.parse(Model.FEATURES, features);
+        }
     }
 
-    public void open() {
+    public boolean open() {
+        if (opened) return false;
+        opened = true;
         saveUpdate(Model.OPEN, true);
+        WindowManager.registerWindow(this);
+        return true;
     }
 
     public void close() {
@@ -81,25 +99,39 @@ public class PWindow extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
-            fireClose();
+            WindowManager.unregisterWindow(this);
+            fireOnClose();
             return;
+        } else if (instruction.containsKey(Model.HANDLER_OPEN_HANDLER.getKey())) {
+            fireOnOpen();
+        } else {
+            super.onClientData(instruction);
         }
-
-        super.onClientData(instruction);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
         closeHandlers.add(handler);
     }
 
+    public void addOpenHandler(final POpenHandler handler) {
+        openHandlers.add(handler);
+    }
+
     public void removeCloseHandler(final PCloseHandler handler) {
         closeHandlers.remove(handler);
     }
 
-    private void fireClose() {
+    private void fireOnClose() {
         final PCloseEvent e = new PCloseEvent(this);
         for (final PCloseHandler h : closeHandlers) {
             h.onClose(e);
+        }
+    }
+
+    private void fireOnOpen() {
+        final POpenEvent e = new POpenEvent(this);
+        for (final POpenHandler h : openHandlers) {
+            h.onOpen(e);
         }
     }
 
@@ -111,10 +143,24 @@ public class PWindow extends PObject {
         return loaded;
     }
 
+    public PRootLayoutPanel getPRootLayoutPanel() {
+        return PRootLayoutPanel.get(this);
+    }
+
+    public PRootPanel getPRootPanel() {
+        return PRootPanel.get(this);
+    }
+
     public void addWidget(final IsPWidget widget) {
         PRootLayoutPanel.get().add(widget);
     }
 
-    protected void onLoad() {}
+    public static class TargetAttribut {
+
+        static final String BLANK = "_blank";
+        static final String PARENT = "_parent";
+        static final String SELF = "_self";
+        static final String TOP = "_top";
+    }
 
 }

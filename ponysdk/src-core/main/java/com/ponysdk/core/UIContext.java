@@ -77,7 +77,7 @@ public class UIContext {
 
     private final WeakHashMap weakReferences = new WeakHashMap();
 
-    private final Map<Long, StreamHandler> streamListenerByID = new HashMap<>();
+    private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
 
     private Map<String, Permission> permissions = new HashMap<>();
 
@@ -88,14 +88,14 @@ public class UIContext {
 
     private final Application application;
 
-    private final Map<String, Object> uiContextAttributes = new ConcurrentHashMap<>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    private long lastReceived = -1;
+    private int lastReceived = -1;
+    private int nextSent = 0;
     private long lastSyncErrorTimestamp = 0;
-    private long nextSent = 0;
-    private final Map<Long, JsonObject> incomingMessageQueue = new HashMap<>();
+    private final Map<Integer, JsonObject> incomingMessageQueue = new HashMap<>();
 
     private static final AtomicInteger ponyUIContextIDcount = new AtomicInteger();
 
@@ -129,13 +129,13 @@ public class UIContext {
 
     public void fireClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(Model.TYPE_CLOSE.getKey())) {
-            UIContext.get().destroy();
+            destroy();
         } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getKey())) {
             if (history != null) {
                 history.fireHistoryChanged(jsonObject.getString(Model.HISTORY_TOKEN.getKey()));
             }
         } else {
-            final Long objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getKey()).longValue();
+            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
 
             final PObject object = weakReferences.get(objectID);
 
@@ -143,7 +143,7 @@ public class UIContext {
                 log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
                 if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getKey())) {
-                    final Long parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getKey()).longValue();
+                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getKey()).intValue();
                     final PObject gcObject = weakReferences.get(parentObjectID);
                     log.warn("" + gcObject);
                 }
@@ -180,20 +180,21 @@ public class UIContext {
         return getAttribute(PPusher.PUSHER);
     }
 
-    public long nextStreamRequestID() {
+    public int nextStreamRequestID() {
         return streamRequestCounter++;
     }
 
     public void registerObject(final PObject object) {
         weakReferences.put(object.getID(), object);
+        System.err.println("Register object : " + object.getID());
     }
 
-    public void assignParentID(final long objectID, final long parentID) {
-        weakReferences.assignParentID(objectID, parentID);
-    }
+    // public void assignParentID(final int objectID, final int parentID) {
+    // weakReferences.assignParentID(objectID, parentID);
+    // }
 
     @SuppressWarnings("unchecked")
-    public <T> T getObject(final long objectID) {
+    public <T> T getObject(final int objectID) {
         return (T) weakReferences.get(objectID);
     }
 
@@ -201,12 +202,12 @@ public class UIContext {
     // return application.getSession();
     // }
 
-    public StreamHandler removeStreamListener(final Long streamID) {
+    public StreamHandler removeStreamListener(final int streamID) {
         return streamListenerByID.remove(streamID);
     }
 
     public void stackStreamRequest(final StreamHandler streamListener) {
-        final long streamRequestID = UIContext.get().nextStreamRequestID();
+        final int streamRequestID = UIContext.get().nextStreamRequestID();
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -222,8 +223,8 @@ public class UIContext {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final long objectID) {
-        final long streamRequestID = UIContext.get().nextStreamRequestID();
+    public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
+        final int streamRequestID = UIContext.get().nextStreamRequestID();
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -335,7 +336,7 @@ public class UIContext {
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
-        else uiContextAttributes.put(name, value);
+        else attributes.put(name, value);
     }
 
     /**
@@ -347,7 +348,7 @@ public class UIContext {
      */
 
     public Object removeAttribute(final String name) {
-        return uiContextAttributes.remove(name);
+        return attributes.remove(name);
     }
 
     /**
@@ -360,7 +361,7 @@ public class UIContext {
      */
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
-        return (T) uiContextAttributes.get(name);
+        return (T) attributes.get(name);
     }
 
     public void setApplicationAttribute(final String name, final Object value) {
@@ -380,10 +381,10 @@ public class UIContext {
         communicationSanityChecker.onMessageReceived();
     }
 
-    public boolean updateIncomingSeqNum(final long receivedSeqNum) {
+    public boolean updateIncomingSeqNum(final int receivedSeqNum) {
         notifyMessageReceived();
 
-        final long previous = lastReceived;
+        final int previous = lastReceived;
         if ((previous + 1) != receivedSeqNum) {
             if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
@@ -394,21 +395,19 @@ public class UIContext {
         return true;
     }
 
-    public long getAndIncrementNextSentSeqNum() {
-        final long n = nextSent;
-        nextSent++;
-        return n;
+    public int getAndIncrementNextSentSeqNum() {
+        return nextSent++;
     }
 
-    public void stackIncomingMessage(final Long receivedSeqNum, final JsonObject data) {
+    public void stackIncomingMessage(final int receivedSeqNum, final JsonObject data) {
         incomingMessageQueue.put(receivedSeqNum, data);
     }
 
-    public List<JsonObject> expungeIncomingMessageQueue(final Long receivedSeqNum) {
+    public List<JsonObject> expungeIncomingMessageQueue(final int receivedSeqNum) {
         if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
 
         final List<JsonObject> datas = new ArrayList<>();
-        long expected = receivedSeqNum + 1;
+        int expected = receivedSeqNum + 1;
         while (incomingMessageQueue.containsKey(expected)) {
             datas.add(incomingMessageQueue.remove(expected));
             lastReceived = expected;

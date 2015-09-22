@@ -83,6 +83,10 @@ public abstract class PScript extends PObject {
         get().executeScript(windowID, js, callback);
     }
 
+    public static void executeDeffered(final String js, final int delay, final TimeUnit unit) {
+        get().executeScriptDeffered(js, null, delay, unit);
+    }
+
     public static void executeDeffered(final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
         get().executeScriptDeffered(js, callback, delay, unit);
     }
@@ -97,6 +101,10 @@ public abstract class PScript extends PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
 
         if (windowID != null) {
@@ -123,6 +131,10 @@ public abstract class PScript extends PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
 
         if (windowID != null) {
@@ -147,7 +159,11 @@ public abstract class PScript extends PObject {
 
             @Override
             protected void run() {
-                executeScript(windowID, js, callback);
+                if (callback == null) {
+                    executeScript(windowID, js);
+                } else {
+                    executeScript(windowID, js, callback);
+                }
             }
         };
         command.schedule(unit.toMillis(delay));
@@ -158,14 +174,7 @@ public abstract class PScript extends PObject {
     }
 
     public void executeScriptDeffered(final Long windowID, final String js, final int delay, final TimeUnit unit) {
-        final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
-
-            @Override
-            protected void run() {
-                executeScript(windowID, js);
-            }
-        };
-        command.schedule(unit.toMillis(delay));
+        executeScriptDeffered(windowID, js, null, delay, unit);
     }
 
     public void executeScriptDeffered(final String js, final int delay, final TimeUnit unit) {

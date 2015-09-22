@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.service.PonyServiceRegistry;
 import com.ponysdk.core.servlet.ApplicationLoader;
 import com.ponysdk.core.servlet.BootstrapServlet;
 import com.ponysdk.impl.main.Main;
@@ -17,7 +16,7 @@ public class TradingSample {
     public static void main(final String[] args) {
         try {
             // Register service
-            PonyServiceRegistry.registerPonyService(new TradingServiceImpl());
+            // PonyServiceRegistry.registerPonyService(new TradingServiceImpl());
 
             // Start webserver
             final ApplicationLoader applicationLoader = new ApplicationLoader(new ApplicationManagerOption());

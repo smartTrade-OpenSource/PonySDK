@@ -133,7 +133,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public long getSeqNum() {
+    public int getSeqNum() {
         return 0;
     }
 

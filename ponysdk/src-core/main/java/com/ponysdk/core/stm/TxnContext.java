@@ -34,7 +34,7 @@ public interface TxnContext {
 
     void setResponse(Response response);
 
-    long getSeqNum();
+    int getSeqNum();
 
     String getHistoryToken();
 

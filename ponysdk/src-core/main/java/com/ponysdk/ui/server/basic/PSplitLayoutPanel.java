@@ -103,6 +103,10 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.MIN_SIZE, minSize);
             parser.comma();
@@ -135,6 +139,10 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
             parser.comma();
@@ -161,6 +169,10 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
             parser.comma();
@@ -178,7 +190,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             final JsonArray array = instruction.getJsonArray(Model.VALUE.getKey());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject ws = array.getJsonObject(i);
-                final long objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).longValue();
+                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
                     final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).longValue();

@@ -1,5 +1,5 @@
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '2.7'
 }
 
 subprojects {
@@ -7,13 +7,15 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    
     version = '1.0.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
     }
+    
     publishing {
         publications {
             maven(MavenPublication) {

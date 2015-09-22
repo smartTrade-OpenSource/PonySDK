@@ -23,12 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.List;
-
-import com.ponysdk.core.query.Query;
-import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 
 public class FlowPanelPageActivity extends SamplePageActivity {
@@ -43,12 +37,12 @@ public class FlowPanelPageActivity extends SamplePageActivity {
 
         final PFlowPanel flowPanel = new PFlowPanel();
 
-        FindPonysCommand command = new FindPonysCommand(new Query());
-        List<Pony> ponyList = command.execute().getData();
+        // FindPonysCommand command = new FindPonysCommand(new Query());
+        // List<Pony> ponyList = command.execute().getData();
 
-        for (Pony pony : ponyList) {
-            flowPanel.add(new PCheckBox(pony.getName()));
-        }
+        // for (final Pony pony : ponyList) {
+        // flowPanel.add(new PCheckBox(pony.getName()));
+        // }
 
         examplePanel.setWidget(flowPanel);
     }

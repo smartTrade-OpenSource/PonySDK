@@ -100,6 +100,10 @@ public abstract class PHTMLTable extends PPanel {
                 parser.parse(Model.TYPE_UPDATE);
                 parser.comma();
                 parser.parse(Model.OBJECT_ID, ID);
+                if (window != null) {
+                    parser.comma();
+                    parser.parse(Model.WINDOW_ID, window.getID());
+                }
                 parser.comma();
                 parser.parse(Model.ROW, row);
                 parser.comma();
@@ -121,6 +125,10 @@ public abstract class PHTMLTable extends PPanel {
                 parser.parse(Model.TYPE_UPDATE);
                 parser.comma();
                 parser.parse(Model.OBJECT_ID, ID);
+                if (window != null) {
+                    parser.comma();
+                    parser.parse(Model.WINDOW_ID, window.getID());
+                }
                 parser.comma();
                 parser.parse(Model.ROW, row);
                 parser.comma();
@@ -146,6 +154,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -186,6 +198,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -203,6 +219,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -220,6 +240,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -237,6 +261,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -254,6 +282,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -274,6 +306,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.COLUMN, column);
             parser.comma();
@@ -289,6 +325,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
             parser.comma();
@@ -304,6 +344,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
             parser.comma();
@@ -319,6 +363,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_UPDATE);
             parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
             parser.comma();
@@ -500,6 +548,10 @@ public abstract class PHTMLTable extends PPanel {
             parser.parse(Model.TYPE_ADD);
             parser.comma();
             parser.parse(Model.OBJECT_ID, widget.getID());
+            if (window != null) {
+                parser.comma();
+                parser.parse(Model.WINDOW_ID, window.getID());
+            }
             parser.comma();
             parser.parse(Model.PARENT_OBJECT_ID, ID);
             parser.comma();

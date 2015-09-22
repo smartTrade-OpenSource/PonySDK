@@ -106,8 +106,7 @@ public class TxnContextHttp implements TxnContext {
     }
 
     @Override
-    public long getSeqNum() {
-        // TODO Auto-generated method stub
+    public int getSeqNum() {
         return 0;
     }
 

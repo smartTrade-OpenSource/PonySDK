@@ -190,6 +190,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 try {
                     context.getUIContext().notifyMessageReceived();
                     request.setText(text);
+
+                    System.err.println("Message received : " + text);
+
                     applicationManager.process(context);
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);

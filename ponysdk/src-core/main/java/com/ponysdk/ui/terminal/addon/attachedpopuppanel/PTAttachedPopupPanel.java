@@ -38,7 +38,7 @@ public class PTAttachedPopupPanel extends PTPopupPanel {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
 
-        attached = (PTUIObject<?>) uiService.getPTObject(create.getLong(Model.WIDGET));
+        attached = (PTUIObject<?>) uiService.getPTObject(create.getInt(Model.WIDGET));
 
         super.create(create, uiService);
     }

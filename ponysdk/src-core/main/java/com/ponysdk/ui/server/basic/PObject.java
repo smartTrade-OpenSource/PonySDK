@@ -48,12 +48,17 @@ public abstract class PObject {
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    private int parentWindowID;
+    protected PWindow window;
 
     private boolean initialized = false;
 
     PObject() {
+        this(null);
+    }
+
+    PObject(final PWindow window) {
         UIContext.get().registerObject(this);
+        this.window = window;
     }
 
     protected void init() {
@@ -64,6 +69,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_CREATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.WIDGET_TYPE, getWidgetType().ordinal());
 
@@ -74,13 +83,25 @@ public abstract class PObject {
         initialized = true;
     }
 
+    public PWindow getWindow() {
+        return window;
+    }
+
+    void attach(final PWindow window) {
+        if (this.window != null && this.window != window) { throw new IllegalAccessError("Widget already attached to an other window"); }
+
+        this.window = window;
+
+        saveUpdate(Model.WINDOW_ID, window.getID());
+    }
+
     protected void enrichOnInit(final Parser parser) {
 
     }
 
     protected abstract WidgetType getWidgetType();
 
-    public final long getID() {
+    public final int getID() {
         return ID;
     }
 
@@ -139,14 +160,6 @@ public abstract class PObject {
         return true;
     }
 
-    public long getParentWindowID() {
-        return parentWindowID;
-    }
-
-    void setParentWindowID(final int parentWindowID) {
-        this.parentWindowID = parentWindowID;
-    }
-
     protected void saveAddHandler(final Model type) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -155,6 +168,10 @@ public abstract class PObject {
         parser.parse(type);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.endObject();
     }
 
@@ -164,6 +181,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_REMOVE_HANDLER);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.endObject();
     }
 
@@ -173,6 +194,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_REMOVE_HANDLER);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -184,67 +209,87 @@ public abstract class PObject {
         parser.parse(Model.TYPE_REMOVE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
     }
 
-    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final boolean value) {
+    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final boolean value) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
 
-        UIContext.get().assignParentID(objectID, parentObjectID);
+        // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
-    protected void saveAdd(final long objectID, final long parentObjectID) {
+    protected void saveAdd(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
 
-        UIContext.get().assignParentID(objectID, parentObjectID);
+        // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
-    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final int value) {
+    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final int value) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
-        parser.comma();
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-        parser.comma();
-        parser.parse(model, value);
-        parser.endObject();
-
-        UIContext.get().assignParentID(objectID, parentObjectID);
-    }
-
-    protected void saveAdd(final long objectID, final long parentObjectID, final Model model, final String value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, objectID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
 
-        UIContext.get().assignParentID(objectID, parentObjectID);
+        // UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final String value) {
+        final Parser parser = Txn.get().getTxnContext().getParser();
+        parser.beginObject();
+        parser.parse(Model.TYPE_ADD);
+        parser.comma();
+        parser.parse(Model.OBJECT_ID, objectID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
+        parser.comma();
+        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        parser.comma();
+        parser.parse(model, value);
+        parser.endObject();
+
+        // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
     protected void saveUpdate(final Model model, final JsonObjectBuilder builder) {
@@ -253,6 +298,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, builder);
         parser.endObject();
@@ -264,6 +313,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, json);
         parser.endObject();
@@ -275,6 +328,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -286,6 +343,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -297,6 +358,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -308,6 +373,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -319,6 +388,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model, value);
         parser.endObject();
@@ -330,6 +403,10 @@ public abstract class PObject {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(model);
         parser.endObject();

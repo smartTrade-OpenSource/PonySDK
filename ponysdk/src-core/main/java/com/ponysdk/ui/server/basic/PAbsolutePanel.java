@@ -42,6 +42,11 @@ public class PAbsolutePanel extends PComplexPanel {
         init();
     }
 
+    public PAbsolutePanel(final PWindow window) {
+        super(window);
+        init();
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ABSOLUTE_PANEL;

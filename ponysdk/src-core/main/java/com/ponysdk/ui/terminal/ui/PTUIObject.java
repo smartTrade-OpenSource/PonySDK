@@ -85,14 +85,14 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (update.containsKey(Model.REMOVE_STYLE_KEY)) {
             uiObject.getElement().getStyle().clearProperty(update.getString(Model.REMOVE_STYLE_KEY));
         } else if (update.containsKey(Model.BIND)) {
-            nativeObject = bind(update.getString(Model.BIND), objectID.toString(), uiObject.getElement());
+            nativeObject = bind(update.getString(Model.BIND), String.valueOf(objectID), uiObject.getElement());
         } else if (update.containsKey(Model.NATIVE)) {
             final JSONObject object = update.getObject(Model.NATIVE);
-            sendToNative(objectID.toString(), nativeObject, object.getJavaScriptObject());
+            sendToNative(String.valueOf(objectID), nativeObject, object.getJavaScriptObject());
         }
     }
 
-    public UIObject asWidget(final Long objectID, final UIService uiService) {
+    public UIObject asWidget(final int objectID, final UIService uiService) {
         if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast(); }
         throw new IllegalStateException("This object is not an UIObject");
     }

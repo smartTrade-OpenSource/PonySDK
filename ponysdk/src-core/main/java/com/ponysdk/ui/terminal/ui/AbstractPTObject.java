@@ -28,10 +28,10 @@ import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class AbstractPTObject implements PTObject {
 
-    protected Long objectID;
+    protected int objectID;
 
     @Override
-    public Long getObjectID() {
+    public int getObjectID() {
         return objectID;
     }
 

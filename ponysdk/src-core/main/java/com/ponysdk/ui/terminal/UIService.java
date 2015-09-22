@@ -44,13 +44,13 @@ public interface UIService {
 
     public void sendDataToServer(Widget source, PTInstruction instruction);
 
-    public PTObject getPTObject(Long ID);
+    public PTObject getPTObject(int ID);
 
     public PTObject getPTObject(UIObject uiObject);
 
-    public void registerUIObject(Long ID, UIObject uiObject);
+    public void registerUIObject(int ID, UIObject uiObject);
 
-    public PTObject unRegisterObject(Long ID);
+    public PTObject unRegisterObject(int ID);
 
     public void update(JSONObject data);
 

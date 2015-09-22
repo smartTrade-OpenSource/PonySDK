@@ -51,7 +51,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
         if (add.containsKey(Model.TAB_TEXT)) {
             tabPanel.insert(w, add.getString(Model.TAB_TEXT), beforeIndex);
         } else if (add.containsKey(Model.TAB_WIDGET)) {
-            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getLong(Model.TAB_WIDGET));
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getInt(Model.TAB_WIDGET));
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
 

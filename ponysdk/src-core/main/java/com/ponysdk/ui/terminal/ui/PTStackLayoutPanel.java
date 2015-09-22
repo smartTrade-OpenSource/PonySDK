@@ -90,7 +90,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.OPEN)) {
-            uiObject.showWidget(asWidget(update.getLong(Model.OPEN), uiService));
+            uiObject.showWidget(asWidget(update.getInt(Model.OPEN), uiService));
         } else if (update.containsKey(Model.ANIMATE)) {
             uiObject.animate(update.getInt(Model.ANIMATE));
         } else if (update.containsKey(Model.ANIMATION_DURATION)) {

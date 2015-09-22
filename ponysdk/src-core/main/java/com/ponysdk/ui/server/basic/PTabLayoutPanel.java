@@ -30,7 +30,6 @@ import java.util.Collections;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
@@ -109,6 +108,10 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, widget.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
@@ -117,7 +120,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         parser.parse(Model.TAB_WIDGET, tabWidget.getID());
         parser.endObject();
 
-        UIContext.get().assignParentID(widget.getID(), ID);
+        // UIContext.get().assignParentID(widget.getID(), ID);
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
@@ -134,6 +137,10 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, widget.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
@@ -142,7 +149,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         parser.parse(Model.TAB_TEXT, tabText);
         parser.endObject();
 
-        UIContext.get().assignParentID(widget.getID(), ID);
+        // UIContext.get().assignParentID(widget.getID(), ID);
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {

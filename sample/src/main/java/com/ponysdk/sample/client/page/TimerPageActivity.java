@@ -25,10 +25,8 @@ package com.ponysdk.sample.client.page;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
 import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor.UIRunnable;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
@@ -161,14 +159,14 @@ public class TimerPageActivity extends SamplePageActivity {
                 label.setText("" + time1);
             }
         };
-        scheduleAtFixedRate = UIScheduledThreadPoolExecutor.get().scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                labelScheduler.setText(time2++ + "");
-
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        // scheduleAtFixedRate = UIScheduledThreadPoolExecutor.get().scheduleAtFixedRate(new Runnable() {
+        //
+        // @Override
+        // public void run() {
+        // labelScheduler.setText(time2++ + "");
+        //
+        // }
+        // }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     @Override

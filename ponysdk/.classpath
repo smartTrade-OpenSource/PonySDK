@@ -8,40 +8,26 @@
 	<classpathentry kind="lib" path="libs/logging/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="libs/tests/junit.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-core.jar"/>
-	<classpathentry kind="lib" path="libs/spring/spring-context.jar"/>
-	<classpathentry kind="lib" path="libs/spring/spring-beans.jar"/>
 	<classpathentry kind="lib" path="libs/tests/selenium-java.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-api.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-web.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-server.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-servlet.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-servlets.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/geronimo-servlet_3.0_spec.jar" sourcepath="/Users/nciaravola/.m2/repository/org/apache/geronimo/specs/geronimo-servlet_3.0_spec/1.0/geronimo-servlet_3.0_spec-1.0-sources.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-webapp.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/jetty-http.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/jetty-util.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-firefox-driver.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-remote-driver.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-support.jar"/>
 	<classpathentry kind="lib" path="libs/commons/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-client.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-io.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-chrome-driver.jar"/>
-	<classpathentry kind="lib" path="libs/tests/selenium-ie-driver.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwtexporter.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/javax.servlet-api.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/jetty-continuation.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/jetty-security.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/jetty-xml.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/websocket-api.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/websocket-client.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/websocket-common.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/websocket-server.jar"/>
-	<classpathentry kind="lib" path="libs/jetty/websocket-servlet.jar"/>
 	<classpathentry kind="lib" path="libs/commons/commons-lang.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
 	<classpathentry kind="lib" path="libs/json/javax.json-api.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-elemental.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/websocket-servlet.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/websocket-api.jar"/>
+	<classpathentry kind="lib" path="libs/spring/spring-beans.jar"/>
+	<classpathentry kind="lib" path="libs/spring/spring-context.jar"/>
 	<classpathentry kind="output" path="bin/classes/main"/>
 </classpath>

@@ -36,7 +36,6 @@ import java.util.TreeSet;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
@@ -130,6 +129,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.ITEM_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         final String s = items.toString();
         parser.parse(Model.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
@@ -168,6 +171,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.ITEM_INSERTED);
         parser.comma();
@@ -187,6 +194,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.ITEM_UPDATED);
         parser.comma();
@@ -244,6 +255,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.ITEM_REMOVED);
         parser.comma();
@@ -289,6 +304,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.SELECTED, selected);
         parser.comma();

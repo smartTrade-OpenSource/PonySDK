@@ -32,6 +32,12 @@ import com.ponysdk.ui.server.basic.event.HasPWidgets;
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
 
+    public PPanel() {}
+
+    public PPanel(final PWindow window) {
+        super(window);
+    }
+
     @Override
     public abstract boolean remove(PWidget child);
 
@@ -43,6 +49,17 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     @Override
     public void add(final IsPWidget w) {
         add(w.asWidget());
+    }
+
+    @Override
+    void attach(final PWindow window) {
+        super.attach(window);
+
+        final Iterator<PWidget> it = iterator();
+        while (it.hasNext()) {
+            final PWidget child = it.next();
+            child.attach(window);
+        }
     }
 
     protected final void adopt(final PWidget child) {

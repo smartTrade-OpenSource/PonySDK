@@ -24,7 +24,6 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -110,6 +109,10 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.WIDGET_SIZE, size);
         parser.comma();
@@ -123,6 +126,10 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_UPDATE);
         parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
         parser.comma();
@@ -143,6 +150,10 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.parse(Model.TYPE_ADD);
         parser.comma();
         parser.parse(Model.OBJECT_ID, child.getID());
+        if (window != null) {
+            parser.comma();
+            parser.parse(Model.WINDOW_ID, window.getID());
+        }
         parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
         parser.comma();
@@ -150,7 +161,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.SIZE, size);
         parser.endObject();
-        UIContext.get().assignParentID(child.getID(), ID);
+        // UIContext.get().assignParentID(child.getID(), ID);
     }
 
     @Override

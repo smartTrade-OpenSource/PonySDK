@@ -12,11 +12,11 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.SessionManager;
 import com.ponysdk.sample.trading.client.activity.MarketData;
-import com.ponysdk.sample.trading.service.trading.TradingService;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PPusher.PusherState;
 
-public class TradingServiceImpl implements TradingService {
+public class TradingServiceImpl /** implements TradingService **/
+{
 
     private final List<MarketData> marketDatas = new ArrayList<MarketData>();
 
@@ -59,10 +59,10 @@ public class TradingServiceImpl implements TradingService {
             }
         }, 1000, 200);
     }
-
-    @Override
-    public List<MarketData> findCurrencies() throws Exception {
-        return marketDatas;
-    }
+    //
+    // @Override
+    // public List<MarketData> findCurrencies() throws Exception {
+    // return marketDatas;
+    // }
 
 }
