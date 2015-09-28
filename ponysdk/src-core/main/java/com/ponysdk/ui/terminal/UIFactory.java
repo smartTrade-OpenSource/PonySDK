@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -87,6 +88,7 @@ import com.ponysdk.ui.terminal.ui.PTWindow;
 public class UIFactory {
 
     public PTObject newUIObject(final UIService uiService, final PTInstruction create) {
+        GWT.log("Create : " + create);
         final int widgetType = create.getInt(Model.WIDGET_TYPE);
 
         if (WidgetType.ELEMENT.ordinal() == widgetType) { return new PTElement(); }

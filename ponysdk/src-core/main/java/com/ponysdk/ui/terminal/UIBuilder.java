@@ -76,6 +76,7 @@ import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
+import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler, AnimationCallback {
 
@@ -222,15 +223,38 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (instruction.containsKey(Model.TYPE_CLOSE)) {
             processClose(instruction);
         } else if (instruction.containsKey(Model.TYPE_CREATE)) {
-            processCreate(instruction);
+            // TEMP
+
+            final int widgetType = instruction.getInt(Model.WIDGET_TYPE);
+            if (widgetType == WidgetType.WINDOW.ordinal()) {
+                GWT.log("Je vais creer la window : " + instruction.getObjectID());
+
+                ptObject = uiFactory.newUIObject(this, instruction);
+                ptObject.create(instruction, this);
+                objectByID.put(instruction.getObjectID(), ptObject);
+            } else {
+                processCreate(instruction);
+            }
+
         } else if (instruction.containsKey(Model.TYPE_ADD)) {
+            GWT.log("Add Instruction  : " + instruction);
+
             if (instruction.containsKey(Model.WINDOW_ID)) {
                 final List<PTInstruction> waitingInstructions = instructionsByObjectID.remove(instruction.getObjectID());
                 if (waitingInstructions != null) {
-                    for (final PTInstruction ptInstruction : waitingInstructions) {
-                        ptObject = uiFactory.newUIObject(this, ptInstruction);
-                        ptObject.create(ptInstruction, this);
-                        objectByID.put(ptInstruction.getObjectID(), ptObject);
+                    final int windowID = instruction.getInt(Model.WINDOW_ID);
+                    for (final PTInstruction waitingInstruction : waitingInstructions) {
+                        GWT.log("Transfert data to window : " + waitingInstruction);
+
+                        GWT.log("Window search : " + windowID);
+
+                        GWT.log("Window found : " + PTWindowManager.getWindow(windowID));
+
+                        PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
+
+                        // ptObject = uiFactory.newUIObject(this, ptInstruction);
+                        // ptObject.create(ptInstruction, this);
+                        // objectByID.put(ptInstruction.getObjectID(), ptObject);
                     }
                 }
             }
@@ -284,12 +308,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         {
             if (instruction.containsKey(Model.WINDOW_ID)) {
+
                 final List<PTInstruction> waitingInstructions = instructionsByObjectID.remove(instruction.getObjectID());
                 if (waitingInstructions != null) {
-                    for (final PTInstruction ptInstruction : waitingInstructions) {
-                        ptObject = uiFactory.newUIObject(this, ptInstruction);
-                        ptObject.create(ptInstruction, this);
-                        objectByID.put(ptInstruction.getObjectID(), ptObject);
+                    final int windowID = instruction.getInt(Model.WINDOW_ID);
+
+                    for (final PTInstruction waitingInstruction : waitingInstructions) {
+                        GWT.log("Transfert data to window : " + waitingInstruction);
+                        PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
+                        // ptObject = uiFactory.newUIObject(this, ptInstruction);
+                        // ptObject.create(ptInstruction, this);
+                        // objectByID.put(ptInstruction.getObjectID(), ptObject);
                     }
                 }
             }
@@ -371,6 +400,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         List<PTInstruction> instructions = instructionsByObjectID.get(instruction.getObjectID());
         if (instructions == null) {
             instructions = new ArrayList<>();
+
+            GWT.log("Stack Instruction  : " + instruction);
+
             instructionsByObjectID.put(instruction.getObjectID(), instructions);
         }
 

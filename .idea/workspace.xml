@@ -2,524 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="77f13e69-1241-4a44-884a-1ff44746f819" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/1.7/taskArtifacts/cache.properties.lock" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/2.2.1/taskArtifacts/cache.properties.lock" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/1.7/taskArtifacts/fileHashes.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/2.2.1/taskArtifacts/fileHashes.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/1.7/taskArtifacts/fileSnapshots.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/2.2.1/taskArtifacts/fileSnapshots.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/gradle/wrapper/gradle-wrapper.jar" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/1.7/taskArtifacts/outputFileStates.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/2.2.1/taskArtifacts/outputFileStates.bin" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.project" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/EntryInstruction.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/build.gradle" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/1.7/taskArtifacts/cache.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/.gradle/2.2.1/taskArtifacts/cache.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/settings.gradle" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\deprecated\AbstractActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\deprecated\Activity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\instruction\AddHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\instruction\GC.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\instruction\Remove.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\instruction\Update.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\json\JSONReader.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\place\AbstractPlace.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\core\tools\Objects.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\event\SubmitFormEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\event\SubmitFormHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\EmailFieldValidator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\FieldValidator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\NotEmptyFieldValidator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\ValidationResult.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\DefaultFormView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\FormActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\FormConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\FormField.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\FormView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\HasText.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\WizardActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\AbstractFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\CheckBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\DateBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\DateTimeBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\FormFieldComponent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\FormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\ListBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\OracleListBoxRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\PasswordTextBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\RadioButtonGroupFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\TextAreaFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\TextBoxBaseFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\TextBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\renderer\TwinListBoxFormFieldRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form\validator\DateFieldValidator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\ComplexListView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\DefaultComplexListView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\DefaultSimpleListView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\SimpleListView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\AbstractCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\CellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\DateCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\EmptyCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\HeaderCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\StringHeaderCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectionMode.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\valueprovider\BeanValueProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\valueprovider\BooleanValueProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\valueprovider\IdentityValueProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\valueprovider\ValueProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ColumnDescriptorFieldHolder.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ComplexListActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ComplexListCommandFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ComplexListConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ExportConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ListColumnDescriptor.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\ListConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\SelectionResult.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\SimpleListActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\AddCustomColumnDescriptorEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\AddCustomColumnDescriptorHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorMovedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorMovedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorRemovedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorRemovedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorShownEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ColumnDescriptorShownHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ComparatorTypeChangeEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ComparatorTypeChangeHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\CustomColumnDescriptorAddedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\CustomColumnDescriptorAddedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\MoveColumnDescriptorEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\MoveColumnDescriptorHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\PreferenceChangedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\PreferenceChangedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RefreshListEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RefreshListHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RemoveColumnDescriptorEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RemoveColumnDescriptorHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RowDeletedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RowDeletedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RowInsertedEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\RowInsertedHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowColumnDescriptorEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowColumnDescriptorHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowCustomColumnDescriptorFormEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowCustomColumnDescriptorFormHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowSubListEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\ShowSubListHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\SortColumnEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\event\SortColumnHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\form\AddCustomColumnDescriptorForm.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\form\PreferenceForm.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\DefaultPagingView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\MenuBarPagingView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\PagingActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\PagingView.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\event\PagingSelectionChangeEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\paging\event\PagingSelectionChangeHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\AnchorCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\BooleanCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\ButtonCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\DetailsCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\ObjectCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\StringCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\cell\SwitchImageCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\header\DateRangeHeaderCellRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\renderer\header\SortableHeader.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\valueprovider\CriterionProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\resources\spec\propertiesDictionnary.json" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\BaseGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\ClassWriter.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\CodeWriter.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\Constructor.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\Generator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\GeneratorHelper.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\PropertiesDictionnaryGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-generator\main\java\com\ponysdk\generator\ServiceGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\dao\HibernateDAO.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\CriteriaContext.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\OrderingCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\PaginatingCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\PonyCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\QueryGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\AbstractCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\CriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\DefaultCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\DefaultQueryGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\DefaultSortCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\PonyCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\impl\DoubleCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\impl\IntegerCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-hibernate\main\java\com\ponysdk\hibernate\query\decorator\impl\LongCriteriaDecorator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jasper\main\java\com\ponysdk\jasper\export\DynamicExportDataSource.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jasper\main\java\com\ponysdk\jasper\export\PDFExporter.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jasper\main\java\com\ponysdk\jasper\export\PDFExporterFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\Client.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\JSONExchange.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\UI.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\action\Action.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\action\ClickAction.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\action\SetTextAction.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\mock\UIMock.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-jetty\test\java\com\ponysdk\jetty\test\bench\mock\UIMockScheduler.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-mongodb\main\java\com\ponysdk\mongodb\dao\MongoDAO.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-persistency\main\java\com\ponysdk\persistency\DAO.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-persistency\main\java\com\ponysdk\persistency\Identifiable.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-spring\main\java\com\ponysdk\spring\ProxyBuilderGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\gradle\wrapper\gradle-wrapper.jar" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\settings.gradle" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\src\main\java\com\ponysdk\sample\client\page\ComplexListPageActivity.java" afterPath="" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\Form.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/Form.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\FormFieldComponent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/FormFieldComponent.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\DataConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/DataConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\DateConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/DateConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\DoubleConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/DoubleConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\FloatConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/FloatConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\IdentityConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/IdentityConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\IntegerConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/IntegerConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\dataconverter\LongConverter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/dataconverter/LongConverter.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\CheckBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/CheckBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\DateBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/DateBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\DoubleTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/DoubleTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\FloatTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/FloatTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\FormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/FormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\FormFieldListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/FormFieldListener.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\IntegerTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/IntegerTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\ListBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/ListBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\LongTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/LongTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\PasswordTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/PasswordTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\StringListBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/StringListBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\StringPasswordTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/StringPasswordTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\StringTextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/StringTextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\formfield\TextBoxFormField.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/formfield/TextBoxFormField.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\CompositeFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/CompositeFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\DoubleFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/DoubleFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\FloatFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/FloatFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\IntegerFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/IntegerFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\LongFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/LongFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\StringLengthValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/StringLengthValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\TwinFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/TwinFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\form2\validator\UncheckedFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/UncheckedFieldValidator.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\DataGridActivity.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DataGridActivity.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\DataGridColumnDescriptor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DataGridColumnDescriptor.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\FieldDescriptor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/FieldDescriptor.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\FilterListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/FilterListener.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\HasCriteria.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/HasCriteria.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\HasFilterListeners.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/HasFilterListeners.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\HasPData.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/HasPData.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\HasQueriable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/HasQueriable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\PSelectionModel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/PSelectionModel.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\Queriable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/Queriable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\Resetable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/Resetable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\Sortable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/Sortable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\Validable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/Validable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\dataprovider\RemoteDataProvider.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/dataprovider/RemoteDataProvider.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\paging\DefaultPagerView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/paging/DefaultPagerView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\paging\Pager.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/paging/Pager.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\paging\PagerListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/paging/PagerListener.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\paging\PagerView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/paging/PagerView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\refreshable\Cell.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/refreshable/Cell.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\refreshable\RefreshableCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/refreshable/RefreshableCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\refreshable\RefreshableDataGrid.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/refreshable/RefreshableDataGrid.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\refreshable\RefreshableDataGridColumnDescriptor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/refreshable/RefreshableDataGridColumnDescriptor.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\LabelCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/LabelCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\PlaceChangeCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/PlaceChangeCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\cell\RefreshableLabelCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/RefreshableLabelCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\ComplexHeaderCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/ComplexHeaderCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\FilterableHeaderCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/FilterableHeaderCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\HeaderSortingHelper.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/HeaderSortingHelper.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\renderer\header\SortableHeaderCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/SortableHeaderCellRenderer.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\CompositeSelectorView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/CompositeSelectorView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\DefaultActionSelectorView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/DefaultActionSelectorView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\DefaultInfoSelectorView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/DefaultInfoSelectorView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\Selectable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/Selectable.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectableListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectableListener.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectionResult.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectionResult.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\Selector.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/Selector.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectorCheckBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectorCheckBox.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectorView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectorView.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list2\selector\SelectorViewListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectorViewListener.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\ponysdk\src-core\main\java\com\ponysdk\ui\server\list\SelectionMode.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/selector/SelectionMode.java" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\gitw" afterPath="$PROJECT_DIR$/build/gitw" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\gradle\wrapper\gradle-wrapper.properties" afterPath="$PROJECT_DIR$/build/gradle/wrapper/gradle-wrapper.properties" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\gradlew" afterPath="$PROJECT_DIR$/build/gradlew" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\gradlew.bat" afterPath="$PROJECT_DIR$/build/gradlew.bat" />
-      <change type="MOVED" beforePath="C:\Users\nciaravola.SMART-TRADE\git\PonySDK\sample\src\main\java\com\ponysdk\sample\client\page\Form2PageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/FormPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/.classpath" afterPath="$PROJECT_DIR$/ponysdk/.classpath" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/.classpath" afterPath="$PROJECT_DIR$/sample/.classpath" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/AbstractApplicationManager.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/AbstractApplicationManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/AbstractCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/AbstractCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/AbstractHttpServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/AbstractHttpServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/AbstractServiceCommand.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/AbstractServiceCommand.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Add.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Add.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/extension/AddonListGenerator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/extension/AddonListGenerator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/Application.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/Application.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/ApplicationManagerOption.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/ApplicationManagerOption.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/addon/BasicAddOn.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/addon/BasicAddOn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/BasicButtonPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/BasicButtonPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/valueprovider/BooleanValueProvider.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/valueprovider/BooleanValueProvider.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/BootstrapServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/BootstrapServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/useragent/Browser.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/useragent/Browser.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/csv/CSVExporterFactory.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/csv/CSVExporterFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/CellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/CellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/ClientDataOutput.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/ClientDataOutput.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Close.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Close.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/launcher/CodeServer.launch" afterPath="$PROJECT_DIR$/sample/launcher/CodeServer.launch" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/CommandQueue.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/CommandQueue.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/CommunicationErrorEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/CommunicationErrorEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/CommunicationSanityChecker.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/CommunicationSanityChecker.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/query/ComparatorType.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/query/ComparatorType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Create.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Create.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/event/DataExportedEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/event/DataExportedEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/DataGridPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/DataGridPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/DateCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/DateCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/DefaultAddOn.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/DefaultAddOn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DefaultComplexListView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DefaultComplexListView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/menu/DefaultMenuView.java" afterPath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/menu/DefaultMenuView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/page/DefaultPageProvider.java" afterPath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/page/DefaultPageProvider.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/DefaultPlaceHistoryMapper.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/DefaultPlaceHistoryMapper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DefaultSimpleListView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/DefaultSimpleListView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/DefaultUIAddOn.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/DefaultUIAddOn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/EmailFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/EmailFieldValidator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/EmptyCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/cell/EmptyCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/server/mock/EmptyTxnContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/server/mock/EmptyTxnContext.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/EventInstruction.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/EventInstruction.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/ExportContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/ExportContext.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/command/ExternalExportCommand.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/command/ExternalExportCommand.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/FieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/FieldValidator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/query/memory/FilteringTools.java" afterPath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/query/memory/FilteringTools.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HTTPServletContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HTTPServletContext.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Handler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Handler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/HeaderCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/HeaderCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/History.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/History.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/HttpRequestSendEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/HttpRequestSendEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HttpResponse.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HttpResponse.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/HttpResponseReceivedEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/event/HttpResponseReceivedEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HttpServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/HttpServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Instruction.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/Instruction.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/JSONBuilder.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/addon/JSONBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/JavascriptPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/JavascriptPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/LessPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/LessPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/ListBoxContainsEmptyItemPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/ListBoxContainsEmptyItemPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/ListBoxPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/ListBoxPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/LoginActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/LoginActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/NotEmptyFieldValidator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/NotEmptyFieldValidator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/useragent/OperatingSystem.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/useragent/OperatingSystem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAbsolutePanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAbsolutePanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAddOn.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAddOn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAnchor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAnchor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAttachedPopupPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PAttachedPopupPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PBeforeSelectionEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PBeforeSelectionEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PBlurEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PBlurEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/breadcrumbs/PBreadCrumbs.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/breadcrumbs/PBreadCrumbs.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PButton.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PButton.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PButtonBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PButtonBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCellPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCellPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PChangeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PChangeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCheckBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCheckBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PClickEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PClickEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PCloseEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PCloseEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PComplexPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PComplexPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PComposite.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PComposite.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PContextMenuEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PContextMenuEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCookies.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PCookies.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDateBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDateBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDatePicker.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDatePicker.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDialogBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDialogBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDisclosurePanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDisclosurePanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDockLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PDockLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDoubleClickEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDoubleClickEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragEndEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragEndEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragEnterEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragEnterEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragLeaveEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragLeaveEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragOverEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragOverEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragStartEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDragStartEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDropEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PDropEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PElement.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PElement.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/PEventsListener.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/PEventsListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFileUpload.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFileUpload.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFlexTable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFlexTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PFocusEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PFocusEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFocusWidget.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PFocusWidget.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PGrid.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PGrid.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHTML.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHTML.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHTMLTable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHTMLTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHeaderPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHeaderPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHistory.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHistory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHorizontalPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PHorizontalPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PImage.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PImage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PImageResource.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PImageResource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PKeyCodes.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PKeyCodes.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyPressEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyPressEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyPressFilterHandler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyPressFilterHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyUpEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyUpEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyUpFilterHandler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PKeyUpFilterHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PLabel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PLabel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PLayoutResizeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PLayoutResizeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PListBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PListBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PMenuBar.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PMenuBar.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PMenuItem.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PMenuItem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseDownEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseDownEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseOutEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseOutEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseOverEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseOverEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseUpEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PMouseUpEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PNativeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PNativeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PNotificationManager.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PNotificationManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PObject.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PObject.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/POpenEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/POpenEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPopupPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPopupPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPushButton.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPushButton.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPusher.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PPusher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRadioButton.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRadioButton.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRichTextArea.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRichTextArea.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRichTextToolbar.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRichTextToolbar.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRootLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRootLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRootPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PRootPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScheduler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScheduler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScript.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScript.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScrollPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PScrollPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PSelectionEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PSelectionEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PShowRangeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PShowRangeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSimplePanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSimplePanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSplitLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSplitLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PStackLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PStackLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSuggestBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PSuggestBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTAddOn.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTAddOn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTAnchor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTAnchor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/addon/attachedpopuppanel/PTAttachedPopupPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/addon/attachedpopuppanel/PTAttachedPopupPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTButtonBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTButtonBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCellPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCellPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCheckBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCheckBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTComposite.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTComposite.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCookies.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTCookies.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDateBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDateBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDatePicker.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDatePicker.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDecoratedPopupPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDecoratedPopupPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDialogBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDialogBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDisclosurePanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDisclosurePanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDockLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTDockLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTElement.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTElement.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFileUpload.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFileUpload.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFlexTable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFlexTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFlowPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFlowPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFocusWidget.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTFocusWidget.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTGrid.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTGrid.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHTML.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHTML.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHTMLTable.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHTMLTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHeaderPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHeaderPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHorizontalPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTHorizontalPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTImage.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTImage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/instruction/PTInstruction.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/instruction/PTInstruction.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTLabel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTLabel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTListBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTListBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTMenuBar.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTMenuBar.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTMenuItem.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTMenuItem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPopupPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPopupPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPushButton.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPushButton.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPusher.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTPusher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRadioButton.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRadioButton.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRichTextArea.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRichTextArea.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRichTextToolbar.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRichTextToolbar.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRootPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTRootPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScheduler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScheduler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScript.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScript.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScrollPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTScrollPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTSplitLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTSplitLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTStackLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTStackLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTStreamResource.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTStreamResource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTSuggestBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTSuggestBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTabLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTabLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTabPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTabPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTerminalScheduledCommand.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTerminalScheduledCommand.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextArea.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextArea.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextBoxBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTextBoxBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTree.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTree.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTreeItem.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTTreeItem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTUIObject.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTUIObject.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTValueBoxBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTValueBoxBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTVerticalPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTVerticalPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTWidget.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTWidget.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTWindow.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/PTWindow.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTabLayoutPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTabLayoutPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTabPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTabPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTerminalScheduledCommand.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTerminalScheduledCommand.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextArea.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextArea.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextBoxBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTextBoxBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTree.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTree.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTreeItem.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTreeItem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTwinListBox.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PTwinListBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PValueBoxBase.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PValueBoxBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PValueChangeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/event/PValueChangeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PVerticalPanel.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PVerticalPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidgetCollection.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidgetCollection.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWindow.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWindow.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/page/place/PagePlace.java" afterPath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/page/place/PagePlace.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/request/ParentWindowRequest.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/request/ParentWindowRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/PlaceChangeEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/PlaceChangeEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/PlaceChangeRequestEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/place/PlaceChangeRequestEvent.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/PonySDK.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/PonySDK.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/service/PonyServiceRegistry.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/service/PonyServiceRegistry.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/PonyTerminal.gwt.xml" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/PonyTerminal.gwt.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/util/PropertyUtil.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/util/PropertyUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/PushListenerCollection.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/PushListenerCollection.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/PushListenerMap.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/PushListenerMap.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/query/Query.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/query/Query.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/RefreshableDataGridPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/RefreshableDataGridPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/server/list2/RefreshableDataGridTest.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/server/list2/RefreshableDataGridTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/RemoveHandler.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/instruction/RemoveHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/Response.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/Response.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/event/RootEventBus.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/event/RootEventBus.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/launcher/Sample-Debug.launch" afterPath="$PROJECT_DIR$/sample/launcher/Sample-Debug.launch" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/launcher/Sample.launch" afterPath="$PROJECT_DIR$/sample/launcher/Sample.launch" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/event/ServiceFailedEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/command/event/ServiceFailedEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/SessionManager.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/SessionManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/event/SimpleEventBus.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/event/SimpleEventBus.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/SimpleListView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/SimpleListView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/SimpleRefreshableDataGridPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/SimpleRefreshableDataGridPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/celltable/SimpleTableView.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/celltable/SimpleTableView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/SortableRefreshableDataGridPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/datagrid/SortableRefreshableDataGridPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-spring/main/java/com/ponysdk/spring/service/SpringApplicationLoader.java" afterPath="$PROJECT_DIR$/ponysdk/src-spring/main/java/com/ponysdk/spring/service/SpringApplicationLoader.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-spring/main/java/com/ponysdk/spring/servlet/SpringHttpServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-spring/main/java/com/ponysdk/spring/servlet/SpringHttpServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/menu/StackLayoutMenuView.java" afterPath="$PROJECT_DIR$/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/webapplication/menu/StackLayoutMenuView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/StreamServiceServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/StreamServiceServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/StringHeaderCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/renderer/header/StringHeaderCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/event/SubmitFormEvent.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/event/SubmitFormEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/widget/mask/TextBoxMaskedDecorator.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/ui/widget/mask/TextBoxMaskedDecorator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/Txn.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/Txn.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnContext.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnContextHttp.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnContextHttp.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnSocketContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/stm/TxnSocketContext.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/UIBuilder.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/UIBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/UIContext.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/UIContext.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/UIFactory.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/UIFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/concurrent/UIScheduledThreadPoolExecutor.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/concurrent/UIScheduledThreadPoolExecutor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/UiBuilderTest.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/test/java/com/ponysdk/test/UiBuilderTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/ValidationResult.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/form/validator/ValidationResult.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/valueprovider/ValueProvider.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/list/valueprovider/ValueProvider.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/WeakHashMap.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/WeakHashMap.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/socket/WebSocket.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/socket/WebSocket.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/socket/WebSocketClient.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/terminal/socket/WebSocketClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/WebSocketServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/servlet/WebSocketServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/WindowPageActivity.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/page/WindowPageActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/xml/XMLExporter.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/xml/XMLExporter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/xml/XMLExporterFactory.java" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/export/xml/XMLExporterFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/build.gradle" afterPath="$PROJECT_DIR$/ponysdk/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/build.gradle" afterPath="$PROJECT_DIR$/sample/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/resources/etc/client_application.xml" afterPath="$PROJECT_DIR$/sample/src/main/resources/etc/client_application.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/.settings/org.eclipse.jdt.core.prefs" afterPath="$PROJECT_DIR$/ponysdk/.settings/org.eclipse.jdt.core.prefs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/.settings/org.eclipse.jdt.core.prefs" afterPath="$PROJECT_DIR$/sample/.settings/org.eclipse.jdt.core.prefs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src-core/main/resources/spec/project_schema.xsd" afterPath="$PROJECT_DIR$/ponysdk/src-core/main/resources/spec/project_schema.xsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/resources/war/script/sample.js" afterPath="$PROJECT_DIR$/sample/src/main/resources/war/script/sample.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="PonySDK.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -548,30 +35,20 @@
         <entry file="file://$PROJECT_DIR$/ponysdk/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="43" column="5" selection-start-line="43" selection-start-column="5" selection-end-line="43" selection-end-column="5" />
-              <folding />
+              <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
+              <folding>
+                <marker date="1442481627788" expanded="true" signature="4:160" placeholder="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AbstractApplicationManager.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="AbstractApplicationManager.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/AbstractApplicationManager.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="19" column="57" selection-start-line="2" selection-start-column="0" selection-end-line="19" selection-end-column="57" />
+              <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PWidget.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6542474">
-              <caret line="386" column="35" selection-start-line="386" selection-start-column="35" selection-end-line="386" selection-end-column="35" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -591,6 +68,7 @@
       <list>
         <option value="$PROJECT_DIR$/build/build.gradle" />
         <option value="$PROJECT_DIR$/ponysdk/build.gradle" />
+        <option value="$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java" />
       </list>
     </option>
   </component>
@@ -630,8 +108,8 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -642,7 +120,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -850,6 +328,12 @@
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <pass-parent-envs>true</pass-parent-envs>
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="osgi.bnd.run" factoryName="Run Launcher">
@@ -870,39 +354,41 @@
       <option name="number" value="Default" />
       <updated>1440077229068</updated>
       <workItem from="1440077230352" duration="367000" />
+      <workItem from="1443081088962" duration="47000" />
+      <workItem from="1443081157290" duration="89000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="367000" />
+    <option name="totallyTimeSpent" value="503000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32917467" sideWeight="0.49583334" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32917467" sideWeight="0.50416666" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32973504" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3224568" sideWeight="0.49791667" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24427083" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32917467" sideWeight="0.50416666" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32973504" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3224568" sideWeight="0.49791667" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24427083" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32917467" sideWeight="0.49583334" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -926,18 +412,20 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sample/src/main/resources/etc/client_application.xml">
+    <entry file="file://$PROJECT_DIR$/ponysdk/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6721992">
-          <caret line="27" column="81" selection-start-line="27" selection-start-column="81" selection-end-line="27" selection-end-column="81" />
-          <folding />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
+          <folding>
+            <marker date="1442481627788" expanded="true" signature="4:160" placeholder="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build/build.gradle">
+    <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/AbstractApplicationManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="33" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -946,7 +434,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="5" selection-start-line="43" selection-start-column="5" selection-end-line="43" selection-end-column="5" />
-          <folding />
+          <folding>
+            <marker date="1442481627788" expanded="true" signature="4:160" placeholder="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -960,11 +450,47 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6542474">
-          <caret line="386" column="35" selection-start-line="386" selection-start-column="35" selection-end-line="386" selection-end-column="35" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sample/src/main/resources/etc/client_application.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6721992">
+          <caret line="27" column="81" selection-start-line="27" selection-start-column="81" selection-end-line="27" selection-end-column="81" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="33" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <marker date="1442481627788" expanded="true" signature="4:160" placeholder="{...}" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/ui/server/basic/PWidget.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="6.1877794">
+          <caret line="529" column="35" selection-start-line="529" selection-start-column="35" selection-end-line="529" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src-core/main/java/com/ponysdk/core/AbstractApplicationManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
+          <folding />
         </state>
       </provider>
     </entry>

@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.terminal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +40,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
+import com.ponysdk.ui.server.basic.PWindow;
+import com.ponysdk.ui.server.basic.WindowManager;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
@@ -48,21 +51,24 @@ import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
-import elemental.events.MessageEvent;
+import elemental.html.StorageEvent;
+import elemental.html.Window;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
-public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketCallback {
+public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketCallback, EventListener {
 
     private final static Logger log = Logger.getLogger(PonySDK.class.getName());
 
     private static PonySDK INSTANCE;
-    protected UIBuilder uiBuilder = new UIBuilder();
+    protected static UIBuilder uiBuilder = new UIBuilder();
 
     protected RequestBuilder requestBuilder;
     protected int applicationViewID;
 
     private WebSocketClient2 socketClient;
+
+    private final List<StartupListener> listener = new ArrayList<>();
 
     private PonySDK() {}
 
@@ -75,16 +81,23 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         return INSTANCE;
     }
 
+    @Override
+    public void handleEvent(final Event event) {
+        GWT.log("COUCOUCOUC");
+        final StorageEvent storageEvent = (StorageEvent) event;
+        // final Integer windowID = Integer.valueOf(storageEvent.getKey());
+        uiBuilder.update(JSONParser.parseStrict(storageEvent.getNewValue()).isObject());
+    }
+
     @Export
     public void start() {
         try {
             log.info("Starting PonySDK instance");
             final elemental.html.Window window = Browser.getWindow();
-            final elemental.html.Window parent = window.getParent();
+            final elemental.html.Window opener = window.getOpener();
+            final elemental.html.Storage localStorage = Browser.getWindow().getLocalStorage();
 
-            if (window == parent) {
-                Window.alert("Coucou parent");
-
+            if (opener == null) {
                 Integer viewID = null;
                 final Storage storage = Storage.getSessionStorageIfSupported();
                 if (storage != null) {
@@ -115,21 +128,40 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
                 socketClient = new WebSocketClient2(builder.toString(), this);
             } else {
-                Window.alert("Coucou window");
-
-                window.addEventListener("message", new EventListener() {
-
-                    @Override
-                    public void handleEvent(final Event event) {
-                        final MessageEvent messageEvent = (MessageEvent) event;
-                        uiBuilder.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
-                    }
-                });
+                window.addEventListener("storage", this, false);
+                // exportWindowReceiver(window);
+                // window.getDocument().addEventListener("message", new EventListener() {
+                //
+                // @Override
+                // public void handleEvent(final Event event) {
+                // GWT.log("Coucou data received in window : " + event);
+                // final MessageEvent messageEvent = (MessageEvent) event;
+                // uiBuilder.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
+                // }
+                // }, false);
             }
 
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
+    }
+
+    public native void exportWindowReceiver(Window win) /*-{
+                                                           var that = this;
+                                                           win.onDataReceived = function(text) {
+                                                           $entry(that.@com.ponysdk.ui.terminal.PonySDK::onDataReceived(Ljava/lang/String;)(text));
+                                                           }
+                                                           }-*/;
+
+    @Export()
+    public void windowReady(final int windowID) {
+        final PWindow window = WindowManager.get().getWindow(windowID);
+        window.uiBuilder.update(JSONParser.parseStrict(text).isObject());
+    }
+
+    @Export("onDataReceived")
+    public void onDataReceived(final String text) {
+        uiBuilder.update(JSONParser.parseStrict(text).isObject());
     }
 
     @Export

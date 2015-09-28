@@ -23,11 +23,12 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONParser;
+import com.ponysdk.ui.terminal.StartupListener;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
@@ -40,19 +41,25 @@ import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
 
-    private final static Logger log = Logger.getLogger(PTWindow.class.getName());
-
     private Window window;
     private String url;
     private String name;
     private String features;
 
     private UIService uiService;
-    private int id;
+
+    private final List<PTInstruction> instructions = new ArrayList<>();
+
+    private final elemental.html.Storage localStorage = Browser.getWindow().getLocalStorage();
+
+    private final boolean ponySDKStarted = false;
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        this.id = create.getObjectID();
+        objectID = create.getObjectID();
+
+        GWT.log("PTWindowID created : " + objectID);
+
         this.uiService = uiService;
 
         if (create.containsKey(Model.URL)) url = create.getString(Model.URL);
@@ -63,6 +70,8 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
         if (create.containsKey(Model.FEATURES)) features = create.getString(Model.FEATURES);
         else features = "";
+
+        PTWindowManager.get().register(this);
     }
 
     @Override
@@ -78,16 +87,24 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         }
     }
 
-    private native void onDataReceived(Element win, final String text) /*-{win.onDataReceived(text);}-*/;
+    public void postMessage(final PTInstruction instruction) {
+        if (!ponySDKStarted) {
+            instructions.add(instruction);
+        } else {
+            localStorage.setItem(objectID + "", instruction.toString());
+        }
+    }
+
+    // private native void postMessage(Window win, final String text)
+    // /*-{alert(win.window);win.window.onDataReceived(text);}-*/;
 
     @Override
     public void handleEvent(final Event event) {
-        com.google.gwt.user.client.Window.alert(event.getType());
         if (event.getSrcElement() == window) {
-
             if (event.getType().equals("onbeforeunload")) {
+                PTWindowManager.get().unregister(this);
                 final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(id);
+                instruction.setObjectID(objectID);
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(instruction);
             } else if (event.getType().equals("message")) {
@@ -95,10 +112,20 @@ public class PTWindow extends AbstractPTObject implements EventListener {
                 uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
             } else if (event.getType().equals("onload")) {
                 final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(id);
+                instruction.setObjectID(objectID);
                 instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(instruction);
+            } else if (event.getType().equals("ponysdk.onstarted")) {
+                for (final PTInstruction instruction : instructions) {
+                    localStorage.setItem(objectID + "", instruction.toString());
+                }
+                localStorage.clear();
             }
         }
     }
+
+    public final native void setOnblur(StartupListener listener) /*-{
+                                                                 @elemental.js.dom.JsElementalMixinBase::getHandlerFor(Lcom/ponysdk/ui/terminal/StartupListener;)(listener);
+                                                                 }-*/;
+
 }
