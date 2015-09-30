@@ -40,8 +40,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
-import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.server.basic.WindowManager;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
@@ -52,7 +50,6 @@ import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.html.StorageEvent;
-import elemental.html.Window;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
@@ -128,7 +125,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
                 socketClient = new WebSocketClient2(builder.toString(), this);
             } else {
-                window.addEventListener("storage", this, false);
+                exportOnDataReceived();
+
+                // window.addEventListener("storage", this, false);
+
+                final Event createEvent = opener.getDocument().createEvent("ponysdk.onstarted");
+                window.dispatchEvent(createEvent);
+
                 // exportWindowReceiver(window);
                 // window.getDocument().addEventListener("message", new EventListener() {
                 //
@@ -146,20 +149,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         }
     }
 
-    public native void exportWindowReceiver(Window win) /*-{
-                                                           var that = this;
-                                                           win.onDataReceived = function(text) {
-                                                           $entry(that.@com.ponysdk.ui.terminal.PonySDK::onDataReceived(Ljava/lang/String;)(text));
-                                                           }
-                                                           }-*/;
+    public native void exportOnDataReceived() /*-{
+                                              var that = this;
+                                              $wnd.onDataReceived = function(text) {
+                                              $entry(that.@com.ponysdk.ui.terminal.PonySDK::onDataReceived(Ljava/lang/String;)(text));
+                                              }
+                                              }-*/;
 
-    @Export()
-    public void windowReady(final int windowID) {
-        final PWindow window = WindowManager.get().getWindow(windowID);
-        window.uiBuilder.update(JSONParser.parseStrict(text).isObject());
-    }
-
-    @Export("onDataReceived")
     public void onDataReceived(final String text) {
         uiBuilder.update(JSONParser.parseStrict(text).isObject());
     }

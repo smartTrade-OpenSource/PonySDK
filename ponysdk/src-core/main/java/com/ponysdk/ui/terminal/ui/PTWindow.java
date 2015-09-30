@@ -28,7 +28,6 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
-import com.ponysdk.ui.terminal.StartupListener;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
@@ -50,9 +49,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     private final List<PTInstruction> instructions = new ArrayList<>();
 
-    private final elemental.html.Storage localStorage = Browser.getWindow().getLocalStorage();
-
-    private final boolean ponySDKStarted = false;
+    private boolean ponySDKStarted = false;
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
@@ -91,12 +88,11 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         if (!ponySDKStarted) {
             instructions.add(instruction);
         } else {
-            localStorage.setItem(objectID + "", instruction.toString());
+            postMessage(instruction.toString());
         }
     }
 
-    // private native void postMessage(Window win, final String text)
-    // /*-{alert(win.window);win.window.onDataReceived(text);}-*/;
+    private native void postMessage(final String text) /*-{this.onDataReceived(text);}-*/;
 
     @Override
     public void handleEvent(final Event event) {
@@ -115,17 +111,17 @@ public class PTWindow extends AbstractPTObject implements EventListener {
                 instruction.setObjectID(objectID);
                 instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(instruction);
-            } else if (event.getType().equals("ponysdk.onstarted")) {
-                for (final PTInstruction instruction : instructions) {
-                    localStorage.setItem(objectID + "", instruction.toString());
-                }
-                localStorage.clear();
             }
         }
     }
 
-    public final native void setOnblur(StartupListener listener) /*-{
-                                                                 @elemental.js.dom.JsElementalMixinBase::getHandlerFor(Lcom/ponysdk/ui/terminal/StartupListener;)(listener);
-                                                                 }-*/;
+    // Call by PonySD window
+    public void setReady() {
+        ponySDKStarted = true;
+
+        for (final PTInstruction instruction : instructions) {
+            postMessage(instruction);
+        }
+    }
 
 }

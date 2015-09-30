@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.UIContext;
-import com.ponysdk.ui.terminal.ui.PTWindow;
 
 public class WindowManager {
 
     private static final String ROOT = "WindowManager";
 
-    private final Map<Integer, PTWindow> windows = new HashMap<>();
+    private final Map<Integer, PWindow> windows = new HashMap<>();
 
     private WindowManager() {}
 
@@ -34,7 +33,7 @@ public class WindowManager {
         get().registerWindow0(window);;
     }
 
-    public void registerWindow0(final PTWindow window) {
+    public void registerWindow0(final PWindow window) {
         windows.put(window.getID(), window);
     }
 
