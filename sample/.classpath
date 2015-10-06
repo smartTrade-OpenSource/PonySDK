@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src-trading/main/java"/>
-	<classpathentry kind="src" path="src-generated/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ponysdk"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/logging/slf4j-api.jar"/>
@@ -11,5 +10,6 @@
 	<classpathentry kind="lib" path="/ponysdk/libs/spring/spring-core.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/java2html/java2html.jar"/>
 	<classpathentry kind="lib" path="/ponysdk/libs/json/javax.json-api.jar"/>
+    <classpathentry kind="lib" path="/ponysdk/libs/gwt/gwt-user.jar"/>
 	<classpathentry kind="output" path="bin/classes/main"/>
 </classpath>
