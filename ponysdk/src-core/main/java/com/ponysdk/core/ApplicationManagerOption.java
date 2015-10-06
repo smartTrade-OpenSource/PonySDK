@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.ponysdk.core.main.EntryPoint;
+
 public class ApplicationManagerOption {
 
     private String applicationID;
@@ -25,6 +27,8 @@ public class ApplicationManagerOption {
     private List<String> customJavascript = Collections.emptyList();
     private List<String> customStyle = Collections.emptyList();
     private List<String> customMeta = Collections.emptyList();
+
+    private Class<? extends EntryPoint> entryPoint;
 
     public ApplicationManagerOption() {
         applicationID = System.getProperty(SystemProperty.APPLICATION_ID, applicationID);
@@ -143,6 +147,14 @@ public class ApplicationManagerOption {
 
     public void setCommunicationErrorFunction(final String communicationErrorFunction) {
         this.communicationErrorFunction = communicationErrorFunction;
+    }
+
+    public void setEntryPoint(final Class<? extends EntryPoint> entryPoint) {
+        this.entryPoint = entryPoint;
+    }
+
+    public Class<? extends EntryPoint> getEntryPoint() {
+        return entryPoint;
     }
 
     @Override

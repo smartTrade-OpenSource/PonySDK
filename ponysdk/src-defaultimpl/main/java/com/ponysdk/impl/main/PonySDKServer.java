@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.SystemProperty;
-import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.ApplicationLoader;
 import com.ponysdk.core.servlet.BootstrapServlet;
 import com.ponysdk.core.servlet.PonySDKHttpServlet;
@@ -96,7 +95,7 @@ public class PonySDKServer {
         context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 
         final ApplicationLoader applicationLoader = new ApplicationLoader(application);
-        applicationLoader.setEntryPointClass(getEntryPoint());
+        applicationLoader.setEntryPointClass(application.getEntryPoint());
         context.addEventListener(applicationLoader);
 
         final SessionHandler sessionHandler = context.getSessionHandler();
@@ -163,10 +162,6 @@ public class PonySDKServer {
 
     protected WebSocketServlet createWebSocketServlet() {
         return new WebSocketServlet();
-    }
-
-    protected Class<? extends EntryPoint> getEntryPoint() {
-        return BasicEntryPoint.class;
     }
 
     public void stop() throws Exception {
