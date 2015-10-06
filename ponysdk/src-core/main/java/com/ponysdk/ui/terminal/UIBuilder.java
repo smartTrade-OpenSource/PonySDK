@@ -251,8 +251,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 try {
                     processInstruction(instruction);
                 } catch (final Throwable e) {
-                    log.log(Level.SEVERE, "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: "
-                            + lastReceived, e);
+                    log.log(Level.SEVERE,
+                            "PonySDK has encountered an internal error on instruction : " + currentInstruction + " => Error Message " + e.getMessage() + ". ReceivedSeqNum: " + receivedSeqNum + " LastProcessSeqNum: " + lastReceived, e);
                     stackError(currentInstruction, e);
                 }
             }
