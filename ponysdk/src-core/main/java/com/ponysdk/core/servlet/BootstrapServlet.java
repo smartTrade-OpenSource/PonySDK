@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -299,11 +299,11 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("</script>");
     }
 
-    protected void addToMeta(final BufferedWriter writer) {}
+    protected void addToMeta(final BufferedWriter writer) throws IOException {}
 
-    protected void addToHeader(final BufferedWriter writer) {}
+    protected void addToHeader(final BufferedWriter writer) throws IOException {}
 
-    protected void addToBody(final BufferedWriter writer) {}
+    protected void addToBody(final BufferedWriter writer) throws IOException {}
 
     public void addStylesheet(final String stylesheetPath) {
         stylesheets.add(stylesheetPath);
