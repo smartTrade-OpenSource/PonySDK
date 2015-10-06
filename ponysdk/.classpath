@@ -12,6 +12,7 @@
 	<classpathentry kind="lib" path="libs/jetty/jetty-server.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-servlet.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-servlets.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/jetty-util.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/geronimo-servlet_3.0_spec.jar" sourcepath="/Users/nciaravola/.m2/repository/org/apache/geronimo/specs/geronimo-servlet_3.0_spec/1.0/geronimo-servlet_3.0_spec-1.0-sources.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/jetty-webapp.jar"/>
 	<classpathentry kind="lib" path="libs/commons/commons-beanutils.jar"/>
@@ -21,7 +22,6 @@
 	<classpathentry kind="lib" path="libs/jetty/websocket-server.jar"/>
 	<classpathentry kind="lib" path="libs/commons/commons-lang.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-user.jar"/>
-	<classpathentry kind="lib" path="libs/gwt/gwt-dev.jar"/>
 	<classpathentry kind="lib" path="libs/json/javax.json-api.jar"/>
 	<classpathentry kind="lib" path="libs/gwt/gwt-elemental.jar"/>
 	<classpathentry kind="lib" path="libs/jetty/websocket-servlet.jar"/>

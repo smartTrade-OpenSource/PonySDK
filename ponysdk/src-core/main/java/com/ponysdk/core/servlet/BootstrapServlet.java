@@ -36,7 +36,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,43 +50,37 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.SystemProperty;
+import com.ponysdk.core.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 6993633431616272739L;
 
     protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     protected static final int BUFFER_SIZE = 4096;
 
-    protected String applicationName = "";
+    private static final long serialVersionUID = 6993633431616272739L;
 
     protected final List<String> meta = new ArrayList<>();
     protected final List<String> stylesheets = new ArrayList<>();
     protected final List<String> javascripts = new ArrayList<>();
     protected final Map<String, String> addons = new LinkedHashMap<>();
+
     protected String communicationErrorFunction;
 
-    private Path indexPath;
+    protected ApplicationManagerOption application;
 
-    public BootstrapServlet() {}
+    private Path indexPath;
 
     @Override
     public void init() throws ServletException {
         super.init();
 
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME);
-
-        final String styles = System.getProperty(SystemProperty.STYLESHEETS);
-        if (styles != null && !styles.isEmpty()) {
-            stylesheets.addAll(Arrays.asList(styles.trim().split(";")));
-        }
-
-        final String scripts = System.getProperty(SystemProperty.JAVASCRIPTS);
-        if (scripts != null && !scripts.isEmpty()) {
-            javascripts.addAll(Arrays.asList(scripts.trim().split(";")));
-        }
+        addStylesheets(application.getStyle());
+        addJavascripts(application.getJavascript());
+        addStylesheets(application.getCustomStyle());
+        addJavascripts(application.getCustomJavascript());
+        // addMetas(application.getMeta());
+        // addMetas(application.getCustomMeta());
 
         initIndexFile();
     }
@@ -202,7 +195,7 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<!-- Powered by PonySDK http://www.ponysdk.com -->");
         writer.newLine();
-        writer.append("<title>" + applicationName + "</title>");
+        writer.append("<title>" + application.getApplicationName() + "</title>");
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         writer.newLine();
@@ -255,7 +248,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
-        writer.append("<div id=\"loading\">Loading " + applicationName + "...</div>");
+        writer.append("<div id=\"loading\">Loading " + application.getApplicationName() + "...</div>");
     }
 
     protected void addNoScript(final BufferedWriter writer) throws IOException {
@@ -282,6 +275,7 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("pony = new ponysdk();");
         writer.newLine();
 
+        final String communicationErrorFunction = application.getCommunicationErrorFunction();
         if (communicationErrorFunction != null) {
             writer.append("pony.registerCommunicationError(" + communicationErrorFunction + ");");
             writer.newLine();
@@ -305,12 +299,24 @@ public class BootstrapServlet extends HttpServlet {
 
     protected void addToBody(final BufferedWriter writer) throws IOException {}
 
+    public void addStylesheets(final List<String> stylesheetPaths) {
+        stylesheets.addAll(stylesheetPaths);
+    }
+
     public void addStylesheet(final String stylesheetPath) {
         stylesheets.add(stylesheetPath);
     }
 
+    public void addMetas(final List<String> m) {
+        meta.addAll(m);
+    }
+
     public void addMeta(final String m) {
         meta.add(m);
+    }
+
+    public void addJavascripts(final List<String> javascriptPaths) {
+        javascripts.addAll(javascriptPaths);
     }
 
     public void addJavascript(final String javascriptPath) {
@@ -321,7 +327,7 @@ public class BootstrapServlet extends HttpServlet {
         addons.put(signature, factory);
     }
 
-    public void setCommunicationErrorFunction(final String communicationErrorFunction) {
-        this.communicationErrorFunction = communicationErrorFunction;
+    public void setApplication(final ApplicationManagerOption application) {
+        this.application = application;
     }
 }
