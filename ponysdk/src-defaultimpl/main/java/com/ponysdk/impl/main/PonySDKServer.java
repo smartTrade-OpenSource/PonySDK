@@ -231,6 +231,7 @@ public class PonySDKServer {
         application.setApplicationDescription("DESCRIPTION");
         application.setApplicationContextName("sample");
         application.setSessionTimeout(1000);
+        application.setEntryPoint(BasicEntryPoint.class);
 
         final String styles = System.getProperty(SystemProperty.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {

@@ -6,9 +6,6 @@
 	
 	<entry-point class='com.ponysdk.ui.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />
-	<generate-with class="com.ponysdk.ui.server.extension.AddonListGenerator">
-		<when-type-assignable class="com.ponysdk.ui.terminal.extension.PonyAddonList" />
-	</generate-with>
 
 	<inherits name="com.google.gwt.user.Debug" />
 	<set-property name="gwt.enableDebugId" value="true" />

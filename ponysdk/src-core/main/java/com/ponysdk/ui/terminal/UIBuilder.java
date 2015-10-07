@@ -68,8 +68,6 @@ import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.extension.AddonFactory;
-import com.ponysdk.ui.terminal.extension.AddonList;
-import com.ponysdk.ui.terminal.extension.PonyAddonList;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
@@ -119,13 +117,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public UIBuilder() {
         History.addValueChangeHandler(this);
 
-        final AddonList addonList = GWT.create(PonyAddonList.class);
+        // final AddonList addonList = GWT.create(PonyAddonList.class);
 
-        final List<AddonFactory> addonFactoryList = addonList.getAddonFactoryList();
-
-        for (final AddonFactory addonFactory : addonFactoryList) {
-            addonByKey.put(addonFactory.getSignature(), addonFactory);
-        }
+        // final List<AddonFactory> addonFactoryList = addonList.getAddonFactoryList();
+        //
+        // for (final AddonFactory addonFactory : addonFactoryList) {
+        // addonByKey.put(addonFactory.getSignature(), addonFactory);
+        // }
 
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
