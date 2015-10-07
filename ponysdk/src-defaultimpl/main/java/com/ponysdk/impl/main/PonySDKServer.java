@@ -69,8 +69,6 @@ public class PonySDKServer {
         server.addConnector(serverConnector);
 
         final ServletContextHandler context = createWebApp();
-        final ServletContextFilter servletContextFilter = new ServletContextFilter();
-        context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
         server.setHandler(context);
 
         server.start();
@@ -93,6 +91,9 @@ public class PonySDKServer {
 
         final FilterHolder filterHolder = new FilterHolder(GzipFilter.class);
         context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+
+        final ServletContextFilter servletContextFilter = new ServletContextFilter();
+        context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
         final ApplicationLoader applicationLoader = new ApplicationLoader(application);
         applicationLoader.setEntryPointClass(application.getEntryPoint());
