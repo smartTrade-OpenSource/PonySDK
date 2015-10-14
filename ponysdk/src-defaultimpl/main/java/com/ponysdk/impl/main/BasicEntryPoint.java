@@ -28,13 +28,9 @@ import javax.json.JsonObject;
 import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.server.basic.event.PCloseEvent;
-import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.server.basic.event.POpenEvent;
-import com.ponysdk.ui.server.basic.event.POpenHandler;
+import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 
 public class BasicEntryPoint implements EntryPoint {
 
@@ -71,8 +67,8 @@ public class BasicEntryPoint implements EntryPoint {
         // child.setInnerText(i + " => Element ");
         // child.setStyleProperty("border", "1px solid red");
 
-        // final PButton button = new PButton(k + " => Button");
-        //
+        final PButton button = new PButton(" => Button");
+
         // button.addClickHandler(new PClickHandler() {
         //
         // @Override
@@ -80,8 +76,10 @@ public class BasicEntryPoint implements EntryPoint {
         // button.setText("" + System.currentTimeMillis());
         // }
         // });
+
         //
-        // PRootPanel.get().add(button);
+
+        PRootLayoutPanel.get().add(button);
         // final PTextBox textBox = new PTextBox(k + " => Button");
         //
         // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
@@ -117,26 +115,26 @@ public class BasicEntryPoint implements EntryPoint {
 
         // }
 
-        final PWindow window = new PWindow(null, "_blank", "");
-        window.open();
-
-        window.addCloseHandler(new PCloseHandler() {
-
-            @Override
-            public void onClose(final PCloseEvent closeEvent) {
-                System.err.println("On Close");
-            }
-        });
-        window.addOpenHandler(new POpenHandler() {
-
-            @Override
-            public void onOpen(final POpenEvent openEvent) {
-                System.err.println("On Open");
-            }
-        });
-
-        final PLabel label = new PLabel("Dans La window");
-        window.getPRootPanel().add(label);
+        // final PWindow window = new PWindow(null, "_blank", "");
+        // window.open();
+        //
+        // window.addCloseHandler(new PCloseHandler() {
+        //
+        // @Override
+        // public void onClose(final PCloseEvent closeEvent) {
+        // System.err.println("On Close");
+        // }
+        // });
+        // window.addOpenHandler(new POpenHandler() {
+        //
+        // @Override
+        // public void onOpen(final POpenEvent openEvent) {
+        // System.err.println("On Open");
+        // }
+        // });
+        //
+        // final PLabel label = new PLabel("Dans La window");
+        // window.getPRootPanel().add(label);
         // UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
         //
         // @Override

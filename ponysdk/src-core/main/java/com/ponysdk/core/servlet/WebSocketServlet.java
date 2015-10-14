@@ -28,6 +28,7 @@ import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
+import com.ponysdk.core.useragent.UserAgent;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -87,6 +88,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
             final Map<String, List<String>> parameterMap = req.getParameterMap();
             // key = Long.parseLong(parameterMap.get(Model.APPLICATION_VIEW_ID.getKey()).get(0));
+
+            System.err.println(req.getHeader("User-Agent"));
+
+            System.err.println(UserAgent.parseUserAgentString(req.getHeader("User-Agent")));
 
             httpSession = HTTPServletContext.get().getRequest().getSession();
             request = new SocketRequest(req);
