@@ -5,7 +5,7 @@
 <setAttribute key="name.schedenig.eclipse.grepconsole.FilterDisabledIds"/>
 <setAttribute key="name.schedenig.eclipse.grepconsole.FilterEnabledIds"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/main/PonySDKServer.java"/>
+<listEntry value="/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/main/Main.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -56,7 +56,7 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_60"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.impl.main.PonySDKServer"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.impl.main.Main"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="port=8081 contextName=sample pony.application.name=Sample pony.application.id=sample pony.application.description=&quot;Sample PonySDK&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13; -Xms2048m -Xmx2048m -XX:+UseG1GC -XX:+PrintStringTableStatistics"/>
