@@ -35,6 +35,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final long serialVersionUID = 1L;
 
+    private static final int DEFAULT_BUFFER_SIZE = 2048;
+
     public int maxIdleTime = 1000000;
 
     private AbstractApplicationManager applicationManager;
@@ -50,10 +52,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         log.info("Initializing Buffer allocation ...");
 
         for (int i = 0; i < 50; i++) {
-            bufferQueue.add(ByteBuffer.allocateDirect(2048));
+            bufferQueue.add(ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE));
         }
 
-        log.info("Buffer allocation initialized {}", 2048 * 50);
+        log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * 50);
     }
 
     @Override
@@ -213,8 +215,22 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public ByteBuffer getByteBuffer() {
             try {
+                // if (session == null) {
+                // if (buffer == null) {
+                // buffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+                // }
+                // } else {
+                // if (buffer == null) {
                 buffer = bufferQueue.poll(5, TimeUnit.SECONDS);
-            } catch (final InterruptedException e) {
+                System.err.println("Get buffer : " + buffer);
+                // }
+                // }
+
+            } catch (
+
+            final InterruptedException e)
+
+            {
                 log.error("Cannot poll buffer", e);
             }
             return buffer;

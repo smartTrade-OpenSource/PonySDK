@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.spring.servlet;
 
@@ -36,10 +58,8 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
 
     private String serverConfiguration;
 
-    private final List<String> clientConfigurations = new ArrayList<>();
-
-    public SpringApplicationLoader(final ApplicationManagerOption option) {
-        super(option);
+    public SpringApplicationLoader() {
+        super();
         serverConfiguration = System.getProperty(SystemProperty.CONTEXT_CONFIG_LOCATION, serverConfiguration);
     }
 
@@ -59,7 +79,7 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
             context = new XmlWebApplicationContext();
             context.setServletContext(servletContext);
             context.setConfigLocations(StringUtils.tokenizeToStringArray(serverConfiguration, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
-            context.refresh();
+            // context.refresh();
 
             servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
         } catch (final Exception e) {
@@ -86,44 +106,38 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
     }
 
     @Override
-    protected AbstractApplicationManager createApplicationManager(final ApplicationManagerOption option) {
-        return new AbstractApplicationManager(option) {
+    public AbstractApplicationManager createApplicationManager(final ApplicationManagerOption applicationManagerOption) {
+        return new AbstractApplicationManager(applicationManagerOption) {
 
             @Override
             protected EntryPoint initializePonySession(final UIContext ponySession) {
-                return newPonySession(ponySession);
+                final List<String> configurations = new ArrayList<>();
+
+                final String clientConfigFile = applicationManagerOption.getClientConfigFile();
+                if (StringUtils.isEmpty(clientConfigFile)) configurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
+                else configurations.add(clientConfigFile);
+
+                EntryPoint entryPoint = null;
+
+                try (final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations.toArray(new String[0]))) {
+                    final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
+                    entryPoint = applicationContext.getBean(EntryPoint.class);
+                    final PHistory history = applicationContext.getBean(PHistory.class);
+
+                    ponySession.setRootEventBus(rootEventBus);
+                    ponySession.setHistory(history);
+
+                    final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
+                    if (initializingPages != null && !initializingPages.isEmpty()) {
+                        for (final InitializingActivity p : initializingPages.values()) {
+                            p.afterContextInitialized();
+                        }
+                    }
+                }
+
+                return entryPoint;
             }
         };
-    }
-
-    protected EntryPoint newPonySession(final UIContext ponySession) {
-        final List<String> configurations = new ArrayList<>();
-        if (clientConfigurations.isEmpty()) configurations.addAll(Arrays.asList("conf/client_application.inc.xml", "client_application.xml"));
-        else configurations.addAll(clientConfigurations);
-
-        EntryPoint entryPoint = null;
-
-        try (final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations.toArray(new String[0]))) {
-            final EventBus rootEventBus = applicationContext.getBean(EventBus.class);
-            entryPoint = applicationContext.getBean(EntryPoint.class);
-            final PHistory history = applicationContext.getBean(PHistory.class);
-
-            ponySession.setRootEventBus(rootEventBus);
-            ponySession.setHistory(history);
-
-            final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-            if (initializingPages != null && !initializingPages.isEmpty()) {
-                for (final InitializingActivity p : initializingPages.values()) {
-                    p.afterContextInitialized();
-                }
-            }
-        }
-
-        return entryPoint;
-    }
-
-    public void addClientConfiguration(final String conf) {
-        clientConfigurations.add(conf);
     }
 
 }

@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.servlet.ApplicationLoader;
+import com.ponysdk.core.servlet.JavaApplicationLoader;
 import com.ponysdk.core.servlet.BootstrapServlet;
-import com.ponysdk.impl.main.Main;
+import com.ponysdk.impl.main.PonySDKServer;
 
 public class TradingSample {
 
@@ -19,21 +19,27 @@ public class TradingSample {
             // PonyServiceRegistry.registerPonyService(new TradingServiceImpl());
 
             // Start webserver
-            final ApplicationLoader applicationLoader = new ApplicationLoader(new ApplicationManagerOption());
-            applicationLoader.setEntryPointClassName("com.ponysdk.sample.trading.client.TradingSampleEntryPoint");
+            final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
+            applicationManagerOption.setApplicationContextName("trading");
+            applicationManagerOption.setEntryPointClass(com.ponysdk.sample.trading.client.TradingSampleEntryPoint.class);
 
-            final BootstrapServlet bootstrapServlet = new BootstrapServlet();
-            bootstrapServlet.addStylesheet("css/sample.less");
-            bootstrapServlet.addStylesheet("css/ponysdk.less");
-            bootstrapServlet.addJavascript("script/less.js");
+            final JavaApplicationLoader applicationLoader = new JavaApplicationLoader();
+            applicationLoader.setApplicationManagerOption(applicationManagerOption);
 
-            final Main main = new Main();
-            main.setApplicationContextName("trading");
-            main.setPort(8081);
-            main.setApplicationLoader(applicationLoader);
-            main.setBootstrapServlet(bootstrapServlet);
+            final PonySDKServer server = new PonySDKServer() {
 
-            main.start();
+                @Override
+                protected BootstrapServlet createBootstrapServlet() {
+                    final BootstrapServlet bootstrapServlet = new BootstrapServlet();
+                    bootstrapServlet.addStylesheet("css/sample.less");
+                    bootstrapServlet.addStylesheet("css/ponysdk.less");
+                    bootstrapServlet.addJavascript("script/less.js");
+                    return bootstrapServlet;
+                }
+            };
+            server.setApplicationLoader(applicationLoader);
+
+            server.start();
         } catch (final Exception e) {
             log.error("", e);
         }
