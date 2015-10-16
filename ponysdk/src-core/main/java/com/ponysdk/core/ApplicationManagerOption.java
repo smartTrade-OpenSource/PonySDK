@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core;
 
@@ -28,7 +50,9 @@ public class ApplicationManagerOption {
     private List<String> customStyle = Collections.emptyList();
     private List<String> customMeta = Collections.emptyList();
 
-    private Class<? extends EntryPoint> entryPoint;
+    private Class<? extends EntryPoint> entryPointClass;
+
+    private String clientConfigFile;
 
     public ApplicationManagerOption() {
         applicationID = System.getProperty(SystemProperty.APPLICATION_ID, applicationID);
@@ -75,6 +99,10 @@ public class ApplicationManagerOption {
     public void setHeartBeatPeriod(final long heartBeatPeriod, final TimeUnit heartBeatPeriodTimeUnit) {
         this.heartBeatPeriod = heartBeatPeriod;
         this.heartBeatPeriodTimeUnit = heartBeatPeriodTimeUnit;
+    }
+
+    public void setHeartBeatPeriod(final long heartBeatPeriod) {
+        this.heartBeatPeriod = heartBeatPeriod;
     }
 
     public long getHeartBeatPeriod() {
@@ -149,16 +177,25 @@ public class ApplicationManagerOption {
         this.communicationErrorFunction = communicationErrorFunction;
     }
 
-    public void setEntryPoint(final Class<? extends EntryPoint> entryPoint) {
-        this.entryPoint = entryPoint;
+    public void setEntryPointClass(final Class<? extends EntryPoint> entryPointClass) {
+        this.entryPointClass = entryPointClass;
     }
 
-    public Class<? extends EntryPoint> getEntryPoint() {
-        return entryPoint;
+    public Class<? extends EntryPoint> getEntryPointClass() {
+        return entryPointClass;
+    }
+
+    public String getClientConfigFile() {
+        return clientConfigFile;
+    }
+
+    public void setClientConfigFile(final String clientConfigFile) {
+        this.clientConfigFile = clientConfigFile;
     }
 
     @Override
     public String toString() {
         return "ApplicationManagerOption [maxOutOfSyncDuration=" + maxOutOfSyncDuration + ", heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
     }
+
 }
