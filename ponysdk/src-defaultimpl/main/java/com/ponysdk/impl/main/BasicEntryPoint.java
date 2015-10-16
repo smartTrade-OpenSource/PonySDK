@@ -34,6 +34,8 @@ import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 
 public class BasicEntryPoint implements EntryPoint {
 
+    final PButton button = new PButton(" => Button");
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput(new ClientDataOutput() {
@@ -67,7 +69,7 @@ public class BasicEntryPoint implements EntryPoint {
         // child.setInnerText(i + " => Element ");
         // child.setStyleProperty("border", "1px solid red");
 
-        final PButton button = new PButton(" => Button");
+        // final PButton button = new PButton(" => Button");
 
         // button.addClickHandler(new PClickHandler() {
         //

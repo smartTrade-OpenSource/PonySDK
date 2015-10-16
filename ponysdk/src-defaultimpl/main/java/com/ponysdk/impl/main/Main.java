@@ -28,7 +28,7 @@ import java.util.Arrays;
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.SystemProperty;
 import com.ponysdk.core.servlet.ApplicationLoader;
-import com.ponysdk.core.servlet.JavaApplicationLoader;
+import com.ponysdk.spring.servlet.SpringApplicationLoader;
 
 public class Main {
 
@@ -51,8 +51,8 @@ public class Main {
             applicationManagerOption.setJavascript(Arrays.asList(scripts.trim().split(";")));
         }
 
-        final ApplicationLoader applicationLoader = new JavaApplicationLoader();
-        applicationLoader.setApplicationManagerOption(applicationManagerOption);
+        final ApplicationLoader applicationLoader = new SpringApplicationLoader();
+        // applicationLoader.setApplicationManagerOption(applicationManagerOption);
 
         final PonySDKServer ponySDKServer = new PonySDKServer();
         ponySDKServer.setApplicationLoader(applicationLoader);

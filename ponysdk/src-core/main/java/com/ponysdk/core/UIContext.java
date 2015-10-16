@@ -253,10 +253,12 @@ public class UIContext {
     }
 
     public void setHistory(final PHistory history) {
+        if (this.history != null) throw new IllegalArgumentException("PHistory already set");
         this.history = history;
     }
 
     public void setRootEventBus(final EventBus eventBus) {
+        if (this.rootEventBus != null) throw new IllegalArgumentException("RootEventBus already set");
         this.rootEventBus = eventBus;
     }
 

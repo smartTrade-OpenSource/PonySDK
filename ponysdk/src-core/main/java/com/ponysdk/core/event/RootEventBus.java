@@ -40,6 +40,7 @@ import java.util.WeakHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.Event.Type;
 import com.ponysdk.core.exception.UmbrellaException;
 
@@ -56,6 +57,10 @@ public class RootEventBus implements EventBus {
     private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
 
     private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<>();
+
+    public RootEventBus() {
+        UIContext.get().setRootEventBus(this);
+    }
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {

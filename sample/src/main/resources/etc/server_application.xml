@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
-	<bean name="proxyBuilder" class="com.ponysdk.service.ProxyBuilder" />
 
-	<bean name="ponyService" class="com.ponysdk.sample.server.PonyServiceImpl" />
+	<bean name="applicationLoader" class="com.ponysdk.spring.servlet.SpringApplicationLoader">
+		<property name="applicationManagerOption" ref="applicationManagerOption" />
+	</bean>
 
-	<bean name="executor" class="com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor" factory-method="initDefault" />
+	<bean name="applicationManagerOption" class="com.ponysdk.core.ApplicationManagerOption">
+		<property name="applicationID" value="sample" />
+		<property name="applicationName" value="sample" />
+		<property name="applicationDescription" value="sample" />
+		<property name="applicationContextName" value="sample" />
+		<property name="clientConfigFile" value="client_application.xml" />
+		<property name="sessionTimeout" value="20" />
+		<property name="entryPointClass" value="com.ponysdk.impl.main.BasicEntryPoint" />
+	</bean>
+
+	<bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
+		<property name="port" value="8081"/>
+		<property name="host" value="0.0.0.0"/>
+		<property name="useSSL" value="false"/>
+		<property name="applicationLoader" ref="applicationLoader"/>
+	</bean>
 
 </beans>
