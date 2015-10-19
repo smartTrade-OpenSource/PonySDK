@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -119,7 +119,9 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
 
     @Override
     public Widget asWidget(final int objectID, final UIService uiService) {
-        return ((PTWidget<?>) uiService.getPTObject(objectID)).cast();
+        final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(objectID);
+        if (ptWidget != null) return ptWidget.cast();
+        else throw new IllegalArgumentException("No widget match with id #" + objectID);
     }
 
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
