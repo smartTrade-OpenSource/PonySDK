@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -70,6 +70,17 @@ public class Application {
 
     public Collection<UIContext> getUIContexts() {
         return uiContexts.values();
+    }
+
+    public void pushToClients(final Object message) {
+        for (final UIContext uiContext : getUIContexts()) {
+            if (log.isDebugEnabled()) log.debug("Pushing to #" + uiContext);
+            try {
+                uiContext.pushToClient(message);
+            } catch (final Throwable throwable) {
+                log.error("Cannot flush message on the session #" + uiContext.getContext(), throwable);
+            }
+        }
     }
 
     public void setAttribute(final String name, final Object value) {

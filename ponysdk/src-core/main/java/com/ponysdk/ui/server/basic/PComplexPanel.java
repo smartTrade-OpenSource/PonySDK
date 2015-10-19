@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -118,10 +118,8 @@ public abstract class PComplexPanel extends PPanel {
 
     @Override
     public Iterator<PWidget> iterator() {
-        if (children == null) {
-            Collections.emptyIterator();
-        }
-        return children.iterator();
+        if (children == null) return Collections.emptyIterator();
+        else return children.iterator();
     }
 
     void assertIsChild(final PWidget widget) {

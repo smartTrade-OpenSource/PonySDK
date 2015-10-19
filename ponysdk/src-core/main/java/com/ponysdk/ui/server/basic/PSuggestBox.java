@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -48,17 +48,17 @@ import com.ponysdk.ui.terminal.model.Model;
  * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as its oracle. Below we show how
  * a {@link PMultiWordSuggestOracle} can be configured:
  * </p>
- * 
+ *
  * <pre>
  * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
  * oracle.add(&quot;Cat&quot;);
  * oracle.add(&quot;Dog&quot;);
  * oracle.add(&quot;Horse&quot;);
  * oracle.add(&quot;Canary&quot;);
- * 
+ *
  * PSuggestBox box = new PSuggestBox(oracle);
  * </pre>
- * 
+ *
  * Using the example above, if the user types "C" into the text widget, the oracle will configure the
  * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key into the
  * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
@@ -68,7 +68,7 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>the suggest box itself</dd>
  * </dl>
  * TODO(pdr): Add SafeHtml support to this and implementing classes.
- * 
+ *
  * @see PSuggestOracle
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
@@ -112,10 +112,10 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
+        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER.getKey())) {
             final String text = instruction.getString(Model.TEXT.getKey());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
-        } else if (instruction.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER)) {
+        } else if (instruction.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER.getKey())) {
             this.replacementString = instruction.getString(Model.REPLACEMENT_STRING.getKey());
             this.displayString = instruction.getString(Model.DISPLAY_STRING.getKey());
             this.textBox.setText(replacementString);

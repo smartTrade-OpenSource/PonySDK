@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -105,7 +105,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     /**
      * Gets the number of items contained at the root of this tree.
-     * 
+     *
      * @return this tree's item count
      */
     public int getItemCount() {
@@ -143,7 +143,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
+        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER.getKey())) {
             final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(Model.HANDLER_SELECTION_HANDLER.getKey()).intValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {

@@ -2,18 +2,14 @@
 package com.ponysdk.sample.trading.server;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.ponysdk.core.Application;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.SessionManager;
 import com.ponysdk.sample.trading.client.activity.MarketData;
-import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PPusher.PusherState;
 
 public class TradingServiceImpl /** implements TradingService **/
 {
@@ -48,13 +44,7 @@ public class TradingServiceImpl /** implements TradingService **/
                 final MarketData price = new MarketData(market.getCurrency(), (int) (Math.random() * 99), (int) (Math.random() * 99));
 
                 for (final Application application : SessionManager.get().getApplications()) {
-                    final Collection<UIContext> uiContexts = application.getUIContexts();
-                    for (final UIContext uiContext : uiContexts) {
-                        final PPusher pusher = uiContext.getPusher();
-                        if (pusher != null) {
-                            if (pusher.getPusherState() == PusherState.STARTED) pusher.pushToClient(price);
-                        }
-                    }
+                    application.pushToClients(price);
                 }
             }
         }, 1000, 200);

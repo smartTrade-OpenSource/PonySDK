@@ -128,13 +128,11 @@ public class UIScheduledThreadPoolExecutor implements UIContextListener {
         }
 
         public void begin() {
-            uiContext.acquire();
-            UIContext.setCurrent(uiContext);
+            uiContext.begin();
         }
 
         public void end() {
-            UIContext.remove();
-            uiContext.release();
+            uiContext.end();
         }
 
         public boolean execute() {
