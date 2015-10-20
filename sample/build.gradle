@@ -18,18 +18,21 @@ repositories {
 
 configurations {
 	java2html
+	spring
 	compile {
 		extendsFrom java2html
 	}
 	runtime {
-		extendsFrom java2html
+		extendsFrom java2html, spring
 	}
 }
 
 dependencies {
 	java2html 'de.java2html:java2html:5.0'
+    spring 'org.springframework:spring-aop:4.1.4.RELEASE'
+    spring 'org.springframework:spring-expression:4.1.4.RELEASE'
 	compile project(':ponysdk')
-	compile fileTree (dir: 'libs', includes: ['*.jar']) 
+	compile fileTree (dir: 'libs', includes: ['*.jar'])
 	runtime project(':ponysdk')
 }
 
@@ -109,6 +112,7 @@ task generateSkeleton2(type: JavaExec) {
 
 task copyAllLibs << {
 	project(':ponysdk').copyLib(configurations.java2html, 'libs/java2html');
+    project(':ponysdk').copyLib(configurations.spring, 'libs/spring');
 }
 
 /**
@@ -119,8 +123,8 @@ task createPackage << {
 	println 'Building war'
 	println 'ponysdk path: ' + ponysdkPath
 	println 'ponysdk war path: ' + ponysdkWarResourcesPath
-	
-	
+
+
 	copy {
 		from configurations.java2html
 		from project(':ponysdk').configurations.sl4j

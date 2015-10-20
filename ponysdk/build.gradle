@@ -61,7 +61,6 @@ configurations {
     json
     jetty
     gwtdev
-    java2html
 
     compile {
         extendsFrom jetty, commons, gwt, spring, sl4j, json
@@ -79,20 +78,20 @@ configurations {
 
 dependencies {
     xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-    
+
     gwt 'com.google.gwt:gwt-user:2.7.0'
     gwt 'com.google.gwt:gwt-codeserver:2.7.0'
     gwt 'javax.validation:validation-api:1.0.0.GA@jar'
     gwt 'org.timepedia.exporter:gwtexporter:2.5.1'
     gwt 'com.google.gwt:gwt-elemental:2.7.0'
     gwt 'org.ow2.asm:asm:5.0.4'
-    
+
     gwtdev 'com.google.gwt:gwt-dev:2.7.0'
 
-    spring 'org.springframework:spring-core:3.2.3.RELEASE'
-    spring 'org.springframework:spring-web:3.2.3.RELEASE'
-    spring 'org.springframework:spring-beans:3.2.3.RELEASE'
-    spring 'org.springframework:spring-context:3.2.3.RELEASE'
+    spring 'org.springframework:spring-core:4.1.4.RELEASE'
+    spring 'org.springframework:spring-web:4.1.4.RELEASE'
+    spring 'org.springframework:spring-beans:4.1.4.RELEASE'
+    spring 'org.springframework:spring-context:4.1.4.RELEASE'
 
     sl4j 'org.slf4j:slf4j-api:1.7.12'
     sl4j 'org.slf4j:log4j-over-slf4j:1.7.12'
@@ -127,7 +126,6 @@ dependencies {
     jetty 'javax.servlet:javax.servlet-api:3.1.0'
 
     asm 'org.ow2.asm:asm:5.0.3'
-    java2html 'de.java2html:java2html:5.0'
 
     json 'javax.json:javax.json-api:1.0'
     json 'org.glassfish:javax.json:1.0.4'
@@ -316,7 +314,6 @@ task copyAllLibs << {
     copyLib(configurations.asm, 'libs/asm');
     copyLib(configurations.json, 'libs/json');
     copyLib(configurations.gwtdev, 'libs/gwtdev');
-    copyLib(configurations.java2html, 'libs/java2html');
 }
 
 task sendTo(type: Copy) {
