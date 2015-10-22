@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -132,22 +132,20 @@ public class PPusher extends PObject implements ConnectionListener {
     }
 
     public void begin() {
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
+        uiContext.begin();
     }
 
     public void end() {
-        UIContext.remove();
-        uiContext.release();
+        uiContext.end();
     }
 
     @Override
     public void onClientData(final JsonObject event) {
-        if (event.containsKey(Model.ERROR_MSG)) {
+        if (event.containsKey(Model.ERROR_MSG.getKey())) {
             log.warn("Failed to open websocket connection. Falling back to polling.");
             txnContext.switchToPollingMode();
             doOpen();
-        } else if (event.containsKey(Model.POLL)) {
+        } else if (event.containsKey(Model.POLL.getKey())) {
             txnContext.flushNow();
         }
     }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -48,10 +48,11 @@ import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContext;
+import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
@@ -69,7 +70,7 @@ public class UIContext {
 
     private static ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
 
-    private final Logger log = LoggerFactory.getLogger(UIContext.class);
+    private static final Logger log = LoggerFactory.getLogger(UIContext.class);
 
     private int objectCounter = 1;
 
@@ -111,6 +112,8 @@ public class UIContext {
 
     private final TxnContext context;
 
+    private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<>();
+
     public UIContext(final Application application, final TxnContext context) {
         this.application = application;
         this.uiContextID = ponyUIContextIDcount.incrementAndGet();
@@ -125,6 +128,78 @@ public class UIContext {
 
     public int getUiContextID() {
         return uiContextID;
+    }
+
+    public void addDataListener(final DataListener listener) {
+        listenerCollection.register(listener);
+    }
+
+    public void removeDataListener(final DataListener listener) {
+        listenerCollection.unregister(listener);
+    }
+
+    public void acquire(final ApplicationRunnable runnable) {
+        if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
+        if (UIContext.get() != this) {
+            begin();
+            try {
+                final Txn txn = Txn.get();
+                txn.begin(context);
+                try {
+                    // final Long receivedSeqNum = checkClientMessage(data, uiContext);
+
+                    // if (receivedSeqNum != null) {
+                    runnable.onAcquire();
+
+                    // final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+                    // for (final JsonObject jsoObject : datas) {
+                    // process(uiContext, jsoObject);
+                    // }
+                    // }
+
+                    txn.commit();
+                } catch (final Throwable e) {
+                    log.error("Cannot process client instruction", e);
+                    txn.rollback();
+                }
+            } finally {
+                end();
+            }
+        } else {
+            runnable.onAcquire();
+        }
+    }
+
+    public void pushToClient(final List<Object> data) {
+        acquire(() -> fireOnData(data));
+    }
+
+    public void pushToClient(final Object data) {
+        acquire(() -> fireOnData(data));
+    }
+
+    private void fireOnData(final List<Object> data) {
+        if (listenerCollection.isEmpty()) return;
+        try {
+            for (final DataListener listener : listenerCollection) {
+                for (final Object object : data) {
+                    listener.onData(object);
+                }
+            }
+        } catch (final Throwable e) {
+            log.error("Cannot send data", e);
+        }
+    }
+
+    private void fireOnData(final Object data) {
+        if (listenerCollection.isEmpty()) return;
+        try {
+            for (final DataListener listener : listenerCollection) {
+                listener.onData(data);
+            }
+        } catch (final Throwable e) {
+            log.error("Cannot send data", e);
+        }
     }
 
     public void fireClientData(final JsonObject jsonObject) {
@@ -164,20 +239,19 @@ public class UIContext {
         this.clientDataOutput = clientDataOutput;
     }
 
-    public void acquire() {
+    public void begin() {
         lock.lock();
+        UIContext.setCurrent(this);
     }
 
-    public void release() {
+    public void end() {
+        getContext().flush();
+        UIContext.remove();
         lock.unlock();
     }
 
     public int nextID() {
         return objectCounter++;
-    }
-
-    public PPusher getPusher() {
-        return getAttribute(PPusher.PUSHER);
     }
 
     public int nextStreamRequestID() {
@@ -330,7 +404,7 @@ public class UIContext {
      * bound to the session, the object is replaced.
      * <p>
      * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
-     * 
+     *
      * @param name
      *            the name to which the object is bound; cannot be null
      * @param value
@@ -344,7 +418,7 @@ public class UIContext {
     /**
      * Removes the object bound with the specified name from this session. If the session does not have an
      * object bound with the specified name, this method does nothing.
-     * 
+     *
      * @param name
      *            the name of the object to remove from this session
      */
@@ -356,7 +430,7 @@ public class UIContext {
     /**
      * Returns the object bound with the specified name in this session, or <code>null</code> if no object is
      * bound under the name.
-     * 
+     *
      * @param name
      *            a string specifying the name of the object
      * @return the object with the specified name
@@ -443,8 +517,7 @@ public class UIContext {
     }
 
     public void sendHeartBeat() {
-        acquire();
-        UIContext.setCurrent(this);
+        begin();
         try {
             final Txn txn = Txn.get();
             txn.begin(context);
@@ -456,10 +529,8 @@ public class UIContext {
                 txn.rollback();
             }
         } finally {
-            UIContext.remove();
-            release();
+            begin();
         }
-
     }
 
     public void addUIContextListener(final UIContextListener listener) {
@@ -495,6 +566,11 @@ public class UIContext {
     @Override
     public String toString() {
         return "UIContext [" + application + ", uiContextID=" + uiContextID + ", destroyed=" + destroyed + "]";
+    }
+
+    public interface ApplicationRunnable {
+
+        void onAcquire();
     }
 
 }

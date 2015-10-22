@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.UIContext.ApplicationRunnable;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.stm.Txn;
@@ -132,32 +133,13 @@ public abstract class AbstractApplicationManager {
 
         if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
 
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
-        try {
-            final Txn txn = Txn.get();
-            txn.begin(context);
-            try {
-                // final Long receivedSeqNum = checkClientMessage(data, uiContext);
+        uiContext.acquire(new ApplicationRunnable() {
 
-                // if (receivedSeqNum != null) {
+            @Override
+            public void onAcquire() {
                 process(uiContext, data);
-
-                // final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
-                // for (final JsonObject jsoObject : datas) {
-                // process(uiContext, jsoObject);
-                // }
-                // }
-
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot process client instruction", e);
-                txn.rollback();
             }
-        } finally {
-            UIContext.remove();
-            uiContext.release();
-        }
+        });
     }
     //
     // private Long checkClientMessage(final JsonObject jsonObject, final UIContext uiContext) {

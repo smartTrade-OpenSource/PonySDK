@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,22 +33,19 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, String> {
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
-            uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
+    protected void init(final PTInstruction create, final UIService uiService, final W uiObject) {
+        uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
-                @Override
-                public void onValueChange(final ValueChangeEvent<String> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instruction.getObjectID());
-                    eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.put(Model.VALUE, event.getValue());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
-            });
-        } else {
-            super.addHandler(instruction, uiService);
-        }
+            @Override
+            public void onValueChange(final ValueChangeEvent<String> event) {
+                final PTInstruction eventInstruction = new PTInstruction();
+                eventInstruction.setObjectID(create.getObjectID());
+                eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                eventInstruction.put(Model.VALUE, event.getValue());
+                uiService.sendDataToServer(uiObject, eventInstruction);
+            }
+        });
+        super.init(create, uiService, uiObject);
     }
 
     @Override

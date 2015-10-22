@@ -14,11 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.SessionManager;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.PPusher;
 
 public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.PonyService **/
 {
@@ -79,10 +77,7 @@ public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.Pony
     protected void pushData(final PonyStock stock) {
         final Collection<Application> applications = SessionManager.get().getApplications();
         for (final Application application : applications) {
-            for (final UIContext uiContext : application.getUIContexts()) {
-                final PPusher pusher = uiContext.getPusher();
-                if (pusher != null) pusher.pushToClient(stock);
-            }
+            application.pushToClients(stock);
         }
     }
     //

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -188,7 +188,7 @@ public abstract class PScript extends PObject {
             if (callback != null) {
                 callback.onFailure(instruction.getString(Model.ERROR_MSG.getKey()));
             }
-        } else if (instruction.containsKey(Model.RESULT)) {
+        } else if (instruction.containsKey(Model.RESULT.getKey())) {
             final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
             if (callback != null) {
                 callback.onSuccess(instruction.getString(Model.RESULT.getKey()));
