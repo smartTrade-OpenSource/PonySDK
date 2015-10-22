@@ -133,8 +133,9 @@ public class ParserImpl implements Parser {
     private ByteBuffer UTF8StringToByteBuffer(final String value) {
         try {
             charBuffer.clear();
-            for (int i = 0; i < value.length(); i++) {
-                charBuffer.put(value.charAt(i));
+            final String escapeValue = value.replace("\"", "\\\"");
+            for (int i = 0; i < escapeValue.length(); i++) {
+                charBuffer.put(escapeValue.charAt(i));
             }
             charBuffer.flip();
             return UTF8Encoder.encode(charBuffer);
@@ -147,8 +148,9 @@ public class ParserImpl implements Parser {
     private ByteBuffer ASCIIStringToByteBuffer(final String value) {
         try {
             charBuffer.clear();
-            for (int i = 0; i < value.length(); i++) {
-                charBuffer.put(value.charAt(i));
+            final String escapeValue = value.replace("\"", "\\\"");
+            for (int i = 0; i < escapeValue.length(); i++) {
+                charBuffer.put(escapeValue.charAt(i));
             }
             charBuffer.flip();
             return ACSIIEncoder.encode(charBuffer);
