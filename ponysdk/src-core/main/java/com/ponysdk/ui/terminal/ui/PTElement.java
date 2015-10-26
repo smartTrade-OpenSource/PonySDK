@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,12 +23,17 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTElement extends PTComplexPanel<HTMLPanel> {
+
+    private final static Logger log = Logger.getLogger(PTElement.class.getName());
 
     private static final String EMPTY = "";
 
@@ -40,8 +45,9 @@ public class PTElement extends PTComplexPanel<HTMLPanel> {
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
         if (add.containsKey(Model.INDEX)) {
-            final int beforeIndex = add.getInt(Model.INDEX);
-            uiObject.add(asWidget(add.getObjectID(), uiService), uiObject.getElement());
+            final Widget widget = asWidget(add.getObjectID(), uiService);
+            if (widget != null) uiObject.add(widget, uiObject.getElement());
+            else log.warning("No widget created for object #" + add.getObjectID() + ", Details : " + add);
         } else {
             super.add(add, uiService);
         }
