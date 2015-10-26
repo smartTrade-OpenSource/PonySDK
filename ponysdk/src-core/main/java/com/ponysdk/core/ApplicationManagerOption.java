@@ -31,6 +31,13 @@ import com.ponysdk.core.main.EntryPoint;
 
 public class ApplicationManagerOption {
 
+    public static final String APPLICATION_ID = "ponysdk.application.id";
+    public static final String APPLICATION_NAME = "ponysdk.application.name";
+    public static final String APPLICATION_DESCRIPTION = "ponysdk.application.description";
+    public static final String APPLICATION_CONTEXT_NAME = "ponysdk.application.context.name";
+    public static final String STYLESHEETS = "ponysdk.application.stylesheets";
+    public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
+
     private String applicationID;
     private String applicationName;
     private String applicationDescription;
@@ -55,13 +62,9 @@ public class ApplicationManagerOption {
     private String clientConfigFile;
 
     public ApplicationManagerOption() {
-        applicationID = System.getProperty(SystemProperty.APPLICATION_ID, applicationID);
-        applicationName = System.getProperty(SystemProperty.APPLICATION_NAME, applicationName);
-        applicationDescription = System.getProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
-
-        if (applicationID != null) System.setProperty(SystemProperty.APPLICATION_ID, applicationID);
-        if (applicationName != null) System.setProperty(SystemProperty.APPLICATION_NAME, applicationName);
-        if (applicationDescription != null) System.setProperty(SystemProperty.APPLICATION_DESCRIPTION, applicationDescription);
+        applicationID = System.getProperty(APPLICATION_ID);
+        applicationName = System.getProperty(APPLICATION_NAME);
+        applicationDescription = System.getProperty(APPLICATION_DESCRIPTION);
     }
 
     public String getApplicationID() {

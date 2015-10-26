@@ -26,33 +26,32 @@ package com.ponysdk.impl.main;
 import java.util.Arrays;
 
 import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.SystemProperty;
 import com.ponysdk.core.servlet.ApplicationLoader;
-import com.ponysdk.spring.servlet.SpringApplicationLoader;
+import com.ponysdk.core.servlet.JavaApplicationLoader;
 
 public class Main {
 
     public static void main(final String[] args) throws Exception {
         final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
-        applicationManagerOption.setApplicationID("ID");
-        applicationManagerOption.setApplicationName("NAME");
-        applicationManagerOption.setApplicationDescription("DESCRIPTION");
-        applicationManagerOption.setApplicationContextName("sample");
+        applicationManagerOption.setApplicationID(System.getProperty(ApplicationManagerOption.APPLICATION_ID, "ID"));
+        applicationManagerOption.setApplicationName(System.getProperty(ApplicationManagerOption.APPLICATION_NAME, "NAME"));
+        applicationManagerOption.setApplicationDescription(System.getProperty(ApplicationManagerOption.APPLICATION_DESCRIPTION, "DESCRIPTION"));
+        applicationManagerOption.setApplicationContextName(System.getProperty(ApplicationManagerOption.APPLICATION_CONTEXT_NAME, ""));
         applicationManagerOption.setSessionTimeout(1000);
         applicationManagerOption.setEntryPointClass(BasicEntryPoint.class);
 
-        final String styles = System.getProperty(SystemProperty.STYLESHEETS);
+        final String styles = System.getProperty(ApplicationManagerOption.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             applicationManagerOption.setStyle(Arrays.asList(styles.trim().split(";")));
         }
 
-        final String scripts = System.getProperty(SystemProperty.JAVASCRIPTS);
+        final String scripts = System.getProperty(ApplicationManagerOption.JAVASCRIPTS);
         if (scripts != null && !scripts.isEmpty()) {
             applicationManagerOption.setJavascript(Arrays.asList(scripts.trim().split(";")));
         }
 
-        final ApplicationLoader applicationLoader = new SpringApplicationLoader();
-        // applicationLoader.setApplicationManagerOption(applicationManagerOption);
+        final ApplicationLoader applicationLoader = new JavaApplicationLoader();
+        applicationLoader.setApplicationManagerOption(applicationManagerOption);
 
         final PonySDKServer ponySDKServer = new PonySDKServer();
         ponySDKServer.setApplicationLoader(applicationLoader);

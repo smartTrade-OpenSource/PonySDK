@@ -25,8 +25,6 @@ package com.ponysdk.core.export;
 
 import java.util.List;
 
-import com.ponysdk.core.datamodel.ExportableData;
-
 public class ExporterContext<T> {
 
     private ExportableData<List<T>> exportableDTO;

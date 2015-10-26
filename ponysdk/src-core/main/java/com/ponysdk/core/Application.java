@@ -74,11 +74,11 @@ public class Application {
 
     public void pushToClients(final Object message) {
         for (final UIContext uiContext : getUIContexts()) {
-            if (log.isDebugEnabled()) log.debug("Pushing to #" + uiContext);
+            if (log.isDebugEnabled()) log.debug("Pushing to {}", uiContext);
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session #" + uiContext.getContext(), throwable);
+                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
             }
         }
     }

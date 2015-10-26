@@ -25,8 +25,6 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     private WebSocket socket;
 
-    private boolean polling = false;
-
     private boolean flushNow = false;
 
     private ParserImpl parser;
@@ -48,14 +46,9 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void flush() {
-        if (polling) return;
         parser.endOfParsing();
         socket.flush();
         parser.reset();
-    }
-
-    public void switchToPollingMode() {
-        polling = true;
     }
 
     public void flushNow() {

@@ -25,9 +25,9 @@ package com.ponysdk.impl.main;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
@@ -38,10 +38,10 @@ public class BasicEntryPoint implements EntryPoint {
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput(new ClientDataOutput() {
+        uiContext.setClientDataOutput(new TerminalDataReceiver() {
 
             @Override
-            public void onClientData(final PObject object, final JsonObject instruction) {
+            public void onDataReceived(final PObject object, final JsonObject instruction) {
                 System.err.println(object + "" + instruction);
             }
         });

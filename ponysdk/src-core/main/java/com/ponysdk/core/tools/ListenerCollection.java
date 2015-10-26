@@ -11,8 +11,8 @@ public class ListenerCollection<C> implements Collection<C> {
 
     private final Set<C> listeners = Collections.newSetFromMap(new ConcurrentHashMap<C, Boolean>());
 
-    public void register(final C listener) {
-        listeners.add(listener);
+    public boolean register(final C listener) {
+        return listeners.add(listener);
     }
 
     public boolean unregister(final C listener) {

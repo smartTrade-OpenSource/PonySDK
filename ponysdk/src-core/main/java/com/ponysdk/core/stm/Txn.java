@@ -5,14 +5,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.UIContext;
-
 public class Txn {
-
-    private static final Logger log = LoggerFactory.getLogger(Txn.class);
 
     private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
@@ -21,17 +14,11 @@ public class Txn {
 
     private TxnContext txnContext;
 
-    private final UIContext uiContext;
-
-    private Txn(final UIContext uiContext) {
-        this.uiContext = uiContext;
-    }
-
     public static Txn get() {
         Txn txn = transactions.get();
 
         if (txn == null) {
-            txn = new Txn(UIContext.get());
+            txn = new Txn();
             transactions.set(txn);
         }
         return txn;

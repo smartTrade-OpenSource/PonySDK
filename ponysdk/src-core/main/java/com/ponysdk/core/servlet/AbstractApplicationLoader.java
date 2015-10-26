@@ -47,12 +47,12 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
     @Override
     public void start() {
         applicationManager = createApplicationManager(applicationManagerOption);
-        printLicence();
+        printWelcomBanner();
     }
 
     @Override
     public void contextDestroyed(final ServletContextEvent event) {
-        printDestroyedBanner();
+        printGoodbyeBanner();
     }
 
     @Override
@@ -73,7 +73,7 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
         SessionManager.get().unregisterSession(httpSessionEvent.getSession().getId());
     }
 
-    private void printLicence() {
+    private void printWelcomBanner() {
         final BannerPrinter bannerPrinter = new BannerPrinter(60);
         bannerPrinter.appendNewEmptyLine(2);
         bannerPrinter.appendLineSeparator();
@@ -87,7 +87,7 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
         bannerPrinter.print();
     }
 
-    private void printDestroyedBanner() {
+    private void printGoodbyeBanner() {
         final BannerPrinter bannerPrinter = new BannerPrinter(60);
         bannerPrinter.appendNewEmptyLine(2);
         bannerPrinter.appendLineSeparator();

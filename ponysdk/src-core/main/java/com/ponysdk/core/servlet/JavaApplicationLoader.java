@@ -40,7 +40,7 @@ public class JavaApplicationLoader extends AbstractApplicationLoader {
         return new AbstractApplicationManager(applicationManagerOption) {
 
             @Override
-            protected EntryPoint initializePonySession(final UIContext ponySession) throws ServletException {
+            protected EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException {
                 final Class<? extends EntryPoint> entryPointClassName = applicationManagerOption.getEntryPointClass();
                 EntryPoint entryPoint = null;
                 try {

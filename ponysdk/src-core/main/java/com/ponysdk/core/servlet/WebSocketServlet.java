@@ -3,8 +3,6 @@ package com.ponysdk.core.servlet;
 
 import java.io.EOFException;
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -13,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
@@ -79,8 +76,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private TxnSocketContext context;
 
-        private final HttpSession httpSession;
-
         private Session session;
 
         private final SocketRequest request;
@@ -88,14 +83,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         private ByteBuffer buffer;
 
         public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
-            final Map<String, List<String>> parameterMap = req.getParameterMap();
-            // key = Long.parseLong(parameterMap.get(Model.APPLICATION_VIEW_ID.getKey()).get(0));
-
             System.err.println(req.getHeader("User-Agent"));
 
             System.err.println(UserAgent.parseUserAgentString(req.getHeader("User-Agent")));
-
-            httpSession = HTTPServletContext.get().getRequest().getSession();
             request = new SocketRequest(req);
         }
 

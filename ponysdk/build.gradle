@@ -2,12 +2,11 @@ ext {
     srcCore = "src-core/main/java"
     srcTerminal = "src-core/main/java/com/ponysdk/ui/terminal"
     srcDefaultimpl = "src-defaultimpl/main/java"
-    srcSpring = "src-spring/main/java"
     resourcesCoreTest = "src-core/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     warResources = "src-core/main/resources/war"
-    confResources = "src-spring/main/resources/conf"
+    confResources = "src-core/main/resources/conf"
     javadocResources = "src-core/main/javadoc"
 }
 
@@ -16,7 +15,6 @@ sourceSets {
         java {
             srcDir srcCore
             srcDir srcDefaultimpl
-            srcDir srcSpring
         }
     }
     test {
@@ -143,7 +141,6 @@ jar {
         from 'src-core/main/resources/META-INF'
         from buildInfoOutputDirName
     }
-
     into('conf') {
         from confResources
     }

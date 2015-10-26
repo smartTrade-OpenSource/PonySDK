@@ -46,7 +46,7 @@ public class PlaceController implements PlaceChangeRequestHandler {
      * @param world
      */
     public void goTo(final Place place) {
-        UIContext.getRootEventBus().fireEvent(new PlaceChangeEvent(this, place));
+        UIContext.fireEvent(new PlaceChangeEvent(this, place));
     }
 
 }

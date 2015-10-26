@@ -60,7 +60,6 @@ import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTPasswordTextBox;
 import com.ponysdk.ui.terminal.ui.PTPopupPanel;
 import com.ponysdk.ui.terminal.ui.PTPushButton;
-import com.ponysdk.ui.terminal.ui.PTPusher;
 import com.ponysdk.ui.terminal.ui.PTRadioButton;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea;
 import com.ponysdk.ui.terminal.ui.PTRichTextToolbar;
@@ -143,7 +142,6 @@ public class UIFactory {
         if (WidgetType.MULTIWORD_SUGGEST_ORACLE.ordinal() == widgetType) { return new PTMultiWordSuggestOracle(); }
         if (WidgetType.DISCLOSURE_PANEL.ordinal() == widgetType) { return new PTDisclosurePanel(); }
         if (WidgetType.DECORATOR_PANEL.ordinal() == widgetType) { return new PTDecoratorPanel(); }
-        if (WidgetType.PUSHER.ordinal() == widgetType) { return new PTPusher(); }
         if (WidgetType.WINDOW.ordinal() == widgetType) { return new PTWindow(); }
         if (WidgetType.HEADER_PANEL.ordinal() == widgetType) { return new PTHeaderPanel(); }
         if (WidgetType.ADDON.ordinal() == widgetType) { return new PTAddOn(); }

@@ -80,7 +80,6 @@ public enum WidgetType {
     ATTACHED_POPUP_PABEL,
     FOCUS_PANEL,
     SCRIPT,
-    PUSHER,
     TERMINAL_SCHEDULED_COMMAND,
     WINDOW,
     HEADER_PANEL;

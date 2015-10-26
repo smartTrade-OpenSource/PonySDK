@@ -9,12 +9,9 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.UIContext.ApplicationRunnable;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContext;
-import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -77,31 +74,13 @@ public abstract class AbstractApplicationManager {
                     final int receivedSeqNum = context.getSeqNum();
                     uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
 
-                    // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey());
-
-                    final EntryPoint entryPoint = initializePonySession(uiContext);
-
-                    // final String historyToken = data.getString(Model.HISTORY_TOKEN.getKey());
+                    final EntryPoint entryPoint = initializeUIContext(uiContext);
 
                     final String historyToken = context.getHistoryToken();
 
                     if (historyToken != null && !historyToken.isEmpty()) {
                         uiContext.getHistory().newItem(historyToken, false);
                     }
-
-                    final PCookies pCookies = uiContext.getCookies();
-
-                    final Request request = context.getRequest();
-
-                    // final Map<String, String> cookies = request.getCookies();
-                    //
-                    // for (final Entry<String, String> entry : cookies.entrySet()) {
-                    // pCookies.cacheCookie(entry.getKey(), entry.getValue());
-                    // }
-
-                    // final JsonArray cookies = data.getJsonArray(Model.COOKIES.getKey());
-
-                    // for (int i = 0; i < cookies.size(); i++) {}
 
                     if (isNewHttpSession) {
                         entryPoint.start(uiContext);
@@ -129,46 +108,16 @@ public abstract class AbstractApplicationManager {
 
         final UIContext uiContext = context.getUIContext();
 
-        // final UIContext uiContext = applicationSession.getUIContext(key);
-
         if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
 
-        uiContext.acquire(new ApplicationRunnable() {
+        uiContext.execute(new Runnable() {
 
             @Override
-            public void onAcquire() {
+            public void run() {
                 process(uiContext, data);
             }
         });
     }
-    //
-    // private Long checkClientMessage(final JsonObject jsonObject, final UIContext uiContext) {
-    // printClientErrorMessage(jsonObject);
-    //
-    // final long receivedSeqNum = jsonObject.getJsonNumber(Model.APPLICATION_SEQ_NUM.getKey()).longValue();
-    // if (!uiContext.updateIncomingSeqNum(receivedSeqNum)) {
-    // final long key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).longValue();
-    // uiContext.stackIncomingMessage(receivedSeqNum, jsonObject);
-    // if (options.maxOutOfSyncDuration > 0 && uiContext.getLastSyncErrorTimestamp() > 0) {
-    // if (System.currentTimeMillis() - uiContext.getLastSyncErrorTimestamp() > options.maxOutOfSyncDuration)
-    // {
-    // log.info("Unable to sync message for " + (System.currentTimeMillis() -
-    // uiContext.getLastSyncErrorTimestamp()) + " ms. Dropping connection (viewID #" + key + ").");
-    // uiContext.destroy();
-    // return null;
-    // }
-    // }
-    //
-    // if (log.isDebugEnabled()) {
-    // log.debug("Stacking incoming message #{}. Data #{} (viewID #{})", Arrays.asList(receivedSeqNum,
-    // jsonObject, key));
-    // }
-    //
-    // return null;
-    // }
-    // return receivedSeqNum;
-    //
-    // }
 
     private void printClientErrorMessage(final JsonObject data) {
         try {
@@ -195,6 +144,6 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    protected abstract EntryPoint initializePonySession(final UIContext ponySession) throws ServletException;
+    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
 
 }

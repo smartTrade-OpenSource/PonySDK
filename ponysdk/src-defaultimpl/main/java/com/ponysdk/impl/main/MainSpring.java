@@ -23,18 +23,28 @@
 
 package com.ponysdk.impl.main;
 
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.ponysdk.spring.servlet.SpringApplicationLoader;
 
 public class MainSpring {
 
     public static void main(final String[] args) throws Exception {
-        String serverConfiguration = "classpath:server_application.xml";
+        final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION, "classpath:server_application.xml");
 
-        if (args.length > 0) {
-            serverConfiguration = "classpath:" + args[0];
-        }
+        final ClassPathXmlApplicationContext classPathXmlApplicationContext = new ClassPathXmlApplicationContext(serverConfigLocation);
 
-        new ClassPathXmlApplicationContext(serverConfiguration);
+        classPathXmlApplicationContext.addApplicationListener(new ApplicationListener<ApplicationEvent>() {
+
+            @Override
+            public void onApplicationEvent(final ApplicationEvent event) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+
     }
 
 }

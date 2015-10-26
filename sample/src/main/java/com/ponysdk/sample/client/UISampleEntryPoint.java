@@ -25,9 +25,9 @@ package com.ponysdk.sample.client;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.ClientDataOutput;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -38,10 +38,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput(new ClientDataOutput() {
+        uiContext.setClientDataOutput(new TerminalDataReceiver() {
 
             @Override
-            public void onClientData(final PObject object, final JsonObject instruction) {
+            public void onDataReceived(final PObject object, final JsonObject instruction) {
                 System.err.println(object + "" + instruction);
             }
         });

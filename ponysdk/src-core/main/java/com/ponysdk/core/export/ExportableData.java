@@ -21,48 +21,57 @@
  * the License.
  */
 
-package com.ponysdk.core.query;
+package com.ponysdk.core.export;
 
 import java.io.Serializable;
-import java.time.Duration;
+import java.util.List;
 
-public class Result<T> implements Serializable {
+import com.ponysdk.core.query.Criterion;
 
-    private static final long serialVersionUID = -8598967363564331854L;
+public class ExportableData<T> implements Serializable {
+
+    private static final long serialVersionUID = -1206357980776899604L;
 
     private T data;
 
-    private int fullSize;
+    private List<Criterion> criterian;
 
-    private Duration executionDuration;
+    private String dateFormat;
 
-    public Result() {}
+    private String timezone;
 
-    public Result(final T data) {
-        this.data = data;
-    }
-
-    public void setData(final T data) {
-        this.data = data;
-    }
+    public ExportableData() {}
 
     public T getData() {
         return data;
     }
 
-    public void setFullSize(final int fullSize) {
-        this.fullSize = fullSize;
+    public void setData(T data) {
+        this.data = data;
     }
 
-    public int getFullSize() {
-        return fullSize;
+    public String getDateFormat() {
+        return dateFormat;
     }
 
-    public Duration getExecutionDuration() {
-        return executionDuration;
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
-    public void setExecutionDuration(final Duration executionTime) {
-        this.executionDuration = executionTime;
+    public String getTimezone() {
+        return timezone;
     }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
+    public List<Criterion> getCriterian() {
+        return criterian;
+    }
+
+    public void setCriterian(List<Criterion> criterian) {
+        this.criterian = criterian;
+    }
+
 }

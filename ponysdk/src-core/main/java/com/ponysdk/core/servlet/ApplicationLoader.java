@@ -29,9 +29,6 @@ import javax.servlet.http.HttpSessionListener;
 import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.ApplicationManagerOption;
 
-/**
- * @author nvelin
- */
 public interface ApplicationLoader extends ServletContextListener, HttpSessionListener {
 
     void start();

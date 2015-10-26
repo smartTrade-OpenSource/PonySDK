@@ -46,6 +46,7 @@ import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
+import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.core.tools.ListenerCollection;
@@ -106,7 +107,7 @@ public class UIContext {
 
     private final List<UIContextListener> uiContextListeners = new ArrayList<>();
 
-    private ClientDataOutput clientDataOutput;
+    private TerminalDataReceiver terminalDataReceiver;
 
     private boolean destroyed = false;
 
@@ -138,7 +139,7 @@ public class UIContext {
         listenerCollection.unregister(listener);
     }
 
-    public void acquire(final ApplicationRunnable runnable) {
+    public void execute(final Runnable runnable) {
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
@@ -149,7 +150,7 @@ public class UIContext {
                     // final Long receivedSeqNum = checkClientMessage(data, uiContext);
 
                     // if (receivedSeqNum != null) {
-                    runnable.onAcquire();
+                    runnable.run();
 
                     // final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
                     // for (final JsonObject jsoObject : datas) {
@@ -166,16 +167,16 @@ public class UIContext {
                 end();
             }
         } else {
-            runnable.onAcquire();
+            runnable.run();
         }
     }
 
     public void pushToClient(final List<Object> data) {
-        acquire(() -> fireOnData(data));
+        execute(() -> fireOnData(data));
     }
 
     public void pushToClient(final Object data) {
-        acquire(() -> fireOnData(data));
+        execute(() -> fireOnData(data));
     }
 
     private void fireOnData(final List<Object> data) {
@@ -227,16 +228,16 @@ public class UIContext {
             }
 
             // if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
-            if (clientDataOutput != null) {
-                clientDataOutput.onClientData(object, jsonObject);
+            if (terminalDataReceiver != null) {
+                terminalDataReceiver.onDataReceived(object, jsonObject);
             }
             object.onClientData(jsonObject);
             // }
         }
     }
 
-    public void setClientDataOutput(final ClientDataOutput clientDataOutput) {
-        this.clientDataOutput = clientDataOutput;
+    public void setClientDataOutput(final TerminalDataReceiver clientDataOutput) {
+        this.terminalDataReceiver = clientDataOutput;
     }
 
     public void begin() {
@@ -566,11 +567,6 @@ public class UIContext {
     @Override
     public String toString() {
         return "UIContext [" + application + ", uiContextID=" + uiContextID + ", destroyed=" + destroyed + "]";
-    }
-
-    public interface ApplicationRunnable {
-
-        void onAcquire();
     }
 
 }
