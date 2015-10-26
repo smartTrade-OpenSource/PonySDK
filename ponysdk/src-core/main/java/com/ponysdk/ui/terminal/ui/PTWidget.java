@@ -121,7 +121,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     public Widget asWidget(final int objectID, final UIService uiService) {
         final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(objectID);
         if (ptWidget != null) return ptWidget.cast();
-        else throw new IllegalArgumentException("No widget match with id #" + objectID);
+        else return null;
     }
 
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {

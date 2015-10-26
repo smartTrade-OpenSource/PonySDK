@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,15 +23,22 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 
 public class PTPanel<W extends Panel> extends PTWidget<W> {
 
+    private final static Logger log = Logger.getLogger(PTPanel.class.getName());
+
     @Override
     public void add(final PTInstruction add, final UIService uiService) {
-        uiObject.add(asWidget(add.getObjectID(), uiService));
+        final Widget widget = asWidget(add.getObjectID(), uiService);
+        if (widget != null) uiObject.add(widget);
+        else log.warning("No widget created for object #" + add.getObjectID() + ", Details : " + add);
     }
 
     @Override

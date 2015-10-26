@@ -215,188 +215,210 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void processInstruction(final PTInstruction instruction) {
-        PTObject ptObject;
-
-        if (instruction.containsKey(Model.TYPE_CLOSE)) {
-            processClose(instruction);
-        } else if (instruction.containsKey(Model.TYPE_CREATE)) {
-            // TEMP
-
-            // final int widgetType = instruction.getInt(Model.WIDGET_TYPE);
-            // if (widgetType == WidgetType.WINDOW.ordinal()) {
-            // GWT.log("Je vais creer la window : " + instruction.getObjectID());
-            //
-            // ptObject = uiFactory.newUIObject(this, instruction);
-            // ptObject.create(instruction, this);
-            // objectByID.put(instruction.getObjectID(), ptObject);
-            // } else {
-            // processCreate(instruction);
-            // }
-
-            // processCreate(instruction);
-
-            ptObject = uiFactory.newUIObject(this, instruction);
-            ptObject.create(instruction, this);
-            objectByID.put(instruction.getObjectID(), ptObject);
-
-        } else if (instruction.containsKey(Model.TYPE_ADD)) {
-            GWT.log("Add Instruction  : " + instruction);
-
-            // if (instruction.containsKey(Model.WINDOW_ID)) {
-            // final List<PTInstruction> waitingInstructions =
-            // instructionsByObjectID.remove(instruction.getObjectID());
-            // if (waitingInstructions != null) {
-            // final int windowID = instruction.getInt(Model.WINDOW_ID);
-            // for (final PTInstruction waitingInstruction : waitingInstructions) {
-            // GWT.log("Transfert data to window : " + waitingInstruction);
-            //
-            // GWT.log("Window search : " + windowID);
-            //
-            // GWT.log("Window found : " + PTWindowManager.getWindow(windowID));
-            //
-            // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
-            //
-            // // ptObject = uiFactory.newUIObject(this, ptInstruction);
-            // // ptObject.create(ptInstruction, this);
-            // // objectByID.put(ptInstruction.getObjectID(), ptObject);
-            // }
-            // }
-            // }
-            //
-            // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
-            // stackInstruction(instruction);
-            // } else {
-            // ptObject = objectByID.get(instruction.getObjectID());
-            //
-            // if (ptObject == null) {
-            // // TODO throw
-            // log.info("Cannot update a garbaged object #" + instruction.getObjectID());
-            // return;
-            // }
-            //
-            // ptObject.update(instruction, this);
-            // // }
-
-            ptObject = objectByID.get(instruction.getParentID());
-            if (ptObject == null) {
-                log.info("Cannot add object to an garbaged parent object #" + instruction.getObjectID());
-                return;
-            }
-            ptObject.add(instruction, this);
-
-        } else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) {
-            processAddHandler(instruction);
-        } else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) {
-            processRemoveHandler(instruction);
-        } else if (instruction.containsKey(Model.TYPE_REMOVE))
-
-        {
-            if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
-            else {
-                ptObject = objectByID.get(instruction.getParentID());
-            }
-            if (ptObject == null) {
-                log.info("Cannot remove a garbaged object #" + instruction.getObjectID());
-                return;
-            }
-            ptObject.remove(instruction, this);
-        } else if (instruction.containsKey(Model.TYPE_GC))
-
-        {
-            ptObject = unRegisterObject(instruction.getObjectID());
-            if (ptObject == null) {
-                log.info("Cannot GC a garbaged object #" + instruction.getObjectID());
-                return;
-            }
-            ptObject.gc(this);
-        } else if (instruction.containsKey(Model.TYPE_UPDATE))
-
-        {
-            // if (instruction.containsKey(Model.WINDOW_ID)) {
-            //
-            // final List<PTInstruction> waitingInstructions =
-            // instructionsByObjectID.remove(instruction.getObjectID());
-            // if (waitingInstructions != null) {
-            // final int windowID = instruction.getInt(Model.WINDOW_ID);
-            //
-            // for (final PTInstruction waitingInstruction : waitingInstructions) {
-            // GWT.log("Transfert data to window : " + waitingInstruction);
-            // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
-            // // ptObject = uiFactory.newUIObject(this, ptInstruction);
-            // // ptObject.create(ptInstruction, this);
-            // // objectByID.put(ptInstruction.getObjectID(), ptObject);
-            // }
-            // }
-            // }
-            //
-            // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
-            // stackInstruction(instruction);
-            // } else {
-            ptObject = objectByID.get(instruction.getObjectID());
-
-            if (ptObject == null) {
-                log.info("Cannot update a garbaged object #" + instruction.getObjectID());
-                return;
-            }
-
-            ptObject.update(instruction, this);
-            // }
-
-        } else if (instruction.containsKey(Model.TYPE_HISTORY))
-
-        {
-            final String oldToken = History.getToken();
-
-            String token = null;
-
-            if (instruction.containsKey(Model.HISTORY_TOKEN)) {
-                token = instruction.getString(Model.HISTORY_TOKEN);
-            }
-
-            if (oldToken != null && oldToken.equals(token)) {
-                if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) {
-                    History.fireCurrentHistoryState();
-                }
-            } else {
-                History.newItem(token, instruction.getBoolean(Model.HISTORY_FIRE_EVENTS));
-            }
-        }
-
-    }
-
-    private void processRemoveHandler(final PTInstruction instruction) {
-        PTObject ptObject;
-        ptObject = objectByID.get(instruction.getObjectID());
-        ptObject.removeHandler(instruction, this);
-    }
-
-    private void processAddHandler(final PTInstruction instruction) {
-        PTObject ptObject;
-        if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
-            new PTStreamResource().addHandler(instruction, this);
-        } else {
-            Window.alert("Coucou on ADD");
-
-            ptObject = objectByID.get(instruction.getObjectID());
-            ptObject.addHandler(instruction, this);
-        }
+        if (instruction.containsKey(Model.TYPE_CREATE)) processCreate(instruction);
+        else if (instruction.containsKey(Model.TYPE_ADD)) processAdd(instruction);
+        else if (instruction.containsKey(Model.TYPE_UPDATE)) processUpdate(instruction);
+        else if (instruction.containsKey(Model.TYPE_REMOVE)) processRemove(instruction);
+        else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) processAddHandler(instruction);
+        else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) processRemoveHandler(instruction);
+        else if (instruction.containsKey(Model.TYPE_HISTORY)) processHistory(instruction);
+        else if (instruction.containsKey(Model.TYPE_CLOSE)) processClose(instruction);
+        else if (instruction.containsKey(Model.TYPE_GC)) processGC(instruction);
     }
 
     private void processCreate(final PTInstruction instruction) {
+        GWT.log("Create instruction : " + instruction);
+
+        final PTObject ptObject;
+        // TEMP
+
+        // final int widgetType = instruction.getInt(Model.WIDGET_TYPE);
+        // if (widgetType == WidgetType.WINDOW.ordinal()) {
+        // GWT.log("Je vais creer la window : " + instruction.getObjectID());
+        //
+        // ptObject = uiFactory.newUIObject(this, instruction);
+        // ptObject.create(instruction, this);
+        // objectByID.put(instruction.getObjectID(), ptObject);
+        // } else {
+        // processSubCreate(instruction);
+        // }
+
+        processSubCreate(instruction);
+    }
+
+    private void processSubCreate(final PTInstruction instruction) {
         PTObject ptObject;
         final boolean isAddon = instruction.containsKey("addOnSignature");
         if (isAddon) {
             final String addOnSignature = instruction.getString("addOnSignature");
             final AddonFactory addonFactory = addonByKey.get(addOnSignature);
-            if (addonFactory == null) { throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet()); }
-
-            ptObject = addonFactory.newAddon();
-            if (ptObject == null) { throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature); }
-            ptObject.create(instruction, this);
-            objectByID.put(instruction.getObjectID(), ptObject);
+            if (addonFactory != null) {
+                ptObject = addonFactory.newAddon();
+                if (ptObject != null) {
+                    ptObject.create(instruction, this);
+                    objectByID.put(instruction.getObjectID(), ptObject);
+                } else throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature);
+            } else throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet());
         } else {
-            stackInstruction(instruction);
+            // stackInstruction(instruction);
+
+            ptObject = uiFactory.newUIObject(this, instruction);
+            if (ptObject != null) {
+                ptObject.create(instruction, this);
+                objectByID.put(instruction.getObjectID(), ptObject);
+            } else log.warning("Cannot create object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
         }
+    }
+
+    private void processAdd(final PTInstruction instruction) {
+        GWT.log("Add instruction  : " + instruction);
+
+        PTObject ptObject;
+
+        // if (instruction.containsKey(Model.WINDOW_ID)) {
+        // final List<PTInstruction> waitingInstructions =
+        // instructionsByObjectID.remove(instruction.getObjectID());
+        // if (waitingInstructions != null) {
+        // final int windowID = instruction.getInt(Model.WINDOW_ID);
+        // for (final PTInstruction waitingInstruction : waitingInstructions) {
+        // GWT.log("Transfert data to window : " + waitingInstruction);
+        //
+        // GWT.log("Window search : " + windowID);
+        //
+        // GWT.log("Window found : " + PTWindowManager.getWindow(windowID));
+        //
+        // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
+        //
+        // // ptObject = uiFactory.newUIObject(this, ptInstruction);
+        // // ptObject.create(ptInstruction, this);
+        // // objectByID.put(ptInstruction.getObjectID(), ptObject);
+        // }
+        // }
+        // }
+        //
+        // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
+        // stackInstruction(instruction);
+        // } else {
+        // ptObject = objectByID.get(instruction.getObjectID());
+        //
+        // if (ptObject == null) {
+        // // TODO throw
+        // log.info("Cannot update a garbaged object #" + instruction.getObjectID());
+        // return;
+        // }
+        //
+        // ptObject.update(instruction, this);
+        // // }
+
+        ptObject = objectByID.get(instruction.getParentID());
+        if (ptObject != null) ptObject.add(instruction, this);
+        else log.warning("Cannot add object " + instruction.getObjectID() + " to an garbaged parent object #" + instruction.getParentID());
+    }
+
+    private void processUpdate(final PTInstruction instruction) {
+        GWT.log("Update instruction  : " + instruction);
+
+        PTObject ptObject;
+        // if (instruction.containsKey(Model.WINDOW_ID)) {
+        //
+        // final List<PTInstruction> waitingInstructions =
+        // instructionsByObjectID.remove(instruction.getObjectID());
+        // if (waitingInstructions != null) {
+        // final int windowID = instruction.getInt(Model.WINDOW_ID);
+        //
+        // for (final PTInstruction waitingInstruction : waitingInstructions) {
+        // GWT.log("Transfert data to window : " + waitingInstruction);
+        // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
+        // // ptObject = uiFactory.newUIObject(this, ptInstruction);
+        // // ptObject.create(ptInstruction, this);
+        // // objectByID.put(ptInstruction.getObjectID(), ptObject);
+        // }
+        // }
+        // }
+        //
+        // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
+        // stackInstruction(instruction);
+        // } else {
+        ptObject = objectByID.get(instruction.getObjectID());
+
+        if (ptObject != null) ptObject.update(instruction, this);
+        else log.warning("Cannot update a garbaged object #" + instruction.getObjectID());
+        // }
+    }
+
+    private void processRemove(final PTInstruction instruction) {
+        GWT.log("Remove instruction  : " + instruction);
+
+        PTObject ptObject;
+
+        if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
+        else ptObject = objectByID.get(instruction.getParentID());
+
+        if (ptObject != null) ptObject.remove(instruction, this);
+        else log.warning("Cannot remove a garbaged object #" + instruction.getObjectID());
+    }
+
+    private void processAddHandler(final PTInstruction instruction) {
+        GWT.log("Add handler instruction  : " + instruction);
+
+        PTObject ptObject;
+        if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
+            new PTStreamResource().addHandler(instruction, this);
+        } else {
+            ptObject = objectByID.get(instruction.getObjectID());
+            if (ptObject != null) ptObject.addHandler(instruction, this);
+            else log.warning("Cannot add handler on a garbaged object #" + instruction.getObjectID());
+        }
+    }
+
+    private void processRemoveHandler(final PTInstruction instruction) {
+        GWT.log("Remove handler instruction  : " + instruction);
+
+        final PTObject ptObject = objectByID.get(instruction.getObjectID());
+        if (ptObject != null) ptObject.removeHandler(instruction, this);
+        else log.warning("Cannot remove handler on a garbaged object #" + instruction.getObjectID());
+    }
+
+    private void processHistory(final PTInstruction instruction) {
+        GWT.log("History instruction  : " + instruction);
+
+        final String oldToken = History.getToken();
+
+        String token = null;
+        if (instruction.containsKey(Model.HISTORY_TOKEN)) token = instruction.getString(Model.HISTORY_TOKEN);
+
+        if (oldToken != null && oldToken.equals(token)) {
+            if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) {
+                History.fireCurrentHistoryState();
+            }
+        } else {
+            History.newItem(token, instruction.getBoolean(Model.HISTORY_FIRE_EVENTS));
+        }
+    }
+
+    private void processClose(final PTInstruction instruction) {
+        GWT.log("Close instruction  : " + instruction);
+
+        pendingClose = true;
+        sendDataToServer(instruction);
+
+        // TODO nciaravola no need
+
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                PonySDK.reload();
+            }
+        });
+    }
+
+    private void processGC(final PTInstruction instruction) {
+        GWT.log("GC instruction  : " + instruction);
+
+        final PTObject ptObject = unRegisterObject(instruction.getObjectID());
+        if (ptObject != null) ptObject.gc(this);
+        else log.warning("Cannot GC a garbaged object #" + instruction.getObjectID());
     }
 
     /**
@@ -415,21 +437,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
 
         instructions.add(instruction); // wait window information
-    }
-
-    private void processClose(final PTInstruction instruction) {
-        pendingClose = true;
-        sendDataToServer(instruction);
-
-        // TODO nciaravola no need
-
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                PonySDK.reload();
-            }
-        });
     }
 
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
