@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -62,10 +61,6 @@ public class PHistory {
     private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<>();
 
     private String token;
-
-    public PHistory() {
-        UIContext.get().setHistory(this);
-    }
 
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);

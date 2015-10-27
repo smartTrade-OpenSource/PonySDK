@@ -84,7 +84,6 @@ public class SimpleTable extends PElement {
         }
 
         newCell.add(widget);
-        newCell.addStyleName("pony-PFlextable-Cell");
 
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
@@ -114,7 +113,6 @@ public class SimpleTable extends PElement {
         }
 
         newCell.add(widget);
-        newCell.addStyleName("pony-PFlextable-Cell");
 
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }

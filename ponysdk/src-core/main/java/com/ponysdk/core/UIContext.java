@@ -43,6 +43,7 @@ import com.ponysdk.core.event.Event.Type;
 import com.ponysdk.core.event.EventBus;
 import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.core.event.RootEventBus;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.core.security.Permission;
 import com.ponysdk.core.servlet.CommunicationSanityChecker;
@@ -83,8 +84,9 @@ public class UIContext {
 
     private Map<String, Permission> permissions = new HashMap<>();
 
-    private PHistory history;
-    private EventBus rootEventBus;
+    private final PHistory history = new PHistory();
+
+    private final EventBus rootEventBus = new RootEventBus();
 
     private final PCookies cookies = new PCookies();
 
@@ -261,7 +263,6 @@ public class UIContext {
 
     public void registerObject(final PObject object) {
         weakReferences.put(object.getID(), object);
-        System.err.println("Register object : " + object.getID());
     }
 
     // public void assignParentID(final int objectID, final int parentID) {
@@ -325,16 +326,6 @@ public class UIContext {
 
     public PCookies getCookies() {
         return cookies;
-    }
-
-    public void setHistory(final PHistory history) {
-        if (this.history != null) throw new IllegalArgumentException("PHistory already set");
-        this.history = history;
-    }
-
-    public void setRootEventBus(final EventBus eventBus) {
-        if (this.rootEventBus != null) throw new IllegalArgumentException("RootEventBus already set");
-        this.rootEventBus = eventBus;
     }
 
     public static UIContext get() {

@@ -42,7 +42,7 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
         final int row = add.getInt(Model.ROW);
         final int cell = add.getInt(Model.CELL);
 
-        uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
+        // uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
         uiObject.setWidget(row, cell, w);
     }
 

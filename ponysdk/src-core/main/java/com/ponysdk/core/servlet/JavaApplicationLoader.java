@@ -28,10 +28,7 @@ import javax.servlet.ServletException;
 import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.event.RootEventBus;
 import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.ui.server.basic.PHistory;
 
 public class JavaApplicationLoader extends AbstractApplicationLoader {
 
@@ -40,7 +37,7 @@ public class JavaApplicationLoader extends AbstractApplicationLoader {
         return new AbstractApplicationManager(applicationManagerOption) {
 
             @Override
-            protected EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException {
+            protected EntryPoint initializeUIContext(final UIContext uiContext) throws ServletException {
                 final Class<? extends EntryPoint> entryPointClassName = applicationManagerOption.getEntryPointClass();
                 EntryPoint entryPoint = null;
                 try {
@@ -48,13 +45,6 @@ public class JavaApplicationLoader extends AbstractApplicationLoader {
                 } catch (final Exception e) {
                     throw new ServletException("Failed to instantiate the EntryPoint #" + entryPointClassName, e);
                 }
-
-                final EventBus rootEventBus = new RootEventBus();
-
-                final PHistory history = new PHistory();
-
-                ponySession.setRootEventBus(rootEventBus);
-                ponySession.setHistory(history);
 
                 return entryPoint;
             }

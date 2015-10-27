@@ -29,8 +29,10 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PElement;
+import com.ponysdk.ui.server.basic.PGrid;
 import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PRootLayoutPanel;
+import com.ponysdk.ui.server.basic.PRootPanel;
 
 public class BasicEntryPoint implements EntryPoint {
 
@@ -52,14 +54,17 @@ public class BasicEntryPoint implements EntryPoint {
 
         // final PFlowPanel flowPanel = new PFlowPanel();
         //
-        // final PGrid grid = new PGrid(200, 50);
+        final PGrid grid = new PGrid(200, 200);
         // PRootPanel.get().add(grid);
         //
-        // for (int i = 0; i < 200; i++) {
-        // for (int j = 0; j < 50; j++) {
-        // grid.setWidget(i, j, new PLabel(i + "-" + j));
-        // }
-        // }
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 20; j++) {
+                final PElement div = new PElement("input");
+                div.setAttribute("type", "text");
+                div.setAttribute("value", i + "-" + j);
+                grid.setWidget(j, i, div);
+            }
+        }
 
         // final Map<Integer, PLabel> labels = new HashMap<>();
         //
@@ -81,7 +86,7 @@ public class BasicEntryPoint implements EntryPoint {
 
         //
 
-        PRootLayoutPanel.get().add(button);
+        PRootPanel.get().add(grid);
         // final PTextBox textBox = new PTextBox(k + " => Button");
         //
         // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
