@@ -4,6 +4,7 @@ package com.ponysdk.sample.trading.client.activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.ui.server.basic.DataListener;
@@ -13,7 +14,6 @@ import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -188,7 +188,7 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDragLeaveEvent.TYPE);
 
-        PPusher.get().addDataListener(new DataListener() {
+        UIContext.get().addDataListener(new DataListener() {
 
             private int lastBuy;
             private int lastSell;

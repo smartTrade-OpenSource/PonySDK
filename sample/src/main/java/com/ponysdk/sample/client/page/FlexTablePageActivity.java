@@ -26,10 +26,10 @@ package com.ponysdk.sample.client.page;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 
 public class FlexTablePageActivity extends SamplePageActivity {
@@ -42,8 +42,6 @@ public class FlexTablePageActivity extends SamplePageActivity {
 
     @Override
     protected void onFirstShowPage() {
-        final PPusher pusher = PPusher.initialize();
-
         super.onFirstShowPage();
 
         final PFlexTable table = new PFlexTable();
@@ -62,7 +60,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
             }
         }
 
-        pusher.addConnectionListener(new ConnectionListener() {
+        UIContext.get().addConnectionListener(new ConnectionListener() {
 
             final Timer timer = new Timer();
 
@@ -73,7 +71,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
 
                     @Override
                     public void run() {
-                        pusher.execute(new Runnable() {
+                        UIContext.get().execute(new Runnable() {
 
                             @Override
                             public void run() {

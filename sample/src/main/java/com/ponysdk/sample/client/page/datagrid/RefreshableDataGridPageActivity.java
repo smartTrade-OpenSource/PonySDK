@@ -25,13 +25,13 @@ package com.ponysdk.sample.client.page.datagrid;
 
 import java.util.Arrays;
 
+import com.ponysdk.core.UIContext;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.sample.client.page.SamplePageActivity;
 import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.list.refreshable.Cell;
@@ -70,8 +70,7 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
 
         examplePanel.setWidget(scroll);
 
-        PPusher.initialize();
-        PPusher.get().addDataListener(this);
+        UIContext.get().addDataListener(this);
     }
 
     @Override

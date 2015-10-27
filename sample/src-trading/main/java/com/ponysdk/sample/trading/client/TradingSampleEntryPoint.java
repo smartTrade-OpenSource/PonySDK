@@ -11,7 +11,6 @@ import com.ponysdk.core.place.PlaceHistoryHandler;
 import com.ponysdk.core.place.PlaceHistoryMapper;
 import com.ponysdk.sample.trading.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.trading.client.place.LoginPlace;
-import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
@@ -32,8 +31,6 @@ public class TradingSampleEntryPoint implements EntryPoint {
     }
 
     private void start0(final UIContext uiContext) {
-
-        PPusher.initialize();
 
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
         PRootLayoutPanel.get().add(panel);
