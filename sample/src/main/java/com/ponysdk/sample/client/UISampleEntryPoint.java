@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,6 +30,8 @@ import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.ponysdk.sample.client.page.addon.LabelPAddOn;
+import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootPanel;
@@ -46,9 +48,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        PRootPanel.get().clear(true);
+        // PRootPanel.get().clear(true);
 
-        PRootPanel.get().add(new PLabel("Coucou"));
+        final PLabel label = new PLabel("Coucou");
+        PRootPanel.get().add(label);
+
+        final LabelPAddOn addon = new LabelPAddOn();
+        // PRootPanel.get().add(new LabelPAddOn());
+
+        final PElement elt = new PElement("div");
+        PRootPanel.get().add(elt);
+        final LabelPAddOn addon2 = new LabelPAddOn(elt);
 
         // uiContext.getHistory().newItem("", false);
     }

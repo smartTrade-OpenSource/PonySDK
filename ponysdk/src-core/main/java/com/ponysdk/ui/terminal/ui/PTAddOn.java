@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,6 +27,7 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Widget;
@@ -48,7 +49,7 @@ public class PTAddOn extends AbstractPTObject {
         if (factory == null) throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
 
         final JSONObject params = new JSONObject();
-        params.put("id", new JSONString(String.valueOf(create.getObjectID())));
+        params.put("id", new JSONNumber(create.getObjectID()));
 
         if (create.containsKey(Model.NATIVE)) {
             final JSONObject data = create.getObject(Model.NATIVE);
@@ -73,9 +74,11 @@ public class PTAddOn extends AbstractPTObject {
                     }
                 }
             });
+
         }
 
         addOn = factory.newAddOn(params.getJavaScriptObject());
+        addOn.onInit();
     }
 
     @Override

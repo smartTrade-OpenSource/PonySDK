@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,7 +25,6 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.sample.client.page.addon.BasicAddOn;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -49,8 +48,6 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
     protected PButton disabledButton;
 
-    private BasicAddOn basicAddOn;
-
     public BasicButtonPageActivity() {
         super("Basic Button", "Widgets");
     }
@@ -63,9 +60,6 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
         panel.add(buildButtonPanel());
         panel.add(buildThemeSelectorPanel());
-
-        basicAddOn = new BasicAddOn();
-        basicAddOn.send("initialization done");
 
         examplePanel.setWidget(panel);
     }
