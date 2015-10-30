@@ -122,23 +122,28 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
     }
 
     protected void callBindedMethod(final String methodName, final Object... args) {
-        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("method", methodName);
-
+        JsonArrayBuilder arrayBuilder = null;
         if (args.length > 0) {
+            arrayBuilder = Json.createArrayBuilder();
             for (final Object object : args) {
                 arrayBuilder.add(String.valueOf(object));
             }
-            builder.add("args", arrayBuilder);
         }
+        callBindedMethod(methodName, arrayBuilder);
+    }
+
+    protected void callBindedMethod(final String methodName, final JsonArrayBuilder arrayBuilder) {
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
+        builder.add("method", methodName);
+
+        if (arrayBuilder != null) builder.add("args", arrayBuilder);
 
         if (!attached) {
             if (pendingDataToSend.size() < LIMIT) pendingDataToSend.add(builder);
         } else {
             update(builder);
         }
+        update(builder);
     }
 
     public PElement asWidget() {
