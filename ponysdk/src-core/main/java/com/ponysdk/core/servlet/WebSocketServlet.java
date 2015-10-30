@@ -3,6 +3,7 @@ package com.ponysdk.core.servlet;
 
 import java.io.EOFException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -33,13 +34,33 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final long serialVersionUID = 1L;
 
-    private static final int DEFAULT_BUFFER_SIZE = 2048;
+    private static final int DEFAULT_BUFFER_SIZE = 51200;
 
     public int maxIdleTime = 1000000;
 
     private AbstractApplicationManager applicationManager;
 
-    private final BlockingQueue<ByteBuffer> bufferQueue = new ArrayBlockingQueue<>(50);
+    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(50);
+
+    public class Buffer {
+
+        ByteBuffer socketBuffer;
+        CharBuffer charBuffer;
+
+        public ByteBuffer getSocketBuffer() {
+            return socketBuffer;
+        }
+
+        public CharBuffer getCharBuffer() {
+            return charBuffer;
+        }
+
+        public Buffer() {
+            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+            charBuffer = CharBuffer.allocate(DEFAULT_BUFFER_SIZE);
+        }
+
+    }
 
     @Override
     public void init() throws ServletException {
@@ -50,7 +71,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         log.info("Initializing Buffer allocation ...");
 
         for (int i = 0; i < 50; i++) {
-            bufferQueue.add(ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE));
+            buffers.add(new Buffer());
         }
 
         log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * 50);
@@ -80,7 +101,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private final SocketRequest request;
 
-        private ByteBuffer buffer;
+        private Buffer buffer;
 
         public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
             System.err.println(req.getHeader("User-Agent"));
@@ -115,12 +136,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         }
 
-        private void flush(final ByteBuffer buffer) {
+        private void flush(final Buffer buffer) {
             if (buffer == null) { return; }
 
-            if (buffer.position() != 0) {
-                buffer.flip();
-                final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(buffer);
+            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+            if (socketBuffer.position() != 0) {
+                socketBuffer.flip();
+                final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
                 try {
                     sendBytesByFuture.get(25, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -131,11 +154,11 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                     }
 
                 }
-                buffer.clear();
+                socketBuffer.clear();
             }
 
             try {
-                bufferQueue.put(buffer);
+                buffers.put(buffer);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
@@ -208,7 +231,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         protected void onAfterMessageProcessed(final String text) {}
 
         @Override
-        public ByteBuffer getByteBuffer() {
+        public Buffer getBuffer() {
             try {
                 // if (session == null) {
                 // if (buffer == null) {
@@ -216,16 +239,12 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 // }
                 // } else {
                 // if (buffer == null) {
-                buffer = bufferQueue.poll(5, TimeUnit.SECONDS);
+                buffer = buffers.poll(5, TimeUnit.SECONDS);
                 System.err.println("Get buffer : " + buffer);
                 // }
                 // }
 
-            } catch (
-
-            final InterruptedException e)
-
-            {
+            } catch (final InterruptedException e) {
                 log.error("Cannot poll buffer", e);
             }
             return buffer;

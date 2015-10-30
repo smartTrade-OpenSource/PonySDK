@@ -16,6 +16,7 @@ import javax.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -114,12 +115,10 @@ public class ParserImpl implements Parser {
 
     private final WebSocket socket;
 
-    private ByteBuffer buffer;
+    private Buffer buffer;
 
     private final CharsetEncoder UTF8Encoder = Charset.forName("UTF8").newEncoder();
-    private final CharsetEncoder ACSIIEncoder = Charset.forName("US-ASCII").newEncoder();
-
-    private final CharBuffer charBuffer = CharBuffer.allocate(10000);
+    private final CharsetEncoder ASCIIEncoder = Charset.forName("US-ASCII").newEncoder();
 
     public ParserImpl(final WebSocket socket) {
         this.socket = socket;
@@ -132,6 +131,7 @@ public class ParserImpl implements Parser {
 
     private ByteBuffer UTF8StringToByteBuffer(final String value) {
         try {
+            final CharBuffer charBuffer = buffer.getCharBuffer();
             charBuffer.clear();
             final String escapeValue = value.replace("\"", "\\\"");
             for (int i = 0; i < escapeValue.length(); i++) {
@@ -147,13 +147,14 @@ public class ParserImpl implements Parser {
 
     private ByteBuffer ASCIIStringToByteBuffer(final String value) {
         try {
+            final CharBuffer charBuffer = buffer.getCharBuffer();
             charBuffer.clear();
             final String escapeValue = value.replace("\"", "\\\"");
             for (int i = 0; i < escapeValue.length(); i++) {
                 charBuffer.put(escapeValue.charAt(i));
             }
             charBuffer.flip();
-            return ACSIIEncoder.encode(charBuffer);
+            return ASCIIEncoder.encode(charBuffer);
         } catch (final CharacterCodingException e) {
             log.error("Cannot convert string");
         }
@@ -165,8 +166,11 @@ public class ParserImpl implements Parser {
         // endOfParsing();
         // socket.flush();
         // reset();
-        buffer = socket.getByteBuffer();
-        buffer.put(HEARTBEAT);
+        buffer = socket.getBuffer();
+
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+        socketBuffer.put(HEARTBEAT);
         buffer = null; // avoid end of parsing call
         // socket.flush();
         // reset();
@@ -175,154 +179,173 @@ public class ParserImpl implements Parser {
     @Override
     public void beginObject() {
         if (buffer == null) {
-            buffer = socket.getByteBuffer();
+            buffer = socket.getBuffer();
         }
 
-        if (buffer.position() == 0) {
-            buffer.put(BEGIN_OBJECT);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+        if (socketBuffer.position() == 0) {
+            socketBuffer.put(BEGIN_OBJECT);
         } else {
-            buffer.put(COMMA_CURVE_LEFT);
+            socketBuffer.put(COMMA_CURVE_LEFT);
         }
     }
 
     @Override
     public void endObject() {
-        if (buffer.position() >= 1024) {
-            buffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+        if (socketBuffer.position() >= 1024) {
+            socketBuffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            buffer.put(CURVE_RIGHT);
+            socketBuffer.put(CURVE_RIGHT);
             socket.flush();
             buffer = null;
         } else {
-            buffer.put(CURVE_RIGHT);
+            socketBuffer.put(CURVE_RIGHT);
         }
     }
 
     @Override
     public void comma() {
-        buffer.put(COMMA);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(COMMA);
     }
 
     @Override
     public void quote() {
-        buffer.put(QUOTE);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(QUOTE);
     }
 
     @Override
     public void beginArray() {
-        buffer.put(BRACKET_LEFT);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(BRACKET_LEFT);
     }
 
     @Override
     public void endArray() {
-        buffer.put(BRACKET_RIGHT);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(BRACKET_RIGHT);
     }
 
     @Override
     public void parseKey(final byte[] key) {
-        buffer.put(QUOTE);
-        buffer.put(key);
-        buffer.put(QUOTE);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(QUOTE);
+        socketBuffer.put(key);
+        socketBuffer.put(QUOTE);
     }
 
     @Override
     public void parse(final JsonObject jsonObject) {
-        buffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
     @Override
     public void parse(final Model model) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-
-        buffer.put(COLON_NULL);
+        socketBuffer.put(COLON_NULL);
     }
 
     @Override
     public void parse(final Model model, final String value) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-
-        buffer.put(COLON);
-        buffer.put(QUOTE);
-        buffer.put(UTF8StringToByteBuffer(value));
-        buffer.put(QUOTE);
+        socketBuffer.put(COLON);
+        socketBuffer.put(QUOTE);
+        socketBuffer.put(UTF8StringToByteBuffer(value));
+        socketBuffer.put(QUOTE);
     }
 
     @Override
     public void parse(final Model model, final JsonObjectBuilder builder) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
-        buffer.put(UTF8StringToByteBuffer(builder.build().toString()));
+        socketBuffer.put(COLON);
+        socketBuffer.put(UTF8StringToByteBuffer(builder.build().toString()));
     }
 
     @Override
     public void parse(final Model model, final boolean value) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
 
-        buffer.put(COLON);
+        socketBuffer.put(COLON);
         if (value) {
-            buffer.put(TRUE);
+            socketBuffer.put(TRUE);
         } else {
-            buffer.put(FALSE);
+            socketBuffer.put(FALSE);
         }
     }
 
     @Override
     public void parse(final Model model, final long value) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
 
-        buffer.put(COLON);
-        // buffer.putLong(value);//FIXME JS decoder
-        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
+        socketBuffer.put(COLON);
+        // socketBuffer.putLong(value);//FIXME JS decoder
+        socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
     public void parse(final Model model, final int value) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
-        // buffer.putInt(value);//FIXME JS decoder
-        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
+        socketBuffer.put(COLON);
+        // socketBuffer.putInt(value);//FIXME JS decoder
+        socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
     public void parse(final Model model, final double value) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
-        // buffer.putDouble(value);//FIXME JS decoder
-        buffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
+        socketBuffer.put(COLON);
+        // socketBuffer.putDouble(value);//FIXME JS decoder
+        socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
     @Override
     public void parse(final Model model, final Collection<String> collection) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
+        socketBuffer.put(COLON);
         beginArray();
 
         final Iterator<String> iterator = collection.iterator();
 
         while (iterator.hasNext()) {
             final String value = iterator.next();
-            buffer.put(QUOTE);
-            buffer.put(UTF8StringToByteBuffer(value));
-            buffer.put(QUOTE);
-            if (iterator.hasNext()) buffer.put(COMMA);
+            socketBuffer.put(QUOTE);
+            socketBuffer.put(UTF8StringToByteBuffer(value));
+            socketBuffer.put(QUOTE);
+            if (iterator.hasNext()) socketBuffer.put(COMMA);
         }
         endArray();
     }
 
     @Override
     public void parse(final Model model, final JsonObject jsonObject) {
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
-        buffer.put(COLON);
-        buffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
+        socketBuffer.put(COLON);
+        socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
     public void endOfParsing() {
         if (buffer == null) return;
 
-        if (buffer.position() != 0) {
-            buffer.put(BRACKET_RIGHT_COMMA);
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+        if (socketBuffer.position() != 0) {
+            socketBuffer.put(BRACKET_RIGHT_COMMA);
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            buffer.put(CURVE_RIGHT);
+            socketBuffer.put(CURVE_RIGHT);
         }
     }
 

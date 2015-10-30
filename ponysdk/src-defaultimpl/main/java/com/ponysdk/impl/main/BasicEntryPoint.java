@@ -54,11 +54,11 @@ public class BasicEntryPoint implements EntryPoint {
 
         // final PFlowPanel flowPanel = new PFlowPanel();
         //
-        final PGrid grid = new PGrid(200, 200);
+        final PGrid grid = new PGrid(100, 100);
         // PRootPanel.get().add(grid);
         //
         for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 20; j++) {
+            for (int j = 0; j < 10; j++) {
                 final PElement div = new PElement("input");
                 div.setAttribute("type", "text");
                 div.setAttribute("value", i + "-" + j);

@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.socket;
 
-import java.nio.ByteBuffer;
+import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 
 public interface WebSocket {
 
@@ -11,6 +11,6 @@ public interface WebSocket {
 
     void addConnectionListener(ConnectionListener listener);
 
-    ByteBuffer getByteBuffer();
+    Buffer getBuffer();
 
 }

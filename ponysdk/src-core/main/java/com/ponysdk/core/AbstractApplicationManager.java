@@ -100,7 +100,8 @@ public abstract class AbstractApplicationManager {
     }
 
     protected void fireInstructions(final JsonObject data, final TxnContext context) throws Exception {
-        final int key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).intValue();
+        // final int key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).intValue();
+        final int key = 1;
 
         final Application applicationSession = context.getApplication();
 
