@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.core.client.GWT;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
@@ -45,6 +46,7 @@ public class PTScript extends AbstractPTObject {
                 uiService.sendDataToServer(eventInstruction);
             }
         } catch (final Throwable e) {
+            GWT.log("PTScript exception for : " + scriptToEval, e);
             if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());

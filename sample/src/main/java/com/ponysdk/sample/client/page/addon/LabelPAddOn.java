@@ -36,4 +36,9 @@ public class LabelPAddOn extends PAddOn {
         super(widget);
     }
 
+    public void log(final String value) {
+        if (value != null) callBindedMethod("logWithText", value);
+        else callBindedMethod("log");
+    }
+
 }

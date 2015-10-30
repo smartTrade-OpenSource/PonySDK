@@ -6,7 +6,6 @@ var Widget = function(pony, params) {
 	this.widgetId = params.widgetID;
 	if(typeof params.widgetElement != 'undefined') {
 		this.element = params.widgetElement;
-		this.jqelement = $(this.element).attr("id", this.id);
 	}
 	this.options = {};
 	this.initializated = false;

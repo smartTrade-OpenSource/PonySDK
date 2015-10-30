@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -42,7 +42,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     /**
      * Creates an anchor with its text specified.
-     * 
+     *
      * @param text
      *            the anchor's text
      */
@@ -56,7 +56,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     /**
      * Creates an anchor with its text and href (target URL) specified.
-     * 
+     *
      * @param text
      *            the anchor's text
      * @param href
@@ -74,7 +74,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     /**
      * Gets the anchor's href (the url to which it links).
-     * 
+     *
      * @return the anchor's href
      */
     public String getHref() {
@@ -83,7 +83,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     /**
      * Sets the anchor's href (the url to which it links).
-     * 
+     *
      * @param href
      *            the anchor's href
      */
@@ -114,9 +114,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
-
         this.html = html;
-        saveUpdate(Model.HTML, this.html);
+        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }
 
 }

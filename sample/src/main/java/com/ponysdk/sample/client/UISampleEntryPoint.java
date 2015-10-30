@@ -54,11 +54,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PRootPanel.get().add(label);
 
         final LabelPAddOn addon = new LabelPAddOn();
+        addon.log(null);
         // PRootPanel.get().add(new LabelPAddOn());
 
         final PElement elt = new PElement("div");
         PRootPanel.get().add(elt);
         final LabelPAddOn addon2 = new LabelPAddOn(elt);
+        addon2.log("Coucou");
 
         // uiContext.getHistory().newItem("", false);
     }
