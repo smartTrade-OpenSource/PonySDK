@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -84,8 +85,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void setHTML(final String html) {
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(Model.HTML, html);
+        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }
 
     public Formatter getFormatter() {

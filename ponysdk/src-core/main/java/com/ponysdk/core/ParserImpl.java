@@ -131,14 +131,7 @@ public class ParserImpl implements Parser {
 
     private ByteBuffer UTF8StringToByteBuffer(final String value) {
         try {
-            final CharBuffer charBuffer = buffer.getCharBuffer();
-            charBuffer.clear();
-            final String escapeValue = value.replace("\"", "\\\"");
-            for (int i = 0; i < escapeValue.length(); i++) {
-                charBuffer.put(escapeValue.charAt(i));
-            }
-            charBuffer.flip();
-            return UTF8Encoder.encode(charBuffer);
+            return UTF8Encoder.encode(stringToByteBuffer(value));
         } catch (final CharacterCodingException e) {
             log.error("Cannot convert string");
         }
@@ -147,18 +140,23 @@ public class ParserImpl implements Parser {
 
     private ByteBuffer ASCIIStringToByteBuffer(final String value) {
         try {
-            final CharBuffer charBuffer = buffer.getCharBuffer();
-            charBuffer.clear();
-            final String escapeValue = value.replace("\"", "\\\"");
-            for (int i = 0; i < escapeValue.length(); i++) {
-                charBuffer.put(escapeValue.charAt(i));
-            }
-            charBuffer.flip();
-            return ASCIIEncoder.encode(charBuffer);
+            return ASCIIEncoder.encode(stringToByteBuffer(value));
         } catch (final CharacterCodingException e) {
             log.error("Cannot convert string");
         }
         return null;
+    }
+
+    private CharBuffer stringToByteBuffer(final String value) {
+        // final CharBuffer charBuffer = buffer.getCharBuffer();
+        // charBuffer.clear();
+        // // final String escapeValue = value.replace("\"", "\\\"");
+        // for (int i = 0; i < value.length(); i++) {
+        // charBuffer.put(value.charAt(i));
+        // }
+        // charBuffer.flip();
+        // return charBuffer;
+        return CharBuffer.wrap(value);
     }
 
     @Override

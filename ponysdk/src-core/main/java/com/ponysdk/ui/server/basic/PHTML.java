@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -37,7 +37,9 @@ import com.ponysdk.ui.terminal.model.Model;
  * as it disallows the use of HTML, which can lead to potential security issues if not used properly.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-HTML { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-HTML { }</li>
+ * </ul>
  */
 public class PHTML extends PLabel implements PHasHTML {
 
@@ -69,7 +71,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html);
+        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }
 
     public boolean isWordWrap() {

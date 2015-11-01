@@ -9,5 +9,7 @@ public class JavascriptAddOn extends JavaScriptObject {
 
     public final native void update(JavaScriptObject json) /*-{ this.update(json); }-*/;
 
+    public final native void onInit() /*-{ this.onInit(); }-*/;
+
     public final native void onAttach(boolean attached) /*-{ this.onAttach(attached); }-*/;
 }

@@ -34,7 +34,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final long serialVersionUID = 1L;
 
-    private static final int DEFAULT_BUFFER_SIZE = 51200;
+    private static final int DEFAULT_BUFFER_SIZE = 512000;
 
     public int maxIdleTime = 1000000;
 
@@ -57,7 +57,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         public Buffer() {
             socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-            charBuffer = CharBuffer.allocate(DEFAULT_BUFFER_SIZE);
+            // charBuffer = CharBuffer.allocate(DEFAULT_BUFFER_SIZE);
         }
 
     }

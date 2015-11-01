@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -233,8 +232,6 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         addNoScript(writer);
         writer.newLine();
-        addOnLoad(writer);
-        writer.newLine();
         addToBody(writer);
         writer.newLine();
         writer.append("</body>");
@@ -263,34 +260,6 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("</div>");
         writer.newLine();
         writer.append("</noscript>");
-    }
-
-    protected void addOnLoad(final BufferedWriter writer) throws IOException {
-        writer.append("<script type=\"text/javascript\">");
-        writer.newLine();
-        writer.append("var pony = null;");
-        writer.newLine();
-        writer.append("function onPonySDKModuleLoaded() {");
-        writer.newLine();
-        writer.append("pony = new ponysdk();");
-        writer.newLine();
-
-        final String communicationErrorFunction = application.getCommunicationErrorFunction();
-        if (communicationErrorFunction != null) {
-            writer.append("pony.registerCommunicationError(" + communicationErrorFunction + ");");
-            writer.newLine();
-        }
-
-        for (final Entry<String, String> e : addons.entrySet()) {
-            writer.append("pony.registerAddOnFactory(\"" + e.getKey() + "\", " + e.getValue() + ");");
-            writer.newLine();
-        }
-
-        writer.append("pony.start();");
-        writer.newLine();
-        writer.append("}");
-        writer.newLine();
-        writer.append("</script>");
     }
 
     protected void addToMeta(final BufferedWriter writer) throws IOException {}

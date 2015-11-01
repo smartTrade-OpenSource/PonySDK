@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,9 +23,17 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
@@ -36,43 +44,35 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * AddOn are used to bind server side object with javascript object
  */
-public class PAddOn extends PObject implements PNativeHandler {
+public abstract class PAddOn extends PObject implements PNativeHandler {
 
-    private final PWidget widget;
-    private final String factory;
-    private final JsonObject params;
+    private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
 
-    /**
-     * @param factory
-     *            a javascript function that will serve as a factory for this addon
-     * @param w
-     *            optional widget linked to this addon
-     * @param params
-     *            optional parameters that will be passed to the create javascript function
-     */
-    public PAddOn(final String factory, final PWidget w, final JsonObject params) {
-        this.widget = w;
-        this.factory = factory;
-        this.params = params;
+    private static final int LIMIT = 1000;
 
-        init();
+    protected boolean attached = false;
+    protected List<JsonObjectBuilder> pendingDataToSend = new ArrayList<>();
 
-        addNativeHandler(this);
+    private final PElement widget;
+
+    public PAddOn() {
+        this(null);
     }
 
-    public PAddOn(final PWidget w, final JsonObject params) {
-        this(PAddOn.class.getName(), w, params);
+    public PAddOn(final PElement widget) {
+        this.widget = widget;
+        init();
+        addNativeHandler(this);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        // parser.parse(Model.addOnSignature, getSignature());
         parser.comma();
-        parser.parse(Model.FACTORY, factory);
-        parser.comma();
-        parser.parse(Model.NATIVE, params);
-        parser.comma();
-        parser.parse(Model.WIDGET, widget != null ? widget.ID : null);
+        parser.parse(Model.FACTORY, getClass().getCanonicalName());
+        if (widget != null) {
+            parser.comma();
+            parser.parse(Model.WIDGET, widget.getID());
+        }
     }
 
     public void update(final JsonObjectBuilder builder) {
@@ -87,10 +87,18 @@ public class PAddOn extends PObject implements PNativeHandler {
     @Override
     public void onNativeEvent(final PNativeEvent event) {
         final JsonObject jsonObject = event.getJsonObject();
-        restate(jsonObject);
+        try {
+            if (jsonObject.containsKey("attached")) {
+                attached = jsonObject.getBoolean("attached");
+                if (attached) {
+                    sendPendingJSONData();
+                    onAttached();
+                } else log.debug("Object detached " + this);
+            }
+        } catch (final Exception e) {
+            log.error("Cannot read native event", e);
+        }
     }
-
-    protected void restate(final JsonObject jsonObject) {}
 
     public void update(final String key, final JsonObject object) {
         final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
@@ -98,7 +106,48 @@ public class PAddOn extends PObject implements PNativeHandler {
         update(objectBuilder);
     }
 
-    public PWidget getWidget() {
+    protected void onAttached() {}
+
+    protected void sendPendingJSONData() {
+        final Iterator<JsonObjectBuilder> iterator = pendingDataToSend.iterator();
+        while (iterator.hasNext()) {
+            final JsonObjectBuilder next = iterator.next();
+            update(next);
+            iterator.remove();
+        }
+    }
+
+    public void setJSLogLevel(final int logLevel) {
+        callBindedMethod("setLog", logLevel);
+    }
+
+    protected void callBindedMethod(final String methodName, final Object... args) {
+        JsonArrayBuilder arrayBuilder = null;
+        if (args.length > 0) {
+            arrayBuilder = Json.createArrayBuilder();
+            for (final Object object : args) {
+                arrayBuilder.add(String.valueOf(object));
+            }
+        }
+        callBindedMethod(methodName, arrayBuilder);
+    }
+
+    protected void callBindedMethod(final String methodName, final JsonArrayBuilder arrayBuilder) {
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
+        builder.add("method", methodName);
+
+        if (arrayBuilder != null) builder.add("args", arrayBuilder);
+
+        if (!attached) {
+            if (pendingDataToSend.size() < LIMIT) pendingDataToSend.add(builder);
+        } else {
+            update(builder);
+        }
+        update(builder);
+    }
+
+    public PElement asWidget() {
         return widget;
     }
+
 }

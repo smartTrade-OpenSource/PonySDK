@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.sample.client.page.addon.ReverseTextInput;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -114,7 +113,6 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
         panel.add(new PLabel("AddOn test (javascript reverse)"));
         final PTextBox boxToReverse = new PTextBox();
-        new ReverseTextInput(boxToReverse);
         final PTerminalScheduledCommand deffered = new PTerminalScheduledCommand() {
 
             @Override
