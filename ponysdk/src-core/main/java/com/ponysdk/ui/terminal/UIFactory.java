@@ -25,7 +25,6 @@ package com.ponysdk.ui.terminal;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
-import com.ponysdk.ui.terminal.addon.attachedpopuppanel.PTAttachedPopupPanel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
@@ -133,7 +132,6 @@ public class UIFactory {
         if (WidgetType.MENU_ITEM_SEPARATOR.ordinal() == widgetType) { return new PTMenuItemSeparator(); }
         if (WidgetType.POPUP_PANEL.ordinal() == widgetType) { return new PTPopupPanel(); }
         if (WidgetType.DECORATED_POPUP_PANEL.ordinal() == widgetType) { return new PTDecoratedPopupPanel(); }
-        if (WidgetType.ATTACHED_POPUP_PABEL.ordinal() == widgetType) { return new PTAttachedPopupPanel(); }
         if (WidgetType.SCHEDULER.ordinal() == widgetType) { return new PTScheduler(); }
         if (WidgetType.RICH_TEXT_AREA.ordinal() == widgetType) { return new PTRichTextArea(); }
         if (WidgetType.RICH_TEXT_TOOLBAR.ordinal() == widgetType) { return new PTRichTextToolbar(); }

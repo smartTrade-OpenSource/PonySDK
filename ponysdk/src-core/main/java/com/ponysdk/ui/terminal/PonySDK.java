@@ -92,7 +92,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             log.info("Starting PonySDK instance");
             final elemental.html.Window window = Browser.getWindow();
             final elemental.html.Window opener = window.getOpener();
-            final elemental.html.Storage localStorage = Browser.getWindow().getLocalStorage();
 
             if (opener == null) {
                 Integer viewID = null;
