@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -95,8 +95,6 @@ public class PImage extends PFocusWidget {
     }
 
     public PImage(final ClassPathURL classpathURL) {
-        init();
-
         String imageToBase64 = null;
 
         try (InputStream in = classpathURL.getUrl().openStream()) {
@@ -113,7 +111,9 @@ public class PImage extends PFocusWidget {
 
         final String extension = classpathURL.getUrl().getFile().substring(classpathURL.getUrl().getFile().lastIndexOf('.') + 1);
 
-        saveUpdate(Model.IMAGE_URL, "data:image/" + extension + ";base64," + imageToBase64);
+        this.url = "data:image/" + extension + ";base64," + imageToBase64;
+
+        init();
     }
 
     @Override
