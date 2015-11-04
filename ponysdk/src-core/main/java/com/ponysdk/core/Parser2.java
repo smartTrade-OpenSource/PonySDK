@@ -6,8 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Collection;
 
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +99,7 @@ public class Parser2 implements Parser {
     public void parseKey(final byte[] key) {}
 
     @Override
-    public void parse(final JsonObject jsonObject) {
+    public void parse(final JsonValue jsonObject) {
         try {
             writer.append(jsonObject.toString());
         } catch (final UnsupportedEncodingException e) {
@@ -255,7 +255,7 @@ public class Parser2 implements Parser {
     }
 
     @Override
-    public void parse(final Model model, final JsonObject jsonObject) {
+    public void parse(final Model model, final JsonValue jsonObject) {
         try {
             writer.append(model.getKey());
         } catch (final IOException e2) {
