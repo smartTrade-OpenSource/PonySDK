@@ -3,8 +3,8 @@ package com.ponysdk.core;
 
 import java.util.Collection;
 
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import com.ponysdk.ui.terminal.model.Model;
 
@@ -28,7 +28,7 @@ public interface Parser {
 
     void parseKey(byte[] key);
 
-    void parse(JsonObject jsonObject);
+    void parse(JsonValue jsonObject);
 
     void parse(Model model);
 
@@ -46,6 +46,6 @@ public interface Parser {
 
     void parse(Model model, Collection<String> collection);
 
-    void parse(Model model, JsonObject jsonObject);
+    void parse(Model model, JsonValue jsonObject);
 
 }

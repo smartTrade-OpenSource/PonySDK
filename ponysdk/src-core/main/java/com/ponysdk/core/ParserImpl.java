@@ -10,8 +10,8 @@ import java.nio.charset.CharsetEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,7 +156,7 @@ public class ParserImpl implements Parser {
         // }
         // charBuffer.flip();
         // return charBuffer;
-        return CharBuffer.wrap(value);
+        return value != null ? CharBuffer.wrap(value) : CharBuffer.wrap("");
     }
 
     @Override
@@ -237,7 +237,7 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parse(final JsonObject jsonObject) {
+    public void parse(final JsonValue jsonObject) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
@@ -328,7 +328,7 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parse(final Model model, final JsonObject jsonObject) {
+    public void parse(final Model model, final JsonValue jsonObject) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
         socketBuffer.put(COLON);
