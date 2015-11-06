@@ -7,6 +7,7 @@ ext {
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     warResources = "src-core/main/resources/war"
     confResources = "src-core/main/resources/conf"
+    scriptResources = "src-core/main/resources/script"
     javadocResources = "src-core/main/javadoc"
 }
 
@@ -143,6 +144,9 @@ jar {
     }
     into('conf') {
         from confResources
+    }
+    into('script') {
+        from scriptResources
     }
 
     manifest {

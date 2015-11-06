@@ -1,3 +1,4 @@
+/* global pony */
 "use strict";
 var Widget = function(pony, params) {
 	this.logLevel = 0;
@@ -18,8 +19,15 @@ Widget.prototype.onInit = function() {
     this.initializated = true;
 }
 
+Widget.prototype.init = function() {
+	throw "[" + this.name + "] abstract function Widget.init() MUST be implemented";
+}
+
+Widget.prototype.onInitDom = function() {
+}
+
 Widget.prototype.onAttach = function(attached) {
-	this.onInit();
+    this.onInitDom();
 	pony.sendDataToServer(this.id, { attached: attached });
 	if( attached === false ) this.onDetached();
 }
@@ -79,12 +87,9 @@ Widget.prototype.update = function( d ) {
 			this[methodName].call(this);
 		}
 	} catch (e) {
+		console.log(e.stack);
 		throw "[" + this.name + "] Exception (in '" + methodName + "'): " + e;
 	}
-}
-
-Widget.prototype.init = function() {
-	throw "[" + this.name + "] abstract function Widget.init() MUST be implemented";
 }
 
 Widget.new = function(javaClass, obj) {
