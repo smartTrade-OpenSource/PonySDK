@@ -61,7 +61,7 @@ public class PTAddOn extends AbstractPTObject {
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
             final Element element = cast.getElement();
-            params.put("widgetID", new JSONString("" + widgetID));
+            params.put("widgetID", new JSONString(String.valueOf(widgetID)));
             params.put("widgetElement", new JSONObject(element));
             cast.addAttachHandler(new AttachEvent.Handler() {
 
@@ -74,7 +74,6 @@ public class PTAddOn extends AbstractPTObject {
                     }
                 }
             });
-
         }
 
         addOn = factory.newAddOn(params.getJavaScriptObject());
