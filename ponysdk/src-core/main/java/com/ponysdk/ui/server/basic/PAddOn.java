@@ -31,6 +31,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,33 +122,34 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
         callBindedMethod("setLog", logLevel);
     }
 
-    protected void callBindedMethod(final String methodName, final Object... args) {
-        JsonArrayBuilder arrayBuilder = null;
-        if (args.length > 0) {
-            arrayBuilder = Json.createArrayBuilder();
-            for (final Object object : args) {
-                if (object instanceof JsonObjectBuilder) {
-                    arrayBuilder.add(((JsonObjectBuilder) object));
-                } else {
-                    arrayBuilder.add(String.valueOf(object));
-                }
-            }
-        }
-        callBindedMethod(methodName, arrayBuilder);
+    protected void callBindedMethod(final String methodName, final JsonObjectBuilder args) {
+        callBindedMethod(methodName, args.build());
     }
 
-    protected void callBindedMethod(final String methodName, final JsonArrayBuilder arrayBuilder) {
+    protected void callBindedMethod(final String methodName, final JsonArrayBuilder args) {
+        callBindedMethod(methodName, args.build());
+    }
+
+    protected void callBindedMethod(final String methodName, final Object... args) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add("method", methodName);
 
-        if (arrayBuilder != null) builder.add("args", arrayBuilder);
+        if (args.length > 0) {
+            final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            for (final Object object : args) {
+                if (object != null) {
+                    if (object instanceof JsonValue) arrayBuilder.add(((JsonValue) object));
+                    else arrayBuilder.add(object.toString());
+                }
+            }
+            builder.add("args", arrayBuilder);
+        }
 
         if (!attached) {
             if (pendingDataToSend.size() < LIMIT) pendingDataToSend.add(builder);
         } else {
             update(builder);
         }
-        update(builder);
     }
 
     public PElement asWidget() {
