@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -54,12 +54,9 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final boolean autoHide = create.getBoolean(Model.POPUP_AUTO_HIDE);
-
+        final boolean autoHide = create.containsKey(Model.POPUP_AUTO_HIDE) ? create.getBoolean(Model.POPUP_AUTO_HIDE) : false;
         init(create, uiService, createPopupPanel(autoHide));
-
         addCloseHandler(create, uiService);
-
     }
 
     protected PopupPanel createPopupPanel(final boolean autoHide) {

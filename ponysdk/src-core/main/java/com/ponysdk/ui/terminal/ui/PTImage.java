@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -36,12 +36,16 @@ public class PTImage extends PTWidget<Image> {
     public void create(final PTInstruction create, final UIService uiService) {
         if (create.containsKey(Model.IMAGE_URL)) {
             final String url = create.getString(Model.IMAGE_URL);
-            final int left = create.getInt(Model.IMAGE_LEFT);
-            final int top = create.getInt(Model.IMAGE_TOP);
-            final int width = create.getInt(Model.WIDGET_WIDTH);
-            final int height = create.getInt(Model.WIDGET_HEIGHT);
+            if (create.containsKey(Model.IMAGE_LEFT)) {
+                final int left = create.getInt(Model.IMAGE_LEFT);
+                final int top = create.getInt(Model.IMAGE_TOP);
+                final int width = create.getInt(Model.WIDGET_WIDTH);
+                final int height = create.getInt(Model.WIDGET_HEIGHT);
 
-            init(create, uiService, new Image(url, left, top, width, height));
+                init(create, uiService, new Image(url, left, top, width, height));
+            } else {
+                init(create, uiService, new Image(url));
+            }
         } else {
             init(create, uiService, new Image());
         }
