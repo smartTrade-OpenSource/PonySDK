@@ -73,6 +73,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public static PonySDK constructor() {
         if (INSTANCE == null) {
             INSTANCE = new PonySDK();
+            GWT.setUncaughtExceptionHandler(INSTANCE);
             log.info("Creating PonySDK instance");
         }
         return INSTANCE;
@@ -80,7 +81,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
     @Override
     public void handleEvent(final Event event) {
-        GWT.log("COUCOUCOUC");
         final StorageEvent storageEvent = (StorageEvent) event;
         // final Integer windowID = Integer.valueOf(storageEvent.getKey());
         uiBuilder.update(JSONParser.parseStrict(storageEvent.getNewValue()).isObject());
@@ -190,7 +190,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             final PTInstruction instruction = new PTInstruction();
             instruction.put(Model.ERROR_MSG, e.getMessage());
             uiBuilder.sendDataToServer(instruction);
-            log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         }
     }
 
@@ -209,11 +208,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     @Override
     public void message(final String message) {
         try {
-            GWT.log(message);
 
             final JSONObject data = JSONParser.parseStrict(message).isObject();
 
             if (data.containsKey(Model.HEARTBEAT.getKey())) {
+                GWT.log(message);
                 socketClient.getRequestBuilder().sendHeartbeat();
             } else {
                 uiBuilder.update(data);

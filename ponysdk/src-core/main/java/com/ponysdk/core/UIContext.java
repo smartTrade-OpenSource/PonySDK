@@ -212,6 +212,8 @@ public class UIContext {
             if (history != null) {
                 history.fireHistoryChanged(jsonObject.getString(Model.HISTORY_TOKEN.getKey()));
             }
+        } else if (jsonObject.containsKey(Model.ERROR_MSG.getKey())) {
+            log.error(jsonObject.getString(Model.ERROR_MSG.getKey()));
         } else {
             final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
 
