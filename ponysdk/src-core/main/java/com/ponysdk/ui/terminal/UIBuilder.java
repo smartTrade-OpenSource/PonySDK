@@ -694,7 +694,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             final JSONArray jsonArray = json.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
                 final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-                processInstruction(instruction);
+                try {
+                    processInstruction(instruction);
+                } catch (final Exception e) {
+                    GWT.log("Exception while executing the instruction " + instruction, e);
+                    throw e;
+                }
             }
         }
         instructions.clear();
