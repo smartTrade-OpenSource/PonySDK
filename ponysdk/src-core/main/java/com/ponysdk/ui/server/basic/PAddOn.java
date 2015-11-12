@@ -139,6 +139,9 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
             for (final Object object : args) {
                 if (object != null) {
                     if (object instanceof JsonValue) arrayBuilder.add(((JsonValue) object));
+                    else if (object instanceof Boolean) arrayBuilder.add(((Boolean) object));
+                    else if (object instanceof Integer) arrayBuilder.add(((Integer) object));
+                    else if (object instanceof Long) arrayBuilder.add(((Long) object));
                     else arrayBuilder.add(object.toString());
                 }
             }
