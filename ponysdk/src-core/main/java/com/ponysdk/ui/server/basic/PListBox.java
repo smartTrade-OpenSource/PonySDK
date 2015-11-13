@@ -46,7 +46,9 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-ListBox { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-ListBox { }</li>
+ * </ul>
  */
 public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
 
@@ -324,39 +326,26 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public String getSelectedItem() {
-        if (selectedIndex < 0) return null;
-        return items.get(selectedIndex).label;
+        return selectedIndex >= 0 ? items.get(selectedIndex).label : null;
     }
 
     public Object getSelectedValue() {
-        if (selectedIndex < 0) return null;
-        return items.get(selectedIndex).value;
+        return selectedIndex >= 0 ? items.get(selectedIndex).value : null;
     }
 
     @Override
     public void addChangeHandler(final PChangeHandler handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>();
-        } else {
-            handlers.add(handler);
-        }
+        if (handlers == null) handlers = new ArrayList<>();
+        handlers.add(handler);
     }
 
     public boolean removeChangeHandler(final PChangeHandler handler) {
-        if (handlers == null) {
-            return false;
-        } else {
-            return handlers.remove(handler);
-        }
+        return handlers != null ? handlers.remove(handler) : false;
     }
 
     @Override
     public Collection<PChangeHandler> getChangeHandlers() {
-        if (handlers == null) {
-            return Collections.emptyList();
-        } else {
-            return Collections.unmodifiableCollection(handlers);
-        }
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     public void setSelectedItem(final String item, final boolean selected) {
