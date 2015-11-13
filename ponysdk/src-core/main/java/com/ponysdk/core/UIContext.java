@@ -523,7 +523,7 @@ public class UIContext {
                 txn.rollback();
             }
         } finally {
-            begin();
+            end();
         }
     }
 
