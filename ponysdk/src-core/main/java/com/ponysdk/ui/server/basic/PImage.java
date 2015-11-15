@@ -66,13 +66,13 @@ public class PImage extends PFocusWidget {
 
     private String url;
 
-    private int left;
+    private int left = -1;
 
-    private int top;
+    private int top = -1;
 
-    private int imageWidth;
+    private int imageWidth = -1;;
 
-    private int imageHeight;
+    private int imageHeight = -1;;
 
     public PImage() {
         init();
@@ -118,16 +118,26 @@ public class PImage extends PFocusWidget {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        parser.comma();
-        parser.parse(Model.IMAGE_URL, url);
-        parser.comma();
-        parser.parse(Model.IMAGE_TOP, top);
-        parser.comma();
-        parser.parse(Model.IMAGE_LEFT, left);
-        parser.comma();
-        parser.parse(Model.WIDGET_HEIGHT, imageHeight);
-        parser.comma();
-        parser.parse(Model.WIDGET_WIDTH, imageWidth);
+        if (url != null) {
+            parser.comma();
+            parser.parse(Model.IMAGE_URL, url);
+        }
+        if (top != -1) {
+            parser.comma();
+            parser.parse(Model.IMAGE_TOP, top);
+        }
+        if (left != -1) {
+            parser.comma();
+            parser.parse(Model.IMAGE_LEFT, left);
+        }
+        if (imageHeight != -1) {
+            parser.comma();
+            parser.parse(Model.WIDGET_HEIGHT, imageHeight);
+        }
+        if (imageWidth != -1) {
+            parser.comma();
+            parser.parse(Model.WIDGET_WIDTH, imageWidth);
+        }
     }
 
     @Override
@@ -165,14 +175,6 @@ public class PImage extends PFocusWidget {
         public String toString() {
             return "ClassPathURL [url=" + url + "]";
         }
-    }
-
-    public int getLeft() {
-        return left;
-    }
-
-    public int getTop() {
-        return top;
     }
 
 }

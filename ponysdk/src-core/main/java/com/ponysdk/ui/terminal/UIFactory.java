@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.terminal;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
@@ -86,7 +85,6 @@ import com.ponysdk.ui.terminal.ui.PTWindow;
 public class UIFactory {
 
     public PTObject newUIObject(final UIService uiService, final PTInstruction create) {
-        GWT.log("Create : " + create);
         final int widgetType = create.getInt(Model.WIDGET_TYPE);
 
         if (WidgetType.ELEMENT.ordinal() == widgetType) { return new PTElement(); }

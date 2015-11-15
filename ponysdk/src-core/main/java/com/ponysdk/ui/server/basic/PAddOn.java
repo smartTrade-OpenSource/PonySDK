@@ -45,7 +45,7 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * AddOn are used to bind server side object with javascript object
  */
-public abstract class PAddOn extends PObject implements PNativeHandler {
+public abstract class PAddOn<T extends PObject> extends PObject implements PNativeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
 
@@ -54,13 +54,13 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
     protected boolean attached = false;
     protected List<JsonObjectBuilder> pendingDataToSend = new ArrayList<>();
 
-    private final PElement widget;
+    private final T widget;
 
     public PAddOn() {
         this(null);
     }
 
-    public PAddOn(final PElement widget) {
+    public PAddOn(final T widget) {
         this.widget = widget;
         init();
         addNativeHandler(this);
@@ -139,6 +139,9 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
             for (final Object object : args) {
                 if (object != null) {
                     if (object instanceof JsonValue) arrayBuilder.add(((JsonValue) object));
+                    else if (object instanceof Boolean) arrayBuilder.add(((Boolean) object));
+                    else if (object instanceof Integer) arrayBuilder.add(((Integer) object));
+                    else if (object instanceof Long) arrayBuilder.add(((Long) object));
                     else arrayBuilder.add(object.toString());
                 }
             }
@@ -152,7 +155,7 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
         }
     }
 
-    public PElement asWidget() {
+    public T asWidget() {
         return widget;
     }
 
