@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -47,7 +47,12 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
         final Widget w = asWidget(add.getObjectID(), uiService);
         final TabLayoutPanel tabPanel = uiObject;
 
-        final int beforeIndex = add.getInt(Model.BEFORE_INDEX);
+        final int beforeIndex;
+        if (add.containsKey(Model.BEFORE_INDEX)) {
+            beforeIndex = add.getInt(Model.BEFORE_INDEX);
+        } else {
+            beforeIndex = tabPanel.getWidgetCount();
+        }
 
         if (add.containsKey(Model.TAB_TEXT)) {
             tabPanel.insert(w, add.getString(Model.TAB_TEXT), beforeIndex);
