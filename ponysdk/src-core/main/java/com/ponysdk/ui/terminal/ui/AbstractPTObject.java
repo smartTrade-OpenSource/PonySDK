@@ -55,4 +55,9 @@ public class AbstractPTObject implements PTObject {
 
     @Override
     public void gc(final UIService uiService) {}
+
+    @Override
+    public PTWidget<?> isPTWidget() {
+        return null;
+    }
 }
