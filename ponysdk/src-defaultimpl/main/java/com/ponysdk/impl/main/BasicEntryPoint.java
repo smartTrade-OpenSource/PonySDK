@@ -30,7 +30,7 @@ import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PElement;
-import com.ponysdk.ui.server.basic.PGrid;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootPanel;
 
@@ -52,17 +52,17 @@ public class BasicEntryPoint implements EntryPoint {
 
         // final long start = System.currentTimeMillis();
 
-        // final PFlowPanel flowPanel = new PFlowPanel();
+        final PFlowPanel flowPanel = new PFlowPanel();
         //
-        final PGrid grid = new PGrid(100, 100);
+        // final PGrid grid = new PGrid(200, 200);
         // PRootPanel.get().add(grid);
         //
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
                 final PElement div = new PElement("input");
                 div.setAttribute("type", "text");
                 div.setAttribute("value", i + "-" + j);
-                grid.setWidget(j, i, div);
+                flowPanel.add(div);
             }
         }
 
@@ -86,7 +86,7 @@ public class BasicEntryPoint implements EntryPoint {
 
         //
 
-        PRootPanel.get().add(grid);
+        PRootPanel.get().add(flowPanel);
         // final PTextBox textBox = new PTextBox(k + " => Button");
         //
         // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {

@@ -43,4 +43,6 @@ public interface PTObject {
     public void gc(final UIService uiService);
 
     public int getObjectID();
+
+    public PTWidget<?> isPTWidget();
 }

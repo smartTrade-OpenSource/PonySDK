@@ -68,7 +68,12 @@ public abstract class PComplexPanel extends PPanel {
         children.insert(child, beforeIndex);
         adopt(child);
 
-        saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
+        if (beforeIndex == 0 || (children.size() - 1) == beforeIndex) {
+            saveAdd(child.getID(), ID);
+        } else {
+            saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
+        }
+
     }
 
     @Override

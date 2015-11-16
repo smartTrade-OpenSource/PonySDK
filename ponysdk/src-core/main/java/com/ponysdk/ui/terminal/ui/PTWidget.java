@@ -67,6 +67,7 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
@@ -74,7 +75,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
-public class PTWidget<W extends Widget> extends PTUIObject<W> {
+public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidget {
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
@@ -118,9 +119,19 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> {
     }
 
     @Override
+    public Widget asWidget() {
+        return uiObject;
+    }
+
+    @Override
+    public PTWidget<?> isPTWidget() {
+        return this;
+    }
+
+    @Override
     public Widget asWidget(final int objectID, final UIService uiService) {
-        final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(objectID);
-        if (ptWidget != null) return ptWidget.cast();
+        final PTWidget<?> ptWidget = uiService.getPTObject(objectID).isPTWidget();
+        if (ptWidget != null) return ptWidget.asWidget();
         else return null;
     }
 
