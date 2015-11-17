@@ -34,7 +34,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final long serialVersionUID = 1L;
 
-    private static final int DEFAULT_BUFFER_SIZE = 512000;
+    private static final int DEFAULT_BUFFER_SIZE = 5120000;
 
     public int maxIdleTime = 1000000;
 
@@ -141,6 +141,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
             final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
+            final long start = System.currentTimeMillis();
+
             if (socketBuffer.position() != 0) {
                 socketBuffer.flip();
                 final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
@@ -162,6 +164,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
+
+            final long end = System.currentTimeMillis();
+
+            System.err.println("time : " + (end - start));
         }
 
         @Override
@@ -239,7 +245,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 // }
                 // } else {
                 // if (buffer == null) {
-                buffer = buffers.poll(5, TimeUnit.SECONDS);
+                buffer = buffers.poll(10, TimeUnit.SECONDS);
                 System.err.println("Get buffer : " + buffer);
                 // }
                 // }

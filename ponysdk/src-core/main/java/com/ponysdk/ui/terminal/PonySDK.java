@@ -208,8 +208,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     @Override
     public void message(final String message) {
         try {
-
+            final long start = System.currentTimeMillis();
             final JSONObject data = JSONParser.parseStrict(message).isObject();
+            final long end = System.currentTimeMillis();
+
+            GWT.log("parsing time : " + (end - start));
 
             if (data.containsKey(Model.HEARTBEAT.getKey())) {
                 GWT.log(message);

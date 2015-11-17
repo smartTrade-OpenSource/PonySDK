@@ -16,15 +16,9 @@ public interface Parser {
 
     void endObject();
 
-    void beginArray();
-
-    void endArray();
-
-    void comma();
-
-    void quote();
-
     void parseAndFlushHeartBeat();
+
+    void parse(final byte value);
 
     void parseKey(byte[] key);
 

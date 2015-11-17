@@ -152,7 +152,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             super(null, name, features);
         }
 
-        @Override
         protected void onLoad() {
             rootLayoutPanel = PRootLayoutPanel.get();
 

@@ -23,7 +23,9 @@
 
 package com.ponysdk.impl.main;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.ponysdk.core.ApplicationManagerOption;
 import com.ponysdk.core.servlet.ApplicationLoader;
@@ -46,9 +48,13 @@ public class Main {
         }
 
         final String scripts = System.getProperty(ApplicationManagerOption.JAVASCRIPTS);
+        final List<String> scriptList = new ArrayList<>();
+        scriptList.add("script/widget.js");
+        scriptList.add("script/bootstrap.js");
         if (scripts != null && !scripts.isEmpty()) {
-            applicationManagerOption.setJavascript(Arrays.asList(scripts.trim().split(";")));
+            scriptList.addAll(Arrays.asList(scripts.trim().split(";")));
         }
+        applicationManagerOption.setJavascript(scriptList);
 
         final ApplicationLoader applicationLoader = new JavaApplicationLoader();
         applicationLoader.setApplicationManagerOption(applicationManagerOption);

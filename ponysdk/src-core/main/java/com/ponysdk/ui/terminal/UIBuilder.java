@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -197,8 +196,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void update(final JSONObject data) {
-        instructions.add(data);
-        AnimationScheduler.get().requestAnimationFrame(this);
+        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
+            try {
+                processInstruction(instruction);
+            } catch (final Exception e) {
+                GWT.log("Exception while executing the instruction " + instruction, e);
+                throw e;
+            }
+        }
+
+        // instructions.add(data);
+        // AnimationScheduler.get().requestAnimationFrame(this);
     }
 
     @Override
@@ -224,11 +234,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         else if (instruction.containsKey(Model.TYPE_HISTORY)) processHistory(instruction);
         else if (instruction.containsKey(Model.TYPE_CLOSE)) processClose(instruction);
         else if (instruction.containsKey(Model.TYPE_GC)) processGC(instruction);
-        else GWT.log("Unknown instruction type : " + instruction);
+        // else GWT.log("Unknown instruction type : " + instruction);
     }
 
     private void processCreate(final PTInstruction instruction) {
-        GWT.log("Create instruction : " + instruction);
+        // GWT.log("Create instruction : " + instruction);
 
         final PTObject ptObject;
         // TEMP
@@ -272,7 +282,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processAdd(final PTInstruction instruction) {
-        GWT.log("Add instruction : " + instruction);
+        // GWT.log("Add instruction : " + instruction);
 
         PTObject ptObject;
 
@@ -317,7 +327,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processUpdate(final PTInstruction instruction) {
-        GWT.log("Update instruction : " + instruction);
+        // GWT.log("Update instruction : " + instruction);
 
         PTObject ptObject;
         // if (instruction.containsKey(Model.WINDOW_ID)) {
@@ -348,7 +358,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processRemove(final PTInstruction instruction) {
-        GWT.log("Remove instruction : " + instruction);
+        // GWT.log("Remove instruction : " + instruction);
 
         PTObject ptObject;
 
@@ -360,7 +370,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processAddHandler(final PTInstruction instruction) {
-        GWT.log("Add handler instruction : " + instruction);
+        // GWT.log("Add handler instruction : " + instruction);
 
         PTObject ptObject;
         if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
@@ -373,7 +383,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processRemoveHandler(final PTInstruction instruction) {
-        GWT.log("Remove handler instruction : " + instruction);
+        // GWT.log("Remove handler instruction : " + instruction);
 
         final PTObject ptObject = objectByID.get(instruction.getObjectID());
         if (ptObject != null) ptObject.removeHandler(instruction, this);
@@ -381,7 +391,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processHistory(final PTInstruction instruction) {
-        GWT.log("History instruction : " + instruction);
+        // GWT.log("History instruction : " + instruction);
 
         final String oldToken = History.getToken();
 
@@ -398,7 +408,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processClose(final PTInstruction instruction) {
-        GWT.log("Close instruction : " + instruction);
+        // GWT.log("Close instruction : " + instruction);
 
         pendingClose = true;
         sendDataToServer(instruction);
@@ -415,7 +425,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processGC(final PTInstruction instruction) {
-        GWT.log("GC instruction : " + instruction);
+        // GWT.log("GC instruction : " + instruction);
 
         final PTObject ptObject = unRegisterObject(instruction.getObjectID());
         if (ptObject != null) ptObject.gc(this);
@@ -432,7 +442,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (instructions == null) {
             instructions = new ArrayList<>();
 
-            GWT.log("Stack Instruction : " + instruction);
+            // GWT.log("Stack Instruction : " + instruction);
 
             instructionsByObjectID.put(instruction.getObjectID(), instructions);
         }

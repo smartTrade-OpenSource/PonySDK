@@ -239,15 +239,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_STYLE_KEY, name);
-            parser.comma();
             parser.parse(Model.STYLE_VALUE, value);
             parser.endObject();
         }
@@ -259,13 +255,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.REMOVE_STYLE_KEY, name);
             parser.endObject();
         }
@@ -277,15 +270,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_PROPERTY_KEY, name);
-            parser.comma();
             parser.parse(Model.PROPERTY_VALUE, value);
             parser.endObject();
         }
@@ -297,15 +286,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_ATTRIBUTE_KEY, name);
-            parser.comma();
             parser.parse(Model.ATTRIBUTE_VALUE, value);
             parser.endObject();
         }
@@ -317,13 +302,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.REMOVE_ATTRIBUTE_KEY, name);
             parser.endObject();
         }
@@ -344,13 +326,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PREVENT_EVENT, e.getCode());
             parser.endObject();
         }
@@ -361,13 +340,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.STOP_EVENT, e.getCode());
             parser.endObject();
         }
@@ -378,13 +354,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.ADD_STYLE_NAME, styleName);
             parser.endObject();
         }
@@ -401,13 +374,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
         parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
         parser.parse(Model.OBJECT_ID, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.REMOVE_STYLE_NAME, styleName);
         parser.endObject();
     }
@@ -439,15 +409,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
         setHeight(Size.HUNDRED_PERCENT);
     }
 
-    // public <H extends EventHandler> HandlerRegistration removeDomHandler(final JsonObject handler, final
-    // PDomEvent.Type<H> type) {
-    // final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-    //
-    // saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE, handler);
-    //
-    // return handlerRegistration;
-    // }
-
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
         saveRemoveHandler(Model.HANDLER_DOM_HANDLER);
@@ -462,17 +423,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
             parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
             parser.parse(Model.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().ordinal());
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(handler.asJsonObject());
             parser.endObject();
         }
@@ -486,17 +442,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
             parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
             parser.parse(Model.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().ordinal());
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.KEY_FILTER, handler.asJsonObject());
             parser.endObject();
         }
@@ -510,14 +461,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
             parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
             parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
             parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
-            parser.comma();
             parser.parse(Model.OBJECT_ID, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.endObject();
