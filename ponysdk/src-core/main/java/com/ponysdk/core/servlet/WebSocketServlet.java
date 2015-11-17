@@ -211,7 +211,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                     context.getUIContext().notifyMessageReceived();
                     request.setText(text);
 
-                    System.err.println("Message received : " + text);
+                    if (log.isDebugEnabled()) log.debug("Message received : " + text);
 
                     applicationManager.process(context);
                 } catch (final Throwable e) {
@@ -240,7 +240,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 // } else {
                 // if (buffer == null) {
                 buffer = buffers.poll(5, TimeUnit.SECONDS);
-                System.err.println("Get buffer : " + buffer);
                 // }
                 // }
 

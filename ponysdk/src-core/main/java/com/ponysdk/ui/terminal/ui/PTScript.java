@@ -23,12 +23,16 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTScript extends AbstractPTObject {
+
+    private final static Logger log = Logger.getLogger(PTScript.class.getName());
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
@@ -46,7 +50,7 @@ public class PTScript extends AbstractPTObject {
                 uiService.sendDataToServer(eventInstruction);
             }
         } catch (final Throwable e) {
-            GWT.log("PTScript exception for : " + scriptToEval, e);
+            log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
             if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());

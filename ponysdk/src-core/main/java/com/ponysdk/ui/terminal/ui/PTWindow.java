@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,6 +25,8 @@ package com.ponysdk.ui.terminal.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
@@ -39,6 +41,8 @@ import elemental.events.MessageEvent;
 import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
+
+    private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
     private Window window;
     private String url;
@@ -55,7 +59,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public void create(final PTInstruction create, final UIService uiService) {
         objectID = create.getObjectID();
 
-        GWT.log("PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
 
         this.uiService = uiService;
 

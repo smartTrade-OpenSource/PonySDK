@@ -159,10 +159,14 @@ public abstract class PScript extends PObject {
 
             @Override
             protected void run() {
-                if (callback == null) {
-                    executeScript(windowID, js);
-                } else {
-                    executeScript(windowID, js, callback);
+                try {
+                    if (callback == null) {
+                        executeScript(windowID, js);
+                    } else {
+                        executeScript(windowID, js, callback);
+                    }
+                } catch (final Exception e) {
+                    e.printStackTrace();
                 }
             }
         };

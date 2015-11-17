@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -74,7 +74,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         if (INSTANCE == null) {
             INSTANCE = new PonySDK();
             GWT.setUncaughtExceptionHandler(INSTANCE);
-            log.info("Creating PonySDK instance");
+            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
         }
         return INSTANCE;
     }
@@ -89,7 +89,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     @Export
     public void start() {
         try {
-            log.info("Starting PonySDK instance");
+            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
             final elemental.html.Window window = Browser.getWindow();
             final elemental.html.Window opener = window.getOpener();
 
@@ -103,7 +103,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                     }
                 }
 
-                log.info("View ID : " + viewID);
+                if (log.isLoggable(Level.INFO)) log.info("View ID : " + viewID);
 
                 if (viewID != null) {
                     applicationViewID = viewID;
@@ -195,13 +195,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
     @Override
     public void connected() {
-        log.info("WebSoket connected");
+        if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
         uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
     }
 
     @Override
     public void disconnected() {
-        log.info("WebSoket disconnected");
+        if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
         uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
     }
 
@@ -212,14 +212,14 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             final JSONObject data = JSONParser.parseStrict(message).isObject();
 
             if (data.containsKey(Model.HEARTBEAT.getKey())) {
-                GWT.log(message);
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, message);
                 socketClient.getRequestBuilder().sendHeartbeat();
             } else {
                 uiBuilder.update(data);
             }
 
         } catch (final Exception e) {
-            GWT.log("Cannot parse " + message, e);
+            log.log(Level.SEVERE, "Cannot parse " + message, e);
         }
     }
 
