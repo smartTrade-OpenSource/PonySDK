@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
 import com.ponysdk.ui.terminal.Dictionnary.HANDLER;
 import com.ponysdk.ui.terminal.Dictionnary.HISTORY;
@@ -469,6 +471,7 @@ public class PonyDriver {
             @Override
             public void onOpen(final Connection connection) {
                 log.info("Wesocket connection succeeded");
+                scheduleHeartbeat();
             }
 
             @Override
@@ -489,6 +492,27 @@ public class PonyDriver {
                 }
             }
         }).get(1, TimeUnit.SECONDS);
+    }
+
+    protected void scheduleHeartbeat() {
+        new Thread() {
+
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        sleep(2000);
+                        final int timeStamp = (int) (new Date().getTime() * .001);
+                        final JSONObject jso = new JSONObject();
+                        jso.put(Dictionnary.APPLICATION.PING, timeStamp);
+                        jso.put(Dictionnary.APPLICATION.VIEW_ID, viewID);
+                        sendInstruction(jso);
+                    } catch (final Throwable throwable) {
+                        log.error("Cannot send ping : ", throwable);
+                    }
+                }
+            };
+        }.start();
     }
 
     private void stopSession() throws Exception {
