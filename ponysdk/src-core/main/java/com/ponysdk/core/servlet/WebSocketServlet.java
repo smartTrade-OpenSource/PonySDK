@@ -121,7 +121,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
             if (session == null || !session.isOpen()) {
                 log.info("Session is down");
-            } else {
+            } else if (buffer != null) {
                 // onBeforeSendMessage();
                 try {
                     flush(buffer);
@@ -132,13 +132,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 } finally {
                     // onAfterMessageSent();
                 }
+            } else {
+                System.err.println("Already flushed");
             }
 
         }
 
         private void flush(final Buffer buffer) {
-            if (buffer == null) { return; }
-
             final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
             if (socketBuffer.position() != 0) {

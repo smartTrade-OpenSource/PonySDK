@@ -108,7 +108,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private CommunicationErrorHandler communicationErrorHandler;
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
-    private final List<JSONObject> instructions = new ArrayList<>();
+    private final List<PTInstruction> instructions = new ArrayList<>();
 
     private final Map<Integer, List<PTInstruction>> instructionsByObjectID = new HashMap<>();
 
@@ -196,8 +196,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void update(final JSONObject data) {
-        instructions.add(data);
-        AnimationScheduler.get().requestAnimationFrame(this);
+        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
+            instructions.add(instruction);
+        }
+
+        if (jsonArray.size() > 0) AnimationScheduler.get().requestAnimationFrame(this);
     }
 
     @Override
@@ -687,16 +692,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void execute(final double timestamp) {
         if (instructions.isEmpty()) return;
 
-        for (final JSONObject json : instructions) {
-            final JSONArray jsonArray = json.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
-            for (int i = 0; i < jsonArray.size(); i++) {
-                final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-                try {
-                    processInstruction(instruction);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Exception while executing the instruction " + instruction, e);
-                    throw e;
-                }
+        for (final PTInstruction instruction : instructions) {
+            try {
+                processInstruction(instruction);
+            } catch (final Exception e) {
+                log.log(Level.SEVERE, "Exception while executing the instruction " + instruction, e);
+                throw e;
             }
         }
         instructions.clear();
