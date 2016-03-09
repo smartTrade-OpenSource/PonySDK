@@ -3,12 +3,14 @@ package com.ponysdk.ui.terminal.ui;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.timepedia.exporter.client.Export;
 
-import com.google.gwt.core.client.GWT;
-
 public class PTWindowManager {
+
+    private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
     private static PTWindowManager instance = new PTWindowManager();
 
@@ -21,7 +23,7 @@ public class PTWindowManager {
     }
 
     public void register(final PTWindow window) {
-        GWT.log("Register window : " + window.getObjectID());
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Register window : " + window.getObjectID());
 
         windowById.put(window.getObjectID(), window);
     }

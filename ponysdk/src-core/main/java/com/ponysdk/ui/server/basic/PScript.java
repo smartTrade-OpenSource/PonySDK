@@ -155,13 +155,22 @@ public abstract class PScript extends PObject {
     }
 
     public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
-        new PTerminalScheduledCommand(js, unit.toMillis(delay)) {
+        final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
 
             @Override
             protected void run() {
-                // Nothing to do
+                try {
+                    if (callback == null) {
+                        executeScript(windowID, js);
+                    } else {
+                        executeScript(windowID, js, callback);
+                    }
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
+        command.schedule(unit.toMillis(delay));
     }
 
     public void executeScriptDeffered(final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
