@@ -23,6 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,11 +73,30 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     @Override
     protected void enrichOnInit(final Parser parser) {
         parser.comma();
-        parser.parse(Model.FACTORY, getClass().getCanonicalName());
+        parser.parse(Model.FACTORY, getModuleName(getClass()));
         if (widget != null) {
             parser.comma();
             parser.parse(Model.WIDGET, widget.getID());
         }
+    }
+
+    private static final String getModuleName(final Class<?> clazz) {
+        Class<?> obj = clazz;
+
+        while (!obj.isAnnotationPresent(Javascript.class)) {
+            obj = obj.getSuperclass();
+            if (obj == null) { throw new IllegalArgumentException("Annotation not found"); }
+        }
+
+        final Javascript jsAnnotation = obj.getAnnotation(Javascript.class);
+        String moduleName = jsAnnotation.value();
+
+        // if no name, take the className, because new pattern es6 classes friendly:
+        // java class name == es6 class name == XXXXAddon
+        if (moduleName.isEmpty()) {
+            moduleName = obj.getCanonicalName();
+        }
+        return moduleName;
     }
 
     public void update(final JsonObjectBuilder builder) {
@@ -157,6 +180,14 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     public T asWidget() {
         return widget;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Javascript {
+
+        public String value() default "";
+
     }
 
 }
