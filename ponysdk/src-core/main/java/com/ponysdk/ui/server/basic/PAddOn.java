@@ -80,12 +80,12 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
         }
     }
 
-    private static final String getModuleName(final Class<?> clazz) {
+    public static final String getModuleName(final Class<?> clazz) {
         Class<?> obj = clazz;
 
         while (!obj.isAnnotationPresent(Javascript.class)) {
             obj = obj.getSuperclass();
-            if (obj == null) { throw new IllegalArgumentException("Annotation not found"); }
+            if (obj == null) throw new IllegalArgumentException("Annotation not found for " + clazz.getCanonicalName());
         }
 
         final Javascript jsAnnotation = obj.getAnnotation(Javascript.class);
@@ -93,9 +93,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
         // if no name, take the className, because new pattern es6 classes friendly:
         // java class name == es6 class name == XXXXAddon
-        if (moduleName.isEmpty()) {
-            moduleName = obj.getCanonicalName();
-        }
+        if (moduleName.isEmpty()) moduleName = obj.getCanonicalName();
+
         return moduleName;
     }
 

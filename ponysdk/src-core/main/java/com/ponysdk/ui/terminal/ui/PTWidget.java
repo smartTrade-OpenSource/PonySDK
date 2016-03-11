@@ -130,9 +130,14 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
     @Override
     public Widget asWidget(final int objectID, final UIService uiService) {
-        final PTWidget<?> ptWidget = uiService.getPTObject(objectID).isPTWidget();
-        if (ptWidget != null) return ptWidget.asWidget();
-        else return null;
+        final PTObject ptObject = uiService.getPTObject(objectID);
+        if (ptObject != null) {
+            final PTWidget<?> ptWidget = ptObject.isPTWidget();
+            if (ptWidget != null) return ptWidget.asWidget();
+        } else {
+            log.severe("No widget found for object #" + objectID);
+        }
+        return null;
     }
 
     protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
