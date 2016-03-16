@@ -36,18 +36,18 @@ public class PTScript extends AbstractPTObject {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
         final String scriptToEval = update.getString(Model.EVAL);
         try {
-            final Object result = eval(scriptToEval);
-
             if (update.containsKey(Model.CALLBACK)) {
+                final Object result = evalWithCallback(scriptToEval);
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
                 // eventInstruction.put(Model.TYPE_EVENT);
                 eventInstruction.put(Model.ID, update.getLong(Model.ID));
                 eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
+            } else {
+                eval(scriptToEval);
             }
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
@@ -62,9 +62,14 @@ public class PTScript extends AbstractPTObject {
         }
     }
 
-    public static native Object eval(String script) /*-{
-                                                     var r = $wnd.eval(script);
-                                                     if (typeof r=="object") return JSON.stringify(r);
-                                                     else return r;
+    public static native void eval(String script) /*-{
+                                                     $wnd.eval(script);
                                                      }-*/;
+
+    public static native Object evalWithCallback(String script) /*-{
+                                                                var r = $wnd.eval(script);
+                                                                if (typeof r=="object") return JSON.stringify(r);
+                                                                else return r;
+                                                                }-*/;
+
 }
