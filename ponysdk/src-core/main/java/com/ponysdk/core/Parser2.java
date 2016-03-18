@@ -96,7 +96,8 @@ public class Parser2 implements Parser {
     }
 
     @Override
-    public void parseKey(final byte[] key) {}
+    public void parseKey(final byte[] key) {
+    }
 
     @Override
     public void parse(final JsonValue jsonObject) {
@@ -280,14 +281,6 @@ public class Parser2 implements Parser {
 
     @Override
     public void reset() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void parseAndFlushHeartBeat() {
-        // TODO Auto-generated method stub
-
     }
 
 }

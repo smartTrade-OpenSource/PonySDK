@@ -40,18 +40,17 @@ public class ParserImpl implements Parser {
     private static byte[] FALSE;
     private static byte[] NULL;
 
-    private static byte[] HEARTBEAT;
-
     static {
         try {
             TRUE = "true".getBytes("UTF8"); // FIXME JS decoder
             FALSE = "false".getBytes("UTF8");
             NULL = "null".getBytes("UTF8");
         } catch (final UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
+
+    public static byte[] HEARTBEAT;
 
     static {
 
@@ -126,6 +125,7 @@ public class ParserImpl implements Parser {
 
     @Override
     public void reset() {
+        socket.flush(buffer);
         buffer = null;
     }
 
@@ -160,21 +160,6 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parseAndFlushHeartBeat() {
-        // endOfParsing();
-        // socket.flush();
-        // reset();
-        buffer = socket.getBuffer();
-
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-
-        socketBuffer.put(HEARTBEAT);
-        buffer = null; // avoid end of parsing call
-        // socket.flush();
-        // reset();
-    }
-
-    @Override
     public void beginObject() {
         if (buffer == null) {
             buffer = socket.getBuffer();
@@ -197,8 +182,7 @@ public class ParserImpl implements Parser {
             socketBuffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
             parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
             socketBuffer.put(CURVE_RIGHT);
-            socket.flush();
-            buffer = null;
+            reset();
         } else {
             socketBuffer.put(CURVE_RIGHT);
         }
@@ -335,15 +319,19 @@ public class ParserImpl implements Parser {
         socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
-    public void endOfParsing() {
-        if (buffer == null) return;
+    public boolean endOfParsing() {
+        if (buffer != null) {
+            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+            if (socketBuffer.position() != 0) {
+                socketBuffer.put(BRACKET_RIGHT_COMMA);
+                parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
+                socketBuffer.put(CURVE_RIGHT);
+            }
 
-        if (socketBuffer.position() != 0) {
-            socketBuffer.put(BRACKET_RIGHT_COMMA);
-            parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            socketBuffer.put(CURVE_RIGHT);
+            return true;
+        } else {
+            return false;
         }
     }
 

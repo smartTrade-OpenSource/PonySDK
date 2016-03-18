@@ -5,12 +5,12 @@ import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 
 public interface WebSocket {
 
-    void close();
-
-    void flush();
+    void flush(final Buffer buffer);
 
     void addConnectionListener(ConnectionListener listener);
 
     Buffer getBuffer();
+
+    void sendHeartBeat();
 
 }

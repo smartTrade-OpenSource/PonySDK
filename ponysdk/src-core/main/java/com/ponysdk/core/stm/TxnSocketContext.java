@@ -37,7 +37,8 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     private UIContext uiContext;
 
-    public TxnSocketContext() {}
+    public TxnSocketContext() {
+    }
 
     public void setSocket(final WebSocket socket) {
         this.socket = socket;
@@ -46,9 +47,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void flush() {
-        parser.endOfParsing();
-        socket.flush();
-        parser.reset();
+        if (parser.endOfParsing()) parser.reset();
     }
 
     public void flushNow() {
@@ -66,10 +65,12 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public void beforeRollback() {}
+    public void beforeRollback() {
+    }
 
     @Override
-    public void afterFlush(final TxnContext txnContext) {}
+    public void afterFlush(final TxnContext txnContext) {
+    }
 
     @Override
     public ParserImpl getParser() {
@@ -82,7 +83,8 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public void setResponse(final Response response) {}
+    public void setResponse(final Response response) {
+    }
 
     @Override
     public JsonReader getReader() {
@@ -152,7 +154,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void sendHeartBeat() {
-        parser.parseAndFlushHeartBeat();
+        socket.sendHeartBeat();
     }
 
 }

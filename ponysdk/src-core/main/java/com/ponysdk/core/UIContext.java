@@ -250,7 +250,7 @@ public class UIContext {
     }
 
     public void end() {
-        getContext().flush();
+        // getContext().flush();
         UIContext.remove();
         lock.unlock();
     }
@@ -513,14 +513,14 @@ public class UIContext {
     public void sendHeartBeat() {
         begin();
         try {
-            final Txn txn = Txn.get();
-            txn.begin(context);
+            // final Txn txn = Txn.get();
+            // txn.begin(context);
             try {
                 context.sendHeartBeat();
-                txn.commit();
+                // txn.commit();
             } catch (final Throwable e) {
-                log.error("Cannot process client instruction", e);
-                txn.rollback();
+                log.error("Cannot send server heartbeat to client", e);
+                // txn.rollback();
             }
         } finally {
             end();

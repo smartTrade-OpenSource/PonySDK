@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.servlet;
 
@@ -17,12 +39,12 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.core.ParserImpl;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
@@ -66,7 +88,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void init() throws ServletException {
         super.init();
 
-        applicationManager = (AbstractApplicationManager) getServletContext().getAttribute(AbstractApplicationManager.class.getCanonicalName());
+        applicationManager = (AbstractApplicationManager) getServletContext()
+                .getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
         log.info("Initializing Buffer allocation ...");
 
@@ -80,15 +103,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     @Override
     public void configure(final WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.setCreator(new MySessionSocketCreator());
-    }
-
-    public class MySessionSocketCreator implements WebSocketCreator {
-
-        @Override
-        public Object createWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
-            return new JettyWebSocket(req, resp);
-        }
+        factory.setCreator((final ServletUpgradeRequest req, final ServletUpgradeResponse resp) -> new JettyWebSocket(req, resp));
     }
 
     public class JettyWebSocket implements WebSocketListener, com.ponysdk.core.socket.WebSocket {
@@ -101,77 +116,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private final SocketRequest request;
 
-        private Buffer buffer;
-
         public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
-            System.err.println(req.getHeader("User-Agent"));
-
-            System.err.println(UserAgent.parseUserAgentString(req.getHeader("User-Agent")));
+            System.err.println(req.getHeader("User-Agent") + " : " + UserAgent.parseUserAgentString(req.getHeader("User-Agent")));
             request = new SocketRequest(req);
-        }
-
-        @Override
-        public void close() {}
-
-        @Override
-        public void flush() {
-            final UIContext uiContext = context.getUIContext();
-
-            if (uiContext.isDestroyed()) { throw new IllegalStateException("UI Context has been destroyed"); }
-
-            if (session == null || !session.isOpen()) {
-                log.info("Session is down");
-            } else if (buffer != null) {
-                // onBeforeSendMessage();
-                try {
-                    flush(buffer);
-
-                    buffer = null;
-                } catch (final Throwable t) {
-                    log.error("Cannot flush to WebSocket", t);
-                } finally {
-                    // onAfterMessageSent();
-                }
-            } else {
-                System.err.println("Already flushed");
-            }
-
-        }
-
-        private void flush(final Buffer buffer) {
-            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-
-            if (socketBuffer.position() != 0) {
-                socketBuffer.flip();
-                final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
-                try {
-                    sendBytesByFuture.get(25, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    if (e instanceof EOFException) {
-                        log.info("Remote Connection is closed");
-                    } else {
-                        log.error("Cannot stream data");
-                    }
-
-                }
-                socketBuffer.clear();
-            }
-
-            try {
-                buffers.put(buffer);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
         public void addConnectionListener(final ConnectionListener listener) {
             this.listener = listener;
-        }
-
-        @Override
-        public void onWebSocketClose(final int arg0, final String arg1) {
-            if (listener != null) listener.onClose();
         }
 
         @Override
@@ -199,56 +151,105 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
 
         @Override
-        public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {}
+        public void onWebSocketClose(final int arg0, final String arg1) {
+            if (listener != null) listener.onClose();
+        }
 
+        /**
+         * Receive from the terminal
+         */
         @Override
         public void onWebSocketText(final String text) {
             if (context.getUIContext().isDestroyed()) {
                 log.info("Message dropped, ui context is destroyed");
             } else {
-                onBeforeMessageReceived(text);
+                //onBeforeMessageReceived(text);
                 try {
                     context.getUIContext().notifyMessageReceived();
                     request.setText(text);
 
-                    if (log.isDebugEnabled()) log.debug("Message received : " + text);
+                    if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
 
                     applicationManager.process(context);
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {
-                    onAfterMessageProcessed(text);
+                    //onAfterMessageProcessed(text);
                 }
             }
         }
 
-        protected void onBeforeSendMessage(final String msg) {}
-
-        protected void onAfterMessageSent(final String msg) {}
-
-        protected void onBeforeMessageReceived(final String text) {}
-
-        protected void onAfterMessageProcessed(final String text) {}
+        @Override
+        public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {
+        }
 
         @Override
         public Buffer getBuffer() {
             try {
-                // if (session == null) {
-                // if (buffer == null) {
-                // buffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-                // }
-                // } else {
-                // if (buffer == null) {
-                buffer = buffers.poll(5, TimeUnit.SECONDS);
-                // }
-                // }
-
+                return buffers.poll(5, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 log.error("Cannot poll buffer", e);
+                return null;
             }
-            return buffer;
         }
 
+        /**
+         * Send to the terminal
+         */
+        @Override
+        public void flush(final Buffer buffer) {
+            final UIContext uiContext = context.getUIContext();
+
+            if (uiContext.isDestroyed()) {
+                throw new IllegalStateException("UI Context has been destroyed");
+            }
+
+            if (session == null || !session.isOpen()) {
+                log.info("Session is down");
+            } else if (buffer != null) {
+                // onBeforeSendMessage();
+                try {
+                    final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+
+                    flush(socketBuffer);
+                    socketBuffer.clear();
+
+                    buffers.put(buffer);
+                } catch (final Throwable t) {
+                    log.error("Cannot flush to WebSocket", t);
+                } finally {
+                    // onAfterMessageSent();
+                }
+            } else {
+                System.err.println("Already flushed");
+            }
+        }
+
+        public void flush(final ByteBuffer socketBuffer) {
+            if (socketBuffer.position() != 0) {
+                socketBuffer.flip();
+                final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
+                try {
+                    sendBytesByFuture.get(25, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    if (e instanceof EOFException) {
+                        log.info("Remote Connection is closed");
+                    } else {
+                        log.error("Cannot stream data");
+                    }
+                }
+            }
+        }
+
+        /**
+         * Send heart beat to the terminal
+         */
+        @Override
+        public void sendHeartBeat() {
+            final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(11);
+            socketBuffer.put(ParserImpl.HEARTBEAT);
+            flush(socketBuffer);
+        }
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
