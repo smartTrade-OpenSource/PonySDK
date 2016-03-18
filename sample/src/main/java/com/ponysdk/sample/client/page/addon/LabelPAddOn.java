@@ -24,9 +24,11 @@
 package com.ponysdk.sample.client.page.addon;
 
 import com.ponysdk.ui.server.basic.PAddOn;
+import com.ponysdk.ui.server.basic.PAddOn.Javascript;
 import com.ponysdk.ui.server.basic.PElement;
 
-public class LabelPAddOn extends PAddOn {
+@Javascript
+public class LabelPAddOn extends PAddOn<PElement> {
 
     public LabelPAddOn() {
         super();
