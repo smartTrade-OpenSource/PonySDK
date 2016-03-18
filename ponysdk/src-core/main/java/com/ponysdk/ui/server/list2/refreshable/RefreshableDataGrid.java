@@ -220,7 +220,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     public D getData(final K key) {
         final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
-        if (map == null) return null;
+        if (map == null || map.isEmpty()) return null;
         return map.entrySet().iterator().next().getValue().getData();
     }
 
