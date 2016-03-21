@@ -111,13 +111,7 @@ public abstract class AbstractApplicationManager {
 
         if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
 
-        uiContext.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                process(uiContext, data);
-            }
-        });
+        uiContext.execute(() -> process(uiContext, data));
     }
 
     private void printClientErrorMessage(final JsonObject data) {
