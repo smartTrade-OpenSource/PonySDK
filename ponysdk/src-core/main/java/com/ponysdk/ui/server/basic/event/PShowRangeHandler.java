@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.EventHandler;
 
+@FunctionalInterface
 public interface PShowRangeHandler<T> extends EventHandler {
 
     void onShowRange(PShowRangeEvent<T> event);

@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic.event;
 
 import com.ponysdk.core.event.EventHandler;
 
+@FunctionalInterface
 public interface PContextMenuHandler extends EventHandler {
 
     void onContextMenu(PContextMenuEvent event);

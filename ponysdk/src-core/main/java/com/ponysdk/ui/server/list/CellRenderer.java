@@ -21,19 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list.valueprovider;
+package com.ponysdk.ui.server.list;
 
-public class BooleanValueProvider<D> implements ValueProvider<D, Boolean> {
+import com.ponysdk.ui.server.basic.IsPWidget;
 
-    private final boolean value;
+public interface CellRenderer<V, W extends IsPWidget> {
 
-    public BooleanValueProvider(final boolean value) {
-        this.value = value;
-    }
+    public W render(V value);
 
-    @Override
-    public Boolean getValue(final D data) {
-        return value;
-    }
+    public void update(final V value, Cell<V, W> previous);
 
 }

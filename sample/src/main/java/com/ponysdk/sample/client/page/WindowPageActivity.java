@@ -28,12 +28,10 @@ import java.util.List;
 
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
-import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWindow;
@@ -145,58 +143,58 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
     private static class MyWindow extends PWindow {
 
-        private int count = 1;
+        private final int count = 1;
         private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
             super(null, name, features);
         }
 
-        @Override
-        protected void onLoad() {
-            rootLayoutPanel = PRootLayoutPanel.get();
-
-            final PFlowPanel flow = new PFlowPanel();
-            final PButton addMessage = new PButton("Add message");
-            addMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    flow.add(new PLabel("Hello " + (count++)));
-                }
-            });
-            final PButton clearMessage = new PButton("Clear message");
-            clearMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
-                        flow.remove(i);
-                    }
-                }
-            });
-            final PButton postMessage = new PButton("Post message");
-            postMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    MyWindow.this.postOpenerCommand(new SayHelloCommand());
-                }
-            });
-            final PButton execJs = new PButton("Exec javascript");
-            execJs.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    PScript.execute("alert('from the popup');");
-                }
-            });
-            flow.add(addMessage);
-            flow.add(clearMessage);
-            flow.add(postMessage);
-            flow.add(execJs);
-            rootLayoutPanel.add(flow);
-        }
+        // @Override
+        // protected void onLoad() {
+        // rootLayoutPanel = PRootLayoutPanel.get();
+        //
+        // final PFlowPanel flow = new PFlowPanel();
+        // final PButton addMessage = new PButton("Add message");
+        // addMessage.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent event) {
+        // flow.add(new PLabel("Hello " + (count++)));
+        // }
+        // });
+        // final PButton clearMessage = new PButton("Clear message");
+        // clearMessage.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent event) {
+        // for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
+        // flow.remove(i);
+        // }
+        // }
+        // });
+        // final PButton postMessage = new PButton("Post message");
+        // postMessage.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent event) {
+        // MyWindow.this.postOpenerCommand(new SayHelloCommand());
+        // }
+        // });
+        // final PButton execJs = new PButton("Exec javascript");
+        // execJs.addClickHandler(new PClickHandler() {
+        //
+        // @Override
+        // public void onClick(final PClickEvent event) {
+        // PScript.execute("alert('from the popup');");
+        // }
+        // });
+        // flow.add(addMessage);
+        // flow.add(clearMessage);
+        // flow.add(postMessage);
+        // flow.add(execJs);
+        // rootLayoutPanel.add(flow);
+        // }
 
         private class SayHelloCommand implements Runnable {
 

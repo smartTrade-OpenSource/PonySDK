@@ -24,7 +24,6 @@
 package com.ponysdk.ui.server.rich;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
@@ -65,14 +64,12 @@ public class PConfirmDialog extends PDialogBox {
 
     public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = new PConfirmDialog();
-        confirmDialog.setStyleName(PonySDKTheme.DIALOGBOX);
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
         final PVerticalPanel dialogContent = new PVerticalPanel();
         dialogContent.setWidth("100%");
         dialogContent.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
         controlsPanel.setWidth("100%");
 

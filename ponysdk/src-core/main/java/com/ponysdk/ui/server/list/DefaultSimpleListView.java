@@ -23,16 +23,10 @@
 
 package com.ponysdk.ui.server.list;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PFlexTable;
 
 public class DefaultSimpleListView extends PFlexTable implements SimpleListView {
-
-    public DefaultSimpleListView() {
-        super();
-        addStyleName(PonySDKTheme.SIMPLELIST);
-    }
 
     @Override
     public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
@@ -55,12 +49,12 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void selectRow(final int row) {
-        getRowFormatter().addStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        // getRowFormatter().addStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override
     public void unSelectRow(final int row) {
-        getRowFormatter().removeStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        // getRowFormatter().removeStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
     }
 
     @Override

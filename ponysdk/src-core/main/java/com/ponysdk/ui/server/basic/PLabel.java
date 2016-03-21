@@ -54,7 +54,9 @@ import com.ponysdk.ui.terminal.model.Model;
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;
  * element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-Label { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-Label { }</li>
+ * </ul>
  */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 

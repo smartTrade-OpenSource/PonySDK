@@ -34,8 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
-import com.ponysdk.core.stm.TxnContextHttp;
-import com.ponysdk.ui.terminal.exception.ServerException;
 
 /**
  * The server side implementation of the RPC service.
@@ -66,26 +64,26 @@ public class PonySDKHttpServlet extends HttpServlet {
     protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json; charset=utf-8");
 
-        final Session session = SessionManager.get().getSession(req.getSession().getId());
-        try {
-            TxnContextHttp context = session.getHttpContext();
-            if (context == null) {
-                context = new TxnContextHttp();
-                session.setHttpContext(context);
-            }
+        // final Session session = SessionManager.get().getSession(req.getSession().getId());
+        // try {
+        // TxnContextHttp context = session.getHttpContext();
+        // if (context == null) {
+        // context = new TxnContextHttp();
+        // session.setHttpContext(context);
+        // }
+        //
+        // context.setRequest(new HttpRequest(session, req));
+        // context.setResponse(new HttpResponse(resp));
+        //
+        // applicationManager.process(context);
 
-            context.setRequest(new HttpRequest(session, req));
-            context.setResponse(new HttpResponse(resp));
-
-            applicationManager.process(context);
-
-        } catch (final ServerException e) {
-            log.error("Failed to process request", e);
-            resp.sendError(e.getCode(), e.getMessage());
-        } catch (final Throwable e) {
-            log.error("Failed to process request", e);
-            resp.sendError(501, e.getMessage());
-        }
+        // } catch (final ServerException e) {
+        // log.error("Failed to process request", e);
+        // resp.sendError(e.getCode(), e.getMessage());
+        // } catch (final Throwable e) {
+        // log.error("Failed to process request", e);
+        // resp.sendError(501, e.getMessage());
+        // }
     }
 
 }

@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.list;
 
 import com.ponysdk.core.query.SortingType;
 
+@FunctionalInterface
 public interface Sortable {
 
     void sort(SortingType sortingType);

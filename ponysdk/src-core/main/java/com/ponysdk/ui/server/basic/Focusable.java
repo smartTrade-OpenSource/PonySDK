@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+@FunctionalInterface
 public interface Focusable {
 
     void setFocus(boolean focused);

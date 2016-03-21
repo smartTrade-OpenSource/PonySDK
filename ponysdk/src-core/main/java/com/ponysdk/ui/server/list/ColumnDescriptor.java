@@ -21,29 +21,39 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.list.renderer.cell;
+package com.ponysdk.ui.server.list;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
 
-public class DateCellRenderer extends AbstractCellRenderer<Date> {
+/**
+ * Defines a {@link DataGrid} column
+ * 
+ * @param <D>
+ */
+public class ColumnDescriptor<D, W extends IsPWidget> {
 
-    private final DateFormat dateFormat;
+    protected HeaderCellRenderer headerCellRenderer;
+    protected CellRenderer<D, W> cellRenderer;
 
-    public DateCellRenderer(final DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
+    public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
+        this.headerCellRenderer = headerCellRender;
     }
 
-    public DateCellRenderer(final String format) {
-        this.dateFormat = new SimpleDateFormat(format);
+    public HeaderCellRenderer getHeaderCellRenderer() {
+        return headerCellRenderer;
     }
 
-    @Override
-    public IsPWidget render0(final int rowCount, final Date value) {
-        return new PLabel(dateFormat.format(value));
+    public void setCellRenderer(final CellRenderer<D, W> cellRenderer) {
+        this.cellRenderer = cellRenderer;
+    }
+
+    public CellRenderer<D, W> getCellRenderer() {
+        return cellRenderer;
+    }
+
+    public W renderCell(final D data) {
+        return cellRenderer.render(data);
     }
 }

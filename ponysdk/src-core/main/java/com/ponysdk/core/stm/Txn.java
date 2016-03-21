@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Txn {
 
-    private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
+    private static ThreadLocal<Txn> transaction = new ThreadLocal<>();
 
     private final Set<TxnListener> txnListnener = Collections.newSetFromMap(new ConcurrentHashMap<TxnListener, Boolean>());
     private final Set<ClientLoopListener> clientLoopListnener = Collections.newSetFromMap(new ConcurrentHashMap<ClientLoopListener, Boolean>());
@@ -15,11 +15,11 @@ public class Txn {
     private TxnContext txnContext;
 
     public static Txn get() {
-        Txn txn = transactions.get();
+        Txn txn = transaction.get();
 
         if (txn == null) {
             txn = new Txn();
-            transactions.set(txn);
+            transaction.set(txn);
         }
         return txn;
     }
@@ -29,20 +29,20 @@ public class Txn {
     }
 
     public void commit() {
-        final Txn txn = transactions.get();
+        final Txn txn = transaction.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
         fireClientLoopEnd();
         fireBeforeFlush();
         flush();
         fireAfterFlush();
-        transactions.remove();
+        transaction.remove();
     }
 
     public void rollback() {
-        final Txn txn = transactions.get();
+        final Txn txn = transaction.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
-        transactions.remove();
+        transaction.remove();
     }
 
     public void flush() {

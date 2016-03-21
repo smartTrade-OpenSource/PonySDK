@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.rich;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -65,7 +64,6 @@ public class POptionPane {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
-        dialogBox.setStyleName(PonySDKTheme.DIALOGBOX);
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
         dialogBox.setTitle(title);
@@ -76,7 +74,6 @@ public class POptionPane {
         final PLabel content = new PLabel(message);
         panel.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {

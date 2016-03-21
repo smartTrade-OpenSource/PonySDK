@@ -24,15 +24,15 @@
 package com.ponysdk.ui.server.list.renderer.header;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.list.DataGridActivity;
-import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
+import com.ponysdk.ui.server.list.Grid;
+import com.ponysdk.ui.server.list.ColumnDescriptor;
 
 /**
  * <p>
- * Way to display a the column Header of a {@link DataGridActivity}
+ * Way to display a the column Header of a {@link Grid}
  * </p>
  * <p>
- * Defined in a {@link DataGridColumnDescriptor}
+ * Defined in a {@link ColumnDescriptor}
  * </p>
  */
 public interface HeaderCellRenderer {

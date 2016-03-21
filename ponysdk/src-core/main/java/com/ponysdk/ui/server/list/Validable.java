@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.list;
 
 import com.ponysdk.ui.server.form.validator.ValidationResult;
 
+@FunctionalInterface
 public interface Validable {
 
     ValidationResult isValid();

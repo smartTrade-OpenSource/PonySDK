@@ -3,14 +3,12 @@ package com.ponysdk.core.servlet;
 
 import javax.servlet.http.HttpSession;
 
-import com.ponysdk.core.stm.TxnContextHttp;
 import com.ponysdk.core.stm.TxnSocketContext;
 
 public class PonySDKSession implements Session {
 
     private final HttpSession session;
 
-    private TxnContextHttp httpContext;
     private TxnSocketContext socketContext;
 
     public PonySDKSession(final HttpSession session) {
@@ -35,16 +33,6 @@ public class PonySDKSession implements Session {
     @Override
     public void invalidate() {
         session.invalidate();
-    }
-
-    @Override
-    public void setHttpContext(final TxnContextHttp context) {
-        this.httpContext = context;
-    }
-
-    @Override
-    public TxnContextHttp getHttpContext() {
-        return httpContext;
     }
 
     @Override

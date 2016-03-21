@@ -1,7 +1,6 @@
 
 package com.ponysdk.ui.server.rich;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PImage;
@@ -29,17 +28,11 @@ public class PClosableDialogBox extends PPopupPanel {
         super(false);
         setModal(modal);
 
-        setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX);
-
         captionContainer = new PSimplePanel();
         closeContainer = new PSimplePanel();
         contentContainer = new PSimplePanel();
-        captionContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CAPTION);
-        closeContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CLOSE);
-        contentContainer.setStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_CONTENT);
 
         final PFlexTable layout = new PFlexTable();
-        layout.addStyleName(PonySDKTheme.CLOSABLE_DIALOGBOX_LAYOUT);
 
         layout.setWidget(0, 0, captionContainer);
         layout.setWidget(0, 1, closeContainer);
@@ -48,8 +41,6 @@ public class PClosableDialogBox extends PPopupPanel {
         layout.getFlexCellFormatter().setColSpan(1, 0, 2);
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
-        layout.getFlexCellFormatter().addStyleName(0, 0, PonySDKTheme.CLOSABLE_DIALOGBOX_HEADER);
-        layout.getFlexCellFormatter().addStyleName(0, 1, PonySDKTheme.CLOSABLE_DIALOGBOX_HEADER);
 
         closeContainer.addDomHandler(new PClickHandler() {
 

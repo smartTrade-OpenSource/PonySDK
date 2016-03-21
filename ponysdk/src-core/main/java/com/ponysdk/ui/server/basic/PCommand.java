@@ -33,6 +33,8 @@ package com.ponysdk.ui.server.basic;
  * nothing about the internals of the MenuItem class and vice-versa.
  * </p>
  */
+
+@FunctionalInterface
 public interface PCommand {
 
     void execute();

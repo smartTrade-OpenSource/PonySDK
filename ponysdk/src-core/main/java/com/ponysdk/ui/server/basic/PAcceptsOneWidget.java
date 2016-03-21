@@ -16,10 +16,11 @@
 
 package com.ponysdk.ui.server.basic;
 
-
 /**
  * Implemented by displays that can be given accept an {@link IsPWidget} to show.
  */
+
+@FunctionalInterface
 public interface PAcceptsOneWidget {
 
     /**

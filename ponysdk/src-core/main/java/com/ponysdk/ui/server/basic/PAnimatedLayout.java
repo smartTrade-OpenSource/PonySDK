@@ -8,6 +8,7 @@ package com.ponysdk.ui.server.basic;
  * to their new positions over some period of time.
  * </p>
  */
+@FunctionalInterface
 public interface PAnimatedLayout {
 
     /**

@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.list;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
@@ -85,13 +84,10 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
         bottomListLayout.setWidget(searchResultTimeLabel);
 
-        simpleListView.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
-
         add(positionPanel);
         add(simpleListView.asWidget());
         add(bottomListLayout);
         setCellHorizontalAlignment(bottomListLayout, PHorizontalAlignment.ALIGN_CENTER);
-        bottomListLayout.addStyleName(PonySDKTheme.COMPLEXLIST_BOTTOM_LIST);
         add(bottomListCustomInformationLayout);
     }
 
