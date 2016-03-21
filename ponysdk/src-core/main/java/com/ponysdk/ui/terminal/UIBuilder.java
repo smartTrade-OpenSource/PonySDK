@@ -261,6 +261,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 ptObject = addonFactory.newAddon();
                 if (ptObject != null) {
                     ptObject.create(instruction, this);
+                    if (log.isLoggable(Level.FINE))
+                        log.log(Level.FINE, "Add object " + instruction.getObjectID() + " with widget type : "
+                                + instruction.getInt(Model.WIDGET_TYPE));
                     objectByID.put(instruction.getObjectID(), ptObject);
                 } else throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature);
             } else throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet());
@@ -270,6 +273,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             ptObject = uiFactory.newUIObject(this, instruction);
             if (ptObject != null) {
                 ptObject.create(instruction, this);
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE,
+                        "Add object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
                 objectByID.put(instruction.getObjectID(), ptObject);
             } else log.warning("Cannot create object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
         }
@@ -479,46 +484,37 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
-        if (widget == null) {
-            sendDataToServer(instruction);
-        } else {
-            sendDataToServer(widget.getElement(), instruction);
+        if (log.isLoggable(Level.FINE)) {
+            if (widget != null) {
+                final Element source = widget.getElement();
+                if (source != null) {
+                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
+                }
+            }
         }
+        sendDataToServer(instruction);
     }
 
     public void sendDataToServer(final List<PTInstruction> instructions) {
-        final PTInstruction requestData = new PTInstruction();
-        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
-
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < instructions.size(); i++) {
             jsonArray.set(0, instructions.get(0));
         }
 
-        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
-
-        if (!stackedErrors.isEmpty()) {
-            final JSONArray errors = new JSONArray();
-            int i = 0;
-            for (final JSONObject jsoObject : stackedErrors) {
-                errors.set(i++, jsoObject);
-            }
-            stackedErrors.clear();
-            requestData.put(Model.APPLICATION_ERRORS, errors);
-        }
-
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send" + requestData.toString());
-
-        requestBuilder.send(requestData.toString());
+        sendDataToServer(jsonArray);
     }
 
     @Override
     public void sendDataToServer(final PTInstruction instruction) {
-        final PTInstruction requestData = new PTInstruction();
-        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
-
         final JSONArray jsonArray = new JSONArray();
         jsonArray.set(0, instruction);
+
+        sendDataToServer(jsonArray);
+    }
+
+    public void sendDataToServer(final JSONArray jsonArray) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
         requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
 
         if (!stackedErrors.isEmpty()) {
@@ -533,18 +529,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send" + requestData.toString());
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData.toString());
-    }
-
-    @Override
-    public void sendDataToServer(final Element source, final PTInstruction instruction) {
-        if (source != null) {
-            log.info("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
-        }
-
-        sendDataToServer(instruction);
     }
 
     private Timer scheduleLoadingMessageBox() {
