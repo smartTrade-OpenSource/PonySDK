@@ -42,18 +42,19 @@ import com.ponysdk.ui.terminal.model.Model;
  * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
  * previously-created popups).
  * <p>
- * A PPopupPanel should not generally be added to other panels; rather, it should be shown and hidden using
- * the {@link #show()} and {@link #hide()} methods.
+ * A PPopupPanel should not generally be added to other panels; rather, it should be shown and
+ * hidden using the {@link #show()} and {@link #hide()} methods.
  * </p>
  * <p>
- * The width and height of the PPopupPanel cannot be explicitly set; they are determined by the PPopupPanel's
- * widget. Calls to {@link #setWidth(String)} and {@link #setHeight(String)} will call these methods on the
- * PPopupPanel's widget.
+ * The width and height of the PPopupPanel cannot be explicitly set; they are determined by the
+ * PPopupPanel's widget. Calls to {@link #setWidth(String)} and {@link #setHeight(String)} will call
+ * these methods on the PPopupPanel's widget.
  * </p>
  * <p>
- * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly used to gray
- * out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}. It has a default
- * style name of "gwt-PopupPanelGlass", which can be changed using {@link #setGlassStyleName(String)}.
+ * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly
+ * used to gray out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}
+ * . It has a default style name of "gwt-PopupPanelGlass", which can be changed using
+ * {@link #setGlassStyleName(String)}.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -68,7 +69,8 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     /**
-     * A callback that is used to set the position of a {@link PPopupPanel} right before it is shown.
+     * A callback that is used to set the position of a {@link PPopupPanel} right before it is
+     * shown.
      */
     public interface PPositionCallback {
 
@@ -103,15 +105,9 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         removeFromParent();
 
-        final PRootPanel root;
-        if (window != null) {
-            root = PRootPanel.get(window);
-        } else {
-            root = PRootPanel.get();
-        }
+        final PRootPanel root = window != null ? PRootPanel.get(window) : PRootPanel.get();
 
-        final PWidgetCollection children = root.getChildren();
-        children.insert(this, children.size());
+        root.add(this);
         root.adopt(this);
     }
 
