@@ -9,6 +9,7 @@ ext {
     confResources = "src-core/main/resources/conf"
     scriptResources = "src-core/main/resources/script"
     javadocResources = "src-core/main/javadoc"
+    jettyVersion = '9.2.12.v20150709'
 }
 
 sourceSets {
@@ -104,22 +105,22 @@ dependencies {
     selenium 'org.seleniumhq.selenium:selenium-java:2.33.0'
     selenium 'junit:junit:4.10'
 
-    jetty 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-servlet:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-servlets:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty.websocket:websocket-server:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty.websocket:websocket-common:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty.websocket:javax-websocket-server-impl:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-client:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-io:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-util:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-http:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-security:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty:jetty-continuation:9.2.12.v20150709'
-
-    jetty 'org.eclipse.jetty.websocket:websocket-api:9.2.12.v20150709'
-    jetty 'org.eclipse.jetty.websocket:websocket-servlet:9.2.12.v20150709'
+    compile 'org.eclipse.jetty:jetty-server:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-server:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-servlet:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-webapp:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-servlets:' + jettyVersion
+    jetty 'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion
+    jetty 'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion
+    jetty 'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion
+    jetty 'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion
+    jetty 'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-client:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-io:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-util:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-http:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-security:' + jettyVersion
+    jetty 'org.eclipse.jetty:jetty-continuation:' + jettyVersion
 
     jetty 'org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0'
     jetty 'javax.servlet:javax.servlet-api:3.1.0'
@@ -129,7 +130,6 @@ dependencies {
     json 'javax.json:javax.json-api:1.0'
     json 'org.glassfish:javax.json:1.0.4'
 }
-
 
 jar {
     baseName = 'ponysdk'

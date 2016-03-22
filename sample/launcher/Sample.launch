@@ -18,7 +18,6 @@
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/ponysdk/src-core/main/resources&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/sample/src/main/resources/war&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/ponysdk/src-core/main/resources/war&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
-<listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/ponysdk/src-spring/main/resources&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/sample/src/main/java&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry path=&quot;3&quot; projectName=&quot;ponysdk&quot; type=&quot;1&quot;/&gt;&#13;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry path=&quot;3&quot; projectName=&quot;sample&quot; type=&quot;1&quot;/&gt;&#13;&#10;"/>
@@ -57,5 +56,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.impl.main.Main"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="port=8081 contextName=sample applicationName=Sample applicationID=sample applicationDescription=&quot;Sample PonySDK&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13;-Xms512m &#13;-Xmx512m&#13;&#10;-Dpony.application.javascripts=&quot;script/less.js;script/sample.js&quot;&#13;&#10;-Dpony.application.stylesheets=&quot;css/sample.less&quot;"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13;-Xms512m &#13;-Xmx512m&#13;&#10;-Dponysdk.application.id=sample&#13;&#10;-Dponysdk.application.name=Sample&#13;&#10;-Dponysdk.application.description=&quot;Sample PonySDK&quot;&#13;&#10;-Dponysdk.application.context.name=sample&#13;&#10;-Dponysdk.application.javascripts=&quot;script/less.js;script/sample.js&quot;&#13;&#10;-Dponysdk.application.stylesheets=&quot;css/sample.less&quot;"/>
 </launchConfiguration>

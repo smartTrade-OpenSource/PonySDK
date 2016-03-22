@@ -37,6 +37,7 @@ public class ApplicationManagerOption {
     public static final String APPLICATION_CONTEXT_NAME = "ponysdk.application.context.name";
     public static final String STYLESHEETS = "ponysdk.application.stylesheets";
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
+    public static final String POINTCLASS = "ponysdk.entry.point.class";
 
     private String applicationID;
     private String applicationName;

@@ -26,6 +26,7 @@ package com.ponysdk.impl.main;
 import java.util.Arrays;
 
 import com.ponysdk.core.ApplicationManagerOption;
+import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.servlet.ApplicationLoader;
 import com.ponysdk.core.servlet.JavaApplicationLoader;
 
@@ -35,10 +36,12 @@ public class Main {
         final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
         applicationManagerOption.setApplicationID(System.getProperty(ApplicationManagerOption.APPLICATION_ID, "ID"));
         applicationManagerOption.setApplicationName(System.getProperty(ApplicationManagerOption.APPLICATION_NAME, "NAME"));
-        applicationManagerOption.setApplicationDescription(System.getProperty(ApplicationManagerOption.APPLICATION_DESCRIPTION, "DESCRIPTION"));
+        applicationManagerOption
+                .setApplicationDescription(System.getProperty(ApplicationManagerOption.APPLICATION_DESCRIPTION, "DESCRIPTION"));
         applicationManagerOption.setApplicationContextName(System.getProperty(ApplicationManagerOption.APPLICATION_CONTEXT_NAME, ""));
         applicationManagerOption.setSessionTimeout(1000);
-        applicationManagerOption.setEntryPointClass(BasicEntryPoint.class);
+        applicationManagerOption.setEntryPointClass((Class<? extends EntryPoint>) Class
+                .forName(System.getProperty(ApplicationManagerOption.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
 
         final String styles = System.getProperty(ApplicationManagerOption.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {

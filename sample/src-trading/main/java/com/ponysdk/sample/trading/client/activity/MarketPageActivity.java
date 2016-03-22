@@ -1,6 +1,8 @@
 
 package com.ponysdk.sample.trading.client.activity;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,14 @@ public class MarketPageActivity extends PageActivity {
         // for (final MarketData md : currenciesCommand.execute()) {
         // boxContainer.add(buildFXBox(md.currency));
         // }
+
+        for (final String currency : Arrays.asList("EURUSD", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
+                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
+                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
+                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
+                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR")) {
+            boxContainer.add(buildFXBox(currency));
+        }
 
         final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setWidget(boxContainer);
