@@ -32,7 +32,9 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A widget that represents a simple &lt;a&gt; element.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-Anchor { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-Anchor { }</li>
+ * </ul>
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
@@ -47,6 +49,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the anchor's text
      */
     public PAnchor(final String text) {
+        init();
         setText(text);
     }
 

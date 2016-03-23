@@ -205,16 +205,6 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         }
     }
 
-    private PWidget getChild(final long objectID) {
-        final PWidgetCollection children = getChildren();
-        if (children != null) {
-            for (final PWidget w : children) {
-                if (w.getID() == objectID) return w;
-            }
-        }
-        return null;
-    }
-
     private void fireLayoutResize(final PLayoutResizeEvent event) {
         for (final PLayoutResizeHandler h : handlers) {
             h.onLayoutResize(event);
