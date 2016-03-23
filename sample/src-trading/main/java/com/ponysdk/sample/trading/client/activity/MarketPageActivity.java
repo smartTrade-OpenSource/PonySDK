@@ -22,13 +22,9 @@ import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
-import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
 import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
-import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
 import com.ponysdk.ui.server.basic.event.PDragStartEvent;
-import com.ponysdk.ui.server.basic.event.PDragStartHandler;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
-import com.ponysdk.ui.server.basic.event.PDropHandler;
 
 public class MarketPageActivity extends PageActivity {
 
@@ -43,7 +39,8 @@ public class MarketPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {}
+    protected void onInitialization() {
+    }
 
     @Override
     protected void onFirstShowPage() {
@@ -55,11 +52,7 @@ public class MarketPageActivity extends PageActivity {
         // boxContainer.add(buildFXBox(md.currency));
         // }
 
-        for (final String currency : Arrays.asList("EURUSD", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
-                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
-                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
-                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR",
-                "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR", "USDEUR")) {
+        for (final String currency : Arrays.asList("EURUSD", "USDEUR", "USDEUR", "EURAUD")) {
             boxContainer.add(buildFXBox(currency));
         }
 
@@ -71,44 +64,63 @@ public class MarketPageActivity extends PageActivity {
     }
 
     @Override
-    protected void onShowPage(final Place place) {}
+    protected void onShowPage(final Place place) {
+    }
 
     @Override
-    protected void onLeavingPage() {}
+    protected void onLeavingPage() {
+    }
 
     private PWidget buildFXBox(final String currency) {
-
         final PFlowPanel box = new PFlowPanel();
         box.addStyleName("widget");
+
         final PFlowPanel background = new PFlowPanel();
         background.addStyleName("background");
+        box.add(background);
+
         final PFlowPanel headInline = new PFlowPanel();
         headInline.addStyleName("head_inline");
+
         final PFlowPanel icon = new PFlowPanel();
         icon.addStyleName("icon");
+        headInline.add(icon);
+
         final PLabel header = new PLabel(currency);
         header.addStyleName("header");
+        headInline.add(header);
+
         final PAnchor close = new PAnchor();
         close.addStyleName("close");
+        headInline.add(close);
+
+        box.add(headInline);
+
         final PHTML buy = new PHTML("<div></div>");
         buy.addStyleName("buy");
-        buy.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PNotificationManager.showHumanizedNotification("Buy clicked!");
-            }
-        });
+        buy.addClickHandler(clickEvent -> PNotificationManager.showHumanizedNotification("Buy clicked!"));
+        box.add(buy);
 
         final PLabel buyPipHead = new PLabel("buy");
         buyPipHead.addStyleName("buy_pip_head");
+        box.add(buyPipHead);
+
         final PLabel buyNum = new PLabel("1.22");
         buyNum.addStyleName("buy_num");
+        box.add(buyNum);
+
         final PFlowPanel buyPipNum = new PFlowPanel();
         buyPipNum.addStyleName("buy_pip_num");
+
         final PElement buyPipNumStrong = new PElement("strong");
+        buyPipNum.add(buyPipNumStrong);
+
+        box.add(buyPipNum);
+
         final PFlowPanel buyDirection = new PFlowPanel();
         buyDirection.addStyleName("buy_direction");
+        box.add(buyDirection);
+
         final PHTML sell = new PHTML("<div></div>");
         sell.addStyleName("sell");
         sell.addClickHandler(new PClickHandler() {
@@ -118,85 +130,68 @@ public class MarketPageActivity extends PageActivity {
                 PNotificationManager.showHumanizedNotification("Sell clicked!");
             }
         });
+        box.add(sell);
+
         final PLabel sellPipHead = new PLabel("offer");
         sellPipHead.addStyleName("sell_pip_head");
+        box.add(sellPipHead);
+
         final PLabel sellNum = new PLabel("1.45");
         sellNum.addStyleName("sell_num");
-        final PElement sellPipNumStrong = new PElement("strong");
+        box.add(sellNum);
+
         final PFlowPanel sellPipNum = new PFlowPanel();
         sellPipNum.addStyleName("sell_pip_num");
+
+        final PElement sellPipNumStrong = new PElement("strong");
+        sellPipNum.add(sellPipNumStrong);
+
+        box.add(sellPipNum);
+
         final PLabel amtLabel = new PLabel("EUR");
         amtLabel.addStyleName("amtlabel");
+        box.add(amtLabel);
+
         final PFlowPanel sellDirection = new PFlowPanel();
         sellDirection.addStyleName("sell_direction");
+        box.add(sellDirection);
+
         final PLabel spread = new PLabel();
         spread.addStyleName("spread");
+        box.add(spread);
+
         final PTextBox textBox = new PTextBox();
         textBox.setStyleName("input");
+
         final PAnchor selector = new PAnchor();
         selector.addStyleName("selector");
 
-        box.add(background);
-        box.add(headInline);
-        headInline.add(icon);
-        headInline.add(header);
-        headInline.add(close);
-        box.add(buy);
-        box.add(buyPipHead);
-        box.add(buyNum);
-        box.add(buyPipNum);
-        buyPipNum.add(buyPipNumStrong);
-        box.add(buyDirection);
-        box.add(sell);
-        box.add(sellPipHead);
-        box.add(sellNum);
-        box.add(sellPipNum);
-        sellPipNum.add(sellPipNumStrong);
-        box.add(amtLabel);
-        box.add(sellDirection);
-        box.add(spread);
+        box.addDomHandler(event -> {
+        } , PDragStartEvent.TYPE);
 
-        box.addDomHandler(new PDragStartHandler() {
+        box.addDomHandler(event -> {
+            box.removeStyleName("dragenter");
+            final PWidget source = event.getDragSource();
+            if (source != null && source != box) {
+                final int dropIndex = boxContainer.getWidgetIndex(box);
+                boxContainer.remove(source);
+                boxContainer.insert(source, dropIndex);
+            }
+        } , PDropEvent.TYPE);
 
-            @Override
-            public void onDragStart(final PDragStartEvent event) {}
-        }, PDragStartEvent.TYPE);
+        box.addDomHandler(event -> {
+            if (currentDrag == null || !currentDrag.equals(box)) {
+                box.addStyleName("dragenter");
+                if (currentDrag != null) currentDrag.removeStyleName("dragenter");
+                currentDrag = box;
+            }
+        } , PDragEnterEvent.TYPE);
 
-        box.addDomHandler(new PDropHandler() {
-
-            @Override
-            public void onDrop(final PDropEvent event) {
+        box.addDomHandler(event -> {
+            if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
-                final PWidget source = event.getDragSource();
-                if (source != null && source != box) {
-                    final int dropIndex = boxContainer.getWidgetIndex(box);
-                    boxContainer.remove(source);
-                    boxContainer.insert(source, dropIndex);
-                }
             }
-        }, PDropEvent.TYPE);
-
-        box.addDomHandler(new PDragEnterHandler() {
-
-            @Override
-            public void onDragEnter(final PDragEnterEvent event) {
-                if (currentDrag == null || !currentDrag.equals(box)) {
-                    box.addStyleName("dragenter");
-                    if (currentDrag != null) currentDrag.removeStyleName("dragenter");
-                    currentDrag = box;
-                }
-            }
-        }, PDragEnterEvent.TYPE);
-
-        box.addDomHandler(new PDragLeaveHandler() {
-
-            @Override
-            public void onDragLeave(final PDragLeaveEvent event) {
-                if (!currentDrag.equals(box)) {
-                    box.removeStyleName("dragenter");
-                }
-            }
-        }, PDragLeaveEvent.TYPE);
+        } , PDragLeaveEvent.TYPE);
 
         UIContext.get().addDataListener(new DataListener() {
 
