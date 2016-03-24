@@ -36,7 +36,6 @@ import org.timepedia.exporter.client.Exportable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
@@ -49,7 +48,10 @@ import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
+import elemental.html.ArrayBuffer;
 import elemental.html.StorageEvent;
+import elemental.html.Uint8Array;
+import elemental.html.Window;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
@@ -67,7 +69,8 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
     private final List<StartupListener> listener = new ArrayList<>();
 
-    private PonySDK() {}
+    private PonySDK() {
+    }
 
     @ExportConstructor
     public static PonySDK constructor() {
@@ -98,18 +101,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 final Storage storage = Storage.getSessionStorageIfSupported();
                 if (storage != null) {
                     final String v = storage.getItem(Model.APPLICATION_VIEW_ID.getKey());
-                    if (v != null && !v.isEmpty()) {
-                        viewID = Integer.parseInt(v);
-                    }
+                    if (v != null && !v.isEmpty()) viewID = Integer.parseInt(v);
                 }
 
                 if (log.isLoggable(Level.INFO)) log.info("View ID : " + viewID);
 
-                if (viewID != null) {
-                    applicationViewID = viewID;
-                } else {
-                    applicationViewID = 0;
-                }
+                if (viewID != null) applicationViewID = viewID;
+                else applicationViewID = 0;
 
                 final StringBuilder builder = new StringBuilder();
                 builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
@@ -206,22 +204,53 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     }
 
     @Override
-    public void message(final String message) {
+    public void message(final ArrayBuffer message) {
         try {
+            // Get the first element on the message, always a key of element of the Model enum
+            final int type = getInt8(message);
 
-            final JSONObject data = JSONParser.parseStrict(message).isObject();
-
-            if (data.containsKey(Model.HEARTBEAT.getKey())) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, message);
+            if (type == Model.HEARTBEAT.getShortKey()) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
                 socketClient.getRequestBuilder().sendHeartbeat();
-            } else {
-                uiBuilder.update(data);
-            }
+            } else if (type == Model.APPLICATION_INSTRUCTIONS.getShortKey()) {
+                ArrayBuffer subMessage = message.slice(2);
+                final int seqNum = getInt8(subMessage);
 
+                subMessage = subMessage.slice(2);
+                final int seqNumValue = getInt16(subMessage);
+
+                uiBuilder.update(subMessage.slice(4));
+            }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + message, e);
         }
     }
+
+    public static final int getInt8(final ArrayBuffer message) {
+        final Window window = Browser.getWindow();
+        final Uint8Array arrayType = window.newUint8Array(message, 0, 2);
+
+        int type = 0;
+        for (int i = 0; i < arrayType.length(); i++)
+            type = (type << 8) + arrayType.intAt(i);
+
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Type : " + arrayType + " => " + type);
+        return type;
+    }
+
+    public static final int getInt16(final ArrayBuffer message) {
+        final Window window = Browser.getWindow();
+        final Uint8Array arrayType = window.newUint8Array(message, 0, 4);
+
+        int type = 0;
+        for (int i = 0; i < arrayType.length(); i++)
+            type = (type << 8) + arrayType.intAt(i);
+
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Type : " + arrayType + " => " + type);
+        return type;
+    }
+
+    public static native String fromCharCode(ArrayBuffer buf) /*-{return new TextDecoder().decode(buf);}-*/;
 
     public static native void reload() /*-{$wnd.location.reload();}-*/;
 

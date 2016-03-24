@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal;
 
 import java.util.Map;
 
-import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -49,7 +49,7 @@ public interface UIService {
 
     public PTObject unRegisterObject(int ID);
 
-    public void update(JSONObject data);
+    public void update(JSONValue data);
 
     public void processInstruction(final PTInstruction instruction) throws Exception;
 

@@ -32,9 +32,7 @@ public class ParserImpl implements Parser {
     private static final byte COMMA = (byte) ',';
     private static final byte QUOTE = (byte) '\"';
     private static final byte[] COMMA_CURVE_LEFT = { COMMA, CURVE_LEFT };
-    private static final byte[] CURVE_RIGHT_BRACKET_RIGHT_COMMA = { CURVE_RIGHT, BRACKET_RIGHT, COMMA };
-
-    private static final byte[] BRACKET_RIGHT_COMMA = { BRACKET_RIGHT, COMMA };
+    private static final byte[] CURVE_RIGHT_BRACKET_RIGHT_COMMA = { CURVE_RIGHT, BRACKET_RIGHT };
 
     private static byte[] TRUE;
     private static byte[] FALSE;
@@ -50,34 +48,6 @@ public class ParserImpl implements Parser {
         }
     }
 
-    public static byte[] HEARTBEAT;
-
-    static {
-
-        final byte[] bytesKey = Model.HEARTBEAT.getBytesKey();
-
-        int index = 0;
-
-        HEARTBEAT = new byte[bytesKey.length + NULL.length + 5];
-
-        HEARTBEAT[index++] = CURVE_LEFT;
-        HEARTBEAT[index++] = QUOTE;
-
-        for (int i = 0; i < bytesKey.length; i++) {
-            HEARTBEAT[index++] = bytesKey[i];
-        }
-
-        HEARTBEAT[index++] = QUOTE;
-        HEARTBEAT[index++] = COLON;
-
-        for (int i = 0; i < NULL.length; i++) {
-            HEARTBEAT[index++] = NULL[i];
-        }
-
-        HEARTBEAT[index] = CURVE_RIGHT;
-
-    }
-
     private static final byte[] COLON_NULL;
 
     static {
@@ -85,31 +55,8 @@ public class ParserImpl implements Parser {
 
         COLON_NULL[0] = COLON;
 
-        for (int i = 0; i < NULL.length; i++) {
+        for (int i = 0; i < NULL.length; i++)
             COLON_NULL[1 + i] = NULL[i];
-        }
-    }
-
-    private static byte[] BEGIN_OBJECT;
-
-    static {
-        final byte[] bytesKey = Model.APPLICATION_INSTRUCTIONS.getBytesKey();
-
-        int index = 0;
-
-        BEGIN_OBJECT = new byte[bytesKey.length + 6];
-
-        BEGIN_OBJECT[index++] = CURVE_LEFT;
-        BEGIN_OBJECT[index++] = QUOTE;
-
-        for (int i = 0; i < bytesKey.length; i++) {
-            BEGIN_OBJECT[index++] = bytesKey[i];
-        }
-
-        BEGIN_OBJECT[index++] = QUOTE;
-        BEGIN_OBJECT[index++] = COLON;
-        BEGIN_OBJECT[index++] = BRACKET_LEFT;
-        BEGIN_OBJECT[index] = CURVE_LEFT;
     }
 
     private final WebSocket socket;
@@ -161,17 +108,17 @@ public class ParserImpl implements Parser {
 
     @Override
     public void beginObject() {
-        if (buffer == null) {
-            buffer = socket.getBuffer();
-        }
+        if (buffer == null) buffer = socket.getBuffer();
 
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
         if (socketBuffer.position() == 0) {
-            socketBuffer.put(BEGIN_OBJECT);
-        } else {
-            socketBuffer.put(COMMA_CURVE_LEFT);
-        }
+            socketBuffer.putShort(Model.APPLICATION_INSTRUCTIONS.getShortKey());
+            socketBuffer.putShort(Model.APPLICATION_SEQ_NUM.getShortKey());
+            socketBuffer.putInt(UIContext.get().getAndIncrementNextSentSeqNum());
+            socketBuffer.put(BRACKET_LEFT);
+            socketBuffer.put(CURVE_LEFT);
+        } else socketBuffer.put(COMMA_CURVE_LEFT);
     }
 
     @Override
@@ -180,12 +127,8 @@ public class ParserImpl implements Parser {
 
         if (socketBuffer.position() >= 1024) {
             socketBuffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
-            parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            socketBuffer.put(CURVE_RIGHT);
             reset();
-        } else {
-            socketBuffer.put(CURVE_RIGHT);
-        }
+        } else socketBuffer.put(CURVE_RIGHT);
     }
 
     @Override
@@ -257,11 +200,8 @@ public class ParserImpl implements Parser {
         parseKey(model.getBytesKey());
 
         socketBuffer.put(COLON);
-        if (value) {
-            socketBuffer.put(TRUE);
-        } else {
-            socketBuffer.put(FALSE);
-        }
+        if (value) socketBuffer.put(TRUE);
+        else socketBuffer.put(FALSE);
     }
 
     @Override
@@ -323,16 +263,10 @@ public class ParserImpl implements Parser {
         if (buffer != null) {
             final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-            if (socketBuffer.position() != 0) {
-                socketBuffer.put(BRACKET_RIGHT_COMMA);
-                parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-                socketBuffer.put(CURVE_RIGHT);
-            }
+            if (socketBuffer.position() != 0) socketBuffer.put(BRACKET_RIGHT);
 
             return true;
-        } else {
-            return false;
-        }
+        } else return false;
     }
 
 }

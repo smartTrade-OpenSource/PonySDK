@@ -44,11 +44,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
-import com.ponysdk.core.ParserImpl;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
 import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.ui.terminal.model.Model;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -246,8 +246,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          */
         @Override
         public void sendHeartBeat() {
-            final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(11);
-            socketBuffer.put(ParserImpl.HEARTBEAT);
+            final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
+            socketBuffer.putShort(Model.HEARTBEAT.getShortKey());
             flush(socketBuffer);
         }
     }

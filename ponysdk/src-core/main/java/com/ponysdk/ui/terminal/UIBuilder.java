@@ -45,7 +45,9 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -74,7 +76,10 @@ import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
-public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler, AnimationCallback {
+import elemental.html.ArrayBuffer;
+
+public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler,
+        HttpRequestSendEvent.Handler, AnimationCallback {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
@@ -153,11 +158,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         // hide loading component
         final Widget w = RootPanel.get("loading");
-        if (w == null) {
-            log.log(Level.WARNING, "Include splash screen html element into your index.html with id=\"loading\"");
-        } else {
+        if (w != null) {
             w.setSize("0px", "0px");
             w.setVisible(false);
+        } else {
+            log.log(Level.WARNING, "Include splash screen html element into your index.html with id=\"loading\"");
         }
     }
 
@@ -173,14 +178,16 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 final StatusCodeException codeException = (StatusCodeException) exception;
                 if (codeException.getStatusCode() == 0) return;
             }
-            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application", exception);
+            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception
+                    + "\nPlease reload your application", exception);
             return;
         }
 
         if (communicationErrorHandler != null) {
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
-                communicationErrorHandler.onCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
+                communicationErrorHandler.onCommunicationError("" + statusCodeException.getStatusCode(),
+                        statusCodeException.getMessage());
             } else {
                 communicationErrorHandler.onCommunicationError("x", exception.getMessage());
             }
@@ -189,14 +196,24 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
                 showCommunicationErrorMessage(statusCodeException);
             } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.", exception);
+                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
+                        exception);
             }
         }
     }
 
+    public void update(final ArrayBuffer message) {
+        final String charMessage = PonySDK.fromCharCode(message);
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Message : " + charMessage);
+        final JSONValue data = JSONParser.parseStrict(charMessage);
+        update(data);
+    }
+
     @Override
-    public void update(final JSONObject data) {
-        final JSONArray jsonArray = data.get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+    public void update(final JSONValue data) {
+        JSONArray jsonArray = data.isArray();
+        if (jsonArray == null) jsonArray = data.isObject().get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
             instructions.add(instruction);
@@ -266,7 +283,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                                 + instruction.getInt(Model.WIDGET_TYPE));
                     objectByID.put(instruction.getObjectID(), ptObject);
                 } else throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature);
-            } else throw new RuntimeException("UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet());
+            } else {
+                throw new RuntimeException(
+                        "UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet());
+            }
         } else {
             // stackInstruction(instruction);
 
@@ -276,7 +296,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE,
                         "Add object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
                 objectByID.put(instruction.getObjectID(), ptObject);
-            } else log.warning("Cannot create object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
+            } else {
+                log.warning("Cannot create object " + instruction.getObjectID() + " with widget type : "
+                        + instruction.getInt(Model.WIDGET_TYPE));
+            }
         }
     }
 
@@ -322,7 +345,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         ptObject = objectByID.get(instruction.getParentID());
         if (ptObject != null) ptObject.add(instruction, this);
-        else log.warning("Cannot add object " + instruction.getObjectID() + " to an garbaged parent object #" + instruction.getParentID());
+        else log.warning(
+                "Cannot add object " + instruction.getObjectID() + " to an garbaged parent object #" + instruction.getParentID());
     }
 
     private void processUpdate(final PTInstruction instruction) {
@@ -398,9 +422,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (instruction.containsKey(Model.HISTORY_TOKEN)) token = instruction.getString(Model.HISTORY_TOKEN);
 
         if (oldToken != null && oldToken.equals(token)) {
-            if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) {
-                History.fireCurrentHistoryState();
-            }
+            if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) History.fireCurrentHistoryState();
         } else {
             History.newItem(token, instruction.getBoolean(Model.HISTORY_FIRE_EVENTS));
         }
@@ -451,9 +473,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
-        if ((previous + 1) != receivedSeqNum) {
+        if (previous + 1 != receivedSeqNum)
             log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
-        }
         lastReceived = receivedSeqNum;
     }
 
@@ -461,9 +482,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
-        if (uiObject != null) {
-            objectIDByWidget.remove(uiObject);
-        }
+        if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
     }
 
@@ -487,9 +506,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
-                if (source != null) {
-                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
-                }
+                if (source != null) log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
             }
         }
         sendDataToServer(instruction);
@@ -497,9 +514,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     public void sendDataToServer(final List<PTInstruction> instructions) {
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < instructions.size(); i++) {
+        for (int i = 0; i < instructions.size(); i++)
             jsonArray.set(0, instructions.get(0));
-        }
 
         sendDataToServer(jsonArray);
     }
@@ -520,9 +536,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (!stackedErrors.isEmpty()) {
             final JSONArray errors = new JSONArray();
             int i = 0;
-            for (final JSONObject jsoObject : stackedErrors) {
+            for (final JSONObject jsoObject : stackedErrors)
                 errors.set(i++, jsoObject);
-            }
             stackedErrors.clear();
             requestData.put(Model.APPLICATION_ERRORS, errors);
         }
@@ -556,7 +571,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         actionPanel.setSize("100%", "100%");
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML("Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(new ClickHandler() {
@@ -572,7 +588,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
-            content.add(new HTML("An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -594,7 +611,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight) {
-                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2);
+                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
+                        (Window.getClientHeight() - offsetHeight) / 2);
             }
         });
     }
@@ -636,9 +654,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     @Override
     public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0) {
-            numberOfrequestInProgress--;
-        }
+        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
 
         hideLoadingMessageBox();
     }

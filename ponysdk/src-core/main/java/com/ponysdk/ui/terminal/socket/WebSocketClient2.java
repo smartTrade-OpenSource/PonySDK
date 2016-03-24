@@ -14,6 +14,7 @@ import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.events.MessageEvent;
+import elemental.html.ArrayBuffer;
 import elemental.html.Blob;
 import elemental.html.FileReader;
 import elemental.html.WebSocket;
@@ -73,7 +74,7 @@ public class WebSocketClient2 implements EventListener {
             } else if (event.getType().equals("message")) {
                 final Blob blob = (Blob) ((MessageEvent) event).getData();
                 if (fileReader.getReadyState() != 1) {
-                    fileReader.readAsBinaryString(blob);
+                    fileReader.readAsArrayBuffer(blob);
                 } else {
                     queue.add(blob);
                 }
@@ -82,12 +83,12 @@ public class WebSocketClient2 implements EventListener {
             }
         } else if (event.getSrcElement() == fileReader) {
             if (event.getType().equals("load")) {
-                callback.message((String) fileReader.getResult());
+                callback.message((ArrayBuffer) fileReader.getResult());
             }
 
             if (!queue.isEmpty()) {
                 final Blob blob = queue.removeFirst();
-                fileReader.readAsBinaryString(blob);
+                fileReader.readAsArrayBuffer(blob);
             }
         }
     }
@@ -101,7 +102,6 @@ public class WebSocketClient2 implements EventListener {
         // final int timeStamp = (int) (new Date().getTime() * .001);
         // final JSONObject jso = new JSONObject();
         // jso.put(Model.APPLICATION_PING.getKey(), new JSONNumber(timeStamp));
-
     }
 
 }
