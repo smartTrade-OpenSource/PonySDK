@@ -33,7 +33,7 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public abstract class PComplexPanel extends PPanel {
 
-    private PWidgetCollection children;
+    protected PWidgetCollection children;
 
     public PComplexPanel() {
     }
@@ -43,8 +43,9 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     public void add(final PWidget... widgets) {
-        for (final PWidget w : widgets)
+        for (final PWidget w : widgets) {
             add(w);
+        }
     }
 
     @Override
@@ -62,12 +63,11 @@ public abstract class PComplexPanel extends PPanel {
         children.insert(child, beforeIndex);
         adopt(child);
 
-        if ((children.size() - 1) == beforeIndex) {
+        if (children.size() - 1 == beforeIndex) {
             saveAdd(child.getID(), ID);
         } else {
             saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
         }
-
     }
 
     @Override
@@ -121,7 +121,7 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     void assertIsChild(final PWidget widget) {
-        if ((widget != null) && (widget.getParent() != this))
+        if (widget != null && widget.getParent() != this)
             throw new IllegalStateException("The specified widget is not a child of this panel");
     }
 
