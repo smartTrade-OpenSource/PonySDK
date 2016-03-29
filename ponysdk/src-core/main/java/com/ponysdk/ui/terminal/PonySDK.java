@@ -41,6 +41,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.TypeModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
@@ -207,47 +208,69 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public void message(final ArrayBuffer message) {
         try {
             // Get the first element on the message, always a key of element of the Model enum
-            final int type = getInt8(message);
+            int begin = 0;
+            final short type = getShort(message, begin);
 
             if (type == Model.HEARTBEAT.getShortKey()) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
                 socketClient.getRequestBuilder().sendHeartbeat();
             } else if (type == Model.APPLICATION_INSTRUCTIONS.getShortKey()) {
-                ArrayBuffer subMessage = message.slice(2);
-                final int seqNum = getInt8(subMessage);
+                begin += TypeModel.SHORT_SIZE.getSize();
+                final short seqNum = getShort(message, begin);
 
-                subMessage = subMessage.slice(2);
-                final int seqNumValue = getInt16(subMessage);
+                begin += TypeModel.SHORT_SIZE.getSize();
+                final int seqNumValue = getInteger(message, begin);
 
-                uiBuilder.update(subMessage.slice(4));
+                begin += TypeModel.INTEGER_SIZE.getSize();
+                uiBuilder.update(message.slice(begin));
             }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + message, e);
         }
     }
 
-    public static final int getInt8(final ArrayBuffer message) {
+    public static final boolean getBoolean(final ArrayBuffer message, int begin) {
         final Window window = Browser.getWindow();
-        final Uint8Array arrayType = window.newUint8Array(message, 0, 2);
-
-        int type = 0;
-        for (int i = 0; i < arrayType.length(); i++)
-            type = (type << 8) + arrayType.intAt(i);
-
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Type : " + arrayType + " => " + type);
-        return type;
+        final Uint8Array arrayType = window.newUint8Array(message, begin, 1);
+        final boolean result = arrayType.intAt(0) == 1;
+        return result;
     }
 
-    public static final int getInt16(final ArrayBuffer message) {
+    public static final byte getByte(final ArrayBuffer message, int begin) {
         final Window window = Browser.getWindow();
-        final Uint8Array arrayType = window.newUint8Array(message, 0, 4);
+        final Uint8Array arrayType = window.newUint8Array(message, begin, 1);
+        final int result = arrayType.intAt(0);
+        return (byte) result;
+    }
 
-        int type = 0;
+    public static final short getShort(final ArrayBuffer message, int begin) {
+        final Window window = Browser.getWindow();
+        final Uint8Array arrayType = window.newUint8Array(message, begin, 2);
+
+        int result = 0;
         for (int i = 0; i < arrayType.length(); i++)
-            type = (type << 8) + arrayType.intAt(i);
+            result = (result << 8) + arrayType.intAt(i);
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Type : " + arrayType + " => " + type);
-        return type;
+        return (short) result;
+    }
+
+    public static final int getInteger(final ArrayBuffer message, int begin) {
+        final Window window = Browser.getWindow();
+        final Uint8Array arrayType = window.newUint8Array(message, begin, 4);
+
+        int result = 0;
+        for (int i = 0; i < arrayType.length(); i++)
+            result = (result << 8) + arrayType.intAt(i);
+
+        return result;
+    }
+
+    public static final String getString(final ArrayBuffer message, int begin) {
+        return fromCharCode(message.slice(begin));
+    }
+
+    public static final String getString(final ArrayBuffer message, int begin, int end) {
+        return fromCharCode(message.slice(begin, end));
     }
 
     public static native String fromCharCode(ArrayBuffer buf) /*-{return new TextDecoder().decode(buf);}-*/;
