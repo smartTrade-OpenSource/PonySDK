@@ -3,9 +3,9 @@ package com.ponysdk.ui.terminal.socket;
 
 import java.util.LinkedList;
 
+import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.WebSocketRequestBuilder;
@@ -95,7 +95,7 @@ public class WebSocketClient2 implements EventListener {
 
     public void sendHeartbeat() {
         final JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Model.HEARTBEAT.getKey(), new JSONString(""));
+        jsonObject.put(Model.HEARTBEAT.getKey(), JSONNull.getInstance());
         jsonObject.put(Model.APPLICATION_VIEW_ID.getKey(), new JSONNumber(UIBuilder.sessionID));
         webSocket.send(jsonObject.toString());
         //

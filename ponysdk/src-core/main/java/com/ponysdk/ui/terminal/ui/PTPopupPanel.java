@@ -140,12 +140,9 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             final int top = update.getInt(Model.POPUP_POSITION_TOP);
             popup.setPopupPosition(left, top);
         } else if (update.containsKey(Model.POPUP_DRAGGABLE)) {
-            final boolean draggable = update.containsKey(Model.POPUP_DRAGGABLE);
-            if (draggable) {
-                popup.addDomHandler(this, MouseDownEvent.getType());
-                popup.addDomHandler(this, MouseUpEvent.getType());
-                popup.addDomHandler(this, MouseMoveEvent.getType());
-            }
+            popup.addDomHandler(this, MouseDownEvent.getType());
+            popup.addDomHandler(this, MouseUpEvent.getType());
+            popup.addDomHandler(this, MouseMoveEvent.getType());
         } else {
             super.update(update, uiService);
         }
@@ -167,7 +164,10 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             final int absX = event.getX() + uiObject.getAbsoluteLeft();
             final int absY = event.getY() + uiObject.getAbsoluteTop();
 
-            if (absX < Document.get().getBodyOffsetLeft() || absX >= Window.getClientWidth() || absY < Document.get().getBodyOffsetTop()) { return; }
+            if (absX < Document.get().getBodyOffsetLeft() || absX >= Window.getClientWidth()
+                    || absY < Document.get().getBodyOffsetTop()) {
+                return;
+            }
 
             cast().setPopupPosition(absX - dragStartX, absY - dragStartY);
         }

@@ -121,7 +121,6 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final String value) {
         try {
             writer.append(type.getKey());
@@ -157,7 +156,6 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final boolean value) {
         try {
             writer.append(type.getKey());
@@ -182,7 +180,6 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final long value) {
         try {
             writer.append(type.getKey());
@@ -198,7 +195,6 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final int value) {
         try {
             writer.append(type.getKey());
@@ -214,7 +210,6 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final double value) {
         try {
             writer.append(type.getKey());
@@ -281,6 +276,10 @@ public class Parser2 implements Parser {
 
     @Override
     public void reset() {
+    }
+
+    @Override
+    public void parse(Model model, Object value) {
     }
 
 }

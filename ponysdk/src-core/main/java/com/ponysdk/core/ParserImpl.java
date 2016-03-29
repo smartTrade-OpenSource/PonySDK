@@ -176,7 +176,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(COLON_NULL);
     }
 
-    @Override
     public void parse(final Model model, final String value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -194,7 +193,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(UTF8StringToByteBuffer(builder.build().toString()));
     }
 
-    @Override
     public void parse(final Model model, final boolean value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -204,7 +202,6 @@ public class ParserImpl implements Parser {
         else socketBuffer.put(FALSE);
     }
 
-    @Override
     public void parse(final Model model, final long value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -214,7 +211,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
-    @Override
     public void parse(final Model model, final int value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -223,7 +219,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
-    @Override
     public void parse(final Model model, final double value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -267,6 +262,38 @@ public class ParserImpl implements Parser {
 
             return true;
         } else return false;
+    }
+
+    @Override
+    public void parse(Model model, Object value) {
+        switch (model.getTypeModel()) {
+            case NULL_SIZE:
+                parse(model);
+                break;
+            case BOOLEAN_SIZE:
+                parse(model, (boolean) value);
+                break;
+            case BYTE_SIZE:
+                parse(model, (byte) value);
+                break;
+            case SHORT_SIZE:
+                parse(model, (short) value);
+                break;
+            case INTEGER_SIZE:
+                parse(model, (int) value);
+                break;
+            case LONG_SIZE:
+                parse(model, (long) value);
+                break;
+            case DOUBLE_SIZE:
+                parse(model, (double) value);
+                break;
+            case VARIABLE_SIZE:
+                parse(model, (String) value);
+                break;
+            default:
+                break;
+        }
     }
 
 }

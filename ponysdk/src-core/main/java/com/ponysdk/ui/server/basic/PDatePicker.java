@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import javax.json.JsonObject;
@@ -167,11 +166,12 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     /**
-     * Sets a visible date to be enabled or disabled. This is only set until the next time the DatePicker is
+     * Sets a visible date to be enabled or disabled. This is only set until the next time the
+     * DatePicker is
      * refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -193,7 +193,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -215,7 +215,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -233,8 +233,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         parser.endObject();
     }
 
-    private List<String> dateToString(final Collection<Date> dates) {
-        final List<String> asString = new ArrayList<>();
+    private Collection<String> dateToString(final Collection<Date> dates) {
+        final Collection<String> asString = new ArrayList<>();
         for (final Date d : dates) {
             asString.add(Long.toString(d.getTime()));
         }

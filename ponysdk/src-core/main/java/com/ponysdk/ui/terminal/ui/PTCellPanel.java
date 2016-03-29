@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -39,7 +39,8 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
     public void update(final PTInstruction update, final UIService uiService) {
 
         if (update.containsKey(Model.CELL_HORIZONTAL_ALIGNMENT)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(Model.CELL_HORIZONTAL_ALIGNMENT)];
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update
+                    .getInt(Model.CELL_HORIZONTAL_ALIGNMENT)];
             final Widget w = asWidget(update.getInt(Model.CELL), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
@@ -71,9 +72,9 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
                     break;
             }
         } else if (update.containsKey(Model.CELL_WIDTH)) {
-            uiObject.setCellWidth(asWidget(update.getInt(Model.CELL), uiService), update.get(Model.CELL_WIDTH).isString().stringValue());
+            uiObject.setCellWidth(asWidget(update.getInt(Model.CELL), uiService), update.getString(Model.CELL_WIDTH));
         } else if (update.containsKey(Model.CELL_HEIGHT)) {
-            uiObject.setCellHeight(asWidget(update.getInt(Model.CELL), uiService), update.get(Model.CELL_HEIGHT).isString().stringValue());
+            uiObject.setCellHeight(asWidget(update.getInt(Model.CELL), uiService), update.getString(Model.CELL_HEIGHT));
         } else {
             super.update(update, uiService);
         }

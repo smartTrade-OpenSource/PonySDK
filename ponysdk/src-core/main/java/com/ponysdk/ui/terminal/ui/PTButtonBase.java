@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,9 +33,9 @@ public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.TEXT)) {
-            uiObject.setText(update.get(Model.TEXT).isString().stringValue());
+            uiObject.setText(update.getString(Model.TEXT));
         } else if (update.containsKey(Model.HTML)) {
-            uiObject.setHTML(update.get(Model.HTML).isString().stringValue());
+            uiObject.setHTML(update.getString(Model.HTML));
         } else {
             super.update(update, uiService);
         }

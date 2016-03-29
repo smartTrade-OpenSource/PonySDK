@@ -16,7 +16,8 @@ public class PTInstruction extends JSONObject {
 
     private final static Logger log = Logger.getLogger(PTInstruction.class.getName());
 
-    public PTInstruction() {}
+    public PTInstruction() {
+    }
 
     public PTInstruction(final JavaScriptObject javaScriptObject) {
         super(javaScriptObject);
@@ -64,11 +65,11 @@ public class PTInstruction extends JSONObject {
     }
 
     public JSONObject getObject(final Model key) {
-        return get(key.getKey()).isObject();
+        return getObject(key.getKey());
     }
 
     public int getInt(final Model key) {
-        return (int) get(key.getKey()).isNumber().doubleValue();
+        return getInt(key.getKey());
     }
 
     public int getInt(final String key) {
@@ -76,7 +77,7 @@ public class PTInstruction extends JSONObject {
     }
 
     public double getDouble(final Model key) {
-        return get(key.getKey()).isNumber().doubleValue();
+        return getDouble(key.getKey());
     }
 
     public double getDouble(final String key) {
@@ -88,7 +89,7 @@ public class PTInstruction extends JSONObject {
     }
 
     public long getLong(final Model key) {
-        return (long) get(key.getKey()).isNumber().doubleValue();
+        return getLong(key.getKey());
     }
 
     public Boolean getBoolean(final String key) {
@@ -96,7 +97,7 @@ public class PTInstruction extends JSONObject {
     }
 
     public Boolean getBoolean(final Model key) {
-        return get(key.getKey()).isBoolean().booleanValue();
+        return getBoolean(key.getKey());
     }
 
     public String getString(final String key) {
@@ -104,7 +105,7 @@ public class PTInstruction extends JSONObject {
     }
 
     public String getString(final Model key) {
-        return get(key.getKey()).isString().stringValue();
+        return getString(key.getKey());
     }
 
     public void put(final Model key) {

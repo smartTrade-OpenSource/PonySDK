@@ -16,6 +16,7 @@ public enum TypeModel {
     SHORT_SIZE(2),
     INTEGER_SIZE(4),
     LONG_SIZE(8),
+    DOUBLE_SIZE(16),
     VARIABLE_SIZE(-1);
 
     private int size;

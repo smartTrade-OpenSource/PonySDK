@@ -61,7 +61,8 @@ public abstract class PScript extends PObject {
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(SCRIPT_KEY);
         if (script == null) {
-            script = new PScript() {};
+            script = new PScript() {
+            };
             session.setAttribute(SCRIPT_KEY, script);
         }
         return script;
@@ -91,7 +92,8 @@ public abstract class PScript extends PObject {
         get().executeScriptDeffered(js, callback, delay, unit);
     }
 
-    public static void executeDeffered(final long windowID, final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
+    public static void executeDeffered(final long windowID, final String js, final ExecutionCallback callback, final int delay,
+            final TimeUnit unit) {
         get().executeScriptDeffered(windowID, js, callback, delay, unit);
     }
 
@@ -114,7 +116,7 @@ public abstract class PScript extends PObject {
 
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, (executionID++));
+        parser.parse(Model.ID, executionID++);
         parser.endObject();
     }
 
@@ -144,9 +146,9 @@ public abstract class PScript extends PObject {
 
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, (executionID++));
+        parser.parse(Model.ID, executionID++);
         parser.comma();
-        parser.parse(Model.CALLBACK, true);
+        parser.parse(Model.CALLBACK);
         parser.endObject();
     }
 
@@ -154,7 +156,8 @@ public abstract class PScript extends PObject {
         executeScript(null, js, callback);
     }
 
-    public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
+    public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback, final int delay,
+            final TimeUnit unit) {
         final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
 
             @Override

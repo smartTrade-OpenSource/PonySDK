@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -52,7 +52,8 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
+public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers,
+        HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -165,7 +166,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
                 @Override
                 public void onClick(final PClickEvent event) {
                     handler.onClick(event);
-                    saveUpdate(Model.END_OF_PROCESSING, true);
+                    saveUpdate(Model.END_OF_PROCESSING);
                 }
             };
 
@@ -183,7 +184,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
                 @Override
                 public void onDoubleClick(final PDoubleClickEvent event) {
                     handler.onDoubleClick(event);
-                    saveUpdate(Model.END_OF_PROCESSING, true);
+                    saveUpdate(Model.END_OF_PROCESSING);
                 }
             };
 

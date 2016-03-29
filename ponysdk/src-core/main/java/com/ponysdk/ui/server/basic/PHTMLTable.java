@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -58,7 +58,7 @@ public abstract class PHTMLTable extends PPanel {
 
         @Override
         public int compareTo(final Row row) {
-            return value >= row.value ? (value != row.value ? 1 : 0) : -1;
+            return value >= row.value ? value != row.value ? 1 : 0 : -1;
         }
     }
 
@@ -107,7 +107,7 @@ public abstract class PHTMLTable extends PPanel {
                 parser.comma();
                 parser.parse(Model.ROW, row);
                 parser.comma();
-                parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.parse(Model.HTMLTABLE_ROW_STYLE);
                 parser.comma();
                 parser.parse(Model.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
                 parser.endObject();
@@ -132,7 +132,7 @@ public abstract class PHTMLTable extends PPanel {
                 parser.comma();
                 parser.parse(Model.ROW, row);
                 parser.comma();
-                parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+                parser.parse(Model.HTMLTABLE_ROW_STYLE);
                 parser.comma();
                 parser.parse(Model.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 parser.endObject();
@@ -161,7 +161,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
-            parser.parse(Model.HTMLTABLE_ROW_STYLE, true);
+            parser.parse(Model.HTMLTABLE_ROW_STYLE);
             parser.comma();
             parser.parse(Model.ROW_FORMATTER_SET_STYLE_NAME, styleName);
             parser.endObject();
@@ -209,7 +209,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
             parser.comma();
-            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE);
             parser.endObject();
         }
 
@@ -230,7 +230,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             parser.comma();
-            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE);
             parser.endObject();
         }
 
@@ -251,7 +251,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.CELL_FORMATTER_SET_STYLE_NAME, styleName);
             parser.comma();
-            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE);
             parser.endObject();
         }
 
@@ -272,7 +272,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.CELL_VERTICAL_ALIGNMENT, align.ordinal());
             parser.comma();
-            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE);
             parser.endObject();
         }
 
@@ -293,7 +293,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, align.ordinal());
             parser.comma();
-            parser.parse(Model.HTMLTABLE_CELL_STYLE, true);
+            parser.parse(Model.HTMLTABLE_CELL_STYLE);
             parser.endObject();
         }
     }
@@ -315,7 +315,7 @@ public abstract class PHTMLTable extends PPanel {
             parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_COLUMN_WIDTH, width);
             parser.comma();
-            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE);
             parser.endObject();
         }
 
@@ -330,7 +330,7 @@ public abstract class PHTMLTable extends PPanel {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.comma();
-            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE);
             parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
             parser.comma();
@@ -349,7 +349,7 @@ public abstract class PHTMLTable extends PPanel {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.comma();
-            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE);
             parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
             parser.comma();
@@ -368,7 +368,7 @@ public abstract class PHTMLTable extends PPanel {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.comma();
-            parser.parse(Model.HTMLTABLE_COLUMN_STYLE, true);
+            parser.parse(Model.HTMLTABLE_COLUMN_STYLE);
             parser.comma();
             parser.parse(Model.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
             parser.comma();
@@ -446,7 +446,7 @@ public abstract class PHTMLTable extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate(Model.CLEAR, "");
+        saveUpdate(Model.CLEAR);
     }
 
     public void removeRow(final int row) {
@@ -496,7 +496,9 @@ public abstract class PHTMLTable extends PPanel {
 
     private boolean remove(final PWidget widget, final boolean physicalDetach) {
         // Validate.
-        if (widget.getParent() != this) { return false; }
+        if (widget.getParent() != this) {
+            return false;
+        }
 
         // Orphan.
         try {
@@ -566,7 +568,9 @@ public abstract class PHTMLTable extends PPanel {
 
     private PWidget getWidgetFromMap(final int row, final int column) {
         final Map<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn != null) { return cellByColumn.get(column); }
+        if (cellByColumn != null) {
+            return cellByColumn.get(column);
+        }
         return null;
     }
 

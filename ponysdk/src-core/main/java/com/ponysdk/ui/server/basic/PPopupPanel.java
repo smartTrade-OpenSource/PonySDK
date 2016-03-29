@@ -140,7 +140,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
-            saveUpdate(Model.POPUP_DRAGGABLE, true);
+            saveUpdate(Model.POPUP_DRAGGABLE);
         }
     }
 
@@ -153,20 +153,20 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void center() {
         this.center = true;
         this.showing = true;
-        saveUpdate(Model.POPUP_CENTER, center);
+        saveUpdate(Model.POPUP_CENTER);
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate(Model.POPUP_SHOW, showing);
+            saveUpdate(Model.POPUP_SHOW);
         }
     }
 
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate(Model.POPUP_HIDE, showing);
+            saveUpdate(Model.POPUP_HIDE);
         }
     }
 

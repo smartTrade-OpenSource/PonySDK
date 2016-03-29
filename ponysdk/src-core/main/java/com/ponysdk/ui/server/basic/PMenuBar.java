@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -34,7 +34,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can either fire
+ * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can
+ * either fire
  * a {@link PCommand} or open a cascaded menu bar.
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -90,8 +91,10 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>the inner element of the cell</dd>
  * </dl>
  * <p>
- * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute (which
- * defaults to false), and may have only MenuItem elements as children. MenuItems may contain HTML and
+ * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute
+ * (which
+ * defaults to false), and may have only MenuItem elements as children. MenuItems may contain HTML
+ * and
  * MenuBars.
  * </p>
  */
@@ -205,7 +208,8 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         return insertSeparator(itemSeparator, items.size());
     }
 
-    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) throws IndexOutOfBoundsException {
+    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex)
+            throws IndexOutOfBoundsException {
         items.add(beforeIndex, itemSeparator);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
@@ -228,7 +232,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public void clearItems() {
-        saveUpdate(Model.CLEAR, true);
+        saveUpdate(Model.CLEAR);
         items.clear();
     }
 
