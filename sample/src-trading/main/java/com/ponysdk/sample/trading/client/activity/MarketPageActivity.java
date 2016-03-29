@@ -167,31 +167,31 @@ public class MarketPageActivity extends PageActivity {
         selector.addStyleName("selector");
 
         box.addDomHandler(event -> {
-        } , PDragStartEvent.TYPE);
+        }, PDragStartEvent.TYPE);
 
         box.addDomHandler(event -> {
-            box.removeStyleName("dragenter");
-            final PWidget source = event.getDragSource();
-            if (source != null && source != box) {
-                final int dropIndex = boxContainer.getWidgetIndex(box);
-                boxContainer.remove(source);
-                boxContainer.insert(source, dropIndex);
-            }
-        } , PDropEvent.TYPE);
-
-        box.addDomHandler(event -> {
-            if (currentDrag == null || !currentDrag.equals(box)) {
-                box.addStyleName("dragenter");
-                if (currentDrag != null) currentDrag.removeStyleName("dragenter");
-                currentDrag = box;
-            }
-        } , PDragEnterEvent.TYPE);
-
-        box.addDomHandler(event -> {
-            if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
-            }
-        } , PDragLeaveEvent.TYPE);
+                final PWidget source = event.getDragSource();
+                if (source != null && source != box) {
+                    final int dropIndex = boxContainer.getWidgetIndex(box);
+                    boxContainer.remove(source);
+                    boxContainer.insert(source, dropIndex);
+                }
+        }, PDropEvent.TYPE);
+
+        box.addDomHandler(event -> {
+                if (currentDrag == null || !currentDrag.equals(box)) {
+                    box.addStyleName("dragenter");
+                    if (currentDrag != null) currentDrag.removeStyleName("dragenter");
+                    currentDrag = box;
+                }
+        }, PDragEnterEvent.TYPE);
+
+        box.addDomHandler(event -> {
+                if (!currentDrag.equals(box)) {
+                    box.removeStyleName("dragenter");
+                }
+        }, PDragLeaveEvent.TYPE);
 
         UIContext.get().addDataListener(new DataListener() {
 

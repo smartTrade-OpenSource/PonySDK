@@ -61,7 +61,7 @@ public class PFlexTable extends PHTMLTable {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.comma();
-            parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.parse(Model.FLEXTABLE_CELL_FORMATTER);
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
@@ -82,7 +82,7 @@ public class PFlexTable extends PHTMLTable {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.comma();
-            parser.parse(Model.FLEXTABLE_CELL_FORMATTER, -1);
+            parser.parse(Model.FLEXTABLE_CELL_FORMATTER);
             parser.comma();
             parser.parse(Model.ROW, row);
             parser.comma();
