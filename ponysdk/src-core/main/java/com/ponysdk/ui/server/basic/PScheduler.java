@@ -163,7 +163,7 @@ public abstract class PScheduler extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.HANDLER_KEY_SCHEDULER.getKey())) {
-            final long cmdID = instruction.getJsonNumber(Model.ID.getKey()).longValue();
+            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null) return;
 

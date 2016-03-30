@@ -104,7 +104,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                     widgetInfo.set(3, new JSONNumber(Window.getClientWidth()));
                     widgetInfo.set(4, new JSONNumber(Window.getClientHeight()));
 
-                    eventInstruction.put(Model.HANDLER_POPUP_POSITION_CALLBACK, widgetInfo);
+                    eventInstruction.put(Model.WIDGET_POSITION, widgetInfo);
 
                     uiService.sendDataToServer(cast(), eventInstruction);
                 }

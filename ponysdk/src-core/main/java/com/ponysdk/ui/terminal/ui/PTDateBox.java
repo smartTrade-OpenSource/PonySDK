@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -87,15 +87,12 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
         if (update.containsKey(Model.VALUE)) {
             dateBox.getTextBox().setText(update.getString(Model.VALUE));
-        } else if (update.containsKey(Model.DATE_FORMAT)) {
-            final DefaultFormat format = new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT)));
-            dateBox.setFormat(format);
         } else if (update.containsKey(Model.DATE_FORMAT_PATTERN)) {
             dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT_PATTERN))));
         } else if (update.containsKey(Model.ENABLED)) {
             dateBox.setEnabled(update.getBoolean(Model.ENABLED));
-        } else if (update.containsKey(Model.MONTH)) {
-            dateBox.setDefaultMonth(update.getString(Model.MONTH));
+        } else if (update.containsKey(Model.TIME)) {
+            dateBox.setDefaultMonth(update.getLong(Model.TIME));
         } else {
             super.update(update, uiService);
         }
@@ -109,9 +106,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
             super(picker, date, format);
         }
 
-        public void setDefaultMonth(final String m) {
-            if (m.isEmpty()) defaultMonth = null;
-            else defaultMonth = new Date(Long.parseLong(m));
+        public void setDefaultMonth(final long m) {
+            defaultMonth = new Date(m);
         }
 
         @Override

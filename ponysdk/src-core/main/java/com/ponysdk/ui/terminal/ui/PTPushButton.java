@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -32,7 +32,7 @@ public class PTPushButton extends PTCustomButton<PushButton> {
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        final PTImage image = (PTImage) uiService.getPTObject(create.getInt(Model.IMAGE));
+        final PTImage image = (PTImage) uiService.getPTObject(create.getInt(Model.WIDGET_ID));
         init(create, uiService, new PushButton(image.cast()));
     }
 }

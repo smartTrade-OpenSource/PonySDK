@@ -112,7 +112,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.MIN_SIZE, minSize);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).minSize = minSize;
@@ -148,7 +148,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
@@ -178,7 +178,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
@@ -195,7 +195,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
                 final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).longValue();
+                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }

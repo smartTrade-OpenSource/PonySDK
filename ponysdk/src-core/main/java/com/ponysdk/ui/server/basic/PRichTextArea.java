@@ -39,10 +39,10 @@ import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 /**
- * A rich text editor that allows complex styling and formatting.there is a formatter interface, accessed via
- * {@link #getFormatter()}.A browser that does not support rich text editing at all will return
- * <code>null</code> for both of these, while one that supports only the basic functionality will return
- * <code>null</code> for the latter.
+ * A rich text editor that allows complex styling and formatting.there is a formatter interface,
+ * accessed via {@link #getFormatter()}. A browser that does not support rich text editing at all
+ * will return <code>null</code> for both of these, while one that supports only the basic
+ * functionality will return <code>null</code> for the latter.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
@@ -152,7 +152,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
         }
 
         public void insertImage(final String url) {
-            saveUpdate(Model.IMAGE, url);
+            saveUpdate(Model.IMAGE_URL, url);
         }
 
         public void insertOrderedList() {

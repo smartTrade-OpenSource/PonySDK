@@ -125,7 +125,7 @@ public class ParserImpl implements Parser {
     public void endObject() {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-        if (socketBuffer.position() >= 1024) {
+        if (socketBuffer.position() >= 4096) {
             socketBuffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
             reset();
         } else socketBuffer.put(CURVE_RIGHT);

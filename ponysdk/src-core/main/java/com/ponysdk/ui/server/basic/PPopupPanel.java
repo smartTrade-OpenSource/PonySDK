@@ -222,7 +222,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_POPUP_POSITION_CALLBACK.getKey())) {
+        if (instruction.containsKey(Model.WIDGET_POSITION.getKey())) {
             final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getKey());
 
             final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();

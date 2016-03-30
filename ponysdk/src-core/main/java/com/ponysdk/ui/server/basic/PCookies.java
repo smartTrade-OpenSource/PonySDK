@@ -34,7 +34,7 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PCookies {
 
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<>();
-    private final long objectID = 0; // reserved
+    private final int objectID = 0; // reserved
 
     public PCookies() {
     }

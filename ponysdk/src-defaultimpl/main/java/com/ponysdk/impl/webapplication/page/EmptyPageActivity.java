@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,22 +24,11 @@
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class EmptyPageActivity extends AbstractActivity {
+public class EmptyPageActivity extends AbstractActivity<PageView> {
 
-    private final PageView pageView;
-
-    public EmptyPageActivity(final PageView pageView) {
-        this.pageView = pageView;
+    public EmptyPageActivity(final PageView view) {
+        this.view = view;
     }
 
-    @Override
-    public IsPWidget buildView() {
-        return pageView;
-    }
-
-    @Override
-    public void updateView(final Place place) {}
 }

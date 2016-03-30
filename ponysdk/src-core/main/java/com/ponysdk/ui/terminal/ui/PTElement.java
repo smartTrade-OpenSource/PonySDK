@@ -59,8 +59,6 @@ public class PTElement extends PTComplexPanel<HTMLPanel> {
             uiObject.getElement().setInnerHTML(update.getString(Model.INNER_HTML));
         } else if (update.containsKey(Model.INNER_TEXT)) {
             uiObject.getElement().setInnerText(update.getString(Model.INNER_TEXT));
-        } else if (update.containsKey(Model.CLEAR_INNER_TEXT)) {// ? if null setInnerText of null do
-            uiObject.getElement().setInnerText(null);
         } else {
             super.update(update, uiService);
         }

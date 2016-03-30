@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,10 +25,8 @@ package com.ponysdk.sample.client;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
-import com.ponysdk.impl.webapplication.header.HeaderView;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PLabel;
@@ -50,10 +48,8 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     private PPopupPanel popup;
 
     @Override
-    public IsPWidget buildView() {
-        final HeaderView view = getHeaderView();
+    public void buildView() {
         // view.addActionWidget(createUserAccountMenu(user));
-        return view;
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {
@@ -115,7 +111,8 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                     popup.setPopupPositionAndShow(new PPositionCallback() {
 
                         @Override
-                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
+                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
+                                final int windowHeight) {
                             final int left = windowWidth - 250;
                             popup.setPopupPosition(left, 26);
 

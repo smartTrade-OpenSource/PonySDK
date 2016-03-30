@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,7 +30,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
-public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHandler {
+public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
 
     private UIService uiService;
 
@@ -61,8 +61,8 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHa
             uiObject.getFormatter().insertHorizontalRule();
         } else if (update.containsKey(Model.INSERT_HTML)) {
             uiObject.getFormatter().insertHTML(update.getString(Model.INSERT_HTML));
-        } else if (update.containsKey(Model.IMAGE)) {
-            uiObject.getFormatter().insertImage(update.getString(Model.IMAGE));
+        } else if (update.containsKey(Model.IMAGE_URL)) {
+            uiObject.getFormatter().insertImage(update.getString(Model.IMAGE_URL));
         } else if (update.containsKey(Model.ORDERED)) {
             uiObject.getFormatter().insertOrderedList();
         } else if (update.containsKey(Model.UNORDERED)) {
@@ -109,11 +109,20 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea>implements BlurHa
     }
 
     public enum FontSize {
-        LARGE, MEDIUM, SMALL, X_LARGE, X_SMALL, XX_LARGE, XX_SMALL;
+        LARGE,
+        MEDIUM,
+        SMALL,
+        X_LARGE,
+        X_SMALL,
+        XX_LARGE,
+        XX_SMALL;
     }
 
     public enum Justification {
-        CENTER, FULL, LEFT, RIGHT;
+        CENTER,
+        FULL,
+        LEFT,
+        RIGHT;
     }
 
 }

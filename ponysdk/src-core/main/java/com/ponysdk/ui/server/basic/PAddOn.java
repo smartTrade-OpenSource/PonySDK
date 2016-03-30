@@ -76,7 +76,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
         parser.parse(Model.FACTORY, getModuleName(getClass()));
         if (widget != null) {
             parser.comma();
-            parser.parse(Model.WIDGET, widget.getID());
+            parser.parse(Model.WIDGET_ID, widget.getID());
         }
     }
 

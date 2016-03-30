@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,38 +27,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 
-public class LoginActivity extends AbstractActivity {
+public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
 
     private static Logger log = LoggerFactory.getLogger(LoginActivity.class);
 
-    private DefaultLoginPageView loginPageView;
+    @Override
+    public DefaultLoginPageView getView() {
+        if (view == null) view = new DefaultLoginPageView("PonySDK trading showcase");
+        return super.getView();
+    }
 
     @Override
-    protected IsPWidget buildView() {
+    protected void buildView() {
         log.info("Showing login page");
 
-        loginPageView = new DefaultLoginPageView("PonySDK trading showcase");
+        view.getLoginTextBox().setText("Trader");
+        view.getPasswordTextBox().setText("Trader");
 
-        loginPageView.getLoginTextBox().setText("Trader");
-        loginPageView.getPasswordTextBox().setText("Trader");
+        view.getLoginTextBox().ensureDebugId("login");
+        view.getPasswordTextBox().ensureDebugId("password");
+        view.getLoginButton().ensureDebugId("signin");
 
-        loginPageView.getLoginTextBox().ensureDebugId("login");
-        loginPageView.getPasswordTextBox().ensureDebugId("password");
-        loginPageView.getLoginButton().ensureDebugId("signin");
-
-        loginPageView.addLoginClickHandler(new PClickHandler() {
+        view.addLoginClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
@@ -67,31 +67,26 @@ public class LoginActivity extends AbstractActivity {
 
         });
 
-        loginPageView.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
+        view.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyPress(final PKeyPressEvent keyPressEvent) {
                 doLogin();
             }
         }, PKeyPressEvent.TYPE);
-
-        return loginPageView;
     }
-
-    @Override
-    public void updateView(final Place place) {}
 
     private void doLogin() {
         final User user = new User();
         user.setID(0);
-        user.setLogin(loginPageView.getLogin());
-        user.setName(loginPageView.getLogin());
-        user.setPassword(loginPageView.getPassword());
+        user.setLogin(view.getLogin());
+        user.setName(view.getLogin());
+        user.setPassword(view.getPassword());
 
         // UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
-        loggedInEvent.setBusinessMessage(loginPageView.getLogin() + " is now connected");
+        loggedInEvent.setBusinessMessage(view.getLogin() + " is now connected");
         fireEvent(loggedInEvent);
 
         log.info("Logged with #" + user.getLogin() + "/" + user.getPassword());

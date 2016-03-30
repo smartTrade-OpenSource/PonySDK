@@ -42,11 +42,11 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.WIDGET_SIZE)) {
             final double newSize = update.getDouble(Model.WIDGET_SIZE);
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             uiObject.setWidgetSize(w, newSize);
         } else if (update.containsKey(Model.WIDGET_HIDDEN)) {
             final boolean hidden = update.getBoolean(Model.WIDGET_HIDDEN);
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             uiObject.setWidgetHidden(w, hidden);
         } else if (update.containsKey(Model.ANIMATE)) {
             uiObject.animate(update.getInt(Model.ANIMATE));

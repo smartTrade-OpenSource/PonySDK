@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -54,7 +54,7 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(addHandler.getObjectID());
                 instruction.put(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
-                instruction.put(Model.VALUE, event.getValue());
+                instruction.put(Model.VALUE_CHECKBOX, event.getValue());
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -62,8 +62,8 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.VALUE)) {
-            uiObject.setValue(update.getBoolean(Model.VALUE));
+        if (update.containsKey(Model.VALUE_CHECKBOX)) {
+            uiObject.setValue(update.getBoolean(Model.VALUE_CHECKBOX));
         } else {
             super.update(update, uiService);
         }

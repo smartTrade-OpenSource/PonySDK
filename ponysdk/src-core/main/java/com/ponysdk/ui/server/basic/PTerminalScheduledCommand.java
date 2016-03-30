@@ -35,18 +35,19 @@ import com.ponysdk.ui.terminal.model.Model;
 public abstract class PTerminalScheduledCommand extends PObject {
 
     private String js;
-    private long delayMillis;
+    private int delayMillis;
 
     /**
      * @param js
      */
-    public PTerminalScheduledCommand() {}
+    public PTerminalScheduledCommand() {
+    }
 
     /**
      * @param js
      * @param delay
      */
-    public PTerminalScheduledCommand(final String js, final long delayMillis) {
+    public PTerminalScheduledCommand(final String js, final int delayMillis) {
         this.js = js;
         this.delayMillis = delayMillis;
         init();

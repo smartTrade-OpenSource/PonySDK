@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -40,7 +40,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     private Object nativeObject;
 
     protected void init(final PTInstruction create, final UIService uiService, final T uiObject) {
-        if (this.uiObject != null) { throw new IllegalStateException("init may only be called once."); }
+        if (this.uiObject != null) {
+            throw new IllegalStateException("init may only be called once.");
+        }
         this.uiObject = uiObject;
         if (create != null) {
             this.objectID = create.getObjectID();
@@ -58,8 +60,6 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setWidth(update.getString(Model.WIDGET_WIDTH));
         } else if (update.containsKey(Model.WIDGET_HEIGHT)) {
             uiObject.setHeight(update.getString(Model.WIDGET_HEIGHT));
-        } else if (update.containsKey(Model.WIDGET_FONT_SIZE)) {// TODO nciaravola WIDGET_FONT_SIZE not used
-            uiObject.getElement().getStyle().setProperty(FONT_SIZE, update.getString(Model.WIDGET_FONT_SIZE));
         } else if (update.containsKey(Model.PUT_PROPERTY_KEY)) {
             uiObject.getElement().setPropertyString(update.getString(Model.PUT_PROPERTY_KEY), update.getString(Model.PROPERTY_VALUE));
         } else if (update.containsKey(Model.PUT_ATTRIBUTE_KEY)) {
@@ -93,7 +93,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     }
 
     public UIObject asWidget(final int objectID, final UIService uiService) {
-        if (uiService.getPTObject(objectID) instanceof PTUIObject) { return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast(); }
+        if (uiService.getPTObject(objectID) instanceof PTUIObject) {
+            return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast();
+        }
         throw new IllegalStateException("This object is not an UIObject");
     }
 

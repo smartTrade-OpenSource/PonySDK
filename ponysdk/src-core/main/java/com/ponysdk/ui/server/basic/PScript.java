@@ -116,7 +116,7 @@ public abstract class PScript extends PObject {
 
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, executionID++);
+        parser.parse(Model.COMMAND_ID, executionID++);
         parser.endObject();
     }
 
@@ -146,7 +146,7 @@ public abstract class PScript extends PObject {
 
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, executionID++);
+        parser.parse(Model.COMMAND_ID, executionID++);
         parser.comma();
         parser.parse(Model.CALLBACK);
         parser.endObject();
@@ -191,12 +191,12 @@ public abstract class PScript extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.ERROR_MSG.getKey())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue());
             if (callback != null) {
                 callback.onFailure(instruction.getString(Model.ERROR_MSG.getKey()));
             }
         } else if (instruction.containsKey(Model.RESULT.getKey())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue());
             if (callback != null) {
                 callback.onSuccess(instruction.getString(Model.RESULT.getKey()));
             }

@@ -32,7 +32,10 @@ public enum Model {
     HREF(20, TypeModel.VARIABLE_SIZE),
     TEXT(21, TypeModel.VARIABLE_SIZE),
     HTML(22, TypeModel.VARIABLE_SIZE),
-    WIDGET(23, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    WIDGET_ID(23, TypeModel.INTEGER_SIZE),
+    WIDGET(125, TypeModel.BOOLEAN_SIZE),
+    VALUE_CHECKBOX(239, TypeModel.BOOLEAN_SIZE),
+    VALUE_KEY(240, TypeModel.INTEGER_SIZE),
     VALUE(24, TypeModel.VARIABLE_SIZE), // Multi type ?!
     WORD_WRAP(25, TypeModel.BOOLEAN_SIZE),
     CLEAR(26, TypeModel.NULL_SIZE),
@@ -41,7 +44,8 @@ public enum Model {
     CELL_PADDING(29, TypeModel.INTEGER_SIZE),
     CELL_SPACING(30, TypeModel.INTEGER_SIZE),
     HORIZONTAL_ALIGNMENT(31, TypeModel.INTEGER_SIZE),
-    VERTICAL_ALIGNMENT(32, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    VERTICAL(238, TypeModel.BOOLEAN_SIZE),
+    VERTICAL_ALIGNMENT(32, TypeModel.VARIABLE_SIZE),
     WIDGET_HIDDEN(33, TypeModel.BOOLEAN_SIZE),
     LEFT(34, TypeModel.DOUBLE_SIZE),
     RIGHT(35, TypeModel.DOUBLE_SIZE),
@@ -53,7 +57,7 @@ public enum Model {
     ANIMATE(41, TypeModel.INTEGER_SIZE),
     NAME(42, TypeModel.VARIABLE_SIZE),
     ANIMATION_DURATION(43, TypeModel.INTEGER_SIZE),
-    OPEN(44, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    OPEN(44, TypeModel.BOOLEAN_SIZE),
     IMAGE_URL(45, TypeModel.VARIABLE_SIZE),
     NATIVE(46, TypeModel.VARIABLE_SIZE),
     BIND(47, TypeModel.VARIABLE_SIZE),
@@ -66,7 +70,7 @@ public enum Model {
     REMOVE(54, TypeModel.NULL_SIZE),
     COOKIE_EXPIRE(55, TypeModel.LONG_SIZE),
     ADD(56, TypeModel.NULL_SIZE),
-    MONTH(57, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    TIME(235, TypeModel.LONG_SIZE),
     ANIMATION(58, TypeModel.BOOLEAN_SIZE),
     MAX_LENGTH(59, TypeModel.INTEGER_SIZE),
     VISIBLE_LENGTH(60, TypeModel.INTEGER_SIZE),
@@ -104,8 +108,10 @@ public enum Model {
     REMOVE_DATE_STYLE(92, TypeModel.VARIABLE_SIZE),
     POPUP_CAPTION(94, TypeModel.VARIABLE_SIZE),
     WIDGET_VISIBLE(95, TypeModel.BOOLEAN_SIZE),
-    WIDGET_WIDTH(96, TypeModel.VARIABLE_SIZE), // Multi type ?!
-    WIDGET_HEIGHT(97, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    IMAGE_WIDTH(248, TypeModel.INTEGER_SIZE),
+    IMAGE_HEIGHT(249, TypeModel.INTEGER_SIZE),
+    WIDGET_WIDTH(96, TypeModel.VARIABLE_SIZE),
+    WIDGET_HEIGHT(97, TypeModel.VARIABLE_SIZE),
     WIDGET_TITLE(98, TypeModel.VARIABLE_SIZE),
     STYLE_PRIMARY_NAME(99, TypeModel.VARIABLE_SIZE),
     ENSURE_DEBUG_ID(101, TypeModel.VARIABLE_SIZE),
@@ -130,9 +136,8 @@ public enum Model {
     POPUP_POSITION(121, TypeModel.NULL_SIZE),
     POPUP_POSITION_LEFT(122, TypeModel.INTEGER_SIZE),
     POPUP_POSITION_TOP(123, TypeModel.INTEGER_SIZE),
-    HANDLER_POPUP_POSITION_CALLBACK(124, TypeModel.VARIABLE_SIZE), // Multi type ?!
-    IMAGE(125, TypeModel.VARIABLE_SIZE), // Multi type ?!
-    FIXDELAY(126, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    HANDLER_POPUP_POSITION_CALLBACK(124, TypeModel.VARIABLE_SIZE),
+    FIXDELAY(126, TypeModel.VARIABLE_SIZE),
     DISCLOSURE_PANEL_OPEN_IMG(128, TypeModel.INTEGER_SIZE),
     DISCLOSURE_PANEL_CLOSE_IMG(129, TypeModel.INTEGER_SIZE),
     MIN_SIZE(130, TypeModel.INTEGER_SIZE),
@@ -173,7 +178,7 @@ public enum Model {
     STATE(166, TypeModel.BOOLEAN_SIZE),
     FACTORY(167, TypeModel.VARIABLE_SIZE),
     DIRECTION(168, TypeModel.INTEGER_SIZE),
-    SIZE(169, TypeModel.DOUBLE_SIZE), // Multi type ?!
+    SIZE(169, TypeModel.DOUBLE_SIZE),
     WIDGET_SIZE(170, TypeModel.DOUBLE_SIZE),
     RESIZE(171, TypeModel.NULL_SIZE),
     BEFORE_INDEX(172, TypeModel.INTEGER_SIZE),
@@ -197,6 +202,7 @@ public enum Model {
     HANDLER_SUBMIT_COMPLETE_HANDLER(190, TypeModel.NULL_SIZE),
     LOADING_ON_REQUEST(191, TypeModel.BOOLEAN_SIZE),
     YEAR(192, TypeModel.INTEGER_SIZE),
+    MONTH(57, TypeModel.INTEGER_SIZE),
     DAY(193, TypeModel.INTEGER_SIZE),
     HANDLER_SHOW_RANGE(194, TypeModel.NULL_SIZE),
     END(195, TypeModel.VARIABLE_SIZE),
@@ -214,7 +220,7 @@ public enum Model {
     EVENT_INFO(212, TypeModel.VARIABLE_SIZE),
     POPUP_POSITION_AND_SHOW(213, TypeModel.NULL_SIZE),
     ERROR_MSG(214, TypeModel.VARIABLE_SIZE),
-    ID(216, TypeModel.VARIABLE_SIZE), // Multi type ?!
+    ID(216, TypeModel.VARIABLE_SIZE),
     WINDOW_ID(218, TypeModel.INTEGER_SIZE),
     EVAL(219, TypeModel.VARIABLE_SIZE),
     CALLBACK(220, TypeModel.NULL_SIZE),
@@ -239,23 +245,13 @@ public enum Model {
     STOP_EVENT(247, TypeModel.INTEGER_SIZE),
     BORDER_WIDTH(22, TypeModel.INTEGER_SIZE),
     SPACING(23, TypeModel.INTEGER_SIZE),
-    HANDLER_KEY_SCHEDULER(217, TypeModel.NULL_SIZE),
-    HANDLER_KEY_RESIZE_HANDLER(226, TypeModel.NULL_SIZE),
+    HANDLER_KEY_SCHEDULER(217, TypeModel.NULL_SIZE), // Not used ?
+    HANDLER_KEY_RESIZE_HANDLER(226, TypeModel.NULL_SIZE), // Not used ?
     HANDLER_KEY_SHOW_RANGE(93, TypeModel.NULL_SIZE), // Not used ?
     HANDLER_KEY(208, TypeModel.VARIABLE_SIZE), // Not used ?
     HANDLER_KEY_COMMAND(209, TypeModel.NULL_SIZE), // Not used ?
     POPUP_GLASS_STYLE_NAME(120, TypeModel.VARIABLE_SIZE), // Not used ?
-    DATE_FORMAT(239, TypeModel.VARIABLE_SIZE), // Not used ?
-    TEXTBOX_ID(228, TypeModel.INTEGER_SIZE), // Not used ?
-    WIDGET_FONT_SIZE(240, TypeModel.VARIABLE_SIZE), // Not used ?
-    CLEAR_INNER_TEXT(238, TypeModel.NULL_SIZE), // Not used ?
-    PINGDELAY(127, TypeModel.VARIABLE_SIZE), // Not used ?
-    DATA(235, TypeModel.VARIABLE_SIZE), // Not used ?
-    POLL(215, TypeModel.VARIABLE_SIZE), // Not used ?
-    KEY(206, TypeModel.VARIABLE_SIZE), // Not used ?
-    COOKIES(205, TypeModel.VARIABLE_SIZE), // Not used ?
-    APPLICATION_PING(164, TypeModel.VARIABLE_SIZE), // Not used ?
-    REPAINT(248, TypeModel.VARIABLE_SIZE); // Not used ?
+    TEXTBOX_ID(228, TypeModel.INTEGER_SIZE); // Not used ?
 
     private short key;
     private String keyStr;

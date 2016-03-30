@@ -38,27 +38,28 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the default) or
- * 'clipped' mode. In clipped mode, a viewport is overlaid on top of the image so that a subset of the image
- * will be displayed. In unclipped mode, there is no viewport - the entire image will be visible. Whether an
- * image is in clipped or unclipped mode depends on how the image is constructed, and how it is transformed
- * after construction. Methods will operate differently depending on the mode that the image is in. These
- * differences are detailed in the documentation for each method.
+ * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the
+ * default) or 'clipped' mode. In clipped mode, a viewport is overlaid on top of the image so that a
+ * subset of the image will be displayed. In unclipped mode, there is no viewport - the entire image
+ * will be visible. Whether an image is in clipped or unclipped mode depends on how the image is
+ * constructed, and how it is transformed after construction. Methods will operate differently
+ * depending on the mode that the image is in. These differences are detailed in the documentation
+ * for each method.
  * <p>
- * If an image transitions between clipped mode and unclipped mode, any {@link PElement}-specific attributes
- * added by the user (including style attributes, style names, and style modifiers), except for event
- * listeners, will be lost.
+ * If an image transitions between clipped mode and unclipped mode, any {@link PElement}-specific
+ * attributes added by the user (including style attributes, style names, and style modifiers),
+ * except for event listeners, will be lost.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Image</dt></dd>The outer element</dd>
  * </dl>
- * Transformations between clipped and unclipped state will result in a loss of any style names that were
- * set/added; the only style names that are preserved are those that are mentioned in the static CSS style
- * rules. Due to browser-specific HTML constructions needed to achieve the clipping effect, certain CSS
- * attributes, such as padding and background, may not work as expected when an image is in clipped mode.
- * These limitations can usually be easily worked around by encapsulating the image in a container widget that
- * can itself be styled.
+ * Transformations between clipped and unclipped state will result in a loss of any style names that
+ * were set/added; the only style names that are preserved are those that are mentioned in the
+ * static CSS style rules. Due to browser-specific HTML constructions needed to achieve the clipping
+ * effect, certain CSS attributes, such as padding and background, may not work as expected when an
+ * image is in clipped mode. These limitations can usually be easily worked around by encapsulating
+ * the image in a container widget that can itself be styled.
  */
 public class PImage extends PFocusWidget {
 
@@ -132,11 +133,11 @@ public class PImage extends PFocusWidget {
         }
         if (imageHeight != -1) {
             parser.comma();
-            parser.parse(Model.WIDGET_HEIGHT, imageHeight);
+            parser.parse(Model.IMAGE_HEIGHT, imageHeight);
         }
         if (imageWidth != -1) {
             parser.comma();
-            parser.parse(Model.WIDGET_WIDTH, imageWidth);
+            parser.parse(Model.IMAGE_WIDTH, imageWidth);
         }
     }
 

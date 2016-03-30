@@ -43,7 +43,7 @@ public class PTScript extends AbstractPTObject {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
                 // eventInstruction.put(Model.TYPE_EVENT);
-                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
             } else {
@@ -55,7 +55,7 @@ public class PTScript extends AbstractPTObject {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
                 // eventInstruction.put(Model.TYPE_EVENT);
-                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.ERROR_MSG, e.getMessage());
                 uiService.sendDataToServer(eventInstruction);
             }

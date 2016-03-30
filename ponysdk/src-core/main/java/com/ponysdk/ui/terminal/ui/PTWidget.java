@@ -140,7 +140,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         return null;
     }
 
-    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+            final UIService uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
 
         final JSONArray eventInfo = new JSONArray();
@@ -163,7 +164,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         preventOrStopEvent(event);
     }
 
-    protected void triggerDomEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final DomEvent<?> event) {
+    protected void triggerDomEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+            final UIService uiService, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
         uiService.sendDataToServer(widget, eventInstruction);
         preventOrStopEvent(event);
@@ -176,10 +178,11 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         return eventInstruction;
     }
 
-    protected void triggerOnKeyPress(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final KeyPressEvent event) {
+    protected void triggerOnKeyPress(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+            final UIService uiService, final KeyPressEvent event) {
 
         final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
+        eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
         if (addHandler.containsKey(Model.KEY_FILTER)) {
             final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
@@ -197,7 +200,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         preventOrStopEvent(event);
     }
 
-    private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType, final UIService uiService) {
+    private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType,
+            final UIService uiService) {
 
         final DomHandlerType h = DomHandlerType.values()[domHandlerType];
         switch (h) {
@@ -304,7 +308,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
                             changeHandlerInstruction.put(Model.VALUE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                            eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(Model.KEY_FILTER)) {
                                 final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
@@ -331,7 +335,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                            eventInstruction.put(Model.VALUE, event.getNativeEvent().getKeyCode());
+                            eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
                             if (addHandler.containsKey(Model.KEY_FILTER)) {
                                 final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -40,11 +40,11 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that stacks its children vertically, displaying only one at a time, with a header for each child
- * which the user can click to display.
+ * A panel that stacks its children vertically, displaying only one at a time, with a header for
+ * each child which the user can click to display.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
- * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -58,7 +58,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>applied to each child widget
  * </dl>
  */
-public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
+public class PStackLayoutPanel extends PComposite
+        implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
@@ -113,7 +114,9 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
 
     @Override
     public boolean remove(final PWidget child) {
-        if (child.getParent() != this) { return false; }
+        if (child.getParent() != this) {
+            return false;
+        }
         orphan(child);
         children.remove(child);
         saveRemove(child.getID(), ID);
@@ -145,12 +148,12 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
     }
 
     private void adopt(final PWidget child) {
-        assert(child.getParent() == null);
+        assert child.getParent() == null;
         child.setParent(this);
     }
 
     private void orphan(final PWidget child) {
-        assert(child.getParent() == this);
+        assert child.getParent() == this;
         child.setParent(null);
     }
 
@@ -197,13 +200,13 @@ public class PStackLayoutPanel extends PComposite implements HasPWidgets, HasPSe
             parser.parse(Model.WINDOW_ID, window.getID());
         }
         parser.comma();
-        parser.parse(Model.OPEN, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     /**
      * Set the duration of the animated transition between children.
-     * 
+     *
      * @param duration
      *            the duration in milliseconds.
      */

@@ -39,8 +39,8 @@ public class PTImage extends PTWidget<Image> {
             if (create.containsKey(Model.IMAGE_LEFT)) {
                 final int left = create.getInt(Model.IMAGE_LEFT);
                 final int top = create.getInt(Model.IMAGE_TOP);
-                final int width = create.getInt(Model.WIDGET_WIDTH);
-                final int height = create.getInt(Model.WIDGET_HEIGHT);
+                final int width = create.getInt(Model.IMAGE_WIDTH);
+                final int height = create.getInt(Model.IMAGE_HEIGHT);
 
                 init(create, uiService, new Image(url, left, top, width, height));
             } else {
@@ -54,7 +54,8 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void addHandler(final PTInstruction addHandler, final UIService uiService) {
         if (addHandler.containsKey(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER)) {
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID + "=" + addHandler.getString(Model.STREAM_REQUEST_ID));
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID
+                    + "=" + addHandler.getString(Model.STREAM_REQUEST_ID));
         } else {
             super.addHandler(addHandler, uiService);
         }

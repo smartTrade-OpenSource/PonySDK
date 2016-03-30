@@ -43,15 +43,15 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.MIN_SIZE)) {
             final int minSize = update.getInt(Model.MIN_SIZE);
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             cast().setWidgetMinSize(w, minSize);
         } else if (update.containsKey(Model.SNAP_CLOSED_SIZE)) {
             final int snapClosedSize = update.getInt(Model.SNAP_CLOSED_SIZE);
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             cast().setWidgetSnapClosedSize(w, snapClosedSize);
         } else if (update.containsKey(Model.TOGGLE_DISPLAY_ALLOWED)) {
             final boolean enable = update.getBoolean(Model.TOGGLE_DISPLAY_ALLOWED);
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             cast().setWidgetToggleDisplayAllowed(w, enable);
         } else {
             super.update(update, uiService);

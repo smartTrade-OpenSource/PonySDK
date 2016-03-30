@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -35,25 +35,37 @@ import com.ponysdk.core.place.PlaceChangeRequestEvent;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
-public abstract class AbstractActivity implements Activity {
+public abstract class AbstractActivity<T extends IsPWidget> implements Activity {
 
+    protected boolean firstStart = true;
     protected boolean started = false;
 
     protected PAcceptsOneWidget world;
-    protected IsPWidget view;
+    protected T view;
 
-    public AbstractActivity() {}
+    public AbstractActivity() {
+    }
 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
         this.world = world;
         this.started = true;
 
-        if (view == null) this.view = buildView();
+        this.world.setWidget(getView());
 
-        this.world.setWidget(view);
+        if (firstStart) {
+            buildView();
+            firstStart = false;
+        }
 
         updateView(place);
+    }
+
+    /**
+     * @return
+     */
+    public T getView() {
+        return view;
     }
 
     @Override
@@ -61,9 +73,13 @@ public abstract class AbstractActivity implements Activity {
         this.started = false;
     }
 
-    protected abstract IsPWidget buildView();
+    protected void buildView() {
+        // Nothing to do
+    }
 
-    protected abstract void updateView(Place place);
+    protected void updateView(Place place) {
+        // Nothing to do
+    }
 
     public void goTo(final Place place) {
         UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
