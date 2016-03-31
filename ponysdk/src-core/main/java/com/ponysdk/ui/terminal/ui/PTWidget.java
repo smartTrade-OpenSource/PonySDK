@@ -361,7 +361,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDragStart(final DragStartEvent event) {
-                        event.setData("text", Long.toString(addHandler.getObjectID()));
+                        event.setData("text", String.valueOf(addHandler.getObjectID()));
                         event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
                         triggerDomEvent(addHandler, widget, h, uiService, event);
                     }

@@ -69,19 +69,18 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER.getKey())) {
-            final String data = jsonObject.getString(Model.VALUE.getKey());
-            Date date = null;
-            if (data != null && !data.isEmpty()) date = new Date(Long.parseLong(data));
+            final long data = jsonObject.getJsonNumber(Model.DATE.getKey()).longValue();
+            Date date = data != -1 ? date = new Date(data) : null;
 
             year = jsonObject.getInt(Model.YEAR.getKey());
             month = jsonObject.getInt(Model.MONTH.getKey());
             day = jsonObject.getInt(Model.DAY.getKey());
             onValueChange(new PValueChangeEvent<>(this, date));
         } else if (jsonObject.containsKey(Model.HANDLER_SHOW_RANGE)) {
-            final String start = jsonObject.getString(Model.START.getKey());
-            final String end = jsonObject.getString(Model.END.getKey());
-            final Date sd = new Date(Long.parseLong(start));
-            final Date ed = new Date(Long.parseLong(end));
+            final long start = jsonObject.getJsonNumber(Model.START_DATE.getKey()).longValue();
+            final long end = jsonObject.getJsonNumber(Model.END_DATE.getKey()).longValue();
+            final Date sd = new Date(start);
+            final Date ed = new Date(end);
 
             // TODO nicolas Use date ???
 
@@ -158,11 +157,11 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(Model.VALUE, date != null ? Long.toString(date.getTime()) : "");
+        saveUpdate(Model.DATE, date != null ? date.getTime() : -1);
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(Model.MONTH, date != null ? Long.toString(date.getTime()) : "");
+        saveUpdate(Model.TIME, date != null ? date.getTime() : -1);
     }
 
     /**

@@ -107,13 +107,13 @@ public abstract class PScript extends PObject {
             parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
 
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
             parser.comma();
+            parser.parse(Model.WINDOW_ID, windowID);
         }
 
+        parser.comma();
         parser.parse(Model.EVAL, js);
         parser.comma();
         parser.parse(Model.COMMAND_ID, executionID++);
@@ -137,13 +137,13 @@ public abstract class PScript extends PObject {
             parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
 
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
             parser.comma();
+            parser.parse(Model.WINDOW_ID, windowID);
         }
 
+        parser.comma();
         parser.parse(Model.EVAL, js);
         parser.comma();
         parser.parse(Model.COMMAND_ID, executionID++);

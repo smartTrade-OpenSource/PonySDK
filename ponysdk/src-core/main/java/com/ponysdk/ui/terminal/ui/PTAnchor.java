@@ -40,13 +40,13 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
     public void update(final PTInstruction update, final UIService uiService) {
         super.update(update, uiService);
         if (update.containsKey(Model.TEXT.getKey())) {
-            uiObject.setText(update.getString(Model.TEXT.getKey()));
+            uiObject.setText(update.getString(Model.TEXT));
         }
         if (update.containsKey(Model.HTML.getKey())) {
-            uiObject.setHTML(update.getString(Model.HTML.getKey()));
+            uiObject.setHTML(update.getString(Model.HTML));
         }
         if (update.containsKey(Model.HREF.getKey())) {
-            uiObject.setHref(update.getString(Model.HREF.getKey()));
+            uiObject.setHref(update.getString(Model.HREF));
         }
     }
 
