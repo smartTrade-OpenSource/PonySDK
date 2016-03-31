@@ -1,8 +1,6 @@
 
 package com.ponysdk.ui.terminal.socket;
 
-import java.util.LinkedList;
-
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -15,8 +13,6 @@ import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
-import elemental.html.Blob;
-import elemental.html.FileReader;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
@@ -24,10 +20,7 @@ public class WebSocketClient2 implements EventListener {
 
     private final WebSocket webSocket;
 
-    private final LinkedList<Blob> queue = new LinkedList<>();
-
     private final WebSocketCallback callback;
-    private final FileReader fileReader;
 
     private WebSocketRequestBuilder requestBuilder;
 
@@ -46,9 +39,7 @@ public class WebSocketClient2 implements EventListener {
         webSocket.setOnerror(this);
         webSocket.setOnmessage(this);
         webSocket.setOnopen(this);
-
-        fileReader = window.newFileReader();
-        fileReader.setOnload(this);
+        webSocket.setBinaryType("arraybuffer");
     }
 
     public void send(final String message) {
@@ -72,23 +63,8 @@ public class WebSocketClient2 implements EventListener {
             } else if (event.getType().equals("close")) {
                 callback.disconnected();
             } else if (event.getType().equals("message")) {
-                final Blob blob = (Blob) ((MessageEvent) event).getData();
-                if (fileReader.getReadyState() != 1) {
-                    fileReader.readAsArrayBuffer(blob);
-                } else {
-                    queue.add(blob);
-                }
-            } else if (event.getType().equals("error")) {
-                // callback.(message);
-            }
-        } else if (event.getSrcElement() == fileReader) {
-            if (event.getType().equals("load")) {
-                callback.message((ArrayBuffer) fileReader.getResult());
-            }
-
-            if (!queue.isEmpty()) {
-                final Blob blob = queue.removeFirst();
-                fileReader.readAsArrayBuffer(blob);
+                final ArrayBuffer arrayBuffer = (ArrayBuffer) ((MessageEvent) event).getData();
+                callback.message(arrayBuffer);
             }
         }
     }
