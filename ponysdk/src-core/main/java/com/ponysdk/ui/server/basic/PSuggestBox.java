@@ -113,6 +113,9 @@ public class PSuggestBox extends PWidget
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.ORACLE, suggestOracle.getID());
     }
 

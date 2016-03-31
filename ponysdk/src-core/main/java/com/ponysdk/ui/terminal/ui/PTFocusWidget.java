@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -41,27 +41,32 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.LOADING_ON_REQUEST)) {
             showLoadingOnRequest = update.getBoolean(Model.LOADING_ON_REQUEST);
-        } else if (update.containsKey(Model.ENABLED_ON_REQUEST)) {
+        }
+        if (update.containsKey(Model.ENABLED_ON_REQUEST)) {
             enabledOnRequest = update.getBoolean(Model.ENABLED_ON_REQUEST);
-        } else if (update.containsKey(Model.END_OF_PROCESSING)) {
+        }
+        if (update.containsKey(Model.END_OF_PROCESSING)) {
             if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
             if (!enabledOnRequest) uiObject.setEnabled(enabled);
-        } else if (update.containsKey(Model.ENABLED)) {
+        }
+        if (update.containsKey(Model.ENABLED)) {
             this.enabled = update.getBoolean(Model.ENABLED);
             uiObject.setEnabled(enabled);
-        } else if (update.containsKey(Model.TABINDEX)) {
+        }
+        if (update.containsKey(Model.TABINDEX)) {
             uiObject.setTabIndex(update.getInt(Model.TABINDEX));
-        } else if (update.containsKey(Model.FOCUSED)) {
+        }
+        if (update.containsKey(Model.FOCUSED)) {
             uiObject.setFocus(update.getBoolean(Model.FOCUSED));
-        } else {
-            super.update(update, uiService);
         }
     }
 
     @Override
-    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+            final UIService uiService, final MouseEvent<?> event) {
         if (!enabledOnRequest) uiObject.setEnabled(false);
         if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
         super.triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);

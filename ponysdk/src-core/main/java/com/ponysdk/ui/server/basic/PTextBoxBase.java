@@ -31,6 +31,7 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
@@ -39,7 +40,7 @@ import com.ponysdk.ui.terminal.model.Model;
 
 public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
-    private static final String EMPTY = "";
+    protected static final String EMPTY = "";
 
     private List<PValueChangeHandler<String>> handlers;
 
@@ -52,10 +53,19 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     public PTextBoxBase(final String text) {
         super();
+        this.text = text != null ? text : EMPTY;
         init();
-
-        setText(text);
         saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
+        super.enrichOnInit(parser);
+
+        if (!EMPTY.equals(text)) {
+            parser.comma();
+            parser.parse(Model.TEXT, this.text);
+        }
     }
 
     @Override

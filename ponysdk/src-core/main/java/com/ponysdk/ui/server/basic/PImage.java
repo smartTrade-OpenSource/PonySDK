@@ -119,6 +119,8 @@ public class PImage extends PFocusWidget {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
         if (url != null) {
             parser.comma();
             parser.parse(Model.IMAGE_URL, url);

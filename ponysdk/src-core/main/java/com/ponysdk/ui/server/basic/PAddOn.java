@@ -72,6 +72,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
         parser.comma();
         parser.parse(Model.FACTORY, getModuleName(getClass()));
         if (widget != null) {
@@ -129,7 +131,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
         update(objectBuilder);
     }
 
-    protected void onAttached() {}
+    protected void onAttached() {
+    }
 
     protected void sendPendingJSONData() {
         final Iterator<JsonObjectBuilder> iterator = pendingDataToSend.iterator();
@@ -160,10 +163,10 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (final Object object : args) {
                 if (object != null) {
-                    if (object instanceof JsonValue) arrayBuilder.add(((JsonValue) object));
-                    else if (object instanceof Boolean) arrayBuilder.add(((Boolean) object));
-                    else if (object instanceof Integer) arrayBuilder.add(((Integer) object));
-                    else if (object instanceof Long) arrayBuilder.add(((Long) object));
+                    if (object instanceof JsonValue) arrayBuilder.add((JsonValue) object);
+                    else if (object instanceof Boolean) arrayBuilder.add((Boolean) object);
+                    else if (object instanceof Integer) arrayBuilder.add((Integer) object);
+                    else if (object instanceof Long) arrayBuilder.add((Long) object);
                     else arrayBuilder.add(object.toString());
                 }
             }

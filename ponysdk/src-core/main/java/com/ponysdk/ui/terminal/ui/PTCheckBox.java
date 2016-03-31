@@ -35,6 +35,15 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new CheckBox());
+        update(create, uiService);
+    }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
+        if (update.containsKey(Model.VALUE_CHECKBOX)) {
+            uiObject.setValue(update.getBoolean(Model.VALUE_CHECKBOX));
+        }
     }
 
     @Override
@@ -58,15 +67,6 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
-    }
-
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.VALUE_CHECKBOX)) {
-            uiObject.setValue(update.getBoolean(Model.VALUE_CHECKBOX));
-        } else {
-            super.update(update, uiService);
-        }
     }
 
 }

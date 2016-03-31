@@ -119,6 +119,9 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.MENU_BAR_IS_VERTICAL, vertical);
     }
 

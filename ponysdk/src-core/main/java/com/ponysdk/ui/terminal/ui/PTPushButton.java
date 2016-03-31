@@ -34,5 +34,6 @@ public class PTPushButton extends PTCustomButton<PushButton> {
     public void create(final PTInstruction create, final UIService uiService) {
         final PTImage image = (PTImage) uiService.getPTObject(create.getInt(Model.WIDGET_ID));
         init(create, uiService, new PushButton(image.cast()));
+        update(create, uiService);
     }
 }

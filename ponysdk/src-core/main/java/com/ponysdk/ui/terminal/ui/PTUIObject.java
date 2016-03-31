@@ -56,37 +56,53 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.WIDGET_WIDTH)) {
             uiObject.setWidth(update.getString(Model.WIDGET_WIDTH));
-        } else if (update.containsKey(Model.WIDGET_HEIGHT)) {
+        }
+        if (update.containsKey(Model.WIDGET_HEIGHT)) {
             uiObject.setHeight(update.getString(Model.WIDGET_HEIGHT));
-        } else if (update.containsKey(Model.PUT_PROPERTY_KEY)) {
+        }
+        if (update.containsKey(Model.PUT_PROPERTY_KEY)) {
             uiObject.getElement().setPropertyString(update.getString(Model.PUT_PROPERTY_KEY), update.getString(Model.PROPERTY_VALUE));
-        } else if (update.containsKey(Model.PUT_ATTRIBUTE_KEY)) {
+        }
+        if (update.containsKey(Model.PUT_ATTRIBUTE_KEY)) {
             uiObject.getElement().setAttribute(update.getString(Model.PUT_ATTRIBUTE_KEY), update.getString(Model.ATTRIBUTE_VALUE));
-        } else if (update.containsKey(Model.REMOVE_ATTRIBUTE_KEY)) {
+        }
+        if (update.containsKey(Model.REMOVE_ATTRIBUTE_KEY)) {
             uiObject.getElement().removeAttribute(update.getString(Model.REMOVE_ATTRIBUTE_KEY));
-        } else if (update.containsKey(Model.STYLE_NAME)) {
+        }
+        if (update.containsKey(Model.STYLE_NAME)) {
             uiObject.setStyleName(update.getString(Model.STYLE_NAME));
-        } else if (update.containsKey(Model.STYLE_PRIMARY_NAME)) {
+        }
+        if (update.containsKey(Model.STYLE_PRIMARY_NAME)) {
             uiObject.setStylePrimaryName(update.getString(Model.STYLE_PRIMARY_NAME));
-        } else if (update.containsKey(Model.ADD_STYLE_NAME)) {
+        }
+        if (update.containsKey(Model.ADD_STYLE_NAME)) {
             uiObject.addStyleName(update.getString(Model.ADD_STYLE_NAME));
-        } else if (update.containsKey(Model.REMOVE_STYLE_NAME)) {
+        }
+        if (update.containsKey(Model.REMOVE_STYLE_NAME)) {
             uiObject.removeStyleName(update.getString(Model.REMOVE_STYLE_NAME));
-        } else if (update.containsKey(Model.WIDGET_VISIBLE)) {
+        }
+        if (update.containsKey(Model.WIDGET_VISIBLE)) {
             uiObject.setVisible(update.getBoolean(Model.WIDGET_VISIBLE));
-        } else if (update.containsKey(Model.ENSURE_DEBUG_ID)) {
+        }
+        if (update.containsKey(Model.ENSURE_DEBUG_ID)) {
             uiObject.ensureDebugId(update.getString(Model.ENSURE_DEBUG_ID));
-        } else if (update.containsKey(Model.WIDGET_TITLE)) {
+        }
+        if (update.containsKey(Model.WIDGET_TITLE)) {
             uiObject.setTitle(update.getString(Model.WIDGET_TITLE));
-        } else if (update.containsKey(Model.PUT_STYLE_KEY)) {
+        }
+        if (update.containsKey(Model.PUT_STYLE_KEY)) {
             uiObject.getElement().getStyle().setProperty(update.getString(Model.PUT_STYLE_KEY), update.getString(Model.STYLE_VALUE));
-        } else if (update.containsKey(Model.REMOVE_STYLE_KEY)) {
+        }
+        if (update.containsKey(Model.REMOVE_STYLE_KEY)) {
             uiObject.getElement().getStyle().clearProperty(update.getString(Model.REMOVE_STYLE_KEY));
-        } else if (update.containsKey(Model.BIND)) {
+        }
+        if (update.containsKey(Model.BIND)) {
             nativeObject = bind(update.getString(Model.BIND), String.valueOf(objectID), uiObject.getElement());
-        } else if (update.containsKey(Model.NATIVE)) {
+        }
+        if (update.containsKey(Model.NATIVE)) {
             final JSONObject object = update.getObject(Model.NATIVE);
             sendToNative(String.valueOf(objectID), nativeObject, object.getJavaScriptObject());
         }

@@ -32,12 +32,12 @@ public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.TEXT)) {
             uiObject.setText(update.getString(Model.TEXT));
-        } else if (update.containsKey(Model.HTML)) {
+        }
+        if (update.containsKey(Model.HTML)) {
             uiObject.setHTML(update.getString(Model.HTML));
-        } else {
-            super.update(update, uiService);
         }
     }
 

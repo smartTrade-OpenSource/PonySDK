@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,16 +33,17 @@ public class PTHTML extends PTLabel {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new HTML());
+        update(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.HTML)) {
             cast().setHTML(update.getString(Model.HTML));
-        } else if (update.containsKey(Model.WORD_WRAP)) {
+        }
+        if (update.containsKey(Model.WORD_WRAP)) {
             cast().setWordWrap(update.getBoolean(Model.WORD_WRAP));
-        } else {
-            super.update(update, uiService);
         }
     }
 

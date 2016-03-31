@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,8 +28,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A rectangular grid that can contain text, html, or a child {@link PWidget} within its cells. It must be
- * resized explicitly to the desired number of rows and columns.
+ * A rectangular grid that can contain text, html, or a child {@link PWidget} within its cells. It
+ * must be resized explicitly to the desired number of rows and columns.
  */
 public class PGrid extends PHTMLTable {
 
@@ -51,10 +51,16 @@ public class PGrid extends PHTMLTable {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        parser.comma();
-        parser.parse(Model.ROW, rows);
-        parser.comma();
-        parser.parse(Model.COLUMN, columns);
+        super.enrichOnInit(parser);
+
+        if (rows != 0) {
+            parser.comma();
+            parser.parse(Model.ROW, rows);
+        }
+        if (columns != 0) {
+            parser.comma();
+            parser.parse(Model.COLUMN, columns);
+        }
     }
 
     @Override

@@ -79,6 +79,9 @@ public class PStackLayoutPanel extends PComposite
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
     }
 

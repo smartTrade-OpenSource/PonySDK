@@ -46,6 +46,8 @@ public class PPushButton extends PButton {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.WIDGET_ID, image.getID());
     }
 

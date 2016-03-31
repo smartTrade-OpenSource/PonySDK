@@ -46,16 +46,17 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
             }
         });
         super.init(create, uiService, uiObject);
+        update(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.TEXT)) {
             uiObject.setText(update.getString(Model.TEXT));
-        } else if (update.containsKey(Model.PLACEHOLDER)) {
+        }
+        if (update.containsKey(Model.PLACEHOLDER)) {
             uiObject.getElement().setAttribute("placeholder", update.getString(Model.PLACEHOLDER));
-        } else {
-            super.update(update, uiService);
         }
     }
 

@@ -33,18 +33,20 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new Anchor());
+        update(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
         if (update.containsKey(Model.TEXT.getKey())) {
             uiObject.setText(update.getString(Model.TEXT.getKey()));
-        } else if (update.containsKey(Model.HTML.getKey())) {
+        }
+        if (update.containsKey(Model.HTML.getKey())) {
             uiObject.setHTML(update.getString(Model.HTML.getKey()));
-        } else if (update.containsKey(Model.HREF.getKey())) {
+        }
+        if (update.containsKey(Model.HREF.getKey())) {
             uiObject.setHref(update.getString(Model.HREF.getKey()));
-        } else {
-            super.update(update, uiService);
         }
     }
 

@@ -46,6 +46,25 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     public void create(final PTInstruction create, final UIService uiService) {
         final PTDatePicker datePicker = (PTDatePicker) uiService.getPTObject(create.getInt(Model.PICKER));
         init(create, uiService, new MyDateBox(datePicker.cast(), null, DEFAULT_FORMAT));
+        update(create, uiService);
+    }
+
+    @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
+        final MyDateBox dateBox = cast();
+        if (update.containsKey(Model.VALUE)) {
+            dateBox.getTextBox().setText(update.getString(Model.VALUE));
+        }
+        if (update.containsKey(Model.DATE_FORMAT_PATTERN)) {
+            dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT_PATTERN))));
+        }
+        if (update.containsKey(Model.ENABLED)) {
+            dateBox.setEnabled(update.getBoolean(Model.ENABLED));
+        }
+        if (update.containsKey(Model.TIME)) {
+            dateBox.setDefaultMonth(update.getLong(Model.TIME));
+        }
     }
 
     @Override
@@ -79,23 +98,6 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
         instruction.put(Model.VALUE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);
-    }
-
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final MyDateBox dateBox = cast();
-
-        if (update.containsKey(Model.VALUE)) {
-            dateBox.getTextBox().setText(update.getString(Model.VALUE));
-        } else if (update.containsKey(Model.DATE_FORMAT_PATTERN)) {
-            dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(update.getString(Model.DATE_FORMAT_PATTERN))));
-        } else if (update.containsKey(Model.ENABLED)) {
-            dateBox.setEnabled(update.getBoolean(Model.ENABLED));
-        } else if (update.containsKey(Model.TIME)) {
-            dateBox.setDefaultMonth(update.getLong(Model.TIME));
-        } else {
-            super.update(update, uiService);
-        }
     }
 
     public static class MyDateBox extends DateBox {

@@ -121,7 +121,12 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        if (autoHide) parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
+        super.enrichOnInit(parser);
+
+        if (autoHide) {
+            parser.comma();
+            parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
+        }
     }
 
     @Override

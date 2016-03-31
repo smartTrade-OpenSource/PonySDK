@@ -83,6 +83,17 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
     private final Set<Integer> stoppedEvents = new HashSet<>();
 
     @Override
+    public void update(final PTInstruction update, final UIService uiService) {
+        super.update(update, uiService);
+        if (update.containsKey(Model.PREVENT_EVENT)) {
+            preventedEvents.add(update.getInt(Model.PREVENT_EVENT));
+        }
+        if (update.containsKey(Model.STOP_EVENT)) {
+            stoppedEvents.add(update.getInt(Model.STOP_EVENT));
+        }
+    }
+
+    @Override
     public void addHandler(final PTInstruction instruction, final UIService uiService) {
         if (instruction.containsKey(Model.HANDLER_DOM_HANDLER)) {
             final int domHandlerType = instruction.getInt(Model.DOM_HANDLER_CODE);
@@ -103,18 +114,6 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
             // removeDomHandler(removeHandler, w, domHandlerType, uiService);
         } else {
             super.removeHandler(removeHandler, uiService);
-        }
-
-    }
-
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.PREVENT_EVENT)) {
-            preventedEvents.add(update.getInt(Model.PREVENT_EVENT));
-        } else if (update.containsKey(Model.STOP_EVENT)) {
-            stoppedEvents.add(update.getInt(Model.STOP_EVENT));
-        } else {
-            super.update(update, uiService);
         }
     }
 
