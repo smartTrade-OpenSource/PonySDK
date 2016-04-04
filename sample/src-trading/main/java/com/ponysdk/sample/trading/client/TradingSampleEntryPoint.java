@@ -11,7 +11,9 @@ import com.ponysdk.core.place.PlaceHistoryHandler;
 import com.ponysdk.core.place.PlaceHistoryMapper;
 import com.ponysdk.sample.trading.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.trading.client.place.LoginPlace;
+import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
+import com.ponysdk.ui.server.basic.PRootPanel;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 
 public class TradingSampleEntryPoint implements EntryPoint {
@@ -44,8 +46,17 @@ public class TradingSampleEntryPoint implements EntryPoint {
         final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);
 
-        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(uiContext.getHistory(), historyMapper, placeController, eventBus);
+        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(uiContext.getHistory(), historyMapper, placeController,
+                eventBus);
         historyHandler.setDefaultPlace(new LoginPlace());
         historyHandler.handleCurrentHistory();
+
+        PRootPanel.get().add(createReconnectionPanel());
+    }
+
+    private PElement createReconnectionPanel() {
+        final PElement pElement = new PElement("div");
+        pElement.setAttribute("id", "reconnection");
+        return pElement;
     }
 }

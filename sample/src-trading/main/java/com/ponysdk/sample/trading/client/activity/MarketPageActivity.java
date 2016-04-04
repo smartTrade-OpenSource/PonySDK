@@ -2,6 +2,7 @@
 package com.ponysdk.sample.trading.client.activity;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.sample.trading.server.TradingServiceImpl;
 import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;
@@ -52,15 +54,24 @@ public class MarketPageActivity extends PageActivity {
         // boxContainer.add(buildFXBox(md.currency));
         // }
 
-        for (final String currency : Arrays.asList("EURUSD", "USDEUR", "USDEUR", "EURAUD")) {
-            boxContainer.add(buildFXBox(currency));
-        }
-
         final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setWidget(boxContainer);
         scrollPanel.setSizeFull();
 
-        pageView.setWidget(scrollPanel);
+        view.setWidget(scrollPanel);
+
+        final List<String> asList = Arrays.asList("EURUSD", "USDEUR", "EURAUD");
+        for (int i = 0; i < 1000; i++) {
+            for (final String currency : asList) {
+                final PFlowPanel box = new PFlowPanel();
+                box.addStyleName("widget");
+                boxContainer.add(box);
+
+                buildFXBox(box, currency);
+            }
+        }
+
+        final TradingServiceImpl t = new TradingServiceImpl();
     }
 
     @Override
@@ -71,9 +82,7 @@ public class MarketPageActivity extends PageActivity {
     protected void onLeavingPage() {
     }
 
-    private PWidget buildFXBox(final String currency) {
-        final PFlowPanel box = new PFlowPanel();
-        box.addStyleName("widget");
+    private PWidget buildFXBox(PFlowPanel box, final String currency) {
 
         final PFlowPanel background = new PFlowPanel();
         background.addStyleName("background");
@@ -123,13 +132,7 @@ public class MarketPageActivity extends PageActivity {
 
         final PHTML sell = new PHTML("<div></div>");
         sell.addStyleName("sell");
-        sell.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PNotificationManager.showHumanizedNotification("Sell clicked!");
-            }
-        });
+        sell.addClickHandler((clickEvent) -> PNotificationManager.showHumanizedNotification("Sell clicked!"));
         box.add(sell);
 
         final PLabel sellPipHead = new PLabel("offer");
@@ -167,31 +170,31 @@ public class MarketPageActivity extends PageActivity {
         selector.addStyleName("selector");
 
         box.addDomHandler(event -> {
-        }, PDragStartEvent.TYPE);
+        } , PDragStartEvent.TYPE);
 
         box.addDomHandler(event -> {
+            box.removeStyleName("dragenter");
+            final PWidget source = event.getDragSource();
+            if (source != null && source != box) {
+                final int dropIndex = boxContainer.getWidgetIndex(box);
+                boxContainer.remove(source);
+                boxContainer.insert(source, dropIndex);
+            }
+        } , PDropEvent.TYPE);
+
+        box.addDomHandler(event -> {
+            if (currentDrag == null || !currentDrag.equals(box)) {
+                box.addStyleName("dragenter");
+                if (currentDrag != null) currentDrag.removeStyleName("dragenter");
+                currentDrag = box;
+            }
+        } , PDragEnterEvent.TYPE);
+
+        box.addDomHandler(event -> {
+            if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
-                final PWidget source = event.getDragSource();
-                if (source != null && source != box) {
-                    final int dropIndex = boxContainer.getWidgetIndex(box);
-                    boxContainer.remove(source);
-                    boxContainer.insert(source, dropIndex);
-                }
-        }, PDropEvent.TYPE);
-
-        box.addDomHandler(event -> {
-                if (currentDrag == null || !currentDrag.equals(box)) {
-                    box.addStyleName("dragenter");
-                    if (currentDrag != null) currentDrag.removeStyleName("dragenter");
-                    currentDrag = box;
-                }
-        }, PDragEnterEvent.TYPE);
-
-        box.addDomHandler(event -> {
-                if (!currentDrag.equals(box)) {
-                    box.removeStyleName("dragenter");
-                }
-        }, PDragLeaveEvent.TYPE);
+            }
+        } , PDragLeaveEvent.TYPE);
 
         UIContext.get().addDataListener(new DataListener() {
 
@@ -244,14 +247,13 @@ public class MarketPageActivity extends PageActivity {
         // // HandlerRegistration registration = null;
         // if (PPusher.get().getPusherState() == PusherState.STARTED) priceCommand.execute();
         // //
-        // // close.addClickHandler(new PClickHandler() {
-        // //
-        // // @Override
-        // // public void onClick(final PClickEvent event) {
-        // // box.removeFromParent();
-        // // registration.removeHandler();
-        // // }
-        // // });
+        close.addClickHandler(new PClickHandler() {
+
+            @Override
+            public void onClick(final PClickEvent event) {
+                box.removeFromParent();
+            }
+        });
 
         return box;
     }
