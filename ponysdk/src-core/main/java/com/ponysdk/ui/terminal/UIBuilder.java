@@ -45,7 +45,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
@@ -70,6 +69,7 @@ import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.extension.AddonFactory;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
@@ -203,10 +203,43 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     public void update(final ArrayBuffer message) {
-        final String charMessage = PonySDK.fromCharCode(message);
+        int position = 0;
+
+        final String charMessage = PonySDK.getString(message, position);
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Message : " + charMessage);
-        final JSONValue data = JSONParser.parseStrict(charMessage);
-        update(data);
+
+        JSONObject object = new JSONObject();
+        BinaryModel pair = BinaryModel.getObject(message, position);
+        //log.severe("First : " + pair.toString());
+        position = pair.getPosition();
+        object.put(pair.getModel().getKey(), pair.getValue());
+        instructions.add(new PTInstruction(object.getJavaScriptObject()));
+        while (position < message.getByteLength()) {
+            boolean sameObject = true;
+            while (sameObject) {
+                pair = BinaryModel.getObject(message, position);
+                position = pair.getPosition();
+                //log.severe("Position : " + position + " - " + message.getByteLength());
+
+                if (pair.getModel().isFirstElement()) {
+                    //log.severe("New Object : " + pair.toString());
+                    sameObject = false;
+                    object = new JSONObject();
+                    instructions.add(new PTInstruction(object.getJavaScriptObject()));
+                } else {
+                    //log.severe("Next : " + pair.toString());
+                }
+
+                object.put(pair.getModel().getKey(), pair.getValue());
+
+                if (position >= message.getByteLength()) break;
+            }
+        }
+
+        if (!instructions.isEmpty()) AnimationScheduler.get().requestAnimationFrame(this);
+
+        //        final JSONValue data = JSONParser.parseStrict(charMessage);
+        //        update(data);
     }
 
     @Override
@@ -514,8 +547,10 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     public void sendDataToServer(final List<PTInstruction> instructions) {
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < instructions.size(); i++)
+        for (int i = 0; i < instructions.size(); i++) {
+            // TODO Weird set, always 0 ???
             jsonArray.set(0, instructions.get(0));
+        }
 
         sendDataToServer(jsonArray);
     }
@@ -541,8 +576,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             stackedErrors.clear();
             requestData.put(Model.APPLICATION_ERRORS, errors);
         }
-
-        // requestData.put(Model.APPLICATION_SEQ_NUM, nextSent++);
 
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 

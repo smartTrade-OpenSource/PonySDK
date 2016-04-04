@@ -96,7 +96,7 @@ public class Parser2 implements Parser {
     }
 
     @Override
-    public void parseKey(final byte[] key) {
+    public void parseKey(final short key) {
     }
 
     @Override
