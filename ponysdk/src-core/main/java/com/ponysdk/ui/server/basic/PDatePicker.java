@@ -53,12 +53,16 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int day = -1;
 
     public PDatePicker() {
-        this(null);
-    }
-
-    public PDatePicker(final TimeZone timeZone) {
         init();
         saveAddHandler(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+    }
+
+    /**
+     * @deprecated Useless
+     */
+    @Deprecated
+    public PDatePicker(final TimeZone timeZone) {
+        this();
     }
 
     @Override

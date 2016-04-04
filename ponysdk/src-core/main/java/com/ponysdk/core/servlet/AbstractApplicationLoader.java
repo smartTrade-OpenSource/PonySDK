@@ -102,7 +102,7 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     @Override
     public void contextInitialized(final ServletContextEvent event) {
-        ServletContext servletContext = event.getServletContext();
+        final ServletContext servletContext = event.getServletContext();
         servletContext.setAttribute(AbstractApplicationLoader.class.getCanonicalName(), this);
         servletContext.setAttribute(AbstractApplicationManager.class.getCanonicalName(), applicationManager);
     }

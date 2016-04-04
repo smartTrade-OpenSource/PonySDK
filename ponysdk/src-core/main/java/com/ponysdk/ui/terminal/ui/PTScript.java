@@ -42,7 +42,6 @@ public class PTScript extends AbstractPTObject {
                 final Object result = evalWithCallback(scriptToEval);
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                // eventInstruction.put(Model.TYPE_EVENT);
                 eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
@@ -54,7 +53,6 @@ public class PTScript extends AbstractPTObject {
             if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                // eventInstruction.put(Model.TYPE_EVENT);
                 eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.ERROR_MSG, e.getMessage());
                 uiService.sendDataToServer(eventInstruction);

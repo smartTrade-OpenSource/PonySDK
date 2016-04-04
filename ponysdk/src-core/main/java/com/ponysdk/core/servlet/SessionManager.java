@@ -42,6 +42,10 @@ public class SessionManager {
         return (Application) session.getAttribute(Application.class.getCanonicalName());
     }
 
+    public void setApplication(final String id, Application application) {
+        getSession(id).setAttribute(Application.class.getCanonicalName(), application);
+    }
+
     public void registerSessionListener(final SessionListener listener) {
         sessionListeners.register(listener);
     }

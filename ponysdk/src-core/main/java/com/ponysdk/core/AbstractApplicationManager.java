@@ -32,22 +32,13 @@ public abstract class AbstractApplicationManager {
 
     public void process(final TxnContext context) throws Exception {
         if (context.getApplication() == null) {
-            startApplication(context);
-        } else {
-            final JsonReader reader = context.getReader();
-            final JsonObject data = reader.readObject();
-            fireInstructions(data, context);
-        }
-    }
-
-    public void startApplication(final TxnContext context) throws Exception {
-        synchronized (context) {
             final Integer reloadedViewID = null;
             boolean isNewHttpSession = false;
             Application application = context.getApplication();
             if (application == null) {
                 application = new Application(context, options);
                 context.setApplication(application);
+
                 isNewHttpSession = true;
                 log.info("Creating a new application, {}", application.toString());
             } else {
@@ -58,6 +49,17 @@ public abstract class AbstractApplicationManager {
                 // log.info("Reloading application {} {}", reloadedViewID, context);
             }
 
+            startApplication(context, application, isNewHttpSession, reloadedViewID);
+        } else {
+            final JsonReader reader = context.getReader();
+            final JsonObject data = reader.readObject();
+            fireInstructions(data, context);
+        }
+    }
+
+    public void startApplication(final TxnContext context, Application application, boolean isNewHttpSession, Integer reloadedViewID)
+            throws Exception {
+        synchronized (context) {
             final UIContext uiContext = new UIContext(application, context);
             UIContext.setCurrent(uiContext);
 
@@ -105,11 +107,17 @@ public abstract class AbstractApplicationManager {
 
         final Application applicationSession = context.getApplication();
 
-        if (applicationSession == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application (viewID #" + key + ")."); }
+        if (applicationSession == null) {
+            throw new ServerException(ServerException.INVALID_SESSION,
+                    "Invalid session, please reload your application (viewID #" + key + ").");
+        }
 
         final UIContext uiContext = context.getUIContext();
 
-        if (uiContext == null) { throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ")."); }
+        if (uiContext == null) {
+            throw new ServerException(ServerException.INVALID_SESSION,
+                    "Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
+        }
 
         uiContext.execute(() -> process(uiContext, data));
     }
@@ -140,5 +148,9 @@ public abstract class AbstractApplicationManager {
     }
 
     protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
+
+    public ApplicationManagerOption getOptions() {
+        return options;
+    }
 
 }

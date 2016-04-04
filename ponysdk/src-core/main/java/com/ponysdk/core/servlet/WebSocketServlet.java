@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
+import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
@@ -136,8 +137,28 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             context.setRequest(request);
             context.setSocket(this);
 
+            Application application = context.getApplication();
+            final boolean isNewHttpSession = application != null;
+            final Integer reloadedViewID = null;
+            if (application == null) {
+                application = new Application(context, applicationManager.getOptions());
+
+                final String sessionId = request.getSessionId();
+                SessionManager.get().setApplication(sessionId, application);
+
+                context.setApplication(application);
+
+                log.info("Creating a new application, {}", application.toString());
+            } else {
+                // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
+                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                // reloadedViewID = jsonNumber.longValue();
+                // }
+                // log.info("Reloading application {} {}", reloadedViewID, context);
+            }
+
             try {
-                applicationManager.process(context);
+                applicationManager.startApplication(context, application, isNewHttpSession, reloadedViewID);
             } catch (final Exception e) {
                 log.error("Cannot process WebSocket instructions", e);
             }
