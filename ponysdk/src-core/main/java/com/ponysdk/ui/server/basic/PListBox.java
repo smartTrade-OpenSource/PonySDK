@@ -44,7 +44,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that presents a list of choices to the user, either as a list box or as a drop-down list.
+ * A widget that presents a list of choices to the user, either as a list box or as a drop-down
+ * list.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-ListBox { }</li>
@@ -267,7 +268,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         parser.parse(Model.INDEX, index);
         parser.endObject();
 
-        if (selectedIndex >= index) setSelectedIndex((selectedIndex - 1));
+        if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
     }
 
     public Object getValue(final int index) {
@@ -280,7 +281,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.clear();
         selectedIndexes.clear();
 
-        saveUpdate(Model.CLEAR, true);
+        saveUpdate(Model.CLEAR);
 
         if (containsEmptyItem) {
             addItem(EMPTY, null);

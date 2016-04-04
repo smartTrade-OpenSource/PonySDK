@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,10 +33,12 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * The panel to which all other widgets must ultimately be added. RootPanels are never created directly.
+ * The panel to which all other widgets must ultimately be added. RootPanels are never created
+ * directly.
  * Rather, they are accessed via {@link PRootPanel#get()} .
  * <p>
- * Most applications will add widgets to the default root panel in their {@link EntryPoint#start(UIContext)}
+ * Most applications will add widgets to the default root panel in their
+ * {@link EntryPoint#start(UIContext)}
  * methods.
  * </p>
  */
@@ -46,7 +48,8 @@ public class PRootPanel extends PAbsolutePanel {
 
     private String id;
 
-    private PRootPanel() {}
+    private PRootPanel() {
+    }
 
     private PRootPanel(final String id) {
         this(null, id);
@@ -59,6 +62,8 @@ public class PRootPanel extends PAbsolutePanel {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
         if (id != null) {
             parser.comma();
             parser.parse(Model.ID, id);
@@ -111,13 +116,16 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     /**
-     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not widgets.
+     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not
+     * widgets.
      * <p>
-     * By default {@link #clear()} will only remove children that are widgets. This method also provides the
+     * By default {@link #clear()} will only remove children that are widgets. This method also
+     * provides the
      * option to remove all children including the non-widget DOM elements that are directly added.
      *
      * @param clearDom
-     *            if {@code true} this method will also remove any DOM elements that are not widgets.
+     *            if {@code true} this method will also remove any DOM elements that are not
+     *            widgets.
      */
     public void clear(final boolean clearDom) {
         clear();

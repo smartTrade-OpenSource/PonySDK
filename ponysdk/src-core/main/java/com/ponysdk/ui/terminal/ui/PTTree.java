@@ -51,7 +51,7 @@ public class PTTree extends PTWidget<Tree> {
                     eventInstruction.setObjectID(instruction.getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(Model.WIDGET, ptObject.getObjectID());
+                    eventInstruction.put(Model.WIDGET_ID, ptObject.getObjectID());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });

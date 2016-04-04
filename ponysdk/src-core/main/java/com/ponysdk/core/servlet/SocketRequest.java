@@ -36,4 +36,8 @@ public class SocketRequest implements Request {
         reader = new StringReader(text);
     }
 
+    public String getSessionId() {
+        return request.getSession().getId();
+    }
+
 }

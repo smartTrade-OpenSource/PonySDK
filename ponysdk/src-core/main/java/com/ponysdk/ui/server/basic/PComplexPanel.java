@@ -33,9 +33,10 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public abstract class PComplexPanel extends PPanel {
 
-    private PWidgetCollection children;
+    protected PWidgetCollection children;
 
-    public PComplexPanel() {}
+    public PComplexPanel() {
+    }
 
     public PComplexPanel(final PWindow window) {
         super(window);
@@ -49,11 +50,7 @@ public abstract class PComplexPanel extends PPanel {
 
     @Override
     public void add(final PWidget child) {
-        if (children == null) {
-            insert(child, 0);
-        } else {
-            insert(child, children.size());
-        }
+        insert(child, children != null ? children.size() : 0);
     }
 
     public void insert(final PWidget child, final int beforeIndex) {
@@ -61,30 +58,28 @@ public abstract class PComplexPanel extends PPanel {
 
         child.removeFromParent();
 
-        if (children == null) {
-            children = new PWidgetCollection(this);
-        }
+        if (children == null) children = new PWidgetCollection(this);
 
         children.insert(child, beforeIndex);
         adopt(child);
 
-        if (beforeIndex == 0 || (children.size() - 1) == beforeIndex) {
+        if (children.size() - 1 == beforeIndex) {
             saveAdd(child.getID(), ID);
         } else {
             saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
         }
-
     }
 
     @Override
     public boolean remove(final PWidget w) {
-        if (w.getParent() != this) return false;
-        if (children == null) return false;
-
-        orphan(w);
-        if (children.remove(w)) {
-            saveRemove(w.getID(), ID);
-            return true;
+        if (w.getParent() == this && children != null) {
+            orphan(w);
+            if (children.remove(w)) {
+                saveRemove(w.getID(), ID);
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -95,40 +90,39 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     protected PWidgetCollection getOrBuildChildrenCollection() {
-        if (children == null) {
-            children = new PWidgetCollection(this);
+        if (children == null) children = new PWidgetCollection(this);
+        return children;
+    }
+
+    protected PWidget getChild(final long objectID) {
+        if (children != null) {
+            for (final PWidget w : children) {
+                if (w.getID() == objectID) return w;
+            }
         }
-        return children;
-    }
-
-    protected PWidgetCollection getChildren() {
-        if (children == null) { return null; }
-        return children;
-    }
-
-    public int getWidgetCount() {
-        if (children == null) { return 0; }
-        return children.size();
-    }
-
-    public PWidget getWidget(final int index) {
-        if (children != null) { return children.get(index); }
         return null;
     }
 
+    public int getWidgetCount() {
+        return children != null ? children.size() : 0;
+    }
+
+    public PWidget getWidget(final int index) {
+        return children != null ? children.get(index) : null;
+    }
+
     public int getWidgetIndex(final PWidget child) {
-        if (children != null) { return children.indexOf(child); }
-        return -1;
+        return children != null ? children.indexOf(child) : -1;
     }
 
     @Override
     public Iterator<PWidget> iterator() {
-        if (children == null) return Collections.emptyIterator();
-        else return children.iterator();
+        return children != null ? children.iterator() : Collections.emptyIterator();
     }
 
     void assertIsChild(final PWidget widget) {
-        if ((widget != null) && (widget.getParent() != this)) throw new IllegalStateException("The specified widget is not a child of this panel");
+        if (widget != null && widget.getParent() != this)
+            throw new IllegalStateException("The specified widget is not a child of this panel");
     }
 
     void assertNotMe(final PWidget widget) {

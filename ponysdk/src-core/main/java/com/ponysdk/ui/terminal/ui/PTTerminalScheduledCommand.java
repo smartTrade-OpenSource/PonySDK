@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -35,8 +35,36 @@ import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTTerminalScheduledCommand extends AbstractPTObject {
-
+    
     private final static Logger log = Logger.getLogger(PTTerminalScheduledCommand.class.getName());
+
+    @Override
+    public void create(final PTInstruction create, final UIService uiService) {
+        final int delayMs = create.getInt(Model.FIXDELAY);
+        if (delayMs <= 0) {
+            Scheduler.get().scheduleFinally(new RepeatingCommand() {
+
+                @Override
+                public boolean execute() {
+                    final PTScript script = new PTScript();
+                    script.update(create, uiService);
+                    return false;
+                }
+            });
+        } else {
+            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+                @Override
+                public boolean execute() {
+                    final PTScript script = new PTScript();
+                    script.update(create, uiService);
+                    return false;
+                }
+
+            }, delayMs);
+        }
+    }
+
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
@@ -82,4 +110,5 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
             uiService.flushEvents();
         }
     }
+
 }

@@ -32,15 +32,11 @@ public class ParserImpl implements Parser {
     private static final byte COMMA = (byte) ',';
     private static final byte QUOTE = (byte) '\"';
     private static final byte[] COMMA_CURVE_LEFT = { COMMA, CURVE_LEFT };
-    private static final byte[] CURVE_RIGHT_BRACKET_RIGHT_COMMA = { CURVE_RIGHT, BRACKET_RIGHT, COMMA };
-
-    private static final byte[] BRACKET_RIGHT_COMMA = { BRACKET_RIGHT, COMMA };
+    private static final byte[] CURVE_RIGHT_BRACKET_RIGHT_COMMA = { CURVE_RIGHT, BRACKET_RIGHT };
 
     private static byte[] TRUE;
     private static byte[] FALSE;
     private static byte[] NULL;
-
-    private static byte[] HEARTBEAT;
 
     static {
         try {
@@ -48,35 +44,8 @@ public class ParserImpl implements Parser {
             FALSE = "false".getBytes("UTF8");
             NULL = "null".getBytes("UTF8");
         } catch (final UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    static {
-
-        final byte[] bytesKey = Model.HEARTBEAT.getBytesKey();
-
-        int index = 0;
-
-        HEARTBEAT = new byte[bytesKey.length + NULL.length + 5];
-
-        HEARTBEAT[index++] = CURVE_LEFT;
-        HEARTBEAT[index++] = QUOTE;
-
-        for (int i = 0; i < bytesKey.length; i++) {
-            HEARTBEAT[index++] = bytesKey[i];
-        }
-
-        HEARTBEAT[index++] = QUOTE;
-        HEARTBEAT[index++] = COLON;
-
-        for (int i = 0; i < NULL.length; i++) {
-            HEARTBEAT[index++] = NULL[i];
-        }
-
-        HEARTBEAT[index] = CURVE_RIGHT;
-
     }
 
     private static final byte[] COLON_NULL;
@@ -86,31 +55,8 @@ public class ParserImpl implements Parser {
 
         COLON_NULL[0] = COLON;
 
-        for (int i = 0; i < NULL.length; i++) {
+        for (int i = 0; i < NULL.length; i++)
             COLON_NULL[1 + i] = NULL[i];
-        }
-    }
-
-    private static byte[] BEGIN_OBJECT;
-
-    static {
-        final byte[] bytesKey = Model.APPLICATION_INSTRUCTIONS.getBytesKey();
-
-        int index = 0;
-
-        BEGIN_OBJECT = new byte[bytesKey.length + 6];
-
-        BEGIN_OBJECT[index++] = CURVE_LEFT;
-        BEGIN_OBJECT[index++] = QUOTE;
-
-        for (int i = 0; i < bytesKey.length; i++) {
-            BEGIN_OBJECT[index++] = bytesKey[i];
-        }
-
-        BEGIN_OBJECT[index++] = QUOTE;
-        BEGIN_OBJECT[index++] = COLON;
-        BEGIN_OBJECT[index++] = BRACKET_LEFT;
-        BEGIN_OBJECT[index] = CURVE_LEFT;
     }
 
     private final WebSocket socket;
@@ -126,6 +72,7 @@ public class ParserImpl implements Parser {
 
     @Override
     public void reset() {
+        socket.flush(buffer);
         buffer = null;
     }
 
@@ -160,48 +107,28 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parseAndFlushHeartBeat() {
-        // endOfParsing();
-        // socket.flush();
-        // reset();
-        buffer = socket.getBuffer();
-
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-
-        socketBuffer.put(HEARTBEAT);
-        buffer = null; // avoid end of parsing call
-        // socket.flush();
-        // reset();
-    }
-
-    @Override
     public void beginObject() {
-        if (buffer == null) {
-            buffer = socket.getBuffer();
-        }
+        if (buffer == null) buffer = socket.getBuffer();
 
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
         if (socketBuffer.position() == 0) {
-            socketBuffer.put(BEGIN_OBJECT);
-        } else {
-            socketBuffer.put(COMMA_CURVE_LEFT);
-        }
+            socketBuffer.putShort(Model.APPLICATION_INSTRUCTIONS.getShortKey());
+            socketBuffer.putShort(Model.APPLICATION_SEQ_NUM.getShortKey());
+            socketBuffer.putInt(UIContext.get().getAndIncrementNextSentSeqNum());
+            socketBuffer.put(BRACKET_LEFT);
+            socketBuffer.put(CURVE_LEFT);
+        } else socketBuffer.put(COMMA_CURVE_LEFT);
     }
 
     @Override
     public void endObject() {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-        if (socketBuffer.position() >= 1024) {
+        if (socketBuffer.position() >= 4096) {
             socketBuffer.put(CURVE_RIGHT_BRACKET_RIGHT_COMMA);
-            parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            socketBuffer.put(CURVE_RIGHT);
-            socket.flush();
-            buffer = null;
-        } else {
-            socketBuffer.put(CURVE_RIGHT);
-        }
+            reset();
+        } else socketBuffer.put(CURVE_RIGHT);
     }
 
     @Override
@@ -249,7 +176,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(COLON_NULL);
     }
 
-    @Override
     public void parse(final Model model, final String value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -267,20 +193,15 @@ public class ParserImpl implements Parser {
         socketBuffer.put(UTF8StringToByteBuffer(builder.build().toString()));
     }
 
-    @Override
     public void parse(final Model model, final boolean value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
 
         socketBuffer.put(COLON);
-        if (value) {
-            socketBuffer.put(TRUE);
-        } else {
-            socketBuffer.put(FALSE);
-        }
+        if (value) socketBuffer.put(TRUE);
+        else socketBuffer.put(FALSE);
     }
 
-    @Override
     public void parse(final Model model, final long value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -290,7 +211,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
-    @Override
     public void parse(final Model model, final int value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -299,7 +219,6 @@ public class ParserImpl implements Parser {
         socketBuffer.put(ASCIIStringToByteBuffer(String.valueOf(value)));
     }
 
-    @Override
     public void parse(final Model model, final double value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         parseKey(model.getBytesKey());
@@ -335,15 +254,45 @@ public class ParserImpl implements Parser {
         socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
-    public void endOfParsing() {
-        if (buffer == null) return;
+    public boolean endOfParsing() {
+        if (buffer != null) {
+            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+            if (socketBuffer.position() != 0) socketBuffer.put(BRACKET_RIGHT);
 
-        if (socketBuffer.position() != 0) {
-            socketBuffer.put(BRACKET_RIGHT_COMMA);
-            parse(Model.APPLICATION_SEQ_NUM, UIContext.get().getAndIncrementNextSentSeqNum());
-            socketBuffer.put(CURVE_RIGHT);
+            return true;
+        } else return false;
+    }
+
+    @Override
+    public void parse(Model model, Object value) {
+        switch (model.getTypeModel()) {
+            case NULL_SIZE:
+                parse(model);
+                break;
+            case BOOLEAN_SIZE:
+                parse(model, (boolean) value);
+                break;
+            case BYTE_SIZE:
+                parse(model, (byte) value);
+                break;
+            case SHORT_SIZE:
+                parse(model, (short) value);
+                break;
+            case INTEGER_SIZE:
+                parse(model, (int) value);
+                break;
+            case LONG_SIZE:
+                parse(model, (long) value);
+                break;
+            case DOUBLE_SIZE:
+                parse(model, (double) value);
+                break;
+            case VARIABLE_SIZE:
+                parse(model, (String) value);
+                break;
+            default:
+                break;
         }
     }
 

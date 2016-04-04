@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,24 +23,13 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
+import com.ponysdk.core.activity.AbstractActivity;
 import com.ponysdk.core.event.BroadcastEventHandler;
 import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.core.event.Event;
-import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
-import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class NotificationActivity extends com.ponysdk.core.activity.AbstractActivity implements BroadcastEventHandler, InitializingActivity {
-
-    private NotificationView notificationView;
-
-    @Override
-    public IsPWidget buildView() {
-        return notificationView;
-    }
-
-    @Override
-    public void updateView(final Place place) {}
+public class NotificationActivity extends AbstractActivity<NotificationView> implements BroadcastEventHandler, InitializingActivity {
 
     @Override
     public void afterContextInitialized() {
@@ -51,12 +40,12 @@ public class NotificationActivity extends com.ponysdk.core.activity.AbstractActi
     public void onEvent(final Event<?> event) {
         if (event instanceof BusinessEvent<?>) {
             final BusinessEvent<?> businessEvent = (BusinessEvent<?>) event;
-            notificationView.addEvent(businessEvent);
+            view.addEvent(businessEvent);
         }
     }
 
-    public void setNotificationView(final NotificationView notificationView) {
-        this.notificationView = notificationView;
+    public void setNotificationView(final NotificationView view) {
+        this.view = view;
     }
 
 }

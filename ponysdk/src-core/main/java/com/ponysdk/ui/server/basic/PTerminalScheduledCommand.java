@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,19 +25,40 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.concurrent.TimeUnit;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A command that will be deferred on the terminal.
  */
 public abstract class PTerminalScheduledCommand extends PObject {
 
+    private String js;
+    private int delayMillis;
+
+    /**
+     * @param js
+     */
+    public PTerminalScheduledCommand() {
+    }
+
+    /**
+     * @param js
+     * @param delay
+     */
+    public PTerminalScheduledCommand(final String js, final int delayMillis) {
+        this.js = js;
+        this.delayMillis = delayMillis;
+        init();
+    }
+
     public void schedule(final long delay, final TimeUnit unit) {
         schedule(unit.toMillis(delay));
     }
 
     public void schedule(final long delayMillis) {
-        return;
+        run();
 
         //
         // try {
@@ -47,6 +68,19 @@ public abstract class PTerminalScheduledCommand extends PObject {
         // final Update update = new Update(ID);
         // update.put(PROPERTY.FIXDELAY, delayMillis);
         // Txn.get().getTxnContext().save(update);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
+        parser.parse(Model.FIXDELAY, delayMillis);
+
+        if (js != null) {
+            parser.comma();
+            parser.parse(Model.EVAL, js);
+        }
     }
 
     protected abstract void run();

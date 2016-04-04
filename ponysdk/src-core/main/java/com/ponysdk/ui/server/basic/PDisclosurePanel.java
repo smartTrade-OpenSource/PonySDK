@@ -41,7 +41,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that consists of a header and a content panel that discloses the content when a user clicks on the
+ * A widget that consists of a header and a content panel that discloses the content when a user
+ * clicks on the
  * header.
  * <h3>CSS Style Rules</h3>
  * <dl class="css">
@@ -88,8 +89,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.TEXT, headerText);
+        parser.comma();
         parser.parse(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
+        parser.comma();
         parser.parse(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
@@ -117,7 +123,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     public void setContent(final PWidget w) {
         // Validate
-        if (w == content) { return; }
+        if (w == content) {
+            return;
+        }
 
         // Detach new child.
         if (w != null) {
@@ -177,7 +185,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     private final void adopt(final PWidget child) {
-        assert (child.getParent() == null);
+        assert child.getParent() == null;
         child.setParent(this);
     }
 

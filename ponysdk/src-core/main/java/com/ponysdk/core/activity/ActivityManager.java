@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,28 +28,20 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.place.Place;
 import com.ponysdk.core.place.PlaceChangeEvent;
 import com.ponysdk.core.place.PlaceChangeHandler;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 /**
- * Manages {@link Activity} objects that should be kicked off in response to {@link PlaceChangeEvent} events.
+ * Manages {@link Activity} objects that should be kicked off in response to
+ * {@link PlaceChangeEvent} events.
  */
 public class ActivityManager implements PlaceChangeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ActivityManager.class);
 
-    private static final Activity NULL_ACTIVITY = new AbstractActivity() {
-
-        @Override
-        protected void updateView(final Place place) {}
-
-        @Override
-        protected IsPWidget buildView() {
-            return null;
-        }
+    private static final Activity NULL_ACTIVITY = new AbstractActivity<IsPWidget>() {
     };
 
     private final ActivityMapper mapper;

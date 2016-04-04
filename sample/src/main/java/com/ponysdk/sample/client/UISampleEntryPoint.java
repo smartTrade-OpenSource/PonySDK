@@ -32,6 +32,7 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LabelPAddOn;
 import com.ponysdk.ui.server.basic.PElement;
+import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PRootPanel;
@@ -51,7 +52,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // PRootPanel.get().clear(true);
 
         final PLabel label = new PLabel("Coucou");
-        PRootPanel.get().add(label);
+        // PRootPanel.get().add(label);
 
         final LabelPAddOn addon = new LabelPAddOn();
         addon.log(null);
@@ -61,6 +62,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PRootPanel.get().add(elt);
         final LabelPAddOn addon2 = new LabelPAddOn(elt);
         addon2.log("Coucou");
+
+        final PFlowPanel panel = new PFlowPanel();
+        panel.add(new PElement("button"));
+        panel.add(new PElement("button"));
+        panel.add(new PElement("button"));
+        panel.add(new PElement("button"));
+
+        PRootPanel.get().add(panel);
 
         // uiContext.getHistory().newItem("", false);
     }

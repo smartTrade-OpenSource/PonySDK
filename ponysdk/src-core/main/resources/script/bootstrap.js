@@ -27,20 +27,36 @@ Check.prototype = {
     initCheck: function () {
         if (window.opener === null || typeof window.opener == "undefined") {
             setTimeout(function() {
+                var xmlhttp = new XMLHttpRequest();
+
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+                        if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
+                        else reconnectionCheck.onCheckError();
+                    }
+                }
+
+                xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
+                xmlhttp.send();
+                
+                /* Avoid JQuery dependencies
             	$.ajax({
                     url: reconnectionCheck.getCheckUrl(),
                     success: reconnectionCheck.onCheckSuccess,
                     error: reconnectionCheck.onCheckError
-            })}, reconnectionCheck.delay_heartbeat);
+                });
+                */
+            }, reconnectionCheck.delay_heartbeat);
         }
     },
 
     failureCheck: function () {
         reconnectionCheck.counter--;
-        $('#reconnection').show();
-        $('#reconnecting').html('Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>');
+        var reconnectionElement = document.getElementById('reconnection'); // $('#reconnection');
+        reconnectionElement.style.display = 'block'; // reconnectionElement.show();
+        reconnectionElement.innerHTML = 'Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>'; // reconnectionElement.html('Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>');
         if (reconnectionCheck.counter == 0) {
-            $('#reconnecting').html('Reconnecting...');
+            reconnectionElement.innerHTML = 'Reconnecting...'; // reconnectionElement.html('Reconnecting...');
             reconnectionCheck.reconnectionInProgress = true;
             window.clearInterval(reconnectionCheck.currentFailureCheck);
             reconnectionCheck.errorDetected = false;

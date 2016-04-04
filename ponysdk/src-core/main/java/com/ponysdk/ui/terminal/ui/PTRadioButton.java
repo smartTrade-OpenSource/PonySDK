@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -40,18 +40,18 @@ public class PTRadioButton extends PTCheckBox {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new RadioButton(null));
+        update(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
+        super.update(update, uiService);
         if (update.containsKey(Model.NAME)) {
             cast().setName(update.getString(Model.NAME));
-        } else if (cast().getName() != null && update.containsKey(Model.VALUE) && update.getBoolean(Model.VALUE)) {
+        }
+        if (cast().getName() != null && update.containsKey(Model.VALUE) && update.getBoolean(Model.VALUE)) {
             cast().setValue(true);
             lastSelectedRadioButtonByGroup.put(cast().getName(), this);
-        } else {
-            super.update(update, uiService);
         }
     }
 

@@ -81,15 +81,15 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.HORIZONTAL_ALIGNMENT)) {
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             final Alignment alignment = getAlignement(Model.HORIZONTAL_ALIGNMENT, update);
             uiObject.setWidgetHorizontalPosition(w, alignment);
         } else if (update.containsKey(Model.VERTICAL_ALIGNMENT)) {
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             final Alignment alignment = getAlignement(Model.VERTICAL_ALIGNMENT, update);
             uiObject.setWidgetVerticalPosition(w, alignment);
         } else if (update.containsKey(Model.UNIT)) {
-            final Widget w = asWidget(update.getInt(Model.WIDGET), uiService);
+            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
             final Unit unit = getUnit(update);
 
             if (update.containsKey(Model.LEFT)) {

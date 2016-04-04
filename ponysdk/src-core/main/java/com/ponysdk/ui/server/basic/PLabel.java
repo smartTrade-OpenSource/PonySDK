@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -51,10 +52,12 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt;
- * element, causing it to be displayed with block layout.
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a
+ * &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-Label { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-Label { }</li>
+ * </ul>
  */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
@@ -65,9 +68,22 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
         init();
     }
 
+    PLabel(boolean init) {
+        if (init) init();
+    }
+
     public PLabel(final String text) {
-        this();
-        setText(text);
+        super();
+        this.text = text;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
+        parser.parse(Model.TEXT, this.text);
     }
 
     @Override
@@ -83,7 +99,6 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
-
         this.text = text;
         saveUpdate(Model.TEXT, this.text);
     }

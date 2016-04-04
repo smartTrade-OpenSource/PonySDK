@@ -61,7 +61,8 @@ public abstract class PScript extends PObject {
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(SCRIPT_KEY);
         if (script == null) {
-            script = new PScript() {};
+            script = new PScript() {
+            };
             session.setAttribute(SCRIPT_KEY, script);
         }
         return script;
@@ -91,7 +92,8 @@ public abstract class PScript extends PObject {
         get().executeScriptDeffered(js, callback, delay, unit);
     }
 
-    public static void executeDeffered(final long windowID, final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
+    public static void executeDeffered(final long windowID, final String js, final ExecutionCallback callback, final int delay,
+            final TimeUnit unit) {
         get().executeScriptDeffered(windowID, js, callback, delay, unit);
     }
 
@@ -105,16 +107,16 @@ public abstract class PScript extends PObject {
             parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
 
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
             parser.comma();
+            parser.parse(Model.WINDOW_ID, windowID);
         }
 
+        parser.comma();
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, (executionID++));
+        parser.parse(Model.COMMAND_ID, executionID++);
         parser.endObject();
     }
 
@@ -135,18 +137,18 @@ public abstract class PScript extends PObject {
             parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
 
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
             parser.comma();
+            parser.parse(Model.WINDOW_ID, windowID);
         }
 
+        parser.comma();
         parser.parse(Model.EVAL, js);
         parser.comma();
-        parser.parse(Model.ID, (executionID++));
+        parser.parse(Model.COMMAND_ID, executionID++);
         parser.comma();
-        parser.parse(Model.CALLBACK, true);
+        parser.parse(Model.CALLBACK);
         parser.endObject();
     }
 
@@ -154,15 +156,20 @@ public abstract class PScript extends PObject {
         executeScript(null, js, callback);
     }
 
-    public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback, final int delay, final TimeUnit unit) {
+    public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback, final int delay,
+            final TimeUnit unit) {
         final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
 
             @Override
             protected void run() {
-                if (callback == null) {
-                    executeScript(windowID, js);
-                } else {
-                    executeScript(windowID, js, callback);
+                try {
+                    if (callback == null) {
+                        executeScript(windowID, js);
+                    } else {
+                        executeScript(windowID, js, callback);
+                    }
+                } catch (final Exception e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -184,12 +191,12 @@ public abstract class PScript extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.ERROR_MSG.getKey())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue());
             if (callback != null) {
                 callback.onFailure(instruction.getString(Model.ERROR_MSG.getKey()));
             }
         } else if (instruction.containsKey(Model.RESULT.getKey())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.ID.getKey()).longValue());
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue());
             if (callback != null) {
                 callback.onSuccess(instruction.getString(Model.RESULT.getKey()));
             }

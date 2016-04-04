@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,27 +24,11 @@
 package com.ponysdk.impl.webapplication.header;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class HeaderActivity extends AbstractActivity {
+public class HeaderActivity extends AbstractActivity<HeaderView> {
 
-    private HeaderView headerView;
-
-    @Override
-    public IsPWidget buildView() {
-        return headerView;
-    }
-
-    @Override
-    public void updateView(final Place place) {}
-
-    public void setHeaderView(final HeaderView headerView) {
-        this.headerView = headerView;
-    }
-
-    public HeaderView getHeaderView() {
-        return headerView;
+    public void setHeaderView(final HeaderView view) {
+        this.view = view;
     }
 
 }

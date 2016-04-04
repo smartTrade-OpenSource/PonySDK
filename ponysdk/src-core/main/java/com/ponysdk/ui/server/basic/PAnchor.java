@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
@@ -32,13 +33,20 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A widget that represents a simple &lt;a&gt; element.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-Anchor { }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-Anchor { }</li>
+ * </ul>
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
     private String text;
     private String html;
     private String href;
+
+    public PAnchor() {
+        super();
+        init();
+    }
 
     /**
      * Creates an anchor with its text specified.
@@ -47,11 +55,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the anchor's text
      */
     public PAnchor(final String text) {
-        setText(text);
-    }
-
-    public PAnchor() {
-        this("");
+        this(text, null);
     }
 
     /**
@@ -63,8 +67,25 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the url to which it will link
      */
     public PAnchor(final String text, final String href) {
-        this(text);
-        setHref(href);
+        super();
+        this.text = text;
+        this.href = href;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
+        super.enrichOnInit(parser);
+
+        if (text != null) {
+            parser.comma();
+            parser.parse(Model.TEXT, this.text);
+        }
+
+        if (href != null) {
+            parser.comma();
+            parser.parse(Model.HREF, this.href);
+        }
     }
 
     @Override
@@ -101,7 +122,6 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
-
         this.text = text;
         saveUpdate(Model.TEXT, this.text);
     }

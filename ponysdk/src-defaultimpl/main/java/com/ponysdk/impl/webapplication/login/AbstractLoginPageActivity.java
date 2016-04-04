@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,18 +24,13 @@
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 
-public abstract class AbstractLoginPageActivity extends AbstractActivity implements PClickHandler {
-
-    protected LoginPageView loginPageView;
+public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPageView> implements PClickHandler {
 
     protected boolean remember;
 
@@ -43,39 +38,23 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity impleme
 
     @Override
     public void onClick(final PClickEvent clickEvent) {
-        sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
+        sendLogon(view.getLogin(), view.getPassword());
     }
 
-    @Override
-    public IsPWidget buildView() {
-        return loginPageView;
-    }
-
-    @Override
-    public void updateView(final Place place) {}
-
-    public LoginPageView getLoginPageView() {
-        return loginPageView;
-    }
-
-    public PAcceptsOneWidget getWorld() {
-        return world;
-    }
-
-    public void setLoginPageView(final LoginPageView loginPageView) {
-        this.loginPageView = loginPageView;
+    public void setLoginPageView(final LoginPageView view) {
+        this.view = view;
         final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                loginPageView.clearMessages();
-                sendLogon(loginPageView.getLogin(), loginPageView.getPassword());
+                view.clearMessages();
+                sendLogon(view.getLogin(), view.getPassword());
             }
         };
-        loginPageView.addLoginShortcutListener(keyPressHandler);
-        loginPageView.addPasswordShortcutListener(keyPressHandler);
+        view.addLoginShortcutListener(keyPressHandler);
+        view.addPasswordShortcutListener(keyPressHandler);
 
-        this.loginPageView.addLoginClickHandler(this);
+        this.view.addLoginClickHandler(this);
     }
 
 }

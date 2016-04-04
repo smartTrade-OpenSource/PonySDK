@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,14 +33,14 @@ public class PTLabel extends PTWidget<Label> {
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
         init(create, uiService, new Label());
+        update(create, uiService);
     }
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.TEXT)) {
             uiObject.setText(update.getString(Model.TEXT));
-        } else {
-            super.update(update, uiService);
         }
+        super.update(update, uiService);
     }
 }

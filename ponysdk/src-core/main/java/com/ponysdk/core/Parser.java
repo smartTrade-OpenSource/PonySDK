@@ -24,28 +24,18 @@ public interface Parser {
 
     void quote();
 
-    void parseAndFlushHeartBeat();
-
     void parseKey(byte[] key);
 
     void parse(JsonValue jsonObject);
 
     void parse(Model model);
 
-    void parse(Model model, String value);
-
     void parse(Model model, JsonObjectBuilder builder);
-
-    void parse(Model model, boolean value);
-
-    void parse(Model model, long value);
-
-    void parse(Model model, int value);
-
-    void parse(Model model, double value);
 
     void parse(Model model, Collection<String> collection);
 
     void parse(Model model, JsonValue jsonObject);
+
+    void parse(Model model, Object value);
 
 }

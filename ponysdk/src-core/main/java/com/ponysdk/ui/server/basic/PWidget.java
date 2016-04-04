@@ -73,8 +73,8 @@ import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * The base class for the majority of user-interface objects. Widget adds support for receiving events from
- * the browser and being added directly to {@link PPanel panels}.
+ * The base class for the majority of user-interface objects. Widget adds support for receiving
+ * events from the browser and being added directly to {@link PPanel panels}.
  */
 public abstract class PWidget extends PObject implements IsPWidget {
 
@@ -102,7 +102,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String stylePrimaryName;
     private String debugID;
 
-    public PWidget() {}
+    public PWidget() {
+    }
 
     public PWidget(final PWindow window) {
         super(window);
@@ -532,10 +533,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(Model.DOM_HANDLER_TYPE.getKey())];
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE.getKey())));
+                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE_KEY.getKey())));
                     break;
                 case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE.getKey())));
+                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE_KEY.getKey())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -579,7 +580,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
                     if (instruction.containsKey(Model.DRAG_SRC.getKey())) {
-                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).intValue());
+                        final PWidget source = UIContext.get()
+                                .getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -636,7 +638,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void removeFromParent() {
         if (parent instanceof HasPWidgets) {
             ((HasPWidgets) parent).remove(this);
-        } else if (parent != null) { throw new IllegalStateException("This widget's parent does not implement HasPWidgets"); }
+        } else if (parent != null) {
+            throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
+        }
     }
 
 }

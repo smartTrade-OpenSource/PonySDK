@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -43,18 +43,20 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A panel that adds user-positioned splitters between each of its child widgets.
  * <p>
- * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes are always
- * specified in {@link PUnit#PX} units, and each pair of child widgets has a splitter between them that the
- * user can drag.
+ * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes
+ * are always specified in {@link PUnit#PX} units, and each pair of child widgets has a splitter
+ * between them that the user can drag.
  * </p>
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
- * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'> <li>.gwt-SplitLayoutPanel { the panel itself }</li> <li>.gwt-SplitLayoutPanel
- * .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li> <li>.gwt-SplitLayoutPanel
- * .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li> </ul>
+ * <ul class='css'>
+ * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li>
+ * </ul>
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
@@ -86,10 +88,10 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     /**
      * Sets the minimum allowable size for the given widget.
      * <p>
-     * Its associated splitter cannot be dragged to a position that would make it smaller than this size. This
-     * method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * Its associated splitter cannot be dragged to a position that would make it smaller than this
+     * size. This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
-     * 
+     *
      * @param child
      *            the child whose minimum size will be set
      * @param minSize
@@ -110,7 +112,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.MIN_SIZE, minSize);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).minSize = minSize;
@@ -118,13 +120,13 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     /**
-     * Sets a size below which the slider will close completely. This can be used in conjunction with
-     * {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to a preferred
-     * minimum size before closing completely.
+     * Sets a size below which the slider will close completely. This can be used in conjunction
+     * with {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to
+     * a preferred minimum size before closing completely.
      * <p>
      * This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
-     * 
+     *
      * @param child
      *            the child whose slider should snap closed
      * @param snapClosedSize
@@ -146,7 +148,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
@@ -155,7 +157,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     /**
      * Sets whether or not double-clicking on the splitter should toggle the display of the widget.
-     * 
+     *
      * @param child
      *            the child whose display toggling will be allowed or not.
      * @param allowed
@@ -176,7 +178,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
             parser.comma();
             parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
             parser.comma();
-            parser.parse(Model.WIDGET, child.getID());
+            parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
@@ -193,7 +195,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
                 final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).longValue();
+                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }
@@ -201,13 +203,6 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         } else {
             super.onClientData(instruction);
         }
-    }
-
-    private PWidget getChild(final long objectID) {
-        for (final PWidget w : getChildren()) {
-            if (w.getID() == objectID) return w;
-        }
-        return null;
     }
 
     private void fireLayoutResize(final PLayoutResizeEvent event) {

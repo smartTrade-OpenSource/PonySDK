@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -54,9 +54,11 @@ public class BasicEntryPoint implements EntryPoint {
 
         final PFlowPanel flowPanel = new PFlowPanel();
         //
-        // final PGrid grid = new PGrid(200, 200);
-        // PRootPanel.get().add(grid);
-        //
+        //        final PGrid grid = new PGrid(200, 200);
+        //        PRootPanel.get().add(grid);
+
+        PRootPanel.get().add(flowPanel);
+
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 100; j++) {
                 final PElement div = new PElement("input");
@@ -70,10 +72,6 @@ public class BasicEntryPoint implements EntryPoint {
         //
         // for (int k = 0; k < 100; k++) {
 
-        // final PElement child = new PElement("div");
-        // child.setInnerText(i + " => Element ");
-        // child.setStyleProperty("border", "1px solid red");
-
         // final PButton button = new PButton(" => Button");
 
         // button.addClickHandler(new PClickHandler() {
@@ -86,7 +84,14 @@ public class BasicEntryPoint implements EntryPoint {
 
         //
 
-        PRootPanel.get().add(flowPanel);
+        //        int i = 0;
+        //        while (true) {
+        //            final PElement child = new PElement("div");
+        //            child.setInnerText(i++ + " => Element ");
+        //            child.setStyleProperty("border", "1px solid red");
+        //            flowPanel.add(child);
+        //        }
+
         // final PTextBox textBox = new PTextBox(k + " => Button");
         //
         // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {

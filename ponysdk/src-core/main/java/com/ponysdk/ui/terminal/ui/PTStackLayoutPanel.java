@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -89,8 +89,8 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.OPEN)) {
-            uiObject.showWidget(asWidget(update.getInt(Model.OPEN), uiService));
+        if (update.containsKey(Model.WIDGET_ID)) {
+            uiObject.showWidget(asWidget(update.getInt(Model.WIDGET_ID), uiService));
         } else if (update.containsKey(Model.ANIMATE)) {
             uiObject.animate(update.getInt(Model.ANIMATE));
         } else if (update.containsKey(Model.ANIMATION_DURATION)) {

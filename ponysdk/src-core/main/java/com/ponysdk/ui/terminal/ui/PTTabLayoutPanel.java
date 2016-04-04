@@ -106,8 +106,8 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
     public void update(final PTInstruction update, final UIService uiService) {
         if (update.containsKey(Model.ANIMATE)) {
             uiObject.animate(update.getInt(Model.ANIMATE));
-        } else if (update.containsKey(Model.VERTICAL_ALIGNMENT)) {
-            uiObject.setAnimationVertical(update.getBoolean(Model.VERTICAL_ALIGNMENT));
+        } else if (update.containsKey(Model.VERTICAL)) {
+            uiObject.setAnimationVertical(update.getBoolean(Model.VERTICAL));
         } else if (update.containsKey(Model.ANIMATION_DURATION)) {
             uiObject.setAnimationDuration(update.getInt(Model.ANIMATION_DURATION));
         } else if (update.containsKey(Model.SELECTED_INDEX)) {

@@ -41,11 +41,14 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of selections that
- * match the user's input. Each {@link PSuggestBox} is associated with a single {@link PSuggestOracle}. The
+ * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of
+ * selections that
+ * match the user's input. Each {@link PSuggestBox} is associated with a single
+ * {@link PSuggestOracle}. The
  * {@link PSuggestBox} is used to provide a set of selections given a specific query string.
  * <p>
- * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as its oracle. Below we show how
+ * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as its oracle. Below
+ * we show how
  * a {@link PMultiWordSuggestOracle} can be configured:
  * </p>
  *
@@ -59,8 +62,10 @@ import com.ponysdk.ui.terminal.model.Model;
  * PSuggestBox box = new PSuggestBox(oracle);
  * </pre>
  *
- * Using the example above, if the user types "C" into the text widget, the oracle will configure the
- * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key into the
+ * Using the example above, if the user types "C" into the text widget, the oracle will configure
+ * the
+ * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key
+ * into the
  * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -73,7 +78,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
+public class PSuggestBox extends PWidget
+        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private List<PSelectionHandler<PSuggestion>> selectionHandler;
 
@@ -107,6 +113,9 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
+        parser.comma();
         parser.parse(Model.ORACLE, suggestOracle.getID());
     }
 
@@ -252,7 +261,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
 
         public void clear() {
-            saveUpdate(Model.CLEAR, true);
+            saveUpdate(Model.CLEAR);
         }
 
         @Override

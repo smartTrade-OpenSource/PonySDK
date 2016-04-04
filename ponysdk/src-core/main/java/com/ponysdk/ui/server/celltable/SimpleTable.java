@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -37,8 +37,8 @@ public class SimpleTable extends PElement {
     public SimpleTable() {
         super("table");
 
-        super.insert(thead, 0);
-        super.insert(tbody, 1);
+        add(thead);
+        add(tbody);
     }
 
     @Override
@@ -226,7 +226,8 @@ public class SimpleTable extends PElement {
 
         if ((beforeIndex < 0) || (beforeIndex >= parentElement.getWidgetCount() + (beforeIndex == 0 ? 0 : 1))) {
             if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
-            else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
+            else throw new IndexOutOfBoundsException(
+                    "beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
         }
     }
 

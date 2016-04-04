@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,9 +30,15 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A standard single-line text box.
  * <p>
- * <img class='gallery' src='/resources/images/pony.png'/> </p> <h3>CSS Style Rules</h3> <ul class='css'>
- * <li>.gwt-TextBox { primary style }</li> <li>.gwt-TextBox-readonly { dependent style set when the text box
- * is read-only }</li> </ul> <p>
+ * <img class='gallery' src='/resources/images/pony.png'/>
+ * </p>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-TextBox { primary style }</li>
+ * <li>.gwt-TextBox-readonly { dependent style set when the text box
+ * is read-only }</li>
+ * </ul>
+ * <p>
  */
 public class PTextBox extends PTextBoxBase {
 
@@ -44,12 +50,12 @@ public class PTextBox extends PTextBoxBase {
     }
 
     public PTextBox(final String text) {
-        super(text);
+        super(EMPTY);
     }
 
     /**
      * Gets the maximum allowable length of the text box.
-     * 
+     *
      * @return the maximum length, in characters
      */
     public int getMaxLength() {
@@ -58,7 +64,7 @@ public class PTextBox extends PTextBoxBase {
 
     /**
      * Gets the number of visible characters in the text box.
-     * 
+     *
      * @return the number of visible characters
      */
     public int getVisibleLength() {
@@ -67,7 +73,7 @@ public class PTextBox extends PTextBoxBase {
 
     /**
      * Sets the maximum allowable length of the text box.
-     * 
+     *
      * @param length
      *            the maximum length, in characters
      */
@@ -78,7 +84,7 @@ public class PTextBox extends PTextBoxBase {
 
     /**
      * Sets the number of visible characters in the text box.
-     * 
+     *
      * @param length
      *            the number of visible characters
      */
@@ -94,7 +100,7 @@ public class PTextBox extends PTextBoxBase {
     /**
      * Apply a mask to the textbox. Value get/set from the textbox will have the mask. <br>
      * Example: ({{000}}) {{000}}.{{0000}}
-     * 
+     *
      * @param pattern
      *            {{[0A]+}}
      * @param showMask

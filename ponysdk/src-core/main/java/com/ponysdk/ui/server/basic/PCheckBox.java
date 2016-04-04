@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -61,13 +61,12 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     /**
      * Creates a check box with the specified text label.
-     * 
+     *
      * @param label
      *            the check box's label
      */
     public PCheckBox(final String label) {
-        setText(label);
-
+        super(label);
         saveAddHandler(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
     }
 
@@ -78,30 +77,23 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>(1);
-        } else {
-            handlers.add(handler);
-        }
+        if (handlers == null) handlers = new ArrayList<>();
+        handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        if (handlers == null) {
-            return false;
-        } else {
-            return handlers.remove(handler);
-        }
+        return handlers != null ? handlers.remove(handler) : false;
     }
 
     @Override
     public Collection<PValueChangeHandler<Boolean>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     /**
      * Determines whether this check box is currently checked.
-     * 
+     *
      * @return <code>true</code> if the check box is checked, false otherwise. Will not return null
      */
     @Override
@@ -111,7 +103,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     /**
      * Checks or unchecks the check box.
-     * 
+     *
      * @param value
      *            true to check, false to uncheck; null value implies false
      */
@@ -119,21 +111,23 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setValue(final Boolean value) {
         if (Objects.equals(this.value, value)) return;
         this.value = value;
-        saveUpdate(Model.VALUE, this.value);
+        saveUpdate(Model.VALUE_CHECKBOX, this.value);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         this.value = event.getValue();
-        for (final PValueChangeHandler<Boolean> handler : handlers) {
-            handler.onValueChange(event);
+        if (handlers != null) {
+            for (final PValueChangeHandler<Boolean> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.getKey())) {
-            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE.getKey())));
+            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE_CHECKBOX.getKey())));
         } else {
             super.onClientData(jsonObject);
         }

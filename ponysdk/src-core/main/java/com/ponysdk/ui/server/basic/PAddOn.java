@@ -23,6 +23,10 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -68,12 +72,32 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
         parser.comma();
-        parser.parse(Model.FACTORY, getClass().getCanonicalName());
+        parser.parse(Model.FACTORY, getModuleName(getClass()));
         if (widget != null) {
             parser.comma();
-            parser.parse(Model.WIDGET, widget.getID());
+            parser.parse(Model.WIDGET_ID, widget.getID());
         }
+    }
+
+    public static final String getModuleName(final Class<?> clazz) {
+        Class<?> obj = clazz;
+
+        while (!obj.isAnnotationPresent(Javascript.class)) {
+            obj = obj.getSuperclass();
+            if (obj == null) throw new IllegalArgumentException("Annotation not found for " + clazz.getCanonicalName());
+        }
+
+        final Javascript jsAnnotation = obj.getAnnotation(Javascript.class);
+        String moduleName = jsAnnotation.value();
+
+        // if no name, take the className, because new pattern es6 classes friendly:
+        // java class name == es6 class name == XXXXAddon
+        if (moduleName.isEmpty()) moduleName = obj.getCanonicalName();
+
+        return moduleName;
     }
 
     public void update(final JsonObjectBuilder builder) {
@@ -107,7 +131,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
         update(objectBuilder);
     }
 
-    protected void onAttached() {}
+    protected void onAttached() {
+    }
 
     protected void sendPendingJSONData() {
         final Iterator<JsonObjectBuilder> iterator = pendingDataToSend.iterator();
@@ -138,10 +163,10 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (final Object object : args) {
                 if (object != null) {
-                    if (object instanceof JsonValue) arrayBuilder.add(((JsonValue) object));
-                    else if (object instanceof Boolean) arrayBuilder.add(((Boolean) object));
-                    else if (object instanceof Integer) arrayBuilder.add(((Integer) object));
-                    else if (object instanceof Long) arrayBuilder.add(((Long) object));
+                    if (object instanceof JsonValue) arrayBuilder.add((JsonValue) object);
+                    else if (object instanceof Boolean) arrayBuilder.add((Boolean) object);
+                    else if (object instanceof Integer) arrayBuilder.add((Integer) object);
+                    else if (object instanceof Long) arrayBuilder.add((Long) object);
                     else arrayBuilder.add(object.toString());
                 }
             }
@@ -157,6 +182,14 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     public T asWidget() {
         return widget;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Javascript {
+
+        public String value() default "";
+
     }
 
 }

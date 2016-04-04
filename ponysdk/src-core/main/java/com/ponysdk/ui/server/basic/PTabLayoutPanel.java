@@ -41,12 +41,12 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are
- * shown as the user selects the various tabs associated with them. The tabs can contain arbitrary text, HTML,
- * or widgets.
+ * A panel that represents a tabbed set of pages, each of which contains another widget. Its child
+ * widgets are shown as the user selects the various tabs associated with them. The tabs can contain
+ * arbitrary text, HTML, or widgets.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
- * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -65,11 +65,12 @@ import com.ponysdk.ui.terminal.model.Model;
  * <code>barUnit</code> attribute with a {com.google.gwt.dom.client.Style.Unit Style.Unit} value.
  * <code>barUnit</code> defaults to PX.
  * <p>
- * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements. Each tab can have one widget
- * child and one of two types of header elements. A &lt;g:header> element can hold html, or a
- * &lt;g:customHeader> element can hold a widget.
+ * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements. Each tab can have
+ * one widget child and one of two types of header elements. A &lt;g:header> element can hold html,
+ * or a &lt;g:customHeader> element can hold a widget.
  */
-public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
+public class PTabLayoutPanel extends PComplexPanel
+        implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
 
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
@@ -246,7 +247,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate(Model.VERTICAL_ALIGNMENT, isVertical);
+        saveUpdate(Model.VERTICAL, isVertical);
     }
 
     @Override

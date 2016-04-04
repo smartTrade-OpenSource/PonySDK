@@ -18,7 +18,7 @@ public class WebSocketClient {
     }
 
     private final void onmessage(final String message) {
-        callback.message(message);
+        //callback.message(message);
     }
 
     public static native boolean isSupported()/*-{
@@ -40,7 +40,7 @@ public class WebSocketClient {
                                               
                                               var _fileReader = new FileReader();
                                               
-                                              _fileReader.onload = function() { 
+                                              _fileReader.onload = function() {
                                                  that.@com.ponysdk.ui.terminal.socket.WebSocketClient::onmessage(Ljava/lang/String;)( _fileReader.result );
                                                   if(queue.length != 0){
                                                       _fileReader.readAsText(queue.shift());

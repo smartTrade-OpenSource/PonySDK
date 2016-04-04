@@ -34,9 +34,10 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PCookies {
 
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<>();
-    private final long objectID = 0; // reserved
+    private final int objectID = 0; // reserved
 
-    public PCookies() {}
+    public PCookies() {
+    }
 
     public void cacheCookie(final String name, final String value) {
         cachedCookies.put(name, value);
@@ -53,7 +54,7 @@ public class PCookies {
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
         parser.comma();
-        parser.parse(Model.REMOVE, true);
+        parser.parse(Model.REMOVE);
         parser.comma();
         parser.parse(Model.NAME, name);
         parser.endObject();
@@ -74,7 +75,7 @@ public class PCookies {
         parser.comma();
         parser.parse(Model.OBJECT_ID, objectID);
         parser.comma();
-        parser.parse(Model.ADD, true);
+        parser.parse(Model.ADD);
         parser.comma();
         parser.parse(Model.NAME, name);
         parser.comma();

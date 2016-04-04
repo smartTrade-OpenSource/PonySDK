@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -31,9 +31,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that includes a header (top), footer (bottom), and content (middle) area. The header and footer
- * areas resize naturally. The content area is allocated all of the remaining space between the header and
- * footer area.
+ * A panel that includes a header (top), footer (bottom), and content (middle) area. The header and
+ * footer areas resize naturally. The content area is allocated all of the remaining space between
+ * the header and footer area.
  */
 public class PHeaderPanel extends PPanel {
 
@@ -42,7 +42,7 @@ public class PHeaderPanel extends PPanel {
     private PWidget footer;
 
     public void resize() {
-        saveUpdate(Model.RESIZE, true);
+        saveUpdate(Model.RESIZE);
     }
 
     @Override

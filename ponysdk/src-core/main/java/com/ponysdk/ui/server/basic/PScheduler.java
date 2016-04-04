@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -44,7 +44,8 @@ public abstract class PScheduler extends PObject {
     private final Map<Long, RepeatingCommand> commandByID = new HashMap<>();
     private final Map<RepeatingCommand, Long> IDByCommand = new HashMap<>();
 
-    private PScheduler() {}
+    private PScheduler() {
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -64,7 +65,8 @@ public abstract class PScheduler extends PObject {
 
         PScheduler scheduler = UIContext.get().getAttribute(rootID);
         if (scheduler == null) {
-            scheduler = new PScheduler() {};
+            scheduler = new PScheduler() {
+            };
             UIContext.get().setAttribute(SCHEDULER_KEY, scheduler);
         }
         return scheduler;
@@ -149,7 +151,7 @@ public abstract class PScheduler extends PObject {
             parser.parse(Model.WINDOW_ID, window.getID());
         }
         parser.comma();
-        parser.parse(Model.STOP, true);
+        parser.parse(Model.STOP);
         parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
         parser.endObject();
@@ -161,7 +163,7 @@ public abstract class PScheduler extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(Model.HANDLER_KEY_SCHEDULER.getKey())) {
-            final long cmdID = instruction.getJsonNumber(Model.ID.getKey()).longValue();
+            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null) return;
 

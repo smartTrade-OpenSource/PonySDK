@@ -25,16 +25,18 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt; element, causing it to be
- * displayed with block layout.
+ * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt; element, causing it to
+ * be displayed with block layout.
  * <p>
- * If you only need a simple label (text, but not HTML), then the {@link PLabel} widget is more appropriate,
- * as it disallows the use of HTML, which can lead to potential security issues if not used properly.
+ * If you only need a simple label (text, but not HTML), then the {@link PLabel} widget is more
+ * appropriate, as it disallows the use of HTML, which can lead to potential security issues if not
+ * used properly.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
@@ -46,15 +48,33 @@ public class PHTML extends PLabel implements PHasHTML {
     private String html;
     private boolean wordWrap = false;
 
-    public PHTML() {}
+    public PHTML() {
+        super();
+    }
 
     public PHTML(final String text) {
         this(text, false);
     }
 
     public PHTML(final String html, final boolean wordWrap) {
-        setHTML(html);
-        setWordWrap(wordWrap);
+        super(false);
+        this.html = html;
+        this.wordWrap = wordWrap;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
+        super.enrichOnInit(parser);
+
+        if (html != null) {
+            parser.comma();
+            parser.parse(Model.HTML, this.html.replace("\"", "\\\""));
+        }
+        if (wordWrap) {
+            parser.comma();
+            parser.parse(Model.WORD_WRAP, this.wordWrap);
+        }
     }
 
     @Override

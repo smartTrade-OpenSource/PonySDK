@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,10 +30,12 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up
+ * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget
+ * to take up
  * the remaining space in its center.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run
  * have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * DockLayoutPanel contains children tagged with the cardinal directions, and center:
@@ -46,7 +48,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dt>east</dt>
  * </dl>
  * <p>
- * Each child can hold only widget, and there can be only one &lt;g:center>. However, there can be any number
+ * Each child can hold only widget, and there can be only one &lt;g:center>. However, there can be
+ * any number
  * of the directional children.
  * </p>
  */
@@ -55,7 +58,13 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     private final PUnit unit;
 
     public enum Direction {
-        NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END
+        NORTH,
+        EAST,
+        SOUTH,
+        WEST,
+        CENTER,
+        LINE_START,
+        LINE_END
     }
 
     public PDockLayoutPanel(final PUnit unit) {
@@ -65,6 +74,8 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+
         parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
     }
@@ -116,7 +127,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.WIDGET_SIZE, size);
         parser.comma();
-        parser.parse(Model.WIDGET, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
@@ -133,7 +144,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
         parser.comma();
-        parser.parse(Model.WIDGET, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 

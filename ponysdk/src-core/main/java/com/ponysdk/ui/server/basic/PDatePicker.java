@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import javax.json.JsonObject;
@@ -54,12 +53,16 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int day = -1;
 
     public PDatePicker() {
-        this(null);
-    }
-
-    public PDatePicker(final TimeZone timeZone) {
         init();
         saveAddHandler(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+    }
+
+    /**
+     * @deprecated Useless
+     */
+    @Deprecated
+    public PDatePicker(final TimeZone timeZone) {
+        this();
     }
 
     @Override
@@ -70,19 +73,18 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER.getKey())) {
-            final String data = jsonObject.getString(Model.VALUE.getKey());
-            Date date = null;
-            if (data != null && !data.isEmpty()) date = new Date(Long.parseLong(data));
+            final long data = jsonObject.getJsonNumber(Model.DATE.getKey()).longValue();
+            Date date = data != -1 ? date = new Date(data) : null;
 
             year = jsonObject.getInt(Model.YEAR.getKey());
             month = jsonObject.getInt(Model.MONTH.getKey());
             day = jsonObject.getInt(Model.DAY.getKey());
             onValueChange(new PValueChangeEvent<>(this, date));
         } else if (jsonObject.containsKey(Model.HANDLER_SHOW_RANGE)) {
-            final String start = jsonObject.getString(Model.START.getKey());
-            final String end = jsonObject.getString(Model.END.getKey());
-            final Date sd = new Date(Long.parseLong(start));
-            final Date ed = new Date(Long.parseLong(end));
+            final long start = jsonObject.getJsonNumber(Model.START_DATE.getKey()).longValue();
+            final long end = jsonObject.getJsonNumber(Model.END_DATE.getKey()).longValue();
+            final Date sd = new Date(start);
+            final Date ed = new Date(end);
 
             // TODO nicolas Use date ???
 
@@ -159,19 +161,20 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(Model.VALUE, date != null ? Long.toString(date.getTime()) : "");
+        saveUpdate(Model.DATE, date != null ? date.getTime() : -1);
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(Model.MONTH, date != null ? Long.toString(date.getTime()) : "");
+        saveUpdate(Model.TIME, date != null ? date.getTime() : -1);
     }
 
     /**
-     * Sets a visible date to be enabled or disabled. This is only set until the next time the DatePicker is
+     * Sets a visible date to be enabled or disabled. This is only set until the next time the
+     * DatePicker is
      * refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -193,7 +196,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -215,7 +218,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        final List<String> asString = dateToString(dates);
+        final Collection<String> asString = dateToString(dates);
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
@@ -233,8 +236,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         parser.endObject();
     }
 
-    private List<String> dateToString(final Collection<Date> dates) {
-        final List<String> asString = new ArrayList<>();
+    private Collection<String> dateToString(final Collection<Date> dates) {
+        final Collection<String> asString = new ArrayList<>();
         for (final Date d : dates) {
             asString.add(Long.toString(d.getTime()));
         }

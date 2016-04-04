@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -65,8 +65,8 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                     final PTInstruction instruction = new PTInstruction();
                     instruction.setObjectID(instruction.getObjectID());
                     instruction.put(Model.HANDLER_SHOW_RANGE);
-                    instruction.put(Model.START, Long.toString(event.getStart().getTime()));
-                    instruction.put(Model.END, Long.toString(event.getEnd().getTime()));
+                    instruction.put(Model.START_DATE, event.getStart().getTime());
+                    instruction.put(Model.END_DATE, event.getEnd().getTime());
                     uiService.sendDataToServer(picker, instruction);
                 }
             });
@@ -75,16 +75,15 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
     }
 
-    protected void triggerEvent(final PTInstruction addHandler, final DatePicker picker, final UIService uiService, final ValueChangeEvent<Date> event) {
-        String date;
+    protected void triggerEvent(final PTInstruction addHandler, final DatePicker picker, final UIService uiService,
+            final ValueChangeEvent<Date> event) {
+        long date = -1;
         int year = -1;
         int month = -1;
         int day = -1;
 
-        if (event.getValue() == null) {
-            date = "";
-        } else {
-            date = Long.toString(event.getValue().getTime());
+        if (event.getValue() != null) {
+            date = event.getValue().getTime();
             final String[] values = format.format(event.getValue()).split("-");
             year = Integer.parseInt(values[0]);
             month = Integer.parseInt(values[1]);
@@ -94,7 +93,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(addHandler.getObjectID());
         instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(Model.VALUE, date);
+        instruction.put(Model.DATE, date);
         instruction.put(Model.YEAR, year);
         instruction.put(Model.MONTH, month);
         instruction.put(Model.DAY, day);
@@ -104,10 +103,10 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         final DatePicker picker = cast();
-        if (update.containsKey(Model.VALUE)) {
-            picker.setValue(asDate(update.getString(Model.VALUE)));
-        } else if (update.containsKey(Model.MONTH)) {
-            picker.setCurrentMonth(asDate(update.getString(Model.MONTH)));
+        if (update.containsKey(Model.DATE)) {
+            picker.setValue(asDate(update.getLong(Model.DATE)));
+        } else if (update.containsKey(Model.TIME)) {
+            picker.setCurrentMonth(asDate(update.getLong(Model.TIME)));
         } else if (update.containsKey(Model.DATE_ENABLED)) {
             final Boolean enabled = update.getBoolean(Model.ENABLED);
             final JSONArray jsonArray = update.get(Model.DATE_ENABLED).isArray();
@@ -131,8 +130,12 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
     }
 
-    private Date asDate(final String s) {
-        return new Date(Long.parseLong(s));
+    private static final Date asDate(final String timestamp) {
+        return new Date(Long.parseLong(timestamp));
+    }
+
+    private static final Date asDate(final long timestamp) {
+        return timestamp != -1 ? new Date(timestamp) : null;
     }
 
 }

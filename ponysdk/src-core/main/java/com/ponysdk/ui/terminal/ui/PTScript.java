@@ -23,44 +23,51 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTScript extends AbstractPTObject {
 
+    private final static Logger log = Logger.getLogger(PTScript.class.getName());
+
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
-
         final String scriptToEval = update.getString(Model.EVAL);
         try {
-            final Object result = eval(scriptToEval);
-
             if (update.containsKey(Model.CALLBACK)) {
+                final Object result = evalWithCallback(scriptToEval);
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                // eventInstruction.put(Model.TYPE_EVENT);
-                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
+            } else {
+                eval(scriptToEval);
             }
         } catch (final Throwable e) {
-            GWT.log("PTScript exception for : " + scriptToEval, e);
+            log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
             if (update.containsKey(Model.CALLBACK)) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(update.getObjectID());
-                // eventInstruction.put(Model.TYPE_EVENT);
-                eventInstruction.put(Model.ID, update.getLong(Model.ID));
+                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
                 eventInstruction.put(Model.ERROR_MSG, e.getMessage());
                 uiService.sendDataToServer(eventInstruction);
             }
         }
     }
 
-    public static native Object eval(String script) /*-{
-                                                     var r = $wnd.eval(script);
-                                                     if (typeof r=="object") return JSON.stringify(r);
-                                                     else return r;
+    public static native void eval(String script) /*-{
+                                                     $wnd.eval(script);
                                                      }-*/;
+
+    public static native Object evalWithCallback(String script) /*-{
+                                                                var r = $wnd.eval(script);
+                                                                if (typeof r=="object") return JSON.stringify(r);
+                                                                else return r;
+                                                                }-*/;
+
 }

@@ -56,8 +56,8 @@ public class PTAddOn extends AbstractPTObject {
             params.put("data", data);
         }
 
-        if (create.containsKey(Model.WIDGET)) {
-            final int widgetID = create.getInt(Model.WIDGET);
+        if (create.containsKey(Model.WIDGET_ID)) {
+            final int widgetID = create.getInt(Model.WIDGET_ID);
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
             final Element element = cast.getElement();

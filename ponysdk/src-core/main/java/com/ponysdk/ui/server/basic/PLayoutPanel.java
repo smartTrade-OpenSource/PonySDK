@@ -68,7 +68,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
         parser.comma();
-        parser.parse(Model.WIDGET, child.getID());
+        parser.parse(Model.WIDGET_ID, child.getID());
         parser.endObject();
     }
 
@@ -85,7 +85,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
             parser.parse(Model.WINDOW_ID, window.getID());
         }
         parser.comma();
-        parser.parse(Model.WIDGET, child.getID());
+        parser.parse(Model.WIDGET_ID, child.getID());
         parser.comma();
         parser.parse(Model.VERTICAL_ALIGNMENT, position.ordinal());
         parser.endObject();
@@ -106,7 +106,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
         parser.comma();
-        parser.parse(Model.WIDGET, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
@@ -153,7 +153,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         parser.comma();
         parser.parse(Model.UNIT, unit.ordinal());
         parser.comma();
-        parser.parse(Model.WIDGET, child.getID());
+        parser.parse(Model.WIDGET_ID, child.getID());
         parser.comma();
         parser.parse(key1, v1);
         parser.comma();

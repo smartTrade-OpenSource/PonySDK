@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,27 +24,11 @@
 package com.ponysdk.impl.webapplication.footer;
 
 import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.ui.server.basic.IsPWidget;
 
-public class FooterActivity extends AbstractActivity {
+public class FooterActivity extends AbstractActivity<FooterView> {
 
-    private FooterView footerView;
-
-    @Override
-    public IsPWidget buildView() {
-        return footerView;
-    }
-
-    @Override
-    public void updateView(final Place place) {}
-
-    public FooterView getFooterView() {
-        return footerView;
-    }
-
-    public void setFooterView(final FooterView footerView) {
-        this.footerView = footerView;
+    public void setFooterView(final FooterView view) {
+        this.view = view;
     }
 
 }
