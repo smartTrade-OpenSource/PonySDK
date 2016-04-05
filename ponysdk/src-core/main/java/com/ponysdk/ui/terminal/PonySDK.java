@@ -40,8 +40,8 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
-import com.ponysdk.ui.terminal.model.TypeModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
@@ -58,7 +58,7 @@ import elemental.html.Window;
 @Export(value = "ponysdk", all = false)
 public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketCallback, EventListener {
 
-    private final static Logger log = Logger.getLogger(PonySDK.class.getName());
+    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
     private static PonySDK INSTANCE;
     protected static UIBuilder uiBuilder = new UIBuilder();
@@ -208,21 +208,16 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public void message(final ArrayBuffer message) {
         try {
             // Get the first element on the message, always a key of element of the Model enum
-            int begin = 0;
-            final short type = getShort(message, begin);
+            int position = 0;
+            final BinaryModel type = BinaryModel.getObject(message, position);
+            position = type.getPosition();
 
-            if (type == Model.HEARTBEAT.getShortKey()) {
+            if (type.getModel() == Model.HEARTBEAT) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
                 socketClient.getRequestBuilder().sendHeartbeat();
-            } else if (type == Model.APPLICATION_INSTRUCTIONS.getShortKey()) {
-                begin += TypeModel.SHORT_SIZE.getSize();
-                final short seqNum = getShort(message, begin);
-
-                begin += TypeModel.SHORT_SIZE.getSize();
-                final int seqNumValue = getInteger(message, begin);
-
-                begin += TypeModel.INTEGER_SIZE.getSize();
-                uiBuilder.update(message.slice(begin));
+            } else if (type.getModel() == Model.APPLICATION_SEQ_NUM) {
+                final int seqNumValue = (int) type.getValue().isNumber().doubleValue();
+                uiBuilder.update(message.slice(position));
             }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + message, e);
@@ -232,15 +227,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public static final boolean getBoolean(final ArrayBuffer message, int begin) {
         final Window window = Browser.getWindow();
         final Uint8Array arrayType = window.newUint8Array(message, begin, 1);
-        final boolean result = arrayType.intAt(0) == 1;
-        return result;
+        return arrayType.intAt(0) == BinaryModel.TRUE;
     }
 
     public static final byte getByte(final ArrayBuffer message, int begin) {
         final Window window = Browser.getWindow();
         final Uint8Array arrayType = window.newUint8Array(message, begin, 1);
-        final int result = arrayType.intAt(0);
-        return (byte) result;
+        return (byte) arrayType.intAt(0);
     }
 
     public static final short getShort(final ArrayBuffer message, int begin) {
@@ -248,8 +241,9 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         final Uint8Array arrayType = window.newUint8Array(message, begin, 2);
 
         int result = 0;
-        for (int i = 0; i < arrayType.length(); i++)
+        for (int i = 0; i < arrayType.length(); i++) {
             result = (result << 8) + arrayType.intAt(i);
+        }
 
         return (short) result;
     }
@@ -259,8 +253,9 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         final Uint8Array arrayType = window.newUint8Array(message, begin, 4);
 
         int result = 0;
-        for (int i = 0; i < arrayType.length(); i++)
+        for (int i = 0; i < arrayType.length(); i++) {
             result = (result << 8) + arrayType.intAt(i);
+        }
 
         return result;
     }
