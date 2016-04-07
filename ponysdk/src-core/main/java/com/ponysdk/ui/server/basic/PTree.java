@@ -36,11 +36,12 @@ import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A standard hierarchical tree widget. The tree contains a hierarchy of {@link PTreeItem TreeItems} that the
- * user can open, close, and select.
+ * A standard hierarchical tree widget. The tree contains a hierarchy of
+ * {@link PTreeItem TreeItems} that the user can open, close, and select.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Tree</dt>
@@ -113,13 +114,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     void orphan(final PWidget widget) {
-        assert(widget.getParent() == this);
+        assert widget.getParent() == this;
         widget.setParent(null);
         childWidgets.remove(widget);
     }
 
     void adopt(final PWidget widget, final PTreeItem item) {
-        assert(!childWidgets.containsKey(widget));
+        assert !childWidgets.containsKey(widget);
         childWidgets.put(widget, item);
         widget.setParent(this);
     }
@@ -127,13 +128,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
-        saveAddHandler(Model.HANDLER_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
-        saveRemoveHandler(Model.HANDLER_SELECTION_HANDLER);
+        saveRemoveHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
@@ -143,8 +144,9 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER.getKey())) {
-            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(Model.HANDLER_SELECTION_HANDLER.getKey()).intValue());
+        if (instruction.containsKey(HandlerModel.HANDLER_SELECTION_HANDLER.getValue())) {
+            final PTreeItem treeItem = UIContext.get()
+                    .getObject(instruction.getJsonNumber(HandlerModel.HANDLER_SELECTION_HANDLER.getValue()).intValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);

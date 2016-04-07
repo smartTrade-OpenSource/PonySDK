@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,21 +33,24 @@ import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented
- * by a single string, referred to as a "token". You can create new history items (which have a token
- * associated with them when they are created), and you can programmatically force the current history to move
- * back or forward.
+ * This class allows you to interact with the browser's history stack. Each
+ * "item" on the stack is represented by a single string, referred to as a
+ * "token". You can create new history items (which have a token associated with
+ * them when they are created), and you can programmatically force the current
+ * history to move back or forward.
  * <p>
- * In order to receive notification of user-directed changes to the current history item, implement the
- * {@link PValueChangeHandler} interface and attach it via {@link #addValueChangeHandler(PValueChangeHandler)}
- * .
+ * In order to receive notification of user-directed changes to the current
+ * history item, implement the {@link PValueChangeHandler} interface and attach
+ * it via {@link #addValueChangeHandler(PValueChangeHandler)} .
  * </p>
  * <p>
- * <h3>URL Encoding</h3> Any valid characters may be used in the history token and will survive round-trips
- * through {@link #newItem(String)} to {@link #getToken()}/
- * {@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but most will be encoded in the user-visible
- * URL. The following US-ASCII characters are not encoded on any currently supported browser (but may be in
- * the future due to future browser changes):
+ * <h3>URL Encoding</h3> Any valid characters may be used in the history token
+ * and will survive round-trips through {@link #newItem(String)} to
+ * {@link #getToken()}/
+ * {@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but most will
+ * be encoded in the user-visible URL. The following US-ASCII characters are not
+ * encoded on any currently supported browser (but may be in the future due to
+ * future browser changes):
  * <ul>
  * <li>a-z
  * <li>A-Z
@@ -75,10 +78,7 @@ public class PHistory {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_HISTORY);
-        parser.comma();
-        parser.parse(Model.HISTORY_TOKEN, token);
-        parser.comma();
+        parser.parse(Model.TYPE_HISTORY, token);
         parser.parse(Model.HISTORY_FIRE_EVENTS, fireEvents);
         parser.endObject();
     }

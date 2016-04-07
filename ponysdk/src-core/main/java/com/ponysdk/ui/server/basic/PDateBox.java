@@ -40,6 +40,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
@@ -76,17 +77,13 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         init();
-        saveAddHandler(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
         parser.parse(Model.PICKER, datePicker.getID());
-
-        parser.comma();
         parser.parse(Model.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
@@ -97,14 +94,15 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER.getKey())) {
-            final String data = jsonObject.getString(Model.VALUE.getKey());
+        if (jsonObject.containsKey(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.getValue())) {
+            final String data = jsonObject.getString(Model.VALUE.getValue());
             Date date = null;
             if (data != null && !data.isEmpty()) {
                 try {
                     date = dateFormat.parse(data);
                 } catch (final ParseException ex) {
-                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", data);
+                    if (log.isWarnEnabled())
+                        log.warn("Cannot parse the date #{}", data);
                 }
             }
             onValueChange(new PValueChangeEvent<>(this, date));
@@ -159,7 +157,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public String getDisplayedValue() {
-        if (getValue() == null) return "";
+        if (getValue() == null)
+            return "";
         return getDateFormat().format(getValue());
     }
 

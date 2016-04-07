@@ -38,24 +38,29 @@ import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that adds user-positioned splitters between each of its child widgets.
+ * A panel that adds user-positioned splitters between each of its child
+ * widgets.
  * <p>
- * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes
- * are always specified in {@link PUnit#PX} units, and each pair of child widgets has a splitter
- * between them that the user can drag.
+ * This panel is used in the same way as {@link PDockLayoutPanel}, except that
+ * its children's sizes are always specified in {@link PUnit#PX} units, and each
+ * pair of child widgets has a splitter between them that the user can drag.
  * </p>
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
- * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger
+ * }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }
+ * </li>
  * </ul>
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
@@ -88,8 +93,9 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     /**
      * Sets the minimum allowable size for the given widget.
      * <p>
-     * Its associated splitter cannot be dragged to a position that would make it smaller than this
-     * size. This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * Its associated splitter cannot be dragged to a position that would make
+     * it smaller than this size. This method has no effect for the
+     * {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
      *
      * @param child
@@ -102,16 +108,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (getMinSize(child) != minSize) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.MIN_SIZE, minSize);
-            parser.comma();
             parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
@@ -120,11 +121,13 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     /**
-     * Sets a size below which the slider will close completely. This can be used in conjunction
-     * with {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to
-     * a preferred minimum size before closing completely.
+     * Sets a size below which the slider will close completely. This can be
+     * used in conjunction with {@link #setWidgetMinSize} to provide a
+     * speed-bump effect where the slider will stick to a preferred minimum size
+     * before closing completely.
      * <p>
-     * This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * This method has no effect for the
+     * {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
      *
      * @param child
@@ -138,16 +141,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
-            parser.comma();
             parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
@@ -156,7 +154,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     /**
-     * Sets whether or not double-clicking on the splitter should toggle the display of the widget.
+     * Sets whether or not double-clicking on the splitter should toggle the
+     * display of the widget.
      *
      * @param child
      *            the child whose display toggling will be allowed or not.
@@ -168,16 +167,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (isToggleDisplayAllowed(child) != allowed) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
-            parser.comma();
             parser.parse(Model.WIDGET_ID, child.getID());
             parser.endObject();
 
@@ -187,15 +181,15 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_KEY_RESIZE_HANDLER.getKey())) {
+        if (instruction.containsKey(HandlerModel.HANDLER_KEY_RESIZE_HANDLER.getValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
-            final JsonArray array = instruction.getJsonArray(Model.VALUE.getKey());
+            final JsonArray array = instruction.getJsonArray(Model.VALUE.getValue());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject ws = array.getJsonObject(i);
-                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
+                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getKey()).doubleValue();
+                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getValue()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }
@@ -213,7 +207,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     public void addLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
         if (handlers.isEmpty()) {
-            saveAddHandler(Model.HANDLER_RESIZE_HANDLER);
+            saveAddHandler(HandlerModel.HANDLER_RESIZE_HANDLER);
         }
         handlers.add(resizeHandler);
     }
@@ -232,7 +226,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     private SplitInfoHolder ensureWidgetInfo(final PWidget w) {
         SplitInfoHolder splitHolder = splitInfoByWidget.get(w);
-        if (splitHolder != null) return splitHolder;
+        if (splitHolder != null)
+            return splitHolder;
 
         splitHolder = new SplitInfoHolder();
         splitInfoByWidget.put(w, splitHolder);
@@ -241,19 +236,22 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     public int getMinSize(final PWidget w) {
         final SplitInfoHolder info = getWidgetInfo(w);
-        if (info == null) return -1;
+        if (info == null)
+            return -1;
         return info.minSize;
     }
 
     public int getSnapClosedSize(final PWidget w) {
         final SplitInfoHolder info = getWidgetInfo(w);
-        if (info == null) return -1;
+        if (info == null)
+            return -1;
         return info.snapClosedSize;
     }
 
     public boolean isToggleDisplayAllowed(final PWidget w) {
         final SplitInfoHolder info = getWidgetInfo(w);
-        if (info == null) return false;
+        if (info == null)
+            return false;
         return info.toggleDisplayAllowed;
     }
 }

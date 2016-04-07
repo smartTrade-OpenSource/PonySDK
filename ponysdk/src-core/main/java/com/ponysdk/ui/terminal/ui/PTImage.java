@@ -27,47 +27,56 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTImage extends PTWidget<Image> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        if (create.containsKey(Model.IMAGE_URL)) {
-            final String url = create.getString(Model.IMAGE_URL);
-            if (create.containsKey(Model.IMAGE_LEFT)) {
-                final int left = create.getInt(Model.IMAGE_LEFT);
-                final int top = create.getInt(Model.IMAGE_TOP);
-                final int width = create.getInt(Model.IMAGE_WIDTH);
-                final int height = create.getInt(Model.IMAGE_HEIGHT);
-
-                init(create, uiService, new Image(url, left, top, width, height));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        final BinaryModel url = buffer.getBinaryModel();
+        if (Model.IMAGE_URL.equals(url.getModel())) {
+            final BinaryModel left = buffer.getBinaryModel();
+            if (Model.IMAGE_LEFT.equals(left.getModel())) {
+                // Model.IMAGE_TOP
+                final int top = buffer.getBinaryModel().getIntValue();
+                // Model.IMAGE_WIDTH
+                final int width = buffer.getBinaryModel().getIntValue();
+                // Model.IMAGE_HEIGHT
+                final int height = buffer.getBinaryModel().getIntValue();
+                this.uiObject = new Image(url.getStringValue(), left.getIntValue(), top, width, height);
             } else {
-                init(create, uiService, new Image(url));
+                buffer.rewind(left);
+                this.uiObject = new Image(url.getStringValue());
             }
         } else {
-            init(create, uiService, new Image());
+            buffer.rewind(url);
+            this.uiObject = new Image();
+        }
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+    }
+
+    @Override
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
+            // Model.STREAM_REQUEST_ID
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
+                    + Model.STREAM_REQUEST_ID + "=" + buffer.getBinaryModel().getIntValue());
+        } else {
+            super.addHandler(buffer, handlerModel, uiService);
         }
     }
 
     @Override
-    public void addHandler(final PTInstruction addHandler, final UIService uiService) {
-        if (addHandler.containsKey(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER)) {
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + Model.STREAM_REQUEST_ID
-                    + "=" + addHandler.getString(Model.STREAM_REQUEST_ID));
-        } else {
-            super.addHandler(addHandler, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.IMAGE_URL.equals(binaryModel.getModel())) {
+            cast().setUrl(binaryModel.getStringValue());
+            return true;
         }
-    }
-
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.IMAGE_URL)) {
-            cast().setUrl(update.getString(Model.IMAGE_URL));
-        } else {
-            super.update(update, uiService);
-        }
+        return super.update(buffer, binaryModel);
     }
 
 }

@@ -29,8 +29,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A flexible table that creates cells on demand. It can be jagged (that is, each row can contain a
- * different number of cells) and individual cells can be set to span multiple rows or columns.
+ * A flexible table that creates cells on demand. It can be jagged (that is,
+ * each row can contain a different number of cells) and individual cells can be
+ * set to span multiple rows or columns.
  */
 public class PFlexTable extends PHTMLTable {
 
@@ -53,42 +54,26 @@ public class PFlexTable extends PHTMLTable {
         public void setColSpan(final int row, final int column, final int colSpan) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
-            parser.parse(Model.FLEXTABLE_CELL_FORMATTER);
-            parser.comma();
-            parser.parse(Model.ROW, row);
-            parser.comma();
-            parser.parse(Model.COLUMN, column);
-            parser.comma();
             parser.parse(Model.SET_COL_SPAN, colSpan);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
             parser.endObject();
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
-            parser.parse(Model.FLEXTABLE_CELL_FORMATTER);
-            parser.comma();
-            parser.parse(Model.ROW, row);
-            parser.comma();
-            parser.parse(Model.COLUMN, column);
-            parser.comma();
             parser.parse(Model.SET_ROW_SPAN, rowSpan);
+            parser.parse(Model.ROW, row);
+            parser.parse(Model.COLUMN, column);
             parser.endObject();
         }
     }

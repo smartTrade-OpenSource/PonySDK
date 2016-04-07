@@ -31,89 +31,97 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
+    private UIService uiService;
+
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new TabLayoutPanel(2, Unit.EM));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new TabLayoutPanel(2, Unit.EM);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+        this.uiService = uiService;
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-
-        final Widget w = asWidget(add.getObjectID(), uiService);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final Widget w = asWidget(ptObject);
         final TabLayoutPanel tabPanel = uiObject;
 
-        final int beforeIndex;
-        if (add.containsKey(Model.BEFORE_INDEX)) {
-            beforeIndex = add.getInt(Model.BEFORE_INDEX);
-        } else {
-            beforeIndex = tabPanel.getWidgetCount();
-        }
+        // Model.BEFORE_INDEX
+        final int beforeIndex = buffer.getBinaryModel().getIntValue();
 
-        if (add.containsKey(Model.TAB_TEXT)) {
-            tabPanel.insert(w, add.getString(Model.TAB_TEXT), beforeIndex);
-        } else if (add.containsKey(Model.TAB_WIDGET)) {
-            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(add.getInt(Model.TAB_WIDGET));
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.TAB_TEXT.equals(binaryModel.getModel())) {
+            tabPanel.insert(w, binaryModel.getStringValue(), beforeIndex);
+        } else if (Model.TAB_WIDGET.equals(binaryModel.getModel())) {
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(binaryModel.getIntValue());
             tabPanel.insert(w, ptWidget.cast(), beforeIndex);
         }
     }
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(Model.INDEX, uiObject.getSelectedIndex());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
-        } else if (instruction.containsKey(Model.HANDLER_BEFORE_SELECTION_HANDLER)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(Model.INDEX, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(instruction, uiService);
+            super.addHandler(buffer, handlerModel, uiService);
         }
 
     }
 
     @Override
-    public void remove(final PTInstruction remove, final UIService uiService) {
-        final Widget w = asWidget(remove.getObjectID(), uiService);
-        uiObject.remove(w);
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+        uiObject.remove(asWidget(ptObject));
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.ANIMATE)) {
-            uiObject.animate(update.getInt(Model.ANIMATE));
-        } else if (update.containsKey(Model.VERTICAL)) {
-            uiObject.setAnimationVertical(update.getBoolean(Model.VERTICAL));
-        } else if (update.containsKey(Model.ANIMATION_DURATION)) {
-            uiObject.setAnimationDuration(update.getInt(Model.ANIMATION_DURATION));
-        } else if (update.containsKey(Model.SELECTED_INDEX)) {
-            uiObject.selectTab(update.getInt(Model.SELECTED_INDEX));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+            uiObject.animate(binaryModel.getIntValue());
+            return true;
         }
+        if (Model.VERTICAL.equals(binaryModel.getModel())) {
+            uiObject.setAnimationVertical(binaryModel.getBooleanValue());
+            return true;
+        }
+        if (Model.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+            uiObject.setAnimationDuration(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.SELECTED_INDEX.equals(binaryModel.getModel())) {
+            uiObject.selectTab(binaryModel.getIntValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 }

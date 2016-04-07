@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -45,17 +45,19 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
 
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
-        if (Objects.equals(this.horizontalAlignment, horizontalAlignment)) return;
+        if (Objects.equals(this.horizontalAlignment, horizontalAlignment))
+            return;
         this.horizontalAlignment = horizontalAlignment;
 
-        saveUpdate(Model.HORIZONTAL_ALIGNMENT, this.horizontalAlignment.ordinal());
+        saveUpdate(Model.HORIZONTAL_ALIGNMENT, this.horizontalAlignment.getValue());
     }
 
     @Override
     public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
-        if (Objects.equals(this.verticalAlignment, verticalAlignment)) return;
+        if (Objects.equals(this.verticalAlignment, verticalAlignment))
+            return;
         this.verticalAlignment = verticalAlignment;
-        saveUpdate(Model.VERTICAL_ALIGNMENT, this.verticalAlignment.ordinal());
+        saveUpdate(Model.VERTICAL_ALIGNMENT, this.verticalAlignment.getValue());
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

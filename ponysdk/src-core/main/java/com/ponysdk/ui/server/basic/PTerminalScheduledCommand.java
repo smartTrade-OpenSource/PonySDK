@@ -66,19 +66,16 @@ public abstract class PTerminalScheduledCommand extends PObject {
         // run();
         // } finally {}
         // final Update update = new Update(ID);
-        // update.put(PROPERTY.FIXDELAY, delayMillis);
+        // update.put(Model.FIXDELAY, delayMillis);
         // Txn.get().getTxnContext().save(update);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
         parser.parse(Model.FIXDELAY, delayMillis);
 
         if (js != null) {
-            parser.comma();
             parser.parse(Model.EVAL, js);
         }
     }

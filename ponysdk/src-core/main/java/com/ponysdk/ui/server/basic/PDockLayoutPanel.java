@@ -30,15 +30,15 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget
- * to take up
- * the remaining space in its center.
+ * A panel that lays its child widgets out "docked" at its outer edges, and
+ * allows its last widget to take up the remaining space in its center.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
- * it is run
- * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
- * DockLayoutPanel contains children tagged with the cardinal directions, and center:
+ * DockLayoutPanel contains children tagged with the cardinal directions, and
+ * center:
  * <p>
  * <dl>
  * <dt>center</dt>
@@ -48,9 +48,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dt>east</dt>
  * </dl>
  * <p>
- * Each child can hold only widget, and there can be only one &lt;g:center>. However, there can be
- * any number
- * of the directional children.
+ * Each child can hold only widget, and there can be only one &lt;g:center>.
+ * However, there can be any number of the directional children.
  * </p>
  */
 public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
@@ -64,7 +63,11 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         WEST,
         CENTER,
         LINE_START,
-        LINE_END
+        LINE_END;
+
+        public byte getValue() {
+            return (byte) ordinal();
+        }
     }
 
     public PDockLayoutPanel(final PUnit unit) {
@@ -75,9 +78,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
-        parser.parse(Model.UNIT, unit.ordinal());
+        parser.parse(Model.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -117,16 +118,11 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetSize(final PWidget widget, final double size) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.WIDGET_SIZE, size);
-        parser.comma();
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
@@ -134,16 +130,11 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
-        parser.comma();
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
@@ -158,18 +149,12 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, child.getID());
+        parser.parse(Model.TYPE_ADD, child.getID());
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.comma();
-        parser.parse(Model.DIRECTION, direction.ordinal());
-        parser.comma();
+        parser.parse(Model.DIRECTION, direction.getValue());
         parser.parse(Model.SIZE, size);
         parser.endObject();
         // UIContext.get().assignParentID(child.getID(), ID);

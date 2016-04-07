@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,55 +25,55 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new MenuBar(create.getBoolean(Model.MENU_BAR_IS_VERTICAL)));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.MENU_BAR_IS_VERTICAL
+        this.uiObject = new MenuBar(buffer.getBinaryModel().getBooleanValue());
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-
-        final PTObject child = uiService.getPTObject(add.getObjectID());
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final MenuBar menuBar = cast();
 
-        if (child instanceof PTMenuItem) {
-            final PTMenuItem menuItem = (PTMenuItem) child;
-            if (add.containsKey(Model.BEFORE_INDEX)) {
-                menuBar.insertItem(menuItem.cast(), add.getInt(Model.BEFORE_INDEX));
-            } else {
-                menuBar.addItem(menuItem.cast());
-            }
+        if (ptObject instanceof PTMenuItem) {
+            final PTMenuItem menuItem = (PTMenuItem) ptObject;
+            // Model.BEFORE_INDEX
+            menuBar.insertItem(menuItem.cast(), buffer.getBinaryModel().getIntValue());
         } else {
-            final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) child;
+            final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
             menuBar.addSeparator(menuItem.cast());
         }
     }
 
     @Override
-    public void remove(final PTInstruction remove, final UIService uiService) {
-        final PTObject child = uiService.getPTObject(remove.getObjectID());
-        if (child instanceof PTMenuItem) {
-            final PTMenuItem menuItem = (PTMenuItem) child;
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+        if (ptObject instanceof PTMenuItem) {
+            final PTMenuItem menuItem = (PTMenuItem) ptObject;
             uiObject.removeItem(menuItem.cast());
         } else {
-            final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) child;
+            final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
             uiObject.removeSeparator(menuItem.cast());
         }
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.CLEAR)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clearItems();
-        } else if (update.containsKey(Model.ANIMATION)) {
-            uiObject.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+            uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 }

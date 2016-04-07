@@ -25,22 +25,25 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTLabel extends PTWidget<Label> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new Label());
-        update(create, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new Label();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.TEXT)) {
-            uiObject.setText(update.getString(Model.TEXT));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
         }
-        super.update(update, uiService);
+        return super.update(buffer, binaryModel);
     }
 }

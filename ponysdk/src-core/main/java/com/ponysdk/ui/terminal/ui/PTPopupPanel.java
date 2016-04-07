@@ -41,8 +41,10 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
@@ -53,10 +55,18 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     private int dragStartY;
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final boolean autoHide = create.containsKey(Model.POPUP_AUTO_HIDE) ? create.getBoolean(Model.POPUP_AUTO_HIDE) : false;
-        init(create, uiService, createPopupPanel(autoHide));
-        addCloseHandler(create, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        boolean autoHide = false;
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
+            autoHide = binaryModel.getBooleanValue();
+        } else {
+            buffer.rewind(binaryModel);
+        }
+        this.uiObject = createPopupPanel(autoHide);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+        addCloseHandler(uiService);
     }
 
     protected PopupPanel createPopupPanel(final boolean autoHide) {
@@ -72,13 +82,13 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         return popup;
     }
 
-    protected void addCloseHandler(final PTInstruction create, final UIService uiService) {
+    protected void addCloseHandler(final UIService uiService) {
         cast().addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(create.getObjectID());
+                instruction.setObjectID(getObjectID());
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }
@@ -86,8 +96,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     }
 
     @Override
-    public void addHandler(final PTInstruction instrcution, final UIService uiService) {
-        if (instrcution.containsKey(Model.HANDLER_POPUP_POSITION_CALLBACK)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_POPUP_POSITION_CALLBACK.equals(handlerModel)) {
             final PopupPanel popup = cast();
             popup.setVisible(true);
             popup.show();
@@ -96,7 +106,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 @Override
                 public void execute() {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instrcution.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
 
                     final JSONArray widgetInfo = new JSONArray();
                     widgetInfo.set(0, new JSONNumber(popup.getOffsetWidth()));
@@ -111,41 +121,57 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             });
 
             return;
+        } else {
+            super.addHandler(buffer, handlerModel, uiService);
         }
-
-        super.addHandler(instrcution, uiService);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final PopupPanel popup = cast();
-
-        if (update.containsKey(Model.ANIMATION)) {
-            popup.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
-        } else if (update.containsKey(Model.POPUP_CENTER)) {
+        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+            popup.setAnimationEnabled(binaryModel.getBooleanValue());
+            return true;
+        }
+        if (Model.POPUP_CENTER.equals(binaryModel.getModel())) {
             popup.show();
             popup.center();
-        } else if (update.containsKey(Model.POPUP_SHOW)) {
+            return true;
+        }
+        if (Model.POPUP_SHOW.equals(binaryModel.getModel())) {
             popup.show();
-        } else if (update.containsKey(Model.POPUP_POSITION_AND_SHOW)) {
+            return true;
+        }
+        if (Model.POPUP_POSITION_AND_SHOW.equals(binaryModel.getModel())) {
             popup.setVisible(true);
-        } else if (update.containsKey(Model.POPUP_HIDE)) {
+            return true;
+        }
+        if (Model.POPUP_HIDE.equals(binaryModel.getModel())) {
             popup.hide();
-        } else if (update.containsKey(Model.POPUP_GLASS_ENABLED)) {
-            popup.setGlassEnabled(update.getBoolean(Model.POPUP_GLASS_ENABLED));
-        } else if (update.containsKey(Model.POPUP_MODAL)) {
-            popup.setModal(update.getBoolean(Model.POPUP_MODAL));
-        } else if (update.containsKey(Model.POPUP_POSITION)) {
-            final int left = update.getInt(Model.POPUP_POSITION_LEFT);
-            final int top = update.getInt(Model.POPUP_POSITION_TOP);
+            return true;
+        }
+        if (Model.POPUP_GLASS_ENABLED.equals(binaryModel.getModel())) {
+            popup.setGlassEnabled(binaryModel.getBooleanValue());
+            return true;
+        }
+        if (Model.POPUP_MODAL.equals(binaryModel.getModel())) {
+            popup.setModal(binaryModel.getBooleanValue());
+            return true;
+        }
+        if (Model.POPUP_POSITION_LEFT.equals(binaryModel.getModel())) {
+            final int left = binaryModel.getIntValue();
+            // Model.POPUP_POSITION_TOP
+            final int top = buffer.getBinaryModel().getIntValue();
             popup.setPopupPosition(left, top);
-        } else if (update.containsKey(Model.POPUP_DRAGGABLE)) {
+            return true;
+        }
+        if (Model.POPUP_DRAGGABLE.equals(binaryModel.getModel())) {
             popup.addDomHandler(this, MouseDownEvent.getType());
             popup.addDomHandler(this, MouseUpEvent.getType());
             popup.addDomHandler(this, MouseMoveEvent.getType());
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -187,7 +213,8 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     protected void onPreviewNativeEvent(final NativePreviewEvent event) {
         // NativeEvent nativeEvent = event.getNativeEvent();
         //
-        // if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN) /* &&
+        // if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN)
+        // /* &&
         // isCaptionEvent(nativeEvent) */) {
         // nativeEvent.preventDefault();
         // }

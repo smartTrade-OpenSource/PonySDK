@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,8 +29,9 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTreeItem extends PTUIObject<TreeItem> {
 
@@ -39,28 +40,38 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     private Tree tree;
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        this.isRoot = create.getBoolean(Model.ROOT);
-
-        if (create.containsKey(Model.TEXT)) {
-            init(create, uiService, new TreeItem(SafeHtmlUtils.fromString(create.getString(Model.TEXT))));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        final String text = buffer.getBinaryModel().getStringValue();
+        if (text != null) {
+            this.uiObject = new TreeItem(SafeHtmlUtils.fromString(text));
         } else {
-            init(create, uiService, new TreeItem());
+            this.uiObject = new TreeItem();
+        }
+
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.ROOT.equals(binaryModel.getModel())) {
+            this.isRoot = binaryModel.getBooleanValue();
+        } else {
+            buffer.rewind(binaryModel);
         }
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        final UIObject widget = asWidget(add.getObjectID(), uiService);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final UIObject widget = asWidget(ptObject);
 
         if (widget instanceof Tree) {
             this.tree = (Tree) widget;
         } else {
-            if (add.containsKey(Model.WIDGET)) {
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+            if (Model.WIDGET.equals(binaryModel.getModel())) {
                 uiObject.setWidget((Widget) widget);
             } else {
                 final TreeItem w = (TreeItem) widget;
-                final int index = add.getInt(Model.INDEX);
+                final int index = buffer.getInt(Model.INDEX);
                 if (isRoot) {
                     tree.insertItem(index, w);
                 } else {
@@ -71,14 +82,16 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.SELECTED)) {
-            uiObject.setSelected(update.getBoolean(Model.SELECTED));
-        } else if (update.containsKey(Model.STATE)) {
-            uiObject.setState(update.getBoolean(Model.STATE));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.SELECTED.equals(binaryModel.getModel())) {
+            uiObject.setSelected(binaryModel.getBooleanValue());
+            return true;
         }
+        if (Model.STATE.equals(binaryModel.getModel())) {
+            uiObject.setState(binaryModel.getBooleanValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
 }

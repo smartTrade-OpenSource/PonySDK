@@ -20,4 +20,8 @@ public enum PAlignment {
      * Stretches an element to fill the layer on a given axis.
      */
     STRETCH;
+
+    public byte getValue() {
+        return (byte) ordinal();
+    }
 }

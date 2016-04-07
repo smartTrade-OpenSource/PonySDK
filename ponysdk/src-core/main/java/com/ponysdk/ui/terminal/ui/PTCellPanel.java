@@ -30,18 +30,25 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
+    private UIService uiService;
 
-        if (update.containsKey(Model.CELL_HORIZONTAL_ALIGNMENT)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update
-                    .getInt(Model.CELL_HORIZONTAL_ALIGNMENT)];
-            final Widget w = asWidget(update.getInt(Model.CELL), uiService);
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
+        this.uiService = uiService;
+    }
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CELL_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
+            final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
@@ -55,9 +62,11 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
                 default:
                     break;
             }
-        } else if (update.containsKey(Model.CELL_VERTICAL_ALIGNMENT)) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(Model.CELL_VERTICAL_ALIGNMENT)];
-            final Widget w = asWidget(update.getInt(Model.CELL), uiService);
+            return true;
+        }
+        if (Model.CELL_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
+            final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
@@ -71,13 +80,20 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
                 default:
                     break;
             }
-        } else if (update.containsKey(Model.CELL_WIDTH)) {
-            uiObject.setCellWidth(asWidget(update.getInt(Model.CELL), uiService), update.getString(Model.CELL_WIDTH));
-        } else if (update.containsKey(Model.CELL_HEIGHT)) {
-            uiObject.setCellHeight(asWidget(update.getInt(Model.CELL), uiService), update.getString(Model.CELL_HEIGHT));
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        if (Model.CELL_WIDTH.equals(binaryModel.getModel())) {
+            uiObject.setCellWidth(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
+                    binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.CELL_HEIGHT.equals(binaryModel.getModel())) {
+            uiObject.setCellHeight(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
+                    binaryModel.getStringValue());
+            return true;
+        }
+
+        return super.update(buffer, binaryModel);
     }
 
 }

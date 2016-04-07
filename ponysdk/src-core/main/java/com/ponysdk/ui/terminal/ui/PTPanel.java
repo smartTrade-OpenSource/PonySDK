@@ -28,22 +28,24 @@ import java.util.logging.Logger;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTPanel<W extends Panel> extends PTWidget<W> {
 
     private final static Logger log = Logger.getLogger(PTPanel.class.getName());
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        final Widget widget = asWidget(add.getObjectID(), uiService);
-        if (widget != null) uiObject.add(widget);
-        else log.warning("No widget created for object #" + add.getObjectID() + ", Details : " + add);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final Widget widget = asWidget(ptObject);
+        if (widget != null)
+            uiObject.add(widget);
+        else
+            log.warning("No widget created for object #" + ptObject.getObjectID() + ", Details : " + buffer);
     }
 
     @Override
-    public void remove(final PTInstruction remove, final UIService uiService) {
-        uiObject.remove(asWidget(remove.getObjectID(), uiService));
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+        uiObject.remove(asWidget(ptObject));
     }
 
 }

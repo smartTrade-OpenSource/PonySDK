@@ -9,9 +9,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id
- * in order
- * to support ARIA.
+ * An item that can be contained within a {@link PTree}. Each tree item is
+ * assigned a unique DOM id in order to support ARIA.
  * <p>
  * <h3>Example</h3> {@example http://ponysdk.com/sample/#Tree}
  * </p>
@@ -58,16 +57,15 @@ public class PTreeItem extends PObject {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
-        parser.parse(Model.ROOT, isRoot);
-
-        parser.comma();
         parser.parse(Model.TEXT, html);
+
+        if (isRoot)
+            parser.parse(Model.ROOT, isRoot);
     }
 
     private void setWidget() {
-        if (widget == null) return;
+        if (widget == null)
+            return;
 
         if (widget.getParent() != null) {
             widget.removeFromParent();
@@ -80,7 +78,7 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.adopt(widget, this);
-            saveAdd(widget.getID(), ID, Model.WIDGET, true);
+            saveAdd(widget.getID(), ID, Model.WIDGET);
         }
     }
 

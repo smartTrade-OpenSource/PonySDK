@@ -55,16 +55,17 @@ import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * <p>
- * Provides a way to identify a user across more than one page request or visit to a Web site and to store
- * information about that user.
+ * Provides a way to identify a user across more than one page request or visit
+ * to a Web site and to store information about that user.
  * </p>
  * <p>
- * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
- * {@link Application} .
+ * There is ONE unique UIContext for each screen displayed. Each UIContext is
+ * bound to the current {@link Application} .
  * </p>
  */
 
@@ -142,19 +143,22 @@ public class UIContext {
     }
 
     public void execute(final Runnable runnable) {
-        if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
+        if (log.isDebugEnabled())
+            log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
-                    // final Long receivedSeqNum = checkClientMessage(data, uiContext);
+                    // final Long receivedSeqNum = checkClientMessage(data,
+                    // uiContext);
 
                     // if (receivedSeqNum != null) {
                     runnable.run();
 
-                    // final List<JsonObject> datas = uiContext.expungeIncomingMessageQueue(receivedSeqNum);
+                    // final List<JsonObject> datas =
+                    // uiContext.expungeIncomingMessageQueue(receivedSeqNum);
                     // for (final JsonObject jsoObject : datas) {
                     // process(uiContext, jsoObject);
                     // }
@@ -182,7 +186,8 @@ public class UIContext {
     }
 
     private void fireOnData(final List<Object> data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listenerCollection.isEmpty())
+            return;
         try {
             for (final DataListener listener : listenerCollection) {
                 for (final Object object : data) {
@@ -195,7 +200,8 @@ public class UIContext {
     }
 
     private void fireOnData(final Object data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listenerCollection.isEmpty())
+            return;
         try {
             for (final DataListener listener : listenerCollection) {
                 listener.onData(data);
@@ -206,24 +212,24 @@ public class UIContext {
     }
 
     public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.TYPE_CLOSE.getKey())) {
+        if (jsonObject.containsKey(Model.TYPE_CLOSE.getValue())) {
             destroy();
-        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getKey())) {
+        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getValue())) {
             if (history != null) {
-                history.fireHistoryChanged(jsonObject.getString(Model.HISTORY_TOKEN.getKey()));
+                history.fireHistoryChanged(jsonObject.getString(Model.TYPE_HISTORY.getValue()));
             }
-        } else if (jsonObject.containsKey(Model.ERROR_MSG.getKey())) {
-            log.error(jsonObject.getString(Model.ERROR_MSG.getKey()));
+        } else if (jsonObject.containsKey(Model.ERROR_MSG.getValue())) {
+            log.error(jsonObject.getString(Model.ERROR_MSG.getValue()));
         } else {
-            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getKey()).intValue();
+            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
 
             final PObject object = weakReferences.get(objectID);
 
             if (object == null) {
                 log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
-                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getKey())) {
-                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getKey()).intValue();
+                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getValue())) {
+                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getValue()).intValue();
                     final PObject gcObject = weakReferences.get(parentObjectID);
                     log.warn("" + gcObject);
                 }
@@ -289,13 +295,9 @@ public class UIContext {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD_HANDLER);
-        parser.comma();
-        parser.parse(Model.HANDLER_STREAM_REQUEST_HANDLER);
-        parser.comma();
-        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
-        parser.comma();
+        parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.getValue());
         parser.parse(Model.OBJECT_ID, 0);
+        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -306,13 +308,9 @@ public class UIContext {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD_HANDLER);
-        parser.comma();
-        parser.parse(Model.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER);
-        parser.comma();
-        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
-        parser.comma();
+        parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.getValue());
         parser.parse(Model.OBJECT_ID, 0);
+        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -350,11 +348,13 @@ public class UIContext {
         get().getEventBus().removeHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type,
+            final Object source, final H handler) {
         return get().getEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
+    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source,
+            final H handler) {
         get().getEventBus().removeHandlerFromSource(type, source, handler);
     }
 
@@ -394,10 +394,11 @@ public class UIContext {
     }
 
     /**
-     * Binds an object to this session, using the name specified. If an object of the same name is already
-     * bound to the session, the object is replaced.
+     * Binds an object to this session, using the name specified. If an object
+     * of the same name is already bound to the session, the object is replaced.
      * <p>
-     * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
+     * If the value passed in is null, this has the same effect as calling
+     * <code>removeAttribute()<code>.
      *
      * @param name
      *            the name to which the object is bound; cannot be null
@@ -405,13 +406,16 @@ public class UIContext {
      *            the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
-        if (value == null) removeAttribute(name);
-        else attributes.put(name, value);
+        if (value == null)
+            removeAttribute(name);
+        else
+            attributes.put(name, value);
     }
 
     /**
-     * Removes the object bound with the specified name from this session. If the session does not have an
-     * object bound with the specified name, this method does nothing.
+     * Removes the object bound with the specified name from this session. If
+     * the session does not have an object bound with the specified name, this
+     * method does nothing.
      *
      * @param name
      *            the name of the object to remove from this session
@@ -422,8 +426,8 @@ public class UIContext {
     }
 
     /**
-     * Returns the object bound with the specified name in this session, or <code>null</code> if no object is
-     * bound under the name.
+     * Returns the object bound with the specified name in this session, or
+     * <code>null</code> if no object is bound under the name.
      *
      * @param name
      *            a string specifying the name of the object
@@ -455,8 +459,9 @@ public class UIContext {
         notifyMessageReceived();
 
         final int previous = lastReceived;
-        if ((previous + 1) != receivedSeqNum) {
-            if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
+        if (previous + 1 != receivedSeqNum) {
+            if (lastSyncErrorTimestamp <= 0)
+                lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
         lastReceived = receivedSeqNum;
@@ -474,7 +479,8 @@ public class UIContext {
     }
 
     public List<JsonObject> expungeIncomingMessageQueue(final int receivedSeqNum) {
-        if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
+        if (incomingMessageQueue.isEmpty())
+            return Collections.emptyList();
 
         final List<JsonObject> datas = new ArrayList<>();
         int expected = receivedSeqNum + 1;
@@ -495,7 +501,8 @@ public class UIContext {
     }
 
     public void destroy() {
-        // log.info("Destroying UIContext ViewID #{} from the Session #{}", uiContextID,
+        // log.info("Destroying UIContext ViewID #{} from the Session #{}",
+        // uiContextID,
         // application.getSession().getId());
         destroyed = true;
 
@@ -506,7 +513,8 @@ public class UIContext {
             listener.onUIContextDestroyed(this);
         }
 
-        // log.info("UIContext destroyed ViewID #{} from the Session #{}", uiContextID,
+        // log.info("UIContext destroyed ViewID #{} from the Session #{}",
+        // uiContextID,
         // application.getSession().getId());
     }
 
@@ -543,17 +551,21 @@ public class UIContext {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (uiContextID ^ (uiContextID >>> 32));
+        result = prime * result + (uiContextID ^ uiContextID >>> 32);
         return result;
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
         final UIContext other = (UIContext) obj;
-        if (uiContextID != other.uiContextID) return false;
+        if (uiContextID != other.uiContextID)
+            return false;
         return true;
     }
 

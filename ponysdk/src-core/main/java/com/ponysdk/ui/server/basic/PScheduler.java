@@ -32,6 +32,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
@@ -94,7 +95,8 @@ public abstract class PScheduler extends PObject {
 
     private void scheduleFixedDelay0(final RepeatingCommand cmd, final int delayMs) {
         final Long existingCommandID = IDByCommand.get(cmd);
-        if (existingCommandID != null) cancelScheduleCommand(existingCommandID);
+        if (existingCommandID != null)
+            cancelScheduleCommand(existingCommandID);
 
         final long cmdID = UIContext.get().nextID();
         scheduleFixedDelayCommand(cmdID, delayMs);
@@ -105,18 +107,11 @@ public abstract class PScheduler extends PObject {
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.START, true);
-        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
-        parser.comma();
         parser.parse(Model.FIXRATE, delayMs);
         parser.endObject();
     }
@@ -124,18 +119,11 @@ public abstract class PScheduler extends PObject {
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.START, true);
-        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
-        parser.comma();
         parser.parse(Model.FIXDELAY, delayMs);
         parser.endObject();
     }
@@ -143,17 +131,12 @@ public abstract class PScheduler extends PObject {
     private void cancelScheduleCommand(final long cmdID) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.STOP);
-        parser.comma();
         parser.parse(Model.COMMAND_ID, cmdID);
+        parser.parse(Model.STOP);
         parser.endObject();
 
         final RepeatingCommand command = commandByID.remove(cmdID);
@@ -162,18 +145,19 @@ public abstract class PScheduler extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_KEY_SCHEDULER.getKey())) {
-            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getKey()).longValue();
+        if (instruction.containsKey(HandlerModel.HANDLER_KEY_SCHEDULER.getValue())) {
+            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getValue()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
-            if (command == null) return;
+            if (command == null)
+                return;
 
             final boolean invokeAgain = command.execute();
             if (!invokeAgain) {
                 cancelScheduleCommand(cmdID);
             } else {
                 // Re-schedule in fixed delay mode
-                if (instruction.containsKey(Model.FIXDELAY.getKey())) {
-                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.getKey()));
+                if (instruction.containsKey(Model.FIXDELAY.getValue())) {
+                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.getValue()));
                 }
             }
         } else {

@@ -47,18 +47,15 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(Parser parser) {
+    protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (text != null) {
-            parser.comma();
-            parser.parse(Model.TEXT, this.text);
-        }
+        parser.parse(Model.TEXT, this.text);
     }
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text)) return;
+        if (Objects.equals(this.text, text))
+            return;
         this.text = text;
         saveUpdate(Model.TEXT, this.text);
     }
@@ -70,7 +67,8 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html)) return;
+        if (Objects.equals(this.html, html))
+            return;
         this.html = html;
         saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }

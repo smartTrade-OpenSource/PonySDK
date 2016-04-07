@@ -56,50 +56,6 @@ public class Parser2 implements Parser {
     }
 
     @Override
-    public void comma() {
-        try {
-            writer.append(COMMA);
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void quote() {
-        try {
-            writer.append(QUOTE);
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void beginArray() {
-        try {
-            writer.append(BRACKET_LEFT);
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void endArray() {
-        try {
-            writer.append(BRACKET_RIGHT);
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void parseKey(final short key) {
-    }
-
-    @Override
     public void parse(final JsonValue jsonObject) {
         try {
             writer.append(jsonObject.toString());
@@ -114,7 +70,7 @@ public class Parser2 implements Parser {
     @Override
     public void parse(final Model type) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -123,7 +79,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final String value) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -141,7 +97,7 @@ public class Parser2 implements Parser {
     @Override
     public void parse(final Model type, final JsonObjectBuilder builder) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -158,7 +114,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final boolean value) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -182,7 +138,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final long value) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -197,7 +153,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final int value) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -212,7 +168,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final double value) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -228,13 +184,11 @@ public class Parser2 implements Parser {
     @Override
     public void parse(final Model type, final Collection<String> collection) {
         try {
-            writer.append(type.getKey());
+            writer.append(type.getValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-
-        beginArray();
 
         for (final String s : collection) {
             try {
@@ -246,14 +200,12 @@ public class Parser2 implements Parser {
                 e.printStackTrace();
             }
         }
-
-        endArray();
     }
 
     @Override
     public void parse(final Model model, final JsonValue jsonObject) {
         try {
-            writer.append(model.getKey());
+            writer.append(model.getValue());
         } catch (final IOException e2) {
             // TODO Auto-generated catch block
             e2.printStackTrace();
@@ -279,7 +231,7 @@ public class Parser2 implements Parser {
     }
 
     @Override
-    public void parse(Model model, Object value) {
+    public void parse(final Model model, final Object value) {
     }
 
 }

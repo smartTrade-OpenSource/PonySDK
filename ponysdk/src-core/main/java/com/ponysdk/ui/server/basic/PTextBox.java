@@ -35,8 +35,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-TextBox { primary style }</li>
- * <li>.gwt-TextBox-readonly { dependent style set when the text box
- * is read-only }</li>
+ * <li>.gwt-TextBox-readonly { dependent style set when the text box is
+ * read-only }</li>
  * </ul>
  * <p>
  */
@@ -98,7 +98,8 @@ public class PTextBox extends PTextBoxBase {
     }
 
     /**
-     * Apply a mask to the textbox. Value get/set from the textbox will have the mask. <br>
+     * Apply a mask to the textbox. Value get/set from the textbox will have the
+     * mask. <br>
      * Example: ({{000}}) {{000}}.{{0000}}
      *
      * @param pattern
@@ -111,18 +112,12 @@ public class PTextBox extends PTextBoxBase {
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.MASK, pattern);
-        parser.comma();
         parser.parse(Model.VISIBILITY, showMask);
-        parser.comma();
         parser.parse(Model.REPLACEMENT_STRING, freeSymbol);
         parser.endObject();
     }

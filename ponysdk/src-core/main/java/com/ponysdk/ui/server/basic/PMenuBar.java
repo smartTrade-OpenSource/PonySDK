@@ -34,9 +34,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A standard menu bar widget. A menu bar can contain any number of menu items, each of which can
- * either fire
- * a {@link PCommand} or open a cascaded menu bar.
+ * A standard menu bar widget. A menu bar can contain any number of menu items,
+ * each of which can either fire a {@link PCommand} or open a cascaded menu bar.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-MenuBar</dt>
@@ -91,16 +90,15 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>the inner element of the cell</dd>
  * </dl>
  * <p>
- * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute
- * (which
- * defaults to false), and may have only MenuItem elements as children. MenuItems may contain HTML
- * and
- * MenuBars.
+ * MenuBar elements in UiBinder template files can have a <code>vertical</code>
+ * boolean attribute (which defaults to false), and may have only MenuItem
+ * elements as children. MenuItems may contain HTML and MenuBars.
  * </p>
  */
 public class PMenuBar extends PWidget implements HasPAnimation {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
+    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
+    // menuItem only
     private final List<PWidget> items = new ArrayList<>();
 
     private boolean animationEnabled = false;
@@ -114,14 +112,13 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         this.vertical = vertical;
         init();
 
-        addStyleName(PonySDKTheme.MENUBAR); // TODO nciaravola must be moved terminal side
+        addStyleName(PonySDKTheme.MENUBAR); // TODO nciaravola must be moved
+                                            // terminal side
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
         parser.parse(Model.MENU_BAR_IS_VERTICAL, vertical);
     }
 
@@ -163,16 +160,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, item.getID());
+        parser.parse(Model.TYPE_ADD, item.getID());
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
@@ -217,16 +209,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, itemSeparator.getID());
+        parser.parse(Model.TYPE_ADD, itemSeparator.getID());
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.comma();
         parser.parse(Model.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 

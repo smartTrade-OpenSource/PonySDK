@@ -2,7 +2,15 @@
 package com.ponysdk.ui.terminal;
 
 public enum PUnit {
-    PX("px"), PCT("%"), EM("em"), EX("ex"), PT("pt"), PC("pc"), IN("in"), CM("cm"), MM("mm");
+    PX("px"),
+    PCT("%"),
+    EM("em"),
+    EX("ex"),
+    PT("pt"),
+    PC("pc"),
+    IN("in"),
+    CM("cm"),
+    MM("mm");
 
     private final String value;
 
@@ -12,6 +20,10 @@ public enum PUnit {
 
     public String getValue() {
         return value;
+    }
+
+    public byte getByteValue() {
+        return (byte) ordinal();
     }
 
 }

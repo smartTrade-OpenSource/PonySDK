@@ -16,19 +16,9 @@ public interface Parser {
 
     void endObject();
 
-    void beginArray();
-
-    void endArray();
-
-    void comma();
-
-    void quote();
-
-    void parseKey(short key);
+    void parse(Model model);
 
     void parse(JsonValue jsonObject);
-
-    void parse(Model model);
 
     void parse(Model model, JsonObjectBuilder builder);
 

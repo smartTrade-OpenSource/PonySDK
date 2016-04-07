@@ -30,54 +30,55 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * All HTML element interfaces derive from this class.Useful to create native HTML component.
+ * All HTML element interfaces derive from this class.Useful to create native
+ * HTML component.
  */
 public class PElement extends PComplexPanel {
 
-    private final String tagName;
+	private final String tagName;
 
-    private String innerText;
-    private String innerHTML;
+	private String innerText;
+	private String innerHTML;
 
-    public PElement(final String tagName) {
-        this.tagName = tagName;
-        init();
-    }
+	public PElement(final String tagName) {
+		this.tagName = tagName;
+		init();
+	}
 
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
+	@Override
+	protected void enrichOnInit(final Parser parser) {
+		super.enrichOnInit(parser);
+		parser.parse(Model.TAG, tagName);
+	}
 
-        parser.comma();
-        parser.parse(Model.TAG, tagName);
-    }
+	@Override
+	protected WidgetType getWidgetType() {
+		return WidgetType.ELEMENT;
+	}
 
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.ELEMENT;
-    }
+	public String getTagName() {
+		return tagName;
+	}
 
-    public String getTagName() {
-        return tagName;
-    }
+	public void setInnerHTML(final String innerHTML) {
+		if (Objects.equals(this.innerHTML, innerHTML))
+			return;
+		this.innerHTML = innerHTML;
+		saveUpdate(Model.INNER_HTML, this.innerHTML);
+	}
 
-    public void setInnerHTML(final String innerHTML) {
-        if (Objects.equals(this.innerHTML, innerHTML)) return;
-        this.innerHTML = innerHTML;
-        saveUpdate(Model.INNER_HTML, this.innerHTML);
-    }
+	public void setInnerText(final String innerText) {
+		if (Objects.equals(this.innerText, innerText))
+			return;
+		this.innerText = innerText;
+		saveUpdate(Model.INNER_TEXT, this.innerText);
+	}
 
-    public void setInnerText(final String innerText) {
-        if (Objects.equals(this.innerText, innerText)) return;
-        this.innerText = innerText;
-        saveUpdate(Model.INNER_TEXT, this.innerText);
-    }
+	public String getInnerText() {
+		return innerText;
+	}
 
-    public String getInnerText() {
-        return innerText;
-    }
-
-    public String getInnerHTML() {
-        return innerHTML;
-    }
+	public String getInnerHTML() {
+		return innerHTML;
+	}
 }

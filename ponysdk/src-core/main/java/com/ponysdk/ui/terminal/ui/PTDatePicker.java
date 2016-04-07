@@ -33,38 +33,43 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
     private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new DatePicker());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new DatePicker();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
             final DatePicker picker = cast();
             picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<Date> event) {
-                    triggerEvent(instruction, picker, uiService, event);
+                    triggerEvent(picker, uiService, event);
                 }
             });
-        } else if (instruction.containsKey(Model.HANDLER_SHOW_RANGE)) {
+        } else if (HandlerModel.HANDLER_SHOW_RANGE.equals(handlerModel)) {
             final DatePicker picker = cast();
             picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
 
                 @Override
                 public void onShowRange(final ShowRangeEvent<Date> event) {
                     final PTInstruction instruction = new PTInstruction();
+                    // FIXME
                     instruction.setObjectID(instruction.getObjectID());
-                    instruction.put(Model.HANDLER_SHOW_RANGE);
+                    instruction.put(HandlerModel.HANDLER_SHOW_RANGE);
                     instruction.put(Model.START_DATE, event.getStart().getTime());
                     instruction.put(Model.END_DATE, event.getEnd().getTime());
                     uiService.sendDataToServer(picker, instruction);
@@ -75,7 +80,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
     }
 
-    protected void triggerEvent(final PTInstruction addHandler, final DatePicker picker, final UIService uiService,
+    protected void triggerEvent(final DatePicker picker, final UIService uiService,
             final ValueChangeEvent<Date> event) {
         long date = -1;
         int year = -1;
@@ -91,8 +96,8 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
 
         final PTInstruction instruction = new PTInstruction();
-        instruction.setObjectID(addHandler.getObjectID());
-        instruction.put(Model.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+        instruction.setObjectID(getObjectID());
+        instruction.put(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
         instruction.put(Model.DATE, date);
         instruction.put(Model.YEAR, year);
         instruction.put(Model.MONTH, month);
@@ -101,33 +106,44 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final DatePicker picker = cast();
-        if (update.containsKey(Model.DATE)) {
-            picker.setValue(asDate(update.getLong(Model.DATE)));
-        } else if (update.containsKey(Model.TIME)) {
-            picker.setCurrentMonth(asDate(update.getLong(Model.TIME)));
-        } else if (update.containsKey(Model.DATE_ENABLED)) {
-            final Boolean enabled = update.getBoolean(Model.ENABLED);
-            final JSONArray jsonArray = update.get(Model.DATE_ENABLED).isArray();
+        if (Model.DATE.equals(binaryModel.getModel())) {
+            picker.setValue(asDate(binaryModel.getLongValue()));
+            return true;
+        }
+        if (Model.TIME.equals(binaryModel.getModel())) {
+            picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
+            return true;
+        }
+        if (Model.DATE_ENABLED.equals(binaryModel.getModel())) {
+            final JSONArray jsonArray = binaryModel.get(Model.DATE_ENABLED).isArray();
+            // Model.ENABLED
+            final boolean enabled = buffer.getBinaryModel().getBooleanValue();
             for (int i = 0; i < jsonArray.size(); i++) {
                 picker.setTransientEnabledOnDates(enabled, asDate(jsonArray.get(i).isString().stringValue()));
             }
-        } else if (update.containsKey(Model.ADD_DATE_STYLE)) {
-            final String style = update.getString(Model.STYLE_NAME);
-            final JSONArray jsonArray = update.get(Model.ADD_DATE_STYLE).isArray();
+            return true;
+        }
+        if (Model.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
+            final JSONArray jsonArray = binaryModel.get(Model.ADD_DATE_STYLE).isArray();
+            // Model.STYLE_NAME
+            final String style = buffer.getBinaryModel().getStringValue();
             for (int i = 0; i < jsonArray.size(); i++) {
                 picker.addStyleToDates(style, asDate(jsonArray.get(i).isString().stringValue()));
             }
-        } else if (update.containsKey(Model.REMOVE_DATE_STYLE)) {
-            final String style = update.getString(Model.STYLE_NAME);
-            final JSONArray jsonArray = update.get(Model.REMOVE_DATE_STYLE).isArray();
+            return true;
+        }
+        if (Model.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
+            final JSONArray jsonArray = binaryModel.get(Model.REMOVE_DATE_STYLE).isArray();
+            // Model.STYLE_NAME
+            final String style = buffer.getBinaryModel().getStringValue();
             for (int i = 0; i < jsonArray.size(); i++) {
                 picker.removeStyleFromDates(style, asDate(jsonArray.get(i).isString().stringValue()));
             }
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     private static final Date asDate(final String timestamp) {

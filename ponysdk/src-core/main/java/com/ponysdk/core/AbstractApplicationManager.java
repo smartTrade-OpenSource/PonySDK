@@ -43,10 +43,12 @@ public abstract class AbstractApplicationManager {
                 log.info("Creating a new application, {}", application.toString());
             } else {
                 // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
-                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                // final JsonNumber jsonNumber =
+                // data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
                 // reloadedViewID = jsonNumber.longValue();
                 // }
-                // log.info("Reloading application {} {}", reloadedViewID, context);
+                // log.info("Reloading application {} {}", reloadedViewID,
+                // context);
             }
 
             startApplication(context, application, isNewHttpSession, reloadedViewID);
@@ -57,15 +59,16 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    public void startApplication(final TxnContext context, Application application, boolean isNewHttpSession, Integer reloadedViewID)
-            throws Exception {
+    public void startApplication(final TxnContext context, final Application application,
+            final boolean isNewHttpSession, final Integer reloadedViewID) throws Exception {
         synchronized (context) {
             final UIContext uiContext = new UIContext(application, context);
             UIContext.setCurrent(uiContext);
 
             if (reloadedViewID != null) {
                 final UIContext previousUIContext = application.getUIContext(reloadedViewID);
-                if (previousUIContext != null) previousUIContext.destroy();
+                if (previousUIContext != null)
+                    previousUIContext.destroy();
             }
 
             try {
@@ -102,7 +105,8 @@ public abstract class AbstractApplicationManager {
     }
 
     protected void fireInstructions(final JsonObject data, final TxnContext context) throws Exception {
-        // final int key = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).intValue();
+        // final int key =
+        // data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey()).intValue();
         final int key = 1;
 
         final Application applicationSession = context.getApplication();
@@ -124,12 +128,13 @@ public abstract class AbstractApplicationManager {
 
     private void printClientErrorMessage(final JsonObject data) {
         try {
-            final JsonArray errors = data.getJsonArray(Model.APPLICATION_ERRORS.getKey());
+            final JsonArray errors = data.getJsonArray(Model.APPLICATION_ERRORS.getValue());
             for (int i = 0; i < errors.size(); i++) {
                 final JsonObject jsoObject = errors.getJsonObject(i);
                 final String message = jsoObject.getString("message");
                 final String details = jsoObject.getString("details");
-                log.error("There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
+                log.error(
+                        "There was an unexpected error on the terminal. Message: " + message + ". Details: " + details);
             }
         } catch (final Throwable e) {
             log.error("Failed to display errors", e);
@@ -137,8 +142,8 @@ public abstract class AbstractApplicationManager {
     }
 
     private void process(final UIContext uiContext, final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.APPLICATION_INSTRUCTIONS.getKey())) {
-            final JsonArray array = jsonObject.getJsonArray(Model.APPLICATION_INSTRUCTIONS.getKey());
+        if (jsonObject.containsKey(Model.APPLICATION_INSTRUCTIONS.getValue())) {
+            final JsonArray array = jsonObject.getJsonArray(Model.APPLICATION_INSTRUCTIONS.getValue());
 
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject item = array.getJsonObject(i);

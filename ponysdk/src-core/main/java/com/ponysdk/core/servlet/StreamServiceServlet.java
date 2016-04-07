@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -48,21 +48,25 @@ public class StreamServiceServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
     private void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
+            final Application ponyApplicationSession = (Application) req.getSession()
+                    .getAttribute(Application.class.getCanonicalName());
             final Integer ponySessionID = Integer.parseInt(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession.removeStreamListener(Integer.parseInt(req.getParameter(Model.STREAM_REQUEST_ID.getKey())));
+            final StreamHandler streamHandler = ponySession
+                    .removeStreamListener(Integer.parseInt(req.getParameter(Model.STREAM_REQUEST_ID.getValue())));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

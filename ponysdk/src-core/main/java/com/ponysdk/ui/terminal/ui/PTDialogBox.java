@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,36 +25,45 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DialogBox;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         boolean autoHide = false;
+        BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
+            autoHide = binaryModel.getBooleanValue();
+        } else {
+            buffer.rewind(binaryModel);
+        }
+
+        // FIXME Never send
         boolean modal = false;
-
-        if (create.containsKey(Model.POPUP_AUTO_HIDE.getKey())) {
-            autoHide = create.getBoolean(Model.POPUP_AUTO_HIDE);
+        binaryModel = buffer.getBinaryModel();
+        if (Model.POPUP_MODAL.equals(binaryModel.getModel())) {
+            modal = binaryModel.getBooleanValue();
+        } else {
+            buffer.rewind(binaryModel);
         }
-        if (create.containsKey(Model.POPUP_MODAL)) {
-            modal = create.getBoolean(Model.POPUP_MODAL);
-        }
 
-        init(create, uiService, new DialogBox(autoHide, modal));
-        addCloseHandler(create, uiService);
+        this.uiObject = new DialogBox(autoHide, modal);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+
+        addCloseHandler(uiService);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final DialogBox dialogBox = cast();
-
-        if (update.containsKey(Model.POPUP_CAPTION)) {
-            dialogBox.setHTML(update.getString(Model.POPUP_CAPTION));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.POPUP_CAPTION.equals(binaryModel.getModel())) {
+            final DialogBox dialogBox = cast();
+            dialogBox.setHTML(binaryModel.getStringValue());
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override

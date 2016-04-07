@@ -24,8 +24,6 @@
 package com.ponysdk.ui.terminal;
 
 import com.google.gwt.user.client.Window;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.ui.terminal.ui.PTAddOn;
 import com.ponysdk.ui.terminal.ui.PTAnchor;
@@ -84,65 +82,123 @@ import com.ponysdk.ui.terminal.ui.PTWindow;
 
 public class UIFactory {
 
-    public PTObject newUIObject(final UIService uiService, final PTInstruction create) {
-        final int widgetType = create.getInt(Model.WIDGET_TYPE);
-
-        if (WidgetType.ELEMENT.ordinal() == widgetType) return new PTElement();
-        if (WidgetType.HTML.ordinal() == widgetType) return new PTHTML();
-        if (WidgetType.LABEL.ordinal() == widgetType) return new PTLabel();
-        if (WidgetType.BUTTON.ordinal() == widgetType) return new PTButton();
-        if (WidgetType.ANCHOR.ordinal() == widgetType) return new PTAnchor();
-        if (WidgetType.LISTBOX.ordinal() == widgetType) return new PTListBox();
-        if (WidgetType.TEXTBOX.ordinal() == widgetType) return new PTTextBox();
-        if (WidgetType.PASSWORD_TEXTBOX.ordinal() == widgetType) return new PTPasswordTextBox();
-        if (WidgetType.SCRIPT.ordinal() == widgetType) return new PTScript();
-        if (WidgetType.FLOW_PANEL.ordinal() == widgetType) return new PTFlowPanel();
-        if (WidgetType.ROOT_LAYOUT_PANEL.ordinal() == widgetType) return new PTRootLayoutPanel();
-        if (WidgetType.ROOT_PANEL.ordinal() == widgetType) return new PTRootPanel();
-        if (WidgetType.LAYOUT_PANEL.ordinal() == widgetType) return new PTLayoutPanel();
-        if (WidgetType.TAB_LAYOUT_PANEL.ordinal() == widgetType) return new PTTabLayoutPanel();
-        if (WidgetType.ABSOLUTE_PANEL.ordinal() == widgetType) return new PTAbsolutePanel();
-        if (WidgetType.TAB_PANEL.ordinal() == widgetType) return new PTTabPanel();
-        if (WidgetType.VERTICAL_PANEL.ordinal() == widgetType) return new PTVerticalPanel();
-        if (WidgetType.HORIZONTAL_PANEL.ordinal() == widgetType) return new PTHorizontalPanel();
-        if (WidgetType.DOCK_LAYOUT_PANEL.ordinal() == widgetType) return new PTDockLayoutPanel();
-        if (WidgetType.SPLIT_LAYOUT_PANEL.ordinal() == widgetType) return new PTSplitLayoutPanel();
-        if (WidgetType.STACKLAYOUT_PANEL.ordinal() == widgetType) return new PTStackLayoutPanel();
-        if (WidgetType.TEXT_AREA.ordinal() == widgetType) return new PTTextArea();
-        if (WidgetType.CHECKBOX.ordinal() == widgetType) return new PTCheckBox();
-        if (WidgetType.RADIO_BUTTON.ordinal() == widgetType) return new PTRadioButton();
-        if (WidgetType.PUSH_BUTTON.ordinal() == widgetType) return new PTPushButton();
-        if (WidgetType.SIMPLE_LAYOUT_PANEL.ordinal() == widgetType) return new PTSimpleLayoutPanel();
-        if (WidgetType.SIMPLE_PANEL.ordinal() == widgetType) return new PTSimplePanel();
-        if (WidgetType.FOCUS_PANEL.ordinal() == widgetType) return new PTFocusPanel();
-        if (WidgetType.SCROLL_PANEL.ordinal() == widgetType) return new PTScrollPanel();
-        if (WidgetType.TERMINAL_SCHEDULED_COMMAND.ordinal() == widgetType) return new PTTerminalScheduledCommand();
-        if (WidgetType.DATEBOX.ordinal() == widgetType) return new PTDateBox();
-        if (WidgetType.DATEPICKER.ordinal() == widgetType) return new PTDatePicker();
-        if (WidgetType.FLEX_TABLE.ordinal() == widgetType) return new PTFlexTable();
-        if (WidgetType.GRID.ordinal() == widgetType) return new PTGrid();
-        if (WidgetType.IMAGE.ordinal() == widgetType) return new PTImage();
-        if (WidgetType.FILE_UPLOAD.ordinal() == widgetType) return new PTFileUpload();
-        if (WidgetType.TREE.ordinal() == widgetType) return new PTTree();
-        if (WidgetType.TREE_ITEM.ordinal() == widgetType) return new PTTreeItem();
-        if (WidgetType.MENU_BAR.ordinal() == widgetType) return new PTMenuBar();
-        if (WidgetType.MENU_ITEM.ordinal() == widgetType) return new PTMenuItem();
-        if (WidgetType.MENU_ITEM_SEPARATOR.ordinal() == widgetType) return new PTMenuItemSeparator();
-        if (WidgetType.POPUP_PANEL.ordinal() == widgetType) return new PTPopupPanel();
-        if (WidgetType.DECORATED_POPUP_PANEL.ordinal() == widgetType) return new PTDecoratedPopupPanel();
-        if (WidgetType.SCHEDULER.ordinal() == widgetType) return new PTScheduler();
-        if (WidgetType.RICH_TEXT_AREA.ordinal() == widgetType) return new PTRichTextArea();
-        if (WidgetType.RICH_TEXT_TOOLBAR.ordinal() == widgetType) return new PTRichTextToolbar();
-        if (WidgetType.DIALOG_BOX.ordinal() == widgetType) return new PTDialogBox();
-        if (WidgetType.SUGGESTBOX.ordinal() == widgetType) return new PTSuggestBox();
-        if (WidgetType.MULTIWORD_SUGGEST_ORACLE.ordinal() == widgetType) return new PTMultiWordSuggestOracle();
-        if (WidgetType.DISCLOSURE_PANEL.ordinal() == widgetType) return new PTDisclosurePanel();
-        if (WidgetType.DECORATOR_PANEL.ordinal() == widgetType) return new PTDecoratorPanel();
-        if (WidgetType.WINDOW.ordinal() == widgetType) return new PTWindow();
-        if (WidgetType.HEADER_PANEL.ordinal() == widgetType) return new PTHeaderPanel();
-        if (WidgetType.ADDON.ordinal() == widgetType) return new PTAddOn();
-
-        Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+    public PTObject newUIObject(final UIService uiService, final WidgetType widgetType) {
+        switch (widgetType) {
+        case ABSOLUTE_PANEL:
+            return new PTAbsolutePanel();
+        case ADDON:
+            return new PTAddOn();
+        case ANCHOR:
+            return new PTAnchor();
+        case BUTTON:
+            return new PTButton();
+        case CHECKBOX:
+            return new PTCheckBox();
+        case COMPOSITE:
+            Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+            break;
+        case DATEBOX:
+            return new PTDateBox();
+        case DATEPICKER:
+            return new PTDatePicker();
+        case DECORATED_POPUP_PANEL:
+            return new PTDecoratedPopupPanel();
+        case DECORATOR_PANEL:
+            return new PTDecoratorPanel();
+        case DIALOG_BOX:
+            return new PTDialogBox();
+        case DISCLOSURE_PANEL:
+            return new PTDisclosurePanel();
+        case DOCK_LAYOUT_PANEL:
+            return new PTDockLayoutPanel();
+        case ELEMENT:
+            return new PTElement();
+        case FILE_UPLOAD:
+            return new PTFileUpload();
+        case FLEX_TABLE:
+            return new PTFlexTable();
+        case FLOW_PANEL:
+            return new PTFlowPanel();
+        case FOCUS_PANEL:
+            return new PTFocusPanel();
+        case GRID:
+            return new PTGrid();
+        case HEADER_PANEL:
+            return new PTHeaderPanel();
+        case HORIZONTAL_PANEL:
+            return new PTHorizontalPanel();
+        case HTML:
+            return new PTHTML();
+        case IMAGE:
+            return new PTImage();
+        case LABEL:
+            return new PTLabel();
+        case LAYOUT_PANEL:
+            return new PTLayoutPanel();
+        case LISTBOX:
+            return new PTListBox();
+        case MENU_BAR:
+            return new PTMenuBar();
+        case MENU_ITEM:
+            return new PTMenuItem();
+        case MENU_ITEM_SEPARATOR:
+            return new PTMenuItemSeparator();
+        case MULTIWORD_SUGGEST_ORACLE:
+            return new PTMultiWordSuggestOracle();
+        case PASSWORD_TEXTBOX:
+            return new PTPasswordTextBox();
+        case POPUP_PANEL:
+            return new PTPopupPanel();
+        case PUSH_BUTTON:
+            return new PTPushButton();
+        case RADIO_BUTTON:
+            return new PTRadioButton();
+        case RICH_TEXT_AREA:
+            return new PTRichTextArea();
+        case RICH_TEXT_TOOLBAR:
+            return new PTRichTextToolbar();
+        case ROOT_LAYOUT_PANEL:
+            return new PTRootLayoutPanel();
+        case ROOT_PANEL:
+            return new PTRootPanel();
+        case SCHEDULER:
+            return new PTScheduler();
+        case SCRIPT:
+            return new PTScript();
+        case SCROLL_PANEL:
+            return new PTScrollPanel();
+        case SIMPLE_LAYOUT_PANEL:
+            return new PTSimpleLayoutPanel();
+        case SIMPLE_PANEL:
+            return new PTSimplePanel();
+        case SPLIT_LAYOUT_PANEL:
+            return new PTSplitLayoutPanel();
+        case STACKLAYOUT_PANEL:
+            return new PTStackLayoutPanel();
+        case SUGGESTBOX:
+            return new PTSuggestBox();
+        case TAB_LAYOUT_PANEL:
+            return new PTTabLayoutPanel();
+        case TAB_PANEL:
+            return new PTTabPanel();
+        case TERMINAL_SCHEDULED_COMMAND:
+            return new PTTerminalScheduledCommand();
+        case TEXTBOX:
+            return new PTTextBox();
+        case TEXT_AREA:
+            return new PTTextArea();
+        case TREE:
+            return new PTTree();
+        case TREE_ITEM:
+            return new PTTreeItem();
+        case VERTICAL_PANEL:
+            return new PTVerticalPanel();
+        case WINDOW:
+            return new PTWindow();
+        default:
+            Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+            break;
+        }
 
         return null;
     }

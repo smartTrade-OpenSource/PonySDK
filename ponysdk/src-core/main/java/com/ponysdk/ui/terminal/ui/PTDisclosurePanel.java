@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,16 +29,20 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final int openImg = create.getInt(Model.DISCLOSURE_PANEL_OPEN_IMG);
-        final int closeImg = create.getInt(Model.DISCLOSURE_PANEL_CLOSE_IMG);
-        final String headerText = create.getString(Model.TEXT);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.TEXT
+        final String headerText = buffer.getBinaryModel().getStringValue();
+        // Model.DISCLOSURE_PANEL_OPEN_IMG
+        final int openImg = buffer.getBinaryModel().getIntValue();
+        // Model.DISCLOSURE_PANEL_CLOSE_IMG
+        final int closeImg = buffer.getBinaryModel().getIntValue();
 
         final PTImage open = (PTImage) uiService.getPTObject(openImg);
         final PTImage close = (PTImage) uiService.getPTObject(closeImg);
@@ -46,18 +50,20 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
         final PImageResource openImageResource = new PImageResource(open.cast());
         final PImageResource closeImageResource = new PImageResource(close.cast());
 
-        init(create, uiService, new DisclosurePanel(openImageResource, closeImageResource, headerText));
+        this.uiObject = new DisclosurePanel(openImageResource, closeImageResource, headerText);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
 
-        addHandlers(create, uiService);
+        addHandlers(buffer, uiService);
     }
 
-    private void addHandlers(final PTInstruction create, final UIService uiService) {
+    private void addHandlers(final ReaderBuffer buffer, final UIService uiService) {
         uiObject.addCloseHandler(new CloseHandler<DisclosurePanel>() {
 
             @Override
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(create.getObjectID());
+                instruction.setObjectID(getObjectID());
                 instruction.put(Model.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
@@ -68,7 +74,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             @Override
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(create.getObjectID());
+                instruction.setObjectID(getObjectID());
                 instruction.put(Model.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
@@ -76,19 +82,21 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        uiObject.setContent(asWidget(add.getObjectID(), uiService));
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        uiObject.setContent(asWidget(ptObject));
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.OPEN)) {
-            uiObject.setOpen(update.getBoolean(Model.OPEN));
-        } else if (update.containsKey(Model.ANIMATION)) {
-            uiObject.setAnimationEnabled(update.getBoolean(Model.ANIMATION));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.OPEN.equals(binaryModel.getModel())) {
+            uiObject.setOpen(binaryModel.getBooleanValue());
+            return true;
         }
+        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+            uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
 }

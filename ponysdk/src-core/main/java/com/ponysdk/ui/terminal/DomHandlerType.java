@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,22 +24,26 @@
 package com.ponysdk.ui.terminal;
 
 public enum DomHandlerType {
-    CLICK, //
-    DOUBLE_CLICK, //
-    MOUSE_OVER, //
-    KEY_PRESS, //
-    KEY_UP, //
-    MOUSE_OUT, //
-    MOUSE_DOWN, //
-    MOUSE_UP, //
-    FOCUS, //
-    BLUR, //
-    DRAG_ENTER, //
-    DRAG_END, //
-    DRAG_START, //
-    DRAG_LEAVE, //
-    DRAG_OVER, //
-    DROP, //
-    CONTEXT_MENU, //
+    CLICK,
+    DOUBLE_CLICK,
+    MOUSE_OVER,
+    KEY_PRESS,
+    KEY_UP,
+    MOUSE_OUT,
+    MOUSE_DOWN,
+    MOUSE_UP,
+    FOCUS,
+    BLUR,
+    DRAG_ENTER,
+    DRAG_END,
+    DRAG_START,
+    DRAG_LEAVE,
+    DRAG_OVER,
+    DROP,
+    CONTEXT_MENU,
     CHANGE_HANDLER;
+
+    public byte getValue() {
+        return (byte) ordinal();
+    }
 }

@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 import com.ponysdk.core.socket.WebSocket;
-import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class ParserImpl implements Parser {
 
@@ -57,12 +57,13 @@ public class ParserImpl implements Parser {
 
     @Override
     public void beginObject() {
-        if (buffer == null) buffer = socket.getBuffer();
+        if (buffer == null)
+            buffer = socket.getBuffer();
 
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
         if (socketBuffer.position() == 0) {
-            socketBuffer.putShort(Model.APPLICATION_SEQ_NUM.getShortKey());
+            socketBuffer.put(Model.APPLICATION_SEQ_NUM.getValue());
             socketBuffer.putInt(UIContext.get().getAndIncrementNextSentSeqNum());
         }
     }
@@ -71,13 +72,8 @@ public class ParserImpl implements Parser {
     public void endObject() {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-        if (socketBuffer.position() >= 4096) reset();
-    }
-
-    @Override
-    public void parseKey(final short key) {
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(key);
+        if (socketBuffer.position() >= 4096)
+            reset();
     }
 
     @Override
@@ -86,55 +82,55 @@ public class ParserImpl implements Parser {
         socketBuffer.put(UTF8StringToByteBuffer(jsonObject.toString()));
     }
 
-    @Override
     public void parse(final Model model) {
-        parseKey(model.getShortKey());
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        socketBuffer.put(model.getValue());
     }
 
     public void parse(final Model model, final String value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
-        parseKey(value != null ? (short) value.length() : 0);
+        socketBuffer.put(model.getValue());
+        socketBuffer.putShort(value != null ? (short) value.length() : 0);
         socketBuffer.put(UTF8StringToByteBuffer(value));
     }
 
     @Override
     public void parse(final Model model, final JsonObjectBuilder builder) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
         final String value = builder.build().toString();
-        parseKey(value != null ? (short) value.length() : 0);
+        socketBuffer.putShort(value != null ? (short) value.length() : 0);
         socketBuffer.put(UTF8StringToByteBuffer(value));
     }
 
     public void parse(final Model model, final boolean value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
-        socketBuffer.put(value ? BinaryModel.TRUE : BinaryModel.FALSE);
+        socketBuffer.put(model.getValue());
+        socketBuffer.put(value ? ReaderBuffer.TRUE : ReaderBuffer.FALSE);
     }
 
     public void parse(final Model model, final long value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
         socketBuffer.putLong(value);
     }
 
     public void parse(final Model model, final int value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
         socketBuffer.putInt(value);
     }
 
     public void parse(final Model model, final double value) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
         socketBuffer.putDouble(value);
     }
 
     @Override
     public void parse(final Model model, final Collection<String> collection) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
 
         final Iterator<String> iterator = collection.iterator();
 
@@ -149,39 +145,21 @@ public class ParserImpl implements Parser {
     @Override
     public void parse(final Model model, final JsonValue jsonObject) {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        parseKey(model.getShortKey());
+        socketBuffer.put(model.getValue());
         final String value = jsonObject.toString();
-        parseKey(value != null ? (short) value.length() : 0);
+        socketBuffer.putShort(value != null ? (short) value.length() : 0);
         socketBuffer.put(UTF8StringToByteBuffer(value));
     }
 
     public boolean endOfParsing() {
-        if (buffer != null) return true;
-        else return false;
-    }
-
-    @Deprecated
-    @Override
-    public void comma() {
-    }
-
-    @Deprecated
-    @Override
-    public void quote() {
-    }
-
-    @Deprecated
-    @Override
-    public void beginArray() {
-    }
-
-    @Deprecated
-    @Override
-    public void endArray() {
+        if (buffer != null)
+            return true;
+        else
+            return false;
     }
 
     @Override
-    public void parse(Model model, Object value) {
+    public void parse(final Model model, final Object value) {
         switch (model.getTypeModel()) {
             case NULL_SIZE:
                 parse(model);

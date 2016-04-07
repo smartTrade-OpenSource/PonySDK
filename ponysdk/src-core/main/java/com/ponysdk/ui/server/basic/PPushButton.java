@@ -31,28 +31,27 @@ import com.ponysdk.ui.terminal.model.Model;
  * A normal push button with custom styling.
  * <h3>CSS Style Rules</h3>
  * <ul class="css">
- * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-disabled {.html-face}</li>
+ * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-
+ * disabled {.html-face}</li>
  * </ul>
  */
 public class PPushButton extends PButton {
 
-    private final PImage image;
+	private final PImage image;
 
-    public PPushButton(final PImage image) {
-        this.image = image;
-        init();
-    }
+	public PPushButton(final PImage image) {
+		this.image = image;
+		init();
+	}
 
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
+	@Override
+	protected void enrichOnInit(final Parser parser) {
+		super.enrichOnInit(parser);
+		parser.parse(Model.WIDGET_ID, image.getID());
+	}
 
-        parser.comma();
-        parser.parse(Model.WIDGET_ID, image.getID());
-    }
-
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.PUSH_BUTTON;
-    }
+	@Override
+	protected WidgetType getWidgetType() {
+		return WidgetType.PUSH_BUTTON;
+	}
 }

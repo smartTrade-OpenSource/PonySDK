@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.animation.client.AnimationScheduler;
-import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -68,18 +66,17 @@ import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
 import com.ponysdk.ui.terminal.extension.AddonFactory;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
 
-import elemental.html.ArrayBuffer;
-
 public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler,
-        HttpRequestSendEvent.Handler, AnimationCallback {
+        HttpRequestSendEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
@@ -93,7 +90,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private final List<PTInstruction> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
-    // private final Map<Integer, JSONObject> incomingMessageQueue = new HashMap<>();
+    // private final Map<Integer, JSONObject> incomingMessageQueue = new
+    // HashMap<>();
 
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
@@ -113,8 +111,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private CommunicationErrorHandler communicationErrorHandler;
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
-    private final List<PTInstruction> instructions = new ArrayList<>();
-
     private final Map<Integer, List<PTInstruction>> instructionsByObjectID = new HashMap<>();
 
     public UIBuilder() {
@@ -122,7 +118,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
         // final AddonList addonList = GWT.create(PonyAddonList.class);
 
-        // final List<AddonFactory> addonFactoryList = addonList.getAddonFactoryList();
+        // final List<AddonFactory> addonFactoryList =
+        // addonList.getAddonFactoryList();
         //
         // for (final AddonFactory addonFactory : addonFactoryList) {
         // addonByKey.put(addonFactory.getSignature(), addonFactory);
@@ -134,7 +131,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     public void init(final int ID, final RequestBuilder requestBuilder) {
-        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
+        if (log.isLoggable(Level.INFO))
+            log.info("Init request builder");
 
         this.requestBuilder = requestBuilder;
         UIBuilder.sessionID = ID;
@@ -170,13 +168,15 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onCommunicationError(final Throwable exception) {
         rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
-        if (pendingClose) return;
+        if (pendingClose)
+            return;
 
         if (loadingMessageBox == null) {
             // First load failed
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0) return;
+                if (codeException.getStatusCode() == 0)
+                    return;
             }
             log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception
                     + "\nPlease reload your application", exception);
@@ -196,276 +196,182 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
                 showCommunicationErrorMessage(statusCodeException);
             } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
+                log.log(Level.SEVERE,
+                        "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
                         exception);
             }
         }
     }
 
-    public void update(final ArrayBuffer message) {
-        int position = 0;
+    public void update(final ReaderBuffer buffer) {
+        BinaryModel binaryModel;
+        while (buffer.getIndex() < buffer.getByteLength()) {
+            binaryModel = buffer.getBinaryModel();
 
-        final String charMessage = PonySDK.getString(message, position);
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Message : " + charMessage);
-
-        JSONObject object = new JSONObject();
-        BinaryModel pair = BinaryModel.getObject(message, position);
-        //log.severe("First : " + pair.toString());
-        position = pair.getPosition();
-        object.put(pair.getModel().getKey(), pair.getValue());
-        instructions.add(new PTInstruction(object.getJavaScriptObject()));
-        while (position < message.getByteLength()) {
-            boolean sameObject = true;
-            while (sameObject) {
-                pair = BinaryModel.getObject(message, position);
-                position = pair.getPosition();
-                //log.severe("Position : " + position + " - " + message.getByteLength());
-
-                if (pair.getModel().isFirstElement()) {
-                    //log.severe("New Object : " + pair.toString());
-                    sameObject = false;
-                    object = new JSONObject();
-                    instructions.add(new PTInstruction(object.getJavaScriptObject()));
-                } else {
-                    //log.severe("Next : " + pair.toString());
-                }
-
-                object.put(pair.getModel().getKey(), pair.getValue());
-
-                if (position >= message.getByteLength()) break;
+            if (Model.TYPE_CREATE.equals(binaryModel.getModel())) {
+                final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
+                processUpdate(buffer, ptObject);
+            } else if (Model.TYPE_UPDATE.equals(binaryModel.getModel())) {
+                processUpdate(buffer, objectByID.get(binaryModel.getIntValue()));
+            } else if (Model.TYPE_ADD.equals(binaryModel.getModel())) {
+                processAdd(buffer, objectByID.get(binaryModel.getIntValue()));
+            } else if (Model.TYPE_GC.equals(binaryModel.getModel())) {
+                processGC(binaryModel.getIntValue());
+            } else if (Model.TYPE_REMOVE.equals(binaryModel.getModel())) {
+                processRemove(buffer, binaryModel.getIntValue());
+            } else if (Model.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
+                processAddHandler(buffer, HandlerModel.values()[binaryModel.getShortValue()]);
+            } else if (Model.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
+                processRemoveHandler(buffer, objectByID.get(binaryModel.getIntValue()));
+            } else if (Model.TYPE_HISTORY.equals(binaryModel.getModel())) {
+                processHistory(buffer, binaryModel.getStringValue());
+            } else if (Model.TYPE_CLOSE.equals(binaryModel.getModel())) {
+                processClose(buffer);
+            } else {
+                log.log(Level.WARNING, "Unknown instruction type : " + buffer);
             }
         }
-
-        if (!instructions.isEmpty()) AnimationScheduler.get().requestAnimationFrame(this);
-
-        //        final JSONValue data = JSONParser.parseStrict(charMessage);
-        //        update(data);
     }
 
     @Override
     public void update(final JSONValue data) {
         JSONArray jsonArray = data.isArray();
-        if (jsonArray == null) jsonArray = data.isObject().get(Model.APPLICATION_INSTRUCTIONS.getKey()).isArray();
+        if (jsonArray == null)
+            jsonArray = data.isObject().get(Model.APPLICATION_INSTRUCTIONS.getValue()).isArray();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-            instructions.add(instruction);
+            executeInstruction(instruction);
         }
-
-        if (jsonArray.size() > 0) AnimationScheduler.get().requestAnimationFrame(this);
     }
 
     @Override
     public void stackError(final PTInstruction currentInstruction, final Throwable e) {
         String msg;
-        if (e.getMessage() == null) msg = "NA";
-        else msg = e.getMessage();
+        if (e.getMessage() == null)
+            msg = "NA";
+        else
+            msg = e.getMessage();
 
         final JSONObject jsoObject = new JSONObject();
-        jsoObject.put("message", new JSONString("PonySDK has encountered an internal error on instruction : " + currentInstruction));
+        jsoObject.put("message",
+                new JSONString("PonySDK has encountered an internal error on instruction : " + currentInstruction));
         jsoObject.put("details", new JSONString(msg));
         stackedErrors.add(jsoObject);
     }
 
     @Override
     public void processInstruction(final PTInstruction instruction) {
-        if (instruction.containsKey(Model.TYPE_CREATE)) processCreate(instruction);
-        else if (instruction.containsKey(Model.TYPE_ADD)) processAdd(instruction);
-        else if (instruction.containsKey(Model.TYPE_UPDATE)) processUpdate(instruction);
-        else if (instruction.containsKey(Model.TYPE_REMOVE)) processRemove(instruction);
-        else if (instruction.containsKey(Model.TYPE_ADD_HANDLER)) processAddHandler(instruction);
-        else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER)) processRemoveHandler(instruction);
-        else if (instruction.containsKey(Model.TYPE_HISTORY)) processHistory(instruction);
-        else if (instruction.containsKey(Model.TYPE_CLOSE)) processClose(instruction);
-        else if (instruction.containsKey(Model.TYPE_GC)) processGC(instruction);
-        else log.log(Level.WARNING, "Unknown instruction type : " + instruction);
+        if (instruction.containsKey(Model.TYPE_CREATE))
+            processCreate(instruction);
+        else if (instruction.containsKey(Model.TYPE_ADD))
+            processAdd(instruction);
+        else if (instruction.containsKey(Model.TYPE_UPDATE))
+            processUpdate(instruction);
+        else if (instruction.containsKey(Model.TYPE_REMOVE))
+            processRemove(instruction);
+        else if (instruction.containsKey(Model.TYPE_ADD_HANDLER))
+            processAddHandler(instruction);
+        else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER))
+            processRemoveHandler(instruction);
+        else if (instruction.containsKey(Model.TYPE_HISTORY))
+            processHistory(instruction);
+        else if (instruction.containsKey(Model.TYPE_CLOSE))
+            processClose(instruction);
+        else if (instruction.containsKey(Model.TYPE_GC))
+            processGC(instruction);
+        else
+            log.log(Level.WARNING, "Unknown instruction type : " + instruction);
     }
 
-    private void processCreate(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Create instruction : " + instruction);
+    private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
+        final BinaryModel widgetType = buffer.getBinaryModel();
+        final WidgetType widgetTypeValue = WidgetType.values()[widgetType.getShortValue()];
 
-        final PTObject ptObject;
-        // TEMP
-
-        // final int widgetType = instruction.getInt(Model.WIDGET_TYPE);
-        // if (widgetType == WidgetType.WINDOW.ordinal()) {
-        // GWT.log("Je vais creer la window : " + instruction.getObjectID());
-        //
-        // ptObject = uiFactory.newUIObject(this, instruction);
-        // ptObject.create(instruction, this);
-        // objectByID.put(instruction.getObjectID(), ptObject);
-        // } else {
-        // processSubCreate(instruction);
-        // }
-
-        processSubCreate(instruction);
-    }
-
-    private void processSubCreate(final PTInstruction instruction) {
-        PTObject ptObject;
-        final boolean isAddon = instruction.containsKey("addOnSignature");
-        if (isAddon) {
-            final String addOnSignature = instruction.getString("addOnSignature");
-            final AddonFactory addonFactory = addonByKey.get(addOnSignature);
-            if (addonFactory != null) {
-                ptObject = addonFactory.newAddon();
-                if (ptObject != null) {
-                    ptObject.create(instruction, this);
-                    if (log.isLoggable(Level.FINE))
-                        log.log(Level.FINE, "Add object " + instruction.getObjectID() + " with widget type : "
-                                + instruction.getInt(Model.WIDGET_TYPE));
-                    objectByID.put(instruction.getObjectID(), ptObject);
-                } else throw new RuntimeException("UIBuilder: Failed to instanciate an Addon of type: " + addOnSignature);
-            } else {
-                throw new RuntimeException(
-                        "UIBuilder: AddOn factory not found for signature: " + addOnSignature + ", available: " + addonByKey.keySet());
-            }
+        final PTObject ptObject = uiFactory.newUIObject(this, widgetTypeValue);
+        if (ptObject != null) {
+            ptObject.create(buffer, objectIdValue, this);
+            objectByID.put(objectIdValue, ptObject);
         } else {
-            // stackInstruction(instruction);
+            log.warning("Cannot create object " + objectIdValue + " with widget type : " + widgetTypeValue);
+        }
 
-            ptObject = uiFactory.newUIObject(this, instruction);
-            if (ptObject != null) {
-                ptObject.create(instruction, this);
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE,
-                        "Add object " + instruction.getObjectID() + " with widget type : " + instruction.getInt(Model.WIDGET_TYPE));
-                objectByID.put(instruction.getObjectID(), ptObject);
-            } else {
-                log.warning("Cannot create object " + instruction.getObjectID() + " with widget type : "
-                        + instruction.getInt(Model.WIDGET_TYPE));
-            }
+        return ptObject;
+    }
+
+    private void processAdd(final ReaderBuffer buffer, final PTObject ptObject) {
+        final int parentId = buffer.getBinaryModel().getIntValue();
+        final PTObject parentObject = objectByID.get(parentId);
+        if (parentObject != null)
+            parentObject.add(buffer, ptObject);
+        else
+            log.warning("Cannot add object " + ptObject.getObjectID() + " to an garbaged parent object #" + parentId);
+    }
+
+    private void processUpdate(final ReaderBuffer buffer, final PTObject ptObject) {
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        boolean result;
+        do {
+            result = ptObject.update(buffer, binaryModel);
+        } while (result);
+
+        if (!result) {
+            buffer.rewind(binaryModel);
         }
     }
 
-    private void processAdd(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add instruction : " + instruction);
+    private void processRemove(final ReaderBuffer buffer, final int objectId) {
+        final int parentId = buffer.getBinaryModel().getIntValue();
 
-        PTObject ptObject;
+        final PTObject ptObject = objectByID.get(objectId);
+        PTObject parentObject;
+        if (parentId == -1)
+            parentObject = ptObject;
+        else
+            parentObject = objectByID.get(parentId);
 
-        // if (instruction.containsKey(Model.WINDOW_ID)) {
-        // final List<PTInstruction> waitingInstructions =
-        // instructionsByObjectID.remove(instruction.getObjectID());
-        // if (waitingInstructions != null) {
-        // final int windowID = instruction.getInt(Model.WINDOW_ID);
-        // for (final PTInstruction waitingInstruction : waitingInstructions) {
-        // GWT.log("Transfert data to window : " + waitingInstruction);
-        //
-        // GWT.log("Window search : " + windowID);
-        //
-        // GWT.log("Window found : " + PTWindowManager.getWindow(windowID));
-        //
-        // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
-        //
-        // // ptObject = uiFactory.newUIObject(this, ptInstruction);
-        // // ptObject.create(ptInstruction, this);
-        // // objectByID.put(ptInstruction.getObjectID(), ptObject);
-        // }
-        // }
-        // }
-        //
-        // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
-        // stackInstruction(instruction);
-        // } else {
-        // ptObject = objectByID.get(instruction.getObjectID());
-        //
-        // if (ptObject == null) {
-        // // TODO throw
-        // log.info("Cannot update a garbaged object #" + instruction.getObjectID());
-        // return;
-        // }
-        //
-        // ptObject.update(instruction, this);
-        // // }
-
-        ptObject = objectByID.get(instruction.getParentID());
-        if (ptObject != null) ptObject.add(instruction, this);
-        else log.warning(
-                "Cannot add object " + instruction.getObjectID() + " to an garbaged parent object #" + instruction.getParentID());
+        if (parentObject != null)
+            parentObject.remove(buffer, ptObject, this);
+        else
+            log.warning("Cannot remove a garbaged object #" + objectId);
     }
 
-    private void processUpdate(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update instruction : " + instruction);
-
-        PTObject ptObject;
-        // if (instruction.containsKey(Model.WINDOW_ID)) {
-        //
-        // final List<PTInstruction> waitingInstructions =
-        // instructionsByObjectID.remove(instruction.getObjectID());
-        // if (waitingInstructions != null) {
-        // final int windowID = instruction.getInt(Model.WINDOW_ID);
-        //
-        // for (final PTInstruction waitingInstruction : waitingInstructions) {
-        // GWT.log("Transfert data to window : " + waitingInstruction);
-        // PTWindowManager.getWindow(windowID).postMessage(waitingInstruction);
-        // // ptObject = uiFactory.newUIObject(this, ptInstruction);
-        // // ptObject.create(ptInstruction, this);
-        // // objectByID.put(ptInstruction.getObjectID(), ptObject);
-        // }
-        // }
-        // }
-        //
-        // if (instructionsByObjectID.containsKey(instruction.getObjectID())) {
-        // stackInstruction(instruction);
-        // } else {
-        ptObject = objectByID.get(instruction.getObjectID());
-
-        if (ptObject != null) ptObject.update(instruction, this);
-        else log.warning("Cannot update a garbaged object #" + instruction.getObjectID());
-        // }
-    }
-
-    private void processRemove(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove instruction : " + instruction);
-
-        PTObject ptObject;
-
-        if (instruction.getParentID() == -1) ptObject = objectByID.get(instruction.getObjectID());
-        else ptObject = objectByID.get(instruction.getParentID());
-
-        if (ptObject != null) ptObject.remove(instruction, this);
-        else log.warning("Cannot remove a garbaged object #" + instruction.getObjectID());
-    }
-
-    private void processAddHandler(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add handler instruction : " + instruction);
-
-        PTObject ptObject;
-        if (instruction.containsKey(Model.HANDLER_STREAM_REQUEST_HANDLER)) {
-            new PTStreamResource().addHandler(instruction, this);
+    private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
+            new PTStreamResource().addHandler(buffer, handlerModel, this);
         } else {
-            ptObject = objectByID.get(instruction.getObjectID());
-            if (ptObject != null) ptObject.addHandler(instruction, this);
-            else log.warning("Cannot add handler on a garbaged object #" + instruction.getObjectID());
+            final int id = buffer.getBinaryModel().getIntValue();
+            final PTObject ptObject = objectByID.get(id);
+            if (ptObject != null)
+                ptObject.addHandler(buffer, handlerModel, this);
+            else
+                log.warning("Cannot add handler on a garbaged object #" + id);
         }
     }
 
-    private void processRemoveHandler(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove handler instruction : " + instruction);
-
-        final PTObject ptObject = objectByID.get(instruction.getObjectID());
-        if (ptObject != null) ptObject.removeHandler(instruction, this);
-        else log.warning("Cannot remove handler on a garbaged object #" + instruction.getObjectID());
+    private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
+        if (ptObject != null)
+            ptObject.removeHandler(buffer, this);
+        else
+            log.warning("Cannot remove handler on a garbaged object #" + ptObject.getObjectID());
     }
 
-    private void processHistory(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + instruction);
-
+    private void processHistory(final ReaderBuffer buffer, final String token) {
         final String oldToken = History.getToken();
 
-        String token = null;
-        if (instruction.containsKey(Model.HISTORY_TOKEN)) token = instruction.getString(Model.HISTORY_TOKEN);
-
+        // Model.HISTORY_FIRE_EVENTS
+        final boolean fireEvents = buffer.getBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
-            if (instruction.getBoolean(Model.HISTORY_FIRE_EVENTS)) History.fireCurrentHistoryState();
+            if (fireEvents)
+                History.fireCurrentHistoryState();
         } else {
-            History.newItem(token, instruction.getBoolean(Model.HISTORY_FIRE_EVENTS));
+            History.newItem(token, fireEvents);
         }
     }
 
-    private void processClose(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Close instruction : " + instruction);
-
+    private void processClose(final ReaderBuffer buffer) {
         pendingClose = true;
-        sendDataToServer(instruction);
+        sendDataToServer(buffer);
 
         // TODO nciaravola no need
 
@@ -478,12 +384,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         });
     }
 
-    private void processGC(final PTInstruction instruction) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "GC instruction : " + instruction);
-
-        final PTObject ptObject = unRegisterObject(instruction.getObjectID());
-        if (ptObject != null) ptObject.gc(this);
-        else log.warning("Cannot GC a garbaged object #" + instruction.getObjectID());
+    private void processGC(final int objectId) {
+        final PTObject ptObject = unRegisterObject(objectId);
+        if (ptObject != null)
+            ptObject.gc(this);
+        else
+            log.warning("Cannot GC a garbaged object #" + objectId);
     }
 
     /**
@@ -496,7 +402,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (instructions == null) {
             instructions = new ArrayList<>();
 
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Stack Instruction : " + instruction);
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Stack Instruction : " + instruction);
 
             instructionsByObjectID.put(instruction.getObjectID(), instructions);
         }
@@ -507,7 +414,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
         if (previous + 1 != receivedSeqNum)
-            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+            log.log(Level.SEVERE,
+                    "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
         lastReceived = receivedSeqNum;
     }
 
@@ -515,19 +423,23 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
-        if (uiObject != null) objectIDByWidget.remove(uiObject);
+        if (uiObject != null)
+            objectIDByWidget.remove(uiObject);
         return ptObject;
     }
 
     @Override
     public void stackInstrution(final PTInstruction instruction) {
-        if (!updateMode) sendDataToServer(instruction);
-        else stackedInstructions.add(instruction);
+        if (!updateMode)
+            sendDataToServer(instruction);
+        else
+            stackedInstructions.add(instruction);
     }
 
     @Override
     public void flushEvents() {
-        if (stackedInstructions.isEmpty()) return;
+        if (stackedInstructions.isEmpty())
+            return;
 
         sendDataToServer(stackedInstructions);
 
@@ -539,7 +451,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
-                if (source != null) log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
+                if (source != null)
+                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
             }
         }
         sendDataToServer(instruction);
@@ -577,14 +490,16 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             requestData.put(Model.APPLICATION_ERRORS, errors);
         }
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
+        if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData.toString());
     }
 
     private Timer scheduleLoadingMessageBox() {
 
-        if (loadingMessageBox == null) return null;
+        if (loadingMessageBox == null)
+            return null;
 
         final Timer timer = new Timer() {
 
@@ -604,8 +519,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         actionPanel.setSize("100%", "100%");
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML(
-                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML("Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : "
+                    + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(new ClickHandler() {
@@ -621,8 +536,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
-            content.add(new HTML(
-                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML("An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>"
+                    + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -654,8 +569,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(Model.TYPE_HISTORY);
-            eventInstruction.put(Model.HISTORY_TOKEN, event.getValue());
+            eventInstruction.put(Model.TYPE_HISTORY, event.getValue());
             stackInstrution(eventInstruction);
         }
     }
@@ -668,7 +582,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
-        if (objectID != null) return objectByID.get(objectID);
+        if (objectID != null)
+            return objectByID.get(objectID);
         return null;
     }
 
@@ -682,19 +597,22 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onHttpRequestSend(final HttpRequestSendEvent event) {
         numberOfrequestInProgress++;
 
-        if (timer == null) timer = scheduleLoadingMessageBox();
+        if (timer == null)
+            timer = scheduleLoadingMessageBox();
     }
 
     @Override
     public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
+        if (numberOfrequestInProgress > 0)
+            numberOfrequestInProgress--;
 
         hideLoadingMessageBox();
     }
 
     private void hideLoadingMessageBox() {
 
-        if (loadingMessageBox == null) return;
+        if (loadingMessageBox == null)
+            return;
 
         if (numberOfrequestInProgress < 1 && timer != null) {
             timer.cancel();
@@ -715,28 +633,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         this.communicationErrorHandler = communicationErrorClosure;
     }
 
-    public void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+    public void registerJavascriptAddOnFactory(final String signature,
+            final JavascriptAddOnFactory javascriptAddOnFactory) {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
     @Override
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
-    }
-
-    @Override
-    public void execute(final double timestamp) {
-        if (instructions.isEmpty()) return;
-
-        for (final PTInstruction instruction : instructions) {
-            try {
-                processInstruction(instruction);
-            } catch (final Exception e) {
-                log.log(Level.SEVERE, "Exception while executing the instruction " + instruction, e);
-                throw e;
-            }
-        }
-        instructions.clear();
     }
 
 }

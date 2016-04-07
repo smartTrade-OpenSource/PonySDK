@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -33,8 +33,9 @@ import com.ponysdk.ui.terminal.model.Model;
 /**
  * A panel that lays its children
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run
- * have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
@@ -58,16 +59,11 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.HORIZONTAL_ALIGNMENT, position.ordinal());
-        parser.comma();
+        parser.parse(Model.HORIZONTAL_ALIGNMENT, position.getValue());
         parser.parse(Model.WIDGET_ID, child.getID());
         parser.endObject();
     }
@@ -77,17 +73,12 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
+        parser.parse(Model.VERTICAL_ALIGNMENT, position.getValue());
         parser.parse(Model.WIDGET_ID, child.getID());
-        parser.comma();
-        parser.parse(Model.VERTICAL_ALIGNMENT, position.ordinal());
         parser.endObject();
     }
 
@@ -96,16 +87,11 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.WIDGET_HIDDEN, hidden);
-        parser.comma();
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
@@ -140,23 +126,17 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         sendUpdate(child, Model.BOTTOM, bottom, Model.HEIGHT, height, unit);
     }
 
-    private void sendUpdate(final PWidget child, final Model key1, final double v1, final Model key2, final double v2, final PUnit unit) {
+    private void sendUpdate(final PWidget child, final Model key1, final double v1, final Model key2, final double v2,
+            final PUnit unit) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.UNIT, unit.ordinal());
-        parser.comma();
+        parser.parse(Model.UNIT, unit.getByteValue());
         parser.parse(Model.WIDGET_ID, child.getID());
-        parser.comma();
         parser.parse(key1, v1);
-        parser.comma();
         parser.parse(key2, v2);
         parser.endObject();
     }

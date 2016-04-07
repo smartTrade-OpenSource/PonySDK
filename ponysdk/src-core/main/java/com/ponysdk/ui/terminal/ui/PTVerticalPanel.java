@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,29 +29,36 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new VerticalPanel());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new VerticalPanel();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        uiObject.insert(asWidget(add.getObjectID(), uiService), add.getInt(Model.INDEX));
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        uiObject.insert(asWidget(ptObject), buffer.getInt(Model.INDEX));
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.BORDER_WIDTH)) {
-            uiObject.setBorderWidth(update.getInt(Model.BORDER_WIDTH));
-        } else if (update.containsKey(Model.SPACING)) {
-            uiObject.setSpacing(update.getInt(Model.SPACING));
-        } else if (update.containsKey(Model.HORIZONTAL_ALIGNMENT)) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[update.getInt(Model.HORIZONTAL_ALIGNMENT)];
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.BORDER_WIDTH.equals(binaryModel.getModel())) {
+            uiObject.setBorderWidth(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.SPACING.equals(binaryModel.getModel())) {
+            uiObject.setSpacing(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getIntValue()];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -65,8 +72,10 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
                 default:
                     break;
             }
-        } else if (update.containsKey(Model.VERTICAL_ALIGNMENT)) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[update.getInt(Model.VERTICAL_ALIGNMENT)];
+            return true;
+        }
+        if (Model.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getIntValue()];
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
@@ -80,8 +89,9 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
                 default:
                     break;
             }
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+
+        return super.update(buffer, binaryModel);
     }
 }

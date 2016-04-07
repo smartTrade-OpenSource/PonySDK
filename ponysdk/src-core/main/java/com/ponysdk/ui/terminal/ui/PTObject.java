@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,25 +24,28 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public interface PTObject {
 
-    public void create(final PTInstruction create, final UIService uiService);
+    public void create(final ReaderBuffer buffer, int objectId, final UIService uiService);
 
-    public void update(final PTInstruction update, final UIService uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel);
 
-    public void add(final PTInstruction add, final UIService uiService);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject);
 
-    public void remove(final PTInstruction remove, final UIService uiService);
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService);
 
-    public void addHandler(final PTInstruction addHandler, final UIService uiService);
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService);
 
-    public void removeHandler(final PTInstruction addHandler, final UIService uiService);
+    public void removeHandler(final ReaderBuffer buffer, final UIService uiService);
 
     public void gc(final UIService uiService);
 
     public int getObjectID();
 
     public PTWidget<?> isPTWidget();
+
 }

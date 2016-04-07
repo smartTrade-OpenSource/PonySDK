@@ -71,13 +71,9 @@ public class WebSocketClient2 implements EventListener {
 
     public void sendHeartbeat() {
         final JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Model.HEARTBEAT.getKey(), JSONNull.getInstance());
-        jsonObject.put(Model.APPLICATION_VIEW_ID.getKey(), new JSONNumber(UIBuilder.sessionID));
+        jsonObject.put(Model.HEARTBEAT.toStringValue(), JSONNull.getInstance());
+        jsonObject.put(Model.APPLICATION_VIEW_ID.toStringValue(), new JSONNumber(UIBuilder.sessionID));
         webSocket.send(jsonObject.toString());
-        //
-        // final int timeStamp = (int) (new Date().getTime() * .001);
-        // final JSONObject jso = new JSONObject();
-        // jso.put(Model.APPLICATION_PING.getKey(), new JSONNumber(timeStamp));
     }
 
 }

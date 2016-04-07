@@ -68,23 +68,14 @@ public class PWindow extends PObject {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (url != null) {
-            parser.comma();
-            parser.parse(Model.URL, url);
-        }
-
-        parser.comma();
+        parser.parse(Model.URL, url);
         parser.parse(Model.NAME, name);
-
-        if (features != null) {
-            parser.comma();
-            parser.parse(Model.FEATURES, features);
-        }
+        parser.parse(Model.FEATURES, features);
     }
 
     public boolean open() {
-        if (opened) return false;
+        if (opened)
+            return false;
         opened = true;
         saveUpdate(Model.OPEN, true);
         WindowManager.registerWindow(this);
@@ -102,11 +93,11 @@ public class PWindow extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
+        if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
             WindowManager.unregisterWindow(this);
             fireOnClose();
             return;
-        } else if (instruction.containsKey(Model.HANDLER_OPEN_HANDLER.getKey())) {
+        } else if (instruction.containsKey(Model.HANDLER_OPEN_HANDLER.getValue())) {
             fireOnOpen();
         } else {
             super.onClientData(instruction);

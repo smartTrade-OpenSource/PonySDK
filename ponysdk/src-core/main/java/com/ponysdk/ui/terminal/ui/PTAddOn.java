@@ -34,30 +34,30 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTAddOn extends AbstractPTObject {
 
     private JavascriptAddOn addOn;
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final String signature = create.getString(Model.FACTORY);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.FACTORY
+        final String signature = buffer.getBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null) throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+        if (factory == null)
+            throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: "
+                    + factories.keySet());
 
         final JSONObject params = new JSONObject();
-        params.put("id", new JSONNumber(create.getObjectID()));
+        params.put("id", new JSONNumber(objectId));
 
-        if (create.containsKey(Model.NATIVE)) {
-            final JSONObject data = create.getObject(Model.NATIVE);
-            params.put("data", data);
-        }
-
-        if (create.containsKey(Model.WIDGET_ID)) {
-            final int widgetID = create.getInt(Model.WIDGET_ID);
+        BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+            final int widgetID = binaryModel.getIntValue();
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
             final Element element = cast.getElement();
@@ -74,6 +74,17 @@ public class PTAddOn extends AbstractPTObject {
                     }
                 }
             });
+        } else {
+            buffer.rewind(binaryModel);
+        }
+
+        // FIXME Never set ?
+        binaryModel = buffer.getBinaryModel();
+        if (Model.NATIVE.equals(binaryModel.getModel())) {
+            final JSONObject data = binaryModel.getObject(Model.NATIVE);
+            params.put("data", data);
+        } else {
+            buffer.rewind(binaryModel);
         }
 
         addOn = factory.newAddOn(params.getJavaScriptObject());
@@ -81,8 +92,12 @@ public class PTAddOn extends AbstractPTObject {
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final JSONObject data = update.getObject(Model.NATIVE);
-        addOn.update(data.getJavaScriptObject());
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.NATIVE.equals(binaryModel.getModel())) {
+            final JSONObject data = binaryModel.getObject();
+            addOn.update(data.getJavaScriptObject());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 }

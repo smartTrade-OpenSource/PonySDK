@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -38,63 +38,69 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     public static Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.ORACLE
+        final int oracleID = buffer.getBinaryModel().getIntValue();
         final PTTextBox ptTextBox = (PTTextBox) uiService.getPTObject(create.getInt(Model.TEXTBOX_ID));
-        final int oracleID = create.getInt(Model.ORACLE);
         final SuggestOracle oracle = oracleByID.get(oracleID);
-        if (oracle == null) throw new RuntimeException("Oracle #" + oracleID + " not registered");
+        if (oracle == null)
+            throw new RuntimeException("Oracle #" + oracleID + " not registered");
 
-        init(create, uiService, new SuggestBox(oracle, ptTextBox.cast()));
+        this.uiObject = new SuggestBox(oracle, ptTextBox.cast());
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.LIMIT)) {
-            uiObject.setLimit(update.getInt(Model.LIMIT));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.LIMIT.equals(binaryModel.getModel())) {
+            uiObject.setLimit(binaryModel.getIntValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void addHandler(final PTInstruction instrcution, final UIService uiService) {
-        if (instrcution.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.setObjectID(instrcution.getObjectID());
-                    eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                    eventInstruction.setObjectID(getObjectID());
+                    eventInstruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(Model.TEXT, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
-        } else if (instrcution.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER)) {
+        } else if (HandlerModel.HANDLER_STRING_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instrcution.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_STRING_SELECTION_HANDLER);
+                    eventInstruction.put(HandlerModel.HANDLER_STRING_SELECTION_HANDLER);
                     eventInstruction.put(Model.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
                     eventInstruction.put(Model.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
         } else {
-            super.addHandler(instrcution, uiService);
+            super.addHandler(buffer, handlerModel, uiService);
         }
     }
 

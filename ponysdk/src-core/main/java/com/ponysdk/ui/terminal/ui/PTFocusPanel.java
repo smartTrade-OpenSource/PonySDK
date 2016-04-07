@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,13 +25,15 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFocusPanel extends PTPanel<FocusPanel> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new FocusPanel());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new FocusPanel();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -37,12 +37,14 @@ import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
-public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
+public class PFileUpload extends PWidget
+        implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
@@ -57,7 +59,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
     private boolean enabled = true;
 
     public PFileUpload() {
-        saveAddHandler(Model.HANDLER_CHANGE_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
     }
 
     @Override
@@ -67,13 +69,13 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_CHANGE_HANDLER.getKey())) {
-            final String fileName = jsonObject.getString(Model.FILE_NAME.getKey());
+        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.getValue())) {
+            final String fileName = jsonObject.getString(Model.FILE_NAME.getValue());
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (jsonObject.containsKey(Model.HANDLER_SUBMIT_COMPLETE_HANDLER.getKey())) {
+        } else if (jsonObject.containsKey(Model.HANDLER_SUBMIT_COMPLETE_HANDLER.getValue())) {
             onSubmitComplete();
         } else {
             super.onClientData(jsonObject);

@@ -25,11 +25,11 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
 
@@ -40,36 +40,46 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
     private boolean enabled = true;
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.LOADING_ON_REQUEST)) {
-            showLoadingOnRequest = update.getBoolean(Model.LOADING_ON_REQUEST);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
+            showLoadingOnRequest = binaryModel.getBooleanValue();
+            return true;
         }
-        if (update.containsKey(Model.ENABLED_ON_REQUEST)) {
-            enabledOnRequest = update.getBoolean(Model.ENABLED_ON_REQUEST);
+        if (Model.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
+            enabledOnRequest = binaryModel.getBooleanValue();
+            return true;
         }
-        if (update.containsKey(Model.END_OF_PROCESSING)) {
-            if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
-            if (!enabledOnRequest) uiObject.setEnabled(enabled);
+        if (Model.END_OF_PROCESSING.equals(binaryModel.getModel())) {
+            if (showLoadingOnRequest)
+                uiObject.removeStyleName("pony-Loading");
+            if (!enabledOnRequest)
+                uiObject.setEnabled(enabled);
+            return true;
         }
-        if (update.containsKey(Model.ENABLED)) {
-            this.enabled = update.getBoolean(Model.ENABLED);
+        if (Model.ENABLED.equals(binaryModel.getModel())) {
+            this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
+            return true;
         }
-        if (update.containsKey(Model.TABINDEX)) {
-            uiObject.setTabIndex(update.getInt(Model.TABINDEX));
+        if (Model.TABINDEX.equals(binaryModel.getModel())) {
+            uiObject.setTabIndex(binaryModel.getIntValue());
+            return true;
         }
-        if (update.containsKey(Model.FOCUSED)) {
-            uiObject.setFocus(update.getBoolean(Model.FOCUSED));
+        if (Model.FOCUSED.equals(binaryModel.getModel())) {
+            uiObject.setFocus(binaryModel.getBooleanValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
-    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+    protected void triggerMouseEvent(final ReaderBuffer buffer, final DomHandlerType domHandlerType,
             final UIService uiService, final MouseEvent<?> event) {
-        if (!enabledOnRequest) uiObject.setEnabled(false);
-        if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
-        super.triggerMouseEvent(addHandler, widget, domHandlerType, uiService, event);
+        if (!enabledOnRequest)
+            uiObject.setEnabled(false);
+        if (showLoadingOnRequest)
+            uiObject.addStyleName("pony-Loading");
+        super.triggerMouseEvent(buffer, domHandlerType, uiService, event);
     }
 
 }

@@ -24,21 +24,24 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.ButtonBase;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.TEXT)) {
-            uiObject.setText(update.getString(Model.TEXT));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.HTML)) {
-            uiObject.setHTML(update.getString(Model.HTML));
+        if (Model.HTML.equals(binaryModel.getModel())) {
+            uiObject.setHTML(binaryModel.getStringValue());
+            return true;
         }
+
+        return super.update(buffer, binaryModel);
     }
 
 }

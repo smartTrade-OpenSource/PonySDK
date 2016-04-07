@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,25 +25,29 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new TextArea());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new TextArea();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.VISIBLE_LINES)) {
-            uiObject.setVisibleLines(update.getInt(Model.VISIBLE_LINES));
-        } else if (update.containsKey(Model.CHARACTER_WIDTH)) {
-            uiObject.setCharacterWidth(update.getInt(Model.CHARACTER_WIDTH));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.VISIBLE_LINES.equals(binaryModel.getModel())) {
+            uiObject.setVisibleLines(binaryModel.getIntValue());
+            return true;
+        } else if (Model.CHARACTER_WIDTH.equals(binaryModel.getModel())) {
+            uiObject.setCharacterWidth(binaryModel.getIntValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
 }

@@ -25,29 +25,34 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new Anchor());
-        update(create, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new Anchor();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.TEXT.getKey())) {
-            uiObject.setText(update.getString(Model.TEXT));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.HTML.getKey())) {
-            uiObject.setHTML(update.getString(Model.HTML));
+        if (Model.HTML.equals(binaryModel.getModel())) {
+            uiObject.setHTML(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.HREF.getKey())) {
-            uiObject.setHref(update.getString(Model.HREF));
+        if (Model.HREF.equals(binaryModel.getModel())) {
+            uiObject.setHref(binaryModel.getStringValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
 }

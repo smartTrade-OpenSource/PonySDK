@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,8 +25,9 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
 public class PTTextBox extends PTTextBoxBase<TextBox> {
@@ -34,29 +35,42 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
     private TextBoxMaskedDecorator maskDecorator;
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new TextBox());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new TextBox();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.TEXT)) {
-            uiObject.setText(update.getString(Model.TEXT));
-        } else if (update.containsKey(Model.VALUE)) {
-            uiObject.setValue(update.getString(Model.VALUE));
-        } else if (update.containsKey(Model.VISIBLE_LENGTH)) {
-            uiObject.setVisibleLength(update.getInt(Model.VISIBLE_LENGTH));
-        } else if (update.containsKey(Model.MAX_LENGTH)) {
-            uiObject.setMaxLength(update.getInt(Model.MAX_LENGTH));
-        } else if (update.containsKey(Model.MASK)) {
-            final boolean showMask = update.getBoolean(Model.VISIBILITY);
-            final String mask = update.getString(Model.MASK);
-            final String replace = update.getString(Model.REPLACEMENT_STRING);
-            if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
-            maskDecorator.setMask(mask, showMask, replace.charAt(0));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
         }
+        if (Model.VALUE.equals(binaryModel.getModel())) {
+            uiObject.setValue(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.VISIBLE_LENGTH.equals(binaryModel.getModel())) {
+            uiObject.setVisibleLength(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.MAX_LENGTH.equals(binaryModel.getModel())) {
+            uiObject.setMaxLength(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.MASK.equals(binaryModel.getModel())) {
+            final String mask = binaryModel.getStringValue();
+            // Model.VISIBILITY
+            final boolean showMask = binaryModel.getBooleanValue();
+            // Model.REPLACEMENT_STRING
+            final String replace = binaryModel.getStringValue();
+            if (maskDecorator == null)
+                maskDecorator = new TextBoxMaskedDecorator(cast());
+            maskDecorator.setMask(mask, showMask, replace.charAt(0));
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
 }

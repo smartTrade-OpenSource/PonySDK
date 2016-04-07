@@ -8,109 +8,101 @@
  *============================================================================*/
 package com.ponysdk.ui.terminal.model;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNull;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.ui.terminal.PonySDK;
-
-import elemental.html.ArrayBuffer;
-
 /**
  * @author nvelin
  */
 public class BinaryModel {
 
-    private final static Logger log = Logger.getLogger(BinaryModel.class.getName());
-
-    public static final byte TRUE = 1;
-    public static final byte FALSE = 0;
-
     private final Model model;
-    private final JSONValue value;
-    private final int position;
+    private final int size;
 
-    public BinaryModel(Model model, JSONValue value, int position) {
-        this.model = model;
-        this.value = value;
-        this.position = position;
+    private boolean booleanValue;
+    private short shortValue;
+    private byte byteValue;
+    private int intValue;
+    private long longValue;
+    private double doubleValue;
+    private String stringValue;
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Message : " + toString());
+    public BinaryModel(final Model key, final short shortValue, final int size) {
+        this(key, size);
+        this.shortValue = shortValue;
+    }
+
+    public BinaryModel(final Model key, final int intValue, final int size) {
+        this(key, size);
+        this.intValue = intValue;
+    }
+
+    public BinaryModel(final Model key, final boolean booleanValue, final int size) {
+        this(key, size);
+        this.booleanValue = booleanValue;
+    }
+
+    public BinaryModel(final Model key, final byte byteValue, final int size) {
+        this(key, size);
+        this.byteValue = byteValue;
+    }
+
+    public BinaryModel(final Model key, final long longValue, final int size) {
+        this(key, size);
+        this.longValue = longValue;
+    }
+
+    public BinaryModel(final Model key, final double doubleValue, final int size) {
+        this(key, size);
+        this.doubleValue = doubleValue;
+    }
+
+    public BinaryModel(final Model key, final String stringValue, final int size) {
+        this(key, size);
+        this.stringValue = stringValue;
+    }
+
+    public BinaryModel(final Model key, final int size) {
+        this.model = key;
+        this.size = size;
     }
 
     public Model getModel() {
         return model;
     }
 
-    public JSONValue getValue() {
-        return value;
+    public short getShortValue() {
+        return shortValue;
     }
 
-    public int getPosition() {
-        return position;
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public boolean getBooleanValue() {
+        return booleanValue;
+    }
+
+    public byte getByteValue() {
+        return byteValue;
+    }
+
+    public long getLongValue() {
+        return longValue;
+    }
+
+    public double getDoubleValue() {
+        return doubleValue;
+    }
+
+    public String getStringValue() {
+        return stringValue;
+    }
+
+    public int getSize() {
+        return size;
     }
 
     @Override
     public String toString() {
-        return model + " => " + value;
-    }
-
-    /**
-     * @param message
-     * @param position
-     * @return
-     */
-    public static BinaryModel getObject(ArrayBuffer message, int position) {
-        try {
-            final Model model = Model.getModel(PonySDK.getShort(message, position));
-            position += TypeModel.SHORT_SIZE.getSize();
-
-            JSONValue value;
-
-            switch (model.getTypeModel()) {
-                case NULL_SIZE:
-                    value = JSONNull.getInstance();
-                    position += model.getTypeModel().getSize();
-                    break;
-                case BOOLEAN_SIZE:
-                    value = JSONBoolean.getInstance(PonySDK.getBoolean(message, position));
-                    position += model.getTypeModel().getSize();
-                    break;
-                case BYTE_SIZE:
-                    value = new JSONNumber(PonySDK.getByte(message, position));
-                    position += model.getTypeModel().getSize();
-                    break;
-                case SHORT_SIZE:
-                    value = new JSONNumber(PonySDK.getShort(message, position));
-                    position += model.getTypeModel().getSize();
-                    break;
-                case INTEGER_SIZE:
-                    value = new JSONNumber(PonySDK.getInteger(message, position));
-                    position += model.getTypeModel().getSize();
-                    break;
-                case LONG_SIZE:
-                    value = new JSONNumber(PonySDK.getInteger(message, position));
-                    position += model.getTypeModel().getSize();
-                    break;
-                case VARIABLE_SIZE:
-                    final int size = PonySDK.getShort(message, position);
-                    position += TypeModel.SHORT_SIZE.getSize();
-                    value = new JSONString(PonySDK.getString(message, position, position + size));
-                    position += size;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown type model : " + model.getTypeModel());
-            }
-
-            return new BinaryModel(model, value, position);
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + PonySDK.getString(message, position), e);
-            throw e;
-        }
+        return model + " => " + intValue;
     }
 
 }

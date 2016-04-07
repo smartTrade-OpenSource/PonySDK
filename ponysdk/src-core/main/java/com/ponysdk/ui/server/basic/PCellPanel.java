@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -32,8 +32,9 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set
- * independently. Each child widget can take up a subset of its cell and can be aligned within it.
+ * A panel whose child widgets are contained within the cells of a table. Each
+ * cell's size may be set independently. Each child widget can take up a subset
+ * of its cell and can be aligned within it.
  */
 public abstract class PCellPanel extends PComplexPanel {
 
@@ -41,13 +42,15 @@ public abstract class PCellPanel extends PComplexPanel {
     private Integer spacing;
 
     public void setBorderWidth(final Integer borderWidth) {
-        if (Objects.equals(this.borderWidth, borderWidth)) return;
+        if (Objects.equals(this.borderWidth, borderWidth))
+            return;
         this.borderWidth = borderWidth;
         saveUpdate(Model.BORDER_WIDTH, this.borderWidth);
     }
 
     public void setSpacing(final Integer spacing) {
-        if (Objects.equals(this.spacing, spacing)) return;
+        if (Objects.equals(this.spacing, spacing))
+            return;
         this.spacing = spacing;
         saveUpdate(Model.SPACING, this.spacing);
     }
@@ -55,68 +58,48 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
-        parser.comma();
-        parser.parse(Model.CELL, widget.getID());
+        parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
-        parser.comma();
-        parser.parse(Model.CELL, widget.getID());
+        parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.CELL_HEIGHT, height);
-        parser.comma();
-        parser.parse(Model.CELL, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.CELL_WIDTH, width);
-        parser.comma();
-        parser.parse(Model.CELL, widget.getID());
+        parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 

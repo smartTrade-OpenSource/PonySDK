@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -152,7 +152,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             super(null, name, features);
         }
 
-        @Override
+        //@Override
         protected void onLoad() {
             rootLayoutPanel = PRootLayoutPanel.get();
 
@@ -162,7 +162,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    flow.add(new PLabel("Hello " + (count++)));
+                    flow.add(new PLabel("Hello " + count++));
                 }
             });
             final PButton clearMessage = new PButton("Clear message");

@@ -31,19 +31,23 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new ListBox());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new ListBox();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_CHANGE_HANDLER)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_CHANGE_HANDLER.equals(handlerModel)) {
             uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
@@ -51,9 +55,9 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                     final int selectedIndex = uiObject.getSelectedIndex();
                     if (selectedIndex == -1) {
                         final PTInstruction eventInstruction = new PTInstruction();
-                        eventInstruction.setObjectID(instruction.getObjectID());
+                        eventInstruction.setObjectID(getObjectID());
                         // eventInstruction.put(Model.TYPE_EVENT);
-                        eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
+                        eventInstruction.put(HandlerModel.HANDLER_CHANGE_HANDLER);
                         eventInstruction.put(Model.VALUE, "-1");
                         uiService.sendDataToServer(uiObject, eventInstruction);
                     } else {
@@ -66,31 +70,37 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                             }
                         }
                         final PTInstruction eventInstruction = new PTInstruction();
-                        eventInstruction.setObjectID(instruction.getObjectID());
+                        eventInstruction.setObjectID(getObjectID());
                         // eventInstruction.put(Model.TYPE_EVENT);
-                        eventInstruction.put(Model.HANDLER_CHANGE_HANDLER);
+                        eventInstruction.put(HandlerModel.HANDLER_CHANGE_HANDLER);
                         eventInstruction.put(Model.VALUE, selectedIndexes);
                         uiService.sendDataToServer(uiObject, eventInstruction);
                     }
                 }
             });
             return;
+        } else {
+            super.addHandler(buffer, handlerModel, uiService);
         }
-
-        super.addHandler(instruction, uiService);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.CLEAR)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clear();
-        } else if (update.containsKey(Model.ITEM_INSERTED)) {
-            final int index = update.getInt(Model.INDEX);
-            final String item = update.getString(Model.ITEM_TEXT);
+            return true;
+        }
+        if (Model.ITEM_INSERTED.equals(binaryModel.getModel())) {
+            final String item = binaryModel.getStringValue();
+            // Model.INDEX
+            final int index = buffer.getBinaryModel().getIntValue();
             uiObject.insertItem(item, index);
-        } else if (update.containsKey(Model.ITEM_ADD)) {
-            final String items = update.getString(Model.ITEM_TEXT);
-            final String groupName = update.getString(Model.ITEM_GROUP);
+            return true;
+        }
+        if (Model.ITEM_ADD.equals(binaryModel.getModel())) {
+            final String items = binaryModel.getStringValue();
+            // Model.ITEM_GROUP
+            final String groupName = buffer.getBinaryModel().getStringValue();
             final SelectElement select = uiObject.getElement().cast();
 
             final OptGroupElement groupElement = Document.get().createOptGroupElement();
@@ -104,24 +114,39 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 groupElement.appendChild(optElement);
             }
             select.appendChild(groupElement);
-        } else if (update.containsKey(Model.ITEM_UPDATED)) {
-            final int index = update.getInt(Model.INDEX);
-            final String item = update.getString(Model.ITEM_TEXT);
-            uiObject.setItemText(index, item);
-        } else if (update.containsKey(Model.ITEM_REMOVED)) {
-            uiObject.removeItem(update.getInt(Model.INDEX));
-        } else if (update.containsKey(Model.SELECTED)) {
-            final boolean selected = update.getBoolean(Model.SELECTED);
-            final int index = update.getInt(Model.SELECTED_INDEX);
-            if (index == -1) uiObject.setSelectedIndex(index);
-            else uiObject.setItemSelected(index, selected);
-        } else if (update.containsKey(Model.VISIBLE_ITEM_COUNT)) {
-            uiObject.setVisibleItemCount(update.getInt(Model.VISIBLE_ITEM_COUNT));
-        } else if (update.containsKey(Model.MULTISELECT)) {
-            uiObject.setMultipleSelect(update.getBoolean(Model.MULTISELECT));
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        if (Model.ITEM_UPDATED.equals(binaryModel.getModel())) {
+            final String item = binaryModel.getStringValue();
+            // Model.INDEX
+            final int index = buffer.getBinaryModel().getIntValue();
+            uiObject.setItemText(index, item);
+            return true;
+        }
+        if (Model.ITEM_REMOVED.equals(binaryModel.getModel())) {
+            // Model.INDEX
+            uiObject.removeItem(buffer.getBinaryModel().getIntValue());
+            return true;
+        }
+        if (Model.SELECTED.equals(binaryModel.getModel())) {
+            final boolean selected = binaryModel.getBooleanValue();
+            // Model.INDEX
+            final int index = buffer.getBinaryModel().getIntValue();
+            if (index == -1)
+                uiObject.setSelectedIndex(index);
+            else
+                uiObject.setItemSelected(index, selected);
+            return true;
+        }
+        if (Model.VISIBLE_ITEM_COUNT.equals(binaryModel.getModel())) {
+            uiObject.setVisibleItemCount(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.MULTISELECT.equals(binaryModel.getModel())) {
+            uiObject.setMultipleSelect(binaryModel.getBooleanValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
 
     }
 }

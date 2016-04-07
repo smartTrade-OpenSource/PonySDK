@@ -23,45 +23,35 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTElement extends PTComplexPanel<HTMLPanel> {
-
-    private final static Logger log = Logger.getLogger(PTElement.class.getName());
 
     private static final String EMPTY = "";
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new HTMLPanel(create.getString(Model.TAG), EMPTY));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.TAG
+        this.uiObject = new HTMLPanel(buffer.getBinaryModel().getStringValue(), EMPTY);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        if (add.containsKey(Model.INDEX)) {
-            final Widget widget = asWidget(add.getObjectID(), uiService);
-            if (widget != null) uiObject.add(widget, uiObject.getElement());
-            else log.warning("No widget created for object #" + add.getObjectID() + ", Details : " + add);
-        } else {
-            super.add(add, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.INNER_HTML.equals(binaryModel.getModel())) {
+            uiObject.getElement().setInnerHTML(binaryModel.getStringValue());
+            return true;
         }
-    }
-
-    @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.INNER_HTML)) {
-            uiObject.getElement().setInnerHTML(update.getString(Model.INNER_HTML));
-        } else if (update.containsKey(Model.INNER_TEXT)) {
-            uiObject.getElement().setInnerText(update.getString(Model.INNER_TEXT));
-        } else {
-            super.update(update, uiService);
+        if (Model.INNER_TEXT.equals(binaryModel.getModel())) {
+            uiObject.getElement().setInnerText(binaryModel.getStringValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
 }

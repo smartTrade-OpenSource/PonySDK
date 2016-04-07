@@ -31,46 +31,58 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTScheduler extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
     private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<>();
     private boolean hasCommunicationError = false;
 
+    private UIService uiService;
+
     public PTScheduler() {
         UIBuilder.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
     }
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
+        this.uiService = uiService;
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final long commandID = update.getLong(Model.COMMAND_ID);
-        if (update.containsKey(Model.STOP)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        // Model.COMMAND_ID
+        final long commandID = binaryModel.getLongValue();
+
+        final BinaryModel model = buffer.getBinaryModel();
+        if (Model.STOP.equals(model)) {
             // Stop the command
             commandByIDs.remove(commandID).cancel();
-        } else if (update.containsKey(Model.FIXDELAY)) {
+        } else if (Model.FIXDELAY.equals(model)) {
+            final int delay = model.getIntValue();
             // Fix-delay
             // Wait for execution terminated before scheduling again
             final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
-            if (previousCmd != null) previousCmd.cancel();
-            final int delay = update.getInt(Model.FIXDELAY);
-            final FixDelayCommand command = new FixDelayCommand(uiService, update.getObjectID(), commandID, delay);
+            if (previousCmd != null)
+                previousCmd.cancel();
+            final FixDelayCommand command = new FixDelayCommand(uiService, getObjectID(), commandID, delay);
             Scheduler.get().scheduleFixedDelay(command, delay);
             commandByIDs.put(commandID, command);
-        } else if (update.containsKey(Model.FIXRATE)) {
+        } else if (Model.FIXRATE.equals(model)) {
+            final int delay = model.getIntValue();
             // Fix-rate
             final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
-            if (previousCmd != null) previousCmd.cancel();
-            final int delay = update.getInt(Model.FIXRATE);
-            final FixRateCommand command = new FixRateCommand(uiService, update.getObjectID(), commandID, delay);
+            if (previousCmd != null)
+                previousCmd.cancel();
+            final FixRateCommand command = new FixRateCommand(uiService, getObjectID(), commandID, delay);
             Scheduler.get().scheduleFixedDelay(command, delay);
             commandByIDs.put(commandID, command);
         }
+
+        return false;
     }
 
     @Override
@@ -89,7 +101,8 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
         protected final int delay;
         protected boolean cancelled = false;
 
-        public SchedulerCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
+        public SchedulerCommand(final UIService uiService, final int schedulerID, final long commandID,
+                final int delay) {
             this.uiService = uiService;
             this.schedulerID = schedulerID;
             this.commandID = commandID;
@@ -110,7 +123,8 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
         @Override
         public boolean execute() {
 
-            if (cancelled) return false;
+            if (cancelled)
+                return false;
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
@@ -127,14 +141,16 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected class FixDelayCommand extends SchedulerCommand {
 
-        public FixDelayCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
+        public FixDelayCommand(final UIService uiService, final int schedulerID, final long commandID,
+                final int delay) {
             super(uiService, schedulerID, commandID, delay);
         }
 
         @Override
         public boolean execute() {
 
-            if (cancelled) return false;
+            if (cancelled)
+                return false;
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);

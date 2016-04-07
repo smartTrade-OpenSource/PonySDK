@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,38 +25,46 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFlexTable extends PTHTMLTable {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final FlexTable flexTable = new FlexTable();
-        flexTable.addStyleName("pony-PFlexTable");
-        init(create, uiService, flexTable);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new FlexTable();
+        this.uiObject.addStyleName("pony-PFlexTable");
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-
-        if (update.containsKey(Model.CLEAR_ROW)) {
-            cast().removeRow(update.getInt(Model.CLEAR_ROW));
-        } else if (update.containsKey(Model.INSERT_ROW)) {
-            cast().insertRow(update.getInt(Model.INSERT_ROW));
-        } else if (update.containsKey(Model.FLEXTABLE_CELL_FORMATTER)) {
-            final int cellFormatterRow = update.getInt(Model.ROW);
-            final int cellFormatterColumn = update.getInt(Model.COLUMN);
-            if (update.containsKey(Model.SET_COL_SPAN)) {
-                cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, update.getInt(Model.SET_COL_SPAN));
-            }
-            if (update.containsKey(Model.SET_ROW_SPAN)) {
-                cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, update.getInt(Model.SET_ROW_SPAN));
-            }
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CLEAR_ROW.equals(binaryModel.getModel())) {
+            cast().removeRow(binaryModel.getIntValue());
+            return true;
         }
-
+        if (Model.INSERT_ROW.equals(binaryModel.getModel())) {
+            cast().insertRow(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.SET_COL_SPAN.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellFormatterRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellFormatterColumn = buffer.getBinaryModel().getIntValue();
+            cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
+        }
+        if (Model.SET_ROW_SPAN.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellFormatterRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellFormatterColumn = buffer.getBinaryModel().getIntValue();
+            cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
     @Override

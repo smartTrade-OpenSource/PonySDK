@@ -38,18 +38,19 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A {@link PSuggestBox} is a text box or text area which displays a pre-configured set of
- * selections that
- * match the user's input. Each {@link PSuggestBox} is associated with a single
- * {@link PSuggestOracle}. The
- * {@link PSuggestBox} is used to provide a set of selections given a specific query string.
+ * A {@link PSuggestBox} is a text box or text area which displays a
+ * pre-configured set of selections that match the user's input. Each
+ * {@link PSuggestBox} is associated with a single {@link PSuggestOracle}. The
+ * {@link PSuggestBox} is used to provide a set of selections given a specific
+ * query string.
  * <p>
- * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as its oracle. Below
- * we show how
- * a {@link PMultiWordSuggestOracle} can be configured:
+ * By default, the {@link PSuggestBox} uses a {@link PMultiWordSuggestOracle} as
+ * its oracle. Below we show how a {@link PMultiWordSuggestOracle} can be
+ * configured:
  * </p>
  *
  * <pre>
@@ -62,11 +63,10 @@ import com.ponysdk.ui.terminal.model.Model;
  * PSuggestBox box = new PSuggestBox(oracle);
  * </pre>
  *
- * Using the example above, if the user types "C" into the text widget, the oracle will configure
- * the
- * suggestions with the "Cat" and "Canary" suggestions. Specifically, whenever the user types a key
- * into the
- * text widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
+ * Using the example above, if the user types "C" into the text widget, the
+ * oracle will configure the suggestions with the "Cat" and "Canary"
+ * suggestions. Specifically, whenever the user types a key into the text
+ * widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-SuggestBox</dt>
@@ -78,8 +78,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget
-        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
+public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>,
+        PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private List<PSelectionHandler<PSuggestion>> selectionHandler;
 
@@ -107,26 +107,24 @@ public class PSuggestBox extends PWidget
         // }
         //
         // create.put(Model.TEXTBOX_ID, textBox.getID());
-        saveAddHandler(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-        saveAddHandler(Model.HANDLER_STRING_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION_HANDLER);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
         parser.parse(Model.ORACLE, suggestOracle.getID());
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER.getKey())) {
-            final String text = instruction.getString(Model.TEXT.getKey());
+        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
+            final String text = instruction.getString(Model.TEXT.getValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
-        } else if (instruction.containsKey(Model.HANDLER_STRING_SELECTION_HANDLER.getKey())) {
-            this.replacementString = instruction.getString(Model.REPLACEMENT_STRING.getKey());
-            this.displayString = instruction.getString(Model.DISPLAY_STRING.getKey());
+        } else if (instruction.containsKey(HandlerModel.HANDLER_STRING_SELECTION_HANDLER.getValue())) {
+            this.replacementString = instruction.getString(Model.REPLACEMENT_STRING.getValue());
+            this.displayString = instruction.getString(Model.DISPLAY_STRING.getValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));

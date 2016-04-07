@@ -27,37 +27,47 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, String> {
 
     @Override
-    protected void init(final PTInstruction create, final UIService uiService, final W uiObject) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
         uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
             @Override
             public void onValueChange(final ValueChangeEvent<String> event) {
                 final PTInstruction eventInstruction = new PTInstruction();
-                eventInstruction.setObjectID(create.getObjectID());
-                eventInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                eventInstruction.setObjectID(objectId);
+                eventInstruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                 eventInstruction.put(Model.VALUE, event.getValue());
                 uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });
-        super.init(create, uiService, uiObject);
-        update(create, uiService);
+
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+        } else {
+            buffer.rewind(binaryModel);
+        }
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.TEXT)) {
-            uiObject.setText(update.getString(Model.TEXT));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.PLACEHOLDER)) {
-            uiObject.getElement().setAttribute("placeholder", update.getString(Model.PLACEHOLDER));
+        if (Model.PLACEHOLDER.equals(binaryModel.getModel())) {
+            uiObject.getElement().setAttribute("placeholder", binaryModel.getStringValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
 }

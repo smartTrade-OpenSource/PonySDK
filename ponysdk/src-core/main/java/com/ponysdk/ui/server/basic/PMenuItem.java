@@ -29,11 +29,13 @@ import javax.json.JsonObject;
 
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand} when they are clicked, or
- * open a cascading sub-menu. Each menu item is assigned a unique DOM id in order to support ARIA. See
+ * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand}
+ * when they are clicked, or open a cascading sub-menu. Each menu item is
+ * assigned a unique DOM id in order to support ARIA. See
  * {com.google.gwt.user.client.ui.Accessibility} for more information.
  */
 public class PMenuItem extends PWidget implements PHasHTML {
@@ -73,8 +75,10 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     public PMenuItem(final String text, final boolean asHTML) {
-        if (asHTML) setHTML(text);
-        else setText(text);
+        if (asHTML)
+            setHTML(text);
+        else
+            setText(text);
     }
 
     @Override
@@ -100,7 +104,8 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html)) return;
+        if (Objects.equals(this.html, html))
+            return;
         this.html = html;
         saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }
@@ -117,17 +122,17 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     public void setCommand(final PCommand cmd) {
         this.cmd = cmd;
-        saveAddHandler(Model.HANDLER_COMMAND);
+        saveAddHandler(HandlerModel.HANDLER_COMMAND);
     }
 
     @Override
     public void onClientData(final JsonObject event) {
         String handlerKey = null;
-        if (event.containsKey(Model.HANDLER_KEY.getKey())) {
-            handlerKey = event.getString(Model.HANDLER_KEY.getKey());
+        if (event.containsKey(HandlerModel.HANDLER_KEY.getValue())) {
+            handlerKey = event.getString(HandlerModel.HANDLER_KEY.getValue());
         }
 
-        if (Model.HANDLER_KEY_COMMAND.getKey().equals(handlerKey)) {
+        if (HandlerModel.HANDLER_KEY_COMMAND.getValue().equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onClientData(event);

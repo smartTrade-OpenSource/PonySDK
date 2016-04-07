@@ -31,8 +31,9 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
 import elemental.events.Event;
@@ -56,36 +57,49 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     private boolean ponySDKStarted = false;
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        objectID = create.getObjectID();
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.objectID = objectId;
 
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO))
+            log.log(Level.INFO, "PTWindowID created : " + objectID);
 
         this.uiService = uiService;
 
-        if (create.containsKey(Model.URL)) url = create.getString(Model.URL);
-        else url = GWT.getHostPageBaseURL() + "?wid=" + create.getObjectID();
+        // Model.URL
+        url = buffer.getBinaryModel().getStringValue();
+        if (url == null)
+            url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
 
-        if (create.containsKey(Model.NAME)) name = create.getString(Model.NAME);
-        else name = "";
+        // Model.NAME
+        name = buffer.getBinaryModel().getStringValue();
+        if (name == null)
+            name = "";
 
-        if (create.containsKey(Model.FEATURES)) features = create.getString(Model.FEATURES);
-        else features = "";
+        // Model.FEATURES
+        features = buffer.getBinaryModel().getStringValue();
+        if (features == null)
+            features = "";
 
         PTWindowManager.get().register(this);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.OPEN)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
             window.addEventListener("beforeunload", this, true);
             window.addEventListener("message", this, true);
-        } else if (update.containsKey(Model.TEXT)) {
-            window.postMessage(update.getString(Model.TEXT), "*");
-        } else if (update.containsKey(Model.CLOSE)) {
-            window.close();
+            return true;
         }
+        if (Model.TEXT.equals(binaryModel.getModel())) {
+            window.postMessage(binaryModel.getStringValue(), "*");
+            return true;
+        }
+        if (Model.CLOSE.equals(binaryModel.getModel())) {
+            window.close();
+            return true;
+        }
+        return false;
     }
 
     public void postMessage(final PTInstruction instruction) {

@@ -37,14 +37,16 @@ import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that stacks its children vertically, displaying only one at a time, with a header for
- * each child which the user can click to display.
+ * A panel that stacks its children vertically, displaying only one at a time,
+ * with a header for each child which the user can click to display.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
- * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -80,9 +82,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
-        parser.parse(Model.UNIT, unit.ordinal());
+        parser.parse(Model.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -97,18 +97,12 @@ public class PStackLayoutPanel extends PComposite
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, child.getID());
+        parser.parse(Model.TYPE_ADD, child.getID());
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.comma();
         parser.parse(Model.HTML, header);
-        parser.comma();
         parser.parse(Model.SIZE, headerSize);
         parser.endObject();
 
@@ -163,7 +157,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        saveAddHandler(Model.HANDLER_BEFORE_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
     }
 
     @Override
@@ -179,7 +173,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        saveAddHandler(Model.HANDLER_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 
     @Override
@@ -195,14 +189,10 @@ public class PStackLayoutPanel extends PComposite
     public void showWidget(final PWidget widget) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }

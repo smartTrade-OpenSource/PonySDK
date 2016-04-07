@@ -26,10 +26,12 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
@@ -39,78 +41,94 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     private Object nativeObject;
 
-    protected void init(final PTInstruction create, final UIService uiService, final T uiObject) {
-        if (this.uiObject != null) {
-            throw new IllegalStateException("init may only be called once.");
-        }
-        this.uiObject = uiObject;
-        if (create != null) {
-            this.objectID = create.getObjectID();
-            uiService.registerUIObject(this.objectID, uiObject);
-        }
-    }
-
     public T cast() {
         return uiObject;
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.WIDGET_WIDTH)) {
-            uiObject.setWidth(update.getString(Model.WIDGET_WIDTH));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.WIDGET_WIDTH.equals(binaryModel.getModel())) {
+            uiObject.setWidth(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.WIDGET_HEIGHT)) {
-            uiObject.setHeight(update.getString(Model.WIDGET_HEIGHT));
+        if (Model.WIDGET_HEIGHT.equals(binaryModel.getModel())) {
+            uiObject.setHeight(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.PUT_PROPERTY_KEY)) {
-            uiObject.getElement().setPropertyString(update.getString(Model.PUT_PROPERTY_KEY), update.getString(Model.PROPERTY_VALUE));
+        if (Model.PUT_PROPERTY_KEY.equals(binaryModel.getModel())) {
+            // Model.PROPERTY_VALUE
+            uiObject.getElement().setPropertyString(binaryModel.getStringValue(),
+                    buffer.getBinaryModel().getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.PUT_ATTRIBUTE_KEY)) {
-            uiObject.getElement().setAttribute(update.getString(Model.PUT_ATTRIBUTE_KEY), update.getString(Model.ATTRIBUTE_VALUE));
+        if (Model.PUT_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+            // Model.ATTRIBUTE_VALUE
+            uiObject.getElement().setAttribute(binaryModel.getStringValue(), buffer.getBinaryModel().getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.REMOVE_ATTRIBUTE_KEY)) {
-            uiObject.getElement().removeAttribute(update.getString(Model.REMOVE_ATTRIBUTE_KEY));
+        if (Model.REMOVE_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+            uiObject.getElement().removeAttribute(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.STYLE_NAME)) {
-            uiObject.setStyleName(update.getString(Model.STYLE_NAME));
+        if (Model.STYLE_NAME.equals(binaryModel.getModel())) {
+            uiObject.setStyleName(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.STYLE_PRIMARY_NAME)) {
-            uiObject.setStylePrimaryName(update.getString(Model.STYLE_PRIMARY_NAME));
+        if (Model.STYLE_PRIMARY_NAME.equals(binaryModel.getModel())) {
+            uiObject.setStylePrimaryName(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.ADD_STYLE_NAME)) {
-            uiObject.addStyleName(update.getString(Model.ADD_STYLE_NAME));
+        if (Model.ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+            uiObject.addStyleName(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.REMOVE_STYLE_NAME)) {
-            uiObject.removeStyleName(update.getString(Model.REMOVE_STYLE_NAME));
+        if (Model.REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+            uiObject.removeStyleName(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.WIDGET_VISIBLE)) {
-            uiObject.setVisible(update.getBoolean(Model.WIDGET_VISIBLE));
+        if (Model.WIDGET_VISIBLE.equals(binaryModel.getModel())) {
+            uiObject.setVisible(binaryModel.getBooleanValue());
+            return true;
         }
-        if (update.containsKey(Model.ENSURE_DEBUG_ID)) {
-            uiObject.ensureDebugId(update.getString(Model.ENSURE_DEBUG_ID));
+        if (Model.ENSURE_DEBUG_ID.equals(binaryModel.getModel())) {
+            uiObject.ensureDebugId(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.WIDGET_TITLE)) {
-            uiObject.setTitle(update.getString(Model.WIDGET_TITLE));
+        if (Model.WIDGET_TITLE.equals(binaryModel.getModel())) {
+            uiObject.setTitle(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.PUT_STYLE_KEY)) {
-            uiObject.getElement().getStyle().setProperty(update.getString(Model.PUT_STYLE_KEY), update.getString(Model.STYLE_VALUE));
+        if (Model.PUT_STYLE_KEY.equals(binaryModel.getModel())) {
+            // Model.STYLE_VALUE
+            uiObject.getElement().getStyle().setProperty(binaryModel.getStringValue(),
+                    buffer.getBinaryModel().getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.REMOVE_STYLE_KEY)) {
-            uiObject.getElement().getStyle().clearProperty(update.getString(Model.REMOVE_STYLE_KEY));
+        if (Model.REMOVE_STYLE_KEY.equals(binaryModel.getModel())) {
+            uiObject.getElement().getStyle().clearProperty(binaryModel.getStringValue());
+            return true;
         }
-        if (update.containsKey(Model.BIND)) {
-            nativeObject = bind(update.getString(Model.BIND), String.valueOf(objectID), uiObject.getElement());
+        if (Model.BIND.equals(binaryModel.getModel())) {
+            nativeObject = bind(binaryModel.getStringValue(), String.valueOf(objectID), uiObject.getElement());
+            return true;
         }
-        if (update.containsKey(Model.NATIVE)) {
-            final JSONObject object = update.getObject(Model.NATIVE);
+        if (Model.NATIVE.equals(binaryModel.getModel())) {
+            final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
             sendToNative(String.valueOf(objectID), nativeObject, object.getJavaScriptObject());
+            return true;
         }
+
+        return super.update(buffer, binaryModel);
     }
 
     public UIObject asWidget(final int objectID, final UIService uiService) {
-        if (uiService.getPTObject(objectID) instanceof PTUIObject) {
-            return ((PTUIObject<?>) uiService.getPTObject(objectID)).cast();
+        final PTObject ptObject = uiService.getPTObject(objectID);
+        return asWidget(ptObject);
+    }
+
+    public UIObject asWidget(final PTObject ptObject) {
+        if (ptObject instanceof PTUIObject) {
+            return ((PTUIObject<?>) ptObject).cast();
         }
         throw new IllegalStateException("This object is not an UIObject");
     }

@@ -44,13 +44,13 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
-        saveUpdate(Model.HORIZONTAL_ALIGNMENT, horizontalAlignment.ordinal());
+        saveUpdate(Model.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
     }
 
     @Override
     public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
-        saveUpdate(Model.VERTICAL_ALIGNMENT, verticalAlignment.ordinal());
+        saveUpdate(Model.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

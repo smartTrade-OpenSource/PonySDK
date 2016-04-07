@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,23 +25,28 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new FlowPanel());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new FlowPanel();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        if (add.containsKey(Model.INDEX)) {
-            final int beforeIndex = add.getInt(Model.INDEX);
-            uiObject.insert(asWidget(add.getObjectID(), uiService), beforeIndex);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (Model.INDEX.equals(binaryModel.getModel())) {
+            final int beforeIndex = binaryModel.getIntValue();
+            uiObject.insert(asWidget(ptObject), beforeIndex);
         } else {
-            super.add(add, uiService);
+            buffer.rewind(binaryModel);
+            super.add(buffer, ptObject);
         }
     }
 }

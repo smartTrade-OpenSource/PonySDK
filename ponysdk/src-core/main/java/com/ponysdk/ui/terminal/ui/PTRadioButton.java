@@ -30,29 +30,41 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRadioButton extends PTCheckBox {
 
     private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<>();
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new RadioButton(null));
-        update(create, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new RadioButton(null);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+
+        // Model.TEXT
+        uiObject.setText(buffer.getBinaryModel().getStringValue());
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.NAME)) {
-            cast().setName(update.getString(Model.NAME));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.NAME.equals(binaryModel.getModel())) {
+            cast().setName(binaryModel.getStringValue());
+            return true;
         }
-        if (cast().getName() != null && update.containsKey(Model.VALUE) && update.getBoolean(Model.VALUE)) {
-            cast().setValue(true);
-            lastSelectedRadioButtonByGroup.put(cast().getName(), this);
+
+        // FIXME
+        if (Model.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
+            if (binaryModel.getBooleanValue() && cast().getName() != null) {
+                cast().setValue(true);
+                lastSelectedRadioButtonByGroup.put(cast().getName(), this);
+            }
         }
+
+        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -68,7 +80,8 @@ public class PTRadioButton extends PTCheckBox {
                 if (cast().getName() != null) {
                     final PTRadioButton previouslySelected = lastSelectedRadioButtonByGroup.get(cast().getName());
                     if (previouslySelected != null && !previouslySelected.equals(radioButton)) {
-                        fireInstruction(previouslySelected.getObjectID(), uiService, previouslySelected.cast().getValue());
+                        fireInstruction(previouslySelected.getObjectID(), uiService,
+                                previouslySelected.cast().getValue());
                     }
                     lastSelectedRadioButtonByGroup.put(radioButton.getName(), PTRadioButton.this);
                 }
@@ -79,7 +92,7 @@ public class PTRadioButton extends PTCheckBox {
     protected void fireInstruction(final int objectID, final UIService uiService, final boolean value) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(objectID);
-        instruction.put(Model.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
+        instruction.put(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
         instruction.put(Model.VALUE, value);
         uiService.sendDataToServer(cast(), instruction);
     }

@@ -74,18 +74,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(Parser parser) {
+    protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (text != null) {
-            parser.comma();
-            parser.parse(Model.TEXT, this.text);
-        }
-
-        if (href != null) {
-            parser.comma();
-            parser.parse(Model.HREF, this.href);
-        }
+        parser.parse(Model.TEXT, this.text);
+        parser.parse(Model.HREF, this.href);
     }
 
     @Override
@@ -109,7 +101,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the anchor's href
      */
     public void setHref(final String href) {
-        if (Objects.equals(this.href, href)) return;
+        if (Objects.equals(this.href, href))
+            return;
         this.href = href;
         saveUpdate(Model.HREF, this.href);
     }
@@ -121,7 +114,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text)) return;
+        if (Objects.equals(this.text, text))
+            return;
         this.text = text;
         saveUpdate(Model.TEXT, this.text);
     }
@@ -133,7 +127,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html)) return;
+        if (Objects.equals(this.html, html))
+            return;
         this.html = html;
         saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }

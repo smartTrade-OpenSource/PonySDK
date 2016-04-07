@@ -28,8 +28,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A rectangular grid that can contain text, html, or a child {@link PWidget} within its cells. It
- * must be resized explicitly to the desired number of rows and columns.
+ * A rectangular grid that can contain text, html, or a child {@link PWidget}
+ * within its cells. It must be resized explicitly to the desired number of rows
+ * and columns.
  */
 public class PGrid extends PHTMLTable {
 
@@ -53,12 +54,8 @@ public class PGrid extends PHTMLTable {
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
 
-        if (rows != 0) {
-            parser.comma();
+        if (rows != 0 && columns != 0) {
             parser.parse(Model.ROW, rows);
-        }
-        if (columns != 0) {
-            parser.comma();
             parser.parse(Model.COLUMN, columns);
         }
     }

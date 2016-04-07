@@ -27,22 +27,33 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTScript extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTScript.class.getName());
 
+    private UIService uiService;
+
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final String scriptToEval = update.getString(Model.EVAL);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
+        this.uiService = uiService;
+    }
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        // Model.EVAL
+        final String scriptToEval = binaryModel.getStringValue();
+        final BinaryModel commandId = buffer.getBinaryModel();
         try {
-            if (update.containsKey(Model.CALLBACK)) {
+            if (Model.COMMAND_ID.equals(commandId.getModel())) {
                 final Object result = evalWithCallback(scriptToEval);
                 final PTInstruction eventInstruction = new PTInstruction();
-                eventInstruction.setObjectID(update.getObjectID());
-                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
+                eventInstruction.setObjectID(getObjectID());
+                eventInstruction.put(Model.COMMAND_ID, commandId.getLongValue());
                 eventInstruction.put(Model.RESULT, result == null ? "" : result.toString());
                 uiService.sendDataToServer(eventInstruction);
             } else {
@@ -50,10 +61,10 @@ public class PTScript extends AbstractPTObject {
             }
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
-            if (update.containsKey(Model.CALLBACK)) {
+            if (Model.COMMAND_ID.equals(commandId.getModel())) {
                 final PTInstruction eventInstruction = new PTInstruction();
-                eventInstruction.setObjectID(update.getObjectID());
-                eventInstruction.put(Model.COMMAND_ID, update.getLong(Model.COMMAND_ID));
+                eventInstruction.setObjectID(getObjectID());
+                eventInstruction.put(Model.COMMAND_ID, commandId.getLongValue());
                 eventInstruction.put(Model.ERROR_MSG, e.getMessage());
                 uiService.sendDataToServer(eventInstruction);
             }

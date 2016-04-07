@@ -41,11 +41,12 @@ import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that presents a list of choices to the user, either as a list box or as a drop-down
- * list.
+ * A widget that presents a list of choices to the user, either as a list box or
+ * as a drop-down list.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-ListBox { }</li>
@@ -84,7 +85,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
             addItem(EMPTY, null);
         }
 
-        saveAddHandler(Model.HANDLER_CHANGE_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
     }
 
     @Override
@@ -94,8 +95,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_CHANGE_HANDLER.getKey())) {
-            final String data = jsonObject.getString(Model.VALUE.getKey());
+        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.getValue())) {
+            final String data = jsonObject.getString(Model.VALUE.getValue());
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<>();
 
@@ -127,19 +128,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD);
-        parser.comma();
-        parser.parse(Model.ITEM_ADD);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_ADD, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         final String s = items.toString();
-        parser.parse(Model.ITEM_TEXT, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
-        parser.comma();
+        parser.parse(Model.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
         parser.parse(Model.ITEM_GROUP, group);
         parser.endObject();
 
@@ -171,19 +165,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.ITEM_INSERTED);
-        parser.comma();
+        parser.parse(Model.ITEM_INSERTED, label);
         parser.parse(Model.INDEX, index);
-        parser.comma();
-        parser.parse(Model.ITEM_TEXT, label);
         parser.endObject();
     }
 
@@ -194,19 +181,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.ITEM_UPDATED);
-        parser.comma();
+        parser.parse(Model.ITEM_UPDATED, text);
         parser.parse(Model.INDEX, index);
-        parser.comma();
-        parser.parse(Model.ITEM_TEXT, text);
         parser.endObject();
     }
 
@@ -255,20 +235,16 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private void sendRemoveItemInstruction(final int index) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.ITEM_REMOVED);
-        parser.comma();
         parser.parse(Model.INDEX, index);
         parser.endObject();
 
-        if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
+        if (selectedIndex >= index)
+            setSelectedIndex(selectedIndex - 1);
     }
 
     public Object getValue(final int index) {
@@ -304,17 +280,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.SELECTED, selected);
-        parser.comma();
-        parser.parse(Model.SELECTED_INDEX, index);
+        parser.parse(Model.INDEX, index);
         parser.endObject();
     }
 
@@ -336,7 +307,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void addChangeHandler(final PChangeHandler handler) {
-        if (handlers == null) handlers = new ArrayList<>();
+        if (handlers == null)
+            handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
@@ -397,11 +369,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void checkItem(final String label) {
-        if (label == null) throw new NullPointerException("Null item is unsupported");
+        if (label == null)
+            throw new NullPointerException("Null item is unsupported");
     }
 
     private void checkIndex(final int index) {
-        if (index >= getItemCount()) throw new IndexOutOfBoundsException();
+        if (index >= getItemCount())
+            throw new IndexOutOfBoundsException();
     }
 
     public List<Integer> getSelectedIndexes() {

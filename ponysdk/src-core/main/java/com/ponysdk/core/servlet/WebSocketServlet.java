@@ -268,7 +268,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void sendHeartBeat() {
             final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
-            socketBuffer.putShort(Model.HEARTBEAT.getShortKey());
+            socketBuffer.putShort(Model.HEARTBEAT.getValue());
             flush(socketBuffer);
         }
     }

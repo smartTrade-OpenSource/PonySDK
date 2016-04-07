@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,39 +28,53 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
+    private UIService uiService;
+
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new DockLayoutPanel(Unit.values()[create.getInt(Model.UNIT)]));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.UNIT
+        this.uiObject = new DockLayoutPanel(Unit.values()[buffer.getBinaryModel().getByteValue()]);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+        this.uiService = uiService;
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.WIDGET_SIZE)) {
-            final double newSize = update.getDouble(Model.WIDGET_SIZE);
-            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.WIDGET_SIZE.equals(binaryModel.getModel())) {
+            final double newSize = binaryModel.getDoubleValue();
+            // Model.WIDGET_ID
+            final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             uiObject.setWidgetSize(w, newSize);
-        } else if (update.containsKey(Model.WIDGET_HIDDEN)) {
-            final boolean hidden = update.getBoolean(Model.WIDGET_HIDDEN);
-            final Widget w = asWidget(update.getInt(Model.WIDGET_ID), uiService);
-            uiObject.setWidgetHidden(w, hidden);
-        } else if (update.containsKey(Model.ANIMATE)) {
-            uiObject.animate(update.getInt(Model.ANIMATE));
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        if (Model.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
+            final boolean hidden = binaryModel.getBooleanValue();
+            // Model.WIDGET_ID
+            final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
+            uiObject.setWidgetHidden(w, hidden);
+            return true;
+        }
+        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+            uiObject.animate(binaryModel.getIntValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-
-        final Widget w = asWidget(add.getObjectID(), uiService);
-        final Direction direction = Direction.values()[add.getInt(Model.DIRECTION)];
-        final double size = add.getDouble(Model.SIZE);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final Widget w = asWidget(ptObject);
+        // Model.DIRECTION
+        final Direction direction = Direction.values()[buffer.getBinaryModel().getByteValue()];
+        // Model.SIZE
+        final double size = buffer.getBinaryModel().getDoubleValue();
 
         switch (direction) {
             case CENTER: {

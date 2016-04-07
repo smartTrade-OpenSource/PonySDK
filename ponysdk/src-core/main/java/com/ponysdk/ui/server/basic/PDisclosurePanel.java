@@ -41,9 +41,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A widget that consists of a header and a content panel that discloses the content when a user
- * clicks on the
- * header.
+ * A widget that consists of a header and a content panel that discloses the
+ * content when a user clicks on the header.
  * <h3>CSS Style Rules</h3>
  * <dl class="css">
  * <dt>.gwt-DisclosurePanel
@@ -54,7 +53,8 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dd>dependent style set when panel is closed
  * </dl>
  * <p>
- * The header and content sections can be easily selected using css with a child selector:<br/>
+ * The header and content sections can be easily selected using css with a child
+ * selector:<br/>
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */
@@ -90,23 +90,19 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        parser.comma();
         parser.parse(Model.TEXT, headerText);
-        parser.comma();
         parser.parse(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        parser.comma();
         parser.parse(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
+        if (jsonObject.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
             isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
                 closeHandler.onClose(new PCloseEvent(this));
             }
-        } else if (jsonObject.containsKey(Model.HANDLER_OPEN_HANDLER.getKey())) {
+        } else if (jsonObject.containsKey(Model.HANDLER_OPEN_HANDLER.getValue())) {
             isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
                 openHandler.onOpen(new POpenEvent(this));

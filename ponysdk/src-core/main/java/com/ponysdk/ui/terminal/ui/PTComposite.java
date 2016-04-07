@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,23 +26,29 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public abstract class PTComposite extends PTWidget<Composite> {
 
+    private UIService uiService;
+
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new MyComposite());
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new MyComposite();
+        this.objectID = objectId;
+        this.uiService = uiService;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.WIDGET_ID)) {
-            cast().initWidget(asWidget(update.getInt(Model.WIDGET_ID), uiService));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+            cast().initWidget(asWidget(binaryModel.getIntValue(), uiService));
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -52,7 +58,8 @@ public abstract class PTComposite extends PTWidget<Composite> {
 
     class MyComposite extends Composite {
 
-        public MyComposite() {}
+        public MyComposite() {
+        }
 
         @Override
         public void initWidget(final Widget widget) {

@@ -72,8 +72,10 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidget {
 
@@ -83,37 +85,40 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
     private final Set<Integer> stoppedEvents = new HashSet<>();
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        super.update(update, uiService);
-        if (update.containsKey(Model.PREVENT_EVENT)) {
-            preventedEvents.add(update.getInt(Model.PREVENT_EVENT));
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.PREVENT_EVENT.equals(binaryModel.getModel())) {
+            preventedEvents.add(binaryModel.getIntValue());
+            return true;
         }
-        if (update.containsKey(Model.STOP_EVENT)) {
-            stoppedEvents.add(update.getInt(Model.STOP_EVENT));
+        if (Model.STOP_EVENT.equals(binaryModel.getModel())) {
+            stoppedEvents.add(binaryModel.getIntValue());
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_DOM_HANDLER)) {
-            final int domHandlerType = instruction.getInt(Model.DOM_HANDLER_CODE);
-            final Widget w = asWidget(instruction.getObjectID(), uiService);
-            addDomHandler(instruction, w, domHandlerType, uiService);
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_DOM_HANDLER.equals(handlerModel)) {
+            final int domHandlerType = buffer.getBinaryModel().getIntValue();
+            addDomHandler(buffer, domHandlerType, uiService);
         } else {
-            super.addHandler(instruction, uiService);
+            super.addHandler(buffer, handlerModel, uiService);
         }
     }
 
     @Override
-    public void removeHandler(final PTInstruction removeHandler, final UIService uiService) {
-        if (removeHandler.containsKey(Model.HANDLER_DOM_HANDLER)) {
-            // final int domHandlerType = removeHandler.getInt(Model.DOM_HANDLER_CODE);
-            // final Widget w = asWidget(removeHandler.getObjectID(), uiService);
+    public void removeHandler(final ReaderBuffer buffer, final UIService uiService) {
+        if (buffer.containsKey(HandlerModel.HANDLER_DOM_HANDLER)) {
+            // final int domHandlerType =
+            // removeHandler.getInt(Model.DOM_HANDLER_CODE);
+            // final Widget w = asWidget(removeHandler.getObjectID(),
+            // uiService);
             // final HandlerRegistration handlerRegistration;
             // handlerRegistration.removeHandler()
             // removeDomHandler(removeHandler, w, domHandlerType, uiService);
         } else {
-            super.removeHandler(removeHandler, uiService);
+            super.removeHandler(buffer, uiService);
         }
     }
 
@@ -129,20 +134,24 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
     @Override
     public Widget asWidget(final int objectID, final UIService uiService) {
-        final PTObject ptObject = uiService.getPTObject(objectID);
+        return asWidget(uiService.getPTObject(objectID));
+    }
+
+    @Override
+    public Widget asWidget(final PTObject ptObject) {
         if (ptObject != null) {
             final PTWidget<?> ptWidget = ptObject.isPTWidget();
-            if (ptWidget != null) return ptWidget.asWidget();
+            if (ptWidget != null)
+                return ptWidget.asWidget();
         } else {
             log.severe("No widget found for object #" + objectID);
         }
         return null;
     }
 
-    protected void triggerMouseEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+    protected void triggerMouseEvent(final ReaderBuffer buffer, final DomHandlerType domHandlerType,
             final UIService uiService, final MouseEvent<?> event) {
-        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
         final JSONArray eventInfo = new JSONArray();
         eventInfo.set(0, new JSONNumber(event.getClientX()));
         eventInfo.set(1, new JSONNumber(event.getClientY()));
@@ -151,6 +160,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         eventInfo.set(4, new JSONNumber(event.getNativeButton()));
         eventInstruction.put(Model.EVENT_INFO, eventInfo);
 
+        final Widget widget = asWidget();
         final JSONArray widgetInfo = new JSONArray();
         widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
         widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
@@ -163,28 +173,28 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         preventOrStopEvent(event);
     }
 
-    protected void triggerDomEvent(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
-            final UIService uiService, final DomEvent<?> event) {
-        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
-        uiService.sendDataToServer(widget, eventInstruction);
+    protected void triggerDomEvent(final DomHandlerType domHandlerType, final UIService uiService,
+            final DomEvent<?> event) {
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+        uiService.sendDataToServer(asWidget(), eventInstruction);
         preventOrStopEvent(event);
     }
 
-    private PTInstruction buildEventInstruction(final PTInstruction addHandler, final DomHandlerType domHandlerType) {
+    private PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(addHandler.getObjectID());
-        eventInstruction.put(Model.DOM_HANDLER_TYPE, domHandlerType.ordinal());
+        eventInstruction.setObjectID(getObjectID());
+        eventInstruction.put(Model.DOM_HANDLER_TYPE, domHandlerType.getValue());
         return eventInstruction;
     }
 
-    protected void triggerOnKeyPress(final PTInstruction addHandler, final Widget widget, final DomHandlerType domHandlerType,
+    protected void triggerOnKeyPress(final ReaderBuffer buffer, final DomHandlerType domHandlerType,
             final UIService uiService, final KeyPressEvent event) {
-
-        final PTInstruction eventInstruction = buildEventInstruction(addHandler, domHandlerType);
+        final Widget widget = asWidget();
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
         eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-        if (addHandler.containsKey(Model.KEY_FILTER)) {
-            final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
+        if (buffer.containsKey(Model.KEY_FILTER)) {
+            final JSONArray jsonArray = buffer.get(Model.KEY_FILTER).isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
                 final JSONNumber keyCode = jsonArray.get(i).isNumber();
                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -199,9 +209,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
         preventOrStopEvent(event);
     }
 
-    private void addDomHandler(final PTInstruction addHandler, final Widget widget, final int domHandlerType,
-            final UIService uiService) {
-
+    private void addDomHandler(final ReaderBuffer buffer, final int domHandlerType, final UIService uiService) {
+        final Widget widget = asWidget();
         final DomHandlerType h = DomHandlerType.values()[domHandlerType];
         switch (h) {
             case CLICK:
@@ -209,7 +218,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onClick(final ClickEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
 
                 }, ClickEvent.getType());
@@ -219,7 +228,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDoubleClick(final DoubleClickEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
                 }, DoubleClickEvent.getType());
                 break;
@@ -228,7 +237,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onMouseOver(final MouseOverEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
 
                 }, MouseOverEvent.getType());
@@ -238,7 +247,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onMouseOut(final MouseOutEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
 
                 }, MouseOutEvent.getType());
@@ -248,7 +257,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onMouseDown(final MouseDownEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
 
                 }, MouseDownEvent.getType());
@@ -258,7 +267,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onMouseUp(final MouseUpEvent event) {
-                        triggerMouseEvent(addHandler, widget, h, uiService, event);
+                        triggerMouseEvent(buffer, h, uiService, event);
                     }
 
                 }, MouseUpEvent.getType());
@@ -268,7 +277,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onBlur(final BlurEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
 
                 }, BlurEvent.getType());
@@ -278,7 +287,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onFocus(final FocusEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
 
                 }, FocusEvent.getType());
@@ -288,13 +297,12 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onKeyPress(final KeyPressEvent event) {
-                        triggerOnKeyPress(addHandler, widget, h, uiService, event);
+                        triggerOnKeyPress(buffer, h, uiService, event);
                     }
 
                 }, KeyPressEvent.getType());
                 break;
             case KEY_UP:
-
                 if (widget instanceof TextBoxBase) {
                     final TextBoxBase textBox = (TextBoxBase) widget;
                     textBox.addKeyUpHandler(new KeyUpHandler() {
@@ -302,15 +310,15 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction();
-                            changeHandlerInstruction.setObjectID(addHandler.getObjectID());
-                            changeHandlerInstruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.setObjectID(getObjectID());
+                            changeHandlerInstruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(Model.VALUE, textBox.getText());
 
-                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
+                            final PTInstruction eventInstruction = buildEventInstruction(h);
                             eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                            if (addHandler.containsKey(Model.KEY_FILTER)) {
-                                final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
+                            if (buffer.containsKey(Model.KEY_FILTER)) {
+                                final JSONArray jsonArray = buffer.get(Model.KEY_FILTER).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -333,11 +341,11 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
+                            final PTInstruction eventInstruction = buildEventInstruction(h);
                             eventInstruction.put(Model.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                            if (addHandler.containsKey(Model.KEY_FILTER)) {
-                                final JSONArray jsonArray = addHandler.get(Model.KEY_FILTER).isArray();
+                            if (buffer.containsKey(Model.KEY_FILTER)) {
+                                final JSONArray jsonArray = buffer.get(Model.KEY_FILTER).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -361,9 +369,9 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDragStart(final DragStartEvent event) {
-                        event.setData("text", String.valueOf(addHandler.getObjectID()));
+                        event.setData("text", String.valueOf(getObjectID()));
                         event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
                 }, DragStartEvent.getType());
                 break;
@@ -372,7 +380,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDragEnd(final DragEndEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
                 }, DragEndEvent.getType());
                 break;
@@ -381,7 +389,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDragEnter(final DragEnterEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
                 }, DragEnterEvent.getType());
                 break;
@@ -390,7 +398,7 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onDragLeave(final DragLeaveEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
                 }, DragLeaveEvent.getType());
                 break;
@@ -400,7 +408,9 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
                     @Override
                     public void onDragOver(final DragOverEvent event) {
                         // required by GWT api
-                        // triggerDomEvent(addHandler, domHandlerType, uiService);
+                        // triggerDomEvent(addHandler.getObjectID(),
+                        // domHandlerType,
+                        // uiService);
                     }
                 }, DragOverEvent.getType());
 
@@ -410,8 +420,9 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
                     public void onDrop(final DropEvent event) {
                         event.preventDefault();
                         final String dragWidgetID = event.getData("text");
-                        final PTInstruction eventInstruction = buildEventInstruction(addHandler, h);
-                        if (dragWidgetID != null) eventInstruction.put(Model.DRAG_SRC, Long.parseLong(dragWidgetID));
+                        final PTInstruction eventInstruction = buildEventInstruction(h);
+                        if (dragWidgetID != null)
+                            eventInstruction.put(Model.DRAG_SRC, Long.parseLong(dragWidgetID));
                         uiService.sendDataToServer(widget, eventInstruction);
                     }
                 }, DropEvent.getType());
@@ -421,10 +432,12 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
 
                     @Override
                     public void onContextMenu(final ContextMenuEvent event) {
-                        triggerDomEvent(addHandler, widget, h, uiService, event);
+                        triggerDomEvent(h, uiService, event);
                     }
                 }, ContextMenuEvent.getType());
                 break;
+            case CHANGE_HANDLER:
+            case DRAG_OVER:
             default:
                 log.info("Handler not supported #" + h);
                 break;
@@ -437,7 +450,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
     }
 
     private void preventEvent(final DomEvent<?> event) {
-        if (preventedEvents.isEmpty()) return;
+        if (preventedEvents.isEmpty())
+            return;
 
         final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
         if (preventedEvents.contains(typeInt)) {
@@ -446,7 +460,8 @@ public class PTWidget<W extends Widget> extends PTUIObject<W> implements IsWidge
     }
 
     private void stopEvent(final DomEvent<?> event) {
-        if (stoppedEvents.isEmpty()) return;
+        if (stoppedEvents.isEmpty())
+            return;
 
         final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
         if (stoppedEvents.contains(typeInt)) {

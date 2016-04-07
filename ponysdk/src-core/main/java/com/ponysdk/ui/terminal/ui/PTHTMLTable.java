@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,76 +27,130 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTHTMLTable extends PTPanel<HTMLTable> {
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        final Widget w = asWidget(add.getObjectID(), uiService);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        final Widget w = asWidget(ptObject);
 
-        final int row = add.getInt(Model.ROW);
-        final int cell = add.getInt(Model.CELL);
+        // Model.ROW
+        final int row = buffer.getBinaryModel().getIntValue();
+        // Model.COLUMN
+        final int cell = buffer.getBinaryModel().getIntValue();
 
-        // uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
+        // uiObject.getCellFormatter().addStyleName(row, cell,
+        // "pony-PFlextable-Cell");
         uiObject.setWidget(row, cell, w);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.CLEAR)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clear();
-        } else if (update.containsKey(Model.BORDER_WIDTH)) {
-            uiObject.setBorderWidth(update.getInt(Model.BORDER_WIDTH));
-        } else if (update.containsKey(Model.CELL_SPACING)) {
-            uiObject.setCellSpacing(update.getInt(Model.CELL_SPACING));
-        } else if (update.containsKey(Model.CELL_PADDING)) {
-            uiObject.setCellPadding(update.getInt(Model.CELL_PADDING));
-        } else if (update.containsKey(Model.HTMLTABLE_ROW_STYLE)) {
-            final int row = update.getInt(Model.ROW);
-            if (update.containsKey(Model.ROW_FORMATTER_ADD_STYLE_NAME)) {
-                uiObject.getRowFormatter().addStyleName(row, update.getString(Model.ROW_FORMATTER_ADD_STYLE_NAME));
-            } else if (update.containsKey(Model.ROW_FORMATTER_SET_STYLE_NAME)) {
-                uiObject.getRowFormatter().setStyleName(row, update.getString(Model.ROW_FORMATTER_SET_STYLE_NAME));
-            } else if (update.containsKey(Model.ROW_FORMATTER_REMOVE_STYLE_NAME)) {
-                uiObject.getRowFormatter().removeStyleName(row, update.getString(Model.ROW_FORMATTER_REMOVE_STYLE_NAME));
-            }
-        } else if (update.containsKey(Model.HTMLTABLE_CELL_STYLE)) {
-            final int cellRow = update.getInt(Model.ROW);
-            final int cellColumn = update.getInt(Model.COLUMN);
-            if (update.containsKey(Model.CELL_FORMATTER_ADD_STYLE_NAME)) {
-                uiObject.getCellFormatter().addStyleName(cellRow, cellColumn, update.getString(Model.CELL_FORMATTER_ADD_STYLE_NAME));
-            } else if (update.containsKey(Model.CELL_FORMATTER_REMOVE_STYLE_NAME)) {
-                uiObject.getCellFormatter().removeStyleName(cellRow, cellColumn, update.getString(Model.CELL_FORMATTER_REMOVE_STYLE_NAME));
-            } else if (update.containsKey(Model.CELL_FORMATTER_SET_STYLE_NAME)) {
-                uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, update.getString(Model.CELL_FORMATTER_SET_STYLE_NAME));
-            }
-            if (update.containsKey(Model.CELL_VERTICAL_ALIGNMENT)) {
-                final VerticalAlignmentConstant asVerticalAlignmentConstant = PVerticalAlignment.values()[update.getInt(Model.CELL_VERTICAL_ALIGNMENT)].asVerticalAlignmentConstant();
-                uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
-            }
-            if (update.containsKey(Model.CELL_HORIZONTAL_ALIGNMENT)) {
-                final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PHorizontalAlignment.values()[update.getInt(Model.CELL_HORIZONTAL_ALIGNMENT)].asHorizontalAlignmentConstant();
-                uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
-            }
-        } else if (update.containsKey(Model.HTMLTABLE_COLUMN_STYLE)) {
-            final int column = update.getInt(Model.COLUMN);
-            if (update.containsKey(Model.COLUMN_FORMATTER_ADD_STYLE_NAME)) {
-                uiObject.getColumnFormatter().addStyleName(column, update.getString(Model.COLUMN_FORMATTER_ADD_STYLE_NAME));
-            } else if (update.containsKey(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME)) {
-                uiObject.getColumnFormatter().removeStyleName(column, update.getString(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME));
-            } else if (update.containsKey(Model.COLUMN_FORMATTER_SET_STYLE_NAME)) {
-                uiObject.getColumnFormatter().setStyleName(column, update.getString(Model.COLUMN_FORMATTER_SET_STYLE_NAME));
-            }
-            if (update.containsKey(Model.COLUMN_FORMATTER_COLUMN_WIDTH)) {
-                uiObject.getColumnFormatter().setWidth(column, update.getString(Model.COLUMN_FORMATTER_COLUMN_WIDTH));
-            }
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        if (Model.BORDER_WIDTH.equals(binaryModel.getModel())) {
+            uiObject.setBorderWidth(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.CELL_SPACING.equals(binaryModel.getModel())) {
+            uiObject.setCellSpacing(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.CELL_PADDING.equals(binaryModel.getModel())) {
+            uiObject.setCellPadding(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.ROW_FORMATTER_ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int row = buffer.getBinaryModel().getIntValue();
+            uiObject.getRowFormatter().addStyleName(row, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.ROW_FORMATTER_SET_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int row = buffer.getBinaryModel().getIntValue();
+            uiObject.getRowFormatter().setStyleName(row, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.ROW_FORMATTER_REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int row = buffer.getBinaryModel().getIntValue();
+            uiObject.getRowFormatter().removeStyleName(row, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.CELL_FORMATTER_ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellColumn = buffer.getBinaryModel().getIntValue();
+            uiObject.getCellFormatter().addStyleName(cellRow, cellColumn, binaryModel.getStringValue());
+            return true;
+        } else if (Model.CELL_FORMATTER_REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellColumn = buffer.getBinaryModel().getIntValue();
+            uiObject.getCellFormatter().removeStyleName(cellRow, cellColumn, binaryModel.getStringValue());
+            return true;
+        } else if (Model.CELL_FORMATTER_SET_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellColumn = buffer.getBinaryModel().getIntValue();
+            uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.CELL_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellColumn = buffer.getBinaryModel().getIntValue();
+            final VerticalAlignmentConstant asVerticalAlignmentConstant = PVerticalAlignment.values()[binaryModel
+                    .getByteValue()].asVerticalAlignmentConstant();
+            uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
+            return true;
+        }
+        if (Model.CELL_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            // Model.ROW
+            final int cellRow = buffer.getBinaryModel().getIntValue();
+            // Model.COLUMN
+            final int cellColumn = buffer.getBinaryModel().getIntValue();
+            final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PHorizontalAlignment.values()[binaryModel
+                    .getByteValue()].asHorizontalAlignmentConstant();
+            uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
+            return true;
+        }
+        if (Model.COLUMN_FORMATTER_ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.COLUMN
+            final int column = buffer.getBinaryModel().getIntValue();
+            uiObject.getColumnFormatter().addStyleName(column, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.COLUMN
+            final int column = buffer.getBinaryModel().getIntValue();
+            uiObject.getColumnFormatter().removeStyleName(column, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.COLUMN_FORMATTER_SET_STYLE_NAME.equals(binaryModel.getModel())) {
+            // Model.COLUMN
+            final int column = buffer.getBinaryModel().getIntValue();
+            uiObject.getColumnFormatter().setStyleName(column, binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.COLUMN_FORMATTER_COLUMN_WIDTH.equals(binaryModel.getModel())) {
+            // Model.COLUMN
+            final int column = buffer.getBinaryModel().getIntValue();
+            uiObject.getColumnFormatter().setWidth(column, binaryModel.getStringValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 }

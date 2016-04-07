@@ -31,23 +31,26 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTerminalScheduledCommand extends AbstractPTObject {
-    
+
     private final static Logger log = Logger.getLogger(PTTerminalScheduledCommand.class.getName());
 
+    private UIService uiService;
+
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final int delayMs = create.getInt(Model.FIXDELAY);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        final int delayMs = buffer.getInt(Model.FIXDELAY);
         if (delayMs <= 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {
 
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    script.update(create, uiService);
+                    script.update(buffer, uiService);
                     return false;
                 }
             });
@@ -57,24 +60,25 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    script.update(create, uiService);
+                    script.update(buffer, uiService);
                     return false;
                 }
 
             }, delayMs);
         }
+
+        this.uiService = uiService;
     }
 
-
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        final int delayMs = update.getInt(Model.FIXDELAY);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        final int delayMs = buffer.getInt(Model.FIXDELAY);
         if (delayMs < 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {
 
                 @Override
                 public boolean execute() {
-                    executeInstruction(update, uiService);
+                    executeInstruction(buffer, uiService);
                     return false;
                 }
             });
@@ -83,7 +87,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
                 @Override
                 public boolean execute() {
-                    executeInstruction(update, uiService);
+                    executeInstruction(buffer, uiService);
                     return false;
                 }
 
@@ -94,7 +98,8 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
     protected void executeInstruction(final PTInstruction update, final UIService uiService) {
         final List<PTInstruction> instructions = new ArrayList<>();
         // for (int i = 0; i < jsonArray.size(); i++) {
-        // instructions.add(new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
+        // instructions.add(new
+        // PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject()));
         // }
 
         PTInstruction currentInstruction = null;
@@ -104,7 +109,8 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
                 uiService.processInstruction(instruction);
             }
         } catch (final Throwable e) {
-            log.log(Level.SEVERE, "PonySDK has encountered an internal error while executing a scheduled command : " + currentInstruction + " => Error Message " + e.getMessage(), e);
+            log.log(Level.SEVERE, "PonySDK has encountered an internal error while executing a scheduled command : "
+                    + currentInstruction + " => Error Message " + e.getMessage(), e);
             uiService.stackError(currentInstruction, e);
         } finally {
             uiService.flushEvents();

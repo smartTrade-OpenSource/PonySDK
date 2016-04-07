@@ -70,11 +70,13 @@ import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseUpEvent;
 import com.ponysdk.ui.terminal.DomHandlerType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * The base class for the majority of user-interface objects. Widget adds support for receiving
- * events from the browser and being added directly to {@link PPanel panels}.
+ * The base class for the majority of user-interface objects. Widget adds
+ * support for receiving events from the browser and being added directly to
+ * {@link PPanel panels}.
  */
 public abstract class PWidget extends PObject implements IsPWidget {
 
@@ -114,79 +116,92 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private final Set<String> safeStyleName() {
-        if (styleNames != null) return styleNames;
+        if (styleNames != null)
+            return styleNames;
         styleNames = new HashSet<>();
         return styleNames;
     }
 
     private final Set<PEvent> safePreventEvents() {
-        if (preventEvents != null) return preventEvents;
+        if (preventEvents != null)
+            return preventEvents;
         preventEvents = new HashSet<>();
         return preventEvents;
     }
 
     private final Set<PEvent> safeStopEvents() {
-        if (stopEvents != null) return stopEvents;
+        if (stopEvents != null)
+            return stopEvents;
         stopEvents = new HashSet<>();
         return stopEvents;
     }
 
     private final Map<String, String> safeStyleProperties() {
-        if (styleProperties != null) return styleProperties;
+        if (styleProperties != null)
+            return styleProperties;
         styleProperties = new HashMap<>();
         return styleProperties;
     }
 
     private final Map<String, String> safeElementProperties() {
-        if (elementProperties != null) return elementProperties;
+        if (elementProperties != null)
+            return elementProperties;
         elementProperties = new HashMap<>();
         return elementProperties;
     }
 
     private final Map<String, String> safeElementAttributes() {
-        if (elementAttributes != null) return elementAttributes;
+        if (elementAttributes != null)
+            return elementAttributes;
         elementAttributes = new HashMap<>();
         return elementAttributes;
     }
 
     public void setVisible(final boolean visible) {
-        if (Objects.equals(this.visible, visible)) return;
+        if (Objects.equals(this.visible, visible))
+            return;
         this.visible = visible;
         saveUpdate(Model.WIDGET_VISIBLE, visible);
     }
 
     public void setWidth(final String width) {
-        if (Objects.equals(this.width, width)) return;
+        if (Objects.equals(this.width, width))
+            return;
         this.width = width;
         saveUpdate(Model.WIDGET_WIDTH, width);
     }
 
     public void setHeight(final String height) {
-        if (Objects.equals(this.height, height)) return;
+        if (Objects.equals(this.height, height))
+            return;
         this.height = height;
         saveUpdate(Model.WIDGET_HEIGHT, height);
     }
 
     public void setTitle(final String title) {
-        if (Objects.equals(this.title, title)) return;
+        if (Objects.equals(this.title, title))
+            return;
         this.title = title;
         saveUpdate(Model.WIDGET_TITLE, title);
     }
 
     public void setStyleName(final String styleName) {
-        if (Objects.equals(this.styleName, styleName)) return;
+        if (Objects.equals(this.styleName, styleName))
+            return;
         this.styleName = styleName;
         saveUpdate(Model.STYLE_NAME, styleName);
     }
 
     public void setStylePrimaryName(final String stylePrimaryName) {
-        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
+        if (Objects.equals(this.stylePrimaryName, stylePrimaryName))
+            return;
         this.stylePrimaryName = stylePrimaryName;
         saveUpdate(Model.STYLE_PRIMARY_NAME, stylePrimaryName);
     }
 
     public void ensureDebugId(final String debugID) {
-        if (Objects.equals(this.debugID, debugID)) return;
+        if (Objects.equals(this.debugID, debugID))
+            return;
         this.debugID = debugID;
         saveUpdate(Model.ENSURE_DEBUG_ID, debugID);
     }
@@ -239,16 +254,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_STYLE_KEY, name);
-            parser.comma();
             parser.parse(Model.STYLE_VALUE, value);
             parser.endObject();
         }
@@ -259,14 +269,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (previous != null) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.REMOVE_STYLE_KEY, name);
             parser.endObject();
         }
@@ -277,16 +283,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_PROPERTY_KEY, name);
-            parser.comma();
             parser.parse(Model.PROPERTY_VALUE, value);
             parser.endObject();
         }
@@ -297,16 +298,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PUT_ATTRIBUTE_KEY, name);
-            parser.comma();
             parser.parse(Model.ATTRIBUTE_VALUE, value);
             parser.endObject();
         }
@@ -317,26 +313,24 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (previous != null) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.REMOVE_ATTRIBUTE_KEY, name);
             parser.endObject();
         }
     }
 
     public String getProperty(final String key) {
-        if (elementProperties == null) return null;
+        if (elementProperties == null)
+            return null;
         return elementProperties.get(key);
     }
 
     public String getAttribute(final String key) {
-        if (elementAttributes == null) return null;
+        if (elementAttributes == null)
+            return null;
         return elementAttributes.get(key);
     }
 
@@ -344,14 +338,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safePreventEvents().add(e)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.PREVENT_EVENT, e.getCode());
             parser.endObject();
         }
@@ -361,14 +351,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safeStopEvents().add(e)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.STOP_EVENT, e.getCode());
             parser.endObject();
         }
@@ -378,21 +364,18 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safeStyleName().add(styleName)) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE);
-            parser.comma();
-            parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.ADD_STYLE_NAME, styleName);
             parser.endObject();
         }
     }
 
     public void removeStyleName(final String styleName) {
-        if (styleNames == null) return;
+        if (styleNames == null)
+            return;
         if (styleNames.remove(styleName)) {
             removeStyle(styleName);
         }
@@ -401,20 +384,17 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private void removeStyle(final String styleName) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
         parser.parse(Model.REMOVE_STYLE_NAME, styleName);
         parser.endObject();
     }
 
     public boolean hasStyleName(final String styleName) {
-        if (styleNames == null) return false;
+        if (styleNames == null)
+            return false;
         return styleNames.contains(styleName);
     }
 
@@ -440,40 +420,39 @@ public abstract class PWidget extends PObject implements IsPWidget {
         setHeight(Size.HUNDRED_PERCENT);
     }
 
-    // public <H extends EventHandler> HandlerRegistration removeDomHandler(final JsonObject handler, final
+    // public <H extends EventHandler> HandlerRegistration
+    // removeDomHandler(final JsonObject handler, final
     // PDomEvent.Type<H> type) {
-    // final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
+    // final HandlerRegistration handlerRegistration =
+    // ensureDomHandler().addHandler(type, handler);
     //
-    // saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE, handler);
+    // saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE,
+    // handler);
     //
     // return handlerRegistration;
     // }
 
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
+    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler,
+            final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-        saveRemoveHandler(Model.HANDLER_DOM_HANDLER);
+        saveRemoveHandler(HandlerModel.HANDLER_DOM_HANDLER);
         return handlerRegistration;
     }
 
     public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
         final Collection<PKeyPressHandler> handlerIterator = ensureDomHandler().getHandlers(PKeyPressEvent.TYPE, this);
-        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(PKeyPressEvent.TYPE, this, handler);
+        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(PKeyPressEvent.TYPE, this,
+                handler);
         if (handlerIterator.isEmpty()) {
 
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
-            parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
-            parser.parse(Model.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().ordinal());
-            parser.comma();
+            parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().getValue());
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(handler.asJsonObject());
             parser.endObject();
         }
@@ -486,18 +465,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (handlerIterator.isEmpty()) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
-            parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
-            parser.parse(Model.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().ordinal());
-            parser.comma();
+            parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().getValue());
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.comma();
             parser.parse(Model.KEY_FILTER, handler.asJsonObject());
             parser.endObject();
         }
@@ -510,15 +483,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (handlerIterator.isEmpty()) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_ADD_HANDLER);
-            parser.comma();
-            parser.parse(Model.HANDLER_DOM_HANDLER);
-            parser.comma();
-            parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().ordinal());
-            parser.comma();
+            parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(Model.OBJECT_ID, ID);
+            parser.parse(Model.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
             if (window != null) {
-                parser.comma();
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
             parser.endObject();
@@ -528,15 +496,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.DOM_HANDLER_TYPE.getKey())) {
+        if (instruction.containsKey(Model.DOM_HANDLER_TYPE.getValue())) {
 
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(Model.DOM_HANDLER_TYPE.getKey())];
+            final DomHandlerType domHandler = DomHandlerType.values()[instruction
+                    .getInt(Model.DOM_HANDLER_TYPE.getValue())];
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE_KEY.getKey())));
+                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE_KEY.getValue())));
                     break;
                 case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE_KEY.getKey())));
+                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE_KEY.getValue())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -579,9 +548,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
-                    if (instruction.containsKey(Model.DRAG_SRC.getKey())) {
+                    if (instruction.containsKey(Model.DRAG_SRC.getValue())) {
                         final PWidget source = UIContext.get()
-                                .getObject(instruction.getJsonNumber(Model.DRAG_SRC.getKey()).intValue());
+                                .getObject(instruction.getJsonNumber(Model.DRAG_SRC.getValue()).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -599,7 +568,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private EventBus ensureDomHandler() {
-        if (domHandler == null) domHandler = new SimpleEventBus();
+        if (domHandler == null)
+            domHandler = new SimpleEventBus();
         return domHandler;
     }
 
@@ -608,8 +578,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
-        if (instruction.containsKey(Model.EVENT_INFO.getKey())) {
-            final JsonArray eventInfo = instruction.getJsonArray(Model.EVENT_INFO.getKey());
+        if (instruction.containsKey(Model.EVENT_INFO.getValue())) {
+            final JsonArray eventInfo = instruction.getJsonArray(Model.EVENT_INFO.getValue());
 
             event.setX(((JsonNumber) eventInfo.get(0)).intValue());
             event.setY(((JsonNumber) eventInfo.get(1)).intValue());
@@ -618,8 +588,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
             event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
         }
 
-        if (instruction.containsKey(Model.WIDGET_POSITION.getKey())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getKey());
+        if (instruction.containsKey(Model.WIDGET_POSITION.getValue())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getValue());
 
             event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
             event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());
@@ -631,7 +601,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireEvent(final Event<?> event) {
-        if (domHandler == null) return;
+        if (domHandler == null)
+            return;
         domHandler.fireEvent(event);
     }
 

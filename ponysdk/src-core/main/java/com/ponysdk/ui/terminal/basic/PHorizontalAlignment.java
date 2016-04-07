@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,9 +26,10 @@ package com.ponysdk.ui.terminal.basic;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 
-
 public enum PHorizontalAlignment {
-    ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT;
+    ALIGN_LEFT,
+    ALIGN_CENTER,
+    ALIGN_RIGHT;
 
     public HorizontalAlignmentConstant asHorizontalAlignmentConstant() {
         switch (this) {
@@ -41,5 +42,9 @@ public enum PHorizontalAlignment {
             default:
                 throw new IllegalArgumentException("Undefined alignement");
         }
+    }
+
+    public byte getValue() {
+        return (byte) ordinal();
     }
 }

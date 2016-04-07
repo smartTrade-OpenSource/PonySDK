@@ -36,24 +36,28 @@ import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
- * previously-created popups).
+ * A panel that can "pop up" over other widgets. It overlays the browser's
+ * client area (and any previously-created popups).
  * <p>
- * A PPopupPanel should not generally be added to other panels; rather, it should be shown and
- * hidden using the {@link #show()} and {@link #hide()} methods.
+ * A PPopupPanel should not generally be added to other panels; rather, it
+ * should be shown and hidden using the {@link #show()} and {@link #hide()}
+ * methods.
  * </p>
  * <p>
- * The width and height of the PPopupPanel cannot be explicitly set; they are determined by the
- * PPopupPanel's widget. Calls to {@link #setWidth(String)} and {@link #setHeight(String)} will call
- * these methods on the PPopupPanel's widget.
+ * The width and height of the PPopupPanel cannot be explicitly set; they are
+ * determined by the PPopupPanel's widget. Calls to {@link #setWidth(String)}
+ * and {@link #setHeight(String)} will call these methods on the PPopupPanel's
+ * widget.
  * </p>
  * <p>
- * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly
- * used to gray out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}
- * . It has a default style name of "gwt-PopupPanelGlass", which can be changed using
+ * The PopupPanel can be optionally displayed with a "glass" element behind it,
+ * which is commonly used to gray out the widgets behind it. It can be enabled
+ * using {@link #setGlassEnabled(boolean)} . It has a default style name of
+ * "gwt-PopupPanelGlass", which can be changed using
  * {@link #setGlassStyleName(String)}.
  * </p>
  * <h3>CSS Style Rules</h3>
@@ -69,8 +73,8 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     /**
-     * A callback that is used to set the position of a {@link PPopupPanel} right before it is
-     * shown.
+     * A callback that is used to set the position of a {@link PPopupPanel}
+     * right before it is shown.
      */
     public interface PPositionCallback {
 
@@ -124,7 +128,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         super.enrichOnInit(parser);
 
         if (autoHide) {
-            parser.comma();
             parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
         }
     }
@@ -199,18 +202,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE);
-        parser.comma();
-        parser.parse(Model.OBJECT_ID, ID);
+        parser.parse(Model.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.comma();
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.comma();
-        parser.parse(Model.POPUP_POSITION);
-        parser.comma();
         parser.parse(Model.POPUP_POSITION_LEFT, leftPosition);
-        parser.comma();
         parser.parse(Model.POPUP_POSITION_TOP, topPosition);
         parser.endObject();
     }
@@ -218,7 +214,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-        saveAddHandler(Model.HANDLER_POPUP_POSITION_CALLBACK);
+        saveAddHandler(HandlerModel.HANDLER_POPUP_POSITION_CALLBACK);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
@@ -227,8 +223,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.WIDGET_POSITION.getKey())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getKey());
+        if (instruction.containsKey(Model.WIDGET_POSITION.getValue())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getValue());
 
             final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();
             final Integer windowHeight = ((JsonNumber) widgetInfo.get(1)).intValue();
@@ -238,7 +234,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
             saveUpdate(Model.POPUP_POSITION_AND_SHOW);
-        } else if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getKey())) {
+        } else if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
             this.showing = false;
             fireOnClose();
         } else {
@@ -252,7 +248,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         }
     }
 
-    public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
+    public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
+            final int windowHeight) {
         this.positionCallback.setPosition(offsetWidth, offsetHeight, windowWidth, windowHeight);
         this.visible = false;
         setVisible(true);

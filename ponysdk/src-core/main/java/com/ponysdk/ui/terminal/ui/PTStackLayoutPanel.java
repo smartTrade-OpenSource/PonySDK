@@ -31,52 +31,59 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
+    private UIService uiService;
+
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new StackLayoutPanel(Unit.values()[create.getInt(Model.UNIT)]));
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new StackLayoutPanel(Unit.values()[buffer.getBinaryModel().getByteValue()]);
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+        this.uiService = uiService;
     }
 
     @Override
-    public void add(final PTInstruction add, final UIService uiService) {
-        super.add(add, uiService);
+    public void add(final ReaderBuffer buffer, final PTObject ptObject) {
+        super.add(buffer, ptObject);
 
-        final Widget w = asWidget(add.getObjectID(), uiService);
-        final String header = add.getString(Model.HTML);
-        final double headerSize = add.getDouble(Model.SIZE);
+        final Widget w = asWidget(ptObject);
+        final String header = buffer.getBinaryModel().getStringValue();
+        final double headerSize = buffer.getBinaryModel().getDoubleValue();
 
         uiObject.add(w, header, true, headerSize);
     }
 
     @Override
-    public void addHandler(final PTInstruction instruction, final UIService uiService) {
-        if (instruction.containsKey(Model.HANDLER_SELECTION_HANDLER)) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+        if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(Model.VALUE, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;
-        } else if (instruction.containsKey(Model.HANDLER_BEFORE_SELECTION_HANDLER)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(instruction.getObjectID());
+                    eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(Model.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(Model.VALUE, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
@@ -84,25 +91,29 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
             return;
         }
 
-        super.addHandler(instruction, uiService);
+        super.addHandler(buffer, handlerModel, uiService);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.WIDGET_ID)) {
-            uiObject.showWidget(asWidget(update.getInt(Model.WIDGET_ID), uiService));
-        } else if (update.containsKey(Model.ANIMATE)) {
-            uiObject.animate(update.getInt(Model.ANIMATE));
-        } else if (update.containsKey(Model.ANIMATION_DURATION)) {
-            uiObject.setAnimationDuration(update.getInt(Model.ANIMATION_DURATION));
-        } else {
-            super.update(update, uiService);
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+            uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiService));
+            return true;
         }
+        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+            uiObject.animate(binaryModel.getIntValue());
+            return true;
+        }
+        if (Model.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+            uiObject.setAnimationDuration(binaryModel.getIntValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void remove(final PTInstruction remove, final UIService uiService) {
-        uiObject.remove(asWidget(remove.getObjectID(), uiService));
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+        uiObject.remove(asWidget(ptObject));
     }
 
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,30 +25,33 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        String id = null;
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // Model.ROOT_ID
+        final String id = buffer.getBinaryModel().getStringValue();
 
-        if (create.containsKey(Model.ID)) id = create.getString(Model.ID);
-        if (id == null) {
-            init(create, uiService, RootPanel.get());
+        if (id != null) {
+            this.uiObject = com.google.gwt.user.client.ui.RootPanel.get(id);
         } else {
-            init(create, uiService, com.google.gwt.user.client.ui.RootPanel.get(id));
+            this.uiObject = RootPanel.get();
         }
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.CLEAR_DOM)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.CLEAR_DOM.equals(binaryModel.getModel())) {
             RootPanel.get().clear(true);
-        } else {
-            super.update(update, uiService);
+            return true;
         }
+        return super.update(buffer, binaryModel);
     }
 
 }

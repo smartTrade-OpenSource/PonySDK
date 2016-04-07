@@ -35,14 +35,16 @@ import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 /**
- * A rich text editor that allows complex styling and formatting.there is a formatter interface,
- * accessed via {@link #getFormatter()}. A browser that does not support rich text editing at all
- * will return <code>null</code> for both of these, while one that supports only the basic
- * functionality will return <code>null</code> for the latter.
+ * A rich text editor that allows complex styling and formatting.there is a
+ * formatter interface, accessed via {@link #getFormatter()}. A browser that
+ * does not support rich text editing at all will return <code>null</code> for
+ * both of these, while one that supports only the basic functionality will
+ * return <code>null</code> for the latter.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
@@ -85,7 +87,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html)) return;
+        if (Objects.equals(this.html, html))
+            return;
         this.html = html;
         saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
     }
@@ -96,8 +99,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER.getKey())) {
-            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.getKey())));
+        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
+            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.getValue())));
         } else {
             super.onClientData(instruction);
         }

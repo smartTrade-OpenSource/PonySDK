@@ -33,13 +33,12 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
- * The panel to which all other widgets must ultimately be added. RootPanels are never created
- * directly.
- * Rather, they are accessed via {@link PRootPanel#get()} .
+ * The panel to which all other widgets must ultimately be added. RootPanels are
+ * never created directly. Rather, they are accessed via
+ * {@link PRootPanel#get()} .
  * <p>
  * Most applications will add widgets to the default root panel in their
- * {@link EntryPoint#start(UIContext)}
- * methods.
+ * {@link EntryPoint#start(UIContext)} methods.
  * </p>
  */
 public class PRootPanel extends PAbsolutePanel {
@@ -63,11 +62,7 @@ public class PRootPanel extends PAbsolutePanel {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (id != null) {
-            parser.comma();
-            parser.parse(Model.ID, id);
-        }
+        parser.parse(Model.ROOT_ID, id);
     }
 
     public static PRootPanel get(final PWindow window) {
@@ -116,16 +111,16 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     /**
-     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not
-     * widgets.
+     * Clears the rootPanel. If clearDom is true, then also remove any DOM
+     * elements that are not widgets.
      * <p>
-     * By default {@link #clear()} will only remove children that are widgets. This method also
-     * provides the
-     * option to remove all children including the non-widget DOM elements that are directly added.
+     * By default {@link #clear()} will only remove children that are widgets.
+     * This method also provides the option to remove all children including the
+     * non-widget DOM elements that are directly added.
      *
      * @param clearDom
-     *            if {@code true} this method will also remove any DOM elements that are not
-     *            widgets.
+     *            if {@code true} this method will also remove any DOM elements
+     *            that are not widgets.
      */
     public void clear(final boolean clearDom) {
         clear();

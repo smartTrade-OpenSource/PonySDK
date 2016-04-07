@@ -27,8 +27,10 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
 
@@ -38,43 +40,65 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
     public void onBlur(final BlurEvent event) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(getObjectID());
-        instruction.put(Model.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+        instruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
         instruction.put(Model.HTML, uiObject.getHTML());
         uiService.sendDataToServer(uiObject, instruction);
     }
 
     @Override
-    public void create(final PTInstruction create, final UIService uiService) {
-        final RichTextArea richTextArea = new RichTextArea();
-        init(create, uiService, richTextArea);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = new RichTextArea();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+
         this.uiService = uiService;
-        richTextArea.addBlurHandler(this);
+        uiObject.addBlurHandler(this);
     }
 
     @Override
-    public void update(final PTInstruction update, final UIService uiService) {
-        if (update.containsKey(Model.HTML)) {
-            uiObject.setHTML(update.getString(Model.HTML));
-        } else if (update.containsKey(Model.CREATE_LINK)) {
-            uiObject.getFormatter().createLink(update.getString(Model.CREATE_LINK));
-        } else if (update.containsKey(Model.INSERT_HORIZONTAL_RULE)) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.HTML.equals(binaryModel.getModel())) {
+            uiObject.setHTML(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.CREATE_LINK.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().createLink(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.INSERT_HORIZONTAL_RULE.equals(binaryModel.getModel())) {
             uiObject.getFormatter().insertHorizontalRule();
-        } else if (update.containsKey(Model.INSERT_HTML)) {
-            uiObject.getFormatter().insertHTML(update.getString(Model.INSERT_HTML));
-        } else if (update.containsKey(Model.IMAGE_URL)) {
-            uiObject.getFormatter().insertImage(update.getString(Model.IMAGE_URL));
-        } else if (update.containsKey(Model.ORDERED)) {
+            return true;
+        }
+        if (Model.INSERT_HTML.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().insertHTML(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.IMAGE_URL.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().insertImage(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.ORDERED.equals(binaryModel.getModel())) {
             uiObject.getFormatter().insertOrderedList();
-        } else if (update.containsKey(Model.UNORDERED)) {
+            return true;
+        }
+        if (Model.UNORDERED.equals(binaryModel.getModel())) {
             uiObject.getFormatter().insertUnorderedList();
-        } else if (update.containsKey(Model.BACK_COLOR)) {
-            uiObject.getFormatter().setBackColor(update.getString(Model.BACK_COLOR));
-        } else if (update.containsKey(Model.FONT_COLOR)) {
-            uiObject.getFormatter().setForeColor(update.getString(Model.FONT_COLOR));
-        } else if (update.containsKey(Model.FONT_NAME)) {
-            uiObject.getFormatter().setFontName(update.getString(Model.FONT_NAME));
-        } else if (update.containsKey(Model.FONT_SIZE)) {
-            final FontSize fontSize = FontSize.valueOf(update.getString(Model.FONT_SIZE));
+            return true;
+        }
+        if (Model.BACK_COLOR.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().setBackColor(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.FONT_COLOR.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().setForeColor(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.FONT_NAME.equals(binaryModel.getModel())) {
+            uiObject.getFormatter().setFontName(binaryModel.getStringValue());
+            return true;
+        }
+        if (Model.FONT_SIZE.equals(binaryModel.getModel())) {
+            final FontSize fontSize = FontSize.valueOf(binaryModel.getStringValue());
             switch (fontSize) {
                 case LARGE:
                     uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
@@ -97,15 +121,12 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
                 case XX_SMALL:
                     uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
                     break;
-
                 default:
                     break;
             }
-
-        } else {
-            super.update(update, uiService);
+            return true;
         }
-
+        return super.update(buffer, binaryModel);
     }
 
     public enum FontSize {
