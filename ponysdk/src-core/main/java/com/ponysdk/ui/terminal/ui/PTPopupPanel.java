@@ -41,6 +41,7 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -54,23 +55,26 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     private int dragStartY;
 
+    protected boolean autoHide;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        boolean autoHide = false;
         final BinaryModel binaryModel = buffer.getBinaryModel();
         if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
             autoHide = binaryModel.getBooleanValue();
         } else {
+            autoHide = false;
             buffer.rewind(binaryModel);
         }
-        this.uiObject = createPopupPanel(autoHide);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+
+        super.create(buffer, objectId, uiService);
+
         addCloseHandler(uiService);
     }
 
-    protected PopupPanel createPopupPanel(final boolean autoHide) {
-        final PopupPanel popup = new PopupPanel(autoHide) {
+    @Override
+    protected PopupPanel createUIObject() {
+        return new PopupPanel(autoHide) {
 
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
@@ -79,7 +83,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 super.onPreviewNativeEvent(event);
             }
         };
-        return popup;
     }
 
     protected void addCloseHandler(final UIService uiService) {
@@ -89,7 +92,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(getObjectID());
-                instruction.put(Model.HANDLER_CLOSE_HANDLER);
+                instruction.put(HandlerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }
         });

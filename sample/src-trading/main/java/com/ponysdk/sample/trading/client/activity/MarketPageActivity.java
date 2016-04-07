@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.sample.trading.client.activity;
 
@@ -61,7 +83,7 @@ public class MarketPageActivity extends PageActivity {
         view.setWidget(scrollPanel);
 
         final List<String> asList = Arrays.asList("EURUSD", "USDEUR", "EURAUD");
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1; i++) {
             for (final String currency : asList) {
                 final PFlowPanel box = new PFlowPanel();
                 box.addStyleName("widget");
@@ -72,6 +94,7 @@ public class MarketPageActivity extends PageActivity {
         }
 
         final TradingServiceImpl t = new TradingServiceImpl();
+        t.start();
     }
 
     @Override
@@ -82,8 +105,7 @@ public class MarketPageActivity extends PageActivity {
     protected void onLeavingPage() {
     }
 
-    private PWidget buildFXBox(PFlowPanel box, final String currency) {
-
+    private PWidget buildFXBox(final PFlowPanel box, final String currency) {
         final PFlowPanel background = new PFlowPanel();
         background.addStyleName("background");
         box.add(background);
@@ -107,7 +129,9 @@ public class MarketPageActivity extends PageActivity {
 
         final PHTML buy = new PHTML("<div></div>");
         buy.addStyleName("buy");
-        buy.addClickHandler(clickEvent -> PNotificationManager.showHumanizedNotification("Buy clicked!"));
+        buy.addClickHandler(clickEvent -> {
+            PNotificationManager.showHumanizedNotification("Buy clicked!");
+        });
         box.add(buy);
 
         final PLabel buyPipHead = new PLabel("buy");

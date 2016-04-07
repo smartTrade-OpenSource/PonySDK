@@ -29,6 +29,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -40,10 +41,14 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new MySplitLayoutPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
+
         this.uiService = uiService;
+    }
+
+    @Override
+    protected MySplitLayoutPanel createUIObject() {
+        return new MySplitLayoutPanel();
     }
 
     @Override
@@ -73,7 +78,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
         if (HandlerModel.HANDLER_RESIZE_HANDLER.equals(handlerModel)) {
             cast().resizeHandler = true;
-            cast().addInstruction = instruction;
+            cast().objectId = getObjectID();
             cast().uiService = uiService;
         } else {
             super.addHandler(buffer, handlerModel, uiService);
@@ -91,7 +96,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
         protected boolean resizeHandler = false;
         protected UIService uiService = null;
-        protected PTInstruction addInstruction = null;
+        protected int objectId = -1;
 
         @Override
         public void onResize() {
@@ -131,10 +136,10 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 }
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(addInstruction.getObjectID());
+                    eventInstruction.setObjectID(objectId);
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(HandlerModel.HANDLER_RESIZE_HANDLER);
-                    eventInstruction.put(Model.VALUE.getValue(), jsonArray);
+                    eventInstruction.put(Model.VALUE, jsonArray);
                     uiService.sendDataToServer(eventInstruction);
                 }
 

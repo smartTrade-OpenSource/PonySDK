@@ -41,6 +41,15 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     private Object nativeObject;
 
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        this.uiObject = createUIObject();
+        this.objectID = objectId;
+        uiService.registerUIObject(this.objectID, uiObject);
+    }
+
+    protected abstract T createUIObject();
+
     public T cast() {
         return uiObject;
     }
@@ -117,7 +126,6 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             sendToNative(String.valueOf(objectID), nativeObject, object.getJavaScriptObject());
             return true;
         }
-
         return super.update(buffer, binaryModel);
     }
 

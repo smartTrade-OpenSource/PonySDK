@@ -32,13 +32,19 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTElement extends PTComplexPanel<HTMLPanel> {
 
     private static final String EMPTY = "";
+    private String tag;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         // Model.TAG
-        this.uiObject = new HTMLPanel(buffer.getBinaryModel().getStringValue(), EMPTY);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        tag = buffer.getBinaryModel().getStringValue();
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected HTMLPanel createUIObject() {
+        return new HTMLPanel(tag, EMPTY);
     }
 
     @Override

@@ -17,12 +17,20 @@ public enum HandlerModel {
     HANDLER_STRING_SELECTION_HANDLER,
     HANDLER_STREAM_REQUEST_HANDLER,
     HANDLER_SHOW_RANGE,
+    HANDLER_SUBMIT_COMPLETE_HANDLER,
+    HANDLER_CLOSE_HANDLER,
+    HANDLER_OPEN_HANDLER,
+    HANDLER_SCHEDULER,
     HANDLER_KEY_SCHEDULER, // Not used ?
     HANDLER_KEY_RESIZE_HANDLER, // Not used ?
     HANDLER_KEY, // Not used ?
     HANDLER_KEY_COMMAND; // Not used ?;
 
-    public short getValue() {
-        return (short) ordinal();
+    public String toStringValue() {
+        return String.valueOf(ordinal());
+    }
+
+    public byte getValue() {
+        return (byte) ordinal();
     }
 }

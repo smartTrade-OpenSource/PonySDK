@@ -26,7 +26,6 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
@@ -36,15 +35,19 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new VerticalPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected VerticalPanel createUIObject() {
+        return new VerticalPanel();
     }
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
-        uiObject.insert(asWidget(ptObject), buffer.getInt(Model.INDEX));
+        final BinaryModel model = buffer.getBinaryModel();
+        if (Model.INDEX.equals(model)) {
+            uiObject.insert(asWidget(ptObject), model.getIntValue());
+        } else {
+            buffer.rewind(model);
+            super.add(buffer, ptObject);
+        }
     }
 
     @Override

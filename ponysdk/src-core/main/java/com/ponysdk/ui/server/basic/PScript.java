@@ -176,17 +176,17 @@ public abstract class PScript extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.ERROR_MSG.getValue())) {
+        if (instruction.containsKey(Model.ERROR_MSG.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.getValue()).longValue());
+                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.toStringValue()).longValue());
             if (callback != null) {
-                callback.onFailure(instruction.getString(Model.ERROR_MSG.getValue()));
+                callback.onFailure(instruction.getString(Model.ERROR_MSG.toStringValue()));
             }
-        } else if (instruction.containsKey(Model.RESULT.getValue())) {
+        } else if (instruction.containsKey(Model.RESULT.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.getValue()).longValue());
+                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.toStringValue()).longValue());
             if (callback != null) {
-                callback.onSuccess(instruction.getString(Model.RESULT.getValue()));
+                callback.onSuccess(instruction.getString(Model.RESULT.toStringValue()));
             }
         } else {
             super.onClientData(instruction);

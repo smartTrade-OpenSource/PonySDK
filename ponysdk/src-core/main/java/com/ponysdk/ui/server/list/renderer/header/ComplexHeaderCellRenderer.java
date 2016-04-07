@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -51,7 +51,8 @@ import com.ponysdk.ui.server.list.Resetable;
 import com.ponysdk.ui.server.list.Sortable;
 import com.ponysdk.ui.server.list.Validable;
 
-public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
+public class ComplexHeaderCellRenderer
+        implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
     protected final FormField<?> formField;
     protected final String key;
@@ -67,7 +68,8 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
         this(caption, formField, key, null);
     }
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key,
+            final FilterListener filterListener) {
         this.formField = formField;
         this.key = key;
         builGUI(caption);
@@ -86,7 +88,7 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
                     filterListener.onFilterChange();
                 }
             }
-        }, PKeyUpEvent.TYPE);
+        });
 
         formField.addFormFieldListener(this);
     }
@@ -185,8 +187,10 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     @Override
     public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
-        if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error")) formField.asWidget().addStyleName("validation-error");
-        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error")) formField.asWidget().removeStyleName("validation-error");
+        if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error"))
+            formField.asWidget().addStyleName("validation-error");
+        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error"))
+            formField.asWidget().removeStyleName("validation-error");
     }
 
     @Override

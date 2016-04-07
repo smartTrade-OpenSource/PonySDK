@@ -145,8 +145,8 @@ public abstract class PScheduler extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_KEY_SCHEDULER.getValue())) {
-            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getValue()).longValue();
+        if (instruction.containsKey(HandlerModel.HANDLER_KEY_SCHEDULER.toStringValue())) {
+            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.toStringValue()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null)
                 return;
@@ -156,8 +156,8 @@ public abstract class PScheduler extends PObject {
                 cancelScheduleCommand(cmdID);
             } else {
                 // Re-schedule in fixed delay mode
-                if (instruction.containsKey(Model.FIXDELAY.getValue())) {
-                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.getValue()));
+                if (instruction.containsKey(Model.FIXDELAY.toStringValue())) {
+                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.toStringValue()));
                 }
             }
         } else {

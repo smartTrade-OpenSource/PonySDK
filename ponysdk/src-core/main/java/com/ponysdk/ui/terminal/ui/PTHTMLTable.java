@@ -33,7 +33,7 @@ import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class PTHTMLTable extends PTPanel<HTMLTable> {
+public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
@@ -107,7 +107,7 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
             uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, binaryModel.getStringValue());
             return true;
         }
-        if (Model.CELL_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (Model.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             // Model.ROW
             final int cellRow = buffer.getBinaryModel().getIntValue();
             // Model.COLUMN
@@ -117,7 +117,7 @@ public class PTHTMLTable extends PTPanel<HTMLTable> {
             uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
             return true;
         }
-        if (Model.CELL_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (Model.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             // Model.ROW
             final int cellRow = buffer.getBinaryModel().getIntValue();
             // Model.COLUMN

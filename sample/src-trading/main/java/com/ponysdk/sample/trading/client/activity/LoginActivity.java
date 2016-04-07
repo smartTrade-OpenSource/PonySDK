@@ -32,8 +32,6 @@ import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
 import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 
@@ -58,14 +56,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
         view.getPasswordTextBox().ensureDebugId("password");
         view.getLoginButton().ensureDebugId("signin");
 
-        view.addLoginClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                doLogin();
-            }
-
-        });
+        view.addLoginClickHandler(clickEvent -> doLogin());
 
         view.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
 
@@ -73,7 +64,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
             public void onKeyPress(final PKeyPressEvent keyPressEvent) {
                 doLogin();
             }
-        }, PKeyPressEvent.TYPE);
+        });
     }
 
     private void doLogin() {

@@ -42,8 +42,10 @@ import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
+import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
@@ -83,8 +85,18 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     }
 
     @Override
+    public HandlerRegistration addKeyUpHandler(final PKeyUpFilterHandler handler) {
+        return addDomHandler(handler);
+    }
+
+    @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addKeyPressHandler(final PKeyPressFilterHandler handler) {
+        return addDomHandler(handler);
     }
 
     @Override

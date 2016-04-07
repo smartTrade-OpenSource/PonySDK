@@ -68,6 +68,7 @@ public class Selector<T> implements SelectorViewListener, SelectableListener, Re
                 }
                 numberOfSelectedItems = fullSize;
                 break;
+            case PARTIAL:
             default:
                 break;
         }

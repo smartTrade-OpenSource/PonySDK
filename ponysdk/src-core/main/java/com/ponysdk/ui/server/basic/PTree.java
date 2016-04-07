@@ -67,6 +67,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     private PTreeItem curSelection;
 
     public PTree() {
+        init();
         root = new PTreeItem(true);
         root.setTree(this);
     }
@@ -144,9 +145,9 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_SELECTION_HANDLER.getValue())) {
-            final PTreeItem treeItem = UIContext.get()
-                    .getObject(instruction.getJsonNumber(HandlerModel.HANDLER_SELECTION_HANDLER.getValue()).intValue());
+        final String handlerSelection = HandlerModel.HANDLER_SELECTION_HANDLER.toStringValue();
+        if (instruction.containsKey(handlerSelection)) {
+            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(handlerSelection).intValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);

@@ -74,9 +74,10 @@ public class PStackLayoutPanel extends PComposite
     private final PUnit unit;
 
     public PStackLayoutPanel(final PUnit unit) {
+        super();
         this.unit = unit;
         init();
-        initWidget(new PLayoutPanel());
+        //        initWidget(new PLayoutPanel());
     }
 
     @Override

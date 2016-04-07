@@ -71,6 +71,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public PDockLayoutPanel(final PUnit unit) {
+        super();
         this.unit = unit;
         init();
     }

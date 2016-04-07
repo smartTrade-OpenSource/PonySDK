@@ -61,103 +61,103 @@ import com.ponysdk.ui.terminal.model.Model;
  * </ul>
  */
 public class PLabel extends PWidget
-		implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
+        implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
-	String text;
+    String text;
 
-	public PLabel() {
-		super();
-		init();
-	}
+    public PLabel() {
+        super();
+        init();
+    }
 
-	PLabel(boolean init) {
-		if (init)
-			init();
-	}
+    PLabel(final boolean init) {
+        if (init)
+            init();
+    }
 
-	public PLabel(final String text) {
-		super();
-		this.text = text;
-		init();
-	}
+    public PLabel(final String text) {
+        super();
+        this.text = text;
+        init();
+    }
 
-	@Override
-	protected void enrichOnInit(Parser parser) {
-		super.enrichOnInit(parser);
-		parser.parse(Model.TEXT, this.text);
-	}
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (this.text != null) parser.parse(Model.TEXT, this.text);
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.LABEL;
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.LABEL;
+    }
 
-	@Override
-	public String getText() {
-		return text;
-	}
+    @Override
+    public String getText() {
+        return text;
+    }
 
-	@Override
-	public void setText(final String text) {
-		if (Objects.equals(this.text, text))
-			return;
-		this.text = text;
-		saveUpdate(Model.TEXT, this.text);
-	}
+    @Override
+    public void setText(final String text) {
+        if (Objects.equals(this.text, text))
+            return;
+        this.text = text;
+        saveUpdate(Model.TEXT, this.text);
+    }
 
-	@Override
-	public HandlerRegistration addClickHandler(final PClickHandler handler) {
-		return addDomHandler(handler, PClickEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addClickHandler(final PClickHandler handler) {
+        return addDomHandler(handler, PClickEvent.TYPE);
+    }
 
-	@Override
-	public Collection<PClickHandler> getClickHandlers() {
-		return getHandlerSet(PClickEvent.TYPE, this);
-	}
+    @Override
+    public Collection<PClickHandler> getClickHandlers() {
+        return getHandlerSet(PClickEvent.TYPE, this);
+    }
 
-	@Override
-	public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
-		return addDomHandler(handler, PDoubleClickEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
+        return addDomHandler(handler, PDoubleClickEvent.TYPE);
+    }
 
-	@Override
-	public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
-		return getHandlerSet(PDoubleClickEvent.TYPE, this);
-	}
+    @Override
+    public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
+        return getHandlerSet(PDoubleClickEvent.TYPE, this);
+    }
 
-	@Override
-	public HandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
-		return addDomHandler(handler, PDragEndEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
+        return addDomHandler(handler, PDragEndEvent.TYPE);
+    }
 
-	@Override
-	public HandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
-		return addDomHandler(handler, PDragEnterEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
+        return addDomHandler(handler, PDragEnterEvent.TYPE);
+    }
 
-	@Override
-	public HandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
-		return addDomHandler(handler, PDragStartEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
+        return addDomHandler(handler, PDragStartEvent.TYPE);
+    }
 
-	@Override
-	public HandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
-		return addDomHandler(handler, PDragLeaveEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
+        return addDomHandler(handler, PDragLeaveEvent.TYPE);
+    }
 
-	@Override
-	public HandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
-		return addDomHandler(handler, PDragOverEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
+        return addDomHandler(handler, PDragOverEvent.TYPE);
+    }
 
-	@Override
-	public HandlerRegistration addDropHandler(final PDropHandler handler) {
-		return addDomHandler(handler, PDropEvent.TYPE);
-	}
+    @Override
+    public HandlerRegistration addDropHandler(final PDropHandler handler) {
+        return addDomHandler(handler, PDropEvent.TYPE);
+    }
 
-	@Override
-	public String toString() {
-		return toString("text=" + text);
-	}
+    @Override
+    public String toString() {
+        return toString("text=" + text);
+    }
 
 }

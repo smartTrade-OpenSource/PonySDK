@@ -27,5 +27,6 @@
 	<classpathentry kind="lib" path="libs/jetty/websocket-api.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-beans.jar"/>
 	<classpathentry kind="lib" path="libs/spring/spring-context.jar"/>
+	<classpathentry kind="lib" path="libs/jetty/websocket-common.jar"/>
 	<classpathentry kind="output" path="bin/classes/main"/>
 </classpath>

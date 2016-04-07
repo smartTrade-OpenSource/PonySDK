@@ -37,6 +37,9 @@ import javax.servlet.ServletException;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
@@ -53,17 +56,18 @@ import com.ponysdk.ui.terminal.model.Model;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
-    protected static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
 
+    private static final int NUMBER_OF_BUFFERS = 50;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
     public int maxIdleTime = 1000000;
 
     private AbstractApplicationManager applicationManager;
 
-    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(50);
+    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(NUMBER_OF_BUFFERS);
 
     public class Buffer {
 
@@ -94,15 +98,20 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         log.info("Initializing Buffer allocation ...");
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
             buffers.add(new Buffer());
         }
 
-        log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * 50);
+        log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * buffers.size());
     }
 
     @Override
     public void configure(final WebSocketServletFactory factory) {
+        // Add compression capabilities
+        factory.getExtensionFactory().register("deflate-frame", DeflateFrameExtension.class);
+        factory.getExtensionFactory().register("permessage-deflate", PerMessageDeflateExtension.class);
+        factory.getExtensionFactory().register("x-webkit-deflate-frame", XWebkitDeflateFrameExtension.class);
+
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((final ServletUpgradeRequest req, final ServletUpgradeResponse resp) -> new JettyWebSocket(req, resp));
     }
@@ -151,7 +160,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 log.info("Creating a new application, {}", application.toString());
             } else {
                 // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
-                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
                 // reloadedViewID = jsonNumber.longValue();
                 // }
                 // log.info("Reloading application {} {}", reloadedViewID, context);
@@ -187,11 +196,16 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 //onBeforeMessageReceived(text);
                 try {
                     context.getUIContext().notifyMessageReceived();
-                    request.setText(text);
 
-                    if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+                    if (!Model.HEARTBEAT.toStringValue().equals(text)) {
+                        request.setText(text);
 
-                    applicationManager.process(context);
+                        if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+
+                        applicationManager.process(context);
+                    } else {
+                        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal");
+                    }
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {

@@ -212,24 +212,25 @@ public class UIContext {
     }
 
     public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.TYPE_CLOSE.getValue())) {
+        if (jsonObject.containsKey(Model.TYPE_CLOSE.toStringValue())) {
             destroy();
-        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getValue())) {
+        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.toStringValue())) {
             if (history != null) {
-                history.fireHistoryChanged(jsonObject.getString(Model.TYPE_HISTORY.getValue()));
+                history.fireHistoryChanged(jsonObject.getString(Model.TYPE_HISTORY.toStringValue()));
             }
-        } else if (jsonObject.containsKey(Model.ERROR_MSG.getValue())) {
-            log.error(jsonObject.getString(Model.ERROR_MSG.getValue()));
+        } else if (jsonObject.containsKey(Model.ERROR_MSG.toStringValue())) {
+            log.error(jsonObject.getString(Model.ERROR_MSG.toStringValue()));
         } else {
-            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
+            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.toStringValue()).intValue();
 
             final PObject object = weakReferences.get(objectID);
 
             if (object == null) {
                 log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
-                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getValue())) {
-                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getValue()).intValue();
+                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.toStringValue())) {
+                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.toStringValue())
+                            .intValue();
                     final PObject gcObject = weakReferences.get(parentObjectID);
                     log.warn("" + gcObject);
                 }
@@ -237,7 +238,7 @@ public class UIContext {
                 return;
             }
 
-            // if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
+            // if (jsonObject.containsKey(Model.TYPE_EVENT.toStringValue())) {
             if (terminalDataReceiver != null) {
                 terminalDataReceiver.onDataReceived(object, jsonObject);
             }

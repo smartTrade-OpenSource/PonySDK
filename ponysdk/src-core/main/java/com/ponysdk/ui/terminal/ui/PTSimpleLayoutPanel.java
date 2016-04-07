@@ -24,15 +24,11 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTSimpleLayoutPanel extends PTSimplePanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new SimpleLayoutPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected SimpleLayoutPanel createUIObject() {
+        return new SimpleLayoutPanel();
     }
 }

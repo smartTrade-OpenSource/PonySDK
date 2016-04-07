@@ -27,6 +27,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -35,10 +36,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new MenuItem("?", (Command) null);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected MenuItem createUIObject() {
+        return new MenuItem("?", (Command) null);
     }
 
     @Override

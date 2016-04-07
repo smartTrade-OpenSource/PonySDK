@@ -24,18 +24,15 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Anchor;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new Anchor();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected Anchor createUIObject() {
+        return new Anchor();
     }
 
     @Override

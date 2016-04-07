@@ -76,8 +76,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TEXT, this.text);
-        parser.parse(Model.HREF, this.href);
+        if (this.text != null) parser.parse(Model.TEXT, this.text);
+        if (this.href != null) parser.parse(Model.HREF, this.href);
     }
 
     @Override

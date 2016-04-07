@@ -31,6 +31,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -39,10 +40,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new ListBox();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected ListBox createUIObject() {
+        return new ListBox();
     }
 
     @Override
@@ -92,9 +91,13 @@ public class PTListBox extends PTFocusWidget<ListBox> {
         }
         if (Model.ITEM_INSERTED.equals(binaryModel.getModel())) {
             final String item = binaryModel.getStringValue();
-            // Model.INDEX
-            final int index = buffer.getBinaryModel().getIntValue();
-            uiObject.insertItem(item, index);
+            final BinaryModel indexModel = buffer.getBinaryModel();
+            if (Model.INDEX.equals(indexModel.getModel())) {
+                uiObject.insertItem(item, indexModel.getIntValue());
+            } else {
+                buffer.rewind(indexModel);
+                uiObject.addItem(item);
+            }
             return true;
         }
         if (Model.ITEM_ADD.equals(binaryModel.getModel())) {
@@ -124,8 +127,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             return true;
         }
         if (Model.ITEM_REMOVED.equals(binaryModel.getModel())) {
-            // Model.INDEX
-            uiObject.removeItem(buffer.getBinaryModel().getIntValue());
+            uiObject.removeItem(binaryModel.getIntValue());
             return true;
         }
         if (Model.SELECTED.equals(binaryModel.getModel())) {

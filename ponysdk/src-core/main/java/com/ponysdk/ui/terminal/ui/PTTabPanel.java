@@ -27,10 +27,10 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -42,31 +42,42 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new TabPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
 
         this.uiService = uiService;
     }
 
     @Override
+    protected TabPanel createUIObject() {
+        return new TabPanel();
+    }
+
+    @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
-        final TabLayoutPanel tabPanel = uiObject;
-
-        // Model.BEFORE_INDEX
-        final int beforeIndex = buffer.getBinaryModel().getIntValue();
 
         final BinaryModel binaryModel = buffer.getBinaryModel();
         if (Model.TAB_TEXT.equals(binaryModel.getModel())) {
-            tabPanel.insert(w, binaryModel.getStringValue(), beforeIndex);
+            final BinaryModel beforeIndexModel = buffer.getBinaryModel();
+            if (Model.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+                uiObject.insert(w, binaryModel.getStringValue(), beforeIndexModel.getIntValue());
+            } else {
+                buffer.rewind(beforeIndexModel);
+                uiObject.add(w, binaryModel.getStringValue());
+            }
         } else if (Model.TAB_WIDGET.equals(binaryModel.getModel())) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(binaryModel.getIntValue());
-            tabPanel.insert(w, ptWidget.cast(), beforeIndex);
+            final BinaryModel beforeIndexModel = buffer.getBinaryModel();
+            if (Model.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+                uiObject.insert(w, ptWidget.cast(), beforeIndexModel.getIntValue());
+            } else {
+                buffer.rewind(beforeIndexModel);
+                uiObject.add(w, ptWidget.cast());
+            }
         }
 
-        if (tabPanel.getWidgetCount() == 1) {
-            tabPanel.selectTab(0);
+        if (uiObject.getWidgetCount() == 1) {
+            uiObject.selectTab(0);
         }
     }
 

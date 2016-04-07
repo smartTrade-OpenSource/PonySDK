@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal;
 
 public enum WidgetType {
+
     ROOT_LAYOUT_PANEL,
     ROOT_PANEL,
     DOCK_LAYOUT_PANEL,
@@ -80,7 +81,7 @@ public enum WidgetType {
     WINDOW,
     HEADER_PANEL;
 
-    public short getValue() {
-        return (short) ordinal();
+    public byte getValue() {
+        return (byte) ordinal();
     }
 }

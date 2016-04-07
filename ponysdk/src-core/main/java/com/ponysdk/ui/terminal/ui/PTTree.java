@@ -28,6 +28,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -36,10 +37,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTTree extends PTWidget<Tree> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new Tree();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected Tree createUIObject() {
+        return new Tree();
     }
 
     @Override

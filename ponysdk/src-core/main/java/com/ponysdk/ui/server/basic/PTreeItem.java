@@ -58,9 +58,7 @@ public class PTreeItem extends PObject {
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         parser.parse(Model.TEXT, html);
-
-        if (isRoot)
-            parser.parse(Model.ROOT, isRoot);
+        if (isRoot) parser.parse(Model.ROOT, isRoot);
     }
 
     private void setWidget() {
@@ -103,7 +101,7 @@ public class PTreeItem extends PObject {
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot) {
-            saveAdd(tree.getID(), ID, Model.ROOT, true);
+            saveAdd(tree.getID(), ID);
         }
         setWidget();
     }
@@ -124,7 +122,10 @@ public class PTreeItem extends PObject {
     }
 
     public PTreeItem addItem(final PTreeItem item) {
-        return insertItem(getChildCount(), item);
+        children.add(item);
+        item.setTree(tree);
+        saveAdd(item.getID(), ID);
+        return item;
     }
 
     public PTreeItem addItem(final String itemHtml) {

@@ -31,7 +31,9 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
@@ -119,7 +121,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
                 PTWindowManager.get().unregister(this);
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(objectID);
-                instruction.put(Model.HANDLER_CLOSE_HANDLER);
+                instruction.put(HandlerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(instruction);
             } else if (event.getType().equals("message")) {
                 final MessageEvent messageEvent = (MessageEvent) event;
@@ -127,7 +129,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
             } else if (event.getType().equals("onload")) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(objectID);
-                instruction.put(Model.HANDLER_OPEN_HANDLER);
+                instruction.put(HandlerModel.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(instruction);
             }
         }

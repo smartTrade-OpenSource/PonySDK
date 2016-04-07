@@ -8,31 +8,26 @@
  *============================================================================*/
 package com.ponysdk.ui.terminal.model;
 
+import com.google.gwt.json.client.JSONObject;
+
 /**
  * @author nvelin
  */
 public class BinaryModel {
 
+    public static final BinaryModel NULL = new BinaryModel(null, 0);
+
     private final Model model;
     private final int size;
 
     private boolean booleanValue;
-    private short shortValue;
     private byte byteValue;
+    private short shortValue;
     private int intValue;
     private long longValue;
     private double doubleValue;
     private String stringValue;
-
-    public BinaryModel(final Model key, final short shortValue, final int size) {
-        this(key, size);
-        this.shortValue = shortValue;
-    }
-
-    public BinaryModel(final Model key, final int intValue, final int size) {
-        this(key, size);
-        this.intValue = intValue;
-    }
+    private JSONObject jsonObject;
 
     public BinaryModel(final Model key, final boolean booleanValue, final int size) {
         this(key, size);
@@ -42,6 +37,16 @@ public class BinaryModel {
     public BinaryModel(final Model key, final byte byteValue, final int size) {
         this(key, size);
         this.byteValue = byteValue;
+    }
+
+    public BinaryModel(final Model key, final short shortValue, final int size) {
+        this(key, size);
+        this.shortValue = shortValue;
+    }
+
+    public BinaryModel(final Model key, final int intValue, final int size) {
+        this(key, size);
+        this.intValue = intValue;
     }
 
     public BinaryModel(final Model key, final long longValue, final int size) {
@@ -57,6 +62,11 @@ public class BinaryModel {
     public BinaryModel(final Model key, final String stringValue, final int size) {
         this(key, size);
         this.stringValue = stringValue;
+    }
+
+    public BinaryModel(final Model key, final JSONObject jsonObject, final int size) {
+        this(key, size);
+        this.jsonObject = jsonObject;
     }
 
     public BinaryModel(final Model key, final int size) {
@@ -96,13 +106,39 @@ public class BinaryModel {
         return stringValue;
     }
 
+    public JSONObject getJsonObject() {
+        return jsonObject;
+    }
+
     public int getSize() {
         return size;
     }
 
     @Override
     public String toString() {
-        return model + " => " + intValue;
+        if (model == null) return null;
+        switch (model.getTypeModel()) {
+            case NULL:
+                return String.valueOf(model);
+            case BOOLEAN:
+                return model + " => " + booleanValue;
+            case BYTE:
+                return model + " => " + byteValue;
+            case SHORT:
+                return model + " => " + shortValue;
+            case INTEGER:
+                return model + " => " + intValue;
+            case LONG:
+                return model + " => " + longValue;
+            case DOUBLE:
+                return model + " => " + doubleValue;
+            case STRING:
+                return model + " => " + stringValue;
+            case JSON_OBJECT:
+                return model + " => " + jsonObject;
+            default:
+                throw new IllegalArgumentException("No model type configured");
+        }
     }
 
 }

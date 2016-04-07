@@ -36,6 +36,7 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PFlexTable extends PHTMLTable {
 
     public PFlexTable() {
+        super();
         init();
         setCellFormatter(new PFlexCellFormatter());
     }

@@ -31,6 +31,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -39,13 +40,21 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     private UIService uiService;
+    private Unit unit;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new StackLayoutPanel(Unit.values()[buffer.getBinaryModel().getByteValue()]);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        // Model.UNIT
+        unit = Unit.values()[buffer.getBinaryModel().getByteValue()];
+
+        super.create(buffer, objectId, uiService);
+
         this.uiService = uiService;
+    }
+
+    @Override
+    protected StackLayoutPanel createUIObject() {
+        return new StackLayoutPanel(unit);
     }
 
     @Override

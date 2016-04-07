@@ -59,6 +59,8 @@ public class PFileUpload extends PWidget
     private boolean enabled = true;
 
     public PFileUpload() {
+        super();
+        init();
         saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
     }
 
@@ -69,13 +71,13 @@ public class PFileUpload extends PWidget
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.getValue())) {
-            final String fileName = jsonObject.getString(Model.FILE_NAME.getValue());
+        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
+            final String fileName = jsonObject.getString(Model.FILE_NAME.toStringValue());
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (jsonObject.containsKey(Model.HANDLER_SUBMIT_COMPLETE_HANDLER.getValue())) {
+        } else if (jsonObject.containsKey(HandlerModel.HANDLER_SUBMIT_COMPLETE_HANDLER.toStringValue())) {
             onSubmitComplete();
         } else {
             super.onClientData(jsonObject);

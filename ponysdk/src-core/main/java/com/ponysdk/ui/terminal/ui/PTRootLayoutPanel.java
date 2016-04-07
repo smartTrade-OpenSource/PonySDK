@@ -24,15 +24,11 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRootLayoutPanel extends PTLayoutPanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = RootLayoutPanel.get();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected RootLayoutPanel createUIObject() {
+        return RootLayoutPanel.get();
     }
 }

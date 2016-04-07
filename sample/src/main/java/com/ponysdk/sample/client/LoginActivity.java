@@ -56,7 +56,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
             public void onKeyPress(final PKeyPressEvent keyPressEvent) {
                 doLogin();
             }
-        }, PKeyPressEvent.TYPE);
+        });
 
         view.getLoginButton().addClickHandler(new PClickHandler() {
 

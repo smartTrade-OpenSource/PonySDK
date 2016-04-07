@@ -43,7 +43,7 @@ public abstract class PKeyPressFilterHandler implements PKeyPressHandler {
         }
 
         final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        jsonObjectBuilder.add(Model.KEY_FILTER.getValue(), builder.build());
+        jsonObjectBuilder.add(Model.KEY_FILTER.toStringValue(), builder.build());
 
         jsonObject = jsonObjectBuilder.build();
     }

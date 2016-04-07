@@ -31,18 +31,18 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
+    private String rootId;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.ROOT_ID
-        final String id = buffer.getBinaryModel().getStringValue();
+        rootId = buffer.getBinaryModel().getStringValue();
 
-        if (id != null) {
-            this.uiObject = com.google.gwt.user.client.ui.RootPanel.get(id);
-        } else {
-            this.uiObject = RootPanel.get();
-        }
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected RootPanel createUIObject() {
+        return rootId != null ? RootPanel.get(rootId) : RootPanel.get();
     }
 
     @Override

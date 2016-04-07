@@ -41,6 +41,10 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         init();
     }
 
+    public PButtonBase(final boolean init) {
+        if (init) init();
+    }
+
     public PButtonBase(final String text) {
         this.text = text;
         init();
@@ -49,7 +53,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TEXT, this.text);
+        if (this.text != null) parser.parse(Model.TEXT, this.text);
     }
 
     @Override

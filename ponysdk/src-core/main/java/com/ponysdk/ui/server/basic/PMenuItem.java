@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -75,10 +76,16 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     public PMenuItem(final String text, final boolean asHTML) {
-        if (asHTML)
-            setHTML(text);
-        else
-            setText(text);
+        if (asHTML) this.html = text;
+        else this.text = text;
+        init();
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (html != null) parser.parse(Model.HTML, html);
+        else parser.parse(Model.TEXT, text);
     }
 
     @Override
@@ -127,12 +134,13 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
+        final String handlerKeyKey = HandlerModel.HANDLER_KEY.toStringValue();
         String handlerKey = null;
-        if (event.containsKey(HandlerModel.HANDLER_KEY.getValue())) {
-            handlerKey = event.getString(HandlerModel.HANDLER_KEY.getValue());
+        if (event.containsKey(handlerKeyKey)) {
+            handlerKey = event.getString(handlerKeyKey);
         }
 
-        if (HandlerModel.HANDLER_KEY_COMMAND.getValue().equals(handlerKey)) {
+        if (HandlerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onClientData(event);

@@ -39,6 +39,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -140,7 +141,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 //
                 // @Override
                 // public void handleEvent(final Event event) {
-                // GWT.log("Coucou data received in window : " + event);
+                // GWT.log("data received in window : " + event);
                 // final MessageEvent messageEvent = (MessageEvent) event;
                 // uiBuilder.update(JSONParser.parseStrict((String)
                 // messageEvent.getData()).isObject());
@@ -225,8 +226,9 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                     log.log(Level.FINE, "Heart beat");
                 socketClient.getRequestBuilder().sendHeartbeat();
             } else if (type.getModel() == Model.APPLICATION_SEQ_NUM) {
-                final int seqNumValue = type.getIntValue();
                 uiBuilder.update(buffer);
+            } else {
+                log.severe("" + type.getModel());
             }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + message, e);

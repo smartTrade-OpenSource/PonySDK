@@ -25,7 +25,6 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -33,10 +32,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTScrollPanel extends PTSimplePanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new ScrollPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected ScrollPanel createUIObject() {
+        return new ScrollPanel();
     }
 
     @Override

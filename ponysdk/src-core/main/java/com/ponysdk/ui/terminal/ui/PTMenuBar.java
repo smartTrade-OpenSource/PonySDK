@@ -31,12 +31,18 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
 
+    private boolean isVertical;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.MENU_BAR_IS_VERTICAL
-        this.uiObject = new MenuBar(buffer.getBinaryModel().getBooleanValue());
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        isVertical = buffer.getBinaryModel().getBooleanValue();
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected MenuBar createUIObject() {
+        return new MenuBar(isVertical);
     }
 
     @Override
@@ -45,11 +51,22 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
-            // Model.BEFORE_INDEX
-            menuBar.insertItem(menuItem.cast(), buffer.getBinaryModel().getIntValue());
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+            if (Model.BEFORE_INDEX.equals(binaryModel.getModel())) {
+                menuBar.insertItem(menuItem.cast(), binaryModel.getIntValue());
+            } else {
+                buffer.rewind(binaryModel);
+                menuBar.addItem(menuItem.cast());
+            }
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
-            menuBar.addSeparator(menuItem.cast());
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+            if (Model.BEFORE_INDEX.equals(binaryModel.getModel())) {
+                menuBar.insertSeparator(menuItem.cast(), binaryModel.getIntValue());
+            } else {
+                buffer.rewind(binaryModel);
+                menuBar.addSeparator(menuItem.cast());
+            }
         }
     }
 

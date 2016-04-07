@@ -33,8 +33,9 @@ import com.ponysdk.ui.terminal.model.Model;
 
 public class PCookies {
 
+    private static final int ID = 0; // reserved
+
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<>();
-    private final int objectID = 0; // reserved
 
     public PCookies() {
     }
@@ -50,8 +51,8 @@ public class PCookies {
     public String removeCookie(final String name) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, objectID);
-        parser.parse(Model.REMOVE, name);
+        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(Model.REMOVE_COOKIE, name);
         parser.endObject();
 
         return cachedCookies.remove(name);
@@ -66,8 +67,8 @@ public class PCookies {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, objectID);
-        parser.parse(Model.ADD, name);
+        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(Model.ADD_COOKIE, name);
         parser.parse(Model.VALUE, value);
         if (expires != null) {
             parser.parse(Model.COOKIE_EXPIRE, expires.getTime());

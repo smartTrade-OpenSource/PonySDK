@@ -17,8 +17,6 @@ public class TradingServiceImpl /** implements TradingService **/
     private final List<MarketData> marketDatas = new ArrayList<MarketData>();
 
     public TradingServiceImpl() {
-        final Random rdm = new Random();
-
         marketDatas.add(new MarketData("EurUSD", 0, 0));
         marketDatas.add(new MarketData("EurUSD1", 0, 0));
         marketDatas.add(new MarketData("EurUSD2", 0, 0));
@@ -34,7 +32,16 @@ public class TradingServiceImpl /** implements TradingService **/
         marketDatas.add(new MarketData("EurNY", 0, 0));
         marketDatas.add(new MarketData("EurNY1", 0, 0));
         marketDatas.add(new MarketData("EurNY2", 0, 0));
+    }
 
+    //
+    // @Override
+    // public List<MarketData> findCurrencies() throws Exception {
+    // return marketDatas;
+    // }
+
+    public void start() {
+        final Random rdm = new Random();
         final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -49,10 +56,5 @@ public class TradingServiceImpl /** implements TradingService **/
             }
         }, 1000, 200);
     }
-    //
-    // @Override
-    // public List<MarketData> findCurrencies() throws Exception {
-    // return marketDatas;
-    // }
 
 }

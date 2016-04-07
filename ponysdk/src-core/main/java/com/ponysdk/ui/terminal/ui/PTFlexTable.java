@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -33,10 +34,14 @@ public class PTFlexTable extends PTHTMLTable {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new FlexTable();
+        super.create(buffer, objectId, uiService);
+
         this.uiObject.addStyleName("pony-PFlexTable");
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    }
+
+    @Override
+    protected HTMLTable createUIObject() {
+        return new FlexTable();
     }
 
     @Override

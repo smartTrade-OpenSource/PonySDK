@@ -35,14 +35,21 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
     private UIService uiService;
+    private Unit unit;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         // Model.UNIT
-        this.uiObject = new DockLayoutPanel(Unit.values()[buffer.getBinaryModel().getByteValue()]);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        unit = Unit.values()[buffer.getBinaryModel().getByteValue()];
+
+        super.create(buffer, objectId, uiService);
+
         this.uiService = uiService;
+    }
+
+    @Override
+    protected DockLayoutPanel createUIObject() {
+        return new DockLayoutPanel(unit);
     }
 
     @Override

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -34,8 +34,8 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 /**
- * POptionPane makes it easy to pop up a standard dialog box that prompts users for a value or informs them of
- * something.
+ * POptionPane makes it easy to pop up a standard dialog box that prompts users for a value or
+ * informs them of something.
  */
 public class POptionPane {
 
@@ -53,15 +53,18 @@ public class POptionPane {
         return showConfirmDialog(handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType) {
         return showConfirmDialog(handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType, final PMessageType messageType) {
         return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
+    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType, final PMessageType messageType, final String... options) {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
@@ -80,8 +83,7 @@ public class POptionPane {
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {
-            final PButton button = new PButton();
-            button.setText(option);
+            final PButton button = new PButton(option);
             button.ensureDebugId("optionpane[" + option + "]");
             button.addClickHandler(new PClickHandler() {
 
@@ -126,7 +128,11 @@ public class POptionPane {
     }
 
     public enum POption {
-        CANCEL_OPTION("CANCEL"), CLOSED_OPTION("CLOSED"), NO_OPTION("NO"), OK_OPTION("OK"), YES_OPTION("YES");
+        CANCEL_OPTION("CANCEL"),
+        CLOSED_OPTION("CLOSED"),
+        NO_OPTION("NO"),
+        OK_OPTION("OK"),
+        YES_OPTION("YES");
 
         private final String name;
 
@@ -144,11 +150,18 @@ public class POptionPane {
     }
 
     public enum POptionType {
-        DEFAULT_OPTION, OK_CANCEL_OPTION, YES_NO_CANCEL_OPTION, YES_NO_OPTION
+        DEFAULT_OPTION,
+        OK_CANCEL_OPTION,
+        YES_NO_CANCEL_OPTION,
+        YES_NO_OPTION
     }
 
     public enum PMessageType {
-        PLAIN_MESSAGE(""), ERROR_MESSAGE("Error"), INFORMATION_MESSAGE("Info"), WARNING_MESSAGE("Warning"), QUESTION_MESSAGE("Question");
+        PLAIN_MESSAGE(""),
+        ERROR_MESSAGE("Error"),
+        INFORMATION_MESSAGE("Info"),
+        WARNING_MESSAGE("Warning"),
+        QUESTION_MESSAGE("Question");
 
         private final String name;
 

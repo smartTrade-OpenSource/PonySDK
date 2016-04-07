@@ -50,7 +50,16 @@ public abstract class PComplexPanel extends PPanel {
 
     @Override
     public void add(final PWidget child) {
-        insert(child, children != null ? children.size() : 0);
+        assertNotMe(child);
+
+        child.removeFromParent();
+
+        if (children == null) children = new PWidgetCollection(this);
+
+        children.add(child);
+        adopt(child);
+
+        saveAdd(child.getID(), ID);
     }
 
     public void insert(final PWidget child, final int beforeIndex) {

@@ -24,14 +24,16 @@
 package com.ponysdk.ui.server.basic.event;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
+import com.ponysdk.ui.terminal.model.Model;
 
 public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
 
-    private final JsonArray jsonObject;
+    private final JsonObject jsonObject;
 
     public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
@@ -40,10 +42,13 @@ public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
             builder.add(code.getCode());
         }
 
-        jsonObject = builder.build();
+        final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        jsonObjectBuilder.add(Model.KEY_FILTER.toStringValue(), builder.build());
+
+        jsonObject = jsonObjectBuilder.build();
     }
 
-    public JsonArray asJsonObject() {
+    public JsonObject asJsonObject() {
         return jsonObject;
     }
 

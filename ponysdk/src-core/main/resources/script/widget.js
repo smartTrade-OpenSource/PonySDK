@@ -10,14 +10,14 @@ var Widget = function(pony, params) {
 		this.element = params.widgetElement;
 	}
 	this.options = {};
-	this.initializated = false;
+	this.initialized = false;
 };
 
 Widget.prototype.onInit = function() {
-    if(!this.initializated ) {
+    if(!this.initialized) {
         this.init();
     }
-    this.initializated = true;
+    this.initialized = true;
 };
 
 /**	 @abstract  */
@@ -36,7 +36,7 @@ Widget.prototype.initDom = function() {
 
 Widget.prototype.onAttach = function(attached) {
     this.onInitDom();
-	pony.sendDataToServer(this.id, { attached: attached });
+	this.sendDataToServer({ attach: attached });
 	if( attached === false ) this.onDetached();
 };
 
@@ -83,7 +83,7 @@ Widget.prototype.update = function( d ) {
 	if(!(methodName in  this) || typeof this[methodName] !== 'function')
 		throw  "[" + this.name + "] Called method '" + methodName + "' that does not exist";
 
-	if(!this.initializated)
+	if(!this.initialized)
 		throw "[" + this.name + "] Tried to call method '" + methodName + "' before init()";
 
 	try {

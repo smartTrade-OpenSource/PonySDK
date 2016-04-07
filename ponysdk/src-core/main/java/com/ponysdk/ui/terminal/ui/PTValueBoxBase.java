@@ -27,12 +27,22 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<W> {
+public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFocusWidget<T> {
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (Model.SELECT_ALL.equals(binaryModel.getModel())) {
+            uiObject.selectAll();
+            return true;
+        }
+        return super.update(buffer, binaryModel);
+    }
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
@@ -50,14 +60,5 @@ public class PTValueBoxBase<W extends ValueBoxBase<T>, T> extends PTFocusWidget<
         } else {
             super.addHandler(buffer, handlerModel, uiService);
         }
-    }
-
-    @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.SELECT_ALL.equals(binaryModel.getModel())) {
-            uiObject.selectAll();
-            return true;
-        }
-        return super.update(buffer, binaryModel);
     }
 }

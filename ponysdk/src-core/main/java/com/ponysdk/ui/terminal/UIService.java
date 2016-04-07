@@ -29,6 +29,7 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.ui.PTObject;
 
 public interface UIService {
@@ -38,6 +39,8 @@ public interface UIService {
     public void stackInstrution(PTInstruction instruction);
 
     public void sendDataToServer(PTInstruction instruction);
+
+    public void sendDataToServer(ReaderBuffer buffer);
 
     public void sendDataToServer(Widget source, PTInstruction instruction);
 

@@ -24,7 +24,6 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.TextBox;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -35,10 +34,8 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
     private TextBoxMaskedDecorator maskDecorator;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new TextBox();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected TextBox createUIObject() {
+        return new TextBox();
     }
 
     @Override

@@ -1,10 +1,6 @@
 
 package com.ponysdk.ui.terminal.socket;
 
-import com.google.gwt.json.client.JSONNull;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.request.WebSocketRequestBuilder;
 
@@ -17,6 +13,24 @@ import elemental.html.WebSocket;
 import elemental.html.Window;
 
 public class WebSocketClient2 implements EventListener {
+
+    private static final String ARRAYBUFFER_TYPE = "arraybuffer";
+
+    private static enum EventType {
+        OPEN("open"),
+        CLOSE("close"),
+        MESSAGE("message");
+
+        private String text;
+
+        private EventType(final String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
 
     private final WebSocket webSocket;
 
@@ -39,7 +53,7 @@ public class WebSocketClient2 implements EventListener {
         webSocket.setOnerror(this);
         webSocket.setOnmessage(this);
         webSocket.setOnopen(this);
-        webSocket.setBinaryType("arraybuffer");
+        webSocket.setBinaryType(ARRAYBUFFER_TYPE);
     }
 
     public void send(final String message) {
@@ -57,12 +71,12 @@ public class WebSocketClient2 implements EventListener {
     @Override
     public void handleEvent(final Event event) {
         if (event.getSrcElement() == webSocket) {
-            if (event.getType().equals("open")) {
+            if (EventType.OPEN.getText().equals(event.getType())) {
                 requestBuilder = new WebSocketRequestBuilder(this, null);
                 callback.connected();
-            } else if (event.getType().equals("close")) {
+            } else if (EventType.CLOSE.getText().equals(event.getType())) {
                 callback.disconnected();
-            } else if (event.getType().equals("message")) {
+            } else if (EventType.MESSAGE.getText().equals(event.getType())) {
                 final ArrayBuffer arrayBuffer = (ArrayBuffer) ((MessageEvent) event).getData();
                 callback.message(arrayBuffer);
             }
@@ -70,10 +84,15 @@ public class WebSocketClient2 implements EventListener {
     }
 
     public void sendHeartbeat() {
-        final JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Model.HEARTBEAT.toStringValue(), JSONNull.getInstance());
-        jsonObject.put(Model.APPLICATION_VIEW_ID.toStringValue(), new JSONNumber(UIBuilder.sessionID));
-        webSocket.send(jsonObject.toString());
+        // Only send one character, no need a json message
+        /*
+         * final JSONObject jsonObject = new JSONObject();
+         * jsonObject.put(Model.HEARTBEAT.toStringValue(), JSONNull.getInstance());
+         * jsonObject.put(Model.APPLICATION_VIEW_ID.toStringValue(), new
+         * JSONNumber(UIBuilder.sessionID));
+         * webSocket.send(jsonObject.toString());
+         */
+        webSocket.send(Model.HEARTBEAT.toStringValue());
     }
 
 }

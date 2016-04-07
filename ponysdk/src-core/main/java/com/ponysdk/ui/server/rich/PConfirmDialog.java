@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -41,21 +41,23 @@ public class PConfirmDialog extends PDialogBox {
     private PButton okButton;
     private PButton cancelButton;
 
-    public static PDialogBox show(final String windowCaption, final String message, final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PDialogBox show(final String windowCaption, final String message, final String okCaption, final String cancelCaption,
+            final PConfirmDialogHandler confirmDialogHandler) {
         return show(windowCaption, new PLabel(message), okCaption, cancelCaption, confirmDialogHandler);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption,
+            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
         confirmDialog.setPopupPositionAndShow(new PPositionCallback() {
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                 if (offsetHeight > windowHeight) {
-                    content.setHeight((windowHeight - 100) + "px");
-                    confirmDialog.setHeight((windowHeight - 100) + "px");
+                    content.setHeight(windowHeight - 100 + "px");
+                    confirmDialog.setHeight(windowHeight - 100 + "px");
                 }
-                confirmDialog.setWidth((offsetWidth + 35) + "px");
+                confirmDialog.setWidth(offsetWidth + 35 + "px");
                 confirmDialog.center();
             }
         });
@@ -63,7 +65,8 @@ public class PConfirmDialog extends PDialogBox {
 
     }
 
-    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption,
+            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = new PConfirmDialog();
         confirmDialog.setStyleName(PonySDKTheme.DIALOGBOX);
         confirmDialog.setAnimationEnabled(true);
@@ -77,8 +80,7 @@ public class PConfirmDialog extends PDialogBox {
         controlsPanel.setWidth("100%");
 
         if (cancelCaption != null) {
-            final PButton cancelButton = new PButton();
-            cancelButton.setText(cancelCaption);
+            final PButton cancelButton = new PButton(cancelCaption);
             cancelButton.addClickHandler(new PClickHandler() {
 
                 @Override
@@ -93,8 +95,7 @@ public class PConfirmDialog extends PDialogBox {
             confirmDialog.setCancelButton(cancelButton);
         }
         if (okCaption != null) {
-            final PButton okButton = new PButton();
-            okButton.setText(okCaption);
+            final PButton okButton = new PButton(okCaption);
             okButton.addClickHandler(new PClickHandler() {
 
                 @Override
@@ -121,7 +122,8 @@ public class PConfirmDialog extends PDialogBox {
         return show(windowCaption, content, PString.get("dialog.ok"), null, null);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PDialogBox show(final String windowCaption, final PWidget content,
+            final PConfirmDialogHandler confirmDialogHandler) {
         return show(windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 

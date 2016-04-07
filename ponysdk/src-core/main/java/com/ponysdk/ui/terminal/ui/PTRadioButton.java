@@ -28,8 +28,10 @@ import java.util.Map;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -40,13 +42,8 @@ public class PTRadioButton extends PTCheckBox {
     private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<>();
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new RadioButton(null);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-
-        // Model.TEXT
-        uiObject.setText(buffer.getBinaryModel().getStringValue());
+    protected CheckBox createUIObject() {
+        return new RadioButton(null);
     }
 
     @Override
@@ -68,14 +65,14 @@ public class PTRadioButton extends PTCheckBox {
     }
 
     @Override
-    protected void addValueChangeHandler(final PTInstruction addHandler, final UIService uiService) {
+    protected void addValueChangeHandler(final UIService uiService) {
         final RadioButton radioButton = cast();
 
         radioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                fireInstruction(addHandler.getObjectID(), uiService, event.getValue());
+                fireInstruction(getObjectID(), uiService, event.getValue());
 
                 if (cast().getName() != null) {
                     final PTRadioButton previouslySelected = lastSelectedRadioButtonByGroup.get(cast().getName());

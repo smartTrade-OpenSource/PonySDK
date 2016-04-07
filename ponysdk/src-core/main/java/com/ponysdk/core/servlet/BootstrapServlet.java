@@ -55,8 +55,6 @@ public class BootstrapServlet extends HttpServlet {
 
     protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
-    protected static final int BUFFER_SIZE = 4096;
-
     private static final long serialVersionUID = 6993633431616272739L;
 
     protected final List<String> meta = new ArrayList<>();
@@ -120,7 +118,10 @@ public class BootstrapServlet extends HttpServlet {
         return extraPathInfo;
     }
 
-    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws ServletException, IOException {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
+            throws ServletException, IOException {
+        request.getSession();
+
         // Try to load from context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
 
@@ -210,7 +211,8 @@ public class BootstrapServlet extends HttpServlet {
 
         for (final String style : stylesheets) {
             final String contentType = new MimetypesFileTypeMap().getContentType(style);
-            if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"" + contentType + "\" href=\"" + style + "\">");
+            if (!contentType.equals("text/css"))
+                writer.append("<link rel=\"stylesheet/less\" type=\"" + contentType + "\" href=\"" + style + "\">");
             else writer.append("<link rel=\"stylesheet\" type=\"" + contentType + "\" href=\"" + style + "\">");
             writer.newLine();
         }
@@ -241,7 +243,8 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
-        writer.append("<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+        writer.append(
+                "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
@@ -251,7 +254,8 @@ public class BootstrapServlet extends HttpServlet {
     protected void addNoScript(final BufferedWriter writer) throws IOException {
         writer.append("<noscript>");
         writer.newLine();
-        writer.append("<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        writer.append(
+                "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         writer.newLine();
         writer.append("Your web browser must have JavaScript enabled");
         writer.newLine();
@@ -262,11 +266,14 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("</noscript>");
     }
 
-    protected void addToMeta(final BufferedWriter writer) throws IOException {}
+    protected void addToMeta(final BufferedWriter writer) throws IOException {
+    }
 
-    protected void addToHeader(final BufferedWriter writer) throws IOException {}
+    protected void addToHeader(final BufferedWriter writer) throws IOException {
+    }
 
-    protected void addToBody(final BufferedWriter writer) throws IOException {}
+    protected void addToBody(final BufferedWriter writer) throws IOException {
+    }
 
     public void addStylesheets(final List<String> stylesheetPaths) {
         stylesheets.addAll(stylesheetPaths);

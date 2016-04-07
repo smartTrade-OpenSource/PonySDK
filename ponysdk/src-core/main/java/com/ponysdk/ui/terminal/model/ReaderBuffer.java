@@ -1,11 +1,19 @@
 package com.ponysdk.ui.terminal.model;
 
+import java.util.logging.Logger;
+
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.ponysdk.ui.terminal.UIBuilder;
+
 import elemental.client.Browser;
 import elemental.html.ArrayBuffer;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
 
 public class ReaderBuffer {
+
+    private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     public static final byte TRUE = 1;
     public static final byte FALSE = 0;
@@ -26,37 +34,43 @@ public class ReaderBuffer {
     }
 
     public BinaryModel getBinaryModel() {
+        if (!hasRemaining()) return BinaryModel.NULL;
         try {
-            final Model key = Model.values()[getByte()];
-            int size = TypeModel.BYTE_SIZE.getSize();
+            final Model key = Model.values()[getShort()];
+            int size = ValueTypeModel.SHORT.getSize();
 
             switch (key.getTypeModel()) {
-                case NULL_SIZE:
+                case NULL:
                     size += key.getTypeModel().getSize();
                     return new BinaryModel(key, size);
-                case BOOLEAN_SIZE:
+                case BOOLEAN:
                     size += key.getTypeModel().getSize();
                     return new BinaryModel(key, getBoolean(), size);
-                case BYTE_SIZE:
+                case BYTE:
                     size += key.getTypeModel().getSize();
                     return new BinaryModel(key, getByte(), size);
-                case SHORT_SIZE:
+                case SHORT:
                     size += key.getTypeModel().getSize();
                     return new BinaryModel(key, getShort(), size);
-                case INTEGER_SIZE:
+                case INTEGER:
                     size += key.getTypeModel().getSize();
                     return new BinaryModel(key, getInt(), size);
-                case LONG_SIZE:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getLong(), size);
-                case DOUBLE_SIZE:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getDouble(), size);
-                case VARIABLE_SIZE:
-                    size += TypeModel.SHORT_SIZE.getSize();
-                    final int messageSize = getShort();
-                    size += key.getTypeModel().getSize();
+                case LONG:
+                    // TODO Read really a long
+                    // return new BinaryModel(key, getLong(), size);
+                case DOUBLE:
+                    // TODO Read really a double
+                    // return new BinaryModel(key, getDouble(), size);
+                case STRING:
+                    size += ValueTypeModel.INTEGER.getSize();
+                    final int messageSize = getInt();
+                    size += messageSize;
                     return new BinaryModel(key, getString(messageSize), size);
+                case JSON_OBJECT:
+                    size += ValueTypeModel.INTEGER.getSize();
+                    final int jsonSize = getInt();
+                    size += jsonSize;
+                    return new BinaryModel(key, getJson(jsonSize), size);
                 default:
                     throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
             }
@@ -68,7 +82,7 @@ public class ReaderBuffer {
 
     private boolean getBoolean() {
         final Window window = Browser.getWindow();
-        final int size = TypeModel.BOOLEAN_SIZE.getSize();
+        final int size = ValueTypeModel.BOOLEAN.getSize();
         final Uint8Array arrayType = window.newUint8Array(message, position, size);
         position += size;
         return arrayType.intAt(0) == TRUE;
@@ -76,7 +90,7 @@ public class ReaderBuffer {
 
     private byte getByte() {
         final Window window = Browser.getWindow();
-        final int size = TypeModel.BYTE_SIZE.getSize();
+        final int size = ValueTypeModel.BYTE.getSize();
         final Uint8Array arrayType = window.newUint8Array(message, position, size);
         position += size;
         return (byte) arrayType.intAt(0);
@@ -84,8 +98,9 @@ public class ReaderBuffer {
 
     private short getShort() {
         final Window window = Browser.getWindow();
-        final int size = TypeModel.SHORT_SIZE.getSize();
+        final int size = ValueTypeModel.SHORT.getSize();
         final Uint8Array arrayType = window.newUint8Array(message, position, size);
+
         position += size;
 
         int result = 0;
@@ -98,7 +113,7 @@ public class ReaderBuffer {
 
     private int getInt() {
         final Window window = Browser.getWindow();
-        final int size = TypeModel.INTEGER_SIZE.getSize();
+        final int size = ValueTypeModel.INTEGER.getSize();
         final Uint8Array arrayType = window.newUint8Array(message, position, size);
         position += size;
 
@@ -110,14 +125,16 @@ public class ReaderBuffer {
         return result;
     }
 
-    // FIXME
     private long getLong() {
-        return getInt();
+        throw new IllegalArgumentException("Not implemented yet");
     }
 
-    // FIXME
     private double getDouble() {
-        return getInt();
+        throw new IllegalArgumentException("Not implemented yet");
+    }
+
+    public JSONObject getJson(final int msgSize) {
+        return JSONParser.parseStrict(getString(msgSize)).isObject();
     }
 
     private String getString() {
@@ -136,10 +153,14 @@ public class ReaderBuffer {
         }
     }
 
-    private static native String fromCharCode(ArrayBuffer buf) /*-{return new TextDecoder().decode(buf);}-*/;
+    private static native String fromCharCode(ArrayBuffer buf) /*-{return new TextDecoder('utf-8').decode(buf);}-*/;
 
     public void rewind(final BinaryModel binaryModel) {
         position -= binaryModel.getSize();
+    }
+
+    public boolean hasRemaining() {
+        return position < getByteLength();
     }
 
 }

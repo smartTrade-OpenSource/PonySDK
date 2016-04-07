@@ -41,6 +41,12 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     private PWidget widget;
 
     public PSimplePanel() {
+        super();
+        init();
+    }
+
+    public PSimplePanel(final PWindow window) {
+        super(window);
         init();
     }
 
@@ -62,7 +68,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     public boolean remove(final PWidget w) {
         // Validate.
-        if (widget == null || widget != w) { return false; }
+        if (widget == null || widget != w) {
+            return false;
+        }
 
         // Orphan.
         try {
@@ -80,7 +88,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w == this) throw new UnsupportedOperationException("You cannot call setWidget with 'this' in parameter");
 
         // Validate
-        if (w == widget) { return; }
+        if (w == widget) {
+            return;
+        }
 
         // Detach new child.
         if (w != null) {
@@ -122,9 +132,11 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
             @Override
             public PWidget next() {
-                if (!hasElement || (widget == null)) { throw new NoSuchElementException(); }
+                if (!hasElement || widget == null) {
+                    throw new NoSuchElementException();
+                }
                 hasElement = false;
-                return (returned = widget);
+                return returned = widget;
             }
 
             @Override

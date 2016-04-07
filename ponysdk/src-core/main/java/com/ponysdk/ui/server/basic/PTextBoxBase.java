@@ -39,7 +39,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
-public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
+public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     protected static final String EMPTY = "";
 
@@ -139,9 +139,9 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
+        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
             final PValueChangeEvent<String> event = new PValueChangeEvent<>(this,
-                    instruction.getString(Model.VALUE.getValue()));
+                    instruction.getString(Model.VALUE.toStringValue()));
             fireOnValueChange(event);
         } else {
             super.onClientData(instruction);

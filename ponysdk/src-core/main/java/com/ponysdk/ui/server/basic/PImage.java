@@ -67,57 +67,38 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PImage extends PFocusWidget {
 
-    private static Logger log = LoggerFactory.getLogger(PImage.class);
+    private static final Logger log = LoggerFactory.getLogger(PImage.class);
 
     private String url;
 
-    private int left = -1;
+    private final int left;
 
-    private int top = -1;
+    private final int top;
 
-    private int imageWidth = -1;;
+    private final int imageWidth;
 
-    private int imageHeight = -1;;
+    private final int imageHeight;
 
     public PImage() {
-        init();
+        this((String) null);
+    }
+
+    public PImage(final ClassPathURL classpathURL) {
+        this(classpathURL.toUrl());
+    }
+
+    public PImage(final String url) {
+        this(url, -1, -1, -1, -1);
     }
 
     public PImage(final String url, final int left, final int top, final int width, final int height) {
+        super();
         this.url = url;
         this.left = left;
         this.top = top;
 
         this.imageWidth = width; // TODO nicolas reuse widget width
         this.imageHeight = height;// TODO nicolas reuse widget height;
-
-        init();
-    }
-
-    public PImage(final String url) {
-        this.url = url;
-        init();
-    }
-
-    public PImage(final ClassPathURL classpathURL) {
-        String imageToBase64 = null;
-
-        try (InputStream in = classpathURL.getUrl().openStream()) {
-            final byte[] buffer = new byte[1024];
-            try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                while (in.read(buffer) != -1) {
-                    out.write(buffer);
-                }
-                imageToBase64 = new String(out.toByteArray(), "UTF-8");
-            }
-        } catch (final IOException e) {
-            log.error("Cannot load resource from " + classpathURL, e);
-        }
-
-        final String extension = classpathURL.getUrl().getFile()
-                .substring(classpathURL.getUrl().getFile().lastIndexOf('.') + 1);
-
-        this.url = "data:image/" + extension + ";base64," + imageToBase64;
 
         init();
     }
@@ -142,13 +123,13 @@ public class PImage extends PFocusWidget {
         return WidgetType.IMAGE;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
     public void setUrl(final String url) {
         this.url = url;
         saveUpdate(Model.IMAGE_URL, url);
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public void setStream(final StreamHandler streamListener) {
@@ -164,8 +145,25 @@ public class PImage extends PFocusWidget {
             url = getClass().getClassLoader().getResource(resourcePath);
         }
 
-        public URL getUrl() {
-            return url;
+        public final String toUrl() {
+            String imageToBase64 = null;
+
+            try (InputStream in = url.openStream()) {
+                final byte[] buffer = new byte[1024];
+                try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    while (in.read(buffer) != -1) {
+                        out.write(buffer);
+                    }
+                    imageToBase64 = new String(out.toByteArray(), "UTF-8");
+                }
+            } catch (final IOException e) {
+                log.error("Cannot load resource from " + this, e);
+            }
+
+            final String extension = url.getFile()
+                    .substring(url.getFile().lastIndexOf('.') + 1);
+
+            return "data:image/" + extension + ";base64," + imageToBase64;
         }
 
         @Override

@@ -27,6 +27,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -35,10 +36,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new CheckBox();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected CheckBox createUIObject() {
+        return new CheckBox();
     }
 
     @Override

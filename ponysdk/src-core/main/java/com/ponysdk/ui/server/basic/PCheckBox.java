@@ -79,8 +79,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        if (handlers == null)
-            handlers = new ArrayList<>();
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
@@ -122,17 +121,15 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         this.value = event.getValue();
-        if (handlers != null) {
-            for (final PValueChangeHandler<Boolean> handler : handlers) {
-                handler.onValueChange(event);
-            }
+        for (final PValueChangeHandler<Boolean> handler : getValueChangeHandlers()) {
+            handler.onValueChange(event);
         }
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.getValue())) {
-            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE_CHECKBOX.getValue())));
+        if (jsonObject.containsKey(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.toStringValue())) {
+            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE_CHECKBOX.toStringValue())));
         } else {
             super.onClientData(jsonObject);
         }

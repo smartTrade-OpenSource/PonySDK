@@ -8,20 +8,21 @@
  *============================================================================*/
 package com.ponysdk.ui.terminal.model;
 
-public enum TypeModel {
+public enum ValueTypeModel {
 
-    NULL_SIZE(0),
-    BOOLEAN_SIZE(1),
-    BYTE_SIZE(1),
-    SHORT_SIZE(2),
-    INTEGER_SIZE(4),
-    LONG_SIZE(8),
-    DOUBLE_SIZE(16),
-    VARIABLE_SIZE(-1);
+    NULL((byte) 0),
+    BOOLEAN((byte) 1),
+    BYTE((byte) 1),
+    SHORT((byte) 2),
+    INTEGER((byte) 4),
+    LONG((byte) 8), // FIXME
+    DOUBLE((byte) 16), // FIXME
+    STRING((byte) -1),
+    JSON_OBJECT((byte) -1);
 
     private int size;
 
-    TypeModel(int size) {
+    ValueTypeModel(final byte size) {
         this.size = size;
     }
 

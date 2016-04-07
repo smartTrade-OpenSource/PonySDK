@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -31,23 +32,27 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTGrid extends PTHTMLTable {
 
+    private int rows = -1;
+    private int columns = -1;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
         if (Model.ROW.equals(binaryModel.getModel())) {
-            final int rows = binaryModel.getIntValue();
-            // Model.COLUMN
-            final int columns = buffer.getBinaryModel().getIntValue();
-            this.uiObject = new Grid(rows, columns);
+            rows = binaryModel.getIntValue();
+            columns = buffer.getBinaryModel().getIntValue();
         } else {
             buffer.rewind(binaryModel);
-            this.uiObject = new Grid();
         }
 
-        this.uiObject.addStyleName("pony-PGrid");
+        super.create(buffer, objectId, uiService);
 
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        this.uiObject.addStyleName("pony-PGrid");
+    }
+
+    @Override
+    protected HTMLTable createUIObject() {
+        return rows != -1 ? new Grid(rows, columns) : new Grid();
     }
 
     @Override

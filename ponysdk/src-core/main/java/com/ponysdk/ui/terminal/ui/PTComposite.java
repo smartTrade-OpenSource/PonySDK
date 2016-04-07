@@ -36,10 +36,13 @@ public abstract class PTComposite extends PTWidget<Composite> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new MyComposite();
-        this.objectID = objectId;
+        super.create(buffer, objectId, uiService);
         this.uiService = uiService;
-        uiService.registerUIObject(this.objectID, uiObject);
+    }
+
+    @Override
+    protected Composite createUIObject() {
+        return new MyComposite();
     }
 
     @Override

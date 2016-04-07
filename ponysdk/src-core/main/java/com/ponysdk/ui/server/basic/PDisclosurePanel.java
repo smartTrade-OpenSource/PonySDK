@@ -38,6 +38,7 @@ import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 /**
@@ -97,12 +98,12 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
+        if (jsonObject.containsKey(HandlerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
                 closeHandler.onClose(new PCloseEvent(this));
             }
-        } else if (jsonObject.containsKey(Model.HANDLER_OPEN_HANDLER.getValue())) {
+        } else if (jsonObject.containsKey(HandlerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
             isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
                 openHandler.onOpen(new POpenEvent(this));

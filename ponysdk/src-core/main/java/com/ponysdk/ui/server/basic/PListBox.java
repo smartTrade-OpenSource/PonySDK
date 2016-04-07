@@ -95,8 +95,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.getValue())) {
-            final String data = jsonObject.getString(Model.VALUE.getValue());
+        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
+            final String data = jsonObject.getString(Model.VALUE.toStringValue());
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<>();
 
@@ -140,11 +140,17 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public void addItem(final String item) {
-        insertItem(item, item, items.size());
+        addItem(item, item);
     }
 
-    public void addItem(final String item, final Object value) {
-        insertItem(item, value, items.size());
+    public void addItem(final String label, final Object value) {
+        checkItem(label);
+
+        final ListItem item = new ListItem(label, value);
+
+        items.add(item);
+
+        saveUpdate(Model.ITEM_INSERTED, label);
     }
 
     public void insertItem(final String item, final int index) {
@@ -239,8 +245,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (window != null) {
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.ITEM_REMOVED);
-        parser.parse(Model.INDEX, index);
+        parser.parse(Model.ITEM_REMOVED, index);
         parser.endObject();
 
         if (selectedIndex >= index)

@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
+public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
     private boolean showLoadingOnRequest = false;
 
@@ -73,13 +73,10 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
     }
 
     @Override
-    protected void triggerMouseEvent(final ReaderBuffer buffer, final DomHandlerType domHandlerType,
-            final UIService uiService, final MouseEvent<?> event) {
-        if (!enabledOnRequest)
-            uiObject.setEnabled(false);
-        if (showLoadingOnRequest)
-            uiObject.addStyleName("pony-Loading");
-        super.triggerMouseEvent(buffer, domHandlerType, uiService, event);
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
+        if (!enabledOnRequest) uiObject.setEnabled(false);
+        if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
+        super.triggerMouseEvent(domHandlerType, uiService, event);
     }
 
 }

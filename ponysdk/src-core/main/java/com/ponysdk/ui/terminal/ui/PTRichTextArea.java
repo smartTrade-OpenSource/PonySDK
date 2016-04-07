@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
@@ -37,22 +38,16 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
     private UIService uiService;
 
     @Override
-    public void onBlur(final BlurEvent event) {
-        final PTInstruction instruction = new PTInstruction();
-        instruction.setObjectID(getObjectID());
-        instruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-        instruction.put(Model.HTML, uiObject.getHTML());
-        uiService.sendDataToServer(uiObject, instruction);
-    }
-
-    @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new RichTextArea();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
 
         this.uiService = uiService;
         uiObject.addBlurHandler(this);
+    }
+
+    @Override
+    protected RichTextArea createUIObject() {
+        return new RichTextArea();
     }
 
     @Override
@@ -127,6 +122,15 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
             return true;
         }
         return super.update(buffer, binaryModel);
+    }
+
+    @Override
+    public void onBlur(final BlurEvent event) {
+        final PTInstruction instruction = new PTInstruction();
+        instruction.setObjectID(getObjectID());
+        instruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+        instruction.put(Model.HTML, uiObject.getHTML());
+        uiService.sendDataToServer(uiObject, instruction);
     }
 
     public enum FontSize {

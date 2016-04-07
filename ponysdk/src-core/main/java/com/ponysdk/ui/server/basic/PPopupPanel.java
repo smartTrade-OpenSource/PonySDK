@@ -126,10 +126,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (autoHide) {
-            parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
-        }
+        if (autoHide) parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override
@@ -223,8 +220,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.WIDGET_POSITION.getValue())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getValue());
+        if (instruction.containsKey(Model.WIDGET_POSITION.toStringValue())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.toStringValue());
 
             final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();
             final Integer windowHeight = ((JsonNumber) widgetInfo.get(1)).intValue();
@@ -234,7 +231,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
             saveUpdate(Model.POPUP_POSITION_AND_SHOW);
-        } else if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
+        } else if (instruction.containsKey(HandlerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             this.showing = false;
             fireOnClose();
         } else {

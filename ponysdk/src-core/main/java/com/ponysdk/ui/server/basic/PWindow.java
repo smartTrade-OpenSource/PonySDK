@@ -35,6 +35,7 @@ import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.Model;
 
 public class PWindow extends PObject {
@@ -93,11 +94,11 @@ public class PWindow extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
+        if (instruction.containsKey(HandlerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             WindowManager.unregisterWindow(this);
             fireOnClose();
             return;
-        } else if (instruction.containsKey(Model.HANDLER_OPEN_HANDLER.getValue())) {
+        } else if (instruction.containsKey(HandlerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
             fireOnOpen();
         } else {
             super.onClientData(instruction);

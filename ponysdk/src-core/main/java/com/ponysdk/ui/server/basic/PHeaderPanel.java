@@ -41,6 +41,16 @@ public class PHeaderPanel extends PPanel {
     private PWidget content;
     private PWidget footer;
 
+    public PHeaderPanel() {
+        super();
+        init();
+    }
+
+    public PHeaderPanel(final PWindow window) {
+        super(window);
+        init();
+    }
+
     public void resize() {
         saveUpdate(Model.RESIZE);
     }

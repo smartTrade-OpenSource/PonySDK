@@ -416,8 +416,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setSizeFull() {
-        setWidth(Size.HUNDRED_PERCENT);
-        setHeight(Size.HUNDRED_PERCENT);
+        this.width = Size.HUNDRED_PERCENT;
+        this.height = Size.HUNDRED_PERCENT;
+        saveUpdate(Model.WIDGET_FULL_SIZE);
     }
 
     // public <H extends EventHandler> HandlerRegistration
@@ -453,7 +454,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
             if (window != null) {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.parse(handler.asJsonObject());
+            parser.parse(Model.KEY_FILTER, handler.asJsonObject());
             parser.endObject();
         }
         return handlerRegistration;
@@ -496,16 +497,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.DOM_HANDLER_TYPE.getValue())) {
-
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction
-                    .getInt(Model.DOM_HANDLER_TYPE.getValue())];
+        final String domHandlerType = Model.DOM_HANDLER_TYPE.toStringValue();
+        if (instruction.containsKey(domHandlerType)) {
+            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(domHandlerType)];
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE_KEY.getValue())));
+                    fireEvent(new PKeyPressEvent(this, instruction.getInt(Model.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE_KEY.getValue())));
+                    fireEvent(new PKeyUpEvent(this, instruction.getInt(Model.VALUE_KEY.toStringValue())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -548,9 +548,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     break;
                 case DROP:
                     final PDropEvent dropEvent = new PDropEvent(this);
-                    if (instruction.containsKey(Model.DRAG_SRC.getValue())) {
-                        final PWidget source = UIContext.get()
-                                .getObject(instruction.getJsonNumber(Model.DRAG_SRC.getValue()).intValue());
+                    final String dragSrc = Model.DRAG_SRC.toStringValue();
+                    if (instruction.containsKey(dragSrc)) {
+                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -558,6 +558,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 case CONTEXT_MENU:
                     fireEvent(new PContextMenuEvent(this));
                     break;
+                case CHANGE_HANDLER:
                 default:
                     log.error("Dom Handler not implemented: " + domHandler);
                     break;
@@ -578,8 +579,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
-        if (instruction.containsKey(Model.EVENT_INFO.getValue())) {
-            final JsonArray eventInfo = instruction.getJsonArray(Model.EVENT_INFO.getValue());
+        final String eventInfoKey = Model.EVENT_INFO.toStringValue();
+        if (instruction.containsKey(eventInfoKey)) {
+            final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
 
             event.setX(((JsonNumber) eventInfo.get(0)).intValue());
             event.setY(((JsonNumber) eventInfo.get(1)).intValue());
@@ -588,8 +590,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
             event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
         }
 
-        if (instruction.containsKey(Model.WIDGET_POSITION.getValue())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.getValue());
+        final String widgetPositionKey = Model.WIDGET_POSITION.toStringValue();
+        if (instruction.containsKey(widgetPositionKey)) {
+            final JsonArray widgetInfo = instruction.getJsonArray(widgetPositionKey);
 
             event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
             event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());

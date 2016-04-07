@@ -34,29 +34,43 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTImage extends PTWidget<Image> {
 
+    private String url;
+    private int left = -1;
+    private int top = -1;
+    private int width = -1;
+    private int height = -1;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        final BinaryModel url = buffer.getBinaryModel();
-        if (Model.IMAGE_URL.equals(url.getModel())) {
-            final BinaryModel left = buffer.getBinaryModel();
-            if (Model.IMAGE_LEFT.equals(left.getModel())) {
+        final BinaryModel urlModel = buffer.getBinaryModel();
+        if (Model.IMAGE_URL.equals(urlModel.getModel())) {
+            final BinaryModel leftModel = buffer.getBinaryModel();
+            url = urlModel.getStringValue();
+            if (Model.IMAGE_LEFT.equals(leftModel.getModel())) {
+                left = leftModel.getIntValue();
                 // Model.IMAGE_TOP
-                final int top = buffer.getBinaryModel().getIntValue();
+                top = buffer.getBinaryModel().getIntValue();
                 // Model.IMAGE_WIDTH
-                final int width = buffer.getBinaryModel().getIntValue();
+                width = buffer.getBinaryModel().getIntValue();
                 // Model.IMAGE_HEIGHT
-                final int height = buffer.getBinaryModel().getIntValue();
-                this.uiObject = new Image(url.getStringValue(), left.getIntValue(), top, width, height);
+                height = buffer.getBinaryModel().getIntValue();
             } else {
-                buffer.rewind(left);
-                this.uiObject = new Image(url.getStringValue());
+                buffer.rewind(leftModel);
             }
         } else {
-            buffer.rewind(url);
-            this.uiObject = new Image();
+            buffer.rewind(urlModel);
         }
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected Image createUIObject() {
+        if (url != null) {
+            return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
+        } else {
+            return new Image();
+        }
     }
 
     @Override

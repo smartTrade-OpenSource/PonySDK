@@ -40,61 +40,26 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new LayoutPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
         this.uiService = uiService;
     }
 
-    private Alignment getAlignement(final byte alignementId) {
-        final PAlignment alignment = PAlignment.values()[alignementId];
-        switch (alignment) {
-            case BEGIN:
-                return Alignment.BEGIN;
-            case END:
-                return Alignment.END;
-            case STRETCH:
-                return Alignment.STRETCH;
-        }
-        return null;
-    }
-
-    private static final Unit getUnit(final byte unit) {
-        final PUnit u = PUnit.values()[unit];
-        switch (u) {
-            case PX:
-                return Unit.PX;
-            case EM:
-                return Unit.EM;
-            case PCT:
-                return Unit.PCT;
-            case CM:
-                return Unit.CM;
-            case EX:
-                return Unit.EX;
-            case IN:
-                return Unit.IN;
-            case MM:
-                return Unit.MM;
-            case PC:
-                return Unit.PC;
-            case PT:
-                return Unit.PT;
-        }
-        return null;
+    @Override
+    protected LayoutPanel createUIObject() {
+        return new LayoutPanel();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (Model.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final Alignment alignment = getAlignement(binaryModel.getByteValue());
+            final Alignment alignment = PAlignment.getAlignement(PAlignment.values()[binaryModel.getByteValue()]);
             // Model.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
         }
         if (Model.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final Alignment alignment = getAlignement(binaryModel.getByteValue());
+            final Alignment alignment = PAlignment.getAlignement(PAlignment.values()[binaryModel.getByteValue()]);
             // Model.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             uiObject.setWidgetVerticalPosition(w, alignment);
@@ -103,7 +68,7 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         if (Model.UNIT.equals(binaryModel.getModel())) {
             // Model.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
-            final Unit unit = getUnit(binaryModel.getByteValue());
+            final Unit unit = PUnit.getUnit(PUnit.values()[binaryModel.getByteValue()]);
 
             final BinaryModel key1 = buffer.getBinaryModel();
             final BinaryModel key2 = buffer.getBinaryModel();
@@ -149,4 +114,5 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         }
         return super.update(buffer, binaryModel);
     }
+
 }

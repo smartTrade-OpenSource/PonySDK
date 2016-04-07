@@ -66,7 +66,7 @@ public class StreamServiceServlet extends HttpServlet {
             final Integer ponySessionID = Integer.parseInt(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
             final StreamHandler streamHandler = ponySession
-                    .removeStreamListener(Integer.parseInt(req.getParameter(Model.STREAM_REQUEST_ID.getValue())));
+                    .removeStreamListener(Integer.parseInt(req.getParameter(Model.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

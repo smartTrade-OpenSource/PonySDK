@@ -74,10 +74,7 @@ public abstract class PTerminalScheduledCommand extends PObject {
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         parser.parse(Model.FIXDELAY, delayMillis);
-
-        if (js != null) {
-            parser.parse(Model.EVAL, js);
-        }
+        parser.parse(Model.EVAL, js);
     }
 
     protected abstract void run();

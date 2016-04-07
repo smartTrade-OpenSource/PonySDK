@@ -25,10 +25,10 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class PTButtonBase<W extends ButtonBase> extends PTFocusWidget<W> {
+public abstract class PTButtonBase<T extends ButtonBase> extends PTFocusWidget<T> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {

@@ -24,15 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public abstract class PTComplexPanel<W extends ComplexPanel> extends PTPanel<W> {
-
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService, final W complexPanel) {
-        this.uiObject = complexPanel;
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-    }
+public abstract class PTComplexPanel<T extends ComplexPanel> extends PTPanel<T> {
 
 }

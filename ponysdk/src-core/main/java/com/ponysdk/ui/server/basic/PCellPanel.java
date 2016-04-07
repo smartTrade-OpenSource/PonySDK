@@ -62,7 +62,7 @@ public abstract class PCellPanel extends PComplexPanel {
         if (window != null) {
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+        parser.parse(Model.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }
@@ -74,7 +74,7 @@ public abstract class PCellPanel extends PComplexPanel {
         if (window != null) {
             parser.parse(Model.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.CELL_VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+        parser.parse(Model.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
         parser.parse(Model.WIDGET_ID, widget.getID());
         parser.endObject();
     }

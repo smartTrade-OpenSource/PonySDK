@@ -24,16 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Button;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTButton extends PTButtonBase<Button> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new Button();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected Button createUIObject() {
+        return new Button();
     }
 
 }

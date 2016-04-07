@@ -181,15 +181,15 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_KEY_RESIZE_HANDLER.getValue())) {
+        if (instruction.containsKey(HandlerModel.HANDLER_KEY_RESIZE_HANDLER.toStringValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
-            final JsonArray array = instruction.getJsonArray(Model.VALUE.getValue());
+            final JsonArray array = instruction.getJsonArray(Model.VALUE.toStringValue());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject ws = array.getJsonObject(i);
-                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
+                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.toStringValue()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getValue()).doubleValue();
+                    final double widgetSize = ws.getJsonNumber(Model.SIZE.toStringValue()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }

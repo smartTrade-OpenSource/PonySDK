@@ -33,17 +33,15 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new HeaderPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected HeaderPanel createUIObject() {
+        return new HeaderPanel();
     }
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
-        final Widget w = asWidget(ptObject);
         final BinaryModel binaryModel = buffer.getBinaryModel();
         if (Model.INDEX.equals(binaryModel.getModel())) {
+            final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
                 cast().setHeaderWidget(w);
@@ -62,7 +60,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
             }
         } else {
             buffer.rewind(binaryModel);
-            uiObject.add(w);
+            super.add(buffer, ptObject);
         }
     }
 

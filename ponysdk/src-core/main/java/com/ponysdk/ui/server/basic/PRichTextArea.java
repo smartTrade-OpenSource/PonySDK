@@ -99,8 +99,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
-            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.getValue())));
+        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
+            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.toStringValue())));
         } else {
             super.onClientData(instruction);
         }

@@ -50,7 +50,7 @@ public class PTextBox extends PTextBoxBase {
     }
 
     public PTextBox(final String text) {
-        super(EMPTY);
+        super(text);
     }
 
     /**

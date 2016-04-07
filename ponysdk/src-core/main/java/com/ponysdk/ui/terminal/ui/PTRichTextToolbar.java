@@ -29,14 +29,19 @@ import com.ponysdk.ui.terminal.ui.widget.richtexttoolbar.RichTextToolbar;
 
 public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
 
+    private PTRichTextArea richTextArea;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         // Model.WIDGET_ID
-        final PTObject child = uiService.getPTObject(buffer.getBinaryModel().getIntValue());
-        final PTRichTextArea richTextArea = (PTRichTextArea) child;
-        this.uiObject = new RichTextToolbar(richTextArea.cast());
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        richTextArea = (PTRichTextArea) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected RichTextToolbar createUIObject() {
+        return new RichTextToolbar(richTextArea.cast());
     }
 
 }

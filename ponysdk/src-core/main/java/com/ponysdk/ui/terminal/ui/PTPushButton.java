@@ -29,18 +29,18 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTPushButton extends PTCustomButton<PushButton> {
 
+    private PTImage image;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        final String text = buffer.getBinaryModel().getStringValue();
+        image = (PTImage) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
 
-        // Model.WIDGET_ID
-        final PTImage image = (PTImage) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
-        this.uiObject = new PushButton(image.cast());
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-
-        if (text != null) {
-            uiObject.setText(text);
-        }
+        super.create(buffer, objectId, uiService);
     }
+
+    @Override
+    protected PushButton createUIObject() {
+        return new PushButton(image.cast());
+    }
+
 }

@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core;
 
@@ -14,6 +36,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.ui.terminal.model.Model;
 
+/**
+ * @deprecated Useless
+ */
+@Deprecated
 public class Parser2 implements Parser {
 
     private static final Logger log = LoggerFactory.getLogger(Parser2.class);
@@ -55,8 +81,7 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
-    public void parse(final JsonValue jsonObject) {
+    private void parse(final JsonValue jsonObject) {
         try {
             writer.append(jsonObject.toString());
         } catch (final UnsupportedEncodingException e) {
@@ -70,7 +95,7 @@ public class Parser2 implements Parser {
     @Override
     public void parse(final Model type) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -79,7 +104,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final String value) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -94,10 +119,9 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
-    public void parse(final Model type, final JsonObjectBuilder builder) {
+    private void parse(final Model type, final JsonObjectBuilder builder) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -114,7 +138,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final boolean value) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -138,7 +162,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final long value) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -153,7 +177,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final int value) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -168,7 +192,7 @@ public class Parser2 implements Parser {
 
     public void parse(final Model type, final double value) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -181,10 +205,9 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
     public void parse(final Model type, final Collection<String> collection) {
         try {
-            writer.append(type.getValue());
+            writer.append(type.toStringValue());
         } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -202,10 +225,9 @@ public class Parser2 implements Parser {
         }
     }
 
-    @Override
-    public void parse(final Model model, final JsonValue jsonObject) {
+    private void parse(final Model model, final JsonValue jsonObject) {
         try {
-            writer.append(model.getValue());
+            writer.append(model.toStringValue());
         } catch (final IOException e2) {
             // TODO Auto-generated catch block
             e2.printStackTrace();

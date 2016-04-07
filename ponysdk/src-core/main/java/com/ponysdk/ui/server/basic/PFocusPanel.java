@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -50,8 +50,10 @@ import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PFocusEvent;
 import com.ponysdk.ui.server.basic.event.PFocusHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
+import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
 import com.ponysdk.ui.server.basic.event.PKeyPressHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
+import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseDownEvent;
 import com.ponysdk.ui.server.basic.event.PMouseDownHandler;
@@ -64,9 +66,11 @@ import com.ponysdk.ui.server.basic.event.PMouseUpHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A simple panel that makes its contents focusable, and adds the ability to catch mouse and keyboard events.
+ * A simple panel that makes its contents focusable, and adds the ability to catch mouse and
+ * keyboard events.
  */
-public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandlers, HasPAllMouseHandlers, HasPClickHandlers, HasPAllKeyHandlers, HasPAllFocusHandlers {
+public class PFocusPanel extends PSimplePanel
+        implements HasPAllDragAndDropHandlers, HasPAllMouseHandlers, HasPClickHandlers, HasPAllKeyHandlers, HasPAllFocusHandlers {
 
     @Override
     protected WidgetType getWidgetType() {
@@ -89,8 +93,18 @@ public class PFocusPanel extends PSimplePanel implements HasPAllDragAndDropHandl
     }
 
     @Override
+    public HandlerRegistration addKeyUpHandler(final PKeyUpFilterHandler handler) {
+        return addDomHandler(handler);
+    }
+
+    @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         return addDomHandler(handler, PKeyPressEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addKeyPressHandler(final PKeyPressFilterHandler handler) {
+        return addDomHandler(handler);
     }
 
     @Override

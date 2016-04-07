@@ -42,6 +42,7 @@ public class PGrid extends PHTMLTable {
     }
 
     public PGrid(final int rows, final int columns) {
+        super();
         this.rows = rows;
         this.columns = columns;
 

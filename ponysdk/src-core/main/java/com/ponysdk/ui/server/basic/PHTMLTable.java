@@ -221,7 +221,7 @@ public abstract class PHTMLTable extends PPanel {
             if (window != null) {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.CELL_VERTICAL_ALIGNMENT, align.getValue());
+            parser.parse(Model.VERTICAL_ALIGNMENT, align.getValue());
             parser.parse(Model.ROW, row);
             parser.parse(Model.COLUMN, column);
             parser.endObject();
@@ -234,7 +234,7 @@ public abstract class PHTMLTable extends PPanel {
             if (window != null) {
                 parser.parse(Model.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.CELL_HORIZONTAL_ALIGNMENT, align.getValue());
+            parser.parse(Model.HORIZONTAL_ALIGNMENT, align.getValue());
             parser.parse(Model.ROW, row);
             parser.parse(Model.COLUMN, column);
             parser.endObject();

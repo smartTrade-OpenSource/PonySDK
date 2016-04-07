@@ -39,6 +39,10 @@ public class PButton extends PButtonBase {
         super();
     }
 
+    public PButton(final boolean init) {
+        super(init);
+    }
+
     public PButton(final String text) {
         super(text);
     }
