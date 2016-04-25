@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard single-line text box.
@@ -79,7 +79,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setMaxLength(final int length) {
         this.maxLength = length;
-        saveUpdate(Model.MAX_LENGTH, length);
+        saveUpdate(ServerToClientModel.MAX_LENGTH, length);
     }
 
     /**
@@ -90,7 +90,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setVisibleLength(final int length) {
         this.visibleLength = length;
-        saveUpdate(Model.VISIBLE_LENGTH, visibleLength);
+        saveUpdate(ServerToClientModel.VISIBLE_LENGTH, visibleLength);
     }
 
     public void applyMask(final String mask) {
@@ -112,13 +112,13 @@ public class PTextBox extends PTextBoxBase {
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.MASK, pattern);
-        parser.parse(Model.VISIBILITY, showMask);
-        parser.parse(Model.REPLACEMENT_STRING, freeSymbol);
+        parser.parse(ServerToClientModel.MASK, pattern);
+        parser.parse(ServerToClientModel.VISIBILITY, showMask);
+        parser.parse(ServerToClientModel.REPLACEMENT_STRING, freeSymbol);
         parser.endObject();
     }
 

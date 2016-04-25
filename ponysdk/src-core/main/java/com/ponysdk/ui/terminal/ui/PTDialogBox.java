@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DialogBox;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
@@ -37,7 +37,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.POPUP_CAPTION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_CAPTION.equals(binaryModel.getModel())) {
             final DialogBox dialogBox = cast();
             dialogBox.setHTML(binaryModel.getStringValue());
         }

@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTRootPanel extends PTAbsolutePanel {
@@ -47,7 +47,7 @@ public class PTRootPanel extends PTAbsolutePanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR_DOM.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR_DOM.equals(binaryModel.getModel())) {
             RootPanel.get().clear(true);
             return true;
         }

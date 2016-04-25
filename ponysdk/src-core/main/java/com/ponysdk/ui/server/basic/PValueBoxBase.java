@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
@@ -35,7 +35,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
      * document and not hidden.
      */
     public void selectAll() {
-        saveUpdate(Model.SELECT_ALL);
+        saveUpdate(ServerToClientModel.SELECT_ALL);
     }
 
 }

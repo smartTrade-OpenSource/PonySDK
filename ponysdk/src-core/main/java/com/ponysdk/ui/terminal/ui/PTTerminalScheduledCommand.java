@@ -43,7 +43,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.FIXDELAY
+        // ServerToClientModel.FIXDELAY
         final int delayMs = buffer.getBinaryModel().getIntValue();
         if (delayMs <= 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {
@@ -51,7 +51,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    // Model.EVAL
+                    // ServerToClientModel.EVAL
                     return script.update(buffer, buffer.getBinaryModel());
                 }
             });
@@ -61,7 +61,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    // Model.EVAL
+                    // ServerToClientModel.EVAL
                     return script.update(buffer, buffer.getBinaryModel());
                 }
 
@@ -73,7 +73,7 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        // Model.FIXDELAY
+        // ServerToClientModel.FIXDELAY
         final int delayMs = buffer.getBinaryModel().getIntValue();
         if (delayMs < 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {

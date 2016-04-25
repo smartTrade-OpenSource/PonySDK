@@ -31,9 +31,9 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
@@ -43,11 +43,11 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.TEXT
+        // ServerToClientModel.TEXT
         headerText = buffer.getBinaryModel().getStringValue();
-        // Model.DISCLOSURE_PANEL_OPEN_IMG
+        // ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG
         final int openImg = buffer.getBinaryModel().getIntValue();
-        // Model.DISCLOSURE_PANEL_CLOSE_IMG
+        // ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG
         final int closeImg = buffer.getBinaryModel().getIntValue();
 
         final PTImage open = (PTImage) uiService.getPTObject(openImg);
@@ -73,7 +73,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onClose(final CloseEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(getObjectID());
-                instruction.put(HandlerModel.HANDLER_CLOSE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -84,7 +84,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
             public void onOpen(final OpenEvent<DisclosurePanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(getObjectID());
-                instruction.put(HandlerModel.HANDLER_OPEN_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -97,11 +97,11 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.OPEN.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             uiObject.setOpen(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }

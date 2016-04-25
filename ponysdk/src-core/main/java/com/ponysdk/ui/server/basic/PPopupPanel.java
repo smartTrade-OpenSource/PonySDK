@@ -36,8 +36,9 @@ import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that can "pop up" over other widgets. It overlays the browser's
@@ -126,7 +127,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (autoHide) parser.parse(Model.POPUP_AUTO_HIDE, autoHide);
+        if (autoHide) parser.parse(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override
@@ -135,49 +136,49 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate(Model.POPUP_MODAL, modal);
+        saveUpdate(ServerToClientModel.POPUP_MODAL, modal);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
-        saveUpdate(Model.POPUP_GLASS_ENABLED, glassEnabled);
+        saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
     }
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
-            saveUpdate(Model.POPUP_DRAGGABLE);
+            saveUpdate(ServerToClientModel.POPUP_DRAGGABLE);
         }
     }
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(Model.ANIMATION, animationEnabled);
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     public void center() {
         this.center = true;
         this.showing = true;
-        saveUpdate(Model.POPUP_CENTER);
+        saveUpdate(ServerToClientModel.POPUP_CENTER);
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate(Model.POPUP_SHOW);
+            saveUpdate(ServerToClientModel.POPUP_SHOW);
         }
     }
 
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate(Model.POPUP_HIDE);
+            saveUpdate(ServerToClientModel.POPUP_HIDE);
         }
     }
 
     public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
-        saveUpdate(Model.POPUP_GLASS_STYLE_NAME, glassStyleName);
+        saveUpdate(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
     }
 
     @Override
@@ -199,12 +200,12 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.POPUP_POSITION_LEFT, leftPosition);
-        parser.parse(Model.POPUP_POSITION_TOP, topPosition);
+        parser.parse(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
+        parser.parse(ServerToClientModel.POPUP_POSITION_TOP, topPosition);
         parser.endObject();
     }
 
@@ -220,8 +221,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.WIDGET_POSITION.toStringValue())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(Model.WIDGET_POSITION.toStringValue());
+        if (instruction.containsKey(ClientToServerModel.WIDGET_POSITION.toStringValue())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(ClientToServerModel.WIDGET_POSITION.toStringValue());
 
             final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();
             final Integer windowHeight = ((JsonNumber) widgetInfo.get(1)).intValue();
@@ -230,8 +231,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
-            saveUpdate(Model.POPUP_POSITION_AND_SHOW);
-        } else if (instruction.containsKey(HandlerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
+            saveUpdate(ServerToClientModel.POPUP_POSITION_AND_SHOW);
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             this.showing = false;
             fireOnClose();
         } else {

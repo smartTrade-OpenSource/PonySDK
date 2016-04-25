@@ -30,7 +30,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
@@ -62,7 +62,7 @@ public class PRootPanel extends PAbsolutePanel {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.ROOT_ID, id);
+        parser.parse(ServerToClientModel.ROOT_ID, id);
     }
 
     public static PRootPanel get(final PWindow window) {
@@ -126,7 +126,7 @@ public class PRootPanel extends PAbsolutePanel {
         clear();
 
         if (clearDom) {
-            saveUpdate(Model.CLEAR_DOM, clearDom);
+            saveUpdate(ServerToClientModel.CLEAR_DOM, clearDom);
         }
     }
 }

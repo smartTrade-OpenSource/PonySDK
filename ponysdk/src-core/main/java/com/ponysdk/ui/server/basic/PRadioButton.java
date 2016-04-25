@@ -28,7 +28,7 @@ import java.util.Objects;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires {@link PClickEvent}s when the radio
@@ -62,7 +62,7 @@ public class PRadioButton extends PCheckBox {
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(Model.NAME, this.name);
+        saveUpdate(ServerToClientModel.NAME, this.name);
     }
 
     public String getName() {

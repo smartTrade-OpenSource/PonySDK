@@ -14,8 +14,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 
 /**
  * @author nvelin
@@ -30,42 +29,38 @@ public class PTInstruction extends JSONObject {
     }
 
     public void setObjectID(final int objectID) {
-        put(Model.OBJECT_ID, objectID);
+        put(ClientToServerModel.OBJECT_ID, objectID);
     }
 
     public int getObjectID() {
-        return (int) get(Model.OBJECT_ID.toStringValue()).isNumber().doubleValue();
+        return (int) get(ClientToServerModel.OBJECT_ID.toStringValue()).isNumber().doubleValue();
     }
 
-    public void put(final HandlerModel key) {
-        put(key.toStringValue(), new JSONString(""));
-    }
-
-    public void put(final Model key) {
+    public void put(final ClientToServerModel key) {
         put(key, "");
     }
 
-    public void put(final Model key, final boolean value) {
+    public void put(final ClientToServerModel key, final boolean value) {
         put(key.toStringValue(), JSONBoolean.getInstance(value));
     }
 
-    public void put(final Model key, final int value) {
+    public void put(final ClientToServerModel key, final int value) {
         put(key.toStringValue(), new JSONNumber(value));
     }
 
-    public void put(final Model key, final double value) {
+    public void put(final ClientToServerModel key, final double value) {
         put(key.toStringValue(), new JSONNumber(value));
     }
 
-    public void put(final Model key, final String value) {
+    public void put(final ClientToServerModel key, final String value) {
         put(key.toStringValue(), new JSONString(value));
     }
 
-    public void put(final Model key, final JavaScriptObject value) {
+    public void put(final ClientToServerModel key, final JavaScriptObject value) {
         put(key.toStringValue(), new JSONObject(value));
     }
 
-    public JSONValue put(final Model key, final JSONValue jsonValue) {
+    public JSONValue put(final ClientToServerModel key, final JSONValue jsonValue) {
         return put(key.toStringValue(), jsonValue);
     }
 

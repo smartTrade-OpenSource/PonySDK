@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTHeaderPanel extends PTPanel<HeaderPanel> {
@@ -40,7 +40,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
             final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
@@ -66,7 +66,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.RESIZE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.RESIZE.equals(binaryModel.getModel())) {
             uiObject.onResize();
             return true;
         }

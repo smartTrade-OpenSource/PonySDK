@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
@@ -42,7 +42,7 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel model = buffer.getBinaryModel();
-        if (Model.INDEX.equals(model)) {
+        if (ServerToClientModel.INDEX.equals(model)) {
             uiObject.insert(asWidget(ptObject), model.getIntValue());
         } else {
             buffer.rewind(model);
@@ -52,15 +52,15 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.BORDER_WIDTH.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.BORDER_WIDTH.equals(binaryModel.getModel())) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
         }
-        if (Model.SPACING.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SPACING.equals(binaryModel.getModel())) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
         }
-        if (Model.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getIntValue()];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
@@ -77,7 +77,7 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
             }
             return true;
         }
-        if (Model.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getIntValue()];
             switch (verticalAlignment) {
                 case ALIGN_TOP:

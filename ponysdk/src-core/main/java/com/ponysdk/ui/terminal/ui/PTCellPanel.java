@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
@@ -46,7 +46,7 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (horizontalAlignment) {
@@ -64,7 +64,7 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
             }
             return true;
         }
-        if (Model.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (verticalAlignment) {
@@ -82,12 +82,12 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
             }
             return true;
         }
-        if (Model.CELL_WIDTH.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CELL_WIDTH.equals(binaryModel.getModel())) {
             uiObject.setCellWidth(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
                     binaryModel.getStringValue());
             return true;
         }
-        if (Model.CELL_HEIGHT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CELL_HEIGHT.equals(binaryModel.getModel())) {
             uiObject.setCellHeight(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
                     binaryModel.getStringValue());
             return true;

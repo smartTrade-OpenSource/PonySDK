@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTGrid extends PTHTMLTable {
@@ -38,7 +38,7 @@ public class PTGrid extends PTHTMLTable {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ROW.equals(binaryModel.getModel())) {
             rows = binaryModel.getIntValue();
             columns = buffer.getBinaryModel().getIntValue();
         } else {
@@ -57,11 +57,11 @@ public class PTGrid extends PTHTMLTable {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
         }
-        if (Model.INSERT_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
         }

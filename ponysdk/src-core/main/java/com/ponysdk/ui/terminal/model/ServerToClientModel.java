@@ -1,7 +1,29 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.ui.terminal.model;
 
-public enum Model {
+public enum ServerToClientModel {
 
     HEARTBEAT(ValueTypeModel.NULL),
 
@@ -17,22 +39,9 @@ public enum Model {
     TYPE_HISTORY(ValueTypeModel.STRING),
     TYPE_REMOVE_HANDLER(ValueTypeModel.NULL),
 
-    APPLICATION_INSTRUCTIONS(ValueTypeModel.STRING),
-    APPLICATION_ERRORS(ValueTypeModel.STRING),
-    APPLICATION_VIEW_ID(ValueTypeModel.INTEGER),
-    APPLICATION_START(ValueTypeModel.NULL),
-    WIDGET_POSITION(ValueTypeModel.STRING),
-    EVENT_INFO(ValueTypeModel.STRING),
-    DOM_HANDLER_TYPE(ValueTypeModel.BYTE),
-
-    ERROR_MSG(ValueTypeModel.STRING),
     NATIVE(ValueTypeModel.JSON_OBJECT),
     DATE(ValueTypeModel.LONG),
     VALUE(ValueTypeModel.STRING),
-    YEAR(ValueTypeModel.INTEGER),
-    MONTH(ValueTypeModel.INTEGER),
-    DAY(ValueTypeModel.INTEGER),
-
     PARENT_OBJECT_ID(ValueTypeModel.INTEGER),
     PUT_STYLE_KEY(ValueTypeModel.STRING),
     STYLE_VALUE(ValueTypeModel.STRING),
@@ -189,11 +198,7 @@ public enum Model {
     IMAGE_TOP(ValueTypeModel.INTEGER),
     IMAGE_LEFT(ValueTypeModel.INTEGER),
     HISTORY_FIRE_EVENTS(ValueTypeModel.BOOLEAN),
-    FILE_NAME(ValueTypeModel.STRING),
     LOADING_ON_REQUEST(ValueTypeModel.BOOLEAN),
-    START_DATE(ValueTypeModel.STRING),
-    END_DATE(ValueTypeModel.STRING),
-    FLEXTABLE_CELL_FORMATTER(ValueTypeModel.NULL),
     SET_COL_SPAN(ValueTypeModel.INTEGER),
     SET_ROW_SPAN(ValueTypeModel.INTEGER),
     APPLICATION_SEQ_NUM(ValueTypeModel.INTEGER),
@@ -202,13 +207,10 @@ public enum Model {
     ROOT_ID(ValueTypeModel.STRING),
     WINDOW_ID(ValueTypeModel.INTEGER),
     EVAL(ValueTypeModel.STRING),
-    CALLBACK(ValueTypeModel.NULL),
-    RESULT(ValueTypeModel.STRING),
     VISIBLE_LINES(ValueTypeModel.INTEGER),
     CHARACTER_WIDTH(ValueTypeModel.INTEGER),
     HORIZONTAL_SCROLL_POSITION(ValueTypeModel.INTEGER),
     SCROLL_TO(ValueTypeModel.INTEGER),
-    DISPLAY_STRING(ValueTypeModel.STRING),
     LIMIT(ValueTypeModel.INTEGER),
     SUGGESTION(ValueTypeModel.STRING),
     SUGGESTIONS(ValueTypeModel.STRING),
@@ -228,12 +230,8 @@ public enum Model {
 
     private ValueTypeModel type;
 
-    private Model(final ValueTypeModel size) {
+    private ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
-    }
-
-    public String toStringValue() {
-        return String.valueOf(ordinal());
     }
 
     public short getValue() {

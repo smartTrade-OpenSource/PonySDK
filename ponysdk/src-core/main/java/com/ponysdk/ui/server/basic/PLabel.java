@@ -49,7 +49,7 @@ import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
@@ -84,7 +84,7 @@ public class PLabel extends PWidget
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(Model.TEXT, this.text);
+        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class PLabel extends PWidget
         if (Objects.equals(this.text, text))
             return;
         this.text = text;
-        saveUpdate(Model.TEXT, this.text);
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -54,7 +54,7 @@ public class PElement extends PComplexPanel {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TAG, tagName);
+        parser.parse(ServerToClientModel.TAG, tagName);
     }
 
     @Override
@@ -76,14 +76,14 @@ public class PElement extends PComplexPanel {
         if (Objects.equals(this.innerHTML, innerHTML))
             return;
         this.innerHTML = innerHTML;
-        saveUpdate(Model.INNER_HTML, this.innerHTML);
+        saveUpdate(ServerToClientModel.INNER_HTML, this.innerHTML);
     }
 
     public void setInnerText(final String innerText) {
         if (Objects.equals(this.innerText, innerText))
             return;
         this.innerText = innerText;
-        saveUpdate(Model.INNER_TEXT, this.innerText);
+        saveUpdate(ServerToClientModel.INNER_TEXT, this.innerText);
     }
 
     public String getInnerText() {

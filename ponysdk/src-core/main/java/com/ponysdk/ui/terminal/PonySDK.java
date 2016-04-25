@@ -41,8 +41,9 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
@@ -102,7 +103,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 Integer viewID = null;
                 final Storage storage = Storage.getSessionStorageIfSupported();
                 if (storage != null) {
-                    final String v = storage.getItem(Model.APPLICATION_VIEW_ID.toStringValue());
+                    final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
                     if (v != null && !v.isEmpty())
                         viewID = Integer.parseInt(v);
                 }
@@ -118,13 +119,13 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 final StringBuilder builder = new StringBuilder();
                 builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
                 builder.append("ws?");
-                builder.append(Model.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID);
+                builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID);
                 builder.append("&");
-                builder.append(Model.APPLICATION_START.toStringValue());
+                builder.append(ClientToServerModel.APPLICATION_START.toStringValue());
                 builder.append("&");
-                builder.append(Model.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0);
+                builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0);
                 builder.append("&");
-                builder.append(Model.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
+                builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
                 socketClient = new WebSocketClient2(builder.toString(), this);
             } else {
@@ -169,7 +170,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
     public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(objectID);
-        instruction.put(Model.NATIVE, jsObject);
+        instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
     }
 
@@ -194,7 +195,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
         if (uiBuilder != null) {
             final PTInstruction instruction = new PTInstruction();
-            instruction.put(Model.ERROR_MSG, e.getMessage());
+            instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
             uiBuilder.sendDataToServer(instruction);
         }
     }
@@ -221,11 +222,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             // the Model enum
             final BinaryModel type = buffer.getBinaryModel();
 
-            if (type.getModel() == Model.HEARTBEAT) {
+            if (type.getModel() == ServerToClientModel.HEARTBEAT) {
                 if (log.isLoggable(Level.FINE))
                     log.log(Level.FINE, "Heart beat");
                 socketClient.getRequestBuilder().sendHeartbeat();
-            } else if (type.getModel() == Model.APPLICATION_SEQ_NUM) {
+            } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
                 uiBuilder.update(buffer);
             } else {
                 log.severe("" + type.getModel());

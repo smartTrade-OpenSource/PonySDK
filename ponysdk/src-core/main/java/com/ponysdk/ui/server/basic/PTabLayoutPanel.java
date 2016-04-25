@@ -38,8 +38,9 @@ import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another
@@ -103,33 +104,33 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD, widget.getID());
+        parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.parse(Model.TAB_WIDGET, tabWidget.getID());
-        parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
+        parser.parse(ServerToClientModel.TAB_WIDGET, tabWidget.getID());
+        parser.parse(ServerToClientModel.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
         // UIContext.get().assignParentID(widget.getID(), ID);
     }
 
     @Override
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final Object value) {
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
         // Nothing to do
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD, widget.getID());
+        parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.parse(Model.TAB_TEXT, tabText);
-        parser.parse(Model.BEFORE_INDEX, beforeIndex);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
+        parser.parse(ServerToClientModel.TAB_TEXT, tabText);
+        parser.parse(ServerToClientModel.BEFORE_INDEX, beforeIndex);
         parser.endObject();
 
         // UIContext.get().assignParentID(widget.getID(), ID);
@@ -144,18 +145,18 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     public void add(final PWidget widget, final String tabText) {
-        saveAdd(widget.getID(), ID, Model.TAB_TEXT, tabText);
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_TEXT, tabText);
     }
 
     public void add(final PWidget widget, final PWidget tabWidget) {
-        saveAdd(widget.getID(), ID, Model.TAB_WIDGET, tabWidget.getID());
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_WIDGET, tabWidget.getID());
     }
 
     public void selectTab(final int index) {
         if (index >= getWidgetCount())
             throw new IndexOutOfBoundsException();
         this.selectedItemIndex = index;
-        saveUpdate(Model.SELECTED_INDEX, index);
+        saveUpdate(ServerToClientModel.SELECTED_INDEX, index);
     }
 
     @Override
@@ -196,14 +197,14 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_SELECTION_HANDLER.toStringValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION_HANDLER.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
-                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(Model.INDEX.toStringValue())));
+                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.INDEX.toStringValue())));
             }
-        } else if (instruction.containsKey(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER.toStringValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER.toStringValue())) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
                 handler.onBeforeSelection(
-                        new PBeforeSelectionEvent<>(this, instruction.getInt(Model.INDEX.toStringValue())));
+                        new PBeforeSelectionEvent<>(this, instruction.getInt(ClientToServerModel.INDEX.toStringValue())));
             }
         } else {
             super.onClientData(instruction);
@@ -227,7 +228,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(Model.ANIMATION_DURATION, duration);
+        saveUpdate(ServerToClientModel.ANIMATION_DURATION, duration);
     }
 
     /**
@@ -237,12 +238,12 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate(Model.VERTICAL, isVertical);
+        saveUpdate(ServerToClientModel.VERTICAL, isVertical);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(Model.ANIMATE, duration);
+        saveUpdate(ServerToClientModel.ANIMATE, duration);
     }
 
     public int getAnimationDuration() {

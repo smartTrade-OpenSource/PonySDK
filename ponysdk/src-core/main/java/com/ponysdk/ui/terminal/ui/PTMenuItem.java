@@ -29,9 +29,10 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTMenuItem extends PTUIObject<MenuItem> {
 
@@ -48,15 +49,15 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
         }
-        if (Model.HTML.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
         }
-        if (Model.ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
         }
@@ -73,7 +74,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_COMMAND);
+                    eventInstruction.put(ClientToServerModel.HANDLER_COMMAND);
                     uiService.sendDataToServer(eventInstruction);
                 }
             });

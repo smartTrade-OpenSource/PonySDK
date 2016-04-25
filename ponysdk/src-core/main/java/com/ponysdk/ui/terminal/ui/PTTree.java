@@ -30,9 +30,10 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTTree extends PTWidget<Tree> {
 
@@ -52,8 +53,8 @@ public class PTTree extends PTWidget<Tree> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(Model.WIDGET_ID, ptObject.getObjectID());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.WIDGET_ID, ptObject.getObjectID());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -69,7 +70,7 @@ public class PTTree extends PTWidget<Tree> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }

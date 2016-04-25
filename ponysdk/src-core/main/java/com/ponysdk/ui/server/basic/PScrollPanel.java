@@ -24,7 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.
@@ -37,7 +37,7 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     public void setHorizontalScrollPosition(final int position) {
-        saveUpdate(Model.HORIZONTAL_SCROLL_POSITION, position);
+        saveUpdate(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position);
     }
 
     public void scrollToBottom() {
@@ -57,6 +57,6 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     private void scrollTo(final int type) {
-        saveUpdate(Model.SCROLL_TO, type);
+        saveUpdate(ServerToClientModel.SCROLL_TO, type);
     }
 }

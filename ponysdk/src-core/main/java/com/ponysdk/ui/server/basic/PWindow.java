@@ -35,8 +35,8 @@ import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PWindow extends PObject {
 
@@ -69,22 +69,22 @@ public class PWindow extends PObject {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.URL, url);
-        parser.parse(Model.NAME, name);
-        parser.parse(Model.FEATURES, features);
+        parser.parse(ServerToClientModel.URL, url);
+        parser.parse(ServerToClientModel.NAME, name);
+        parser.parse(ServerToClientModel.FEATURES, features);
     }
 
     public boolean open() {
         if (opened)
             return false;
         opened = true;
-        saveUpdate(Model.OPEN, true);
+        saveUpdate(ServerToClientModel.OPEN, true);
         WindowManager.registerWindow(this);
         return true;
     }
 
     public void close() {
-        saveUpdate(Model.CLOSE, true);
+        saveUpdate(ServerToClientModel.CLOSE, true);
     }
 
     @Override
@@ -94,11 +94,11 @@ public class PWindow extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             WindowManager.unregisterWindow(this);
             fireOnClose();
             return;
-        } else if (instruction.containsKey(HandlerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
             fireOnOpen();
         } else {
             super.onClientData(instruction);

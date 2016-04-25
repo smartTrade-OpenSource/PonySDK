@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
@@ -52,7 +52,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
             final BinaryModel binaryModel = buffer.getBinaryModel();
-            if (Model.BEFORE_INDEX.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
                 menuBar.insertItem(menuItem.cast(), binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
@@ -61,7 +61,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
             final BinaryModel binaryModel = buffer.getBinaryModel();
-            if (Model.BEFORE_INDEX.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
                 menuBar.insertSeparator(menuItem.cast(), binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
@@ -83,11 +83,11 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clearItems();
             return true;
         }
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }

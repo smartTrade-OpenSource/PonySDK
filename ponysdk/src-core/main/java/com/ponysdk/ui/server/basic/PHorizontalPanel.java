@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that lays all of its widgets out in a single horizontal column.
@@ -48,13 +48,13 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
-        saveUpdate(Model.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
     }
 
     @Override
     public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
-        saveUpdate(Model.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

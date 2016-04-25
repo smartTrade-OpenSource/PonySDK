@@ -44,7 +44,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * AddOn are used to bind server side object with javascript object
@@ -76,9 +76,9 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
 
-        parser.parse(Model.FACTORY, getModuleName(getClass()));
+        parser.parse(ServerToClientModel.FACTORY, getModuleName(getClass()));
         if (widget != null) {
-            parser.parse(Model.WIDGET_ID, widget.getID());
+            parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     }
 
     public void update(final JsonObject jsonObject) {
-        saveUpdate(Model.NATIVE, jsonObject);
+        saveUpdate(ServerToClientModel.NATIVE, jsonObject);
     }
 
     @Override

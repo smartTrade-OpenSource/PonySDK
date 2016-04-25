@@ -36,7 +36,8 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * This class allows to execute native Java-script code.
@@ -101,16 +102,16 @@ public abstract class PScript extends PObject {
     public void executeScript(final Long windowID, final String js) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
 
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         }
 
-        parser.parse(Model.EVAL, js);
+        parser.parse(ServerToClientModel.EVAL, js);
         parser.endObject();
     }
 
@@ -124,16 +125,16 @@ public abstract class PScript extends PObject {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
         if (windowID != null) {
-            parser.parse(Model.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         }
 
-        parser.parse(Model.EVAL, js);
-        parser.parse(Model.COMMAND_ID, executionID++);
+        parser.parse(ServerToClientModel.EVAL, js);
+        parser.parse(ServerToClientModel.COMMAND_ID, executionID++);
         parser.endObject();
     }
 
@@ -176,17 +177,17 @@ public abstract class PScript extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(Model.ERROR_MSG.toStringValue())) {
+        if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.toStringValue()).longValue());
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
             if (callback != null) {
-                callback.onFailure(instruction.getString(Model.ERROR_MSG.toStringValue()));
+                callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
             }
-        } else if (instruction.containsKey(Model.RESULT.toStringValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(Model.COMMAND_ID.toStringValue()).longValue());
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
             if (callback != null) {
-                callback.onSuccess(instruction.getString(Model.RESULT.toStringValue()));
+                callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
             }
         } else {
             super.onClientData(instruction);

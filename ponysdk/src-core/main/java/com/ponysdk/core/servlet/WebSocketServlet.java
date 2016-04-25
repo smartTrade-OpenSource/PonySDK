@@ -52,7 +52,8 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
 import com.ponysdk.core.useragent.UserAgent;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -191,13 +192,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void onWebSocketText(final String text) {
             if (context.getUIContext().isDestroyed()) {
-                log.info("Message dropped, ui context is destroyed");
+                if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");
             } else {
                 //onBeforeMessageReceived(text);
                 try {
                     context.getUIContext().notifyMessageReceived();
 
-                    if (!Model.HEARTBEAT.toStringValue().equals(text)) {
+                    if (!ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                         request.setText(text);
 
                         if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
@@ -282,7 +283,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void sendHeartBeat() {
             final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
-            socketBuffer.putShort(Model.HEARTBEAT.getValue());
+            socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
             flush(socketBuffer);
         }
     }

@@ -29,7 +29,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each
@@ -45,61 +45,61 @@ public abstract class PCellPanel extends PComplexPanel {
         if (Objects.equals(this.borderWidth, borderWidth))
             return;
         this.borderWidth = borderWidth;
-        saveUpdate(Model.BORDER_WIDTH, this.borderWidth);
+        saveUpdate(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
     }
 
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing))
             return;
         this.spacing = spacing;
-        saveUpdate(Model.SPACING, this.spacing);
+        saveUpdate(ServerToClientModel.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
-        parser.parse(Model.WIDGET_ID, widget.getID());
+        parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
-        parser.parse(Model.WIDGET_ID, widget.getID());
+        parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.CELL_HEIGHT, height);
-        parser.parse(Model.WIDGET_ID, widget.getID());
+        parser.parse(ServerToClientModel.CELL_HEIGHT, height);
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.CELL_WIDTH, width);
-        parser.parse(Model.WIDGET_ID, widget.getID());
+        parser.parse(ServerToClientModel.CELL_WIDTH, width);
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 

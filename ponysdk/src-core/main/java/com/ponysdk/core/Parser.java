@@ -23,7 +23,7 @@
 
 package com.ponysdk.core;
 
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public interface Parser {
 
@@ -33,8 +33,8 @@ public interface Parser {
 
     void endObject();
 
-    void parse(Model model);
+    void parse(ServerToClientModel model);
 
-    void parse(Model model, Object value);
+    void parse(ServerToClientModel model, Object value);
 
 }

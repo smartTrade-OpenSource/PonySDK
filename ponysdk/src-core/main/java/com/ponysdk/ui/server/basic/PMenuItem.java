@@ -30,8 +30,9 @@ import javax.json.JsonObject;
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand}
@@ -84,8 +85,8 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(Model.HTML, html);
-        else parser.parse(Model.TEXT, text);
+        if (html != null) parser.parse(ServerToClientModel.HTML, html);
+        else parser.parse(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -101,7 +102,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        saveUpdate(Model.TEXT, text);
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -114,12 +115,12 @@ public class PMenuItem extends PWidget implements PHasHTML {
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(Model.ENABLED, enabled);
+        saveUpdate(ServerToClientModel.ENABLED, enabled);
     }
 
     private void setSubMenu(final PMenuBar subMenu) {
@@ -134,13 +135,13 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
-        final String handlerKeyKey = HandlerModel.HANDLER_KEY.toStringValue();
+        final String handlerKeyKey = ClientToServerModel.HANDLER_KEY.toStringValue();
         String handlerKey = null;
         if (event.containsKey(handlerKeyKey)) {
             handlerKey = event.getString(handlerKeyKey);
         }
 
-        if (HandlerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) {
+        if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) {
             cmd.execute();
         } else {
             super.onClientData(event);

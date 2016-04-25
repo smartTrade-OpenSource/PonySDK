@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A command that will be deferred on the terminal.
@@ -73,8 +73,8 @@ public abstract class PTerminalScheduledCommand extends PObject {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.FIXDELAY, delayMillis);
-        parser.parse(Model.EVAL, js);
+        parser.parse(ServerToClientModel.FIXDELAY, delayMillis);
+        parser.parse(ServerToClientModel.EVAL, js);
     }
 
     protected abstract void run();

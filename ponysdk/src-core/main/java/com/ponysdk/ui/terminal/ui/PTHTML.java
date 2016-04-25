@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HTML;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTHTML extends PTLabel {
@@ -37,11 +37,11 @@ public class PTHTML extends PTLabel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.HTML.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             cast().setHTML(binaryModel.getStringValue());
             return true;
         }
-        if (Model.WORD_WRAP.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
             cast().setWordWrap(binaryModel.getBooleanValue());
             return true;
         }

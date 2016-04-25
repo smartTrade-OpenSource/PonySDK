@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PCookies {
 
@@ -51,8 +51,8 @@ public class PCookies {
     public String removeCookie(final String name) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        parser.parse(Model.REMOVE_COOKIE, name);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.REMOVE_COOKIE, name);
         parser.endObject();
 
         return cachedCookies.remove(name);
@@ -67,11 +67,11 @@ public class PCookies {
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        parser.parse(Model.ADD_COOKIE, name);
-        parser.parse(Model.VALUE, value);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.ADD_COOKIE, name);
+        parser.parse(ServerToClientModel.VALUE, value);
         if (expires != null) {
-            parser.parse(Model.COOKIE_EXPIRE, expires.getTime());
+            parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
         }
         parser.endObject();
     }

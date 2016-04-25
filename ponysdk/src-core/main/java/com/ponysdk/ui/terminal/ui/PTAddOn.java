@@ -35,8 +35,8 @@ import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -44,7 +44,7 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.FACTORY
+        // ServerToClientModel.FACTORY
         final String signature = buffer.getBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
@@ -56,7 +56,7 @@ public class PTAddOn extends AbstractPTObject {
         params.put("id", new JSONNumber(objectId));
 
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
             final int widgetID = binaryModel.getIntValue();
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
@@ -80,7 +80,7 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.NATIVE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
             final JSONObject data = binaryModel.getJsonObject();
             addOn.update(data.getJavaScriptObject());
             return true;

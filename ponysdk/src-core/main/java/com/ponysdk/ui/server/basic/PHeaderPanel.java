@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that includes a header (top), footer (bottom), and content (middle) area. The header and
@@ -52,7 +52,7 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void resize() {
-        saveUpdate(Model.RESIZE);
+        saveUpdate(ServerToClientModel.RESIZE);
     }
 
     @Override
@@ -76,21 +76,21 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         header = child;
-        saveAdd(child.getID(), ID, Model.INDEX, 0);
+        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 0);
     }
 
     public void setContentWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         content = child;
-        saveAdd(child.getID(), ID, Model.INDEX, 1);
+        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 1);
     }
 
     public void setFooterWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         footer = child;
-        saveAdd(child.getID(), ID, Model.INDEX, 2);
+        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 2);
     }
 
     @Override

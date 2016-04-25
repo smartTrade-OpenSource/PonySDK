@@ -30,8 +30,8 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTTreeItem extends PTUIObject<TreeItem> {
 
@@ -43,13 +43,13 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.TEXT
+        // ServerToClientModel.TEXT
         this.text = buffer.getBinaryModel().getStringValue();
 
         super.create(buffer, objectId, uiService);
 
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.ROOT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ROOT.equals(binaryModel.getModel())) {
             this.isRoot = binaryModel.getBooleanValue();
         } else {
             buffer.rewind(binaryModel);
@@ -69,9 +69,9 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
             this.tree = (Tree) widget;
         } else {
             final BinaryModel binaryModel = buffer.getBinaryModel();
-            if (Model.WIDGET.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.WIDGET.equals(binaryModel.getModel())) {
                 uiObject.setWidget((Widget) widget);
-            } else if (Model.INDEX.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
                 final TreeItem w = (TreeItem) widget;
                 final int index = binaryModel.getIntValue();
                 if (isRoot) tree.insertItem(index, w);
@@ -87,11 +87,11 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.SELECTED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
             uiObject.setSelected(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.STATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.STATE.equals(binaryModel.getModel())) {
             uiObject.setState(binaryModel.getBooleanValue());
             return true;
         }

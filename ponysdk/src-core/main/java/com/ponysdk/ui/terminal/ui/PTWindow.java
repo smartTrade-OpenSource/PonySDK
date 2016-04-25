@@ -33,9 +33,9 @@ import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 import elemental.client.Browser;
 import elemental.events.Event;
@@ -44,6 +44,8 @@ import elemental.events.MessageEvent;
 import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
+
+    private static final String EMPTY = "";
 
     private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
@@ -67,37 +69,37 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
         this.uiService = uiService;
 
-        // Model.URL
+        // ServerToClientModel.URL
         url = buffer.getBinaryModel().getStringValue();
         if (url == null)
             url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
 
-        // Model.NAME
+        // ServerToClientModel.NAME
         name = buffer.getBinaryModel().getStringValue();
         if (name == null)
-            name = "";
+            name = EMPTY;
 
-        // Model.FEATURES
+        // ServerToClientModel.FEATURES
         features = buffer.getBinaryModel().getStringValue();
         if (features == null)
-            features = "";
+            features = EMPTY;
 
         PTWindowManager.get().register(this);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.OPEN.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
             window.addEventListener("beforeunload", this, true);
             window.addEventListener("message", this, true);
             return true;
         }
-        if (Model.TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             window.postMessage(binaryModel.getStringValue(), "*");
             return true;
         }
-        if (Model.CLOSE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
             window.close();
             return true;
         }
@@ -121,7 +123,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
                 PTWindowManager.get().unregister(this);
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(objectID);
-                instruction.put(HandlerModel.HANDLER_CLOSE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(instruction);
             } else if (event.getType().equals("message")) {
                 final MessageEvent messageEvent = (MessageEvent) event;
@@ -129,7 +131,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
             } else if (event.getType().equals("onload")) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(objectID);
-                instruction.put(HandlerModel.HANDLER_OPEN_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
                 uiService.sendDataToServer(instruction);
             }
         }

@@ -27,20 +27,20 @@ import java.util.Date;
 
 import com.google.gwt.user.client.Cookies;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTCookies extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.ADD_COOKIE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ADD_COOKIE.equals(binaryModel.getModel())) {
             final String name = binaryModel.getStringValue();
-            // Model.VALUE
+            // ServerToClientModel.VALUE
             final String value = buffer.getBinaryModel().getStringValue();
 
             final BinaryModel expire = buffer.getBinaryModel();
-            if (Model.COOKIE_EXPIRE.equals(expire.getModel())) {
+            if (ServerToClientModel.COOKIE_EXPIRE.equals(expire.getModel())) {
                 final Date date = new Date(expire.getLongValue());
                 Cookies.setCookie(name, value, date);
             } else {
@@ -49,7 +49,7 @@ public class PTCookies extends AbstractPTObject {
             }
             return true;
         }
-        if (Model.REMOVE_COOKIE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.REMOVE_COOKIE.equals(binaryModel.getModel())) {
             Cookies.removeCookie(binaryModel.getStringValue());
             return true;
         }

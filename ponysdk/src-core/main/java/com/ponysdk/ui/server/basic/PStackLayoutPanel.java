@@ -38,7 +38,7 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time,
@@ -83,7 +83,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.UNIT, unit.getByteValue());
+        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -98,13 +98,13 @@ public class PStackLayoutPanel extends PComposite
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD, child.getID());
+        parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.parse(Model.HTML, header);
-        parser.parse(Model.SIZE, headerSize);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
+        parser.parse(ServerToClientModel.HTML, header);
+        parser.parse(ServerToClientModel.SIZE, headerSize);
         parser.endObject();
 
         // UIContext.get().assignParentID(child.getID(), ID);
@@ -190,11 +190,11 @@ public class PStackLayoutPanel extends PComposite
     public void showWidget(final PWidget widget) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.WIDGET_ID, widget.getID());
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
     }
 
@@ -206,12 +206,12 @@ public class PStackLayoutPanel extends PComposite
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(Model.ANIMATION_DURATION, duration);
+        saveUpdate(ServerToClientModel.ANIMATION_DURATION, duration);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(Model.ANIMATE, duration);
+        saveUpdate(ServerToClientModel.ANIMATE, duration);
     }
 
     public int getAnimationDuration() {

@@ -41,8 +41,9 @@ import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that presents a list of choices to the user, either as a list box or
@@ -95,8 +96,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
-            final String data = jsonObject.getString(Model.VALUE.toStringValue());
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
+            final String data = jsonObject.getString(ClientToServerModel.VALUE.toStringValue());
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<>();
 
@@ -128,13 +129,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD, ID);
+        parser.parse(ServerToClientModel.TYPE_ADD, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
         final String s = items.toString();
-        parser.parse(Model.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
-        parser.parse(Model.ITEM_GROUP, group);
+        parser.parse(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
+        parser.parse(ServerToClientModel.ITEM_GROUP, group);
         parser.endObject();
 
     }
@@ -150,7 +151,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.add(item);
 
-        saveUpdate(Model.ITEM_INSERTED, label);
+        saveUpdate(ServerToClientModel.ITEM_INSERTED, label);
     }
 
     public void insertItem(final String item, final int index) {
@@ -171,12 +172,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.ITEM_INSERTED, label);
-        parser.parse(Model.INDEX, index);
+        parser.parse(ServerToClientModel.ITEM_INSERTED, label);
+        parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();
     }
 
@@ -187,12 +188,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.ITEM_UPDATED, text);
-        parser.parse(Model.INDEX, index);
+        parser.parse(ServerToClientModel.ITEM_UPDATED, text);
+        parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();
     }
 
@@ -241,11 +242,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private void sendRemoveItemInstruction(final int index) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.ITEM_REMOVED, index);
+        parser.parse(ServerToClientModel.ITEM_REMOVED, index);
         parser.endObject();
 
         if (selectedIndex >= index)
@@ -262,7 +263,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.clear();
         selectedIndexes.clear();
 
-        saveUpdate(Model.CLEAR);
+        saveUpdate(ServerToClientModel.CLEAR);
 
         if (containsEmptyItem) {
             addItem(EMPTY, null);
@@ -285,12 +286,12 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.SELECTED, selected);
-        parser.parse(Model.INDEX, index);
+        parser.parse(ServerToClientModel.SELECTED, selected);
+        parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();
     }
 
@@ -405,7 +406,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setVisibleItemCount(final int visibleItemCount) {
         this.visibleItemCount = visibleItemCount;
-        saveUpdate(Model.VISIBLE_ITEM_COUNT, visibleItemCount);
+        saveUpdate(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount);
     }
 
     public int getVisibleItemCount() {
@@ -418,7 +419,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setMultipleSelect(final boolean isMultipleSelect) {
         this.isMultipleSelect = isMultipleSelect;
-        saveUpdate(Model.MULTISELECT, isMultipleSelect);
+        saveUpdate(ServerToClientModel.MULTISELECT, isMultipleSelect);
     }
 
     public class ListItem {

@@ -25,7 +25,7 @@ package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
@@ -38,7 +38,7 @@ public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
             final int beforeIndex = binaryModel.getIntValue();
             uiObject.insert(asWidget(ptObject), beforeIndex);
         } else {

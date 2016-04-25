@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collections;
 import java.util.Iterator;
 
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.
@@ -75,7 +75,7 @@ public abstract class PComplexPanel extends PPanel {
         if (children.size() - 1 == beforeIndex) {
             saveAdd(child.getID(), ID);
         } else {
-            saveAdd(child.getID(), ID, Model.INDEX, beforeIndex);
+            saveAdd(child.getID(), ID, ServerToClientModel.INDEX, beforeIndex);
         }
     }
 

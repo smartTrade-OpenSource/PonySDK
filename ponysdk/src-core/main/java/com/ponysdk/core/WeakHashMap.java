@@ -38,7 +38,7 @@ import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class WeakHashMap implements Map<Integer, PObject> {
 
@@ -174,13 +174,13 @@ public class WeakHashMap implements Map<Integer, PObject> {
             // if (parentObjectID != null) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_GC, objectID);
+            parser.parse(ServerToClientModel.TYPE_GC, objectID);
 
             if (removedObject.get() instanceof PWidget) {
                 System.err.println("GC object ");
                 final PWidget widget = (PWidget) removedObject.get();
                 final PWindow window = widget.getWindow();
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
 
             // parser.comma();

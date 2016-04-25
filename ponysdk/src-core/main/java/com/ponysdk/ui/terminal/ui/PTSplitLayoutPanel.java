@@ -31,9 +31,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
@@ -53,19 +54,19 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.MIN_SIZE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.MIN_SIZE.equals(binaryModel.getModel())) {
             final int minSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             cast().setWidgetMinSize(w, minSize);
             return true;
         }
-        if (Model.SNAP_CLOSED_SIZE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SNAP_CLOSED_SIZE.equals(binaryModel.getModel())) {
             final int snapClosedSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             cast().setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
         }
-        if (Model.TOGGLE_DISPLAY_ALLOWED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.equals(binaryModel.getModel())) {
             final boolean enable = binaryModel.getBooleanValue();
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             cast().setWidgetToggleDisplayAllowed(w, enable);
@@ -129,7 +130,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                         final Double wSize = getWidgetSize(w);
                         final PTInstruction ws = new PTInstruction();
                         ws.setObjectID(ptObject.getObjectID());
-                        ws.put(Model.SIZE, wSize);
+                        ws.put(ClientToServerModel.SIZE, wSize);
                         jsonArray.set(i, ws);
                         i++;
                     }
@@ -138,8 +139,8 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(objectId);
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_RESIZE_HANDLER);
-                    eventInstruction.put(Model.VALUE, jsonArray);
+                    eventInstruction.put(ClientToServerModel.HANDLER_RESIZE_HANDLER);
+                    eventInstruction.put(ClientToServerModel.VALUE, jsonArray);
                     uiService.sendDataToServer(eventInstruction);
                 }
 

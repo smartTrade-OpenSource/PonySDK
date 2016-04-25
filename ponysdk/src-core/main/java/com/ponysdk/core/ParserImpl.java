@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 import com.ponysdk.core.socket.WebSocket;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class ParserImpl implements Parser {
@@ -69,7 +69,7 @@ public class ParserImpl implements Parser {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
         if (socketBuffer.position() == 0) {
-            socketBuffer.putShort(Model.APPLICATION_SEQ_NUM.getValue());
+            socketBuffer.putShort(ServerToClientModel.APPLICATION_SEQ_NUM.getValue());
             socketBuffer.putInt(UIContext.get().getAndIncrementNextSentSeqNum());
         }
     }
@@ -80,8 +80,8 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parse(final Model model, final Object value) {
-        if (Model.TYPE_UPDATE.equals(model)) {
+    public void parse(final ServerToClientModel model, final Object value) {
+        if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
                 if (log.isDebugEnabled())
@@ -90,11 +90,11 @@ public class ParserImpl implements Parser {
             } else {
                 lastUpdatedID = newUpdatedID;
             }
-        } else if (Model.TYPE_ADD.equals(model) || Model.TYPE_ADD_HANDLER.equals(model) ||
-                Model.TYPE_CLOSE.equals(model)
-                || Model.TYPE_CREATE.equals(model) || Model.TYPE_GC.equals(model) ||
-                Model.TYPE_HISTORY.equals(model)
-                || Model.TYPE_REMOVE.equals(model) || Model.TYPE_REMOVE_HANDLER.equals(model)) {
+        } else if (ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model) ||
+                ServerToClientModel.TYPE_CLOSE.equals(model)
+                || ServerToClientModel.TYPE_CREATE.equals(model) || ServerToClientModel.TYPE_GC.equals(model) ||
+                ServerToClientModel.TYPE_HISTORY.equals(model)
+                || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)) {
             lastUpdatedID = -1;
         }
 
@@ -136,56 +136,56 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public void parse(final Model model) {
+    public void parse(final ServerToClientModel model) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
     }
 
-    private void parse(final Model model, final boolean value) {
+    private void parse(final ServerToClientModel model, final boolean value) {
         parse(model, value ? ReaderBuffer.TRUE : ReaderBuffer.FALSE);
     }
 
-    private void parse(final Model model, final byte value) {
+    private void parse(final ServerToClientModel model, final byte value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.put(value);
     }
 
-    private void parse(final Model model, final short value) {
+    private void parse(final ServerToClientModel model, final short value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putShort(value);
     }
 
-    private void parse(final Model model, final int value) {
+    private void parse(final ServerToClientModel model, final int value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putInt(value);
     }
 
-    private void parse(final Model model, final long value) {
+    private void parse(final ServerToClientModel model, final long value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putLong(value);
     }
 
-    private void parse(final Model model, final double value) {
+    private void parse(final ServerToClientModel model, final double value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putDouble(value);
     }
 
-    private void parse(final Model model, final JsonObject jsonObject) {
+    private void parse(final ServerToClientModel model, final JsonObject jsonObject) {
         parse(model, jsonObject.toString());
     }
 
-    private void parse(final Model model, final String value) {
+    private void parse(final ServerToClientModel model, final String value) {
         if (log.isDebugEnabled())
             log.debug("Writing in the buffer : " + model + " => " + (value != null ? value.length() : 0) + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();

@@ -37,8 +37,9 @@ import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
@@ -71,13 +72,13 @@ public class PFileUpload extends PWidget
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
-            final String fileName = jsonObject.getString(Model.FILE_NAME.toStringValue());
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
+            final String fileName = jsonObject.getString(ClientToServerModel.FILE_NAME.toStringValue());
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (jsonObject.containsKey(HandlerModel.HANDLER_SUBMIT_COMPLETE_HANDLER.toStringValue())) {
+        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SUBMIT_COMPLETE_HANDLER.toStringValue())) {
             onSubmitComplete();
         } else {
             super.onClientData(jsonObject);
@@ -91,7 +92,7 @@ public class PFileUpload extends PWidget
 
     public void setName(final String name) {
         this.name = name;
-        saveUpdate(Model.NAME, name);
+        saveUpdate(ServerToClientModel.NAME, name);
     }
 
     public void submit() {
@@ -113,7 +114,7 @@ public class PFileUpload extends PWidget
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(Model.ENABLED, enabled);
+        saveUpdate(ServerToClientModel.ENABLED, enabled);
     }
 
     public String getFileName() {

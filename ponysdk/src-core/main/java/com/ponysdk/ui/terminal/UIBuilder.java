@@ -65,12 +65,12 @@ import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
-import com.ponysdk.ui.terminal.extension.AddonFactory;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
@@ -84,15 +84,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private static EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
-    private final Map<String, AddonFactory> addonByKey = new HashMap<>();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
     private final List<PTInstruction> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
-    // private final Map<Integer, JSONObject> incomingMessageQueue = new
-    // HashMap<>();
+    // private final Map<Integer, JSONObject> incomingMessageQueue = new HashMap<>();
 
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
@@ -105,7 +103,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private RequestBuilder requestBuilder;
 
     private long lastReceived = -1;
-    // private final long nextSent = 1;
 
     public static int sessionID;
 
@@ -117,18 +114,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public UIBuilder() {
         History.addValueChangeHandler(this);
 
-        // final AddonList addonList = GWT.create(PonyAddonList.class);
-
-        // final List<AddonFactory> addonFactoryList =
-        // addonList.getAddonFactoryList();
-        //
-        // for (final AddonFactory addonFactory : addonFactoryList) {
-        // addonByKey.put(addonFactory.getSignature(), addonFactory);
-        // }
-
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
-
     }
 
     public void init(final int ID, final RequestBuilder requestBuilder) {
@@ -208,24 +195,24 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         while (buffer.getIndex() < buffer.getByteLength()) {
             binaryModel = buffer.getBinaryModel();
 
-            if (Model.TYPE_CREATE.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
                 final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
                 processUpdate(buffer, ptObject);
-            } else if (Model.TYPE_UPDATE.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
                 processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (Model.TYPE_ADD.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
                 processAdd(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (Model.TYPE_GC.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
                 processGC(binaryModel.getIntValue());
-            } else if (Model.TYPE_REMOVE.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
                 processRemove(buffer, binaryModel.getIntValue());
-            } else if (Model.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
                 processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
-            } else if (Model.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
                 processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (Model.TYPE_HISTORY.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
                 processHistory(buffer, binaryModel.getStringValue());
-            } else if (Model.TYPE_CLOSE.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
                 processClose(buffer);
             } else {
                 log.log(Level.WARNING, "Unknown instruction type : " + binaryModel.getModel());
@@ -237,7 +224,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void update(final JSONValue data) {
         JSONArray jsonArray = data.isArray();
         if (jsonArray == null)
-            jsonArray = data.isObject().get(Model.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
+            jsonArray = data.isObject().get(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
@@ -261,7 +248,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
-        // Model.WIDGET_TYPE
+        // ServerToClientModel.WIDGET_TYPE
         final WidgetType widgetType = WidgetType.values()[buffer.getBinaryModel().getByteValue()];
 
         final PTObject ptObject = uiFactory.newUIObject(this, widgetType);
@@ -278,7 +265,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processAdd(final ReaderBuffer buffer, final PTObject ptObject) {
-        // Model.PARENT_OBJECT_ID
+        // ServerToClientModel.PARENT_OBJECT_ID
         final int parentId = buffer.getBinaryModel().getIntValue();
         final PTObject parentObject = getPTObject(parentId);
         if (parentObject != null) {
@@ -325,7 +312,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel, this);
         } else {
-            // Model.OBJECT_ID
+            // ServerToClientModel.OBJECT_ID
             final int id = buffer.getBinaryModel().getIntValue();
             final PTObject ptObject = getPTObject(id);
             if (ptObject != null)
@@ -346,7 +333,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + token);
         final String oldToken = History.getToken();
 
-        // Model.HISTORY_FIRE_EVENTS
+        // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.getBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
             if (fireEvents)
@@ -469,8 +456,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     public void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
-        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
+        requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
+        requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
         if (!stackedErrors.isEmpty()) {
             final JSONArray errors = new JSONArray();
@@ -478,7 +465,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             for (final JSONObject jsoObject : stackedErrors)
                 errors.set(i++, jsoObject);
             stackedErrors.clear();
-            requestData.put(Model.APPLICATION_ERRORS, errors);
+            requestData.put(ClientToServerModel.APPLICATION_ERRORS, errors);
         }
 
         if (log.isLoggable(Level.FINE))
@@ -560,7 +547,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(Model.TYPE_HISTORY, event.getValue());
+            eventInstruction.put(ClientToServerModel.TYPE_HISTORY, event.getValue());
             stackInstrution(eventInstruction);
         }
     }
@@ -640,11 +627,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Deprecated
     @Override
     public void processInstruction(final PTInstruction instruction) throws Exception {
+        log.severe("Deprecated UIBuilder#processInstruction() method, don't use it : " + instruction);
     }
 
     // FIXME REMOVE
     @Deprecated
     private void executeInstruction(final PTInstruction instruction) {
+        log.severe("Deprecated UIBuilder#executeInstruction() method, don't use it : " + instruction);
     }
 
 }

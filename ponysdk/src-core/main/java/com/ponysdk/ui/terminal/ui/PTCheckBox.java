@@ -29,9 +29,10 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTCheckBox extends PTButtonBase<CheckBox> {
 
@@ -42,7 +43,7 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
             uiObject.setValue(binaryModel.getBooleanValue());
             return true;
         }
@@ -65,8 +66,8 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(getObjectID());
-                instruction.put(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
-                instruction.put(Model.VALUE_CHECKBOX, event.getValue());
+                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
+                instruction.put(ClientToServerModel.VALUE_CHECKBOX, event.getValue());
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });

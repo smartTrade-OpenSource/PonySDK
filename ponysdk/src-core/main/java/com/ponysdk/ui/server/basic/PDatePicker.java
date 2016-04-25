@@ -39,8 +39,9 @@ import com.ponysdk.ui.server.basic.event.PShowRangeHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTDatePicker;
 
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
@@ -74,17 +75,17 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.toStringValue())) {
-            final long data = jsonObject.getJsonNumber(Model.DATE.toStringValue()).longValue();
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.toStringValue())) {
+            final long data = jsonObject.getJsonNumber(ClientToServerModel.DATE.toStringValue()).longValue();
             Date date = data != -1 ? date = new Date(data) : null;
 
-            year = jsonObject.getInt(Model.YEAR.toStringValue());
-            month = jsonObject.getInt(Model.MONTH.toStringValue());
-            day = jsonObject.getInt(Model.DAY.toStringValue());
+            year = jsonObject.getInt(ClientToServerModel.YEAR.toStringValue());
+            month = jsonObject.getInt(ClientToServerModel.MONTH.toStringValue());
+            day = jsonObject.getInt(ClientToServerModel.DAY.toStringValue());
             onValueChange(new PValueChangeEvent<>(this, date));
-        } else if (jsonObject.containsKey(HandlerModel.HANDLER_SHOW_RANGE.toStringValue())) {
-            final long start = jsonObject.getJsonNumber(Model.START_DATE.toStringValue()).longValue();
-            final long end = jsonObject.getJsonNumber(Model.END_DATE.toStringValue()).longValue();
+        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SHOW_RANGE.toStringValue())) {
+            final long start = jsonObject.getJsonNumber(ClientToServerModel.START_DATE.toStringValue()).longValue();
+            final long end = jsonObject.getJsonNumber(ClientToServerModel.END_DATE.toStringValue()).longValue();
             final Date sd = new Date(start);
             final Date ed = new Date(end);
 
@@ -148,11 +149,11 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(Model.DATE, date != null ? date.getTime() : -1);
+        saveUpdate(ServerToClientModel.DATE, date != null ? date.getTime() : -1);
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(Model.TIME, date != null ? date.getTime() : -1);
+        saveUpdate(ServerToClientModel.TIME, date != null ? date.getTime() : -1);
     }
 
     /**
@@ -162,12 +163,12 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.DATE_ENABLED, dateToString(dates));
-        parser.parse(Model.ENABLED, enabled);
+        parser.parse(ServerToClientModel.DATE_ENABLED, dateToString(dates));
+        parser.parse(ServerToClientModel.ENABLED, enabled);
         parser.endObject();
     }
 
@@ -177,12 +178,12 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.ADD_DATE_STYLE, dateToString(dates));
-        parser.parse(Model.STYLE_NAME, styleName);
+        parser.parse(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
+        parser.parse(ServerToClientModel.STYLE_NAME, styleName);
         parser.endObject();
     }
 
@@ -192,12 +193,12 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getTxnContext().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
+            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(Model.REMOVE_DATE_STYLE, dateToString(dates));
-        parser.parse(Model.STYLE_NAME, styleName);
+        parser.parse(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
+        parser.parse(ServerToClientModel.STYLE_NAME, styleName);
         parser.endObject();
     }
 

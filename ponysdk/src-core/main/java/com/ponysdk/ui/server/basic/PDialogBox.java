@@ -24,7 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a PPopupPanel,
@@ -74,7 +74,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
 
     public void setCaption(final String caption) {
         this.caption = caption;
-        saveUpdate(Model.POPUP_CAPTION, caption);
+        saveUpdate(ServerToClientModel.POPUP_CAPTION, caption);
     }
 
     public String getCaption() {

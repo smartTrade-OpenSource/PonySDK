@@ -1,7 +1,7 @@
 
 package com.ponysdk.ui.terminal.socket;
 
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.request.WebSocketRequestBuilder;
 
 import elemental.client.Browser;
@@ -92,7 +92,7 @@ public class WebSocketClient2 implements EventListener {
          * JSONNumber(UIBuilder.sessionID));
          * webSocket.send(jsonObject.toString());
          */
-        webSocket.send(Model.HEARTBEAT.toStringValue());
+        webSocket.send(ClientToServerModel.HEARTBEAT.toStringValue());
     }
 
 }

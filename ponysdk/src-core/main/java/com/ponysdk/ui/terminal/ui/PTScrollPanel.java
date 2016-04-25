@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTScrollPanel extends PTSimplePanel {
@@ -44,11 +44,11 @@ public class PTScrollPanel extends PTSimplePanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.HORIZONTAL_SCROLL_POSITION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION.equals(binaryModel.getModel())) {
             cast().setHorizontalScrollPosition(binaryModel.getIntValue());
             return true;
         }
-        if (Model.SCROLL_TO.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SCROLL_TO.equals(binaryModel.getModel())) {
             final long scrollTo = binaryModel.getLongValue();
             if (scrollTo == 0)
                 cast().scrollToBottom();

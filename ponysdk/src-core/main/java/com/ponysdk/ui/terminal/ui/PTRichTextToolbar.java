@@ -33,7 +33,7 @@ public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.WIDGET_ID
+        // ServerToClientModel.WIDGET_ID
         richTextArea = (PTRichTextArea) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
 
         super.create(buffer, objectId, uiService);

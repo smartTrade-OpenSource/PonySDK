@@ -28,9 +28,10 @@ import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTImage extends PTWidget<Image> {
 
@@ -43,16 +44,16 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         final BinaryModel urlModel = buffer.getBinaryModel();
-        if (Model.IMAGE_URL.equals(urlModel.getModel())) {
+        if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
             final BinaryModel leftModel = buffer.getBinaryModel();
             url = urlModel.getStringValue();
-            if (Model.IMAGE_LEFT.equals(leftModel.getModel())) {
+            if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
                 left = leftModel.getIntValue();
-                // Model.IMAGE_TOP
+                // ServerToClientModel.IMAGE_TOP
                 top = buffer.getBinaryModel().getIntValue();
-                // Model.IMAGE_WIDTH
+                // ServerToClientModel.IMAGE_WIDTH
                 width = buffer.getBinaryModel().getIntValue();
-                // Model.IMAGE_HEIGHT
+                // ServerToClientModel.IMAGE_HEIGHT
                 height = buffer.getBinaryModel().getIntValue();
             } else {
                 buffer.rewind(leftModel);
@@ -76,9 +77,9 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
         if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
-            // Model.STREAM_REQUEST_ID
+            // ServerToClientModel.STREAM_REQUEST_ID
             cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                    + Model.STREAM_REQUEST_ID + "=" + buffer.getBinaryModel().getIntValue());
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + buffer.getBinaryModel().getIntValue());
         } else {
             super.addHandler(buffer, handlerModel, uiService);
         }
@@ -86,7 +87,7 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.IMAGE_URL.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
             cast().setUrl(binaryModel.getStringValue());
             return true;
         }

@@ -37,7 +37,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and
@@ -98,12 +98,12 @@ public abstract class PHTMLTable extends PPanel {
             if (styles.add(styleName)) {
                 final Parser parser = Txn.get().getTxnContext().getParser();
                 parser.beginObject();
-                parser.parse(Model.TYPE_UPDATE, ID);
+                parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
                 if (window != null) {
-                    parser.parse(Model.WINDOW_ID, window.getID());
+                    parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
                 }
-                parser.parse(Model.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
-                parser.parse(Model.ROW, row);
+                parser.parse(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
+                parser.parse(ServerToClientModel.ROW, row);
                 parser.endObject();
             }
         }
@@ -117,12 +117,12 @@ public abstract class PHTMLTable extends PPanel {
             if (styles.remove(styleName)) {
                 final Parser parser = Txn.get().getTxnContext().getParser();
                 parser.beginObject();
-                parser.parse(Model.TYPE_UPDATE, ID);
+                parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
                 if (window != null) {
-                    parser.parse(Model.WINDOW_ID, window.getID());
+                    parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
                 }
-                parser.parse(Model.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                parser.parse(Model.ROW, row);
+                parser.parse(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                parser.parse(ServerToClientModel.ROW, row);
                 parser.endObject();
             }
         }
@@ -139,12 +139,12 @@ public abstract class PHTMLTable extends PPanel {
 
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.ROW_FORMATTER_SET_STYLE_NAME, styleName);
-            parser.parse(Model.ROW, row);
+            parser.parse(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.ROW, row);
             parser.endObject();
         }
 
@@ -178,65 +178,65 @@ public abstract class PHTMLTable extends PPanel {
         public void addStyleName(final int row, final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void setStyleName(final int row, final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.CELL_FORMATTER_SET_STYLE_NAME, styleName);
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.VERTICAL_ALIGNMENT, align.getValue());
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.HORIZONTAL_ALIGNMENT, align.getValue());
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
     }
@@ -246,48 +246,48 @@ public abstract class PHTMLTable extends PPanel {
         public void setWidth(final int column, final String width) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.COLUMN_FORMATTER_COLUMN_WIDTH, width);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void addStyleName(final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void removeStyleName(final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
 
         public void setStyleName(final int column, final String styleName) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
         }
     }
@@ -363,7 +363,7 @@ public abstract class PHTMLTable extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate(Model.CLEAR);
+        saveUpdate(ServerToClientModel.CLEAR);
     }
 
     public void removeRow(final int row) {
@@ -388,7 +388,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
 
-        saveUpdate(Model.CLEAR_ROW, row);
+        saveUpdate(ServerToClientModel.CLEAR_ROW, row);
 
     }
 
@@ -404,7 +404,7 @@ public abstract class PHTMLTable extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        saveUpdate(Model.INSERT_ROW, row);
+        saveUpdate(ServerToClientModel.INSERT_ROW, row);
     }
 
     @Override
@@ -435,17 +435,17 @@ public abstract class PHTMLTable extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        saveUpdate(Model.BORDER_WIDTH, width);
+        saveUpdate(ServerToClientModel.BORDER_WIDTH, width);
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        saveUpdate(Model.CELL_PADDING, padding);
+        saveUpdate(ServerToClientModel.CELL_PADDING, padding);
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        saveUpdate(Model.CELL_SPACING, spacing);
+        saveUpdate(ServerToClientModel.CELL_SPACING, spacing);
     }
 
     protected void setCellFormatter(final PCellFormatter cellFormatter) {
@@ -465,13 +465,13 @@ public abstract class PHTMLTable extends PPanel {
             // Physical attach.
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_ADD, widget.getID());
+            parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.PARENT_OBJECT_ID, ID);
-            parser.parse(Model.ROW, row);
-            parser.parse(Model.COLUMN, column);
+            parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
+            parser.parse(ServerToClientModel.ROW, row);
+            parser.parse(ServerToClientModel.COLUMN, column);
             parser.endObject();
 
             adopt(widget);

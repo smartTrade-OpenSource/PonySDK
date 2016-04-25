@@ -34,9 +34,10 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
@@ -69,9 +70,9 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                     final PTInstruction instruction = new PTInstruction();
                     // FIXME
                     instruction.setObjectID(instruction.getObjectID());
-                    instruction.put(HandlerModel.HANDLER_SHOW_RANGE);
-                    instruction.put(Model.START_DATE, event.getStart().getTime());
-                    instruction.put(Model.END_DATE, event.getEnd().getTime());
+                    instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
+                    instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
+                    instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
                     uiService.sendDataToServer(picker, instruction);
                 }
             });
@@ -97,46 +98,46 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(getObjectID());
-        instruction.put(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(Model.DATE, date);
-        instruction.put(Model.YEAR, year);
-        instruction.put(Model.MONTH, month);
-        instruction.put(Model.DAY, day);
+        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+        instruction.put(ClientToServerModel.DATE, date);
+        instruction.put(ClientToServerModel.YEAR, year);
+        instruction.put(ClientToServerModel.MONTH, month);
+        instruction.put(ClientToServerModel.DAY, day);
         uiService.sendDataToServer(picker, instruction);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final DatePicker picker = cast();
-        if (Model.DATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.DATE.equals(binaryModel.getModel())) {
             picker.setValue(asDate(binaryModel.getLongValue()));
             return true;
         }
-        if (Model.TIME.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
             picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
             return true;
         }
-        if (Model.DATE_ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.DATE_ENABLED.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
-            // Model.ENABLED
+            // ServerToClientModel.ENABLED
             final boolean enabled = buffer.getBinaryModel().getBooleanValue();
             for (final String date : dates) {
                 picker.setTransientEnabledOnDates(enabled, asDate(date));
             }
             return true;
         }
-        if (Model.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
-            // Model.STYLE_NAME
+            // ServerToClientModel.STYLE_NAME
             final String style = buffer.getBinaryModel().getStringValue();
             for (final String date : dates) {
                 picker.addStyleToDates(style, asDate(date));
             }
             return true;
         }
-        if (Model.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
-            // Model.STYLE_NAME
+            // ServerToClientModel.STYLE_NAME
             final String style = buffer.getBinaryModel().getStringValue();
             for (final String date : dates) {
                 picker.removeStyleFromDates(style, asDate(date));

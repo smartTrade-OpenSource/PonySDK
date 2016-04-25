@@ -34,7 +34,7 @@ import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.ui.terminal.exception.ServerException;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 
 public abstract class AbstractApplicationManager {
 
@@ -123,7 +123,7 @@ public abstract class AbstractApplicationManager {
     }
 
     protected void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
-        final String applicationInstructions = Model.APPLICATION_INSTRUCTIONS.toStringValue();
+        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
         if (jsonObject.containsKey(applicationInstructions)) {
             // final int key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue()).intValue();
             final int key = 1;
@@ -148,7 +148,7 @@ public abstract class AbstractApplicationManager {
 
     private void printClientErrorMessage(final JsonObject data) {
         try {
-            final JsonArray errors = data.getJsonArray(Model.APPLICATION_ERRORS.toStringValue());
+            final JsonArray errors = data.getJsonArray(ClientToServerModel.APPLICATION_ERRORS.toStringValue());
             for (int i = 0; i < errors.size(); i++) {
                 final JsonObject jsoObject = errors.getJsonObject(i);
                 final String message = jsoObject.getString("message");

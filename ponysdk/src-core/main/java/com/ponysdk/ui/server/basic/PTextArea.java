@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Objects;
 
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A text box that allows multiple lines of text to be entered.
@@ -59,7 +59,7 @@ public class PTextArea extends PTextBoxBase {
     public void setVisibleLines(final int visibleLines) {
         if (Objects.equals(this.visibleLines, visibleLines)) return;
         this.visibleLines = visibleLines;
-        saveUpdate(Model.VISIBLE_LINES, visibleLines);
+        saveUpdate(ServerToClientModel.VISIBLE_LINES, visibleLines);
     }
 
     public int getCharacterWidth() {
@@ -69,7 +69,7 @@ public class PTextArea extends PTextBoxBase {
     public void setCharacterWidth(final int characterWidth) {
         if (Objects.equals(this.characterWidth, characterWidth)) return;
         this.characterWidth = characterWidth;
-        saveUpdate(Model.CHARACTER_WIDTH, characterWidth);
+        saveUpdate(ServerToClientModel.CHARACTER_WIDTH, characterWidth);
     }
 
 }

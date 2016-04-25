@@ -24,7 +24,7 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A type of widget that can wrap another widget, hiding the wrapped widget's methods. When added to
@@ -50,7 +50,7 @@ public abstract class PComposite extends PWidget {
         this.widget = child;
         child.setParent(this);
 
-        saveUpdate(Model.WIDGET_ID, child.getID());
+        saveUpdate(ServerToClientModel.WIDGET_ID, child.getID());
     }
 
 }

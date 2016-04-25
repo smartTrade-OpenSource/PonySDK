@@ -27,8 +27,8 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTFlexTable extends PTHTMLTable {
 
@@ -46,25 +46,25 @@ public class PTFlexTable extends PTHTMLTable {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
         }
-        if (Model.INSERT_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
         }
-        if (Model.SET_COL_SPAN.equals(binaryModel.getModel())) {
-            // Model.ROW
+        if (ServerToClientModel.SET_COL_SPAN.equals(binaryModel.getModel())) {
+            // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.getBinaryModel().getIntValue();
-            // Model.COLUMN
+            // ServerToClientModel.COLUMN
             final int cellFormatterColumn = buffer.getBinaryModel().getIntValue();
             cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
         }
-        if (Model.SET_ROW_SPAN.equals(binaryModel.getModel())) {
-            // Model.ROW
+        if (ServerToClientModel.SET_ROW_SPAN.equals(binaryModel.getModel())) {
+            // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.getBinaryModel().getIntValue();
-            // Model.COLUMN
+            // ServerToClientModel.COLUMN
             final int cellFormatterColumn = buffer.getBinaryModel().getIntValue();
             cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
             return true;

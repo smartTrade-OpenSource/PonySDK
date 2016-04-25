@@ -33,9 +33,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
@@ -58,18 +59,18 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
         final TabLayoutPanel tabPanel = uiObject;
 
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.TAB_TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TAB_TEXT.equals(binaryModel.getModel())) {
             final BinaryModel beforeIndexModel = buffer.getBinaryModel();
-            if (Model.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
                 tabPanel.insert(w, binaryModel.getStringValue(), beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
                 tabPanel.add(w, binaryModel.getStringValue());
             }
-        } else if (Model.TAB_WIDGET.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.getBinaryModel();
-            if (Model.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
                 tabPanel.insert(w, ptWidget.cast(), beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
@@ -88,8 +89,8 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(Model.INDEX, uiObject.getSelectedIndex());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.INDEX, uiObject.getSelectedIndex());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -101,8 +102,8 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
-                    eventInstruction.put(Model.INDEX, event.getItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.INDEX, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -118,19 +119,19 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         }
-        if (Model.VERTICAL.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VERTICAL.equals(binaryModel.getModel())) {
             uiObject.setAnimationVertical(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
         }
-        if (Model.SELECTED_INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SELECTED_INDEX.equals(binaryModel.getModel())) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
         }

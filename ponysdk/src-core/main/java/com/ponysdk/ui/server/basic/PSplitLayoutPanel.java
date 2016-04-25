@@ -38,8 +38,9 @@ import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -108,12 +109,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (getMinSize(child) != minSize) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.MIN_SIZE, minSize);
-            parser.parse(Model.WIDGET_ID, child.getID());
+            parser.parse(ServerToClientModel.MIN_SIZE, minSize);
+            parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).minSize = minSize;
@@ -141,12 +142,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
-            parser.parse(Model.WIDGET_ID, child.getID());
+            parser.parse(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
+            parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
@@ -167,12 +168,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (isToggleDisplayAllowed(child) != allowed) {
             final Parser parser = Txn.get().getTxnContext().getParser();
             parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
+                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
-            parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
-            parser.parse(Model.WIDGET_ID, child.getID());
+            parser.parse(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
+            parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
 
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
@@ -181,15 +182,15 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_KEY_RESIZE_HANDLER.toStringValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_KEY_RESIZE_HANDLER.toStringValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
-            final JsonArray array = instruction.getJsonArray(Model.VALUE.toStringValue());
+            final JsonArray array = instruction.getJsonArray(ClientToServerModel.VALUE.toStringValue());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject ws = array.getJsonObject(i);
-                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.toStringValue()).intValue();
+                final int objectID = ws.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.toStringValue()).doubleValue();
+                    final double widgetSize = ws.getJsonNumber(ClientToServerModel.SIZE.toStringValue()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }

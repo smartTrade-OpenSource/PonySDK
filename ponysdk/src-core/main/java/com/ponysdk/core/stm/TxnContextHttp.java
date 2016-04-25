@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.Parser2;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.Request;
 import com.ponysdk.core.servlet.Response;
@@ -51,8 +50,6 @@ public class TxnContextHttp implements TxnContext {
 
     private Request request;
     private Response response;
-
-    private Parser2 parser;
 
     private UserAgent userAgent;
 
@@ -71,7 +68,7 @@ public class TxnContextHttp implements TxnContext {
 
     @Override
     public Parser getParser() {
-        return parser;
+        return null;
     }
 
     @Override
@@ -94,11 +91,6 @@ public class TxnContextHttp implements TxnContext {
     @Override
     public void setResponse(final Response response) {
         this.response = response;
-        try {
-            this.parser = new Parser2(response.getWriter());
-        } catch (final IOException e) {
-            log.error("Cannot initialize Parser", e);
-        }
     }
 
     @Override

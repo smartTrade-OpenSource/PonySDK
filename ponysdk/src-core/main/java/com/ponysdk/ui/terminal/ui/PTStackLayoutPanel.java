@@ -33,9 +33,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
@@ -44,7 +45,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.UNIT
+        // ServerToClientModel.UNIT
         unit = Unit.values()[buffer.getBinaryModel().getByteValue()];
 
         super.create(buffer, objectId, uiService);
@@ -78,8 +79,8 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(Model.VALUE, event.getSelectedItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.VALUE, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -92,8 +93,8 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
-                    eventInstruction.put(Model.VALUE, event.getItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.VALUE, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -105,15 +106,15 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
             uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiService));
             return true;
         }
-        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         }
-        if (Model.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
         }

@@ -30,7 +30,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
@@ -118,7 +118,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.MENU_BAR_IS_VERTICAL, vertical);
+        parser.parse(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, item);
-        saveAdd(item.getID(), ID, Model.BEFORE_INDEX, beforeIndex);
+        saveAdd(item.getID(), ID, ServerToClientModel.BEFORE_INDEX, beforeIndex);
         return item;
     }
 
@@ -196,12 +196,12 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) {
         items.add(beforeIndex, itemSeparator);
-        saveAdd(itemSeparator.getID(), ID, Model.BEFORE_INDEX, beforeIndex);
+        saveAdd(itemSeparator.getID(), ID, ServerToClientModel.BEFORE_INDEX, beforeIndex);
         return itemSeparator;
     }
 
     public void clearItems() {
-        saveUpdate(Model.CLEAR);
+        saveUpdate(ServerToClientModel.CLEAR);
         items.clear();
     }
 
@@ -217,7 +217,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(Model.ANIMATION, animationEnabled);
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
 }

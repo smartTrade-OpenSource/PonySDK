@@ -35,7 +35,7 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that displays the image at a given URL. The image can be in
@@ -108,12 +108,12 @@ public class PImage extends PFocusWidget {
         super.enrichOnInit(parser);
 
         if (url != null) {
-            parser.parse(Model.IMAGE_URL, url);
+            parser.parse(ServerToClientModel.IMAGE_URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
-                parser.parse(Model.IMAGE_LEFT, left);
-                parser.parse(Model.IMAGE_TOP, top);
-                parser.parse(Model.IMAGE_HEIGHT, imageHeight);
-                parser.parse(Model.IMAGE_WIDTH, imageWidth);
+                parser.parse(ServerToClientModel.IMAGE_LEFT, left);
+                parser.parse(ServerToClientModel.IMAGE_TOP, top);
+                parser.parse(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
+                parser.parse(ServerToClientModel.IMAGE_WIDTH, imageWidth);
             }
         }
     }
@@ -125,7 +125,7 @@ public class PImage extends PFocusWidget {
 
     public void setUrl(final String url) {
         this.url = url;
-        saveUpdate(Model.IMAGE_URL, url);
+        saveUpdate(ServerToClientModel.IMAGE_URL, url);
     }
 
     public String getUrl() {

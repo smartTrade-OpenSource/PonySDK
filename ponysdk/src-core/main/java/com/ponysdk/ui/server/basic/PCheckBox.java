@@ -34,8 +34,9 @@ import javax.json.JsonObject;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard check box widget. This class also serves as a base class for
@@ -115,7 +116,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         if (Objects.equals(this.value, value))
             return;
         this.value = value;
-        saveUpdate(Model.VALUE_CHECKBOX, this.value);
+        saveUpdate(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override
@@ -128,8 +129,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.toStringValue())) {
-            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE_CHECKBOX.toStringValue())));
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.toStringValue())) {
+            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(ClientToServerModel.VALUE_CHECKBOX.toStringValue())));
         } else {
             super.onClientData(jsonObject);
         }

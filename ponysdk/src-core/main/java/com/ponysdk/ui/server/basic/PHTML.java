@@ -28,7 +28,7 @@ import java.util.Objects;
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -66,8 +66,8 @@ public class PHTML extends PLabel implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(Model.HTML, this.html.replace("\"", "\\\""));
-        if (wordWrap) parser.parse(Model.WORD_WRAP, this.wordWrap);
+        if (html != null) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     public boolean isWordWrap() {
@@ -96,7 +96,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.wordWrap, wordWrap))
             return;
         this.wordWrap = wordWrap;
-        saveUpdate(Model.WORD_WRAP, this.wordWrap);
+        saveUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override

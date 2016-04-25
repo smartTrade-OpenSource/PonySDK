@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
@@ -53,7 +53,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(Model.TEXT, this.text);
+        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -61,7 +61,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.text, text))
             return;
         this.text = text;
-        saveUpdate(Model.TEXT, this.text);
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     @Override

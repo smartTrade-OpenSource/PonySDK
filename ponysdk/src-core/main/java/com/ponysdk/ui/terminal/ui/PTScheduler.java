@@ -33,9 +33,9 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTScheduler extends AbstractPTObject implements CommunicationErrorEvent.Handler {
 
@@ -56,15 +56,15 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        // Model.COMMAND_ID
+        // ServerToClientModel.COMMAND_ID
         final long commandID = binaryModel.getLongValue();
 
         final BinaryModel model = buffer.getBinaryModel();
-        if (Model.STOP.equals(model)) {
+        if (ServerToClientModel.STOP.equals(model)) {
             // Stop the command
             commandByIDs.remove(commandID).cancel();
             return true;
-        } else if (Model.FIXDELAY.equals(model)) {
+        } else if (ServerToClientModel.FIXDELAY.equals(model)) {
             final int delay = model.getIntValue();
             // Fix-delay
             // Wait for execution terminated before scheduling again
@@ -75,7 +75,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
             Scheduler.get().scheduleFixedDelay(command, delay);
             commandByIDs.put(commandID, command);
             return true;
-        } else if (Model.FIXRATE.equals(model)) {
+        } else if (ServerToClientModel.FIXRATE.equals(model)) {
             final int delay = model.getIntValue();
             // Fix-rate
             final SchedulerCommand previousCmd = commandByIDs.remove(commandID);
@@ -131,9 +131,9 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(HandlerModel.HANDLER_SCHEDULER);
-            instruction.put(Model.COMMAND_ID, commandID);
-            instruction.put(Model.FIXRATE, delay);
+            instruction.put(ClientToServerModel.HANDLER_SCHEDULER);
+            instruction.put(ClientToServerModel.COMMAND_ID, commandID);
+            instruction.put(ClientToServerModel.FIXRATE, delay);
 
             uiService.sendDataToServer(instruction);
 
@@ -156,9 +156,9 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
             final PTInstruction instruction = new PTInstruction();
             instruction.setObjectID(schedulerID);
-            instruction.put(HandlerModel.HANDLER_SCHEDULER);
-            instruction.put(Model.COMMAND_ID, commandID);
-            instruction.put(Model.FIXDELAY, delay);
+            instruction.put(ClientToServerModel.HANDLER_SCHEDULER);
+            instruction.put(ClientToServerModel.COMMAND_ID, commandID);
+            instruction.put(ClientToServerModel.FIXDELAY, delay);
 
             uiService.sendDataToServer(instruction);
 
