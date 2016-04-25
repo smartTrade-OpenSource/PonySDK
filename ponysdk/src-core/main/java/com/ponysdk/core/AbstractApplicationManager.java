@@ -122,25 +122,21 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    protected void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
+    public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
         if (jsonObject.containsKey(applicationInstructions)) {
             // final int key = jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue()).intValue();
             final int key = 1;
 
             final Application applicationSession = context.getApplication();
-
-            if (applicationSession == null) {
+            if (applicationSession == null)
                 throw new ServerException(ServerException.INVALID_SESSION,
                         "Invalid session, please reload your application (viewID #" + key + ").");
-            }
 
             final UIContext uiContext = context.getUIContext();
-
-            if (uiContext == null) {
+            if (uiContext == null)
                 throw new ServerException(ServerException.INVALID_SESSION,
                         "Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
-            }
 
             uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
         }

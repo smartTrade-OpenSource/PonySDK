@@ -84,7 +84,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
         flushNow = false;
 
-        Txn.get().getTxnContext().flush();
+        Txn.get().flush();
     }
 
     @Override

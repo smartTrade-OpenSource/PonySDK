@@ -100,7 +100,7 @@ public abstract class PScript extends PObject {
     }
 
     public void executeScript(final Long windowID, final String js) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -123,7 +123,7 @@ public abstract class PScript extends PObject {
         final long id = executionID++;
         callbacksByID.put(id, callback);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {

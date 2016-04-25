@@ -38,7 +38,8 @@ public abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectID, final UIService uiService) {
+        this.objectID = objectID;
     }
 
     @Override

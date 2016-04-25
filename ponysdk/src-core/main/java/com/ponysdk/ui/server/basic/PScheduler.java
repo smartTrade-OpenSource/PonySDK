@@ -105,7 +105,7 @@ public abstract class PScheduler extends PObject {
     }
 
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -117,7 +117,7 @@ public abstract class PScheduler extends PObject {
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -129,14 +129,14 @@ public abstract class PScheduler extends PObject {
     }
 
     private void cancelScheduleCommand(final long cmdID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
             parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
         parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
-        parser.parse(ServerToClientModel.STOP);
+        parser.parse(ServerToClientModel.STOP, null);
         parser.endObject();
 
         final RepeatingCommand command = commandByID.remove(cmdID);

@@ -69,7 +69,6 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * bound to the current {@link Application} .
  * </p>
  */
-
 public class UIContext {
 
     private static ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
@@ -227,7 +226,7 @@ public class UIContext {
             final PObject object = weakReferences.get(objectID);
 
             if (object == null) {
-                log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
                 if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                     final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
@@ -295,7 +294,7 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, 0);
@@ -308,7 +307,7 @@ public class UIContext {
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, 0);
@@ -381,9 +380,9 @@ public class UIContext {
     }
 
     public void close() {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_CLOSE);
+        parser.parse(ServerToClientModel.TYPE_CLOSE, null);
         parser.endObject();
     }
 

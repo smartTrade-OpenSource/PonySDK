@@ -101,6 +101,6 @@ public class PHTML extends PLabel implements PHasHTML {
 
     @Override
     public String toString() {
-        return toString("text=" + text + ", html=" + html);
+        return super.toString() + ", text=" + text + ", html=" + html;
     }
 }

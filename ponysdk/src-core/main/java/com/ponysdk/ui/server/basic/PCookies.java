@@ -49,7 +49,7 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.REMOVE_COOKIE, name);
@@ -65,7 +65,7 @@ public class PCookies {
     public void setCookie(final String name, final String value, final Date expires) {
         cachedCookies.put(name, value);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.ADD_COOKIE, name);

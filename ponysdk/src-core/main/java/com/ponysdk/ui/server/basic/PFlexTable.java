@@ -53,7 +53,7 @@ public class PFlexTable extends PHTMLTable {
     public class PFlexCellFormatter extends PCellFormatter {
 
         public void setColSpan(final int row, final int column, final int colSpan) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -66,7 +66,7 @@ public class PFlexTable extends PHTMLTable {
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {

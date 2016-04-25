@@ -51,7 +51,7 @@ public class PToolbar implements IsPWidget, HasPWidgets {
     @Override
     public void add(final PWidget w) {
         panel.add(w);
-        panel.setCellHeight(w, "100%");
+        panel.setCellHeight(w, Size.HUNDRED_PERCENT);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.objectID = objectId;
+        super.create(buffer, objectId, uiService);
 
         if (log.isLoggable(Level.INFO))
             log.log(Level.INFO, "PTWindowID created : " + objectID);

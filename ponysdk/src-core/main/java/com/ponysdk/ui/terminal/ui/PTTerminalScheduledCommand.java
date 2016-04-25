@@ -43,6 +43,8 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
+
         // ServerToClientModel.FIXDELAY
         final int delayMs = buffer.getBinaryModel().getIntValue();
         if (delayMs <= 0) {

@@ -157,7 +157,7 @@ public class PLabel extends PWidget
 
     @Override
     public String toString() {
-        return toString("text=" + text);
+        return super.toString() + ", text=" + text;
     }
 
 }

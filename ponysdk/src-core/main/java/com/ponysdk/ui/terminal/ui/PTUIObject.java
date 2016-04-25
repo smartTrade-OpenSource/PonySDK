@@ -43,8 +43,8 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
         this.uiObject = createUIObject();
-        this.objectID = objectId;
         uiService.registerUIObject(this.objectID, uiObject);
     }
 

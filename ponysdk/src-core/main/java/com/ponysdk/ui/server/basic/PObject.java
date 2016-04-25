@@ -64,7 +64,7 @@ public abstract class PObject {
         if (initialized)
             return;
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_CREATE, ID);
         if (window != null) {
@@ -160,7 +160,7 @@ public abstract class PObject {
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
@@ -171,7 +171,7 @@ public abstract class PObject {
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         if (window != null) {
@@ -181,7 +181,7 @@ public abstract class PObject {
     }
 
     protected void saveRemoveHandler(final ServerToClientModel type, final ServerToClientModel model, final Object value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         if (window != null) {
@@ -192,7 +192,7 @@ public abstract class PObject {
     }
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
         if (window != null) {
@@ -203,37 +203,31 @@ public abstract class PObject {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        parser.parse(model);
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        parser.parse(model, null);
         parser.endObject();
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.endObject();
         // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(model, value);
         parser.endObject();
 
@@ -241,18 +235,18 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ServerToClientModel model) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
             parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         }
-        parser.parse(model);
+        parser.parse(model, null);
         parser.endObject();
     }
 
     protected void saveUpdate(final ServerToClientModel model, final Object value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -264,11 +258,7 @@ public abstract class PObject {
 
     @Override
     public String toString() {
-        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + "]";
-    }
-
-    public String toString(final String append) {
-        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + ", " + append + "]";
+        return "ID=" + ID + ", widgetType=" + getWidgetType().name();
     }
 
 }

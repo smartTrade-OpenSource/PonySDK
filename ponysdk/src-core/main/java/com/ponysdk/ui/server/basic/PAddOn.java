@@ -51,7 +51,9 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public abstract class PAddOn<T extends PObject> extends PObject implements PNativeHandler {
 
-    private static final String ATTACH = "attach";
+    private static final String ARGUMENTS_PROPERTY_NAME = "arg";
+    private static final String METHOD_PROPERTY_NAME = "m";
+    private static final String ATTACH_PROPERTY_NAME = "att";
 
     private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
 
@@ -94,8 +96,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
         final Javascript jsAnnotation = obj.getAnnotation(Javascript.class);
         String moduleName = jsAnnotation.value();
 
-        // if no name, take the className, because new pattern es6 classes
-        // friendly:
+        // if no name, take the className, because new pattern es6 classes friendly:
         // java class name == es6 class name == XXXXAddon
         if (moduleName.isEmpty())
             moduleName = obj.getCanonicalName();
@@ -116,8 +117,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     public void onNativeEvent(final PNativeEvent event) {
         final JsonObject jsonObject = event.getJsonObject();
         try {
-            if (jsonObject.containsKey(ATTACH)) {
-                attached = jsonObject.getBoolean(ATTACH);
+            if (jsonObject.containsKey(ATTACH_PROPERTY_NAME)) {
+                attached = jsonObject.getBoolean(ATTACH_PROPERTY_NAME);
                 if (attached) {
                     sendPendingJSONData();
                     onAttached();
@@ -161,7 +162,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     protected void callBindedMethod(final String methodName, final Object... args) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("method", methodName);
+        builder.add(METHOD_PROPERTY_NAME, methodName);
 
         if (args.length > 0) {
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -179,7 +180,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
                         arrayBuilder.add(object.toString());
                 }
             }
-            builder.add("args", arrayBuilder);
+            builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
         }
 
         if (!attached) {

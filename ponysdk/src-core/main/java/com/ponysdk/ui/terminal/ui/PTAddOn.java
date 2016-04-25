@@ -44,6 +44,8 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        super.create(buffer, objectId, uiService);
+
         // ServerToClientModel.FACTORY
         final String signature = buffer.getBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();

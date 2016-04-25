@@ -96,13 +96,11 @@ public class PStackLayoutPanel extends PComposite
         children.add(child);
         adopt(child);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.HTML, header);
         parser.parse(ServerToClientModel.SIZE, headerSize);
         parser.endObject();
@@ -188,7 +186,7 @@ public class PStackLayoutPanel extends PComposite
     }
 
     public void showWidget(final PWidget widget) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {

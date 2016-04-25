@@ -57,7 +57,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -71,7 +71,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -85,7 +85,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         assertIsChild(widget);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -126,9 +126,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         sendUpdate(child, ServerToClientModel.BOTTOM, bottom, ServerToClientModel.HEIGHT, height, unit);
     }
 
-    private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2, final double v2,
+    private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
+            final double v2,
             final PUnit unit) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {

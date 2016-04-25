@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ponysdk.core.Parser;
+
 public class Txn {
 
     private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
@@ -80,8 +82,8 @@ public class Txn {
         }
     }
 
-    public TxnContext getTxnContext() {
-        return txnContext;
+    public Parser getParser() {
+        return txnContext.getParser();
     }
 
     public void addTnxListener(final TxnListener txnListener) {

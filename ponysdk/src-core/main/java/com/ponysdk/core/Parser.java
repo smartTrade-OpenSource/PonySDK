@@ -33,8 +33,6 @@ public interface Parser {
 
     void endObject();
 
-    void parse(ServerToClientModel model);
-
     void parse(ServerToClientModel model, Object value);
 
 }

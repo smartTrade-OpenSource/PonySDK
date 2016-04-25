@@ -172,7 +172,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
                 log.debug("Removing reference on object #" + objectID);
 
             // if (parentObjectID != null) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_GC, objectID);
 

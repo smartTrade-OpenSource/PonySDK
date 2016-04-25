@@ -253,7 +253,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setStyleProperty(final String name, final String value) {
         final String previous = safeStyleProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -268,7 +268,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void removeStyleProperty(final String name) {
         final String previous = safeStyleProperties().remove(name);
         if (previous != null) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -282,7 +282,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setProperty(final String name, final String value) {
         final String previous = safeElementProperties().put(name, value);
         if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -297,7 +297,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setAttribute(final String name, final String value) {
         final String previous = safeElementAttributes().put(name, value);
         if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -312,7 +312,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void removeAttribute(final String name) {
         final String previous = safeElementAttributes().remove(name);
         if (previous != null) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -337,7 +337,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void preventEvent(final PEvent e) {
         if (safePreventEvents().add(e)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -350,7 +350,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void stopEvent(final PEvent e) {
         if (safeStopEvents().add(e)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -363,7 +363,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void addStyleName(final String styleName) {
         if (safeStyleName().add(styleName)) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -383,7 +383,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private void removeStyle(final String styleName) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
@@ -447,7 +447,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 handler);
         if (handlerIterator.isEmpty()) {
 
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
@@ -465,7 +465,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Collection<PKeyUpHandler> handlerIterator = ensureDomHandler().getHandlers(PKeyUpEvent.TYPE, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(PKeyUpEvent.TYPE, this, handler);
         if (handlerIterator.isEmpty()) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
@@ -483,7 +483,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);

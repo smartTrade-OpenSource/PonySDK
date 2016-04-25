@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.servlet.WebSocketServlet.Buffer;
 import com.ponysdk.core.socket.WebSocket;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class ParserImpl implements Parser {
 
@@ -135,8 +135,7 @@ public class ParserImpl implements Parser {
         }
     }
 
-    @Override
-    public void parse(final ServerToClientModel model) {
+    private void parse(final ServerToClientModel model) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());

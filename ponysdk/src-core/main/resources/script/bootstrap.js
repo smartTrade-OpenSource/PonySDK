@@ -81,9 +81,9 @@ Check.prototype = {
         if (i === -1) {
             url = document.URL;
         } else {
-            url = document.URL.substr(0, i - 1);
+            url = document.URL.substr(0, i);
         }
-        return url + "?ping";
+        return url + '?ping=' + new Date().getTime();
     },
 
     onCheckSuccess: function (data) {

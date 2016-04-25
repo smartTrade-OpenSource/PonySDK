@@ -76,7 +76,7 @@ public class PHistory {
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_HISTORY, token);
         parser.parse(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);

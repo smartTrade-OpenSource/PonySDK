@@ -107,7 +107,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -140,7 +140,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
 
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {
@@ -166,7 +166,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
+            final Parser parser = Txn.get().getParser();
             parser.beginObject();
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
             if (window != null) {

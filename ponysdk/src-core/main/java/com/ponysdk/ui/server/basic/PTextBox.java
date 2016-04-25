@@ -110,7 +110,7 @@ public class PTextBox extends PTextBoxBase {
      *            replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         if (window != null) {
