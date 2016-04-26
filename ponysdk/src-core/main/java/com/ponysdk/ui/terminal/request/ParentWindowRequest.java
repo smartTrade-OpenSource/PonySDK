@@ -29,7 +29,7 @@ public class ParentWindowRequest extends RequestBuilder {
         callback.onDataReceived(JSONParser.parseStrict(text).isObject());
     }
 
-    public static native void sendToParent(final String objectID, final JavaScriptObject data) /*-{$wnd.opener.sendDataToServer(objectID, data);}-*/;
+    public static native void sendToParent(final String objectID, final JavaScriptObject data) /*-{$wnd.opener.pony.sendDataToServer(objectID, data);}-*/;
 
     public native void exportOnDataReceived() /*-{
                                               var that = this;
