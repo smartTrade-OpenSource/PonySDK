@@ -3,12 +3,11 @@ package com.ponysdk.ui.terminal.request;
 
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 
-public class WebSocketRequestBuilder extends RequestBuilder {
+public class WebSocketRequestBuilder implements RequestBuilder {
 
     private final WebSocketClient2 webSocketClient;
 
-    public WebSocketRequestBuilder(final WebSocketClient2 webSocketClient, final RequestCallback callback) {
-        super(callback);
+    public WebSocketRequestBuilder(final WebSocketClient2 webSocketClient) {
         this.webSocketClient = webSocketClient;
     }
 
@@ -17,8 +16,4 @@ public class WebSocketRequestBuilder extends RequestBuilder {
         webSocketClient.send(s);
     }
 
-    @Override
-    public void sendHeartbeat() {
-        webSocketClient.sendHeartbeat();
-    }
 }

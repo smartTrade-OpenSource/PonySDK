@@ -14,14 +14,17 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 
-public class HttpRequestBuilder extends RequestBuilder {
+public class HttpRequestBuilder implements RequestBuilder {
+
+    protected final RequestCallback callback;
 
     private final static Logger log = Logger.getLogger(HttpRequestBuilder.class.getName());
 
-    private final com.google.gwt.http.client.RequestBuilder requestBuilder = new com.google.gwt.http.client.RequestBuilder(com.google.gwt.http.client.RequestBuilder.POST, GWT.getHostPageBaseURL() + "p");
+    private final com.google.gwt.http.client.RequestBuilder requestBuilder = new com.google.gwt.http.client.RequestBuilder(
+            com.google.gwt.http.client.RequestBuilder.POST, GWT.getHostPageBaseURL() + "p");
 
     public HttpRequestBuilder(final RequestCallback callback) {
-        super(callback);
+        this.callback = callback;
     }
 
     @Override
@@ -56,6 +59,4 @@ public class HttpRequestBuilder extends RequestBuilder {
         }
     }
 
-    @Override
-    public void sendHeartbeat() {}
 }
