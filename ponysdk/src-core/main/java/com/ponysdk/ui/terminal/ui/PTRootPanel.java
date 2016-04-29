@@ -26,8 +26,8 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
@@ -35,6 +35,7 @@ public class PTRootPanel extends PTAbsolutePanel {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        // ServerToClientModel.ROOT_ID
         rootId = buffer.getBinaryModel().getStringValue();
 
         super.create(buffer, objectId, uiService);

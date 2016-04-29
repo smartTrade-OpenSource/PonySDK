@@ -25,10 +25,13 @@ package com.ponysdk.sample.client;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.UIContext;
+import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
@@ -87,6 +90,7 @@ import com.ponysdk.ui.server.basic.PTreeItem;
 import com.ponysdk.ui.server.basic.PTwinListBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
@@ -105,26 +109,19 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        // PRootPanel.get().clear(true);
-
-        final PLabel label = new PLabel("Coucou");
-        // PRootPanel.get().add(label);
-
-        final LabelPAddOn addon = new LabelPAddOn();
-        addon.log(null);
-        // PRootPanel.get().add(new LabelPAddOn());
-
-        final PElement elt = new PElement("div");
-        PRootPanel.get().add(elt);
-        final LabelPAddOn addon2 = new LabelPAddOn(elt);
-        addon2.log("Coucou");
-
         final PFlowPanel boxContainer = new PFlowPanel();
 
         //        boxContainer.add(new PHistory());
         //        boxContainer.add(new PNotificationManager());
         //        boxContainer.add(new PSuggestBox());
-        //        boxContainer.add(new PWindow());
+        //final PWindow w = new PWindow(null, "Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
+        final PWindow w = new PWindow(null, "Window 1", null);
+        w.open();
+        w.addWidget(new PLabel("Window 1"));
+
+        final AtomicInteger i = new AtomicInteger();
+        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> w.addWidget(new PLabel("Window 1 " + i.incrementAndGet())), 10, 10,
+                TimeUnit.SECONDS);
 
         boxContainer.add(createBlock(createAbsolutePanel()));
         //boxContainer.add(createPAddOn().asWidget());

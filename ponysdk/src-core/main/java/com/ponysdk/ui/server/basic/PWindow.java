@@ -62,8 +62,6 @@ public class PWindow extends PObject {
         this.features = features;
 
         init();
-
-        System.err.println("Window id : " + getID());
     }
 
     @Override
@@ -75,8 +73,7 @@ public class PWindow extends PObject {
     }
 
     public boolean open() {
-        if (opened)
-            return false;
+        if (opened) return false;
         opened = true;
         saveUpdate(ServerToClientModel.OPEN, true);
         WindowManager.registerWindow(this);
@@ -148,7 +145,7 @@ public class PWindow extends PObject {
     }
 
     public void addWidget(final IsPWidget widget) {
-        PRootLayoutPanel.get().add(widget);
+        getPRootLayoutPanel().add(widget);
     }
 
     public static class TargetAttribut {

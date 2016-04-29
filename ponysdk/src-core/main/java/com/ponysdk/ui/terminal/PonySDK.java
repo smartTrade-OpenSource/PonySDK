@@ -36,24 +36,23 @@ import org.timepedia.exporter.client.Exportable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.request.ParentWindowRequest;
+import com.ponysdk.ui.terminal.request.RequestCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 
 import elemental.client.Browser;
 import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.StorageEvent;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
-public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketCallback, EventListener {
+public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
@@ -77,13 +76,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
         }
         return INSTANCE;
-    }
-
-    @Override
-    public void handleEvent(final Event event) {
-        final StorageEvent storageEvent = (StorageEvent) event;
-        // final Integer windowID = Integer.valueOf(storageEvent.getKey());
-        uiBuilder.update(JSONParser.parseStrict(storageEvent.getNewValue()).isObject());
     }
 
     @Export
@@ -114,11 +106,49 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
                 builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-                socketClient = new WebSocketClient2(builder.toString(), this);
-            } else {
-                exportOnDataReceived();
+                socketClient = new WebSocketClient2(builder.toString(), new WebSocketCallback() {
 
-                // uiBuilder.init(applicationViewID, new ParentWindowRequest(String.valueOf(UIBuilder.sessionID), null));
+                    @Override
+                    public void connected() {
+                        if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+                        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
+                    }
+
+                    @Override
+                    public void disconnected() {
+                        if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
+                        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
+                    }
+
+                    /**
+                     * Message from server
+                     */
+                    @Override
+                    public void message(final ReaderBuffer buffer) {
+                        try {
+                            uiBuilder.update(buffer);
+                        } catch (final Exception e) {
+                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+                        }
+                    }
+
+                });
+            } else {
+                uiBuilder.init(applicationViewID, new ParentWindowRequest(String.valueOf(UIBuilder.sessionID), new RequestCallback() {
+
+                    @Override
+                    public void onDataReceived(final ReaderBuffer buffer) {
+                        uiBuilder.update(buffer);
+                    }
+
+                    @Override
+                    public void onDataReceived(final JSONObject object) {
+                    }
+
+                    @Override
+                    public void onError(final Throwable exception) {
+                    }
+                }));
 
                 // window.addEventListener("storage", this, false);
 
@@ -142,17 +172,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
-    }
-
-    public native void exportOnDataReceived() /*-{
-                                              var that = this;
-                                              $wnd.onDataReceived = function(text) {
-                                              $entry(that.@com.ponysdk.ui.terminal.PonySDK::onDataReceived(Ljava/lang/String;)(text));
-                                              }
-                                              }-*/;
-
-    public void onDataReceived(final String text) {
-        uiBuilder.update(JSONParser.parseStrict(text).isObject());
     }
 
     @Export
@@ -186,27 +205,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
             final PTInstruction instruction = new PTInstruction();
             instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
             uiBuilder.sendDataToServer(instruction);
-        }
-    }
-
-    @Override
-    public void connected() {
-        if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
-    }
-
-    @Override
-    public void disconnected() {
-        if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-    }
-
-    @Override
-    public void message(final ReaderBuffer buffer) {
-        try {
-            uiBuilder.update(buffer);
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
         }
     }
 
