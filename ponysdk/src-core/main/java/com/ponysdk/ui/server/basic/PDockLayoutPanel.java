@@ -119,10 +119,8 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetSize(final PWidget widget, final double size) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.WIDGET_SIZE, size);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -131,10 +129,8 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.WIDGET_HIDDEN, hidden);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -150,9 +146,9 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.DIRECTION, direction.getValue());
         parser.parse(ServerToClientModel.SIZE, size);
         parser.endObject();

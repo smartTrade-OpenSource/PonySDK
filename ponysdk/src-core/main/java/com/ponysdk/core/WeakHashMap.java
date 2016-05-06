@@ -174,7 +174,6 @@ public class WeakHashMap implements Map<Integer, PObject> {
             // if (parentObjectID != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
-            parser.parse(ServerToClientModel.TYPE_GC, objectID);
 
             if (removedObject.get() instanceof PWidget) {
                 System.err.println("GC object ");
@@ -183,7 +182,8 @@ public class WeakHashMap implements Map<Integer, PObject> {
                 parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             }
 
-            // parser.comma();
+            parser.parse(ServerToClientModel.TYPE_GC, objectID);
+
             // parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
             parser.endObject();
             // }

@@ -102,15 +102,9 @@ public abstract class PScript extends PObject {
     public void executeScript(final Long windowID, final String js) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
-
-        if (windowID != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        }
-
         parser.parse(ServerToClientModel.EVAL, js);
         parser.endObject();
     }
@@ -125,14 +119,9 @@ public abstract class PScript extends PObject {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
-        if (windowID != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        }
-
         parser.parse(ServerToClientModel.EVAL, js);
         parser.parse(ServerToClientModel.COMMAND_ID, executionID++);
         parser.endObject();

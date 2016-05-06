@@ -59,10 +59,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
         parser.endObject();
@@ -73,10 +71,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
         parser.endObject();
@@ -87,10 +83,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.WIDGET_HIDDEN, hidden);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -131,10 +125,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
             final PUnit unit) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
         parser.parse(key1, v1);

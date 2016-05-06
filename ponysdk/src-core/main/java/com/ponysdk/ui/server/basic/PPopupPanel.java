@@ -200,10 +200,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
         parser.parse(ServerToClientModel.POPUP_POSITION_TOP, topPosition);
         parser.endObject();

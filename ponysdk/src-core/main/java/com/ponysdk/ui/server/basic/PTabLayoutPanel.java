@@ -104,9 +104,9 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TAB_WIDGET, tabWidget.getID());
         parser.parse(ServerToClientModel.BEFORE_INDEX, beforeIndex);
         parser.endObject();
@@ -122,9 +122,9 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TAB_TEXT, tabText);
         parser.parse(ServerToClientModel.BEFORE_INDEX, beforeIndex);
         parser.endObject();

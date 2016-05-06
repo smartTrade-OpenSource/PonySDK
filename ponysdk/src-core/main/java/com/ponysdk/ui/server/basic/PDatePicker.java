@@ -163,10 +163,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.DATE_ENABLED, dateToString(dates));
         parser.parse(ServerToClientModel.ENABLED, enabled);
         parser.endObject();
@@ -178,10 +176,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
         parser.parse(ServerToClientModel.STYLE_NAME, styleName);
         parser.endObject();
@@ -193,10 +189,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
         parser.parse(ServerToClientModel.STYLE_NAME, styleName);
         parser.endObject();

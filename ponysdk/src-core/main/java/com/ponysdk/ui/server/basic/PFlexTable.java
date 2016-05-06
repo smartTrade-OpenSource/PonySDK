@@ -55,10 +55,8 @@ public class PFlexTable extends PHTMLTable {
         public void setColSpan(final int row, final int column, final int colSpan) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.SET_COL_SPAN, colSpan);
             parser.parse(ServerToClientModel.ROW, row);
             parser.parse(ServerToClientModel.COLUMN, column);
@@ -68,10 +66,8 @@ public class PFlexTable extends PHTMLTable {
         public void setRowSpan(final int row, final int column, final int rowSpan) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.SET_ROW_SPAN, rowSpan);
             parser.parse(ServerToClientModel.ROW, row);
             parser.parse(ServerToClientModel.COLUMN, column);

@@ -129,8 +129,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_ADD, ID);
         if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        parser.parse(ServerToClientModel.TYPE_ADD, ID);
         final String s = items.toString();
         parser.parse(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
         parser.parse(ServerToClientModel.ITEM_GROUP, group);
@@ -170,10 +170,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.ITEM_INSERTED, label);
         parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();
@@ -186,10 +184,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.ITEM_UPDATED, text);
         parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();
@@ -240,10 +236,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private void sendRemoveItemInstruction(final int index) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.ITEM_REMOVED, index);
         parser.endObject();
 
@@ -284,10 +278,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.SELECTED, selected);
         parser.parse(ServerToClientModel.INDEX, index);
         parser.endObject();

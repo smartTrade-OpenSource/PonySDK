@@ -58,10 +58,8 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -70,10 +68,8 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -82,10 +78,8 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setCellHeight(final PWidget widget, final String height) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.CELL_HEIGHT, height);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();
@@ -94,10 +88,8 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setCellWidth(final PWidget widget, final String width) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.CELL_WIDTH, width);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();

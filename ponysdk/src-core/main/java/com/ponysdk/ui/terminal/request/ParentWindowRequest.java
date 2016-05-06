@@ -61,21 +61,21 @@ public class ParentWindowRequest implements RequestBuilder {
      * To Main terminal
      */
     public static native void sendToParent(final String objectID, final JavaScriptObject data) /*-{
-        $wnd.opener.pony.sendDataToServer(objectID, data);
-    }-*/;
+                                                                                               $wnd.opener.pony.sendDataToServer(objectID, data);
+                                                                                               }-*/;
 
     /**
-     * From Main terminal
+     * From Main terminal to the matching window terminal
      */
     public native void exportOnDataReceived() /*-{
-        var that = this;
-        $wnd.onDataReceived = function(buffer) {
-            $entry(that.@com.ponysdk.ui.terminal.request.ParentWindowRequest::onDataReceived(Lcom/ponysdk/ui/terminal/model/ReaderBuffer;)(buffer));
-        }
-    }-*/;
+                                              var that = this;
+                                              $wnd.onDataReceived = function(buffer) {
+                                              $entry(that.@com.ponysdk.ui.terminal.request.ParentWindowRequest::onDataReceived(Lcom/ponysdk/ui/terminal/model/ReaderBuffer;)(buffer));
+                                              }
+                                              }-*/;
 
     /**
-     * From Main terminal
+     * From Main terminal to the matching window terminal
      */
     public void onDataReceived(final ReaderBuffer buffer) {
         if (log.isLoggable(Level.FINE)) log.fine("Data received from main terminal");

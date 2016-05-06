@@ -242,4 +242,8 @@ public enum ServerToClientModel {
         return type;
     }
 
+    public boolean equals(final ServerToClientModel other) {
+        return other != null ? this.ordinal() == other.ordinal() : false;
+    }
+
 }

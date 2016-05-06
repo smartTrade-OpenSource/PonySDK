@@ -75,6 +75,8 @@ import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
+import com.ponysdk.ui.terminal.ui.PTWindow;
+import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler,
         HttpRequestSendEvent.Handler {
@@ -122,8 +124,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (log.isLoggable(Level.INFO))
             log.info("Init request builder");
 
-        this.requestBuilder = requestBuilder;
         UIBuilder.sessionID = ID;
+        this.requestBuilder = requestBuilder;
 
         loadingMessageBox = new SimplePanel();
 
@@ -190,10 +192,34 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
+    public void updateMainTerminal(final ReaderBuffer buffer) {
+        while (buffer.hasRemaining()) {
+            // Detect if the message is not for the main terminal but for a specific window
+            final BinaryModel windowIdModel = buffer.getBinaryModel();
+            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
+                // Event on a specific window
+                final int requestedWindowId = windowIdModel.getIntValue();
+                // Main terminal, we need to dispatch the event
+                final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
+                if (window != null) {
+                    log.log(Level.INFO, "The main terminal send the buffer to window " + requestedWindowId);
+                    window.postMessage(buffer);
+                } else {
+                    log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
+
+                    // FIXME To be remove
+                    update(buffer);
+                }
+            } else {
+                buffer.rewind(windowIdModel);
+                update(buffer);
+            }
+        }
+    }
+
     public void update(final ReaderBuffer buffer) {
-        BinaryModel binaryModel;
-        while (buffer.getIndex() < buffer.getByteLength()) {
-            binaryModel = buffer.getBinaryModel();
+        if (buffer.hasRemaining()) {
+            final BinaryModel binaryModel = buffer.getBinaryModel();
 
             if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
                 final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
@@ -269,11 +295,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         final int parentId = buffer.getBinaryModel().getIntValue();
         final PTObject parentObject = getPTObject(parentId);
         if (parentObject != null) {
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
+            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
-        } else
-            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentObject);
+        } else {
+            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId);
+        }
     }
 
     private void processUpdate(final ReaderBuffer buffer, final PTObject ptObject) {

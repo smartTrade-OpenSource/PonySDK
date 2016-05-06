@@ -255,10 +255,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.PUT_STYLE_KEY, name);
             parser.parse(ServerToClientModel.STYLE_VALUE, value);
             parser.endObject();
@@ -270,10 +268,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (previous != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.REMOVE_STYLE_KEY, name);
             parser.endObject();
         }
@@ -284,10 +280,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.PUT_PROPERTY_KEY, name);
             parser.parse(ServerToClientModel.PROPERTY_VALUE, value);
             parser.endObject();
@@ -299,10 +293,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!Objects.equals(previous, value)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
             parser.parse(ServerToClientModel.ATTRIBUTE_VALUE, value);
             parser.endObject();
@@ -314,10 +306,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (previous != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name);
             parser.endObject();
         }
@@ -339,10 +329,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safePreventEvents().add(e)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.PREVENT_EVENT, e.getCode());
             parser.endObject();
         }
@@ -352,10 +340,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safeStopEvents().add(e)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.STOP_EVENT, e.getCode());
             parser.endObject();
         }
@@ -365,10 +351,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (safeStyleName().add(styleName)) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.ADD_STYLE_NAME, styleName);
             parser.endObject();
         }
@@ -385,10 +369,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private void removeStyle(final String styleName) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.REMOVE_STYLE_NAME, styleName);
         parser.endObject();
     }
@@ -449,12 +431,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
             parser.parse(ServerToClientModel.DOM_HANDLER_CODE, PKeyPressEvent.TYPE.getDomHandlerType().getValue());
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.KEY_FILTER, handler.asJsonObject());
             parser.endObject();
         }
@@ -467,12 +447,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (handlerIterator.isEmpty()) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
             parser.parse(ServerToClientModel.DOM_HANDLER_CODE, PKeyUpEvent.TYPE.getDomHandlerType().getValue());
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.KEY_FILTER, handler.asJsonObject());
             parser.endObject();
         }
@@ -485,12 +463,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (handlerIterator.isEmpty()) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
             parser.parse(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.endObject();
         }
         return handlerRegistration;

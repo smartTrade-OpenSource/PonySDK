@@ -39,6 +39,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -121,12 +122,12 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                     }
 
                     /**
-                     * Message from server
+                     * Message from server to Main terminal
                      */
                     @Override
                     public void message(final ReaderBuffer buffer) {
                         try {
-                            uiBuilder.update(buffer);
+                            uiBuilder.updateMainTerminal(buffer);
                         } catch (final Exception e) {
                             log.log(Level.SEVERE, "Cannot parse " + buffer, e);
                         }
@@ -134,8 +135,12 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                 });
             } else {
-                uiBuilder.init(applicationViewID, new ParentWindowRequest(String.valueOf(UIBuilder.sessionID), new RequestCallback() {
+                final String windowId = Window.Location.getParameter("wid");
+                uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
 
+                    /**
+                     * Message from Main terminal to the matching terminal
+                     */
                     @Override
                     public void onDataReceived(final ReaderBuffer buffer) {
                         uiBuilder.update(buffer);

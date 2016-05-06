@@ -110,11 +110,16 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         if (!ponySDKStarted) {
             instructions.add(instruction);
         } else {
-            postMessage(instruction.toString());
+            //postMessage(instruction.toString());
         }
     }
 
-    private native void postMessage(final String text) /*-{this.onDataReceived(text);}-*/;
+    public void postMessage(final ReaderBuffer buffer) {
+        if (window != null) postMessage(buffer, window);
+        else log.log(Level.WARNING, "No window set");
+    }
+
+    public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
 
     @Override
     public void handleEvent(final Event event) {
@@ -137,7 +142,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         }
     }
 
-    // Call by PonySD window
+    // Call by PonySDK window
     public void setReady() {
         ponySDKStarted = true;
 

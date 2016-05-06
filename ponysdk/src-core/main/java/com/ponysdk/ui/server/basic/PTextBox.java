@@ -112,10 +112,8 @@ public class PTextBox extends PTextBoxBase {
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
+        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        }
         parser.parse(ServerToClientModel.MASK, pattern);
         parser.parse(ServerToClientModel.VISIBILITY, showMask);
         parser.parse(ServerToClientModel.REPLACEMENT_STRING, freeSymbol);

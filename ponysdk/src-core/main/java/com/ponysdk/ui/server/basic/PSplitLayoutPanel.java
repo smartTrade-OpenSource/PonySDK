@@ -109,10 +109,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (getMinSize(child) != minSize) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.MIN_SIZE, minSize);
             parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
@@ -142,10 +140,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
             parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
@@ -168,10 +164,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         if (isToggleDisplayAllowed(child) != allowed) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
+            if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
             parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-            }
             parser.parse(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
             parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
             parser.endObject();
