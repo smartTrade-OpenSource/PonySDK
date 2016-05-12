@@ -73,7 +73,6 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public PDockLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
-        init();
     }
 
     @Override
@@ -119,7 +118,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetSize(final PWidget widget, final double size) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.WIDGET_SIZE, size);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
@@ -129,7 +128,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.WIDGET_HIDDEN, hidden);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
@@ -146,7 +145,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
         parser.parse(ServerToClientModel.DIRECTION, direction.getValue());

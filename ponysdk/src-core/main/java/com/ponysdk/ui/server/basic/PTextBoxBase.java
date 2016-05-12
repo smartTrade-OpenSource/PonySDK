@@ -56,7 +56,11 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     public PTextBoxBase(final String text) {
         super();
         this.text = text != null ? text : EMPTY;
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
 

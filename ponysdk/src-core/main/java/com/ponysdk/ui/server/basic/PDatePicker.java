@@ -56,8 +56,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int day = -1;
 
     public PDatePicker() {
-        init();
-        saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     /**
@@ -66,6 +64,12 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Deprecated
     public PDatePicker(final TimeZone timeZone) {
         this();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -163,7 +167,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.DATE_ENABLED, dateToString(dates));
         parser.parse(ServerToClientModel.ENABLED, enabled);
@@ -176,7 +180,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
         parser.parse(ServerToClientModel.STYLE_NAME, styleName);
@@ -189,7 +193,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
         parser.parse(ServerToClientModel.STYLE_NAME, styleName);

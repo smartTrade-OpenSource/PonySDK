@@ -61,7 +61,6 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     public PRichTextArea() {
         super();
-        init();
     }
 
     @Override

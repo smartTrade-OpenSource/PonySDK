@@ -42,12 +42,10 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     public PSimplePanel() {
         super();
-        init();
     }
 
-    public PSimplePanel(final PWindow window) {
-        super(window);
-        init();
+    public PSimplePanel(final int windowID) {
+        super(windowID);
     }
 
     @Override

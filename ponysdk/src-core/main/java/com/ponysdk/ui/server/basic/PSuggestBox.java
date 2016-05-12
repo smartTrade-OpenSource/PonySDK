@@ -98,9 +98,11 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
+    }
 
-        init();
-
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
         saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION_HANDLER);
     }
@@ -247,7 +249,6 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     public static class PMultiWordSuggestOracle extends PSuggestOracle {
 
         public PMultiWordSuggestOracle() {
-            init();
         }
 
         @Override

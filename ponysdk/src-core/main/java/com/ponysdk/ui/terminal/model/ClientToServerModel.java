@@ -88,7 +88,8 @@ public enum ClientToServerModel {
     HANDLER_KEY,
     HANDLER_KEY_COMMAND,
     HANDLER_KEY_RESIZE_HANDLER,
-    HANDLER_KEY_SCHEDULER;
+    HANDLER_KEY_SCHEDULER,
+    DATA;
 
     private ClientToServerModel() {
     }

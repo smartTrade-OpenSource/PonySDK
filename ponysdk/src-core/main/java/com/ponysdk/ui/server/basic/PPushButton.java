@@ -40,9 +40,8 @@ public class PPushButton extends PButton {
     private final PImage image;
 
     public PPushButton(final PImage image) {
-        super(false);
+        super();
         this.image = image;
-        init();
     }
 
     @Override

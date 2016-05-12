@@ -84,7 +84,11 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     private int animationDuration;
 
     public PTabLayoutPanel() {
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 
@@ -104,7 +108,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
         parser.parse(ServerToClientModel.TAB_WIDGET, tabWidget.getID());
@@ -122,7 +126,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, widget.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
         parser.parse(ServerToClientModel.TAB_TEXT, tabText);

@@ -50,7 +50,6 @@ public abstract class PTerminalScheduledCommand extends PObject {
     public PTerminalScheduledCommand(final String js, final int delayMillis) {
         this.js = js;
         this.delayMillis = delayMillis;
-        init();
     }
 
     public void schedule(final long delay, final TimeUnit unit) {

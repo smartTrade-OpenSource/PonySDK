@@ -70,6 +70,11 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     public PCheckBox(final String label) {
         super(label);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
     }
 

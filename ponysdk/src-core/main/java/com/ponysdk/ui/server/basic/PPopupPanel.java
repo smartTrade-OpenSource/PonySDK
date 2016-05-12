@@ -102,26 +102,24 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private final List<PCloseHandler> listeners = new ArrayList<>();
 
-    public PPopupPanel(final boolean autoHide, final PWindow window) {
+    public PPopupPanel(final boolean autoHide, final int windowID) {
         this.visible = false;
         this.autoHide = autoHide;
 
-        init();
-
         removeFromParent();
 
-        final PRootPanel root = window != null ? PRootPanel.get(window) : PRootPanel.get();
+        final PRootPanel root = windowID != PWindow.EMPTY_WINDOW_ID ? PRootPanel.get(windowID) : PRootPanel.get();
 
         root.add(this);
         root.adopt(this);
     }
 
     public PPopupPanel() {
-        this(false, null);
+        this(false, PWindow.EMPTY_WINDOW_ID);
     }
 
     public PPopupPanel(final boolean autoHide) {
-        this(autoHide, null);
+        this(autoHide, PWindow.EMPTY_WINDOW_ID);
     }
 
     @Override
@@ -200,7 +198,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
         parser.parse(ServerToClientModel.POPUP_POSITION_TOP, topPosition);

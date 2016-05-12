@@ -173,16 +173,14 @@ public abstract class PFocusWidget extends PWidget implements Focusable, HasPCli
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
-            final PClickHandler clickHandler = new PClickHandler() {
+            return addDomHandler(new PClickHandler() {
 
                 @Override
                 public void onClick(final PClickEvent event) {
                     handler.onClick(event);
                     saveUpdate(ServerToClientModel.END_OF_PROCESSING);
                 }
-            };
-
-            return addDomHandler(clickHandler, PClickEvent.TYPE);
+            }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
         }

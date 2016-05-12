@@ -45,7 +45,6 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     public PAnchor() {
         super();
-        init();
     }
 
     /**
@@ -70,7 +69,6 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         super();
         this.text = text;
         this.href = href;
-        init();
     }
 
     @Override

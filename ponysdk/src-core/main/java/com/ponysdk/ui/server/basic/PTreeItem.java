@@ -34,7 +34,6 @@ public class PTreeItem extends PObject {
     PTreeItem(final boolean isRoot, final String html) {
         this.isRoot = isRoot;
         this.html = html;
-        init();
     }
 
     PTreeItem(final boolean isRoot) {

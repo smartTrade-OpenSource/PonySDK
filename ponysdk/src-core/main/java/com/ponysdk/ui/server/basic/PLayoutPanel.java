@@ -40,13 +40,12 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
-    public PLayoutPanel(final PWindow window) {
-        super(window);
-        init();
+    public PLayoutPanel() {
+        this(PWindow.EMPTY_WINDOW_ID);
     }
 
-    public PLayoutPanel() {
-        this(null);
+    public PLayoutPanel(final int windowID) {
+        super(windowID);
     }
 
     @Override
@@ -59,7 +58,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
@@ -71,7 +70,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
@@ -83,7 +82,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.WIDGET_HIDDEN, hidden);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
@@ -121,11 +120,10 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
-            final double v2,
-            final PUnit unit) {
+            final double v2, final PUnit unit) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
         parser.parse(ServerToClientModel.WIDGET_ID, child.getID());

@@ -67,18 +67,11 @@ public class PLabel extends PWidget
 
     public PLabel() {
         super();
-        init();
-    }
-
-    PLabel(final boolean init) {
-        if (init)
-            init();
     }
 
     public PLabel(final String text) {
         super();
         this.text = text;
-        init();
     }
 
     @Override

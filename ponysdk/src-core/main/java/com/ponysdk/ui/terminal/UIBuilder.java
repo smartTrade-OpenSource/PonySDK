@@ -278,9 +278,9 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         final WidgetType widgetType = WidgetType.values()[buffer.getBinaryModel().getByteValue()];
 
         final PTObject ptObject = uiFactory.newUIObject(this, widgetType);
-        if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
         if (ptObject != null) {
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
             ptObject.create(buffer, objectIdValue, this);
             objectByID.put(objectIdValue, ptObject);
         } else {

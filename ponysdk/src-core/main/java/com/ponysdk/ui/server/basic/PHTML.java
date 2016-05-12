@@ -57,10 +57,9 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     public PHTML(final String html, final boolean wordWrap) {
-        super(false);
+        super();
         this.html = html;
         this.wordWrap = wordWrap;
-        init();
     }
 
     @Override

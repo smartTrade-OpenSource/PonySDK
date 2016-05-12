@@ -50,7 +50,6 @@ public abstract class PScript extends PObject {
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
     private PScript() {
-        init();
     }
 
     @Override
@@ -99,11 +98,11 @@ public abstract class PScript extends PObject {
         get().executeScriptDeffered(windowID, js, callback, delay, unit);
     }
 
-    public void executeScript(final Long windowID, final String js) {
+    public void executeScript(final Long windowID2, final String js) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        if (windowID != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID2 != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID2);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.EVAL, js);
         parser.endObject();
@@ -113,14 +112,14 @@ public abstract class PScript extends PObject {
         executeScript(null, js);
     }
 
-    public void executeScript(final Long windowID, final String js, final ExecutionCallback callback) {
+    public void executeScript(final Long windowID2, final String js, final ExecutionCallback callback) {
         final long id = executionID++;
         callbacksByID.put(id, callback);
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        if (windowID != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID2 != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID2);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.EVAL, js);
         parser.parse(ServerToClientModel.COMMAND_ID, executionID++);
@@ -131,7 +130,7 @@ public abstract class PScript extends PObject {
         executeScript(null, js, callback);
     }
 
-    public void executeScriptDeffered(final Long windowID, final String js, final ExecutionCallback callback,
+    public void executeScriptDeffered(final Long windowID2, final String js, final ExecutionCallback callback,
             final int delay, final TimeUnit unit) {
         final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
 
@@ -139,9 +138,9 @@ public abstract class PScript extends PObject {
             protected void run() {
                 try {
                     if (callback == null) {
-                        executeScript(windowID, js);
+                        executeScript(windowID2, js);
                     } else {
-                        executeScript(windowID, js, callback);
+                        executeScript(windowID2, js, callback);
                     }
                 } catch (final Exception e) {
                     e.printStackTrace();

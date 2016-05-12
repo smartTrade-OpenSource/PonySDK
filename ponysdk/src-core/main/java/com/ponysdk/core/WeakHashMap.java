@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class WeakHashMap implements Map<Integer, PObject> {
@@ -178,8 +177,8 @@ public class WeakHashMap implements Map<Integer, PObject> {
             if (removedObject.get() instanceof PWidget) {
                 System.err.println("GC object ");
                 final PWidget widget = (PWidget) removedObject.get();
-                final PWindow window = widget.getWindow();
-                parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+                final int windowID = widget.getWindowID();
+                parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             }
 
             parser.parse(ServerToClientModel.TYPE_GC, objectID);

@@ -40,6 +40,9 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PWindow extends PObject {
 
+    public static final int EMPTY_WINDOW_ID = -2;
+    public static final int MAIN_WINDOW_ID = -1;
+
     private final List<Runnable> postedCommands = new ArrayList<>();
     private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<>();
     private final ListenerCollection<POpenHandler> openHandlers = new ListenerCollection<>();
@@ -55,7 +58,7 @@ public class PWindow extends PObject {
     private boolean opened = false;
 
     public PWindow(final String url, final String name, final String features) {
-        super();
+        super(MAIN_WINDOW_ID);
 
         this.url = url;
         this.name = name;
@@ -77,6 +80,9 @@ public class PWindow extends PObject {
         opened = true;
         saveUpdate(ServerToClientModel.OPEN, true);
         WindowManager.registerWindow(this);
+
+        // TODO Force send ?!
+        // Txn.get().getParser().reset();
         return true;
     }
 
@@ -93,10 +99,16 @@ public class PWindow extends PObject {
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             WindowManager.unregisterWindow(this);
-            fireOnClose();
+            final PCloseEvent e = new PCloseEvent(this);
+            for (final PCloseHandler h : closeHandlers) {
+                h.onClose(e);
+            }
             return;
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
-            fireOnOpen();
+            final POpenEvent e = new POpenEvent(this);
+            for (final POpenHandler h : openHandlers) {
+                h.onOpen(e);
+            }
         } else {
             super.onClientData(instruction);
         }
@@ -114,20 +126,6 @@ public class PWindow extends PObject {
         closeHandlers.remove(handler);
     }
 
-    private void fireOnClose() {
-        final PCloseEvent e = new PCloseEvent(this);
-        for (final PCloseHandler h : closeHandlers) {
-            h.onClose(e);
-        }
-    }
-
-    private void fireOnOpen() {
-        final POpenEvent e = new POpenEvent(this);
-        for (final POpenHandler h : openHandlers) {
-            h.onOpen(e);
-        }
-    }
-
     protected void postOpenerCommand(final Runnable runnable) {
         postedCommands.add(runnable);
     }
@@ -137,11 +135,11 @@ public class PWindow extends PObject {
     }
 
     public PRootLayoutPanel getPRootLayoutPanel() {
-        return PRootLayoutPanel.get(this);
+        return PRootLayoutPanel.get(getID());
     }
 
     public PRootPanel getPRootPanel() {
-        return PRootPanel.get(this);
+        return PRootPanel.get(getID());
     }
 
     public void addWidget(final IsPWidget widget) {

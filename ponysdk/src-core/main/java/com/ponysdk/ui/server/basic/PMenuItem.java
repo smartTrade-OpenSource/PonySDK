@@ -79,7 +79,6 @@ public class PMenuItem extends PWidget implements PHasHTML {
     public PMenuItem(final String text, final boolean asHTML) {
         if (asHTML) this.html = text;
         else this.text = text;
-        init();
     }
 
     @Override
@@ -136,13 +135,10 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     public void onClientData(final JsonObject event) {
         final String handlerKeyKey = ClientToServerModel.HANDLER_KEY.toStringValue();
-        String handlerKey = null;
         if (event.containsKey(handlerKeyKey)) {
-            handlerKey = event.getString(handlerKeyKey);
-        }
-
-        if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) {
-            cmd.execute();
+            final String handlerKey = event.getString(handlerKeyKey);
+            if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) cmd.execute();
+            else super.onClientData(event);
         } else {
             super.onClientData(event);
         }

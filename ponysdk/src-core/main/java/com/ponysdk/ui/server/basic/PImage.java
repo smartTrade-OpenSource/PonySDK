@@ -99,8 +99,6 @@ public class PImage extends PFocusWidget {
 
         this.imageWidth = width; // TODO nicolas reuse widget width
         this.imageHeight = height;// TODO nicolas reuse widget height;
-
-        init();
     }
 
     @Override

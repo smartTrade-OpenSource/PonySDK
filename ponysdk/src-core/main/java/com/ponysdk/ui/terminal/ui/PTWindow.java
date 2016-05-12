@@ -45,6 +45,10 @@ import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
 
+    private static final String WINDOW_EVENT_TYPE_LOAD = "load";
+    private static final String WINDOW_EVENT_TYPE_MESSAGE = "message";
+    private static final String WINDOW_EVENT_TYPE_BEFORE_UNLOAD = "beforeunload";
+
     private static final String EMPTY = "";
 
     private static final Logger log = Logger.getLogger(PTWindow.class.getName());
@@ -91,8 +95,11 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
-            window.addEventListener("beforeunload", this, true);
-            window.addEventListener("message", this, true);
+
+            window.addEventListener(WINDOW_EVENT_TYPE_LOAD, this, true);
+            window.addEventListener(WINDOW_EVENT_TYPE_MESSAGE, this, true);
+            //window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -104,6 +111,28 @@ public class PTWindow extends AbstractPTObject implements EventListener {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        if (event.getCurrentTarget() == window) {
+            final String type = event.getType();
+            if (WINDOW_EVENT_TYPE_LOAD.equals(type)) {
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(objectID);
+                instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
+                uiService.sendDataToServer(instruction);
+            } else if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
+                final MessageEvent messageEvent = (MessageEvent) event;
+                uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
+            } else if (WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(type)) {
+                PTWindowManager.get().unregister(this);
+                final PTInstruction instruction = new PTInstruction();
+                instruction.setObjectID(objectID);
+                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
+                uiService.sendDataToServer(instruction);
+            }
+        }
     }
 
     public void postMessage(final PTInstruction instruction) {
@@ -120,27 +149,6 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     }
 
     public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
-
-    @Override
-    public void handleEvent(final Event event) {
-        if (event.getSrcElement() == window) {
-            if (event.getType().equals("onbeforeunload")) {
-                PTWindowManager.get().unregister(this);
-                final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(objectID);
-                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
-                uiService.sendDataToServer(instruction);
-            } else if (event.getType().equals("message")) {
-                final MessageEvent messageEvent = (MessageEvent) event;
-                uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
-            } else if (event.getType().equals("onload")) {
-                final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(objectID);
-                instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
-                uiService.sendDataToServer(instruction);
-            }
-        }
-    }
 
     // Call by PonySDK window
     public void setReady() {

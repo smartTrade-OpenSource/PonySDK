@@ -76,8 +76,12 @@ public class PStackLayoutPanel extends PComposite
     public PStackLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
-        init();
-        //        initWidget(new PLayoutPanel());
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        // initWidget(new PLayoutPanel());
     }
 
     @Override
@@ -98,7 +102,7 @@ public class PStackLayoutPanel extends PComposite
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
         parser.parse(ServerToClientModel.HTML, header);
@@ -188,7 +192,7 @@ public class PStackLayoutPanel extends PComposite
     public void showWidget(final PWidget widget) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
         parser.endObject();

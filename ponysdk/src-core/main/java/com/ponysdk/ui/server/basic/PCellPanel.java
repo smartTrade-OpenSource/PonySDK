@@ -32,9 +32,9 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel whose child widgets are contained within the cells of a table. Each
- * cell's size may be set independently. Each child widget can take up a subset
- * of its cell and can be aligned within it.
+ * A panel whose child widgets are contained within the cells of a table.
+ * Each cell's size may be set independently. Each child widget can take up a subset of its cell and
+ * can be aligned within it.
  */
 public abstract class PCellPanel extends PComplexPanel {
 
@@ -56,42 +56,28 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(widget.getID(), ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(widget.getID(), ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.CELL_HEIGHT, height);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(widget.getID(), ServerToClientModel.CELL_HEIGHT, height);
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
+        saveUpdate(widget.getID(), ServerToClientModel.CELL_WIDTH, width);
+    }
+
+    public void saveUpdate(final int widgetID, final ServerToClientModel model, final Object value) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.CELL_WIDTH, width);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
+        parser.parse(model, value);
+        parser.parse(ServerToClientModel.WIDGET_ID, widgetID);
         parser.endObject();
     }
 

@@ -48,7 +48,6 @@ public class PElement extends PComplexPanel {
     public PElement(final String tagName) {
         super();
         this.tagName = tagName;
-        init();
     }
 
     @Override

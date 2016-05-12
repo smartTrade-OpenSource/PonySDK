@@ -32,7 +32,6 @@ public class PFlowPanel extends PComplexPanel {
 
     public PFlowPanel() {
         super();
-        init();
     }
 
     @Override

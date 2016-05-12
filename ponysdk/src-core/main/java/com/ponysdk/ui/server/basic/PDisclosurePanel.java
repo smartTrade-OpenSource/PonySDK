@@ -84,8 +84,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         this.headerText = headerText;
         this.openImage = openImage;
         this.closeImage = closeImage;
-
-        init();
     }
 
     @Override

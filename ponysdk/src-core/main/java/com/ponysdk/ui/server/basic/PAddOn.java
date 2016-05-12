@@ -70,7 +70,11 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     public PAddOn(final T widget) {
         this.widget = widget;
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         addNativeHandler(this);
     }
 

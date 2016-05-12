@@ -45,9 +45,11 @@ public class PGrid extends PHTMLTable {
         super();
         this.rows = rows;
         this.columns = columns;
+    }
 
-        init();
-
+    @Override
+    protected void init() {
+        super.init();
         setCellFormatter(new PCellFormatter());
     }
 

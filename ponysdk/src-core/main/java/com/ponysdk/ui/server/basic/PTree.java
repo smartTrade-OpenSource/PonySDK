@@ -68,8 +68,12 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     private PTreeItem curSelection;
 
     public PTree() {
-        init();
         root = new PTreeItem(true);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         root.setTree(this);
     }
 

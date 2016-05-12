@@ -26,10 +26,12 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
+
+    private static final String MENUBAR_STYLE = "pony-MenuBar";
 
     private boolean isVertical;
 
@@ -42,7 +44,9 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     protected MenuBar createUIObject() {
-        return new MenuBar(isVertical);
+        final MenuBar menuBar = new MenuBar(isVertical);
+        menuBar.addStyleName(MENUBAR_STYLE);
+        return menuBar;
     }
 
     @Override

@@ -43,12 +43,10 @@ public class PHeaderPanel extends PPanel {
 
     public PHeaderPanel() {
         super();
-        init();
     }
 
-    public PHeaderPanel(final PWindow window) {
-        super(window);
-        init();
+    public PHeaderPanel(final int windowID) {
+        super(windowID);
     }
 
     public void resize() {

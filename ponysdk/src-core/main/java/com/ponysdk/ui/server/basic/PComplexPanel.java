@@ -38,8 +38,8 @@ public abstract class PComplexPanel extends PPanel {
     public PComplexPanel() {
     }
 
-    public PComplexPanel(final PWindow window) {
-        super(window);
+    public PComplexPanel(final int windowID) {
+        super(windowID);
     }
 
     public void add(final PWidget... widgets) {
@@ -59,7 +59,7 @@ public abstract class PComplexPanel extends PPanel {
         children.add(child);
         adopt(child);
 
-        saveAdd(child.getID(), ID);
+        if (child.attach(windowID)) saveAdd(child.getID(), ID);
     }
 
     public void insert(final PWidget child, final int beforeIndex) {

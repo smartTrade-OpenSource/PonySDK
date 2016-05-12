@@ -31,7 +31,6 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PMenuItemSeparator extends PWidget {
 
     public PMenuItemSeparator() {
-        init();
     }
 
     @Override

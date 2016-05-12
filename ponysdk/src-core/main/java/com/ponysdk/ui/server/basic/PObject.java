@@ -47,17 +47,17 @@ public abstract class PObject {
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    protected PWindow window;
+    protected int windowID;
 
     private boolean initialized = false;
 
     PObject() {
-        this(null);
+        this(PWindow.EMPTY_WINDOW_ID);
     }
 
-    PObject(final PWindow window) {
+    PObject(final int windowID) {
         UIContext.get().registerObject(this);
-        this.window = window;
+        this.windowID = windowID;
     }
 
     protected void init() {
@@ -66,7 +66,7 @@ public abstract class PObject {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_CREATE, ID);
         parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
@@ -75,18 +75,19 @@ public abstract class PObject {
         initialized = true;
     }
 
-    public PWindow getWindow() {
-        return window;
+    public int getWindowID() {
+        return windowID;
     }
 
-    void attach(final PWindow window) {
-        if (this.window != null && this.window != window) {
+    protected boolean attach(final int windowID) {
+        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
+            this.windowID = windowID;
+            init();
+            return true;
+        } else if (this.windowID != windowID) {
             throw new IllegalAccessError("Widget already attached to an other window");
         }
-
-        this.window = window;
-
-        saveUpdate(ServerToClientModel.WINDOW_ID, window.getID());
+        return false;
     }
 
     protected void enrichOnInit(final Parser parser) {
@@ -160,7 +161,7 @@ public abstract class PObject {
     protected void saveAddHandler(final HandlerModel type) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
         parser.endObject();
@@ -169,7 +170,7 @@ public abstract class PObject {
     protected void saveRemoveHandler(final HandlerModel type) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         parser.endObject();
     }
@@ -177,7 +178,7 @@ public abstract class PObject {
     protected void saveRemoveHandler(final ServerToClientModel type, final ServerToClientModel model, final Object value) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         parser.parse(model, value);
         parser.endObject();
@@ -186,7 +187,7 @@ public abstract class PObject {
     protected void saveRemove(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
@@ -195,7 +196,7 @@ public abstract class PObject {
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.parse(model, null);
@@ -205,7 +206,7 @@ public abstract class PObject {
     protected void saveAdd(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
@@ -215,7 +216,7 @@ public abstract class PObject {
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.parse(model, value);
@@ -227,7 +228,7 @@ public abstract class PObject {
     protected void saveUpdate(final ServerToClientModel model) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(model, null);
         parser.endObject();
@@ -236,7 +237,7 @@ public abstract class PObject {
     protected void saveUpdate(final ServerToClientModel model, final Object value) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(model, value);
         parser.endObject();

@@ -107,7 +107,7 @@ public abstract class PScheduler extends PObject {
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
         parser.parse(ServerToClientModel.FIXRATE, delayMs);
@@ -117,7 +117,7 @@ public abstract class PScheduler extends PObject {
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
         parser.parse(ServerToClientModel.FIXDELAY, delayMs);
@@ -127,7 +127,7 @@ public abstract class PScheduler extends PObject {
     private void cancelScheduleCommand(final long cmdID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (window != null) parser.parse(ServerToClientModel.WINDOW_ID, window.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
         parser.parse(ServerToClientModel.STOP, null);

@@ -37,7 +37,6 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
 
     public PHorizontalPanel() {
-        init();
     }
 
     @Override
