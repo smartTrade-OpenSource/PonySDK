@@ -23,19 +23,39 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.ui.widget.filter.TextBoxFilterDecorator;
 import com.ponysdk.ui.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
 public class PTTextBox extends PTTextBoxBase<TextBox> {
 
     private TextBoxMaskedDecorator maskDecorator;
+    private TextBoxFilterDecorator filterDecorator;
 
     @Override
     public void create(final PTInstruction create, final UIService uiService) {
-        init(create, uiService, new TextBox());
+        init(create, uiService, new TextBox() {
+
+            @Override
+            protected void setElement(final Element elem) {
+                super.setElement(elem);
+                sinkEvents(Event.ONPASTE);
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (filterDecorator != null) {
+                    filterDecorator.onBrowserEvent(event);
+                }
+            }
+
+        });
     }
 
     @Override
@@ -54,6 +74,10 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
             final String replace = update.getString(PROPERTY.REPLACEMENT_STRING);
             if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
+        } else if (update.containsKey(PROPERTY.FILTER)) {
+            final String filter = update.getString(PROPERTY.FILTER);
+            if (filterDecorator == null) filterDecorator = new TextBoxFilterDecorator(cast());
+            filterDecorator.setFilter(filter);
         } else {
             super.update(update, uiService);
         }

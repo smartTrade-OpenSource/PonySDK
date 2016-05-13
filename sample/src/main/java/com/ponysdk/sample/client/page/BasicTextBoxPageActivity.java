@@ -78,6 +78,12 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         });
         panel.add(button);
 
+        final String pattern = "[a-zA-Z0-9]";
+        final PTextBox filtered = new PTextBox();
+        filtered.applyFilter(pattern);
+        panel.add(new PLabel("Filtered text box ( " + pattern + " ):"));
+        panel.add(filtered);
+
         final PTextBox masked = new PTextBox();
         final PTextBox maskedTextBox = new PTextBox();
         final PTextBox replacement = new PTextBox();
