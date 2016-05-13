@@ -55,38 +55,17 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue());
-        parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue(), ServerToClientModel.WIDGET_ID, child.getID());
     }
 
     public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue());
-        parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue(), ServerToClientModel.WIDGET_ID, child.getID());
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         assertIsChild(widget);
-
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.WIDGET_HIDDEN, hidden);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.WIDGET_HIDDEN, hidden, ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public void setWidgetLeftRight(final PWidget child, final double left, final double right, final PUnit unit) {

@@ -165,13 +165,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.add(index, item);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ITEM_INSERTED, label);
-        parser.parse(ServerToClientModel.INDEX, index);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.ITEM_INSERTED, label, ServerToClientModel.INDEX, index);
     }
 
     public void setItemText(final int index, final String text) {
@@ -179,13 +173,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.get(index).label = text;
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ITEM_UPDATED, text);
-        parser.parse(ServerToClientModel.INDEX, index);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.ITEM_UPDATED, text, ServerToClientModel.INDEX, index);
     }
 
     public void setValue(final int index, final Object value) {
@@ -231,15 +219,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void sendRemoveItemInstruction(final int index) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ITEM_REMOVED, index);
-        parser.endObject();
-
-        if (selectedIndex >= index)
-            setSelectedIndex(selectedIndex - 1);
+        saveUpdate(ServerToClientModel.ITEM_REMOVED, index);
+        if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
     }
 
     public Object getValue(final int index) {
@@ -268,13 +249,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (isMultipleSelect && selected) selectedIndexes.add(index);
         else selectedIndexes.remove(index);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.SELECTED, selected);
-        parser.parse(ServerToClientModel.INDEX, index);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.SELECTED, selected, ServerToClientModel.INDEX, index);
     }
 
     public void setSelectedIndex(final int index) {

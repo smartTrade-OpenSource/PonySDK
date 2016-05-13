@@ -74,9 +74,8 @@ import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * The base class for the majority of user-interface objects. Widget adds
- * support for receiving events from the browser and being added directly to
- * {@link PPanel panels}.
+ * The base class for the majority of user-interface objects. Widget adds support for receiving
+ * events from the browser and being added directly to {@link PPanel panels}.
  */
 public abstract class PWidget extends PObject implements IsPWidget {
 
@@ -243,66 +242,26 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleProperty(final String name, final String value) {
-        final String previous = safeStyleProperties().put(name, value);
-        if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.PUT_STYLE_KEY, name);
-            parser.parse(ServerToClientModel.STYLE_VALUE, value);
-            parser.endObject();
-        }
+        if (!Objects.equals(safeStyleProperties().put(name, value), value))
+            saveUpdate(ServerToClientModel.PUT_STYLE_KEY, name, ServerToClientModel.STYLE_VALUE, value);
     }
 
     public void removeStyleProperty(final String name) {
-        final String previous = safeStyleProperties().remove(name);
-        if (previous != null) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.REMOVE_STYLE_KEY, name);
-            parser.endObject();
-        }
+        if (safeStyleProperties().remove(name) != null) saveUpdate(ServerToClientModel.REMOVE_STYLE_KEY, name);
     }
 
     public void setProperty(final String name, final String value) {
-        final String previous = safeElementProperties().put(name, value);
-        if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.PUT_PROPERTY_KEY, name);
-            parser.parse(ServerToClientModel.PROPERTY_VALUE, value);
-            parser.endObject();
-        }
+        if (!Objects.equals(safeElementProperties().put(name, value), value))
+            saveUpdate(ServerToClientModel.PUT_PROPERTY_KEY, name, ServerToClientModel.PROPERTY_VALUE, value);
     }
 
     public void setAttribute(final String name, final String value) {
-        final String previous = safeElementAttributes().put(name, value);
-        if (!Objects.equals(previous, value)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-            parser.parse(ServerToClientModel.ATTRIBUTE_VALUE, value);
-            parser.endObject();
-        }
+        if (!Objects.equals(safeElementAttributes().put(name, value), value))
+            saveUpdate(ServerToClientModel.PUT_ATTRIBUTE_KEY, name, ServerToClientModel.ATTRIBUTE_VALUE, value);
     }
 
     public void removeAttribute(final String name) {
-        final String previous = safeElementAttributes().remove(name);
-        if (previous != null) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name);
-            parser.endObject();
-        }
+        if (safeElementAttributes().remove(name) != null) saveUpdate(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name);
     }
 
     public String getProperty(final String key) {
@@ -314,59 +273,28 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void preventEvent(final PEvent e) {
-        if (safePreventEvents().add(e)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.PREVENT_EVENT, e.getCode());
-            parser.endObject();
-        }
+        if (safePreventEvents().add(e)) saveUpdate(ServerToClientModel.PREVENT_EVENT, e.getCode());
     }
 
     public void stopEvent(final PEvent e) {
-        if (safeStopEvents().add(e)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.STOP_EVENT, e.getCode());
-            parser.endObject();
-        }
+        if (safeStopEvents().add(e)) saveUpdate(ServerToClientModel.STOP_EVENT, e.getCode());
     }
 
     public void addStyleName(final String styleName) {
-        if (safeStyleName().add(styleName)) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.ADD_STYLE_NAME, styleName);
-            parser.endObject();
-        }
+        if (safeStyleName().add(styleName)) saveUpdate(ServerToClientModel.ADD_STYLE_NAME, styleName);
     }
 
     public void removeStyleName(final String styleName) {
-        if (styleNames == null)
-            return;
-        if (styleNames.remove(styleName)) {
-            removeStyle(styleName);
-        }
+        if (styleNames != null && styleNames.remove(styleName)) removeStyle(styleName);
     }
 
     private void removeStyle(final String styleName) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.REMOVE_STYLE_NAME, styleName);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.REMOVE_STYLE_NAME, styleName);
     }
 
     public boolean hasStyleName(final String styleName) {
-        if (styleNames == null)
-            return false;
-        return styleNames.contains(styleName);
+        if (styleNames == null) return false;
+        else return styleNames.contains(styleName);
     }
 
     public Object getData() {
@@ -430,25 +358,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
             parser.parse(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
-            parser.parse(ServerToClientModel.KEY_FILTER, jsonObject);
+            if (jsonObject != null) parser.parse(ServerToClientModel.KEY_FILTER, jsonObject);
             parser.endObject();
         }
         return handlerRegistration;
     }
 
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type) {
-        final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
-        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
-        if (handlerIterator.isEmpty()) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
-            parser.parse(ServerToClientModel.OBJECT_ID, ID);
-            parser.parse(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
-            parser.endObject();
-        }
-        return handlerRegistration;
+        return addDomHandler(handler, type, null);
     }
 
     @Override

@@ -25,8 +25,6 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -56,29 +54,21 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
-        saveUpdate(widget.getID(), ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue(), ServerToClientModel.WIDGET_ID,
+                widget.getID());
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
-        saveUpdate(widget.getID(), ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue(), ServerToClientModel.WIDGET_ID,
+                widget.getID());
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
-        saveUpdate(widget.getID(), ServerToClientModel.CELL_HEIGHT, height);
+        saveUpdate(ServerToClientModel.CELL_HEIGHT, height, ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
-        saveUpdate(widget.getID(), ServerToClientModel.CELL_WIDTH, width);
-    }
-
-    public void saveUpdate(final int widgetID, final ServerToClientModel model, final Object value) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(model, value);
-        parser.parse(ServerToClientModel.WIDGET_ID, widgetID);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.CELL_WIDTH, width, ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public Integer getBorderWidth() {

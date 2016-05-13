@@ -31,8 +31,6 @@ import java.util.TimeZone;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PShowRangeEvent;
 import com.ponysdk.ui.server.basic.event.PShowRangeHandler;
@@ -165,39 +163,21 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.DATE_ENABLED, dateToString(dates));
-        parser.parse(ServerToClientModel.ENABLED, enabled);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.DATE_ENABLED, dateToString(dates), ServerToClientModel.ENABLED, enabled);
     }
 
     /**
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
-        parser.parse(ServerToClientModel.STYLE_NAME, styleName);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates), ServerToClientModel.STYLE_NAME, styleName);
     }
 
     /**
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
-        parser.parse(ServerToClientModel.STYLE_NAME, styleName);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates), ServerToClientModel.STYLE_NAME, styleName);
     }
 
     private String dateToString(final Collection<Date> dates) {

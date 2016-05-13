@@ -28,9 +28,7 @@ import java.util.Map;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -105,33 +103,15 @@ public abstract class PScheduler extends PObject {
     }
 
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
-        parser.parse(ServerToClientModel.FIXRATE, delayMs);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.FIXRATE, delayMs);
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
-        parser.parse(ServerToClientModel.FIXDELAY, delayMs);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.FIXDELAY, delayMs);
     }
 
     private void cancelScheduleCommand(final long cmdID) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.COMMAND_ID, cmdID);
-        parser.parse(ServerToClientModel.STOP, null);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.STOP, null);
 
         final RepeatingCommand command = commandByID.remove(cmdID);
         IDByCommand.remove(command);

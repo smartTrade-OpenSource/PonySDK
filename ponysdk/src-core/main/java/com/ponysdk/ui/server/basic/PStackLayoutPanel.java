@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
@@ -41,12 +40,11 @@ import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that stacks its children vertically, displaying only one at a time,
- * with a header for each child which the user can click to display.
+ * A panel that stacks its children vertically, displaying only one at a time, with a header for
+ * each child which the user can click to display.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -100,16 +98,7 @@ public class PStackLayoutPanel extends PComposite
         children.add(child);
         adopt(child);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_ADD, child.getID());
-        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, ID);
-        parser.parse(ServerToClientModel.HTML, header);
-        parser.parse(ServerToClientModel.SIZE, headerSize);
-        parser.endObject();
-
-        // UIContext.get().assignParentID(child.getID(), ID);
+        saveAdd(child.getID(), ID, ServerToClientModel.HTML, header, ServerToClientModel.SIZE, headerSize);
     }
 
     @Override
@@ -190,12 +179,7 @@ public class PStackLayoutPanel extends PComposite
     }
 
     public void showWidget(final PWidget widget) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     /**

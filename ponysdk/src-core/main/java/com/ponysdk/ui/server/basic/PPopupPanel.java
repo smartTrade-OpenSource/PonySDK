@@ -31,7 +31,6 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
@@ -41,24 +40,21 @@ import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that can "pop up" over other widgets. It overlays the browser's
- * client area (and any previously-created popups).
+ * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
+ * previously-created popups).
  * <p>
- * A PPopupPanel should not generally be added to other panels; rather, it
- * should be shown and hidden using the {@link #show()} and {@link #hide()}
- * methods.
+ * A PPopupPanel should not generally be added to other panels; rather, it should be shown and
+ * hidden using the {@link #show()} and {@link #hide()} methods.
  * </p>
  * <p>
- * The width and height of the PPopupPanel cannot be explicitly set; they are
- * determined by the PPopupPanel's widget. Calls to {@link #setWidth(String)}
- * and {@link #setHeight(String)} will call these methods on the PPopupPanel's
- * widget.
+ * The width and height of the PPopupPanel cannot be explicitly set; they are determined by the
+ * PPopupPanel's widget. Calls to {@link #setWidth(String)} and {@link #setHeight(String)} will call
+ * these methods on the PPopupPanel's widget.
  * </p>
  * <p>
- * The PopupPanel can be optionally displayed with a "glass" element behind it,
- * which is commonly used to gray out the widgets behind it. It can be enabled
- * using {@link #setGlassEnabled(boolean)} . It has a default style name of
- * "gwt-PopupPanelGlass", which can be changed using
+ * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly
+ * used to gray out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}
+ * . It has a default style name of "gwt-PopupPanelGlass", which can be changed using
  * {@link #setGlassStyleName(String)}.
  * </p>
  * <h3>CSS Style Rules</h3>
@@ -74,8 +70,8 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     /**
-     * A callback that is used to set the position of a {@link PPopupPanel}
-     * right before it is shown.
+     * A callback that is used to set the position of a {@link PPopupPanel} right before it is
+     * shown.
      */
     public interface PPositionCallback {
 
@@ -196,13 +192,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         leftPosition = left;
         topPosition = top;
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
-        parser.parse(ServerToClientModel.POPUP_POSITION_TOP, topPosition);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition, ServerToClientModel.POPUP_POSITION_TOP, topPosition);
     }
 
     public void setPopupPositionAndShow(final PPositionCallback callback) {
