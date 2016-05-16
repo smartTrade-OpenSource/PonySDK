@@ -27,23 +27,21 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new HeaderPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected HeaderPanel createUIObject() {
+        return new HeaderPanel();
     }
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
-        final Widget w = asWidget(ptObject);
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
+            final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
                 cast().setHeaderWidget(w);
@@ -62,13 +60,13 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
             }
         } else {
             buffer.rewind(binaryModel);
-            uiObject.add(w);
+            super.add(buffer, ptObject);
         }
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.RESIZE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.RESIZE.equals(binaryModel.getModel())) {
             uiObject.onResize();
             return true;
         }

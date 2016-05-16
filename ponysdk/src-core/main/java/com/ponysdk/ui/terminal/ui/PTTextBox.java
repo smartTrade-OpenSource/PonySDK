@@ -24,10 +24,9 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.TextBox;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
 public class PTTextBox extends PTTextBoxBase<TextBox> {
@@ -35,35 +34,33 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
     private TextBoxMaskedDecorator maskDecorator;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new TextBox();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected TextBox createUIObject() {
+        return new TextBox();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
         }
-        if (Model.VALUE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
             uiObject.setValue(binaryModel.getStringValue());
             return true;
         }
-        if (Model.VISIBLE_LENGTH.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VISIBLE_LENGTH.equals(binaryModel.getModel())) {
             uiObject.setVisibleLength(binaryModel.getIntValue());
             return true;
         }
-        if (Model.MAX_LENGTH.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.MAX_LENGTH.equals(binaryModel.getModel())) {
             uiObject.setMaxLength(binaryModel.getIntValue());
             return true;
         }
-        if (Model.MASK.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.MASK.equals(binaryModel.getModel())) {
             final String mask = binaryModel.getStringValue();
-            // Model.VISIBILITY
+            // ServerToClientModel.VISIBILITY
             final boolean showMask = binaryModel.getBooleanValue();
-            // Model.REPLACEMENT_STRING
+            // ServerToClientModel.REPLACEMENT_STRING
             final String replace = binaryModel.getStringValue();
             if (maskDecorator == null)
                 maskDecorator = new TextBoxMaskedDecorator(cast());

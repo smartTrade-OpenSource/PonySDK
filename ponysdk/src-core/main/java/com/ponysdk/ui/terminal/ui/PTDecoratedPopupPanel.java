@@ -24,27 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDecoratedPopupPanel extends PTPopupPanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        boolean autoHide = false;
-        final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
-            autoHide = binaryModel.getBooleanValue();
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
-        this.uiObject = new DecoratedPopupPanel(autoHide);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-        addCloseHandler(uiService);
+    protected DecoratedPopupPanel createUIObject() {
+        return new DecoratedPopupPanel(autoHide);
     }
 
     @Override

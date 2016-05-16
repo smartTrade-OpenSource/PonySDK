@@ -10,14 +10,14 @@ var Widget = function(pony, params) {
 		this.element = params.widgetElement;
 	}
 	this.options = {};
-	this.initializated = false;
+	this.initialized = false;
 };
 
 Widget.prototype.onInit = function() {
-    if(!this.initializated ) {
+    if(!this.initialized) {
         this.init();
     }
-    this.initializated = true;
+    this.initialized = true;
 };
 
 /**	 @abstract  */
@@ -36,7 +36,7 @@ Widget.prototype.initDom = function() {
 
 Widget.prototype.onAttach = function(attached) {
     this.onInitDom();
-	pony.sendDataToServer(this.id, { attached: attached });
+	this.sendDataToServer({ att: attached });
 	if( attached === false ) this.onDetached();
 };
 
@@ -76,20 +76,20 @@ Widget.prototype.setLog = function(level) {
 };
 
 Widget.prototype.update = function( d ) {
-	if(!d.hasOwnProperty( 'method' ))
-		throw  "[" + this.name + "] Couldn't find 'method' property in received data";
+	if(!d.hasOwnProperty( 'm' ))
+		throw  "[" + this.name + "] Couldn't find 'm' property in received data";
 
-	var methodName = d['method'];
+	var methodName = d['m'];
 	if(!(methodName in  this) || typeof this[methodName] !== 'function')
 		throw  "[" + this.name + "] Called method '" + methodName + "' that does not exist";
 
-	if(!this.initializated)
+	if(!this.initialized)
 		throw "[" + this.name + "] Tried to call method '" + methodName + "' before init()";
 
 	try {
-		if(d.hasOwnProperty('args')) {
-			if(this.logLevel > 0) this.log(methodName, d['args']);
-			this[methodName].apply(this, d['args']);
+		if(d.hasOwnProperty('arg')) {
+			if(this.logLevel > 0) this.log(methodName, d['arg']);
+			this[methodName].apply(this, d['arg']);
 		} else {
 			if(this.logLevel > 0) this.log(methodName);
 			this[methodName].call(this);

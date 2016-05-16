@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class AbstractPTObject implements PTObject {
+public abstract class AbstractPTObject implements PTObject {
 
     protected int objectID;
 
@@ -38,7 +38,8 @@ public class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectID, final UIService uiService) {
+        this.objectID = objectID;
     }
 
     @Override
@@ -70,4 +71,10 @@ public class AbstractPTObject implements PTObject {
     public PTWidget<?> isPTWidget() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " #" + getObjectID();
+    }
+
 }

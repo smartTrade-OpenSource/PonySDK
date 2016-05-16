@@ -29,39 +29,46 @@ import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
     private UIService uiService;
+    private Unit unit;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.UNIT
-        this.uiObject = new DockLayoutPanel(Unit.values()[buffer.getBinaryModel().getByteValue()]);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        // ServerToClientModel.UNIT
+        unit = Unit.values()[buffer.getBinaryModel().getByteValue()];
+
+        super.create(buffer, objectId, uiService);
+
         this.uiService = uiService;
     }
 
     @Override
+    protected DockLayoutPanel createUIObject() {
+        return new DockLayoutPanel(unit);
+    }
+
+    @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.WIDGET_SIZE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_SIZE.equals(binaryModel.getModel())) {
             final double newSize = binaryModel.getDoubleValue();
-            // Model.WIDGET_ID
+            // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             uiObject.setWidgetSize(w, newSize);
             return true;
         }
-        if (Model.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
             final boolean hidden = binaryModel.getBooleanValue();
-            // Model.WIDGET_ID
+            // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             uiObject.setWidgetHidden(w, hidden);
             return true;
         }
-        if (Model.ANIMATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         }
@@ -71,9 +78,9 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
-        // Model.DIRECTION
+        // ServerToClientModel.DIRECTION
         final Direction direction = Direction.values()[buffer.getBinaryModel().getByteValue()];
-        // Model.SIZE
+        // ServerToClientModel.SIZE
         final double size = buffer.getBinaryModel().getDoubleValue();
 
         switch (direction) {

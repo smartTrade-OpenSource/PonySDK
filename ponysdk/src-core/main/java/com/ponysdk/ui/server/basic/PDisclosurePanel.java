@@ -38,7 +38,8 @@ import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that consists of a header and a content panel that discloses the
@@ -83,26 +84,24 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         this.headerText = headerText;
         this.openImage = openImage;
         this.closeImage = closeImage;
-
-        init();
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TEXT, headerText);
-        parser.parse(Model.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        parser.parse(Model.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
+        parser.parse(ServerToClientModel.TEXT, headerText);
+        parser.parse(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
+        parser.parse(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.HANDLER_CLOSE_HANDLER.getValue())) {
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {
                 closeHandler.onClose(new PCloseEvent(this));
             }
-        } else if (jsonObject.containsKey(Model.HANDLER_OPEN_HANDLER.getValue())) {
+        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
             isOpen = true;
             for (final POpenHandler openHandler : openHandlers) {
                 openHandler.onOpen(new POpenEvent(this));
@@ -188,7 +187,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     public void setOpen(final boolean isOpen) {
         if (this.isOpen != isOpen) {
             this.isOpen = isOpen;
-            saveUpdate(Model.OPEN, isOpen);
+            saveUpdate(ServerToClientModel.OPEN, isOpen);
         }
     }
 
@@ -212,6 +211,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(Model.ANIMATION, animationEnabled);
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 }

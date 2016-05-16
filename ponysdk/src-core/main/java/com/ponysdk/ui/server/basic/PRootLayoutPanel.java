@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,56 +30,53 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A singleton implementation of {@link PLayoutPanel} that always attaches itself to the document body (i.e.
- * {@link PRootPanel#get()}).
+ * A singleton implementation of {@link PLayoutPanel} that always attaches itself to the document
+ * body (i.e. {@link PRootPanel#get()}).
  * <p>
- * NOTE: This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it
- * is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * NOTE: This widget will <em>only</em> work in standards mode, which requires that the HTML page in
+ * which it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  */
 public class PRootLayoutPanel extends PLayoutPanel {
 
     private static final String KEY = PRootLayoutPanel.class.getSimpleName();
 
-    private PRootLayoutPanel(final PWindow window) {
-        super(window);
+    private PRootLayoutPanel(final int windowID) {
+        super(windowID);
+        init();
     }
 
-    private PRootLayoutPanel(final PWindow window, final String id) {
-        super(window);
+    private PRootLayoutPanel(final int windowID, final String id) {
+        this(windowID);
         // TODO
     }
 
-    public static PRootLayoutPanel get(final PWindow window) {
-        return get(window, null);
+    public static PRootLayoutPanel get(final int windowID) {
+        return get(windowID, null);
     }
 
     public static PRootLayoutPanel get() {
-        return get(null, null);
+        return get(PWindow.EMPTY_WINDOW_ID, null);
     }
 
     public static PRootLayoutPanel get(final String id) {
-        return get(null, id);
+        return get(PWindow.EMPTY_WINDOW_ID, id);
     }
 
-    public static PRootLayoutPanel get(final PWindow window, final String id) {
-        final Map<String, PRootLayoutPanel> childs = ensureChilds(window);
+    public static PRootLayoutPanel get(final int windowID, final String id) {
+        final Map<String, PRootLayoutPanel> childs = ensureChilds(windowID);
         PRootLayoutPanel defaultRoot = childs.get(id);
         if (defaultRoot == null) {
-            defaultRoot = new PRootLayoutPanel(window, id);
+            defaultRoot = new PRootLayoutPanel(windowID, id);
             childs.put(id, defaultRoot);
         }
         return defaultRoot;
     }
 
-    private static Map<String, PRootLayoutPanel> ensureChilds(final PWindow window) {
+    private static Map<String, PRootLayoutPanel> ensureChilds(final int windowID) {
         final UIContext session = UIContext.get();
 
-        String key = KEY;
-
-        if (window != null) {
-            key = key + window.getID();
-        }
+        final String key = KEY + windowID;
 
         Map<String, PRootLayoutPanel> rootByIDs = session.getAttribute(key);
         if (rootByIDs == null) {

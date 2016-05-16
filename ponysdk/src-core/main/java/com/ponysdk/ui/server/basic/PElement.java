@@ -25,9 +25,12 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -35,50 +38,58 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PElement extends PComplexPanel {
 
-	private final String tagName;
+    private static final Logger log = LoggerFactory.getLogger(PElement.class);
 
-	private String innerText;
-	private String innerHTML;
+    private final String tagName;
 
-	public PElement(final String tagName) {
-		this.tagName = tagName;
-		init();
-	}
+    private String innerText;
+    private String innerHTML;
 
-	@Override
-	protected void enrichOnInit(final Parser parser) {
-		super.enrichOnInit(parser);
-		parser.parse(Model.TAG, tagName);
-	}
+    public PElement(final String tagName) {
+        super();
+        this.tagName = tagName;
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.ELEMENT;
-	}
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        parser.parse(ServerToClientModel.TAG, tagName);
+    }
 
-	public String getTagName() {
-		return tagName;
-	}
+    @Override
+    public void insert(final PWidget child, final int beforeIndex) {
+        log.warn("Use directly add(PWidget) function, we can't insert where we want in a PElement");
+        super.add(child);
+    }
 
-	public void setInnerHTML(final String innerHTML) {
-		if (Objects.equals(this.innerHTML, innerHTML))
-			return;
-		this.innerHTML = innerHTML;
-		saveUpdate(Model.INNER_HTML, this.innerHTML);
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.ELEMENT;
+    }
 
-	public void setInnerText(final String innerText) {
-		if (Objects.equals(this.innerText, innerText))
-			return;
-		this.innerText = innerText;
-		saveUpdate(Model.INNER_TEXT, this.innerText);
-	}
+    public String getTagName() {
+        return tagName;
+    }
 
-	public String getInnerText() {
-		return innerText;
-	}
+    public void setInnerHTML(final String innerHTML) {
+        if (Objects.equals(this.innerHTML, innerHTML))
+            return;
+        this.innerHTML = innerHTML;
+        saveUpdate(ServerToClientModel.INNER_HTML, this.innerHTML);
+    }
 
-	public String getInnerHTML() {
-		return innerHTML;
-	}
+    public void setInnerText(final String innerText) {
+        if (Objects.equals(this.innerText, innerText))
+            return;
+        this.innerText = innerText;
+        saveUpdate(ServerToClientModel.INNER_TEXT, this.innerText);
+    }
+
+    public String getInnerText() {
+        return innerText;
+    }
+
+    public String getInnerHTML() {
+        return innerHTML;
+    }
 }

@@ -41,10 +41,12 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
@@ -54,23 +56,26 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     private int dragStartY;
 
+    protected boolean autoHide;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        boolean autoHide = false;
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
             autoHide = binaryModel.getBooleanValue();
         } else {
+            autoHide = false;
             buffer.rewind(binaryModel);
         }
-        this.uiObject = createPopupPanel(autoHide);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+
+        super.create(buffer, objectId, uiService);
+
         addCloseHandler(uiService);
     }
 
-    protected PopupPanel createPopupPanel(final boolean autoHide) {
-        final PopupPanel popup = new PopupPanel(autoHide) {
+    @Override
+    protected PopupPanel createUIObject() {
+        return new PopupPanel(autoHide) {
 
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
@@ -79,7 +84,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 super.onPreviewNativeEvent(event);
             }
         };
-        return popup;
     }
 
     protected void addCloseHandler(final UIService uiService) {
@@ -89,7 +93,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(getObjectID());
-                instruction.put(Model.HANDLER_CLOSE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(cast(), instruction);
             }
         });
@@ -114,7 +118,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                     widgetInfo.set(3, new JSONNumber(Window.getClientWidth()));
                     widgetInfo.set(4, new JSONNumber(Window.getClientHeight()));
 
-                    eventInstruction.put(Model.WIDGET_POSITION, widgetInfo);
+                    eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
 
                     uiService.sendDataToServer(cast(), eventInstruction);
                 }
@@ -129,43 +133,43 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final PopupPanel popup = cast();
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             popup.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.POPUP_CENTER.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_CENTER.equals(binaryModel.getModel())) {
             popup.show();
             popup.center();
             return true;
         }
-        if (Model.POPUP_SHOW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_SHOW.equals(binaryModel.getModel())) {
             popup.show();
             return true;
         }
-        if (Model.POPUP_POSITION_AND_SHOW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_POSITION_AND_SHOW.equals(binaryModel.getModel())) {
             popup.setVisible(true);
             return true;
         }
-        if (Model.POPUP_HIDE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_HIDE.equals(binaryModel.getModel())) {
             popup.hide();
             return true;
         }
-        if (Model.POPUP_GLASS_ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_GLASS_ENABLED.equals(binaryModel.getModel())) {
             popup.setGlassEnabled(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.POPUP_MODAL.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_MODAL.equals(binaryModel.getModel())) {
             popup.setModal(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.POPUP_POSITION_LEFT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_POSITION_LEFT.equals(binaryModel.getModel())) {
             final int left = binaryModel.getIntValue();
-            // Model.POPUP_POSITION_TOP
+            // ServerToClientModel.POPUP_POSITION_TOP
             final int top = buffer.getBinaryModel().getIntValue();
             popup.setPopupPosition(left, top);
             return true;
         }
-        if (Model.POPUP_DRAGGABLE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_DRAGGABLE.equals(binaryModel.getModel())) {
             popup.addDomHandler(this, MouseDownEvent.getType());
             popup.addDomHandler(this, MouseUpEvent.getType());
             popup.addDomHandler(this, MouseMoveEvent.getType());

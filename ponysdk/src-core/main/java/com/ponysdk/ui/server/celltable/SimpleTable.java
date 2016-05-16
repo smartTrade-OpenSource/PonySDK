@@ -43,12 +43,11 @@ public class SimpleTable extends PElement {
 
     @Override
     public void insert(final PWidget child, final int beforeIndex) {
-        final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
-        parentElement.insert(child, beforeIndex);
+        final PElement parentElement = beforeIndex == 0 ? thead : tbody;
+        parentElement.add(child);
     }
 
     public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
-
         if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
         if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
@@ -146,20 +145,20 @@ public class SimpleTable extends PElement {
 
     @Override
     public boolean remove(final int row) {
-        final PElement parentElement = (row == 0) ? thead : tbody;
+        final PElement parentElement = row == 0 ? thead : tbody;
         return parentElement.remove(parentElement.getWidget(row - (row == 0 ? 0 : 1)));
     }
 
     public PElement getRow(final int row) {
         checkRowBound(row);
 
-        final PElement parentElement = (row == 0) ? thead : tbody;
+        final PElement parentElement = row == 0 ? thead : tbody;
 
         return (PElement) parentElement.getWidget(row - (row == 0 ? 0 : 1));
     }
 
     public PElement getCell(final int row, final int column) {
-        final PElement parentElement = (row == 0) ? thead : tbody;
+        final PElement parentElement = row == 0 ? thead : tbody;
 
         checkRowBound(row);
         checkColumnBound(column);
@@ -203,7 +202,7 @@ public class SimpleTable extends PElement {
         checkRowBound(index);
         checkRowBound(beforeIndex);
 
-        final PElement parentElement = (index == 0) ? thead : tbody;
+        final PElement parentElement = index == 0 ? thead : tbody;
 
         final PWidget source = parentElement.getWidget(index - (index == 0 ? 0 : 1));
         parentElement.insert(source, beforeIndex - (beforeIndex == 0 ? 0 : 1));
@@ -213,7 +212,7 @@ public class SimpleTable extends PElement {
         checkColumnBound(index);
         checkColumnBound(beforeIndex);
 
-        final PElement parentElement = (index == 0) ? thead : tbody;
+        final PElement parentElement = index == 0 ? thead : tbody;
 
         for (int r = 0; r < parentElement.getWidgetCount(); r++) {
             final PElement row = (PElement) parentElement.getWidget(r);
@@ -222,10 +221,10 @@ public class SimpleTable extends PElement {
     }
 
     private void checkRowBound(final int beforeIndex) {
-        final PElement parentElement = (beforeIndex == 0) ? thead : tbody;
+        final PElement parentElement = beforeIndex == 0 ? thead : tbody;
 
-        if ((beforeIndex < 0) || (beforeIndex >= parentElement.getWidgetCount() + (beforeIndex == 0 ? 0 : 1))) {
-            if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
+        if (beforeIndex < 0 || beforeIndex >= parentElement.getWidgetCount() + (beforeIndex == 0 ? 0 : 1)) {
+            if (beforeIndex < 0) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
             else throw new IndexOutOfBoundsException(
                     "beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
         }

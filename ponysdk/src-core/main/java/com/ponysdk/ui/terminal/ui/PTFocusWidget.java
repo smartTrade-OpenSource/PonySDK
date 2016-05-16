@@ -28,10 +28,10 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
-public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
+public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
     private boolean showLoadingOnRequest = false;
 
@@ -41,31 +41,31 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
             showLoadingOnRequest = binaryModel.getBooleanValue();
             return true;
         }
-        if (Model.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
             enabledOnRequest = binaryModel.getBooleanValue();
             return true;
         }
-        if (Model.END_OF_PROCESSING.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.END_OF_PROCESSING.equals(binaryModel.getModel())) {
             if (showLoadingOnRequest)
                 uiObject.removeStyleName("pony-Loading");
             if (!enabledOnRequest)
                 uiObject.setEnabled(enabled);
             return true;
         }
-        if (Model.ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
             return true;
         }
-        if (Model.TABINDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TABINDEX.equals(binaryModel.getModel())) {
             uiObject.setTabIndex(binaryModel.getIntValue());
             return true;
         }
-        if (Model.FOCUSED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.FOCUSED.equals(binaryModel.getModel())) {
             uiObject.setFocus(binaryModel.getBooleanValue());
             return true;
         }
@@ -73,13 +73,10 @@ public class PTFocusWidget<W extends FocusWidget> extends PTWidget<W> {
     }
 
     @Override
-    protected void triggerMouseEvent(final ReaderBuffer buffer, final DomHandlerType domHandlerType,
-            final UIService uiService, final MouseEvent<?> event) {
-        if (!enabledOnRequest)
-            uiObject.setEnabled(false);
-        if (showLoadingOnRequest)
-            uiObject.addStyleName("pony-Loading");
-        super.triggerMouseEvent(buffer, domHandlerType, uiService, event);
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final UIService uiService, final MouseEvent<?> event) {
+        if (!enabledOnRequest) uiObject.setEnabled(false);
+        if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
+        super.triggerMouseEvent(domHandlerType, uiService, event);
     }
 
 }

@@ -36,8 +36,9 @@ import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of
@@ -68,6 +69,11 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     public PTree() {
         root = new PTreeItem(true);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         root.setTree(this);
     }
 
@@ -144,9 +150,9 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_SELECTION_HANDLER.getValue())) {
-            final PTreeItem treeItem = UIContext.get()
-                    .getObject(instruction.getJsonNumber(HandlerModel.HANDLER_SELECTION_HANDLER.getValue()).intValue());
+        final String handlerSelection = ClientToServerModel.HANDLER_SELECTION_HANDLER.toStringValue();
+        if (instruction.containsKey(handlerSelection)) {
+            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(handlerSelection).intValue());
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);
@@ -168,6 +174,6 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(Model.ANIMATION, animationEnabled);
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 }

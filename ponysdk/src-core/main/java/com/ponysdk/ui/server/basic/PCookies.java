@@ -29,12 +29,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PCookies {
 
+    private static final int ID = 0; // reserved
+
     private final Map<String, String> cachedCookies = new ConcurrentHashMap<>();
-    private final int objectID = 0; // reserved
 
     public PCookies() {
     }
@@ -48,10 +49,10 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, objectID);
-        parser.parse(Model.REMOVE, name);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.REMOVE_COOKIE, name);
         parser.endObject();
 
         return cachedCookies.remove(name);
@@ -64,13 +65,13 @@ public class PCookies {
     public void setCookie(final String name, final String value, final Date expires) {
         cachedCookies.put(name, value);
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, objectID);
-        parser.parse(Model.ADD, name);
-        parser.parse(Model.VALUE, value);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.ADD_COOKIE, name);
+        parser.parse(ServerToClientModel.VALUE, value);
         if (expires != null) {
-            parser.parse(Model.COOKIE_EXPIRE, expires.getTime());
+            parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
         }
         parser.endObject();
     }

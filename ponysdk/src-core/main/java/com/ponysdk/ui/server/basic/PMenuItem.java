@@ -27,10 +27,12 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand}
@@ -75,10 +77,15 @@ public class PMenuItem extends PWidget implements PHasHTML {
     }
 
     public PMenuItem(final String text, final boolean asHTML) {
-        if (asHTML)
-            setHTML(text);
-        else
-            setText(text);
+        if (asHTML) this.html = text;
+        else this.text = text;
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (html != null) parser.parse(ServerToClientModel.HTML, html);
+        else parser.parse(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -94,7 +101,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        saveUpdate(Model.TEXT, text);
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -107,12 +114,12 @@ public class PMenuItem extends PWidget implements PHasHTML {
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(Model.ENABLED, enabled);
+        saveUpdate(ServerToClientModel.ENABLED, enabled);
     }
 
     private void setSubMenu(final PMenuBar subMenu) {
@@ -127,13 +134,11 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
-        String handlerKey = null;
-        if (event.containsKey(HandlerModel.HANDLER_KEY.getValue())) {
-            handlerKey = event.getString(HandlerModel.HANDLER_KEY.getValue());
-        }
-
-        if (HandlerModel.HANDLER_KEY_COMMAND.getValue().equals(handlerKey)) {
-            cmd.execute();
+        final String handlerKeyKey = ClientToServerModel.HANDLER_KEY.toStringValue();
+        if (event.containsKey(handlerKeyKey)) {
+            final String handlerKey = event.getString(handlerKeyKey);
+            if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) cmd.execute();
+            else super.onClientData(event);
         } else {
             super.onClientData(event);
         }

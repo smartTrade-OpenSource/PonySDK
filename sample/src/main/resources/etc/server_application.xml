@@ -24,6 +24,13 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                 <value>bootstrap.js</value>
                 <value>widget.js</value>
                 <value>script/sample.js</value>
+                <value>script/less.js</value>
+            </list>
+        </property>
+        <property name="style">
+            <list>
+                <value>css/sample.less</value>
+                <value>css/ponysdk.less</value>
             </list>
         </property>
 	</bean>

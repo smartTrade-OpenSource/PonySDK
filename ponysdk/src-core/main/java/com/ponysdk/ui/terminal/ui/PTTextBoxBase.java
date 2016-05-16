@@ -27,12 +27,13 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
-public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, String> {
+public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBase<T, String> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
@@ -43,27 +44,20 @@ public class PTTextBoxBase<W extends TextBoxBase> extends PTValueBoxBase<W, Stri
             public void onValueChange(final ValueChangeEvent<String> event) {
                 final PTInstruction eventInstruction = new PTInstruction();
                 eventInstruction.setObjectID(objectId);
-                eventInstruction.put(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-                eventInstruction.put(Model.VALUE, event.getValue());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                eventInstruction.put(ClientToServerModel.VALUE, event.getValue());
                 uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });
-
-        final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.TEXT.equals(binaryModel.getModel())) {
-            uiObject.setText(binaryModel.getStringValue());
-        } else {
-            buffer.rewind(binaryModel);
-        }
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
         }
-        if (Model.PLACEHOLDER.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.PLACEHOLDER.equals(binaryModel.getModel())) {
             uiObject.getElement().setAttribute("placeholder", binaryModel.getStringValue());
             return true;
         }

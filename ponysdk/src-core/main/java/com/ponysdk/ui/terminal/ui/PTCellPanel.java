@@ -31,10 +31,10 @@ import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
-public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
+public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
     private UIService uiService;
 
@@ -46,8 +46,9 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CELL_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
+            // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
@@ -64,8 +65,9 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
             }
             return true;
         }
-        if (Model.CELL_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
+            // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.getBinaryModel().getIntValue(), uiService);
             switch (verticalAlignment) {
                 case ALIGN_TOP:
@@ -82,12 +84,14 @@ public class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
             }
             return true;
         }
-        if (Model.CELL_WIDTH.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CELL_WIDTH.equals(binaryModel.getModel())) {
+            // ServerToClientModel.WIDGET_ID
             uiObject.setCellWidth(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
                     binaryModel.getStringValue());
             return true;
         }
-        if (Model.CELL_HEIGHT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CELL_HEIGHT.equals(binaryModel.getModel())) {
+            // ServerToClientModel.WIDGET_ID
             uiObject.setCellHeight(asWidget(buffer.getBinaryModel().getIntValue(), uiService),
                     binaryModel.getStringValue());
             return true;

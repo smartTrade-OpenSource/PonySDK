@@ -40,8 +40,9 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
@@ -58,6 +59,8 @@ import com.ponysdk.ui.terminal.model.Model;
 public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
+
+    private static final String EMPTY = "";
 
     private List<PValueChangeHandler<Date>> handlers;
 
@@ -76,15 +79,19 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
         this.datePicker = picker;
         this.dateFormat = dateFormat;
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.PICKER, datePicker.getID());
-        parser.parse(Model.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+        parser.parse(ServerToClientModel.PICKER, datePicker.getID());
+        parser.parse(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     @Override
@@ -94,15 +101,14 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.getValue())) {
-            final String data = jsonObject.getString(Model.VALUE.getValue());
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.toStringValue())) {
+            final String data = jsonObject.getString(ClientToServerModel.VALUE.toStringValue());
             Date date = null;
             if (data != null && !data.isEmpty()) {
                 try {
                     date = dateFormat.parse(data);
                 } catch (final ParseException ex) {
-                    if (log.isWarnEnabled())
-                        log.warn("Cannot parse the date #{}", data);
+                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", data);
                 }
             }
             onValueChange(new PValueChangeEvent<>(this, date));
@@ -113,38 +119,31 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>(1);
-        } else {
-            handlers.add(handler);
-        }
+        if (handlers == null) handlers = new ArrayList<>();
+        handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        if (handlers == null) {
-            return false;
-        } else {
-            return handlers.remove(handler);
-        }
+        return handlers != null ? handlers.remove(handler) : false;
     }
 
     @Override
     public Collection<PValueChangeHandler<Date>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
         this.date = event.getValue();
-        for (final PValueChangeHandler<Date> handler : handlers) {
+        for (final PValueChangeHandler<Date> handler : getValueChangeHandlers()) {
             handler.onValueChange(event);
         }
     }
 
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
-        saveUpdate(Model.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+        saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     public SimpleDateFormat getDateFormat() {
@@ -157,19 +156,19 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public String getDisplayedValue() {
-        if (getValue() == null)
-            return "";
-        return getDateFormat().format(getValue());
+        if (getValue() == null) return EMPTY;
+        else return getDateFormat().format(getValue());
     }
 
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(Model.VALUE, date != null ? dateFormat.format(date) : "");
+        saveUpdate(ServerToClientModel.VALUE, date != null ? dateFormat.format(date) : EMPTY);
+        datePicker.setValue(date);
     }
 
     public void setDefaultMonth(final Date date) {
-        saveUpdate(Model.TIME, date.getTime());
+        saveUpdate(ServerToClientModel.TIME, date.getTime());
     }
 
     public PDatePicker getDatePicker() {

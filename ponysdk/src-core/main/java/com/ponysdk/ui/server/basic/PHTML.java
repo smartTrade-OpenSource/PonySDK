@@ -28,7 +28,7 @@ import java.util.Objects;
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -45,67 +45,61 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PHTML extends PLabel implements PHasHTML {
 
-	private String html;
-	private boolean wordWrap = false;
+    private String html;
+    private boolean wordWrap = false;
 
-	public PHTML() {
-		super();
-	}
+    public PHTML() {
+        super();
+    }
 
-	public PHTML(final String text) {
-		this(text, false);
-	}
+    public PHTML(final String text) {
+        this(text, false);
+    }
 
-	public PHTML(final String html, final boolean wordWrap) {
-		super(false);
-		this.html = html;
-		this.wordWrap = wordWrap;
-		init();
-	}
+    public PHTML(final String html, final boolean wordWrap) {
+        super();
+        this.html = html;
+        this.wordWrap = wordWrap;
+    }
 
-	@Override
-	protected void enrichOnInit(Parser parser) {
-		super.enrichOnInit(parser);
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (html != null) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
+    }
 
-		if (html != null) {
-			parser.parse(Model.HTML, this.html.replace("\"", "\\\""));
-		}
-		if (wordWrap) {
-			parser.parse(Model.WORD_WRAP, this.wordWrap);
-		}
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.HTML;
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.HTML;
-	}
+    @Override
+    public String getHTML() {
+        return html;
+    }
 
-	@Override
-	public String getHTML() {
-		return html;
-	}
+    @Override
+    public void setHTML(final String html) {
+        if (Objects.equals(this.html, html))
+            return;
+        this.html = html;
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+    }
 
-	@Override
-	public void setHTML(final String html) {
-		if (Objects.equals(this.html, html))
-			return;
-		this.html = html;
-		saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
-	}
+    public boolean isWordWrap() {
+        return wordWrap;
+    }
 
-	public boolean isWordWrap() {
-		return wordWrap;
-	}
+    public void setWordWrap(final boolean wordWrap) {
+        if (Objects.equals(this.wordWrap, wordWrap))
+            return;
+        this.wordWrap = wordWrap;
+        saveUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
+    }
 
-	public void setWordWrap(final boolean wordWrap) {
-		if (Objects.equals(this.wordWrap, wordWrap))
-			return;
-		this.wordWrap = wordWrap;
-		saveUpdate(Model.WORD_WRAP, this.wordWrap);
-	}
-
-	@Override
-	public String toString() {
-		return toString("text=" + text + ", html=" + html);
-	}
+    @Override
+    public String toString() {
+        return super.toString() + ", text=" + text + ", html=" + html;
+    }
 }

@@ -28,7 +28,7 @@ import java.util.Objects;
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.
@@ -45,7 +45,6 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     public PAnchor() {
         super();
-        init();
     }
 
     /**
@@ -70,14 +69,13 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         super();
         this.text = text;
         this.href = href;
-        init();
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TEXT, this.text);
-        parser.parse(Model.HREF, this.href);
+        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.href != null) parser.parse(ServerToClientModel.HREF, this.href);
     }
 
     @Override
@@ -104,7 +102,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.href, href))
             return;
         this.href = href;
-        saveUpdate(Model.HREF, this.href);
+        saveUpdate(ServerToClientModel.HREF, this.href);
     }
 
     @Override
@@ -117,7 +115,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.text, text))
             return;
         this.text = text;
-        saveUpdate(Model.TEXT, this.text);
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -130,7 +128,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
 }

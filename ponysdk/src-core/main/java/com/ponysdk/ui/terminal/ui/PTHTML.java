@@ -24,41 +24,24 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTHTML extends PTLabel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new HTML();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-
-        BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.HTML.equals(binaryModel.getModel())) {
-            cast().setHTML(binaryModel.getStringValue());
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
-        binaryModel = buffer.getBinaryModel();
-        if (Model.WORD_WRAP.equals(binaryModel.getModel())) {
-            cast().setWordWrap(binaryModel.getBooleanValue());
-        } else {
-            buffer.rewind(binaryModel);
-        }
+    protected HTML createUIObject() {
+        return new HTML();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.HTML.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             cast().setHTML(binaryModel.getStringValue());
             return true;
         }
-        if (Model.WORD_WRAP.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
             cast().setWordWrap(binaryModel.getBooleanValue());
             return true;
         }

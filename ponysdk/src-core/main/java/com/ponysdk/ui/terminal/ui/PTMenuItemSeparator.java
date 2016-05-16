@@ -24,16 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.MenuItemSeparator;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTMenuItemSeparator extends PTUIObject<MenuItemSeparator> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new MenuItemSeparator();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected MenuItemSeparator createUIObject() {
+        return new MenuItemSeparator();
     }
 
 }

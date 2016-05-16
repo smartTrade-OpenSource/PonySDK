@@ -24,39 +24,44 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTGrid extends PTHTMLTable {
 
+    private int rows = -1;
+    private int columns = -1;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.ROW.equals(binaryModel.getModel())) {
-            final int rows = binaryModel.getIntValue();
-            // Model.COLUMN
-            final int columns = buffer.getBinaryModel().getIntValue();
-            this.uiObject = new Grid(rows, columns);
+        if (ServerToClientModel.ROW.equals(binaryModel.getModel())) {
+            rows = binaryModel.getIntValue();
+            columns = buffer.getBinaryModel().getIntValue();
         } else {
             buffer.rewind(binaryModel);
-            this.uiObject = new Grid();
         }
 
-        this.uiObject.addStyleName("pony-PGrid");
+        super.create(buffer, objectId, uiService);
 
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        this.uiObject.addStyleName("pony-PGrid");
+    }
+
+    @Override
+    protected HTMLTable createUIObject() {
+        return rows != -1 ? new Grid(rows, columns) : new Grid();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
         }
-        if (Model.INSERT_ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
         }

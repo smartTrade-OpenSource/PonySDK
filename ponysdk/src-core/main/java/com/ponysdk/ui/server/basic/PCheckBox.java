@@ -34,8 +34,9 @@ import javax.json.JsonObject;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard check box widget. This class also serves as a base class for
@@ -69,6 +70,11 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     public PCheckBox(final String label) {
         super(label);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
     }
 
@@ -79,8 +85,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        if (handlers == null)
-            handlers = new ArrayList<>();
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
@@ -116,23 +121,21 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         if (Objects.equals(this.value, value))
             return;
         this.value = value;
-        saveUpdate(Model.VALUE_CHECKBOX, this.value);
+        saveUpdate(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         this.value = event.getValue();
-        if (handlers != null) {
-            for (final PValueChangeHandler<Boolean> handler : handlers) {
-                handler.onValueChange(event);
-            }
+        for (final PValueChangeHandler<Boolean> handler : getValueChangeHandlers()) {
+            handler.onValueChange(event);
         }
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.getValue())) {
-            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(Model.VALUE_CHECKBOX.getValue())));
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.toStringValue())) {
+            onValueChange(new PValueChangeEvent<>(this, jsonObject.getBoolean(ClientToServerModel.VALUE_CHECKBOX.toStringValue())));
         } else {
             super.onClientData(jsonObject);
         }

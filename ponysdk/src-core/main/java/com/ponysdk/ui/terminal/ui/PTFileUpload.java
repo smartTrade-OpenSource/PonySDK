@@ -34,10 +34,12 @@ import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTFileUpload extends PTWidget<FormPanel> {
 
@@ -47,9 +49,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new FormPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
 
         uiObject.setEncoding(FormPanel.ENCODING_MULTIPART);
         uiObject.setMethod(FormPanel.METHOD_POST);
@@ -64,10 +64,15 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             public void onSubmitComplete(final SubmitCompleteEvent event) {
                 final PTInstruction instruction = new PTInstruction();
                 instruction.setObjectID(objectId);
-                instruction.put(Model.HANDLER_SUBMIT_COMPLETE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE_HANDLER);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
+    }
+
+    @Override
+    protected FormPanel createUIObject() {
+        return new FormPanel();
     }
 
     @Override
@@ -80,18 +85,18 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_CHANGE_HANDLER);
-                    eventInstruction.put(Model.FILE_NAME, fileUpload.getFilename());
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
+                    eventInstruction.put(ClientToServerModel.FILE_NAME, fileUpload.getFilename());
                     uiService.sendDataToServer(fileUpload, eventInstruction);
                 }
             });
         } else if (HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
             final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                    + Model.STREAM_REQUEST_ID + "=" + buffer.getBinaryModel().getIntValue();
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + buffer.getBinaryModel().getIntValue();
             getFrame().setUrl(action);
         } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
             final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                    + Model.STREAM_REQUEST_ID + "=" + buffer.getBinaryModel().getIntValue();
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + buffer.getBinaryModel().getIntValue();
             uiObject.setAction(action);
             uiObject.submit();
         } else {
@@ -101,11 +106,11 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.NAME.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.NAME.equals(binaryModel.getModel())) {
             fileUpload.setName(binaryModel.getStringValue());
             return true;
         }
-        if (Model.ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             fileUpload.setEnabled(binaryModel.getBooleanValue());
             return true;
         }

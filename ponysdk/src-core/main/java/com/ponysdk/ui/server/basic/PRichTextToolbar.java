@@ -25,30 +25,29 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PRichTextToolbar extends PWidget {
 
-	private final PRichTextArea richTextArea;
+    private final PRichTextArea richTextArea;
 
-	public PRichTextToolbar(final PRichTextArea richTextArea) {
-		this.richTextArea = richTextArea;
-		init();
-	}
+    public PRichTextToolbar(final PRichTextArea richTextArea) {
+        this.richTextArea = richTextArea;
+    }
 
-	@Override
-	protected void enrichOnInit(final Parser parser) {
-		super.enrichOnInit(parser);
-		parser.parse(Model.WIDGET_ID, richTextArea.getID());
-	}
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        parser.parse(ServerToClientModel.WIDGET_ID, richTextArea.getID());
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.RICH_TEXT_TOOLBAR;
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.RICH_TEXT_TOOLBAR;
+    }
 
-	public PRichTextArea getRichTextArea() {
-		return richTextArea;
-	}
+    public PRichTextArea getRichTextArea() {
+        return richTextArea;
+    }
 
 }

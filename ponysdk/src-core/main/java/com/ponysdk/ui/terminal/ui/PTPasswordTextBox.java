@@ -24,16 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTPasswordTextBox extends PTTextBox {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new PasswordTextBox();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected PasswordTextBox createUIObject() {
+        return new PasswordTextBox();
     }
 
 }

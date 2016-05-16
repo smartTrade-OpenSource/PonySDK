@@ -65,15 +65,18 @@ import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
 import com.ponysdk.ui.terminal.event.HttpResponseReceivedEvent;
 import com.ponysdk.ui.terminal.exception.ServerException;
-import com.ponysdk.ui.terminal.extension.AddonFactory;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.ui.PTCookies;
 import com.ponysdk.ui.terminal.ui.PTObject;
 import com.ponysdk.ui.terminal.ui.PTStreamResource;
+import com.ponysdk.ui.terminal.ui.PTWindow;
+import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler,
         HttpRequestSendEvent.Handler {
@@ -83,15 +86,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private static EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
-    private final Map<String, AddonFactory> addonByKey = new HashMap<>();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
     private final List<PTInstruction> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
-    // private final Map<Integer, JSONObject> incomingMessageQueue = new
-    // HashMap<>();
+    // private final Map<Integer, JSONObject> incomingMessageQueue = new HashMap<>();
 
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
@@ -104,7 +105,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private RequestBuilder requestBuilder;
 
     private long lastReceived = -1;
-    // private final long nextSent = 1;
 
     public static int sessionID;
 
@@ -116,26 +116,16 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public UIBuilder() {
         History.addValueChangeHandler(this);
 
-        // final AddonList addonList = GWT.create(PonyAddonList.class);
-
-        // final List<AddonFactory> addonFactoryList =
-        // addonList.getAddonFactoryList();
-        //
-        // for (final AddonFactory addonFactory : addonFactoryList) {
-        // addonByKey.put(addonFactory.getSignature(), addonFactory);
-        // }
-
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
-
     }
 
     public void init(final int ID, final RequestBuilder requestBuilder) {
         if (log.isLoggable(Level.INFO))
             log.info("Init request builder");
 
-        this.requestBuilder = requestBuilder;
         UIBuilder.sessionID = ID;
+        this.requestBuilder = requestBuilder;
 
         loadingMessageBox = new SimplePanel();
 
@@ -151,7 +141,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         loadingMessageBox.getElement().setInnerText("Loading ...");
 
         final PTCookies cookies = new PTCookies();
-        cookies.create(null, null);
         objectByID.put(0, cookies);
 
         // hide loading component
@@ -203,32 +192,56 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    public void update(final ReaderBuffer buffer) {
-        BinaryModel binaryModel;
-        while (buffer.getIndex() < buffer.getByteLength()) {
-            binaryModel = buffer.getBinaryModel();
+    public void updateMainTerminal(final ReaderBuffer buffer) {
+        while (buffer.hasRemaining()) {
+            // Detect if the message is not for the main terminal but for a specific window
+            final BinaryModel windowIdModel = buffer.getBinaryModel();
+            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
+                // Event on a specific window
+                final int requestedWindowId = windowIdModel.getIntValue();
+                // Main terminal, we need to dispatch the event
+                final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
+                if (window != null) {
+                    log.log(Level.INFO, "The main terminal send the buffer to window " + requestedWindowId);
+                    window.postMessage(buffer);
+                } else {
+                    log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
 
-            if (Model.TYPE_CREATE.equals(binaryModel.getModel())) {
+                    // FIXME To be remove
+                    update(buffer);
+                }
+            } else {
+                buffer.rewind(windowIdModel);
+                update(buffer);
+            }
+        }
+    }
+
+    public void update(final ReaderBuffer buffer) {
+        if (buffer.hasRemaining()) {
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+
+            if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
                 final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
                 processUpdate(buffer, ptObject);
-            } else if (Model.TYPE_UPDATE.equals(binaryModel.getModel())) {
-                processUpdate(buffer, objectByID.get(binaryModel.getIntValue()));
-            } else if (Model.TYPE_ADD.equals(binaryModel.getModel())) {
-                processAdd(buffer, objectByID.get(binaryModel.getIntValue()));
-            } else if (Model.TYPE_GC.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
+                processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
+            } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
+                processAdd(buffer, getPTObject(binaryModel.getIntValue()));
+            } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
                 processGC(binaryModel.getIntValue());
-            } else if (Model.TYPE_REMOVE.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
                 processRemove(buffer, binaryModel.getIntValue());
-            } else if (Model.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
-                processAddHandler(buffer, HandlerModel.values()[binaryModel.getShortValue()]);
-            } else if (Model.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
-                processRemoveHandler(buffer, objectByID.get(binaryModel.getIntValue()));
-            } else if (Model.TYPE_HISTORY.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
+                processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
+            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
+                processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
+            } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
                 processHistory(buffer, binaryModel.getStringValue());
-            } else if (Model.TYPE_CLOSE.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
                 processClose(buffer);
             } else {
-                log.log(Level.WARNING, "Unknown instruction type : " + buffer);
+                log.log(Level.WARNING, "Unknown instruction type : " + binaryModel.getModel());
             }
         }
     }
@@ -237,7 +250,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void update(final JSONValue data) {
         JSONArray jsonArray = data.isArray();
         if (jsonArray == null)
-            jsonArray = data.isObject().get(Model.APPLICATION_INSTRUCTIONS.getValue()).isArray();
+            jsonArray = data.isObject().get(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
@@ -260,88 +273,74 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         stackedErrors.add(jsoObject);
     }
 
-    @Override
-    public void processInstruction(final PTInstruction instruction) {
-        if (instruction.containsKey(Model.TYPE_CREATE))
-            processCreate(instruction);
-        else if (instruction.containsKey(Model.TYPE_ADD))
-            processAdd(instruction);
-        else if (instruction.containsKey(Model.TYPE_UPDATE))
-            processUpdate(instruction);
-        else if (instruction.containsKey(Model.TYPE_REMOVE))
-            processRemove(instruction);
-        else if (instruction.containsKey(Model.TYPE_ADD_HANDLER))
-            processAddHandler(instruction);
-        else if (instruction.containsKey(Model.TYPE_REMOVE_HANDLER))
-            processRemoveHandler(instruction);
-        else if (instruction.containsKey(Model.TYPE_HISTORY))
-            processHistory(instruction);
-        else if (instruction.containsKey(Model.TYPE_CLOSE))
-            processClose(instruction);
-        else if (instruction.containsKey(Model.TYPE_GC))
-            processGC(instruction);
-        else
-            log.log(Level.WARNING, "Unknown instruction type : " + instruction);
-    }
-
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
-        final BinaryModel widgetType = buffer.getBinaryModel();
-        final WidgetType widgetTypeValue = WidgetType.values()[widgetType.getShortValue()];
+        // ServerToClientModel.WIDGET_TYPE
+        final WidgetType widgetType = WidgetType.values()[buffer.getBinaryModel().getByteValue()];
 
-        final PTObject ptObject = uiFactory.newUIObject(this, widgetTypeValue);
+        final PTObject ptObject = uiFactory.newUIObject(this, widgetType);
         if (ptObject != null) {
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
             ptObject.create(buffer, objectIdValue, this);
             objectByID.put(objectIdValue, ptObject);
         } else {
-            log.warning("Cannot create object " + objectIdValue + " with widget type : " + widgetTypeValue);
+            log.warning("Cannot create object " + objectIdValue + " with widget type : " + widgetType);
         }
 
         return ptObject;
     }
 
     private void processAdd(final ReaderBuffer buffer, final PTObject ptObject) {
+        // ServerToClientModel.PARENT_OBJECT_ID
         final int parentId = buffer.getBinaryModel().getIntValue();
-        final PTObject parentObject = objectByID.get(parentId);
-        if (parentObject != null)
+        final PTObject parentObject = getPTObject(parentId);
+        if (parentObject != null) {
+            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
-        else
-            log.warning("Cannot add object " + ptObject.getObjectID() + " to an garbaged parent object #" + parentId);
+        } else {
+            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId);
+        }
     }
 
     private void processUpdate(final ReaderBuffer buffer, final PTObject ptObject) {
-        final BinaryModel binaryModel = buffer.getBinaryModel();
-        boolean result;
+        BinaryModel binaryModel;
+        boolean result = false;
         do {
-            result = ptObject.update(buffer, binaryModel);
-        } while (result);
+            binaryModel = buffer.getBinaryModel();
+            if (!BinaryModel.NULL.equals(binaryModel)) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
+                result = ptObject.update(buffer, binaryModel);
+            }
+        } while (result && buffer.hasRemaining());
 
-        if (!result) {
-            buffer.rewind(binaryModel);
-        }
+        if (!result) buffer.rewind(binaryModel);
     }
 
     private void processRemove(final ReaderBuffer buffer, final int objectId) {
         final int parentId = buffer.getBinaryModel().getIntValue();
 
-        final PTObject ptObject = objectByID.get(objectId);
+        final PTObject ptObject = getPTObject(objectId);
         PTObject parentObject;
         if (parentId == -1)
             parentObject = ptObject;
         else
-            parentObject = objectByID.get(parentId);
+            parentObject = getPTObject(parentId);
 
-        if (parentObject != null)
+        if (parentObject != null) {
+            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove : " + ptObject);
             parentObject.remove(buffer, ptObject, this);
-        else
+        } else
             log.warning("Cannot remove a garbaged object #" + objectId);
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add handler " + handlerModel);
         if (HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel, this);
         } else {
+            // ServerToClientModel.OBJECT_ID
             final int id = buffer.getBinaryModel().getIntValue();
-            final PTObject ptObject = objectByID.get(id);
+            final PTObject ptObject = getPTObject(id);
             if (ptObject != null)
                 ptObject.addHandler(buffer, handlerModel, this);
             else
@@ -350,16 +349,17 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     }
 
     private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
-        if (ptObject != null)
+        if (ptObject != null) {
+            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove handler : " + ptObject);
             ptObject.removeHandler(buffer, this);
-        else
-            log.warning("Cannot remove handler on a garbaged object #" + ptObject.getObjectID());
+        }
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + token);
         final String oldToken = History.getToken();
 
-        // Model.HISTORY_FIRE_EVENTS
+        // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.getBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
             if (fireEvents)
@@ -476,10 +476,14 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         sendDataToServer(jsonArray);
     }
 
+    @Override
+    public void sendDataToServer(final ReaderBuffer buffer) {
+    }
+
     public void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(Model.APPLICATION_VIEW_ID, sessionID);
-        requestData.put(Model.APPLICATION_INSTRUCTIONS, jsonArray);
+        requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
+        requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
         if (!stackedErrors.isEmpty()) {
             final JSONArray errors = new JSONArray();
@@ -487,7 +491,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             for (final JSONObject jsoObject : stackedErrors)
                 errors.set(i++, jsoObject);
             stackedErrors.clear();
-            requestData.put(Model.APPLICATION_ERRORS, errors);
+            requestData.put(ClientToServerModel.APPLICATION_ERRORS, errors);
         }
 
         if (log.isLoggable(Level.FINE))
@@ -569,21 +573,23 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     public void onValueChange(final ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(Model.TYPE_HISTORY, event.getValue());
+            eventInstruction.put(ClientToServerModel.TYPE_HISTORY, event.getValue());
             stackInstrution(eventInstruction);
         }
     }
 
     @Override
-    public PTObject getPTObject(final int ID) {
-        return objectByID.get(ID);
+    public PTObject getPTObject(final int id) {
+        final PTObject ptObject = objectByID.get(id);
+        if (ptObject == null) log.warning("PTObject #" + id + " not found");
+        return ptObject;
     }
 
     @Override
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
         if (objectID != null)
-            return objectByID.get(objectID);
+            return getPTObject(objectID);
         return null;
     }
 
@@ -641,6 +647,19 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
+    }
+
+    // FIXME REMOVE
+    @Deprecated
+    @Override
+    public void processInstruction(final PTInstruction instruction) throws Exception {
+        log.severe("Deprecated UIBuilder#processInstruction() method, don't use it : " + instruction);
+    }
+
+    // FIXME REMOVE
+    @Deprecated
+    private void executeInstruction(final PTInstruction instruction) {
+        log.severe("Deprecated UIBuilder#executeInstruction() method, don't use it : " + instruction);
     }
 
 }

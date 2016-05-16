@@ -26,17 +26,27 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTMenuBar extends PTWidget<MenuBar> {
 
+    private static final String MENUBAR_STYLE = "pony-MenuBar";
+
+    private boolean isVertical;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.MENU_BAR_IS_VERTICAL
-        this.uiObject = new MenuBar(buffer.getBinaryModel().getBooleanValue());
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        isVertical = buffer.getBinaryModel().getBooleanValue();
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected MenuBar createUIObject() {
+        final MenuBar menuBar = new MenuBar(isVertical);
+        menuBar.addStyleName(MENUBAR_STYLE);
+        return menuBar;
     }
 
     @Override
@@ -45,11 +55,22 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
-            // Model.BEFORE_INDEX
-            menuBar.insertItem(menuItem.cast(), buffer.getBinaryModel().getIntValue());
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
+                menuBar.insertItem(menuItem.cast(), binaryModel.getIntValue());
+            } else {
+                buffer.rewind(binaryModel);
+                menuBar.addItem(menuItem.cast());
+            }
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
-            menuBar.addSeparator(menuItem.cast());
+            final BinaryModel binaryModel = buffer.getBinaryModel();
+            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
+                menuBar.insertSeparator(menuItem.cast(), binaryModel.getIntValue());
+            } else {
+                buffer.rewind(binaryModel);
+                menuBar.addSeparator(menuItem.cast());
+            }
         }
     }
 
@@ -66,11 +87,11 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.CLEAR.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clearItems();
             return true;
         }
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }

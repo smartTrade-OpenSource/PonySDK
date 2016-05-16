@@ -35,8 +35,8 @@ import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 /**
@@ -61,7 +61,6 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     public PRichTextArea() {
         super();
-        init();
     }
 
     @Override
@@ -77,7 +76,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void setText(final String text) {
         this.html = text;
-        saveUpdate(Model.TEXT, text);
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -90,7 +89,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
         if (Objects.equals(this.html, html))
             return;
         this.html = html;
-        saveUpdate(Model.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     public Formatter getFormatter() {
@@ -99,8 +98,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
-            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(Model.HTML.getValue())));
+        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
+            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HTML.toStringValue())));
         } else {
             super.onClientData(instruction);
         }
@@ -143,87 +142,87 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public class Formatter {
 
         public void createLink(final String url) {
-            saveUpdate(Model.CREATE_LINK, url);
+            saveUpdate(ServerToClientModel.CREATE_LINK, url);
         }
 
         public void insertHorizontalRule() {
-            saveUpdate(Model.INSERT_HORIZONTAL_RULE);
+            saveUpdate(ServerToClientModel.INSERT_HORIZONTAL_RULE);
         }
 
         public void insertHTML(final String html) {
-            saveUpdate(Model.INSERT_HTML, html);
+            saveUpdate(ServerToClientModel.INSERT_HTML, html);
         }
 
         public void insertImage(final String url) {
-            saveUpdate(Model.IMAGE_URL, url);
+            saveUpdate(ServerToClientModel.IMAGE_URL, url);
         }
 
         public void insertOrderedList() {
-            saveUpdate(Model.ORDERED);
+            saveUpdate(ServerToClientModel.ORDERED);
         }
 
         public void insertUnorderedList() {
-            saveUpdate(Model.UNORDERED);
+            saveUpdate(ServerToClientModel.UNORDERED);
         }
 
         public void setBackColor(final String color) {
-            saveUpdate(Model.BACK_COLOR, color);
+            saveUpdate(ServerToClientModel.BACK_COLOR, color);
         }
 
         public void setFontName(final String name) {
-            saveUpdate(Model.FONT_NAME, name);
+            saveUpdate(ServerToClientModel.FONT_NAME, name);
         }
 
         public void setFontSize(final String fontSize) {
-            saveUpdate(Model.FONT_SIZE, fontSize);
+            saveUpdate(ServerToClientModel.FONT_SIZE, fontSize);
         }
 
         public void setForeColor(final String color) {
-            saveUpdate(Model.FONT_COLOR, color);
+            saveUpdate(ServerToClientModel.FONT_COLOR, color);
         }
 
         public void setJustification(final Justification justification) {
-            saveUpdate(Model.JUSTIFICATION, justification.name());
+            saveUpdate(ServerToClientModel.JUSTIFICATION, justification.name());
         }
 
         public void toggleBold() {
-            saveUpdate(Model.TOGGLE_BOLD);
+            saveUpdate(ServerToClientModel.TOGGLE_BOLD);
         }
 
         public void toggleItalic() {
-            saveUpdate(Model.TOGGLE_ITALIC);
+            saveUpdate(ServerToClientModel.TOGGLE_ITALIC);
         }
 
         public void toggleSubscript() {
-            saveUpdate(Model.TOGGLE_SUBSCRIPT);
+            saveUpdate(ServerToClientModel.TOGGLE_SUBSCRIPT);
         }
 
         public void toggleUnderline() {
-            saveUpdate(Model.TOGGLE_UNDERLINE);
+            saveUpdate(ServerToClientModel.TOGGLE_UNDERLINE);
         }
 
         public void leftIndent() {
-            saveUpdate(Model.LEFT_INDENT);
+            saveUpdate(ServerToClientModel.LEFT_INDENT);
         }
 
         public void redo() {
-            saveUpdate(Model.REDO);
+            saveUpdate(ServerToClientModel.REDO);
         }
 
         public void removeFormat() {
-            saveUpdate(Model.REMOVE_FORMAT);
+            saveUpdate(ServerToClientModel.REMOVE_FORMAT);
         }
 
         public void removeLink() {
-            saveUpdate(Model.REMOVE_LINK);
+            saveUpdate(ServerToClientModel.REMOVE_LINK);
         }
 
         public void rightIndent() {
-            saveUpdate(Model.TOGGLE_RIGHT_INDENT);
+            saveUpdate(ServerToClientModel.TOGGLE_RIGHT_INDENT);
         }
 
         public void selectAll() {
-            saveUpdate(Model.SELECT_ALL);
+            saveUpdate(ServerToClientModel.SELECT_ALL);
         }
     }
 

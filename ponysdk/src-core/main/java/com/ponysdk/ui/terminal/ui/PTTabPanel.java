@@ -27,14 +27,15 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTTabPanel extends PTWidget<TabPanel> {
 
@@ -42,31 +43,42 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new TabPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        super.create(buffer, objectId, uiService);
 
         this.uiService = uiService;
     }
 
     @Override
+    protected TabPanel createUIObject() {
+        return new TabPanel();
+    }
+
+    @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
-        final TabLayoutPanel tabPanel = uiObject;
-
-        // Model.BEFORE_INDEX
-        final int beforeIndex = buffer.getBinaryModel().getIntValue();
 
         final BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.TAB_TEXT.equals(binaryModel.getModel())) {
-            tabPanel.insert(w, binaryModel.getStringValue(), beforeIndex);
-        } else if (Model.TAB_WIDGET.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TAB_TEXT.equals(binaryModel.getModel())) {
+            final BinaryModel beforeIndexModel = buffer.getBinaryModel();
+            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+                uiObject.insert(w, binaryModel.getStringValue(), beforeIndexModel.getIntValue());
+            } else {
+                buffer.rewind(beforeIndexModel);
+                uiObject.add(w, binaryModel.getStringValue());
+            }
+        } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(binaryModel.getIntValue());
-            tabPanel.insert(w, ptWidget.cast(), beforeIndex);
+            final BinaryModel beforeIndexModel = buffer.getBinaryModel();
+            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+                uiObject.insert(w, ptWidget.cast(), beforeIndexModel.getIntValue());
+            } else {
+                buffer.rewind(beforeIndexModel);
+                uiObject.add(w, ptWidget.cast());
+            }
         }
 
-        if (tabPanel.getWidgetCount() == 1) {
-            tabPanel.selectTab(0);
+        if (uiObject.getWidgetCount() == 1) {
+            uiObject.selectTab(0);
         }
     }
 
@@ -80,8 +92,8 @@ public class PTTabPanel extends PTWidget<TabPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(Model.INDEX, event.getSelectedItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.INDEX, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -94,8 +106,8 @@ public class PTTabPanel extends PTWidget<TabPanel> {
                     final PTInstruction eventInstruction = new PTInstruction();
                     eventInstruction.setObjectID(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
-                    eventInstruction.put(Model.INDEX, event.getItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.INDEX, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -111,11 +123,11 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.SELECTED_INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SELECTED_INDEX.equals(binaryModel.getModel())) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
         }
-        if (Model.ANIMATION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         }

@@ -25,7 +25,6 @@ package com.ponysdk.ui.terminal.ui;
 
 import java.util.Date;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -34,45 +33,51 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTDateBox.MyDateBox;
 
 public class PTDateBox extends PTWidget<MyDateBox> {
 
-    private static final DefaultFormat DEFAULT_FORMAT = GWT.create(DefaultFormat.class);
+    private PTDatePicker datePicker;
+    private DefaultFormat defaultFormat;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.PICKER
-        final PTDatePicker datePicker = (PTDatePicker) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
-        this.uiObject = new MyDateBox(datePicker.cast(), null, DEFAULT_FORMAT);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        // ServerToClientModel.PICKER
+        datePicker = (PTDatePicker) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
+        // ServerToClientModel.DATE_FORMAT_PATTERN
+        defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(buffer.getBinaryModel().getStringValue()));
 
-        // Model.DATE_FORMAT_PATTERN
-        final MyDateBox dateBox = cast();
-        dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(buffer.getBinaryModel().getStringValue())));
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected MyDateBox createUIObject() {
+        return new MyDateBox(datePicker.cast(), null, defaultFormat);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final MyDateBox dateBox = cast();
-        if (Model.VALUE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
             dateBox.getTextBox().setText(binaryModel.getStringValue());
             return true;
         }
-        if (Model.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {
-            dateBox.setFormat(new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue())));
+        if (ServerToClientModel.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {
+            defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
+            dateBox.setFormat(defaultFormat);
             return true;
         }
-        if (Model.ENABLED.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             dateBox.setEnabled(binaryModel.getBooleanValue());
             return true;
         }
-        if (Model.TIME.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
             dateBox.setDefaultMonth(binaryModel.getLongValue());
             return true;
         }
@@ -107,8 +112,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     protected void triggerEvent(final UIService uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(getObjectID());
-        instruction.put(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(Model.VALUE, dateBox.getTextBox().getText());
+        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
+        instruction.put(ClientToServerModel.VALUE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);
     }
 
@@ -126,13 +131,10 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
         @Override
         public void showDatePicker() {
-            if (!getTextBox().getText().trim().isEmpty() || defaultMonth == null) {
-                super.showDatePicker();
-                return;
-            }
-
             super.showDatePicker();
-            getDatePicker().setCurrentMonth(defaultMonth);
+            if (defaultMonth != null && getTextBox().getText().trim().isEmpty()) {
+                getDatePicker().setCurrentMonth(defaultMonth);
+            }
         }
 
     }

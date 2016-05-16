@@ -110,19 +110,20 @@ public class CommunicationSanityChecker {
                 if (isCommunicationSuspectedToBeNonFunctional(now)) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
-                    log.info("[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
+                    if (log.isDebugEnabled()) log.debug(
+                            "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
                             uiContext);
                     uiContext.sendHeartBeat();
                 }
                 break;
             case SUSPECT:
                 if (lastReceivedTime < suspectTime) {
-                    if ((now - suspectTime) >= heartBeatPeriod) {
-                        // No message have been received since we suspected the communication to be non
-                        // functional
-                        log.info(
-                                "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
-                                uiContext);
+                    if (now - suspectTime >= heartBeatPeriod) {
+                        // No message have been received since we suspected the communication to be non functional
+                        if (log.isInfoEnabled())
+                            log.info(
+                                    "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
+                                    uiContext);
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();
@@ -132,6 +133,7 @@ public class CommunicationSanityChecker {
                     suspectTime = -1;
                 }
                 break;
+            case KO:
             default:
                 break;
         }

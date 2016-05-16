@@ -24,16 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratorPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDecoratorPanel extends PTSimplePanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new DecoratorPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected DecoratorPanel createUIObject() {
+        return new DecoratorPanel();
     }
 
     @Override

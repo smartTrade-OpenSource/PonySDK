@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is
@@ -34,7 +34,6 @@ public class PTreeItem extends PObject {
     PTreeItem(final boolean isRoot, final String html) {
         this.isRoot = isRoot;
         this.html = html;
-        init();
     }
 
     PTreeItem(final boolean isRoot) {
@@ -57,10 +56,8 @@ public class PTreeItem extends PObject {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.TEXT, html);
-
-        if (isRoot)
-            parser.parse(Model.ROOT, isRoot);
+        parser.parse(ServerToClientModel.TEXT, html);
+        if (isRoot) parser.parse(ServerToClientModel.ROOT, isRoot);
     }
 
     private void setWidget() {
@@ -78,7 +75,7 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.adopt(widget, this);
-            saveAdd(widget.getID(), ID, Model.WIDGET);
+            saveAdd(widget.getID(), ID, ServerToClientModel.WIDGET);
         }
     }
 
@@ -97,13 +94,13 @@ public class PTreeItem extends PObject {
 
     public void setHTML(final String html) {
         this.html = html;
-        saveUpdate(Model.TEXT, html);
+        saveUpdate(ServerToClientModel.TEXT, html);
     }
 
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot) {
-            saveAdd(tree.getID(), ID, Model.ROOT, true);
+            saveAdd(tree.getID(), ID);
         }
         setWidget();
     }
@@ -119,12 +116,15 @@ public class PTreeItem extends PObject {
     public PTreeItem insertItem(final int beforeIndex, final PTreeItem item) {
         children.add(beforeIndex, item);
         item.setTree(tree);
-        saveAdd(item.getID(), ID, Model.INDEX, beforeIndex);
+        saveAdd(item.getID(), ID, ServerToClientModel.INDEX, beforeIndex);
         return item;
     }
 
     public PTreeItem addItem(final PTreeItem item) {
-        return insertItem(getChildCount(), item);
+        children.add(item);
+        item.setTree(tree);
+        saveAdd(item.getID(), ID);
+        return item;
     }
 
     public PTreeItem addItem(final String itemHtml) {
@@ -138,7 +138,7 @@ public class PTreeItem extends PObject {
 
     public void setSelected(final boolean selected) {
         this.selected = selected;
-        saveUpdate(Model.SELECTED, selected);
+        saveUpdate(ServerToClientModel.SELECTED, selected);
     }
 
     public boolean isSelected() {
@@ -147,7 +147,7 @@ public class PTreeItem extends PObject {
 
     public void setState(final boolean open) {
         this.open = open;
-        saveUpdate(Model.STATE, open);
+        saveUpdate(ServerToClientModel.STATE, open);
     }
 
     public boolean getState() {

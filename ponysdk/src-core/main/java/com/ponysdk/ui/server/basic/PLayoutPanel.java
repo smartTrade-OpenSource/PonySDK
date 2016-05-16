@@ -28,7 +28,7 @@ import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PAlignment;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that lays its children
@@ -40,13 +40,12 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
-    public PLayoutPanel(final PWindow window) {
-        super(window);
-        init();
+    public PLayoutPanel() {
+        this(PWindow.EMPTY_WINDOW_ID);
     }
 
-    public PLayoutPanel() {
-        this(null);
+    public PLayoutPanel(final int windowID) {
+        super(windowID);
     }
 
     @Override
@@ -56,86 +55,57 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.HORIZONTAL_ALIGNMENT, position.getValue());
-        parser.parse(Model.WIDGET_ID, child.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue(), ServerToClientModel.WIDGET_ID, child.getID());
     }
 
     public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
-
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.VERTICAL_ALIGNMENT, position.getValue());
-        parser.parse(Model.WIDGET_ID, child.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue(), ServerToClientModel.WIDGET_ID, child.getID());
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         assertIsChild(widget);
-
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.WIDGET_HIDDEN, hidden);
-        parser.parse(Model.WIDGET_ID, widget.getID());
-        parser.endObject();
+        saveUpdate(ServerToClientModel.WIDGET_HIDDEN, hidden, ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public void setWidgetLeftRight(final PWidget child, final double left, final double right, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.LEFT, left, Model.RIGHT, right, unit);
+        sendUpdate(child, ServerToClientModel.LEFT, left, ServerToClientModel.RIGHT, right, unit);
     }
 
     public void setWidgetLeftWidth(final PWidget child, final double left, final double width, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.LEFT, left, Model.WIDTH, width, unit);
+        sendUpdate(child, ServerToClientModel.LEFT, left, ServerToClientModel.WIDTH, width, unit);
     }
 
     public void setWidgetRightWidth(final PWidget child, final double right, final double width, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.RIGHT, right, Model.WIDTH, width, unit);
+        sendUpdate(child, ServerToClientModel.RIGHT, right, ServerToClientModel.WIDTH, width, unit);
     }
 
     public void setWidgetTopBottom(final PWidget child, final double top, final double bottom, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.TOP, top, Model.BOTTOM, bottom, unit);
+        sendUpdate(child, ServerToClientModel.TOP, top, ServerToClientModel.BOTTOM, bottom, unit);
     }
 
     public void setWidgetTopHeight(final PWidget child, final double top, final double height, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.TOP, top, Model.HEIGHT, height, unit);
+        sendUpdate(child, ServerToClientModel.TOP, top, ServerToClientModel.HEIGHT, height, unit);
     }
 
     public void setWidgetBottomHeight(final PWidget child, final double bottom, final double height, final PUnit unit) {
         assertIsChild(child);
-        sendUpdate(child, Model.BOTTOM, bottom, Model.HEIGHT, height, unit);
+        sendUpdate(child, ServerToClientModel.BOTTOM, bottom, ServerToClientModel.HEIGHT, height, unit);
     }
 
-    private void sendUpdate(final PWidget child, final Model key1, final double v1, final Model key2, final double v2,
-            final PUnit unit) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+    private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
+            final double v2, final PUnit unit) {
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.UNIT, unit.getByteValue());
-        parser.parse(Model.WIDGET_ID, child.getID());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
+        parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
         parser.parse(key1, v1);
         parser.parse(key2, v2);
         parser.endObject();
@@ -143,6 +113,6 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(Model.ANIMATE, duration);
+        saveUpdate(ServerToClientModel.ANIMATE, duration);
     }
 }

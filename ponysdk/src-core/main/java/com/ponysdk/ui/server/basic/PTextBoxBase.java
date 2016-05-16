@@ -36,10 +36,11 @@ import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
-public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
+public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     protected static final String EMPTY = "";
 
@@ -55,7 +56,11 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
     public PTextBoxBase(final String text) {
         super();
         this.text = text != null ? text : EMPTY;
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
 
@@ -64,7 +69,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         super.enrichOnInit(parser);
 
         if (!EMPTY.equals(text)) {
-            parser.parse(Model.TEXT, this.text);
+            parser.parse(ServerToClientModel.TEXT, this.text);
         }
     }
 
@@ -85,7 +90,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         if (Objects.equals(this.text, text))
             return;
         this.text = text;
-        saveUpdate(Model.TEXT, this.text);
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -104,7 +109,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
         if (Objects.equals(this.placeholder, placeholder))
             return;
         this.placeholder = placeholder;
-        saveUpdate(Model.PLACEHOLDER, this.placeholder);
+        saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     public String getPlaceholder() {
@@ -139,9 +144,9 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
             final PValueChangeEvent<String> event = new PValueChangeEvent<>(this,
-                    instruction.getString(Model.VALUE.getValue()));
+                    instruction.getString(ClientToServerModel.VALUE.toStringValue()));
             fireOnValueChange(event);
         } else {
             super.onClientData(instruction);
@@ -160,7 +165,7 @@ public class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<S
 
     @Override
     public String toString() {
-        return toString("text=" + text);
+        return super.toString() + ", text=" + text;
     }
 
 }

@@ -31,8 +31,8 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTTerminalScheduledCommand extends AbstractPTObject {
@@ -43,15 +43,18 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        final int delayMs = buffer.getInt(Model.FIXDELAY);
+        super.create(buffer, objectId, uiService);
+
+        // ServerToClientModel.FIXDELAY
+        final int delayMs = buffer.getBinaryModel().getIntValue();
         if (delayMs <= 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {
 
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    script.update(buffer, uiService);
-                    return false;
+                    // ServerToClientModel.EVAL
+                    return script.update(buffer, buffer.getBinaryModel());
                 }
             });
         } else {
@@ -60,8 +63,8 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
                 @Override
                 public boolean execute() {
                     final PTScript script = new PTScript();
-                    script.update(buffer, uiService);
-                    return false;
+                    // ServerToClientModel.EVAL
+                    return script.update(buffer, buffer.getBinaryModel());
                 }
 
             }, delayMs);
@@ -72,30 +75,33 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int delayMs = buffer.getInt(Model.FIXDELAY);
+        // ServerToClientModel.FIXDELAY
+        final int delayMs = buffer.getBinaryModel().getIntValue();
         if (delayMs < 0) {
             Scheduler.get().scheduleFinally(new RepeatingCommand() {
 
                 @Override
                 public boolean execute() {
-                    executeInstruction(buffer, uiService);
+                    executeInstruction(buffer);
                     return false;
                 }
             });
+            return true;
         } else {
             Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 
                 @Override
                 public boolean execute() {
-                    executeInstruction(buffer, uiService);
+                    executeInstruction(buffer);
                     return false;
                 }
 
             }, delayMs);
+            return true;
         }
     }
 
-    protected void executeInstruction(final PTInstruction update, final UIService uiService) {
+    protected void executeInstruction(final ReaderBuffer buffer) {
         final List<PTInstruction> instructions = new ArrayList<>();
         // for (int i = 0; i < jsonArray.size(); i++) {
         // instructions.add(new

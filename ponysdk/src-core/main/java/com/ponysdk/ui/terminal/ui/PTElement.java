@@ -26,28 +26,34 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTElement extends PTComplexPanel<HTMLPanel> {
 
     private static final String EMPTY = "";
+    private String tag;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.TAG
-        this.uiObject = new HTMLPanel(buffer.getBinaryModel().getStringValue(), EMPTY);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+        // ServerToClientModel.TAG
+        tag = buffer.getBinaryModel().getStringValue();
+
+        super.create(buffer, objectId, uiService);
+    }
+
+    @Override
+    protected HTMLPanel createUIObject() {
+        return new HTMLPanel(tag, EMPTY);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.INNER_HTML.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INNER_HTML.equals(binaryModel.getModel())) {
             uiObject.getElement().setInnerHTML(binaryModel.getStringValue());
             return true;
         }
-        if (Model.INNER_TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INNER_TEXT.equals(binaryModel.getModel())) {
             uiObject.getElement().setInnerText(binaryModel.getStringValue());
             return true;
         }

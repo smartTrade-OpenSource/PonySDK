@@ -23,10 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.Collection;
-
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
@@ -35,8 +32,9 @@ import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * The superclass for all PonySDK objects.
@@ -49,48 +47,47 @@ public abstract class PObject {
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    protected PWindow window;
+    protected int windowID;
 
     private boolean initialized = false;
 
     PObject() {
-        this(null);
+        this(PWindow.EMPTY_WINDOW_ID);
     }
 
-    PObject(final PWindow window) {
+    PObject(final int windowID) {
         UIContext.get().registerObject(this);
-        this.window = window;
+        this.windowID = windowID;
     }
 
     protected void init() {
         if (initialized)
             return;
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_CREATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.WIDGET_TYPE, getWidgetType().getValue());
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_CREATE, ID);
+        parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
         parser.endObject();
 
         initialized = true;
     }
 
-    public PWindow getWindow() {
-        return window;
+    public int getWindowID() {
+        return windowID;
     }
 
-    void attach(final PWindow window) {
-        if (this.window != null && this.window != window) {
+    protected boolean attach(final int windowID) {
+        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
+            this.windowID = windowID;
+            init();
+            return true;
+        } else if (this.windowID != windowID) {
             throw new IllegalAccessError("Widget already attached to an other window");
         }
-
-        this.window = window;
-
-        saveUpdate(Model.WINDOW_ID, window.getID());
+        return false;
     }
 
     protected void enrichOnInit(final Parser parser) {
@@ -109,7 +106,7 @@ public abstract class PObject {
 
         nativeBindingFunction = functionName;
 
-        saveUpdate(Model.BIND, functionName);
+        saveUpdate(ServerToClientModel.BIND, functionName);
     }
 
     public void sendToNative(final JsonObject data) {
@@ -117,7 +114,7 @@ public abstract class PObject {
         if (nativeBindingFunction == null)
             throw new IllegalAccessError("Object not bind to a native function");
 
-        saveUpdate(Model.NATIVE, data);
+        saveUpdate(ServerToClientModel.NATIVE, data);
     }
 
     public void addNativeHandler(final PNativeHandler handler) {
@@ -128,18 +125,15 @@ public abstract class PObject {
     }
 
     public void onClientData(final JsonObject event) {
-        if (event.containsKey(Model.NATIVE.getValue())) {
-            final JsonObject jsonObject = event.getJsonObject(Model.NATIVE.getValue());
-            if (nativeHandlers != null) {
+        if (nativeHandlers != null && !nativeHandlers.isEmpty()) {
+            final String nativeKey = ClientToServerModel.NATIVE.toStringValue();
+            if (event.containsKey(nativeKey)) {
+                final PNativeEvent nativeEvent = new PNativeEvent(this, event.getJsonObject(nativeKey));
                 for (final PNativeHandler handler : nativeHandlers) {
-                    handler.onNativeEvent(new PNativeEvent(this, jsonObject));
+                    handler.onNativeEvent(nativeEvent);
                 }
             }
         }
-    }
-
-    public UIContext getUIContext() {
-        return UIContext.get();
     }
 
     @Override
@@ -165,207 +159,83 @@ public abstract class PObject {
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD_HANDLER, type.getValue());
-        parser.parse(Model.OBJECT_ID, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, ID);
         parser.endObject();
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_REMOVE_HANDLER, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.endObject();
+        saveRemoveHandler(type, null, null);
     }
 
-    protected void saveRemoveHandler(final Model type, final Model model, final String value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+    protected void saveRemoveHandler(final HandlerModel type, final ServerToClientModel model, final Object value) {
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_REMOVE_HANDLER, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        if (model != null) parser.parse(model, value);
         parser.endObject();
     }
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_REMOVE, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
     }
 
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final boolean value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-        parser.parse(model);
-        parser.endObject();
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model) {
+        saveAdd(objectID, parentObjectID, model, null);
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        saveAdd(objectID, parentObjectID, null, null);
+    }
+
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
+        saveAdd(objectID, parentObjectID, model, value, null, null);
+    }
+
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model1, final Object value1,
+            final ServerToClientModel model2, final Object value2) {
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_ADD, objectID);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        if (model1 != null) parser.parse(model1, value1);
+        if (model2 != null) parser.parse(model2, value2);
         parser.endObject();
         // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final int value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-        parser.parse(model, value);
-        parser.endObject();
-
-        // UIContext.get().assignParentID(objectID, parentObjectID);
+    protected void saveUpdate(final ServerToClientModel model) {
+        saveUpdate(model, null);
     }
 
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final String value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, objectID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
-        parser.parse(model, value);
-        parser.endObject();
-
-        // UIContext.get().assignParentID(objectID, parentObjectID);
+    protected void saveUpdate(final ServerToClientModel model, final Object value) {
+        saveUpdate(model, value, null, null);
     }
 
-    protected void saveUpdate(final Model model, final JsonObjectBuilder builder) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
+            final Object value2) {
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, builder);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final JsonObject json) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, json);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final boolean value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final Collection<String> value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final int value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final long value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model, final String value) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveUpdate(final Model model) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(model);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        parser.parse(model1, value1);
+        if (model2 != null) parser.parse(model2, value2);
         parser.endObject();
     }
 
     @Override
     public String toString() {
-        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + "]";
-    }
-
-    public String toString(final String append) {
-        return "[ID=" + ID + ", widgetType=" + getWidgetType().name() + ", " + append + "]";
+        return "ID=" + ID + ", widgetType=" + getWidgetType().name();
     }
 
 }

@@ -24,42 +24,20 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.DialogBox;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        boolean autoHide = false;
-        BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
-            autoHide = binaryModel.getBooleanValue();
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
-        // FIXME Never send
-        boolean modal = false;
-        binaryModel = buffer.getBinaryModel();
-        if (Model.POPUP_MODAL.equals(binaryModel.getModel())) {
-            modal = binaryModel.getBooleanValue();
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
-        this.uiObject = new DialogBox(autoHide, modal);
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
-
-        addCloseHandler(uiService);
+    protected DialogBox createUIObject() {
+        return new DialogBox(autoHide, false);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.POPUP_CAPTION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_CAPTION.equals(binaryModel.getModel())) {
             final DialogBox dialogBox = cast();
             dialogBox.setHTML(binaryModel.getStringValue());
         }

@@ -29,7 +29,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 
 public abstract class PKeyPressFilterHandler implements PKeyPressHandler {
 
@@ -43,7 +43,7 @@ public abstract class PKeyPressFilterHandler implements PKeyPressHandler {
         }
 
         final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        jsonObjectBuilder.add(Model.KEY_FILTER.getValue(), builder.build());
+        jsonObjectBuilder.add(ClientToServerModel.KEY_FILTER.toStringValue(), builder.build());
 
         jsonObject = jsonObjectBuilder.build();
     }

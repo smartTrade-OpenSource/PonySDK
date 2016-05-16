@@ -31,7 +31,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PFlowPanel extends PComplexPanel {
 
     public PFlowPanel() {
-        init();
+        super();
     }
 
     @Override

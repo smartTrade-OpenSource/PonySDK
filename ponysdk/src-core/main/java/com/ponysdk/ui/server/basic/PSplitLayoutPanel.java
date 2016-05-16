@@ -30,29 +30,26 @@ import java.util.Map;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
 import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that adds user-positioned splitters between each of its child
- * widgets.
+ * A panel that adds user-positioned splitters between each of its child widgets.
  * <p>
- * This panel is used in the same way as {@link PDockLayoutPanel}, except that
- * its children's sizes are always specified in {@link PUnit#PX} units, and each
- * pair of child widgets has a splitter between them that the user can drag.
+ * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes
+ * are always specified in {@link PUnit#PX} units, and each pair of child widgets has a splitter
+ * between them that the user can drag.
  * </p>
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
@@ -93,9 +90,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     /**
      * Sets the minimum allowable size for the given widget.
      * <p>
-     * Its associated splitter cannot be dragged to a position that would make
-     * it smaller than this size. This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * Its associated splitter cannot be dragged to a position that would make it smaller than this
+     * size. This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
      *
      * @param child
@@ -106,28 +102,17 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
-            parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
-            }
-            parser.parse(Model.MIN_SIZE, minSize);
-            parser.parse(Model.WIDGET_ID, child.getID());
-            parser.endObject();
-
+            saveUpdate(ServerToClientModel.MIN_SIZE, minSize, ServerToClientModel.WIDGET_ID, child.getID());
             ensureWidgetInfo(child).minSize = minSize;
         }
     }
 
     /**
-     * Sets a size below which the slider will close completely. This can be
-     * used in conjunction with {@link #setWidgetMinSize} to provide a
-     * speed-bump effect where the slider will stick to a preferred minimum size
-     * before closing completely.
+     * Sets a size below which the slider will close completely. This can be used in conjunction
+     * with {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to
+     * a preferred minimum size before closing completely.
      * <p>
-     * This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * This method has no effect for the {@link PDockLayoutPanel.Direction#CENTER} widget.
      * </p>
      *
      * @param child
@@ -138,17 +123,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
-
-            final Parser parser = Txn.get().getTxnContext().getParser();
-            parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
-            }
-            parser.parse(Model.SNAP_CLOSED_SIZE, snapClosedSize);
-            parser.parse(Model.WIDGET_ID, child.getID());
-            parser.endObject();
-
+            saveUpdate(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize, ServerToClientModel.WIDGET_ID, child.getID());
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
         }
     }
@@ -165,31 +140,22 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
-            final Parser parser = Txn.get().getTxnContext().getParser();
-            parser.beginObject();
-            parser.parse(Model.TYPE_UPDATE, ID);
-            if (window != null) {
-                parser.parse(Model.WINDOW_ID, window.getID());
-            }
-            parser.parse(Model.TOGGLE_DISPLAY_ALLOWED, allowed);
-            parser.parse(Model.WIDGET_ID, child.getID());
-            parser.endObject();
-
+            saveUpdate(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed, ServerToClientModel.WIDGET_ID, child.getID());
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
         }
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_KEY_RESIZE_HANDLER.getValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_KEY_RESIZE_HANDLER.toStringValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
-            final JsonArray array = instruction.getJsonArray(Model.VALUE.getValue());
+            final JsonArray array = instruction.getJsonArray(ClientToServerModel.VALUE.toStringValue());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject ws = array.getJsonObject(i);
-                final int objectID = ws.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
+                final int objectID = ws.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
                 final PWidget w = getChild(objectID);
                 if (w != null) {
-                    final double widgetSize = ws.getJsonNumber(Model.SIZE.getValue()).doubleValue();
+                    final double widgetSize = ws.getJsonNumber(ClientToServerModel.SIZE.toStringValue()).doubleValue();
                     resizeEvent.addLayoutResizeData(new LayoutResizeData(w, widgetSize));
                 }
             }

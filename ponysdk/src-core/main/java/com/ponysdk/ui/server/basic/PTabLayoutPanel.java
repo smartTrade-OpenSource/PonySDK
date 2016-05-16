@@ -29,8 +29,6 @@ import java.util.Collections;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
@@ -38,17 +36,17 @@ import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that represents a tabbed set of pages, each of which contains another
- * widget. Its child widgets are shown as the user selects the various tabs
- * associated with them. The tabs can contain arbitrary text, HTML, or widgets.
+ * A panel that represents a tabbed set of pages, each of which contains another widget. Its child
+ * widgets are shown as the user selects the various tabs associated with them. The tabs can contain
+ * arbitrary text, HTML, or widgets.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
+ * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -63,15 +61,13 @@ import com.ponysdk.ui.terminal.model.Model;
  * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent
  * <dd>applied to all child content widgets
  * </dl>
- * A TabLayoutPanel must have a <code>barHeight</code> attribute with a double
- * value, and may have a <code>barUnit</code> attribute with a
- * {com.google.gwt.dom.client.Style.Unit Style.Unit} value. <code>barUnit</code>
- * defaults to PX.
+ * A TabLayoutPanel must have a <code>barHeight</code> attribute with a double value, and may have a
+ * <code>barUnit</code> attribute with a {com.google.gwt.dom.client.Style.Unit Style.Unit} value.
+ * <code>barUnit</code> defaults to PX.
  * <p>
  * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements.
- * Each tab can have one widget child and one of two types of header elements. A
- * &lt;g:header> element can hold html, or a &lt;g:customHeader> element can
- * hold a widget.
+ * Each tab can have one widget child and one of two types of header elements.
+ * A &lt;g:header> element can hold html, or a &lt;g:customHeader> element can hold a widget.
  */
 public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectionHandlers<Integer>,
         HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
@@ -83,7 +79,11 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     private int animationDuration;
 
     public PTabLayoutPanel() {
-        init();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 
@@ -101,42 +101,16 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
-        insert(widget, beforeIndex);
-
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, widget.getID());
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.parse(Model.BEFORE_INDEX, beforeIndex);
-        parser.parse(Model.TAB_WIDGET, tabWidget.getID());
-        parser.endObject();
-
-        // UIContext.get().assignParentID(widget.getID(), ID);
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_WIDGET, tabWidget.getID(), ServerToClientModel.BEFORE_INDEX, beforeIndex);
     }
 
     @Override
-    protected void saveAdd(final int objectID, final int parentObjectID, final Model model, final int value) {
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
         // Nothing to do
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
-        insert(widget, beforeIndex);
-
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_ADD, widget.getID());
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.PARENT_OBJECT_ID, ID);
-        parser.parse(Model.BEFORE_INDEX, beforeIndex);
-        parser.parse(Model.TAB_TEXT, tabText);
-        parser.endObject();
-
-        // UIContext.get().assignParentID(widget.getID(), ID);
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_TEXT, tabText, ServerToClientModel.BEFORE_INDEX, beforeIndex);
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -147,19 +121,19 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
         add(asWidgetOrNull(w), tabText);
     }
 
-    public void add(final PWidget w, final String tabText) {
-        insert(w, tabText, getWidgetCount());
+    public void add(final PWidget widget, final String tabText) {
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_TEXT, tabText);
     }
 
-    public void add(final PWidget w, final PWidget tabWidget) {
-        insert(w, tabWidget, getWidgetCount());
+    public void add(final PWidget widget, final PWidget tabWidget) {
+        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_WIDGET, tabWidget.getID());
     }
 
     public void selectTab(final int index) {
         if (index >= getWidgetCount())
             throw new IndexOutOfBoundsException();
         this.selectedItemIndex = index;
-        saveUpdate(Model.SELECTED_INDEX, index);
+        saveUpdate(ServerToClientModel.SELECTED_INDEX, index);
     }
 
     @Override
@@ -200,14 +174,14 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_SELECTION_HANDLER.getValue())) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION_HANDLER.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
-                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(Model.INDEX.getValue())));
+                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.INDEX.toStringValue())));
             }
-        } else if (instruction.containsKey(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER.getValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER.toStringValue())) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
                 handler.onBeforeSelection(
-                        new PBeforeSelectionEvent<>(this, instruction.getInt(Model.INDEX.getValue())));
+                        new PBeforeSelectionEvent<>(this, instruction.getInt(ClientToServerModel.INDEX.toStringValue())));
             }
         } else {
             super.onClientData(instruction);
@@ -231,7 +205,7 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(Model.ANIMATION_DURATION, duration);
+        saveUpdate(ServerToClientModel.ANIMATION_DURATION, duration);
     }
 
     /**
@@ -241,12 +215,12 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate(Model.VERTICAL, isVertical);
+        saveUpdate(ServerToClientModel.VERTICAL, isVertical);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(Model.ANIMATE, duration);
+        saveUpdate(ServerToClientModel.ANIMATE, duration);
     }
 
     public int getAnimationDuration() {

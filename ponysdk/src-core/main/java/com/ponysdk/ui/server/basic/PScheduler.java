@@ -28,12 +28,10 @@ import java.util.Map;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.stm.Txn;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * This class provides low-level task scheduling primitives.
@@ -105,39 +103,15 @@ public abstract class PScheduler extends PObject {
     }
 
     private void scheduleFixedRateCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.COMMAND_ID, cmdID);
-        parser.parse(Model.FIXRATE, delayMs);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.FIXRATE, delayMs);
     }
 
     private void scheduleFixedDelayCommand(final long cmdID, final int delayMs) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.COMMAND_ID, cmdID);
-        parser.parse(Model.FIXDELAY, delayMs);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.FIXDELAY, delayMs);
     }
 
     private void cancelScheduleCommand(final long cmdID) {
-        final Parser parser = Txn.get().getTxnContext().getParser();
-        parser.beginObject();
-        parser.parse(Model.TYPE_UPDATE, ID);
-        if (window != null) {
-            parser.parse(Model.WINDOW_ID, window.getID());
-        }
-        parser.parse(Model.COMMAND_ID, cmdID);
-        parser.parse(Model.STOP);
-        parser.endObject();
+        saveUpdate(ServerToClientModel.COMMAND_ID, cmdID, ServerToClientModel.STOP, null);
 
         final RepeatingCommand command = commandByID.remove(cmdID);
         IDByCommand.remove(command);
@@ -145,8 +119,8 @@ public abstract class PScheduler extends PObject {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_KEY_SCHEDULER.getValue())) {
-            final long cmdID = instruction.getJsonNumber(Model.COMMAND_ID.getValue()).longValue();
+        if (instruction.containsKey(ClientToServerModel.HANDLER_KEY_SCHEDULER.toStringValue())) {
+            final long cmdID = instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue();
             final RepeatingCommand command = commandByID.get(cmdID);
             if (command == null)
                 return;
@@ -156,8 +130,8 @@ public abstract class PScheduler extends PObject {
                 cancelScheduleCommand(cmdID);
             } else {
                 // Re-schedule in fixed delay mode
-                if (instruction.containsKey(Model.FIXDELAY.getValue())) {
-                    scheduleFixedDelayCommand(cmdID, instruction.getInt(Model.FIXDELAY.getValue()));
+                if (instruction.containsKey(ClientToServerModel.FIXDELAY.toStringValue())) {
+                    scheduleFixedDelayCommand(cmdID, instruction.getInt(ClientToServerModel.FIXDELAY.toStringValue()));
                 }
             }
         } else {

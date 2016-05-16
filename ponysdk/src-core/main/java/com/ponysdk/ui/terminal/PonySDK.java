@@ -36,33 +36,31 @@ import org.timepedia.exporter.client.Exportable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
-import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.google.gwt.user.client.Window;
+import com.ponysdk.ui.terminal.instruction.PTInstruction;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.request.RequestBuilder;
+import com.ponysdk.ui.terminal.request.ParentWindowRequest;
+import com.ponysdk.ui.terminal.request.RequestCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 
 import elemental.client.Browser;
 import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.ArrayBuffer;
-import elemental.html.StorageEvent;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
-public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketCallback, EventListener {
+public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
     private static PonySDK INSTANCE;
-    protected static UIBuilder uiBuilder = new UIBuilder();
+    private static final UIBuilder uiBuilder = new UIBuilder();
 
-    protected RequestBuilder requestBuilder;
-    protected int applicationViewID;
+    private int applicationViewID;
 
     private WebSocketClient2 socketClient;
 
@@ -76,24 +74,15 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         if (INSTANCE == null) {
             INSTANCE = new PonySDK();
             GWT.setUncaughtExceptionHandler(INSTANCE);
-            if (log.isLoggable(Level.INFO))
-                log.info("Creating PonySDK instance");
+            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
         }
         return INSTANCE;
-    }
-
-    @Override
-    public void handleEvent(final Event event) {
-        final StorageEvent storageEvent = (StorageEvent) event;
-        // final Integer windowID = Integer.valueOf(storageEvent.getKey());
-        uiBuilder.update(JSONParser.parseStrict(storageEvent.getNewValue()).isObject());
     }
 
     @Export
     public void start() {
         try {
-            if (log.isLoggable(Level.INFO))
-                log.info("Starting PonySDK instance");
+            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
             final elemental.html.Window window = Browser.getWindow();
             final elemental.html.Window opener = window.getOpener();
 
@@ -101,33 +90,70 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 Integer viewID = null;
                 final Storage storage = Storage.getSessionStorageIfSupported();
                 if (storage != null) {
-                    final String v = storage.getItem(Model.APPLICATION_VIEW_ID.toStringValue());
+                    final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
                     if (v != null && !v.isEmpty())
                         viewID = Integer.parseInt(v);
                 }
 
-                if (log.isLoggable(Level.INFO))
-                    log.info("View ID : " + viewID);
+                if (log.isLoggable(Level.INFO)) log.info("View ID : " + viewID);
 
-                if (viewID != null)
-                    applicationViewID = viewID;
-                else
-                    applicationViewID = 0;
+                applicationViewID = viewID != null ? viewID : 0;
 
                 final StringBuilder builder = new StringBuilder();
                 builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
                 builder.append("ws?");
-                builder.append(Model.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID);
-                builder.append("&");
-                builder.append(Model.APPLICATION_START.toStringValue());
-                builder.append("&");
-                builder.append(Model.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0);
-                builder.append("&");
-                builder.append(Model.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
+                builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID).append("&");
+                builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
+                builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
+                builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-                socketClient = new WebSocketClient2(builder.toString(), this);
+                socketClient = new WebSocketClient2(builder.toString(), new WebSocketCallback() {
+
+                    @Override
+                    public void connected() {
+                        if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+                        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
+                    }
+
+                    @Override
+                    public void disconnected() {
+                        if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
+                        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
+                    }
+
+                    /**
+                     * Message from server to Main terminal
+                     */
+                    @Override
+                    public void message(final ReaderBuffer buffer) {
+                        try {
+                            uiBuilder.updateMainTerminal(buffer);
+                        } catch (final Exception e) {
+                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+                        }
+                    }
+
+                });
             } else {
-                exportOnDataReceived();
+                final String windowId = Window.Location.getParameter("wid");
+                uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
+
+                    /**
+                     * Message from Main terminal to the matching terminal
+                     */
+                    @Override
+                    public void onDataReceived(final ReaderBuffer buffer) {
+                        uiBuilder.update(buffer);
+                    }
+
+                    @Override
+                    public void onDataReceived(final JSONObject object) {
+                    }
+
+                    @Override
+                    public void onError(final Throwable exception) {
+                    }
+                }));
 
                 // window.addEventListener("storage", this, false);
 
@@ -140,7 +166,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
                 //
                 // @Override
                 // public void handleEvent(final Event event) {
-                // GWT.log("Coucou data received in window : " + event);
+                // GWT.log("data received in window : " + event);
                 // final MessageEvent messageEvent = (MessageEvent) event;
                 // uiBuilder.update(JSONParser.parseStrict((String)
                 // messageEvent.getData()).isObject());
@@ -153,22 +179,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
         }
     }
 
-    public native void exportOnDataReceived() /*-{
-                                              var that = this;
-                                              $wnd.onDataReceived = function(text) {
-                                              $entry(that.@com.ponysdk.ui.terminal.PonySDK::onDataReceived(Ljava/lang/String;)(text));
-                                              }
-                                              }-*/;
-
-    public void onDataReceived(final String text) {
-        uiBuilder.update(JSONParser.parseStrict(text).isObject());
-    }
-
     @Export
     public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction();
         instruction.setObjectID(objectID);
-        instruction.put(Model.NATIVE, jsObject);
+        instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
     }
 
@@ -193,43 +208,8 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler, WebSocketC
 
         if (uiBuilder != null) {
             final PTInstruction instruction = new PTInstruction();
-            instruction.put(Model.ERROR_MSG, e.getMessage());
+            instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
             uiBuilder.sendDataToServer(instruction);
-        }
-    }
-
-    @Override
-    public void connected() {
-        if (log.isLoggable(Level.INFO))
-            log.info("WebSoket connected");
-        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
-    }
-
-    @Override
-    public void disconnected() {
-        if (log.isLoggable(Level.INFO))
-            log.info("WebSoket disconnected");
-        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-    }
-
-    @Override
-    public void message(final ArrayBuffer message) {
-        try {
-            final ReaderBuffer buffer = new ReaderBuffer(message);
-            // Get the first element on the message, always a key of element of
-            // the Model enum
-            final BinaryModel type = buffer.getBinaryModel();
-
-            if (type.getModel() == Model.HEARTBEAT) {
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Heart beat");
-                socketClient.getRequestBuilder().sendHeartbeat();
-            } else if (type.getModel() == Model.APPLICATION_SEQ_NUM) {
-                final int seqNumValue = type.getIntValue();
-                uiBuilder.update(buffer);
-            }
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + message, e);
         }
     }
 

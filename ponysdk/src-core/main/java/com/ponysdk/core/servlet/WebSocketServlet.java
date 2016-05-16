@@ -37,6 +37,9 @@ import javax.servlet.ServletException;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
@@ -45,25 +48,26 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.Application;
-import com.ponysdk.core.UIContext;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnSocketContext;
 import com.ponysdk.core.useragent.UserAgent;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
-    protected static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
 
+    private static final int NUMBER_OF_BUFFERS = 50;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
     public int maxIdleTime = 1000000;
 
     private AbstractApplicationManager applicationManager;
 
-    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(50);
+    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(NUMBER_OF_BUFFERS);
 
     public class Buffer {
 
@@ -92,17 +96,22 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         applicationManager = (AbstractApplicationManager) getServletContext()
                 .getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
-        log.info("Initializing Buffer allocation ...");
+        if (log.isInfoEnabled()) log.info("Initializing Buffer allocation ...");
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
             buffers.add(new Buffer());
         }
 
-        log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * 50);
+        if (log.isInfoEnabled()) log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * buffers.size());
     }
 
     @Override
     public void configure(final WebSocketServletFactory factory) {
+        // Add compression capabilities
+        factory.getExtensionFactory().register("deflate-frame", DeflateFrameExtension.class);
+        factory.getExtensionFactory().register("permessage-deflate", PerMessageDeflateExtension.class);
+        factory.getExtensionFactory().register("x-webkit-deflate-frame", XWebkitDeflateFrameExtension.class);
+
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((final ServletUpgradeRequest req, final ServletUpgradeResponse resp) -> new JettyWebSocket(req, resp));
     }
@@ -129,7 +138,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void onWebSocketConnect(final Session session) {
-            log.info("WebSocket connected from {}", session.getRemoteAddress());
+            if (log.isInfoEnabled()) log.info("WebSocket connected from {}", session.getRemoteAddress());
 
             this.session = session;
 
@@ -148,10 +157,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
                 context.setApplication(application);
 
-                log.info("Creating a new application, {}", application.toString());
+                if (log.isInfoEnabled()) log.info("Creating a new application, {}", application.toString());
             } else {
                 // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
-                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.getKey());
+                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
                 // reloadedViewID = jsonNumber.longValue();
                 // }
                 // log.info("Reloading application {} {}", reloadedViewID, context);
@@ -181,27 +190,36 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          */
         @Override
         public void onWebSocketText(final String text) {
-            if (context.getUIContext().isDestroyed()) {
-                log.info("Message dropped, ui context is destroyed");
-            } else {
+            if (!context.getUIContext().isDestroyed()) {
                 //onBeforeMessageReceived(text);
                 try {
                     context.getUIContext().notifyMessageReceived();
-                    request.setText(text);
 
-                    if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+                    if (!ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
+                        request.setText(text);
 
-                    applicationManager.process(context);
+                        if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+
+                        applicationManager.fireInstructions(context.getJsonObject(), context);
+                    } else {
+                        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal");
+                    }
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {
                     //onAfterMessageProcessed(text);
                 }
+            } else {
+                if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");
             }
         }
 
+        /**
+         * Receive from the terminal
+         */
         @Override
         public void onWebSocketBinary(final byte[] arg0, final int arg1, final int arg2) {
+            // Can't receive binary data from terminal (GWT limitation)
         }
 
         @Override
@@ -219,42 +237,42 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          */
         @Override
         public void flush(final Buffer buffer) {
-            final UIContext uiContext = context.getUIContext();
+            if (buffer != null) {
+                if (!context.getUIContext().isDestroyed()) {
+                    if (session != null && session.isOpen()) {
+                        // onBeforeSendMessage();
+                        try {
+                            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
-            if (uiContext.isDestroyed()) {
-                throw new IllegalStateException("UI Context has been destroyed");
-            }
+                            flush(socketBuffer);
+                            socketBuffer.clear();
 
-            if (session == null || !session.isOpen()) {
-                log.info("Session is down");
-            } else if (buffer != null) {
-                // onBeforeSendMessage();
-                try {
-                    final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-
-                    flush(socketBuffer);
-                    socketBuffer.clear();
-
-                    buffers.put(buffer);
-                } catch (final Throwable t) {
-                    log.error("Cannot flush to WebSocket", t);
-                } finally {
-                    // onAfterMessageSent();
+                            buffers.put(buffer);
+                        } catch (final Throwable t) {
+                            log.error("Cannot flush to WebSocket", t);
+                        } finally {
+                            // onAfterMessageSent();
+                        }
+                    } else {
+                        if (log.isInfoEnabled()) log.info("Session is down");
+                    }
+                } else {
+                    throw new IllegalStateException("UI Context has been destroyed");
                 }
             } else {
-                System.err.println("Already flushed");
+                if (log.isInfoEnabled()) log.info("Already flushed");
             }
         }
 
         public void flush(final ByteBuffer socketBuffer) {
-            if (socketBuffer.position() != 0) {
+            if (session != null && session.isOpen() && socketBuffer.position() != 0) {
                 socketBuffer.flip();
                 final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
                 try {
                     sendBytesByFuture.get(25, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     if (e instanceof EOFException) {
-                        log.info("Remote Connection is closed");
+                        if (log.isInfoEnabled()) log.info("Remote Connection is closed");
                     } else {
                         log.error("Cannot stream data");
                     }
@@ -268,7 +286,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void sendHeartBeat() {
             final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
-            socketBuffer.putShort(Model.HEARTBEAT.getValue());
+            socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
             flush(socketBuffer);
         }
     }

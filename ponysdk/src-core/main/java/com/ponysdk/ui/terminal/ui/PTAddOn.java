@@ -35,8 +35,8 @@ import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.Model;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -44,7 +44,9 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        // Model.FACTORY
+        super.create(buffer, objectId, uiService);
+
+        // ServerToClientModel.FACTORY
         final String signature = buffer.getBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
@@ -55,8 +57,8 @@ public class PTAddOn extends AbstractPTObject {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
-        BinaryModel binaryModel = buffer.getBinaryModel();
-        if (Model.WIDGET_ID.equals(binaryModel.getModel())) {
+        final BinaryModel binaryModel = buffer.getBinaryModel();
+        if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
             final int widgetID = binaryModel.getIntValue();
             final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
             final Widget cast = object.cast();
@@ -67,22 +69,9 @@ public class PTAddOn extends AbstractPTObject {
 
                 @Override
                 public void onAttachOrDetach(final AttachEvent event) {
-                    if (event.isAttached()) {
-                        addOn.onAttach(true);
-                    } else {
-                        addOn.onAttach(false);
-                    }
+                    addOn.onAttach(event.isAttached());
                 }
             });
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
-        // FIXME Never set ?
-        binaryModel = buffer.getBinaryModel();
-        if (Model.NATIVE.equals(binaryModel.getModel())) {
-            final JSONObject data = binaryModel.getObject(Model.NATIVE);
-            params.put("data", data);
         } else {
             buffer.rewind(binaryModel);
         }
@@ -93,8 +82,8 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (Model.NATIVE.equals(binaryModel.getModel())) {
-            final JSONObject data = binaryModel.getObject();
+        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+            final JSONObject data = binaryModel.getJsonObject();
             addOn.update(data.getJavaScriptObject());
             return true;
         }

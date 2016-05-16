@@ -24,16 +24,12 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.ponysdk.ui.terminal.UIService;
-import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTFocusPanel extends PTPanel<FocusPanel> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
-        this.uiObject = new FocusPanel();
-        this.objectID = objectId;
-        uiService.registerUIObject(this.objectID, uiObject);
+    protected FocusPanel createUIObject() {
+        return new FocusPanel();
     }
 
 }

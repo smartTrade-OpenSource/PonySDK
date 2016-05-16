@@ -55,8 +55,9 @@ import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PHistory;
 import com.ponysdk.ui.server.basic.PObject;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * <p>
@@ -68,7 +69,6 @@ import com.ponysdk.ui.terminal.model.Model;
  * bound to the current {@link Application} .
  * </p>
  */
-
 public class UIContext {
 
     private static ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
@@ -212,24 +212,25 @@ public class UIContext {
     }
 
     public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(Model.TYPE_CLOSE.getValue())) {
+        if (jsonObject.containsKey(ClientToServerModel.TYPE_CLOSE.toStringValue())) {
             destroy();
-        } else if (jsonObject.containsKey(Model.TYPE_HISTORY.getValue())) {
+        } else if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
             if (history != null) {
-                history.fireHistoryChanged(jsonObject.getString(Model.TYPE_HISTORY.getValue()));
+                history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
             }
-        } else if (jsonObject.containsKey(Model.ERROR_MSG.getValue())) {
-            log.error(jsonObject.getString(Model.ERROR_MSG.getValue()));
+        } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+            log.error(jsonObject.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else {
-            final int objectID = jsonObject.getJsonNumber(Model.OBJECT_ID.getValue()).intValue();
+            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
 
             final PObject object = weakReferences.get(objectID);
 
             if (object == null) {
-                log.warn("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
-                if (jsonObject.containsKey(Model.PARENT_OBJECT_ID.getValue())) {
-                    final int parentObjectID = jsonObject.getJsonNumber(Model.PARENT_OBJECT_ID.getValue()).intValue();
+                if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
+                    final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
+                            .intValue();
                     final PObject gcObject = weakReferences.get(parentObjectID);
                     log.warn("" + gcObject);
                 }
@@ -237,7 +238,7 @@ public class UIContext {
                 return;
             }
 
-            // if (jsonObject.containsKey(Model.TYPE_EVENT.getKey())) {
+            // if (jsonObject.containsKey(Model.TYPE_EVENT.toStringValue())) {
             if (terminalDataReceiver != null) {
                 terminalDataReceiver.onDataReceived(object, jsonObject);
             }
@@ -293,11 +294,11 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.getValue());
-        parser.parse(Model.OBJECT_ID, 0);
-        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, 0);
+        parser.parse(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -306,11 +307,11 @@ public class UIContext {
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.getValue());
-        parser.parse(Model.OBJECT_ID, 0);
-        parser.parse(Model.STREAM_REQUEST_ID, streamRequestID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, 0);
+        parser.parse(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -379,9 +380,9 @@ public class UIContext {
     }
 
     public void close() {
-        final Parser parser = Txn.get().getTxnContext().getParser();
+        final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(Model.TYPE_CLOSE);
+        parser.parse(ServerToClientModel.TYPE_CLOSE, null);
         parser.endObject();
     }
 

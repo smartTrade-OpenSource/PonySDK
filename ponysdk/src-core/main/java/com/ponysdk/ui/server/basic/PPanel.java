@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -32,10 +32,11 @@ import com.ponysdk.ui.server.basic.event.HasPWidgets;
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
 
-    public PPanel() {}
+    public PPanel() {
+    }
 
-    public PPanel(final PWindow window) {
-        super(window);
+    public PPanel(final int windowID) {
+        super(windowID);
     }
 
     @Override
@@ -52,23 +53,25 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    void attach(final PWindow window) {
-        super.attach(window);
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
 
         final Iterator<PWidget> it = iterator();
         while (it.hasNext()) {
             final PWidget child = it.next();
-            child.attach(window);
+            if (child.attach(windowID)) saveAdd(child.getID(), ID);
         }
+
+        return result;
     }
 
     protected final void adopt(final PWidget child) {
-        assert(child.getParent() == null);
+        assert child.getParent() == null;
         child.setParent(this);
     }
 
     protected final void orphan(final PWidget child) {
-        assert(child.getParent() == this);
+        assert child.getParent() == this;
         child.setParent(null);
     }
 

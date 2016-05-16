@@ -38,8 +38,9 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
+import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a
@@ -97,16 +98,11 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
+    }
 
-        init();
-
-        // TODO nciaravola
-
-        // if (textBox == null) {
-        // textBox = new PTextBox();
-        // }
-        //
-        // create.put(Model.TEXTBOX_ID, textBox.getID());
+    @Override
+    protected void init() {
+        super.init();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
         saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION_HANDLER);
     }
@@ -114,17 +110,25 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(Model.ORACLE, suggestOracle.getID());
+        parser.parse(ServerToClientModel.ORACLE, suggestOracle.getID());
+
+        // TODO nciaravola
+
+        // if (textBox == null) {
+        // textBox = new PTextBox();
+        // }
+        //
+        // parser.parse(Model.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.getValue())) {
-            final String text = instruction.getString(Model.TEXT.getValue());
+        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
+            final String text = instruction.getString(ClientToServerModel.TEXT.toStringValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
-        } else if (instruction.containsKey(HandlerModel.HANDLER_STRING_SELECTION_HANDLER.getValue())) {
-            this.replacementString = instruction.getString(Model.REPLACEMENT_STRING.getValue());
-            this.displayString = instruction.getString(Model.DISPLAY_STRING.getValue());
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_SELECTION_HANDLER.toStringValue())) {
+            this.replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
+            this.displayString = instruction.getString(ClientToServerModel.DISPLAY_STRING.toStringValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
@@ -158,7 +162,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public void setLimit(final int limit) {
         this.limit = limit;
-        saveUpdate(Model.LIMIT, limit);
+        saveUpdate(ServerToClientModel.LIMIT, limit);
     }
 
     public void setText(final String text) {
@@ -244,22 +248,25 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public static class PMultiWordSuggestOracle extends PSuggestOracle {
 
+        public PMultiWordSuggestOracle() {
+        }
+
         @Override
         public void add(final String suggestion) {
-            saveUpdate(Model.SUGGESTION, suggestion);
+            saveUpdate(ServerToClientModel.SUGGESTION, suggestion);
         }
 
         @Override
         public void addAll(final Collection<String> collection) {
-            saveUpdate(Model.SUGGESTIONS, collection);
+            //saveUpdate(Model.SUGGESTIONS, collection);
         }
 
         public void setDefaultSuggestions(final Collection<String> collection) {
-            saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
+            //saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
         }
 
         public void clear() {
-            saveUpdate(Model.CLEAR);
+            saveUpdate(ServerToClientModel.CLEAR);
         }
 
         @Override

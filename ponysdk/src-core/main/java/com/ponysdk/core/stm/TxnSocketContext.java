@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.stm;
 
@@ -6,12 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.Json;
-import javax.json.JsonReader;
+import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
+import com.ponysdk.core.Parser;
 import com.ponysdk.core.ParserImpl;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.Request;
@@ -27,7 +50,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     private boolean flushNow = false;
 
-    private ParserImpl parser;
+    private Parser parser;
 
     private Application application;
 
@@ -47,7 +70,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
     @Override
     public void flush() {
-        if (parser.endOfParsing()) parser.reset();
+        parser.reset();
     }
 
     public void flushNow() {
@@ -61,7 +84,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
 
         flushNow = false;
 
-        Txn.get().getTxnContext().flush();
+        Txn.get().flush();
     }
 
     @Override
@@ -73,7 +96,7 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public ParserImpl getParser() {
+    public Parser getParser() {
         return parser;
     }
 
@@ -87,9 +110,9 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     }
 
     @Override
-    public JsonReader getReader() {
+    public JsonObject getJsonObject() {
         try {
-            return Json.createReader(request.getReader());
+            return Json.createReader(request.getReader()).readObject();
         } catch (final IOException e) {
             log.error("Cannot build reader from HTTP request", e);
         }
@@ -135,11 +158,6 @@ public class TxnSocketContext implements TxnContext, TxnListener {
     @Override
     public String getHistoryToken() {
         return null;
-    }
-
-    @Override
-    public Request getRequest() {
-        return request;
     }
 
     @Override

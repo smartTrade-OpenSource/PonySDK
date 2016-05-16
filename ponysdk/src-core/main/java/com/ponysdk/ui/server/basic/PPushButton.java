@@ -25,7 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.Model;
+import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A normal push button with custom styling.
@@ -37,21 +37,21 @@ import com.ponysdk.ui.terminal.model.Model;
  */
 public class PPushButton extends PButton {
 
-	private final PImage image;
+    private final PImage image;
 
-	public PPushButton(final PImage image) {
-		this.image = image;
-		init();
-	}
+    public PPushButton(final PImage image) {
+        super();
+        this.image = image;
+    }
 
-	@Override
-	protected void enrichOnInit(final Parser parser) {
-		super.enrichOnInit(parser);
-		parser.parse(Model.WIDGET_ID, image.getID());
-	}
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(ServerToClientModel.WIDGET_ID, image.getID());
+        super.enrichOnInit(parser);
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.PUSH_BUTTON;
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.PUSH_BUTTON;
+    }
 }
