@@ -1,8 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
-version = '0.7.3.0'
+version = '0.7.3.1-SNAPSHOT'
 
 ext{
     srcCore = "src-core/main/java"
@@ -58,6 +59,18 @@ repositories {
         url "http://oss.sonatype.org/content/repositories/snapshots"
     }
 }
+
+ publishing {
+       publications {
+           maven(MavenPublication) {
+               groupId 'com.ponysdk'
+               artifactId project.name
+               version version
+
+               from components.java
+           }
+       }
+   }
 
 uploadArchives {
     repositories {
