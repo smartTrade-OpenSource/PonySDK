@@ -29,6 +29,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -118,10 +120,16 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         if (event.getCurrentTarget() == window) {
             final String type = event.getType();
             if (WINDOW_EVENT_TYPE_LOAD.equals(type)) {
-                final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(objectID);
-                instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
-                uiService.sendDataToServer(instruction);
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                    @Override
+                    public void execute() {
+                        final PTInstruction instruction = new PTInstruction();
+                        instruction.setObjectID(objectID);
+                        instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
+                        uiService.sendDataToServer(instruction);
+                    }
+                });
             } else if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
                 final MessageEvent messageEvent = (MessageEvent) event;
                 uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
