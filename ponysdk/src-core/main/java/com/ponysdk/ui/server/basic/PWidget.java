@@ -24,8 +24,10 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -68,6 +70,7 @@ import com.ponysdk.ui.server.basic.event.PMouseEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOutEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseUpEvent;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.DomHandlerType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -340,32 +343,97 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE, handler.asJsonObject());
+        return addDomHandler(handler, PKeyPressEvent.TYPE, ServerToClientModel.KEY_FILTER, handler.asJsonObject());
     }
 
     public HandlerRegistration addDomHandler(final PKeyUpFilterHandler handler) {
-        return addDomHandler(handler, PKeyUpEvent.TYPE, handler.asJsonObject());
+        return addDomHandler(handler, PKeyUpEvent.TYPE, ServerToClientModel.KEY_FILTER, handler.asJsonObject());
     }
 
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type,
-            final JsonObject jsonObject) {
+    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type) {
+        return addDomHandler(handler, type, null, null);
+    }
+
+    private final Deque<AddDomHandlerInstruction<? extends EventHandler>> stackedAddDomHandlerInstructions = new LinkedList<>();
+
+    private class AddDomHandlerInstruction<H extends EventHandler> {
+
+        private final AddDomHandler<H> updater;
+        ServerToClientModel model1;
+        Object value1;
+        ServerToClientModel model2;
+        Object value2;
+
+        public AddDomHandlerInstruction(final AddDomHandler<H> updater, final ServerToClientModel model1, final Object value1,
+                final ServerToClientModel model2, final Object value2) {
+            this.updater = updater;
+            this.model1 = model1;
+            this.value1 = value1;
+            this.model2 = model2;
+            this.value2 = value2;
+        }
+
+        public void execute() {
+            updater.execute(model1, value1, model2, value2);
+        }
+    }
+
+    private interface AddDomHandler<H extends EventHandler> {
+
+        void execute(ServerToClientModel model1, Object value1, ServerToClientModel model2, Object value2);
+    }
+
+    @Override
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+        if (result) {
+            while (!stackedAddDomHandlerInstructions.isEmpty()) {
+                final AddDomHandlerInstruction<? extends EventHandler> updater = stackedAddDomHandlerInstructions.pop();
+                updater.execute();
+            }
+        }
+
+        return result;
+    }
+
+    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type,
+            final ServerToClientModel model2, final Object value2) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
-            parser.parse(ServerToClientModel.OBJECT_ID, ID);
-            parser.parse(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
-            if (jsonObject != null) parser.parse(ServerToClientModel.KEY_FILTER, jsonObject);
-            parser.endObject();
+            final ServerToClientModel model1 = ServerToClientModel.DOM_HANDLER_CODE;
+            final Object value1 = type.getDomHandlerType().getValue();
+            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(model1, value1, model2, value2);
+            else stackedAddDomHandlerInstructions
+                    .add(new AddDomHandlerInstruction(this::executeAddDomHandler, model1, value1, model2, value2));
         }
         return handlerRegistration;
     }
 
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type) {
-        return addDomHandler(handler, type, null);
+    private <H extends EventHandler> void executeAddDomHandler(final ServerToClientModel model1, final Object value1,
+            final ServerToClientModel model2, final Object value2) {
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, ID);
+        parser.parse(model1, value1);
+        if (model2 != null) parser.parse(model2, value2);
+        parser.endObject();
+    }
+
+    private <H extends EventHandler> void executeAddDomHandlerBis(final ServerBinaryModel... binaryModels) {
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, ID);
+        if (binaryModels != null && binaryModels.length > 0) {
+            for (final ServerBinaryModel binaryModel : binaryModels) {
+                parser.parse(binaryModel.getKey(), binaryModel.getValue());
+            }
+        }
+        parser.endObject();
     }
 
     @Override

@@ -23,6 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.Deque;
+import java.util.LinkedList;
+
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
@@ -83,6 +86,12 @@ public abstract class PObject {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
             init();
+
+            while (!stackedUpdateInstructions.isEmpty()) {
+                final UpdaterInstruction updater = stackedUpdateInstructions.pop();
+                updater.execute();
+            }
+
             return true;
         } else if (this.windowID != windowID) {
             throw new IllegalAccessError("Widget already attached to an other window");
@@ -224,6 +233,12 @@ public abstract class PObject {
 
     protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
             final Object value2) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeSaveUpdate(model1, value1, model2, value2);
+        else stackedUpdateInstructions.add(new UpdaterInstruction(this::executeSaveUpdate, model1, value1, model2, value2));
+    }
+
+    private void executeSaveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
+            final Object value2) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
@@ -231,6 +246,36 @@ public abstract class PObject {
         parser.parse(model1, value1);
         if (model2 != null) parser.parse(model2, value2);
         parser.endObject();
+    }
+
+    private final Deque<UpdaterInstruction> stackedUpdateInstructions = new LinkedList<>();
+
+    private class UpdaterInstruction {
+
+        Updater updater;
+        ServerToClientModel model1;
+        Object value1;
+        ServerToClientModel model2;
+        Object value2;
+
+        public UpdaterInstruction(final Updater updater, final ServerToClientModel model1, final Object value1,
+                final ServerToClientModel model2,
+                final Object value2) {
+            this.updater = updater;
+            this.model1 = model1;
+            this.value1 = value1;
+            this.model2 = model2;
+            this.value2 = value2;
+        }
+
+        public void execute() {
+            updater.execute(model1, value1, model2, value2);
+        }
+    }
+
+    private interface Updater {
+
+        void execute(ServerToClientModel model1, Object value1, ServerToClientModel model2, Object value2);
     }
 
     @Override

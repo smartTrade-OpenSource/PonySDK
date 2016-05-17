@@ -70,7 +70,6 @@ public class PLabel extends PWidget
     }
 
     public PLabel(final String text) {
-        super();
         this.text = text;
     }
 
