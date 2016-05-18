@@ -26,6 +26,7 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.sample.client.page.addon.ReverseTextInput;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
+import com.ponysdk.ui.server.basic.PFilterTextBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
@@ -79,8 +80,8 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         panel.add(button);
 
         final String pattern = "[a-zA-Z0-9]";
-        final PTextBox filtered = new PTextBox();
-        filtered.applyFilter(pattern);
+        final PFilterTextBox filtered = new PFilterTextBox();
+        filtered.setFilter(pattern);
         panel.add(new PLabel("Filtered text box ( " + pattern + " ):"));
         panel.add(filtered);
 

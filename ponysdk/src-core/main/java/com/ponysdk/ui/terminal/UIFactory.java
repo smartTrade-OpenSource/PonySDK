@@ -41,6 +41,7 @@ import com.ponysdk.ui.terminal.ui.PTDisclosurePanel;
 import com.ponysdk.ui.terminal.ui.PTDockLayoutPanel;
 import com.ponysdk.ui.terminal.ui.PTElement;
 import com.ponysdk.ui.terminal.ui.PTFileUpload;
+import com.ponysdk.ui.terminal.ui.PTFilterTextBox;
 import com.ponysdk.ui.terminal.ui.PTFlexTable;
 import com.ponysdk.ui.terminal.ui.PTFlowPanel;
 import com.ponysdk.ui.terminal.ui.PTFocusPanel;
@@ -106,6 +107,7 @@ public class UIFactory {
         if (WidgetType.HTML.equals(widgetType)) { return new PTHTML(); }
         if (WidgetType.TEXTBOX.equals(widgetType)) { return new PTTextBox(); }
         if (WidgetType.PASSWORD_TEXTBOX.equals(widgetType)) { return new PTPasswordTextBox(); }
+        if (WidgetType.FILTER_TEXTBOX.equals(widgetType)) { return new PTFilterTextBox(); }
         if (WidgetType.TEXT_AREA.equals(widgetType)) { return new PTTextArea(); }
         if (WidgetType.CHECKBOX.equals(widgetType)) { return new PTCheckBox(); }
         if (WidgetType.RADIO_BUTTON.equals(widgetType)) { return new PTRadioButton(); }

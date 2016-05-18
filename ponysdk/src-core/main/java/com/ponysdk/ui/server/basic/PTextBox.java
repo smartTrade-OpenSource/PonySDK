@@ -115,16 +115,4 @@ public class PTextBox extends PTextBoxBase {
         Txn.get().getTxnContext().save(update);
     }
 
-    /**
-     * Apply a filter to the textbox. Value set to the textbox will be filtered. <br>
-     * Example: ([a-zA-Z0-9])
-     * 
-     * @param regExp
-     *            the regular expression to use as filter.
-     */
-    public void applyFilter(final String regExp) {
-        final Update update = new Update(getID());
-        update.put(PROPERTY.FILTER, regExp);
-        Txn.get().getTxnContext().save(update);
-    }
 }
