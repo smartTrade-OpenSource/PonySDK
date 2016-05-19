@@ -35,6 +35,7 @@ import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionEvent;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -101,16 +102,18 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
-        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_WIDGET, tabWidget.getID(), ServerToClientModel.BEFORE_INDEX, beforeIndex);
+        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
     }
 
     @Override
-    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
+    protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         // Nothing to do
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
-        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_TEXT, tabText, ServerToClientModel.BEFORE_INDEX, beforeIndex);
+        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -122,11 +125,11 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     public void add(final PWidget widget, final String tabText) {
-        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_TEXT, tabText);
+        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText));
     }
 
     public void add(final PWidget widget, final PWidget tabWidget) {
-        saveAdd(widget.getID(), ID, ServerToClientModel.TAB_WIDGET, tabWidget.getID());
+        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()));
     }
 
     public void selectTab(final int index) {

@@ -118,92 +118,73 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private final Set<String> safeStyleName() {
-        if (styleNames != null)
-            return styleNames;
-        styleNames = new HashSet<>();
+        if (styleNames == null) styleNames = new HashSet<>();
         return styleNames;
     }
 
     private final Set<PEvent> safePreventEvents() {
-        if (preventEvents != null)
-            return preventEvents;
-        preventEvents = new HashSet<>();
+        if (preventEvents == null) preventEvents = new HashSet<>();
         return preventEvents;
     }
 
     private final Set<PEvent> safeStopEvents() {
-        if (stopEvents != null)
-            return stopEvents;
-        stopEvents = new HashSet<>();
+        if (stopEvents == null) stopEvents = new HashSet<>();
         return stopEvents;
     }
 
     private final Map<String, String> safeStyleProperties() {
-        if (styleProperties != null)
-            return styleProperties;
-        styleProperties = new HashMap<>();
+        if (styleProperties == null) styleProperties = new HashMap<>();
         return styleProperties;
     }
 
     private final Map<String, String> safeElementProperties() {
-        if (elementProperties != null)
-            return elementProperties;
-        elementProperties = new HashMap<>();
+        if (elementProperties == null) elementProperties = new HashMap<>();
         return elementProperties;
     }
 
     private final Map<String, String> safeElementAttributes() {
-        if (elementAttributes != null)
-            return elementAttributes;
-        elementAttributes = new HashMap<>();
+        if (elementAttributes == null) elementAttributes = new HashMap<>();
         return elementAttributes;
     }
 
     public void setVisible(final boolean visible) {
-        if (Objects.equals(this.visible, visible))
-            return;
+        if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
         saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
     }
 
     public void setWidth(final String width) {
-        if (Objects.equals(this.width, width))
-            return;
+        if (Objects.equals(this.width, width)) return;
         this.width = width;
         saveUpdate(ServerToClientModel.WIDGET_WIDTH, width);
     }
 
     public void setHeight(final String height) {
-        if (Objects.equals(this.height, height))
-            return;
+        if (Objects.equals(this.height, height)) return;
         this.height = height;
         saveUpdate(ServerToClientModel.WIDGET_HEIGHT, height);
     }
 
     public void setTitle(final String title) {
-        if (Objects.equals(this.title, title))
-            return;
+        if (Objects.equals(this.title, title)) return;
         this.title = title;
         saveUpdate(ServerToClientModel.WIDGET_TITLE, title);
     }
 
     public void setStyleName(final String styleName) {
-        if (Objects.equals(this.styleName, styleName))
-            return;
+        if (Objects.equals(this.styleName, styleName)) return;
         this.styleName = styleName;
         saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
     }
 
     public void setStylePrimaryName(final String stylePrimaryName) {
-        if (Objects.equals(this.stylePrimaryName, stylePrimaryName))
-            return;
+        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
         this.stylePrimaryName = stylePrimaryName;
         saveUpdate(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName);
     }
 
     public void ensureDebugId(final String debugID) {
-        if (Objects.equals(this.debugID, debugID))
-            return;
+        if (Objects.equals(this.debugID, debugID)) return;
         this.debugID = debugID;
         saveUpdate(ServerToClientModel.ENSURE_DEBUG_ID, debugID);
     }
@@ -343,15 +324,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE, ServerToClientModel.KEY_FILTER, handler.asJsonObject());
+        return addDomHandler(handler, PKeyPressEvent.TYPE,
+                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
     }
 
     public HandlerRegistration addDomHandler(final PKeyUpFilterHandler handler) {
-        return addDomHandler(handler, PKeyUpEvent.TYPE, ServerToClientModel.KEY_FILTER, handler.asJsonObject());
+        return addDomHandler(handler, PKeyUpEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
     }
 
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type) {
-        return addDomHandler(handler, type, null, null);
+        return addDomHandler(handler, type, null);
     }
 
     private final Deque<AddDomHandlerInstruction<? extends EventHandler>> stackedAddDomHandlerInstructions = new LinkedList<>();
@@ -359,78 +341,56 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private class AddDomHandlerInstruction<H extends EventHandler> {
 
         private final AddDomHandler<H> updater;
-        ServerToClientModel model1;
-        Object value1;
-        ServerToClientModel model2;
-        Object value2;
+        private final ServerBinaryModel[] binaryModels;
 
-        public AddDomHandlerInstruction(final AddDomHandler<H> updater, final ServerToClientModel model1, final Object value1,
-                final ServerToClientModel model2, final Object value2) {
+        public AddDomHandlerInstruction(final AddDomHandler<H> updater, final ServerBinaryModel... binaryModels) {
             this.updater = updater;
-            this.model1 = model1;
-            this.value1 = value1;
-            this.model2 = model2;
-            this.value2 = value2;
+            this.binaryModels = binaryModels;
         }
 
         public void execute() {
-            updater.execute(model1, value1, model2, value2);
+            updater.execute(binaryModels);
         }
     }
 
     private interface AddDomHandler<H extends EventHandler> {
 
-        void execute(ServerToClientModel model1, Object value1, ServerToClientModel model2, Object value2);
+        void execute(final ServerBinaryModel... binaryModels);
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
-        if (result) {
-            while (!stackedAddDomHandlerInstructions.isEmpty()) {
-                final AddDomHandlerInstruction<? extends EventHandler> updater = stackedAddDomHandlerInstructions.pop();
-                updater.execute();
-            }
-        }
+    protected void init() {
+        super.init();
 
-        return result;
+        while (!stackedAddDomHandlerInstructions.isEmpty()) {
+            final AddDomHandlerInstruction<? extends EventHandler> updater = stackedAddDomHandlerInstructions.pop();
+            updater.execute();
+        }
     }
 
     private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type,
-            final ServerToClientModel model2, final Object value2) {
+            final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
-            final ServerToClientModel model1 = ServerToClientModel.DOM_HANDLER_CODE;
-            final Object value1 = type.getDomHandlerType().getValue();
-            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(model1, value1, model2, value2);
+            final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
+                    type.getDomHandlerType().getValue());
+            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(binaryModel1, binaryModel);
             else stackedAddDomHandlerInstructions
-                    .add(new AddDomHandlerInstruction(this::executeAddDomHandler, model1, value1, model2, value2));
+                    .add(new AddDomHandlerInstruction(this::executeAddDomHandler, binaryModel1, binaryModel));
         }
         return handlerRegistration;
     }
 
-    private <H extends EventHandler> void executeAddDomHandler(final ServerToClientModel model1, final Object value1,
-            final ServerToClientModel model2, final Object value2) {
+    private <H extends EventHandler> void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
-        parser.parse(model1, value1);
-        if (model2 != null) parser.parse(model2, value2);
-        parser.endObject();
-    }
-
-    private <H extends EventHandler> void executeAddDomHandlerBis(final ServerBinaryModel... binaryModels) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
-        parser.parse(ServerToClientModel.OBJECT_ID, ID);
-        if (binaryModels != null && binaryModels.length > 0) {
+        if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {
-                parser.parse(binaryModel.getKey(), binaryModel.getValue());
+                if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
             }
         }
         parser.endObject();
@@ -510,8 +470,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private EventBus ensureDomHandler() {
-        if (domHandler == null)
-            domHandler = new SimpleEventBus();
+        if (domHandler == null) domHandler = new SimpleEventBus();
         return domHandler;
     }
 
@@ -545,17 +504,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireEvent(final Event<?> event) {
-        if (domHandler == null)
-            return;
+        if (domHandler == null) return;
         domHandler.fireEvent(event);
     }
 
     public void removeFromParent() {
-        if (parent instanceof HasPWidgets) {
-            ((HasPWidgets) parent).remove(this);
-        } else if (parent != null) {
-            throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
-        }
+        if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
+        else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 
 }

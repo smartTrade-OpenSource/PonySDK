@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -74,21 +75,21 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         header = child;
-        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 0);
+        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
     }
 
     public void setContentWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         content = child;
-        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 1);
+        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
     }
 
     public void setFooterWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         footer = child;
-        saveAdd(child.getID(), ID, ServerToClientModel.INDEX, 2);
+        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
     @Override

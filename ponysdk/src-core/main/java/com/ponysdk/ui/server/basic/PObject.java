@@ -34,6 +34,7 @@ import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -63,6 +64,18 @@ public abstract class PObject {
         this.windowID = windowID;
     }
 
+    protected boolean attach(final int windowID) {
+        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
+            this.windowID = windowID;
+            init();
+
+            return true;
+        } else if (this.windowID != windowID) {
+            throw new IllegalAccessError("Widget already attached to an other window");
+        }
+        return false;
+    }
+
     protected void init() {
         if (initialized)
             return;
@@ -76,27 +89,19 @@ public abstract class PObject {
         parser.endObject();
 
         initialized = true;
+
+        while (!stackedUpdateInstructions.isEmpty())
+            stackedUpdateInstructions.pop().execute();
+        while (!stackedRemoveInstructions.isEmpty())
+            stackedRemoveInstructions.pop().execute();
+        while (!stackedAddHandlerInstructions.isEmpty())
+            stackedAddHandlerInstructions.pop().execute();
+        while (!stackedRemoveHandlerInstructions.isEmpty())
+            stackedRemoveHandlerInstructions.pop().execute();
     }
 
     public int getWindowID() {
         return windowID;
-    }
-
-    protected boolean attach(final int windowID) {
-        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
-            this.windowID = windowID;
-            init();
-
-            while (!stackedUpdateInstructions.isEmpty()) {
-                final UpdaterInstruction updater = stackedUpdateInstructions.pop();
-                updater.execute();
-            }
-
-            return true;
-        } else if (this.windowID != windowID) {
-            throw new IllegalAccessError("Widget already attached to an other window");
-        }
-        return false;
     }
 
     protected void enrichOnInit(final Parser parser) {
@@ -109,7 +114,6 @@ public abstract class PObject {
     }
 
     public void bindTerminalFunction(final String functionName) {
-
         if (nativeBindingFunction != null)
             throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
@@ -119,7 +123,6 @@ public abstract class PObject {
     }
 
     public void sendToNative(final JsonObject data) {
-
         if (nativeBindingFunction == null)
             throw new IllegalAccessError("Object not bind to a native function");
 
@@ -155,72 +158,78 @@ public abstract class PObject {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final PObject other = (PObject) obj;
-        if (ID != other.ID)
-            return false;
+        if (ID != other.ID) return false;
         return true;
     }
 
-    protected void saveAddHandler(final HandlerModel type) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
-        parser.parse(ServerToClientModel.OBJECT_ID, ID);
-        parser.endObject();
+    protected void executeAdd(final int objectID, final int parentObjectID) {
+        executeAdd(objectID, parentObjectID, (ServerBinaryModel) null);
     }
 
-    protected void saveRemoveHandler(final HandlerModel type) {
-        saveRemoveHandler(type, null, null);
-    }
-
-    protected void saveRemoveHandler(final HandlerModel type, final ServerToClientModel model, final Object value) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        if (model != null) parser.parse(model, value);
-        parser.endObject();
-    }
-
-    protected void saveRemove(final int objectID, final int parentObjectID) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
-        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        parser.endObject();
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model) {
-        saveAdd(objectID, parentObjectID, model, null);
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID) {
-        saveAdd(objectID, parentObjectID, null, null);
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model, final Object value) {
-        saveAdd(objectID, parentObjectID, model, value, null, null);
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID, final ServerToClientModel model1, final Object value1,
-            final ServerToClientModel model2, final Object value2) {
+    protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        if (model1 != null) parser.parse(model1, value1);
-        if (model2 != null) parser.parse(model2, value2);
+        if (binaryModels != null) {
+            for (final ServerBinaryModel binaryModel : binaryModels) {
+                if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
+            }
+        }
         parser.endObject();
         // UIContext.get().assignParentID(objectID, parentObjectID);
+    }
+
+    protected void saveAddHandler(final HandlerModel type) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
+        else stackedAddHandlerInstructions.add(new AdderHandlerInstruction(this::executeAddHandler, type));
+    }
+
+    protected void executeAddHandler(final HandlerModel type) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final Parser parser = Txn.get().getParser();
+            parser.beginObject();
+            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
+            parser.parse(ServerToClientModel.OBJECT_ID, ID);
+            parser.endObject();
+        }
+    }
+
+    protected void saveRemoveHandler(final HandlerModel type) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
+        else stackedRemoveHandlerInstructions.add(new RemoverHandlerInstruction(this::executeRemoveHandler));
+    }
+
+    protected void executeRemoveHandler() {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final Parser parser = Txn.get().getParser();
+            parser.beginObject();
+            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            parser.endObject();
+        }
+    }
+
+    protected void saveRemove(final int objectID, final int parentObjectID) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
+        else stackedRemoveInstructions.add(new RemoverInstruction(this::executeRemove, objectID, parentObjectID));
+    }
+
+    protected void executeRemove(final int objectID, final int parentObjectID) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final Parser parser = Txn.get().getParser();
+            parser.beginObject();
+            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
+            parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            parser.endObject();
+        }
     }
 
     protected void saveUpdate(final ServerToClientModel model) {
@@ -228,54 +237,125 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ServerToClientModel model, final Object value) {
-        saveUpdate(model, value, null, null);
+        saveUpdate(new ServerBinaryModel(model, value));
     }
 
     protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
             final Object value2) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeSaveUpdate(model1, value1, model2, value2);
-        else stackedUpdateInstructions.add(new UpdaterInstruction(this::executeSaveUpdate, model1, value1, model2, value2));
+        saveUpdate(new ServerBinaryModel(model1, value1), new ServerBinaryModel(model2, value2));
     }
 
-    private void executeSaveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
-            final Object value2) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(model1, value1);
-        if (model2 != null) parser.parse(model2, value2);
-        parser.endObject();
+    protected void saveUpdate(final ServerBinaryModel... binaryModels) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(binaryModels);
+        else stackedUpdateInstructions.add(new UpdaterInstruction(this::executeUpdate, binaryModels));
+    }
+
+    protected void executeUpdate(final ServerToClientModel model, final Object value) {
+        executeUpdate(new ServerBinaryModel(model, value));
+    }
+
+    protected void executeUpdate(final ServerBinaryModel... binaryModels) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final Parser parser = Txn.get().getParser();
+            parser.beginObject();
+            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+            if (binaryModels != null) {
+                for (final ServerBinaryModel binaryModel : binaryModels) {
+                    if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
+                }
+            }
+
+            parser.endObject();
+        }
+    }
+
+    private final Deque<AdderHandlerInstruction> stackedAddHandlerInstructions = new LinkedList<>();
+
+    private class AdderHandlerInstruction {
+
+        private final AdderHandler adderHandler;
+        private final HandlerModel type;
+
+        public AdderHandlerInstruction(final AdderHandler adderHandler, final HandlerModel type) {
+            this.adderHandler = adderHandler;
+            this.type = type;
+        }
+
+        public void execute() {
+            adderHandler.execute(type);
+        }
+    }
+
+    private interface AdderHandler {
+
+        void execute(final HandlerModel type);
+    }
+
+    private final Deque<RemoverHandlerInstruction> stackedRemoveHandlerInstructions = new LinkedList<>();
+
+    private class RemoverHandlerInstruction {
+
+        private final RemoverHandler removerHandler;
+
+        public RemoverHandlerInstruction(final RemoverHandler removerHandler) {
+            this.removerHandler = removerHandler;
+        }
+
+        public void execute() {
+            removerHandler.execute();
+        }
+    }
+
+    private interface RemoverHandler {
+
+        void execute();
+    }
+
+    private final Deque<RemoverInstruction> stackedRemoveInstructions = new LinkedList<>();
+
+    private class RemoverInstruction {
+
+        private final Remover remover;
+        private final int objectID;
+        private final int parentObjectID;
+
+        public RemoverInstruction(final Remover remover, final int objectID, final int parentObjectID) {
+            this.remover = remover;
+            this.objectID = objectID;
+            this.parentObjectID = parentObjectID;
+        }
+
+        public void execute() {
+            remover.execute(objectID, parentObjectID);
+        }
+    }
+
+    private interface Remover {
+
+        void execute(final int objectID, final int parentObjectID);
     }
 
     private final Deque<UpdaterInstruction> stackedUpdateInstructions = new LinkedList<>();
 
     private class UpdaterInstruction {
 
-        Updater updater;
-        ServerToClientModel model1;
-        Object value1;
-        ServerToClientModel model2;
-        Object value2;
+        private final Updater updater;
+        private final ServerBinaryModel[] binaryModels;
 
-        public UpdaterInstruction(final Updater updater, final ServerToClientModel model1, final Object value1,
-                final ServerToClientModel model2,
-                final Object value2) {
+        public UpdaterInstruction(final Updater updater, final ServerBinaryModel... binaryModels) {
             this.updater = updater;
-            this.model1 = model1;
-            this.value1 = value1;
-            this.model2 = model2;
-            this.value2 = value2;
+            this.binaryModels = binaryModels;
         }
 
         public void execute() {
-            updater.execute(model1, value1, model2, value2);
+            updater.execute(binaryModels);
         }
     }
 
     private interface Updater {
 
-        void execute(ServerToClientModel model1, Object value1, ServerToClientModel model2, Object value2);
+        void execute(final ServerBinaryModel... binaryModels);
     }
 
     @Override

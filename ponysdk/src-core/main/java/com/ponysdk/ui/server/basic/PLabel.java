@@ -52,21 +52,20 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
- * widget uses a &lt;div&gt; element, causing it to be displayed with block
- * layout.
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a
+ * &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
  * </ul>
  */
-public class PLabel extends PWidget
-        implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
+public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
-    String text;
+    private static final String DEFAULT_TEXT_VALUE = null;
+
+    private String text = DEFAULT_TEXT_VALUE;
 
     public PLabel() {
-        super();
     }
 
     public PLabel(final String text) {
@@ -76,7 +75,7 @@ public class PLabel extends PWidget
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -91,10 +90,9 @@ public class PLabel extends PWidget
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text))
-            return;
+        if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
+        executeUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -57,25 +56,13 @@ public class PFlexTable extends PHTMLTable {
     public class PFlexCellFormatter extends PCellFormatter {
 
         public void setColSpan(final int row, final int column, final int colSpan) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.SET_COL_SPAN, colSpan);
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_COL_SPAN, colSpan),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
 
         public void setRowSpan(final int row, final int column, final int rowSpan) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.SET_ROW_SPAN, rowSpan);
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_ROW_SPAN, rowSpan),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
     }
 }

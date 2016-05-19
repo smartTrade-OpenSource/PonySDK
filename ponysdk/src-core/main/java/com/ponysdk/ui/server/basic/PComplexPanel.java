@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.basic;
 import java.util.Collections;
 import java.util.Iterator;
 
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
@@ -59,7 +60,7 @@ public abstract class PComplexPanel extends PPanel {
         children.add(child);
         adopt(child);
 
-        if (child.attach(windowID)) saveAdd(child.getID(), ID);
+        if (child.attach(windowID)) executeAdd(child.getID(), ID);
     }
 
     public void insert(final PWidget child, final int beforeIndex) {
@@ -73,9 +74,9 @@ public abstract class PComplexPanel extends PPanel {
         adopt(child);
 
         if (children.size() - 1 == beforeIndex) {
-            saveAdd(child.getID(), ID);
+            executeAdd(child.getID(), ID);
         } else {
-            saveAdd(child.getID(), ID, ServerToClientModel.INDEX, beforeIndex);
+            executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         }
     }
 

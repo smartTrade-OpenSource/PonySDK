@@ -70,9 +70,7 @@ public class PCookies {
         parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
         parser.parse(ServerToClientModel.ADD_COOKIE, name);
         parser.parse(ServerToClientModel.VALUE, value);
-        if (expires != null) {
-            parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
-        }
+        if (expires != null) parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
         parser.endObject();
     }
 

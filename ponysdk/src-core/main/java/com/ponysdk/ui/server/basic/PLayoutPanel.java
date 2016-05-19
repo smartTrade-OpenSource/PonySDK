@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PAlignment;
@@ -100,15 +99,9 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
             final double v2, final PUnit unit) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
-        parser.parse(ServerToClientModel.WIDGET_ID, child.getID());
-        parser.parse(key1, v1);
-        parser.parse(key2, v2);
-        parser.endObject();
+        saveUpdate(new ServerBinaryModel(ServerToClientModel.UNIT, unit.getByteValue()),
+                new ServerBinaryModel(ServerToClientModel.WIDGET_ID, child.getID()), new ServerBinaryModel(key1, v1),
+                new ServerBinaryModel(key2, v2));
     }
 
     @Override

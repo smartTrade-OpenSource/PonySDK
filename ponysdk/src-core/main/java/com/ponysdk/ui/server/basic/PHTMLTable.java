@@ -34,8 +34,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -153,58 +152,28 @@ public abstract class PHTMLTable extends PPanel {
     public class PCellFormatter {
 
         public void addStyleName(final int row, final int column, final String styleName) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
 
         public void removeStyleName(final int row, final int column, final String styleName) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
 
         public void setStyleName(final int row, final int column, final String styleName) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName);
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
 
         public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue()),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
 
         public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            parser.parse(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
-            parser.parse(ServerToClientModel.ROW, row);
-            parser.parse(ServerToClientModel.COLUMN, column);
-            parser.endObject();
+            saveUpdate(new ServerBinaryModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue()),
+                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
         }
     }
 
@@ -397,7 +366,8 @@ public abstract class PHTMLTable extends PPanel {
             addWidgetToMap(row, column, widget);
 
             // Physical attach.
-            saveAdd(widget.getID(), ID, ServerToClientModel.ROW, row, ServerToClientModel.COLUMN, column);
+            executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
 
             adopt(widget);
         }

@@ -23,8 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
@@ -110,14 +109,9 @@ public class PTextBox extends PTextBoxBase {
      *            replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.MASK, pattern);
-        parser.parse(ServerToClientModel.VISIBILITY, showMask);
-        parser.parse(ServerToClientModel.REPLACEMENT_STRING, freeSymbol);
-        parser.endObject();
+        saveUpdate(new ServerBinaryModel(ServerToClientModel.MASK, pattern),
+                new ServerBinaryModel(ServerToClientModel.VISIBILITY, showMask),
+                new ServerBinaryModel(ServerToClientModel.REPLACEMENT_STRING, freeSymbol));
     }
 
 }

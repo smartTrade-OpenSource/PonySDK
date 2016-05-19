@@ -34,6 +34,7 @@ import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -98,7 +99,8 @@ public class PStackLayoutPanel extends PComposite
         children.add(child);
         adopt(child);
 
-        saveAdd(child.getID(), ID, ServerToClientModel.HTML, header, ServerToClientModel.SIZE, headerSize);
+        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
+                new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }
 
     @Override
