@@ -262,6 +262,7 @@
 		"maxLength": [],
 		"year": [],
 		"month": [],
-		"day": []
+		"day": [],
+		"filter": []
 	}
 }
