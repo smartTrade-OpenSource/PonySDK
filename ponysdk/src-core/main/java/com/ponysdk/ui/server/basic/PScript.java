@@ -32,9 +32,8 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -45,6 +44,8 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 public abstract class PScript extends PObject {
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
+
+    private static final Logger log = LoggerFactory.getLogger(PScript.class);
 
     private long executionID = 0;
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
@@ -72,16 +73,8 @@ public abstract class PScript extends PObject {
         get().executeScript(js);
     }
 
-    public static void execute(final long windowID, final String js) {
-        get().executeScript(windowID, js);
-    }
-
     public static void execute(final String js, final ExecutionCallback callback) {
         get().executeScript(js, callback);
-    }
-
-    public static void execute(final long windowID, final String js, final ExecutionCallback callback) {
-        get().executeScript(windowID, js, callback);
     }
 
     public static void executeDeffered(final String js, final int delay, final TimeUnit unit) {
@@ -93,74 +86,33 @@ public abstract class PScript extends PObject {
         get().executeScriptDeffered(js, callback, delay, unit);
     }
 
-    public static void executeDeffered(final long windowID, final String js, final ExecutionCallback callback,
-            final int delay, final TimeUnit unit) {
-        get().executeScriptDeffered(windowID, js, callback, delay, unit);
+    private void executeScript(final String js) {
+        saveUpdate(new ServerBinaryModel(ServerToClientModel.EVAL, js));
     }
 
-    public void executeScript(final Long windowID2, final String js) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        if (windowID2 != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID2);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.EVAL, js);
-        parser.endObject();
-    }
-
-    public void executeScript(final String js) {
-        executeScript(null, js);
-    }
-
-    public void executeScript(final Long windowID2, final String js, final ExecutionCallback callback) {
+    private void executeScript(final String js, final ExecutionCallback callback) {
         final long id = executionID++;
         callbacksByID.put(id, callback);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        if (windowID2 != null) parser.parse(ServerToClientModel.WINDOW_ID, windowID2);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.EVAL, js);
-        parser.parse(ServerToClientModel.COMMAND_ID, executionID++);
-        parser.endObject();
+        saveUpdate(new ServerBinaryModel(ServerToClientModel.EVAL, js),
+                new ServerBinaryModel(ServerToClientModel.COMMAND_ID, executionID++));
     }
 
-    public void executeScript(final String js, final ExecutionCallback callback) {
-        executeScript(null, js, callback);
-    }
-
-    public void executeScriptDeffered(final Long windowID2, final String js, final ExecutionCallback callback,
+    private void executeScriptDeffered(final String js, final ExecutionCallback callback,
             final int delay, final TimeUnit unit) {
         final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
 
             @Override
             protected void run() {
                 try {
-                    if (callback == null) {
-                        executeScript(windowID2, js);
-                    } else {
-                        executeScript(windowID2, js, callback);
-                    }
+                    if (callback == null) executeScript(js);
+                    else executeScript(js, callback);
                 } catch (final Exception e) {
-                    e.printStackTrace();
+                    log.error("Exception while execution the script " + js, e);
                 }
             }
         };
         command.schedule(unit.toMillis(delay));
-    }
-
-    public void executeScriptDeffered(final String js, final ExecutionCallback callback, final int delay,
-            final TimeUnit unit) {
-        executeScriptDeffered(null, js, callback, delay, unit);
-    }
-
-    public void executeScriptDeffered(final Long windowID, final String js, final int delay, final TimeUnit unit) {
-        executeScriptDeffered(windowID, js, null, delay, unit);
-    }
-
-    public void executeScriptDeffered(final String js, final int delay, final TimeUnit unit) {
-        executeScriptDeffered(null, js, delay, unit);
     }
 
     @Override
@@ -168,15 +120,11 @@ public abstract class PScript extends PObject {
         if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
                     .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) {
-                callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
-            }
+            if (callback != null) callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
             final ExecutionCallback callback = callbacksByID
                     .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) {
-                callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
-            }
+            if (callback != null) callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
         } else {
             super.onClientData(instruction);
         }

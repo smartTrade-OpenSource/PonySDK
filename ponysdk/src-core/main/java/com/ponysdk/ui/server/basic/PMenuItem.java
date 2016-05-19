@@ -124,7 +124,7 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
-        saveAdd(subMenu.getID(), ID);
+        executeAdd(subMenu.getID(), ID);
     }
 
     public void setCommand(final PCommand cmd) {

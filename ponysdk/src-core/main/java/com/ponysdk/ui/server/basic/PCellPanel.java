@@ -25,6 +25,7 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -36,21 +37,29 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public abstract class PCellPanel extends PComplexPanel {
 
-    private Integer borderWidth;
-    private Integer spacing;
+    private static final Integer DEFAULT_BORDER_WIDTH_VALUE = null;
+    private static final Integer DEFAULT_SPACING_VALUE = null;
+
+    private Integer borderWidth = DEFAULT_BORDER_WIDTH_VALUE;
+    private Integer spacing = DEFAULT_SPACING_VALUE;
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (this.borderWidth != DEFAULT_BORDER_WIDTH_VALUE) parser.parse(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        if (this.spacing != DEFAULT_SPACING_VALUE) parser.parse(ServerToClientModel.SPACING, this.spacing);
+    }
 
     public void setBorderWidth(final Integer borderWidth) {
-        if (Objects.equals(this.borderWidth, borderWidth))
-            return;
+        if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        executeUpdate(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
     }
 
     public void setSpacing(final Integer spacing) {
-        if (Objects.equals(this.spacing, spacing))
-            return;
+        if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(ServerToClientModel.SPACING, this.spacing);
+        executeUpdate(ServerToClientModel.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {

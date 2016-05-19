@@ -124,10 +124,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     public void addShowRangeHandler(final PShowRangeHandler<Date> handler) {
-        if (showRangeHandlers.isEmpty()) {
-            saveAddHandler(HandlerModel.HANDLER_KEY_SHOW_RANGE);
-        }
-
+        if (showRangeHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_KEY_SHOW_RANGE);
         showRangeHandlers.add(handler);
     }
 
@@ -180,7 +177,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         saveUpdate(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates), ServerToClientModel.STYLE_NAME, styleName);
     }
 
-    private String dateToString(final Collection<Date> dates) {
+    private static final String dateToString(final Collection<Date> dates) {
         final StringBuilder asString = new StringBuilder();
         final Iterator<Date> it = dates.iterator();
         while (it.hasNext()) {

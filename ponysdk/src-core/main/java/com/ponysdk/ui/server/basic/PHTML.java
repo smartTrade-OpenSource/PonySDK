@@ -45,8 +45,11 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PHTML extends PLabel implements PHasHTML {
 
-    private String html;
-    private boolean wordWrap = false;
+    private static final String DEFAULT_HTML_VALUE = null;
+    private static final boolean DEFAULT_WORD_WRAP_VALUE = false;
+
+    private String html = DEFAULT_HTML_VALUE;
+    private boolean wordWrap = DEFAULT_WORD_WRAP_VALUE;
 
     public PHTML() {
         super();
@@ -65,8 +68,8 @@ public class PHTML extends PLabel implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
-        if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
+        if (html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (wordWrap != DEFAULT_WORD_WRAP_VALUE) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override
@@ -81,10 +84,9 @@ public class PHTML extends PLabel implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html))
-            return;
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     public boolean isWordWrap() {
@@ -92,14 +94,13 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     public void setWordWrap(final boolean wordWrap) {
-        if (Objects.equals(this.wordWrap, wordWrap))
-            return;
+        if (Objects.equals(this.wordWrap, wordWrap)) return;
         this.wordWrap = wordWrap;
-        saveUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
+        executeUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override
     public String toString() {
-        return super.toString() + ", text=" + text + ", html=" + html;
+        return super.toString() + ", html=" + html;
     }
 }

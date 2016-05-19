@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -127,7 +128,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem addItem(final PMenuItem item) {
         items.add(item);
-        saveAdd(item.getID(), ID);
+        executeAdd(item.getID(), ID);
         return item;
     }
 
@@ -153,7 +154,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, item);
-        saveAdd(item.getID(), ID, ServerToClientModel.BEFORE_INDEX, beforeIndex);
+        executeAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         return item;
     }
 
@@ -185,13 +186,13 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItemSeparator addSeparator(final PMenuItemSeparator itemSeparator) {
         items.add(itemSeparator);
-        saveAdd(itemSeparator.getID(), ID);
+        executeAdd(itemSeparator.getID(), ID);
         return itemSeparator;
     }
 
     public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) {
         items.add(beforeIndex, itemSeparator);
-        saveAdd(itemSeparator.getID(), ID, ServerToClientModel.BEFORE_INDEX, beforeIndex);
+        executeAdd(itemSeparator.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         return itemSeparator;
     }
 

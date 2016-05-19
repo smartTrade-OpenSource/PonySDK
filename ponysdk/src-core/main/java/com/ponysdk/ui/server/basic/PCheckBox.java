@@ -31,6 +31,7 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
@@ -39,8 +40,7 @@ import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A standard check box widget. This class also serves as a base class for
- * {@link PRadioButton}.
+ * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
@@ -51,15 +51,16 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
+    private static final Boolean DEFAULT_VALUE_VALUE = Boolean.FALSE;
+
     private List<PValueChangeHandler<Boolean>> handlers;
 
-    private Boolean value = Boolean.FALSE;
+    private Boolean value = DEFAULT_VALUE_VALUE;
 
     /**
      * Creates a check box with no label.
      */
     public PCheckBox() {
-        this(null);
     }
 
     /**
@@ -76,6 +77,12 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     protected void init() {
         super.init();
         saveAddHandler(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (this.value != DEFAULT_VALUE_VALUE) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override
@@ -118,10 +125,9 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     @Override
     public void setValue(final Boolean value) {
-        if (Objects.equals(this.value, value))
-            return;
+        if (Objects.equals(this.value, value)) return;
         this.value = value;
-        saveUpdate(ServerToClientModel.VALUE_CHECKBOX, this.value);
+        executeUpdate(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override

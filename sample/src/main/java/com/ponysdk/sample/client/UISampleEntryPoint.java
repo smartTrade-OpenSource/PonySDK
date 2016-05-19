@@ -250,7 +250,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
         boxContainer.add(child);
+
         PRootPanel.get().add(boxContainer);
+
         final PLabel child2 = new PLabel("Label2");
         boxContainer.add(child2);
         child2.addClickHandler(new PClickHandler() {
@@ -376,7 +378,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.get().executeScript("alert('" + keyUpEvent.getEventID() + "');");
+                PScript.execute("alert('" + keyUpEvent.getEventID() + "');");
             }
         };
 

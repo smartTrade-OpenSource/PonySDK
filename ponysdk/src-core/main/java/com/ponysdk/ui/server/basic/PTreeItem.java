@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -75,7 +76,7 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.adopt(widget, this);
-            saveAdd(widget.getID(), ID, ServerToClientModel.WIDGET);
+            executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
         }
     }
 
@@ -100,7 +101,7 @@ public class PTreeItem extends PObject {
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot) {
-            saveAdd(tree.getID(), ID);
+            executeAdd(tree.getID(), ID);
         }
         setWidget();
     }
@@ -116,14 +117,14 @@ public class PTreeItem extends PObject {
     public PTreeItem insertItem(final int beforeIndex, final PTreeItem item) {
         children.add(beforeIndex, item);
         item.setTree(tree);
-        saveAdd(item.getID(), ID, ServerToClientModel.INDEX, beforeIndex);
+        executeAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         return item;
     }
 
     public PTreeItem addItem(final PTreeItem item) {
         children.add(item);
         item.setTree(tree);
-        saveAdd(item.getID(), ID);
+        executeAdd(item.getID(), ID);
         return item;
     }
 

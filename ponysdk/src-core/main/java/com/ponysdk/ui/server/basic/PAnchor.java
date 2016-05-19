@@ -39,12 +39,15 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
-    private String text;
-    private String html;
-    private String href;
+    private static final String DEFAULT_TEXT_VALUE = null;
+    private static final String DEFAULT_HTML_VALUE = null;
+    private static final String DEFAULT_HREF_VALUE = null;
+
+    private String text = DEFAULT_TEXT_VALUE;
+    private String html = DEFAULT_HTML_VALUE;
+    private String href = DEFAULT_HREF_VALUE;
 
     public PAnchor() {
-        super();
     }
 
     /**
@@ -66,7 +69,6 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the url to which it will link
      */
     public PAnchor(final String text, final String href) {
-        super();
         this.text = text;
         this.href = href;
     }
@@ -74,8 +76,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
-        if (this.href != null) parser.parse(ServerToClientModel.HREF, this.href);
+        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.href != DEFAULT_HREF_VALUE) parser.parse(ServerToClientModel.HREF, this.href);
+        if (this.html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     @Override
@@ -99,10 +102,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      *            the anchor's href
      */
     public void setHref(final String href) {
-        if (Objects.equals(this.href, href))
-            return;
+        if (Objects.equals(this.href, href)) return;
         this.href = href;
-        saveUpdate(ServerToClientModel.HREF, this.href);
+        executeUpdate(ServerToClientModel.HREF, this.href);
     }
 
     @Override
@@ -112,10 +114,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text))
-            return;
+        if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
+        executeUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -125,10 +126,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html))
-            return;
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
 }

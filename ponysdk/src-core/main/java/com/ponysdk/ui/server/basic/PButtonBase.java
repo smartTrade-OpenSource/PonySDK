@@ -34,8 +34,11 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
-    private String text;
-    private String html;
+    private static final String DEFAULT_TEXT_VALUE = null;
+    private static final String DEFAULT_HTML_VALUE = null;
+
+    private String text = DEFAULT_TEXT_VALUE;
+    private String html = DEFAULT_HTML_VALUE;
 
     public PButtonBase() {
     }
@@ -45,17 +48,22 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
+    protected void init() {
+        super.init();
+    }
+
+    @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text))
-            return;
+        if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
+        executeUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -65,10 +73,9 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html))
-            return;
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
 
     @Override
