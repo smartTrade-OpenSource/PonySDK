@@ -100,9 +100,7 @@ public class PTreeItem extends PObject {
 
     final void setTree(final PTree tree) {
         this.tree = tree;
-        if (isRoot) {
-            executeAdd(tree.getID(), ID);
-        }
+        if (isRoot) saveAdd(tree.getID(), ID);
         setWidget();
     }
 
@@ -124,7 +122,7 @@ public class PTreeItem extends PObject {
     public PTreeItem addItem(final PTreeItem item) {
         children.add(item);
         item.setTree(tree);
-        executeAdd(item.getID(), ID);
+        if (item.attach(windowID)) executeAdd(item.getID(), ID);
         return item;
     }
 

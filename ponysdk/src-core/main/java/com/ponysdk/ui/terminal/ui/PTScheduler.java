@@ -129,8 +129,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
             if (cancelled)
                 return false;
 
-            final PTInstruction instruction = new PTInstruction();
-            instruction.setObjectID(schedulerID);
+            final PTInstruction instruction = new PTInstruction(schedulerID);
             instruction.put(ClientToServerModel.HANDLER_SCHEDULER);
             instruction.put(ClientToServerModel.COMMAND_ID, commandID);
             instruction.put(ClientToServerModel.FIXRATE, delay);
@@ -154,8 +153,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
             if (cancelled)
                 return false;
 
-            final PTInstruction instruction = new PTInstruction();
-            instruction.setObjectID(schedulerID);
+            final PTInstruction instruction = new PTInstruction(schedulerID);
             instruction.put(ClientToServerModel.HANDLER_SCHEDULER);
             instruction.put(ClientToServerModel.COMMAND_ID, commandID);
             instruction.put(ClientToServerModel.FIXDELAY, delay);

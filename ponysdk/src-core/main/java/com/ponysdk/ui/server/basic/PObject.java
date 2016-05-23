@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.json.JsonObject;
 
@@ -55,6 +55,8 @@ public abstract class PObject {
 
     private boolean initialized = false;
 
+    protected final Queue<Runnable> stackedInstructions = new LinkedList<>();
+
     PObject() {
         this(PWindow.EMPTY_WINDOW_ID);
     }
@@ -77,27 +79,25 @@ public abstract class PObject {
     }
 
     protected void init() {
-        if (initialized)
-            return;
+        if (!initialized) {
+            final Parser parser = Txn.get().getParser();
+            parser.beginObject();
+            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            parser.parse(ServerToClientModel.TYPE_CREATE, ID);
+            parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+            enrichOnInit(parser);
+            parser.endObject();
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_CREATE, ID);
-        parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-        enrichOnInit(parser);
-        parser.endObject();
+            init0();
 
-        initialized = true;
+            while (!stackedInstructions.isEmpty())
+                stackedInstructions.poll().run();
 
-        while (!stackedUpdateInstructions.isEmpty())
-            stackedUpdateInstructions.pop().execute();
-        while (!stackedRemoveInstructions.isEmpty())
-            stackedRemoveInstructions.pop().execute();
-        while (!stackedAddHandlerInstructions.isEmpty())
-            stackedAddHandlerInstructions.pop().execute();
-        while (!stackedRemoveHandlerInstructions.isEmpty())
-            stackedRemoveHandlerInstructions.pop().execute();
+            initialized = true;
+        }
+    }
+
+    protected void init0() {
     }
 
     public int getWindowID() {
@@ -166,6 +166,15 @@ public abstract class PObject {
         return true;
     }
 
+    protected void saveAdd(final int objectID, final int parentObjectID) {
+        saveAdd(objectID, parentObjectID, (ServerBinaryModel) null);
+    }
+
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAdd(objectID, parentObjectID, binaryModels);
+        else stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
+    }
+
     protected void executeAdd(final int objectID, final int parentObjectID) {
         executeAdd(objectID, parentObjectID, (ServerBinaryModel) null);
     }
@@ -187,7 +196,7 @@ public abstract class PObject {
 
     protected void saveAddHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
-        else stackedAddHandlerInstructions.add(new AdderHandlerInstruction(this::executeAddHandler, type));
+        else stackedInstructions.add(() -> executeAddHandler(type));
     }
 
     protected void executeAddHandler(final HandlerModel type) {
@@ -203,7 +212,7 @@ public abstract class PObject {
 
     protected void saveRemoveHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
-        else stackedRemoveHandlerInstructions.add(new RemoverHandlerInstruction(this::executeRemoveHandler));
+        else stackedInstructions.add(() -> executeRemoveHandler());
     }
 
     protected void executeRemoveHandler() {
@@ -218,7 +227,7 @@ public abstract class PObject {
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
-        else stackedRemoveInstructions.add(new RemoverInstruction(this::executeRemove, objectID, parentObjectID));
+        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
     protected void executeRemove(final int objectID, final int parentObjectID) {
@@ -247,14 +256,14 @@ public abstract class PObject {
 
     protected void saveUpdate(final ServerBinaryModel... binaryModels) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(binaryModels);
-        else stackedUpdateInstructions.add(new UpdaterInstruction(this::executeUpdate, binaryModels));
+        else stackedInstructions.add(() -> executeUpdate(binaryModels));
     }
 
     protected void executeUpdate(final ServerToClientModel model, final Object value) {
         executeUpdate(new ServerBinaryModel(model, value));
     }
 
-    protected void executeUpdate(final ServerBinaryModel... binaryModels) {
+    private void executeUpdate(final ServerBinaryModel... binaryModels) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
@@ -268,94 +277,6 @@ public abstract class PObject {
 
             parser.endObject();
         }
-    }
-
-    private final Deque<AdderHandlerInstruction> stackedAddHandlerInstructions = new LinkedList<>();
-
-    private class AdderHandlerInstruction {
-
-        private final AdderHandler adderHandler;
-        private final HandlerModel type;
-
-        public AdderHandlerInstruction(final AdderHandler adderHandler, final HandlerModel type) {
-            this.adderHandler = adderHandler;
-            this.type = type;
-        }
-
-        public void execute() {
-            adderHandler.execute(type);
-        }
-    }
-
-    private interface AdderHandler {
-
-        void execute(final HandlerModel type);
-    }
-
-    private final Deque<RemoverHandlerInstruction> stackedRemoveHandlerInstructions = new LinkedList<>();
-
-    private class RemoverHandlerInstruction {
-
-        private final RemoverHandler removerHandler;
-
-        public RemoverHandlerInstruction(final RemoverHandler removerHandler) {
-            this.removerHandler = removerHandler;
-        }
-
-        public void execute() {
-            removerHandler.execute();
-        }
-    }
-
-    private interface RemoverHandler {
-
-        void execute();
-    }
-
-    private final Deque<RemoverInstruction> stackedRemoveInstructions = new LinkedList<>();
-
-    private class RemoverInstruction {
-
-        private final Remover remover;
-        private final int objectID;
-        private final int parentObjectID;
-
-        public RemoverInstruction(final Remover remover, final int objectID, final int parentObjectID) {
-            this.remover = remover;
-            this.objectID = objectID;
-            this.parentObjectID = parentObjectID;
-        }
-
-        public void execute() {
-            remover.execute(objectID, parentObjectID);
-        }
-    }
-
-    private interface Remover {
-
-        void execute(final int objectID, final int parentObjectID);
-    }
-
-    private final Deque<UpdaterInstruction> stackedUpdateInstructions = new LinkedList<>();
-
-    private class UpdaterInstruction {
-
-        private final Updater updater;
-        private final ServerBinaryModel[] binaryModels;
-
-        public UpdaterInstruction(final Updater updater, final ServerBinaryModel... binaryModels) {
-            this.updater = updater;
-            this.binaryModels = binaryModels;
-        }
-
-        public void execute() {
-            updater.execute(binaryModels);
-        }
-    }
-
-    private interface Updater {
-
-        void execute(final ServerBinaryModel... binaryModels);
     }
 
     @Override

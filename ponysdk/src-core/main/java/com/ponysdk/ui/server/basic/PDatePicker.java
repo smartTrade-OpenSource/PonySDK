@@ -65,8 +65,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 

@@ -83,8 +83,8 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
     }
 

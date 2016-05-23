@@ -194,8 +194,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
-        final PTInstruction eventInstruction = new PTInstruction();
-        eventInstruction.setObjectID(getObjectID());
+        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.DOM_HANDLER_TYPE, domHandlerType.getValue());
         return eventInstruction;
     }
@@ -335,8 +334,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction changeHandlerInstruction = new PTInstruction();
-                            changeHandlerInstruction.setObjectID(getObjectID());
+                            final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
                             changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                             changeHandlerInstruction.put(ClientToServerModel.VALUE, textBox.getText());
 

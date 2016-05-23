@@ -128,7 +128,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem addItem(final PMenuItem item) {
         items.add(item);
-        executeAdd(item.getID(), ID);
+        saveAdd(item.getID(), ID);
         return item;
     }
 
@@ -186,7 +186,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItemSeparator addSeparator(final PMenuItemSeparator itemSeparator) {
         items.add(itemSeparator);
-        executeAdd(itemSeparator.getID(), ID);
+        saveAdd(itemSeparator.getID(), ID);
         return itemSeparator;
     }
 

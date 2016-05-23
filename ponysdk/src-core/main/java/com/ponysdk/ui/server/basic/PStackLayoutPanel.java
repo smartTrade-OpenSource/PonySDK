@@ -78,8 +78,8 @@ public class PStackLayoutPanel extends PComposite
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         // initWidget(new PLayoutPanel());
     }
 
@@ -99,7 +99,7 @@ public class PStackLayoutPanel extends PComposite
         children.add(child);
         adopt(child);
 
-        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
+        if (child.attach(windowID)) executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }
 

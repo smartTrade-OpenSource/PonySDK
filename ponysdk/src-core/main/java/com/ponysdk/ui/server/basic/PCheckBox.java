@@ -74,8 +74,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
     }
 

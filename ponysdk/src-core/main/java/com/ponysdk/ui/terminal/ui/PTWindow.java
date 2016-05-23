@@ -23,14 +23,10 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
@@ -47,13 +43,12 @@ import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
 
-    private static final String WINDOW_EVENT_TYPE_LOAD = "load";
+    private static final Logger log = Logger.getLogger(PTWindow.class.getName());
+
     private static final String WINDOW_EVENT_TYPE_MESSAGE = "message";
     private static final String WINDOW_EVENT_TYPE_BEFORE_UNLOAD = "beforeunload";
 
     private static final String EMPTY = "";
-
-    private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
     private Window window;
     private String url;
@@ -61,8 +56,6 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     private String features;
 
     private UIService uiService;
-
-    private final List<PTInstruction> instructions = new ArrayList<>();
 
     private boolean ponySDKStarted = false;
 
@@ -97,11 +90,6 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
-
-            window.addEventListener(WINDOW_EVENT_TYPE_LOAD, this, true);
-            window.addEventListener(WINDOW_EVENT_TYPE_MESSAGE, this, true);
-            //window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
-
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -119,52 +107,27 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public void handleEvent(final Event event) {
         if (event.getCurrentTarget() == window) {
             final String type = event.getType();
-            if (WINDOW_EVENT_TYPE_LOAD.equals(type)) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        final PTInstruction instruction = new PTInstruction();
-                        instruction.setObjectID(objectID);
-                        instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
-                        uiService.sendDataToServer(instruction);
-                    }
-                });
-            } else if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
+            if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
                 final MessageEvent messageEvent = (MessageEvent) event;
                 uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
             } else if (WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(type)) {
                 PTWindowManager.get().unregister(this);
-                final PTInstruction instruction = new PTInstruction();
-                instruction.setObjectID(objectID);
+                final PTInstruction instruction = new PTInstruction(objectID);
                 instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(instruction);
             }
         }
     }
 
-    public void postMessage(final PTInstruction instruction) {
-        if (!ponySDKStarted) {
-            instructions.add(instruction);
-        } else {
-            //postMessage(instruction.toString());
-        }
-    }
-
     public void postMessage(final ReaderBuffer buffer) {
-        if (window != null) postMessage(buffer, window);
+        if (ponySDKStarted) postMessage(buffer, window);
         else log.log(Level.WARNING, "No window set");
     }
 
     public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
 
-    // Call by PonySDK window
     public void setReady() {
         ponySDKStarted = true;
-
-        for (final PTInstruction instruction : instructions) {
-            postMessage(instruction);
-        }
     }
 
 }

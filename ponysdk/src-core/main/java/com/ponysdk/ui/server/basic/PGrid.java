@@ -48,8 +48,8 @@ public class PGrid extends PHTMLTable {
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         setCellFormatter(new PCellFormatter());
     }
 

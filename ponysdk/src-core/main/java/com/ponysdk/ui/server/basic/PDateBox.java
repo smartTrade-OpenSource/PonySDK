@@ -82,8 +82,14 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected boolean attach(final int windowID) {
+        datePicker.attach(windowID);
+        return super.attach(windowID);
+    }
+
+    @Override
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 

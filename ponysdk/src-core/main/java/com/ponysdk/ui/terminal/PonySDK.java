@@ -49,7 +49,6 @@ import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 
 import elemental.client.Browser;
-import elemental.events.Event;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk", all = false)
@@ -157,8 +156,8 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                 // window.addEventListener("storage", this, false);
 
-                final Event createEvent = opener.getDocument().createEvent("ponysdk.onstarted");
-                window.dispatchEvent(createEvent);
+                //                final Event createEvent = opener.getDocument().createEvent("ponysdk.onstarted");
+                //                window.dispatchEvent(createEvent);
 
                 // exportWindowReceiver(window);
                 // window.getDocument().addEventListener("message", new
@@ -181,10 +180,14 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     @Export
     public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
-        final PTInstruction instruction = new PTInstruction();
-        instruction.setObjectID(objectID);
+        final PTInstruction instruction = new PTInstruction(objectID);
         instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
+    }
+
+    @Export
+    public void setReadyWindow(final int windowID) {
+        uiBuilder.setReadyWindow(windowID);
     }
 
     @Export

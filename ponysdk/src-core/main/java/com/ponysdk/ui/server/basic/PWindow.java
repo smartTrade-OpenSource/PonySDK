@@ -24,7 +24,9 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.json.JsonObject;
 
@@ -32,13 +34,15 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.server.basic.event.POpenEvent;
+import com.ponysdk.ui.server.basic.event.PNativeEvent;
+import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
-public class PWindow extends PObject {
+public class PWindow extends PObject implements PNativeHandler {
 
     public static final int EMPTY_WINDOW_ID = -2;
     public static final int MAIN_WINDOW_ID = -1;
@@ -56,6 +60,8 @@ public class PWindow extends PObject {
     private final String features;
 
     private boolean opened = false;
+
+    private final Queue<Runnable> stackedInstructions = new LinkedList<>();
 
     public PWindow(final String url, final String name, final String features) {
         super(MAIN_WINDOW_ID);
@@ -77,13 +83,13 @@ public class PWindow extends PObject {
 
     public boolean open() {
         if (opened) return false;
-        opened = true;
+        addNativeHandler(this);
         saveUpdate(ServerToClientModel.OPEN, true);
-        WindowManager.registerWindow(this);
+        opened = true;
 
         // TODO Force send ?!
         // Txn.get().getParser().reset();
-        return true;
+        return opened;
     }
 
     public void close() {
@@ -96,6 +102,17 @@ public class PWindow extends PObject {
     }
 
     @Override
+    public void onNativeEvent(final PNativeEvent event) {
+        final int nativeValue = event.getJsonObject().getInt(ClientToServerModel.NATIVE.toStringValue());
+        if (HandlerModel.HANDLER_OPEN_HANDLER.getValue() == nativeValue) {
+            WindowManager.registerWindow(this);
+            while (!stackedInstructions.isEmpty()) {
+                stackedInstructions.poll().run();
+            }
+        }
+    }
+
+    @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
             WindowManager.unregisterWindow(this);
@@ -104,11 +121,6 @@ public class PWindow extends PObject {
                 h.onClose(e);
             }
             return;
-        } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
-            final POpenEvent e = new POpenEvent(this);
-            for (final POpenHandler h : openHandlers) {
-                h.onOpen(e);
-            }
         } else {
             super.onClientData(instruction);
         }
@@ -143,7 +155,21 @@ public class PWindow extends PObject {
     }
 
     public void addWidget(final IsPWidget widget) {
-        getPRootLayoutPanel().add(widget);
+        if (WindowManager.get().getWindow(ID) == this) {
+            addWidget0(widget);
+        } else {
+            stackedInstructions.add(new Runnable() {
+
+                @Override
+                public void run() {
+                    addWidget0(widget);
+                };
+            });
+        }
+    }
+
+    private void addWidget0(final IsPWidget widget) {
+        getPRootPanel().add(widget);
     }
 
     public static class TargetAttribut {

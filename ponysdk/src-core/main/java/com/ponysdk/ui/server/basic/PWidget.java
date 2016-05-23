@@ -24,10 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -336,38 +334,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return addDomHandler(handler, type, null);
     }
 
-    private final Deque<AddDomHandlerInstruction<? extends EventHandler>> stackedAddDomHandlerInstructions = new LinkedList<>();
-
-    private class AddDomHandlerInstruction<H extends EventHandler> {
-
-        private final AddDomHandler<H> updater;
-        private final ServerBinaryModel[] binaryModels;
-
-        public AddDomHandlerInstruction(final AddDomHandler<H> updater, final ServerBinaryModel... binaryModels) {
-            this.updater = updater;
-            this.binaryModels = binaryModels;
-        }
-
-        public void execute() {
-            updater.execute(binaryModels);
-        }
-    }
-
-    private interface AddDomHandler<H extends EventHandler> {
-
-        void execute(final ServerBinaryModel... binaryModels);
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-
-        while (!stackedAddDomHandlerInstructions.isEmpty()) {
-            final AddDomHandlerInstruction<? extends EventHandler> updater = stackedAddDomHandlerInstructions.pop();
-            updater.execute();
-        }
-    }
-
     private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type,
             final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
@@ -376,8 +342,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                     type.getDomHandlerType().getValue());
             if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(binaryModel1, binaryModel);
-            else stackedAddDomHandlerInstructions
-                    .add(new AddDomHandlerInstruction(this::executeAddDomHandler, binaryModel1, binaryModel));
+            else stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
         return handlerRegistration;
     }

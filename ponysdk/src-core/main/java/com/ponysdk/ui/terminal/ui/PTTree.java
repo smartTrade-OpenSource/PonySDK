@@ -50,8 +50,7 @@ public class PTTree extends PTWidget<Tree> {
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
                     final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.WIDGET_ID, ptObject.getObjectID());
