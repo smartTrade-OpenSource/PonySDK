@@ -45,6 +45,14 @@ public class PPushButton extends PButton {
     }
 
     @Override
+    protected boolean attach(final int windowID) {
+        final boolean imageResult = image.attach(windowID);
+        final boolean result = super.attach(windowID);
+        if (imageResult) image.executeAdd(image.getID(), ID);
+        return result;
+    }
+
+    @Override
     protected void enrichOnInit(final Parser parser) {
         parser.parse(ServerToClientModel.WIDGET_ID, image.getID());
         super.enrichOnInit(parser);

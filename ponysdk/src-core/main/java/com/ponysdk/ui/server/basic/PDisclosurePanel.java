@@ -84,6 +84,15 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         this.headerText = headerText;
         this.openImage = openImage;
         this.closeImage = closeImage;
+        openImage.saveAdd(openImage.getID(), ID);
+        closeImage.saveAdd(closeImage.getID(), ID);
+    }
+
+    @Override
+    protected boolean attach(final int windowID) {
+        openImage.attach(windowID);
+        closeImage.attach(windowID);
+        return super.attach(windowID);
     }
 
     @Override

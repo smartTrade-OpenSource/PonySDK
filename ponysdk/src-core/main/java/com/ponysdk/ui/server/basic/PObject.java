@@ -69,32 +69,31 @@ public abstract class PObject {
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
-            init();
+            if (!initialized) init();
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError("Widget already attached to an other window");
+            throw new IllegalAccessError(
+                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
 
     protected void init() {
-        if (!initialized) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_CREATE, ID);
-            parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-            enrichOnInit(parser);
-            parser.endObject();
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_CREATE, ID);
+        parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+        enrichOnInit(parser);
+        parser.endObject();
 
-            init0();
+        init0();
 
-            while (!stackedInstructions.isEmpty())
-                stackedInstructions.poll().run();
+        while (!stackedInstructions.isEmpty())
+            stackedInstructions.poll().run();
 
-            initialized = true;
-        }
+        initialized = true;
     }
 
     protected void init0() {
@@ -200,14 +199,12 @@ public abstract class PObject {
     }
 
     protected void executeAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
-            parser.parse(ServerToClientModel.OBJECT_ID, ID);
-            parser.endObject();
-        }
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
+        parser.parse(ServerToClientModel.OBJECT_ID, ID);
+        parser.endObject();
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
@@ -216,13 +213,11 @@ public abstract class PObject {
     }
 
     protected void executeRemoveHandler() {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-            parser.endObject();
-        }
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        parser.endObject();
     }
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
@@ -231,14 +226,12 @@ public abstract class PObject {
     }
 
     protected void executeRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
-            parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-            parser.endObject();
-        }
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
+        parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        parser.endObject();
     }
 
     protected void saveUpdate(final ServerToClientModel model) {
@@ -260,23 +253,21 @@ public abstract class PObject {
     }
 
     protected void executeUpdate(final ServerToClientModel model, final Object value) {
-        executeUpdate(new ServerBinaryModel(model, value));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(new ServerBinaryModel(model, value));
     }
 
     private void executeUpdate(final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-            if (binaryModels != null) {
-                for (final ServerBinaryModel binaryModel : binaryModels) {
-                    if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
-                }
+        final Parser parser = Txn.get().getParser();
+        parser.beginObject();
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
+        if (binaryModels != null) {
+            for (final ServerBinaryModel binaryModel : binaryModels) {
+                if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
             }
-
-            parser.endObject();
         }
+
+        parser.endObject();
     }
 
     @Override

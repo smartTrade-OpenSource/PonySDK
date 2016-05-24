@@ -48,20 +48,17 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    public void add(final IsPWidget w) {
-        add(w.asWidget());
+    public void add(final IsPWidget child) {
+        add(child.asWidget());
     }
 
     @Override
     protected boolean attach(final int windowID) {
         final boolean result = super.attach(windowID);
-
-        final Iterator<PWidget> it = iterator();
-        while (it.hasNext()) {
-            final PWidget child = it.next();
-            if (child.attach(windowID)) executeAdd(child.getID(), ID);
+        final Iterator<PWidget> child = iterator();
+        while (child.hasNext()) {
+            child.next().attach(windowID);
         }
-
         return result;
     }
 

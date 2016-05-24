@@ -99,8 +99,9 @@ public class PStackLayoutPanel extends PComposite
         children.add(child);
         adopt(child);
 
-        if (child.attach(windowID)) executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
+        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
+        child.attach(windowID);
     }
 
     @Override

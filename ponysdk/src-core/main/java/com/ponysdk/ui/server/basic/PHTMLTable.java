@@ -366,8 +366,9 @@ public abstract class PHTMLTable extends PPanel {
             addWidgetToMap(row, column, widget);
 
             // Physical attach.
-            if (widget.attach(windowID)) executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
                     new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+            widget.attach(windowID);
 
             adopt(widget);
         }

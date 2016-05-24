@@ -154,21 +154,12 @@ public class PWindow extends PObject implements PNativeHandler {
         return PRootPanel.get(getID());
     }
 
-    public void addWidget(final IsPWidget widget) {
-        if (WindowManager.get().getWindow(ID) == this) {
-            addWidget0(widget);
-        } else {
-            stackedInstructions.add(new Runnable() {
-
-                @Override
-                public void run() {
-                    addWidget0(widget);
-                };
-            });
-        }
+    public void add(final IsPWidget widget) {
+        if (WindowManager.get().getWindow(ID) == this) add0(widget);
+        else stackedInstructions.add(() -> add0(widget));
     }
 
-    private void addWidget0(final IsPWidget widget) {
+    private void add0(final IsPWidget widget) {
         getPRootPanel().add(widget);
     }
 

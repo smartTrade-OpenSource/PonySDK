@@ -53,14 +53,21 @@ public abstract class PComplexPanel extends PPanel {
     public void add(final PWidget child) {
         assertNotMe(child);
 
-        child.removeFromParent();
+        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+            child.removeFromParent();
 
-        if (children == null) children = new PWidgetCollection(this);
+            if (children == null) children = new PWidgetCollection(this);
 
-        children.add(child);
-        adopt(child);
+            children.add(child);
+            adopt(child);
 
-        if (child.attach(windowID)) executeAdd(child.getID(), ID);
+            child.saveAdd(child.getID(), ID);
+            child.attach(windowID);
+        } else {
+            throw new IllegalAccessError(
+                    "Widget already attached to an other window, current window : " + child.getWindowID() + ", new window : "
+                            + windowID);
+        }
     }
 
     public void insert(final PWidget child, final int beforeIndex) {

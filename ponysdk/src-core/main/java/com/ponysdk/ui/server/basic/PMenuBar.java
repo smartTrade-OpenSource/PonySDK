@@ -89,16 +89,15 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * <dd>the inner element of the cell</dd>
  * </dl>
  * <p>
- * MenuBar elements in UiBinder template files can have a <code>vertical</code>
- * boolean attribute (which defaults to false), and may have only MenuItem
- * elements as children. MenuItems may contain HTML and MenuBars.
+ * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute
+ * (which defaults to false), and may have only MenuItem elements as children. MenuItems may contain
+ * HTML and MenuBars.
  * </p>
  */
 public class PMenuBar extends PWidget implements HasPAnimation {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
-    // menuItem only
-    private final List<PWidget> items = new ArrayList<>();
+    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
+    private final List<PMenuSubElement> items = new ArrayList<>();
 
     private boolean animationEnabled = false;
     private final boolean vertical;
@@ -109,6 +108,15 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuBar(final boolean vertical) {
         this.vertical = vertical;
+    }
+
+    @Override
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+        for (final PWidget item : items) {
+            item.attach(windowID);
+        }
+        return result;
     }
 
     @Override
@@ -124,12 +132,6 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public PMenuItem addItem(final String text) {
         return addItem(new PMenuItem(text, false));
-    }
-
-    public PMenuItem addItem(final PMenuItem item) {
-        items.add(item);
-        saveAdd(item.getID(), ID);
-        return item;
     }
 
     public PMenuItem addItem(final String text, final boolean asHTML, final PCommand cmd) {
@@ -148,52 +150,58 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         return addItem(new PMenuItem(text, popup));
     }
 
-    public PWidget getItem(final int index) {
+    public PMenuItem addItem(final PMenuItem elt) {
+        return addElement(elt);
+    }
+
+    public PMenuSubElement getItem(final int index) {
         return items.get(index);
     }
 
-    public PMenuItem insertItem(final PMenuItem item, final int beforeIndex) throws IndexOutOfBoundsException {
-        items.add(beforeIndex, item);
-        executeAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        return item;
+    public <T extends PMenuSubElement> T addElement(final T elt) {
+        items.add(elt);
+        elt.saveAdd(elt.getID(), ID);
+        elt.attach(windowID);
+        return elt;
+    }
+
+    /**
+     * @deprecated Useless method, called {@link #insertElement(PMenuSubElement, int)}
+     */
+    @Deprecated
+    public PMenuItem insertItem(final PMenuItem elt, final int beforeIndex) throws IndexOutOfBoundsException {
+        return insertElement(elt, beforeIndex);
+    }
+
+    public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
+        items.add(beforeIndex, elt);
+        elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+        elt.attach(windowID);
+        return elt;
     }
 
     public boolean removeItem(final int index) {
-        final PWidget item = items.remove(index);
+        final PMenuSubElement item = items.remove(index);
         saveRemove(item.getID(), ID);
         return true;
     }
 
-    public boolean removeItem(final PMenuItem item) {
-        final boolean removed = items.remove(item);
-        if (removed) {
-            saveRemove(item.getID(), ID);
-        }
-        return removed;
-    }
-
-    public boolean removeItem(final PMenuItemSeparator item) {
-        final boolean removed = items.remove(item);
-        if (removed) {
-            saveRemove(item.getID(), ID);
-        }
+    public boolean removeItem(final PMenuSubElement elt) {
+        final boolean removed = items.remove(elt);
+        if (removed) saveRemove(elt.getID(), ID);
         return removed;
     }
 
     public void addSeparator() {
-        addSeparator(new PMenuItemSeparator());
+        addElement(new PMenuItemSeparator());
     }
 
-    public PMenuItemSeparator addSeparator(final PMenuItemSeparator itemSeparator) {
-        items.add(itemSeparator);
-        saveAdd(itemSeparator.getID(), ID);
-        return itemSeparator;
-    }
-
-    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator itemSeparator, final int beforeIndex) {
-        items.add(beforeIndex, itemSeparator);
-        executeAdd(itemSeparator.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        return itemSeparator;
+    /**
+     * @deprecated Useless method, called {@link #insertElement(PMenuSubElement, int)}
+     */
+    @Deprecated
+    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator elt, final int beforeIndex) {
+        return insertElement(elt, beforeIndex);
     }
 
     public void clearItems() {

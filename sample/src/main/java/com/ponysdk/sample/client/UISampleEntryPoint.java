@@ -44,6 +44,10 @@ import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PCookies;
 import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PDatePicker;
+import com.ponysdk.ui.server.basic.PDecoratedPopupPanel;
+import com.ponysdk.ui.server.basic.PDecoratorPanel;
+import com.ponysdk.ui.server.basic.PDialogBox;
+import com.ponysdk.ui.server.basic.PDisclosurePanel;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PFileUpload;
@@ -61,9 +65,10 @@ import com.ponysdk.ui.server.basic.PLayoutPanel;
 import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
-import com.ponysdk.ui.server.basic.PMenuItemSeparator;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
+import com.ponysdk.ui.server.basic.PPopupPanel;
+import com.ponysdk.ui.server.basic.PPushButton;
 import com.ponysdk.ui.server.basic.PRadioButton;
 import com.ponysdk.ui.server.basic.PRichTextArea;
 import com.ponysdk.ui.server.basic.PRichTextToolbar;
@@ -103,11 +108,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        createWindow1();
-        createWindow2();
-        createWindow3();
-
         final PFlowPanel boxContainer = new PFlowPanel();
+
+        final PWindow w1 = createWindow1();
+        final PWindow w2 = createWindow2();
+        final PWindow w3 = createWindow3();
 
         // boxContainer.add(new PHistory());
         // boxContainer.add(new PNotificationManager());
@@ -116,7 +121,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(createBlock(createAbsolutePanel()));
         //boxContainer.add(createPAddOn().asWidget());
         boxContainer.add(new PAnchor());
-
         boxContainer.add(new PAnchor("Anchor"));
         boxContainer.add(new PAnchor("Anchor 1", "anchor2"));
         boxContainer.add(new PButton());
@@ -125,20 +129,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PCheckBox("Checkbox"));
         final PCookies cookies = new PCookies();
         cookies.setCookie("Cook", "ies");
-
         boxContainer.add(createDateBox());
         boxContainer.add(new PDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         boxContainer.add(new PDateBox(new PDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
         boxContainer.add(new PDatePicker());
-        /*
-         * boxContainer.add(new PDecoratedPopupPanel(false));
-         * boxContainer.add(new PDecoratedPopupPanel(true));
-         * boxContainer.add(new PDecoratorPanel());
-         * boxContainer.add(new PDialogBox());
-         * boxContainer.add(new PDialogBox(true));
-         * boxContainer.add(new PDisclosurePanel("Disclosure"));
-         * boxContainer.add(createDockLayoutPanel());
-         */
+        boxContainer.add(new PDecoratedPopupPanel(false));
+        boxContainer.add(new PDecoratedPopupPanel(true));
+        boxContainer.add(new PDecoratorPanel());
+        boxContainer.add(new PDialogBox());
+        boxContainer.add(new PDialogBox(true));
+        boxContainer.add(new PDisclosurePanel("Disclosure"));
+        boxContainer.add(createDockLayoutPanel());
         boxContainer.add(new PElement("a"));
         boxContainer.add(new PFileUpload());
         boxContainer.add(new PFlexTable());
@@ -158,18 +159,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PLayoutPanel());
         boxContainer.add(new PListBox());
         boxContainer.add(createListBox());
-        /*
-         * boxContainer.add(new PMenuBar());
-         * boxContainer.add(createMenu());
-         */
+        boxContainer.add(new PMenuBar());
+        boxContainer.add(createMenu());
         // boxContainer.add(new PNotificationManager());
         boxContainer.add(new PPasswordTextBox());
         boxContainer.add(new PPasswordTextBox("Password"));
-        /*
-         * boxContainer.add(new PPopupPanel());
-         * boxContainer.add(new PPopupPanel(true));
-         */
-        /* boxContainer.add(new PPushButton(new PImage())); // FIXME Test with image */
+
+        boxContainer.add(new PPopupPanel());
+        boxContainer.add(new PPopupPanel(true));
+
+        boxContainer.add(new PPushButton(new PImage())); // FIXME Test with image
+
         boxContainer.add(new PRadioButton("RadioLabel"));
         boxContainer.add(new PRadioButton("RadioName", "RadioLabel"));
         final PRichTextArea richTextArea = new PRichTextArea();
@@ -187,15 +187,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PTextArea());
         boxContainer.add(createPTextBox());
         boxContainer.add(new PToolbar());
-        boxContainer.add(createTree());
+        //boxContainer.add(createTree());
         boxContainer.add(new PTwinListBox());
         boxContainer.add(new PVerticalPanel());
-        // boxContainer.add(new PWindow());
 
         PRootPanel.get().add(boxContainer);
 
         final PLabel child2 = new PLabel("Label2");
-        boxContainer.add(child2);
         child2.addClickHandler(new PClickHandler() {
 
             @Override
@@ -203,6 +201,25 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 System.out.println("bbbbb");
             }
         });
+        boxContainer.add(child2);
+
+        try {
+            w1.add(child2);
+        } catch (final Exception e) {
+
+        }
+
+        boxContainer.add(new PLabel("Label3"));
+
+        final PLabel label = new PLabel("Label4");
+
+        try {
+            w1.add(label);
+
+            boxContainer.add(label);
+        } catch (final Exception e) {
+
+        }
 
         // uiContext.getHistory().newItem("", false);
     }
@@ -211,7 +228,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow w3 = new PWindow(null, "Window 3",
                 "resizable=yes,location=0,status=0,scrollbars=0");
         final PFlowPanel windowContainer = new PFlowPanel();
-        w3.addWidget(windowContainer);
+        w3.add(windowContainer);
         final PLabel child = new PLabel("Window 3");
         windowContainer.add(child);
 
@@ -235,7 +252,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public PWindow createWindow2() {
         final PWindow w2 = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         final PFlowPanel windowContainer = new PFlowPanel();
-        w2.addWidget(windowContainer);
+        w2.add(windowContainer);
         final PLabel child = new PLabel("Window 2");
         windowContainer.add(child);
 
@@ -259,7 +276,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow w = new PWindow(null, "Window 1", null);
         w.open();
         final PFlowPanel windowContainer = new PFlowPanel();
-        w.addWidget(windowContainer);
+        w.add(windowContainer);
         final PLabel child = new PLabel("Window 1");
         child.setText("Modified Window 1");
         windowContainer.add(child);
@@ -313,7 +330,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PMenuBar pMenuBar = new PMenuBar(true);
         pMenuBar.addItem(new PMenuItem("Menu 1", new PMenuBar()));
         pMenuBar.addItem(new PMenuItem("Menu 2", true, new PMenuBar()));
-        pMenuBar.addSeparator(new PMenuItemSeparator());
+        pMenuBar.addSeparator();
         return pMenuBar;
     }
 
