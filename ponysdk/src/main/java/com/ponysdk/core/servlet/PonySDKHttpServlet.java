@@ -39,7 +39,7 @@ import com.ponysdk.ui.terminal.exception.ServerException;
 
 /**
  * The server side implementation of the RPC service.
- * 
+ *
  * @deprecated useless
  */
 @Deprecated
@@ -67,7 +67,7 @@ public class PonySDKHttpServlet extends HttpServlet {
         doProcess(req, resp);
     }
 
-    protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doProcess(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json; charset=utf-8");
 
         final Session session = SessionManager.get().getSession(req.getSession().getId());

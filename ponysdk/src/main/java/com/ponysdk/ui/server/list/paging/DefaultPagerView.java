@@ -57,7 +57,7 @@ public class DefaultPagerView extends PHorizontalPanel implements PagerView {
     public void addPageIndex(final int pageIndex) {
         final PMenuItem item = new PMenuItem(String.valueOf(pageIndex + 1));
         item.setCommand(getClickCommand(pageIndex));
-        menuBar.insertItem(item, 4 + items.values().size());
+        menuBar.insertElement(item, 4 + items.values().size());
         items.put(pageIndex, item);
     }
 

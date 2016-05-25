@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import com.ponysdk.core.AbstractApplicationManager;
@@ -57,8 +56,8 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
     public void contextDestroyed(final ServletContextEvent event) {
         log.info("Closing Spring context");
         try {
-            if (this.context instanceof ConfigurableWebApplicationContext) {
-                ((ConfigurableWebApplicationContext) this.context).close();
+            if (this.context != null) {
+                this.context.close();
             }
         } catch (final Exception e) {
             log.error("Failure during Spring context closure", e);

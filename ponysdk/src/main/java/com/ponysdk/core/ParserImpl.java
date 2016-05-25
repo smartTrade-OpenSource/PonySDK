@@ -194,7 +194,7 @@ public class ParserImpl implements Parser {
         if (utf8StringBuffer != null) socketBuffer.put(utf8StringBuffer);
     }
 
-    private ByteBuffer UTF8StringToByteBuffer(final String value) {
+    private static ByteBuffer UTF8StringToByteBuffer(final String value) {
         try {
             return value != null ? ByteBuffer.wrap(value.getBytes(ENCODING_CHARSET)) : null;
         } catch (final UnsupportedEncodingException e) {

@@ -24,7 +24,6 @@
 package com.ponysdk.sample.client.page.datagrid;
 
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -34,7 +33,7 @@ import com.ponysdk.ui.server.form.formfield.IntegerTextBoxFormField;
 import com.ponysdk.ui.server.form.formfield.LongTextBoxFormField;
 import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
 
-public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity implements DataListener {
+public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
     private RefreshableDataGrid<Long, PonyStock> dataGrid;
 

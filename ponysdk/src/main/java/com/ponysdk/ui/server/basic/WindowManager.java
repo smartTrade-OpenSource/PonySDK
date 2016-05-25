@@ -13,7 +13,8 @@ public class WindowManager {
 
     private final Map<Integer, PWindow> windows = new HashMap<>();
 
-    private WindowManager() {}
+    private WindowManager() {
+    }
 
     public static WindowManager get() {
         final UIContext session = UIContext.get();
@@ -30,7 +31,7 @@ public class WindowManager {
     }
 
     static void unregisterWindow(final PWindow window) {
-        get().registerWindow0(window);;
+        get().registerWindow0(window);
     }
 
     public void registerWindow0(final PWindow window) {

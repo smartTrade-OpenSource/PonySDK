@@ -119,7 +119,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
-            throws ServletException, IOException {
+            throws IOException {
         request.getSession();
 
         // Try to load from context
@@ -266,13 +266,13 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("</noscript>");
     }
 
-    protected void addToMeta(final BufferedWriter writer) throws IOException {
+    protected void addToMeta(final BufferedWriter writer) {
     }
 
-    protected void addToHeader(final BufferedWriter writer) throws IOException {
+    protected void addToHeader(final BufferedWriter writer) {
     }
 
-    protected void addToBody(final BufferedWriter writer) throws IOException {
+    protected void addToBody(final BufferedWriter writer) {
     }
 
     public void addStylesheets(final List<String> stylesheetPaths) {

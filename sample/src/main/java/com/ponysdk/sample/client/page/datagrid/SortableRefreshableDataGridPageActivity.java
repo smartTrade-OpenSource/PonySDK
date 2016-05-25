@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -37,7 +36,7 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.celltable.SimpleTableView;
 import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
 
-public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity implements DataListener {
+public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
     private SortableRefreshableDataGrid<Long, PonyStock> dataGrid;
     private boolean added = false;
