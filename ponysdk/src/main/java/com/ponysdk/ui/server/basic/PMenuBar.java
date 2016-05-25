@@ -134,7 +134,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         return addItem(new PMenuItem(text, false));
     }
 
-    public PMenuItem addItem(final String text, final boolean asHTML, final PCommand cmd) {
+    public PMenuItem addItem(final String text, final boolean asHTML, final Runnable cmd) {
         return addItem(new PMenuItem(text, asHTML, cmd));
     }
 
@@ -142,7 +142,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         return addItem(new PMenuItem(text, asHTML, popup));
     }
 
-    public PMenuItem addItem(final String text, final PCommand cmd) {
+    public PMenuItem addItem(final String text, final Runnable cmd) {
         return addItem(new PMenuItem(text, cmd));
     }
 

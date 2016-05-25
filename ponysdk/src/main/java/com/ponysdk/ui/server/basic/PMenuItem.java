@@ -48,11 +48,11 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     private PMenuBar subMenu;
 
-    private PCommand cmd;
+    private Runnable cmd;
 
     private boolean enabled;
 
-    public PMenuItem(final String text, final boolean asHTML, final PCommand cmd) {
+    public PMenuItem(final String text, final boolean asHTML, final Runnable cmd) {
         this(text, asHTML);
         setCommand(cmd);
     }
@@ -62,7 +62,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         setSubMenu(subMenu);
     }
 
-    public PMenuItem(final String text, final PCommand cmd) {
+    public PMenuItem(final String text, final Runnable cmd) {
         this(text, false);
         setCommand(cmd);
     }
@@ -135,7 +135,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         subMenu.attach(windowID);
     }
 
-    public void setCommand(final PCommand cmd) {
+    public void setCommand(final Runnable cmd) {
         this.cmd = cmd;
         saveAddHandler(HandlerModel.HANDLER_COMMAND);
     }
@@ -145,7 +145,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         final String handlerKeyKey = ClientToServerModel.HANDLER_KEY.toStringValue();
         if (event.containsKey(handlerKeyKey)) {
             final String handlerKey = event.getString(handlerKeyKey);
-            if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) cmd.execute();
+            if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) cmd.run();
             else super.onClientData(event);
         } else {
             super.onClientData(event);
@@ -156,7 +156,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         return subMenu;
     }
 
-    public PCommand getCmd() {
+    public Runnable getCmd() {
         return cmd;
     }
 

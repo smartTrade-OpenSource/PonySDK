@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
@@ -61,14 +60,10 @@ public class DefaultPagerView extends PHorizontalPanel implements PagerView {
         items.put(pageIndex, item);
     }
 
-    private PCommand getClickCommand(final int pageIndex) {
-        return new PCommand() {
-
-            @Override
-            public void execute() {
-                for (final PagerListener pagerListener : pagerListeners) {
-                    pagerListener.onPageChange(pageIndex);
-                }
+    private Runnable getClickCommand(final int pageIndex) {
+        return () -> {
+            for (final PagerListener pagerListener : pagerListeners) {
+                pagerListener.onPageChange(pageIndex);
             }
         };
     }

@@ -4,7 +4,6 @@ package com.ponysdk.ui.server.list.selector;
 import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -34,26 +33,18 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorView 
         return this;
     }
 
-    private PCommand getSelectAllCommand() {
-        return new PCommand() {
-
-            @Override
-            public void execute() {
-                for (final SelectorViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onSelectionChange(SelectionMode.PAGE);
-                }
+    private Runnable getSelectAllCommand() {
+        return () -> {
+            for (final SelectorViewListener selectorListener : selectorViewListeners) {
+                selectorListener.onSelectionChange(SelectionMode.PAGE);
             }
         };
     }
 
-    private PCommand getSelectNoneCommand() {
-        return new PCommand() {
-
-            @Override
-            public void execute() {
-                for (final SelectorViewListener selectorListener : selectorViewListeners) {
-                    selectorListener.onSelectionChange(SelectionMode.NONE);
-                }
+    private Runnable getSelectNoneCommand() {
+        return () -> {
+            for (final SelectorViewListener selectorListener : selectorViewListeners) {
+                selectorListener.onSelectionChange(SelectionMode.NONE);
             }
         };
     }

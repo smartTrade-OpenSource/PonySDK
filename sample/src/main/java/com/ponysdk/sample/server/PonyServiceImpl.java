@@ -53,22 +53,18 @@ public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.Pony
         }
 
         final Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                final Random rdm = new Random();
-                while (true) {
-                    try {
-                        final int index = rdm.nextInt(stocks.size());
-                        final float newPrice = rdm.nextFloat() * 100;
-                        final PonyStock stock = stocks.get(index);
-                        stock.setPrice(newPrice);
-                        pushData(stock);
-                        Thread.sleep(1000);
-                    } catch (final Exception e) {
-                        log.error("", e);
-                    }
+        executor.execute(() -> {
+            final Random rdm = new Random();
+            while (true) {
+                try {
+                    final int index = rdm.nextInt(stocks.size());
+                    final float newPrice = rdm.nextFloat() * 100;
+                    final PonyStock stock = stocks.get(index);
+                    stock.setPrice(newPrice);
+                    pushData(stock);
+                    Thread.sleep(1000);
+                } catch (final Exception e) {
+                    log.error("", e);
                 }
             }
         });
