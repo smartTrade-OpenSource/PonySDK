@@ -6,3 +6,4 @@ log
 gwt-unitCache
 src-generated
 debug
+.classpath

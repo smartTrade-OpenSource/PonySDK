@@ -5,3 +5,4 @@ bin
 classes
 /doc
 /javadoc.xml
+.classpath
