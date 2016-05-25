@@ -32,36 +32,39 @@ import com.ponysdk.core.servlet.JavaApplicationLoader;
 
 public class Main {
 
-    public static void main(final String[] args) throws Exception {
-        final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
-        applicationManagerOption.setApplicationID(System.getProperty(ApplicationManagerOption.APPLICATION_ID, "ID"));
-        applicationManagerOption.setApplicationName(System.getProperty(ApplicationManagerOption.APPLICATION_NAME, "NAME"));
-        applicationManagerOption
-                .setApplicationDescription(System.getProperty(ApplicationManagerOption.APPLICATION_DESCRIPTION, "DESCRIPTION"));
-        applicationManagerOption.setApplicationContextName(System.getProperty(ApplicationManagerOption.APPLICATION_CONTEXT_NAME, ""));
-        applicationManagerOption.setSessionTimeout(1000);
-        applicationManagerOption.setEntryPointClass((Class<? extends EntryPoint>) Class
-                .forName(System.getProperty(ApplicationManagerOption.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
+	@SuppressWarnings("unchecked")
+	public static void main(final String[] args) throws Exception {
+		final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
+		applicationManagerOption.setApplicationID(System.getProperty(ApplicationManagerOption.APPLICATION_ID, "ID"));
+		applicationManagerOption
+				.setApplicationName(System.getProperty(ApplicationManagerOption.APPLICATION_NAME, "NAME"));
+		applicationManagerOption.setApplicationDescription(
+				System.getProperty(ApplicationManagerOption.APPLICATION_DESCRIPTION, "DESCRIPTION"));
+		applicationManagerOption
+				.setApplicationContextName(System.getProperty(ApplicationManagerOption.APPLICATION_CONTEXT_NAME, ""));
+		applicationManagerOption.setSessionTimeout(1000);
+		applicationManagerOption.setEntryPointClass((Class<? extends EntryPoint>) Class.forName(
+				System.getProperty(ApplicationManagerOption.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
 
-        final String styles = System.getProperty(ApplicationManagerOption.STYLESHEETS);
-        if (styles != null && !styles.isEmpty()) {
-            applicationManagerOption.setStyle(Arrays.asList(styles.trim().split(";")));
-        }
+		final String styles = System.getProperty(ApplicationManagerOption.STYLESHEETS);
+		if (styles != null && !styles.isEmpty()) {
+			applicationManagerOption.setStyle(Arrays.asList(styles.trim().split(";")));
+		}
 
-        final String scripts = System.getProperty(ApplicationManagerOption.JAVASCRIPTS);
-        if (scripts != null && !scripts.isEmpty()) {
-            applicationManagerOption.setJavascript(Arrays.asList(scripts.trim().split(";")));
-        }
+		final String scripts = System.getProperty(ApplicationManagerOption.JAVASCRIPTS);
+		if (scripts != null && !scripts.isEmpty()) {
+			applicationManagerOption.setJavascript(Arrays.asList(scripts.trim().split(";")));
+		}
 
-        final ApplicationLoader applicationLoader = new JavaApplicationLoader();
-        applicationLoader.setApplicationManagerOption(applicationManagerOption);
+		final ApplicationLoader applicationLoader = new JavaApplicationLoader();
+		applicationLoader.setApplicationManagerOption(applicationManagerOption);
 
-        final PonySDKServer ponySDKServer = new PonySDKServer();
-        ponySDKServer.setApplicationLoader(applicationLoader);
-        ponySDKServer.setPort(8081);
-        ponySDKServer.setHost("0.0.0.0");
-        ponySDKServer.setUseSSL(false);
-        ponySDKServer.start();
-    }
+		final PonySDKServer ponySDKServer = new PonySDKServer();
+		ponySDKServer.setApplicationLoader(applicationLoader);
+		ponySDKServer.setPort(8081);
+		ponySDKServer.setHost("0.0.0.0");
+		ponySDKServer.setUseSSL(false);
+		ponySDKServer.start();
+	}
 
 }

@@ -29,11 +29,12 @@ import com.ponysdk.spring.servlet.SpringApplicationLoader;
 
 public class MainSpring {
 
-    public static void main(final String[] args) throws Exception {
-        final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION,
-                "classpath:etc/server_application.xml");
+	@SuppressWarnings("resource")
+	public static void main(final String[] args) throws Exception {
+		final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION,
+				"classpath:etc/server_application.xml");
 
-        new ClassPathXmlApplicationContext(serverConfigLocation);
-    }
+		new ClassPathXmlApplicationContext(serverConfigLocation);
+	}
 
 }

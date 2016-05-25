@@ -1,14 +1,9 @@
 ext {
-    srcCore = "src-core/main/java"
-    srcTerminal = "src-core/main/java/com/ponysdk/ui/terminal"
-    srcDefaultimpl = "src-defaultimpl/main/java"
-    resourcesCoreTest = "src-core/test/resources"
+    srcTerminal = ""
+    resourcesCoreTest = "src/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
-    warResources = "src-core/main/resources/war"
-    confResources = "src-core/main/resources/conf"
-    scriptResources = "src-core/main/resources/script"
-    javadocResources = "src-core/main/javadoc"
+    javadocResources = "src/main/javadoc"
     jettyVersion = '9.3.9.v20160517'
 }
 
@@ -43,10 +38,25 @@ configurations {
 
 dependencies {
     xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
+    
     gwtdev 'com.google.gwt:gwt-dev:2.7.0'
+	//gwtdev 'javax.validation:validation-api:1.0.0.GA'
+    //gwtdev 'javax.validation:validation-api:1.0.0.GA-sources'
+
+	compile('javax.validation:validation-api:1.0.0.GA') {
+        artifact {
+            name = 'validation-api'
+            type = 'jar'
+        }
+        artifact {
+            name = 'validation-api'
+            type = 'jar'
+            classifier = 'sources'
+        }
+    }
+
 
     compile 'com.google.gwt:gwt-user:2.7.0'
-    compile 'javax.validation:validation-api:1.0.0.GA@jar'
     compile 'org.timepedia.exporter:gwtexporter:2.5.1'
     compile 'com.google.gwt:gwt-elemental:2.7.0'
     compile 'org.ow2.asm:asm:5.0.4'
@@ -93,8 +103,6 @@ dependencies {
     runtime 'org.ow2.asm:asm:5.0.3'
 
     runtime 'com.google.gwt:gwt-codeserver:2.7.0'
-
-    runtime 'javax.validation:validation-api:1.1.0.Final'
 }
 
 jar {
@@ -102,19 +110,11 @@ jar {
     from sourceSets.main.output
     from sourceSets.test.output
     from gwtOutputDirName
-    from warResources
 
     metaInf {
-        from 'src-core/main/resources/META-INF'
+        from 'src/main/resources/META-INF'
         from buildInfoOutputDirName
     }
-    into('conf') {
-        from confResources
-    }
-    into('script') {
-        from scriptResources
-    }
-
     manifest {
         def cmd = "git rev-parse HEAD"
         def proc = cmd.execute()
@@ -137,48 +137,32 @@ jar {
     }
 }
 
-
 javadoc {
     failOnError false
 }
 
-
-task compileTerminal << {
-    def result = System.getProperty('gwtc', 'true')
-    println('gwtc ? ' + result)
-    if (result == 'false') {
-        println('[WARN] terminal compilation disabled');
-    } else {
-        tasks.gwtc.execute();
-    }
-}
-
-task gwtc {
-    description = 'GWT compile'
-    inputs.files fileTree(srcTerminal)
+task gwtc (dependsOn: classes, type: JavaExec) {
+	inputs.files fileTree('src/main/java/com/ponysdk/ui/terminal')
     outputs.files fileTree(gwtOutputDirName)
-    doLast {
-        javaexec {
-            main = 'com.google.gwt.dev.Compiler'
-            maxHeapSize = '512M'
-            workingDir = buildDir
-            classpath {
-                [
-                        sourceSets.main.java.srcDirs,
-                        sourceSets.main.output,
-                        configurations.runtime,
-                        gwtdev
-                ]
-            }
-            args = [
-                    '-war',
-                    'gwt',
-                    '-localWorkers',
-                    Runtime.getRuntime().availableProcessors(),
-                    'com.ponysdk.ui.PonyTerminal'
-            ]
-        }
-    }
+    description = "GWT compile to JavaScript (production mode)"
+    main = 'com.google.gwt.dev.Compiler'
+ 	workingDir = buildDir
+ 
+    classpath {[
+        sourceSets.main.java.srcDirs,
+        configurations.compile,
+        configurations.gwtdev
+    ]}
+
+    args = [
+        '-war',
+        'gwt',
+        '-localWorkers',
+        Runtime.getRuntime().availableProcessors(),
+        'com.ponysdk.ui.PonyTerminal'
+    ]
+ 
+    maxHeapSize = '512M'
 }
 
 // custom tasks for creating source/javadoc jars
@@ -187,7 +171,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allJava
     from sourceSets.test.allJava
 
-    from(srcCore) {
+    from(sourceSets.main.java.srcDirs) {
         include '**/*.xml'
     }
 
@@ -261,4 +245,4 @@ artifacts {
     archives javadocJar
 }
 
-jar.dependsOn(compileTerminal)
+jar.dependsOn('gwtc')
