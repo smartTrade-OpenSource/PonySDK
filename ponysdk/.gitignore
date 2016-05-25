@@ -3,6 +3,5 @@ src-generated
 .gradle
 bin
 classes
-libs
 /doc
 /javadoc.xml

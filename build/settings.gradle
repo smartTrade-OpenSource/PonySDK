@@ -1,1 +1,1 @@
-includeFlat 'ponysdk'
+includeFlat 'ponysdk', 'sample'

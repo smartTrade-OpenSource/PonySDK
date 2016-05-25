@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.sample.trading.client.activity;
+package com.ponysdk.sample.client.activity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.sample.trading.server.TradingServiceImpl;
+import com.ponysdk.sample.server.TradingServiceImpl;
 import com.ponysdk.ui.server.basic.DataListener;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;

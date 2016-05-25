@@ -364,7 +364,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement label = new PElement("div");
         final LabelPAddOn labelPAddOn = new LabelPAddOn(label);
         final StringBuilder sb = new StringBuilder(70000);
-        sb.append("é");
+        sb.append("aa");
         for (int i = 0; i < 1; i++)
             sb.append("a");
         labelPAddOn.log(sb.append("z").toString());

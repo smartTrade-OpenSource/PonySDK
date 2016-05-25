@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.sample.trading.client.activity;
+package com.ponysdk.sample.client.activity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

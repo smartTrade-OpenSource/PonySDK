@@ -2,12 +2,12 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,30 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.sample.trading.client.activity;
+package com.ponysdk.sample.client.place;
 
-public class MarketData {
+import com.ponysdk.core.place.Place;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
-    final String currency;
-    final int buy;
-    final int sell;
+public class LoginPlace extends PagePlace implements Place {
 
-    public MarketData(final String currency, final int buy, final int sell) {
-        this.currency = currency;
-        this.buy = buy;
-        this.sell = sell;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public int getBuy() {
-        return buy;
-    }
-
-    public int getSell() {
-        return sell;
+    public LoginPlace() {
+        super(LoginPlace.class.getSimpleName());
     }
 
 }

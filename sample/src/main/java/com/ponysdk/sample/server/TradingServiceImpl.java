@@ -1,5 +1,5 @@
 
-package com.ponysdk.sample.trading.server;
+package com.ponysdk.sample.server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.TimerTask;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.servlet.SessionManager;
-import com.ponysdk.sample.trading.client.activity.MarketData;
+import com.ponysdk.sample.client.activity.MarketData;
 
 public class TradingServiceImpl /** implements TradingService **/
 {

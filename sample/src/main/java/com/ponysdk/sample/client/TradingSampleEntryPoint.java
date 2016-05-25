@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.sample.trading.client;
+package com.ponysdk.sample.client;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.activity.ActivityManager;
@@ -31,8 +31,8 @@ import com.ponysdk.core.place.DefaultPlaceHistoryMapper;
 import com.ponysdk.core.place.PlaceController;
 import com.ponysdk.core.place.PlaceHistoryHandler;
 import com.ponysdk.core.place.PlaceHistoryMapper;
-import com.ponysdk.sample.trading.client.activity.SampleActivityMapper;
-import com.ponysdk.sample.trading.client.place.LoginPlace;
+import com.ponysdk.sample.client.activity.SampleActivityMapper;
+import com.ponysdk.sample.client.place.LoginPlace;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PRootPanel;

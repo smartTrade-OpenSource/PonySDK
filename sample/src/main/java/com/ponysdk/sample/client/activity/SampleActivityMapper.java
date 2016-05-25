@@ -21,13 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.sample.trading.client.activity;
+package com.ponysdk.sample.client.activity;
 
 import com.ponysdk.core.activity.Activity;
 import com.ponysdk.core.activity.ActivityMapper;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.impl.webapplication.page.SimplePageView;
-import com.ponysdk.sample.trading.client.place.LoginPlace;
+import com.ponysdk.sample.client.place.LoginPlace;
 
 public class SampleActivityMapper implements ActivityMapper {
 

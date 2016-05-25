@@ -9,7 +9,7 @@ ext {
     confResources = "src-core/main/resources/conf"
     scriptResources = "src-core/main/resources/script"
     javadocResources = "src-core/main/javadoc"
-    jettyVersion = '9.2.12.v20150709'
+    jettyVersion = '9.3.9.v20160517'
 }
 
 sourceSets {
@@ -295,35 +295,4 @@ artifacts {
     archives javadocJar
 }
 
-
-def copyLib(configurations, dest) {
-    println 'copying libs to #' + dest
-    copy {
-        from configurations
-        into dest
-        rename '(.*)-(.*).jar', '$1.jar'
-    }
-}
-
-task copyAllLibs << {
-    copyLib(configurations.gwt, 'libs/gwt');
-    copyLib(configurations.spring, 'libs/spring');
-    copyLib(configurations.sl4j, 'libs/logging');
-    copyLib(configurations.selenium, 'libs/tests');
-    copyLib(configurations.jetty, 'libs/jetty');
-    copyLib(configurations.commons, 'libs/commons');
-    copyLib(configurations.asm, 'libs/asm');
-    copyLib(configurations.json, 'libs/json');
-    copyLib(configurations.gwtdev, 'libs/gwtdev');
-}
-
-task sendTo(type: Copy) {
-    def outputdir = System.getProperty("jar.destination", ".");
-    println('copying jars to: ' + outputdir)
-
-    from file("$buildDir/libs")
-    into file(outputdir)
-}
-
 jar.dependsOn(compileTerminal)
-assemble.dependsOn(copyAllLibs)
