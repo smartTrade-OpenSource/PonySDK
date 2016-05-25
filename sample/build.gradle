@@ -27,6 +27,14 @@ dependencies {
     spring 'org.springframework:spring-expression:4.1.4.RELEASE'
 }
 
+task runCodeServer(type: JavaExec) {
+  classpath = project(':ponysdk').configurations.gwtdev
+  classpath += sourceSets.main.runtimeClasspath
+  main = 'com.google.gwt.dev.codeserver.CodeServer'
+  args = ['-src', '../ponysdk/src/main/java', 'com.ponysdk.ui.PonyTerminal']
+  jvmArgs = ['-server', '-Xmx1024m']
+}
+
 task runSampleSpring(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   classpath += files(buildDir.getAbsolutePath() + '/gwt')

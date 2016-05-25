@@ -5,7 +5,7 @@
 <setAttribute key="name.schedenig.eclipse.grepconsole.FilterDisabledIds"/>
 <setAttribute key="name.schedenig.eclipse.grepconsole.FilterEnabledIds"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/ponysdk/src-defaultimpl/main/java/com/ponysdk/impl/main/MainSpring.java"/>
+<listEntry value="/ponysdk/src/main/java/com/ponysdk/impl/main/MainSpring.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>

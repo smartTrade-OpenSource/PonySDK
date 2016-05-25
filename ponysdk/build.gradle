@@ -38,10 +38,12 @@ configurations {
     }
 
     xjc
+    gwtdev
 }
 
 dependencies {
     xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
+    gwtdev 'com.google.gwt:gwt-dev:2.7.0'
 
     compile 'com.google.gwt:gwt-user:2.7.0'
     compile 'javax.validation:validation-api:1.0.0.GA@jar'
@@ -91,7 +93,8 @@ dependencies {
     runtime 'org.ow2.asm:asm:5.0.3'
 
     runtime 'com.google.gwt:gwt-codeserver:2.7.0'
-    runtime 'com.google.gwt:gwt-dev:2.7.0'
+
+    runtime 'javax.validation:validation-api:1.1.0.Final'
 }
 
 jar {
@@ -163,8 +166,8 @@ task gwtc {
                 [
                         sourceSets.main.java.srcDirs,
                         sourceSets.main.output,
-                        configurations.gwt,
-                        configurations.gwtdev
+                        configurations.runtime,
+                        gwtdev
                 ]
             }
             args = [
