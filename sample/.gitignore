@@ -7,3 +7,4 @@ gwt-unitCache
 src-generated
 debug
 .classpath
+/sample.iml

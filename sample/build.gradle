@@ -1,11 +1,3 @@
-ext{
-	srcSample = 'src/main/java'
-	srcGenerated = 'src-generated/main/java'
-	srcTrading = 'src-trading/main/java'
-	ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
-	packageOutputDirName = buildDir.name + '/package'
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -37,7 +29,7 @@ dependencies {
 
 task runSampleSpring(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
+  classpath += files(buildDir.getAbsolutePath() + '/gwt')
   main = 'com.ponysdk.impl.main.MainSpring'
-  //args 'appArg1'
-  jvmArgs = ['-server', '-xmx128m']
+  jvmArgs = ['-server', '-Xmx128m']
 }

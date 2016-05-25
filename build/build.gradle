@@ -7,16 +7,17 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
     apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
-    
+
     version = '1.0.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
     }
-    
+
     publishing {
         publications {
             maven(MavenPublication) {
