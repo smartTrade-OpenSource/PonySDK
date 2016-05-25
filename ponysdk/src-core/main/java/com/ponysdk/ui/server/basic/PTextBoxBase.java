@@ -59,18 +59,16 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
-        if (!EMPTY.equals(text)) {
-            parser.parse(ServerToClientModel.TEXT, this.text);
-        }
+        if (!EMPTY.equals(text)) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (!EMPTY.equals(placeholder)) parser.parse(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
@@ -85,10 +83,8 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void setText(String text) {
-        if (text == null)
-            text = EMPTY; // null not send over json
-        if (Objects.equals(this.text, text))
-            return;
+        if (text == null) text = EMPTY; // null not send over json
+        if (Objects.equals(this.text, text)) return;
         this.text = text;
         saveUpdate(ServerToClientModel.TEXT, this.text);
     }
@@ -104,10 +100,8 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     public void setPlaceholder(String placeholder) {
-        if (placeholder == null)
-            placeholder = EMPTY; // null not send over json
-        if (Objects.equals(this.placeholder, placeholder))
-            return;
+        if (placeholder == null) placeholder = EMPTY; // null not send over json
+        if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
         saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
@@ -118,28 +112,18 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>(1);
-        }
+        if (handlers == null) handlers = new ArrayList<>(1);
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handlers == null) {
-            return false;
-        } else {
-            return handlers.remove(handler);
-        }
+        return handlers != null ? handlers.remove(handler) : false;
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        if (handlers != null) {
-            return Collections.emptyList();
-        } else {
-            return Collections.unmodifiableCollection(handlers);
-        }
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     @Override

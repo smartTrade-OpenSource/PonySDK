@@ -28,7 +28,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * A separator that can be placed in a {@link PMenuBar}.
  */
-public class PMenuItemSeparator extends PWidget {
+public class PMenuItemSeparator extends PMenuSubElement {
 
     public PMenuItemSeparator() {
     }

@@ -64,8 +64,8 @@ public class PFileUpload extends PWidget
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
     }
 

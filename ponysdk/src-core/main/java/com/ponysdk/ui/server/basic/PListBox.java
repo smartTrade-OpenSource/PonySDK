@@ -82,8 +82,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
 
         if (this.containsEmptyItem) addItem(EMPTY, null);
         saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);

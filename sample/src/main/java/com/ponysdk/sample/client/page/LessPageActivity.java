@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -83,7 +83,8 @@ public class LessPageActivity extends SamplePageActivity {
         PScript.execute("window.colors = {};");
 
         final PFlowPanel layout = new PFlowPanel();
-        layout.add(new PLabel("Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
+        layout.add(new PLabel(
+                "Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
         layout.add(new PLabel("Customize the sample by changing this variables :"));
 
         final Form form = new Form();
@@ -215,7 +216,8 @@ public class LessPageActivity extends SamplePageActivity {
         PScript.execute(js.toString(), new ExecutionCallback() {
 
             @Override
-            public void onSuccess(final String msg) {}
+            public void onSuccess(final String msg) {
+            }
 
             @Override
             public void onFailure(final String msg) {
@@ -259,7 +261,7 @@ public class LessPageActivity extends SamplePageActivity {
         final StringTextBoxFormField ff = new StringTextBoxFormField();
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
-        ff.getTextBox().addValueChangeHandler(new PValueChangeHandler<String>() {
+        ff.getWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
 
             @Override
             public void onValueChange(final PValueChangeEvent<String> event) {

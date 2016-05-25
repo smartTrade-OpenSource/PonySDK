@@ -32,7 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,7 +225,16 @@ public class UIContext {
         } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
             log.error(jsonObject.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else {
-            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
+            final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
+            int objectID;
+            if (ValueType.NUMBER.equals(jsonValue.getValueType())) {
+                objectID = ((JsonNumber) jsonValue).intValue();
+            } else if (ValueType.STRING.equals(jsonValue.getValueType())) {
+                objectID = Integer.parseInt(((JsonString) jsonValue).getString());
+            } else {
+                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                return;
+            }
 
             final PObject object = weakReferences.get(objectID);
 

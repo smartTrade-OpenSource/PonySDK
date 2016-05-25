@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.Form;
 import com.ponysdk.ui.server.form.dataconverter.DataConverter;
 import com.ponysdk.ui.server.form.validator.FieldValidator;
@@ -37,7 +38,7 @@ import com.ponysdk.ui.server.list.Validable;
 /**
  * A field of a {@link Form} that can be validated or reset
  */
-public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
+public abstract class FormField<T, W extends PWidget> implements IsPWidget, Validable, Resetable {
 
     private final Set<FormFieldListener> listeners = new HashSet<>();
 
@@ -45,7 +46,10 @@ public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
 
     protected DataConverter<String, T> dataProvider;
 
-    public FormField(final DataConverter<String, T> dataProvider) {
+    protected final W widget;
+
+    public FormField(final W widget, final DataConverter<String, T> dataProvider) {
+        this.widget = widget;
         this.dataProvider = dataProvider;
     }
 
@@ -97,6 +101,17 @@ public abstract class FormField<T> implements IsPWidget, Validable, Resetable {
 
     public abstract T getValue();
 
-    public abstract void setValue(T value);
+    public abstract void setValue(final T value);
+
+    public abstract void setEnabled(final boolean enabled);
+
+    @Override
+    public PWidget asWidget() {
+        return getWidget();
+    }
+
+    public W getWidget() {
+        return widget;
+    }
 
 }

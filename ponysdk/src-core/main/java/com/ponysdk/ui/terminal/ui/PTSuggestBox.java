@@ -83,9 +83,8 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.setObjectID(getObjectID());
                     eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
                     eventInstruction.put(ClientToServerModel.TEXT, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);
@@ -96,8 +95,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.DISPLAY_STRING, event.getSelectedItem().getDisplayString());

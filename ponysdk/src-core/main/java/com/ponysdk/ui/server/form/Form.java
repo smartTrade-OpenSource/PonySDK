@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,6 +26,7 @@ package com.ponysdk.ui.server.form;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.formfield.FormField;
 import com.ponysdk.ui.server.form.validator.ValidationResult;
 
@@ -34,19 +35,19 @@ import com.ponysdk.ui.server.form.validator.ValidationResult;
  */
 public class Form {
 
-    protected final List<FormField<?>> formFields = new ArrayList<>();
+    protected final List<FormField<?, ? extends PWidget>> formFields = new ArrayList<>();
 
-    public void addFormField(final FormField<?> formField) {
+    public void addFormField(final FormField<?, ? extends PWidget> formField) {
         formFields.add(formField);
     }
 
-    public void removeFormField(final FormField<?> formField) {
+    public void removeFormField(final FormField<?, ? extends PWidget> formField) {
         formFields.remove(formField);
     }
 
     public boolean isValid() {
         boolean valid = true;
-        for (final FormField<?> formField : formFields) {
+        for (final FormField<?, ? extends PWidget> formField : formFields) {
             final ValidationResult result = formField.isValid();
             if (!result.isValid()) {
                 valid = false;
@@ -56,12 +57,12 @@ public class Form {
     }
 
     public void reset() {
-        for (final FormField<?> formField : formFields) {
+        for (final FormField<?, ? extends PWidget> formField : formFields) {
             formField.reset();
         }
     }
 
-    public List<FormField<?>> getFormFields() {
+    public List<FormField<?, ? extends PWidget>> getFormFields() {
         return formFields;
     }
 

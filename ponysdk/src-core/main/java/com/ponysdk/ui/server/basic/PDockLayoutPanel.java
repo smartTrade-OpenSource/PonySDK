@@ -129,8 +129,9 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Adopt.
         adopt(child);
 
-        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
+        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
                 new ServerBinaryModel(ServerToClientModel.SIZE, size));
+        child.attach(windowID);
     }
 
     @Override

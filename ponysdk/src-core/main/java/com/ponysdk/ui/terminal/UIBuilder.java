@@ -111,8 +111,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private CommunicationErrorHandler communicationErrorHandler;
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
-    private final Map<Integer, List<PTInstruction>> instructionsByObjectID = new HashMap<>();
-
     public UIBuilder() {
         History.addValueChangeHandler(this);
 
@@ -392,25 +390,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             log.warning("Cannot GC a garbaged object #" + objectId);
     }
 
-    /**
-     * Stack instruction until window information is not done
-     *
-     * @param instruction
-     */
-    private void stackInstruction(final PTInstruction instruction) {
-        List<PTInstruction> instructions = instructionsByObjectID.get(instruction.getObjectID());
-        if (instructions == null) {
-            instructions = new ArrayList<>();
-
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Stack Instruction : " + instruction);
-
-            instructionsByObjectID.put(instruction.getObjectID(), instructions);
-        }
-
-        instructions.add(instruction); // wait window information
-    }
-
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
         if (previous + 1 != receivedSeqNum)
@@ -482,8 +461,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     public void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
+        requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
 
         if (!stackedErrors.isEmpty()) {
             final JSONArray errors = new JSONArray();
@@ -647,6 +626,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     @Override
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
+    }
+
+    public void setReadyWindow(final int windowID) {
+        final PTWindow window = PTWindowManager.getWindow(windowID);
+        if (window != null) window.setReady();
+        else log.warning("Window " + windowID + " doesn't exist");
     }
 
     // FIXME REMOVE

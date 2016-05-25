@@ -39,12 +39,12 @@ public class PTInstruction extends JSONObject {
     public PTInstruction() {
     }
 
-    public PTInstruction(final JavaScriptObject javaScriptObject) {
-        super(javaScriptObject);
+    public PTInstruction(final int objectID) {
+        put(ClientToServerModel.OBJECT_ID, objectID);
     }
 
-    public void setObjectID(final int objectID) {
-        put(ClientToServerModel.OBJECT_ID, objectID);
+    public PTInstruction(final JavaScriptObject javaScriptObject) {
+        super(javaScriptObject);
     }
 
     public int getObjectID() {

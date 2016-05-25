@@ -76,8 +76,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.VALUE, event.getSelectedItem());
@@ -90,8 +89,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.VALUE, event.getItem());

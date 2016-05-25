@@ -5,13 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.ponysdk.ui.server.basic.PDateBox;
-import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.dataconverter.DataConverter;
 import com.ponysdk.ui.server.form.dataconverter.DateConverter;
 
-public class DateBoxFormField extends FormField<Date> {
-
-    private final PDateBox dateBox;
+public class DateBoxFormField extends FormField<Date, PDateBox> {
 
     public DateBoxFormField() {
         this(new PDateBox(), new DateConverter());
@@ -29,29 +26,23 @@ public class DateBoxFormField extends FormField<Date> {
         this(dateBox, new DateConverter(dateBox.getDateFormat()));
     }
 
-    public DateBoxFormField(final PDateBox dateBox, final DataConverter<String, Date> dataConverter) {
-        super(dataConverter);
-        this.dateBox = dateBox;
-    }
-
-    @Override
-    public PWidget asWidget() {
-        return dateBox;
+    public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter) {
+        super(widget, dataConverter);
     }
 
     @Override
     public void reset0() {
-        dateBox.setValue(null);
+        widget.setValue(null);
     }
 
     @Override
     public Date getValue() {
-        return dateBox.getValue();
+        return widget.getValue();
     }
 
     @Override
     public void setValue(final Date value) {
-        dateBox.setValue(value);
+        widget.setValue(value);
     }
 
     @Override
@@ -59,8 +50,9 @@ public class DateBoxFormField extends FormField<Date> {
         return dataProvider.from(getValue());
     }
 
-    public PDateBox getDateBox() {
-        return dateBox;
+    @Override
+    public void setEnabled(final boolean enabled) {
+        widget.setEnabled(enabled);
     }
 
 }

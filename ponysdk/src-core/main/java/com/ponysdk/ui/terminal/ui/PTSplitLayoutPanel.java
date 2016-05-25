@@ -128,16 +128,14 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                     final PTObject ptObject = uiService.getPTObject(w);
                     if (ptObject != null) {
                         final Double wSize = getWidgetSize(w);
-                        final PTInstruction ws = new PTInstruction();
-                        ws.setObjectID(ptObject.getObjectID());
+                        final PTInstruction ws = new PTInstruction(ptObject.getObjectID());
                         ws.put(ClientToServerModel.SIZE, wSize);
                         jsonArray.set(i, ws);
                         i++;
                     }
                 }
                 if (i > 0) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(objectId);
+                    final PTInstruction eventInstruction = new PTInstruction(objectId);
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_RESIZE_HANDLER);
                     eventInstruction.put(ClientToServerModel.VALUE, jsonArray);

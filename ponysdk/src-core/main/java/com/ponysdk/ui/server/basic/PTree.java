@@ -69,11 +69,19 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     public PTree() {
         root = new PTreeItem(true);
+        root.saveAdd(root.getID(), ID);
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+        root.attach(windowID);
+        return result;
+    }
+
+    @Override
+    protected void init0() {
+        super.init0();
         root.setTree(this);
     }
 

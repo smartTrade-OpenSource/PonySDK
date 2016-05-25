@@ -40,7 +40,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * assigned a unique DOM id in order to support ARIA. See
  * {com.google.gwt.user.client.ui.Accessibility} for more information.
  */
-public class PMenuItem extends PWidget implements PHasHTML {
+public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     private String text;
 
@@ -79,6 +79,13 @@ public class PMenuItem extends PWidget implements PHasHTML {
     public PMenuItem(final String text, final boolean asHTML) {
         if (asHTML) this.html = text;
         else this.text = text;
+    }
+
+    @Override
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+        subMenu.attach(windowID);
+        return result;
     }
 
     @Override
@@ -124,7 +131,8 @@ public class PMenuItem extends PWidget implements PHasHTML {
 
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
-        executeAdd(subMenu.getID(), ID);
+        subMenu.saveAdd(subMenu.getID(), ID);
+        subMenu.attach(windowID);
     }
 
     public void setCommand(final PCommand cmd) {
