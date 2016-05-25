@@ -5,12 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.dataconverter.DataConverter;
 
-public class ListBoxFormField<T> extends FormField<T> {
-
-    private PListBox listBox;
+public class ListBoxFormField<T> extends FormField<T, PListBox> {
 
     public ListBoxFormField() {
         this(new PListBox(), null);
@@ -20,52 +17,47 @@ public class ListBoxFormField<T> extends FormField<T> {
         this(new PListBox(), dataProvider);
     }
 
-    public ListBoxFormField(final PListBox listBox) {
-        this(listBox, null);
+    public ListBoxFormField(final PListBox widget) {
+        this(widget, null);
     }
 
     public ListBoxFormField(final Map<String, T> datas) {
         this(new PListBox(), null);
         for (final Entry<String, T> entry : datas.entrySet()) {
-            listBox.addItem(entry.getKey(), entry.getValue());
+            widget.addItem(entry.getKey(), entry.getValue());
         }
     }
 
-    public ListBoxFormField(final PListBox listBox, final DataConverter<String, T> dataProvider) {
-        super(dataProvider);
-        this.listBox = listBox;
+    public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider) {
+        super(widget, dataProvider);
+    }
+
+    @Override
+    public void reset0() {
+        widget.setSelectedIndex(-1);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public T getValue() {
-        if (dataProvider != null) return dataProvider.to(listBox.getSelectedItem());
-        return (T) listBox.getSelectedValue();
+        if (dataProvider != null) return dataProvider.to(widget.getSelectedItem());
+        return (T) widget.getSelectedValue();
     }
 
     @Override
     public void setValue(final T value) {
-        if (dataProvider != null) listBox.setSelectedItem(dataProvider.from(value));
-        else listBox.setSelectedValue(value);
-    }
-
-    @Override
-    public PWidget asWidget() {
-        return listBox;
+        if (dataProvider != null) widget.setSelectedItem(dataProvider.from(value));
+        else widget.setSelectedValue(value);
     }
 
     @Override
     protected String getStringValue() {
-        return listBox.getSelectedItem();
+        return widget.getSelectedItem();
     }
 
     @Override
-    public void reset0() {
-        listBox.setSelectedIndex(-1);
-    }
-
-    public PListBox getListBox() {
-        return listBox;
+    public void setEnabled(final boolean enabled) {
+        widget.setEnabled(enabled);
     }
 
 }

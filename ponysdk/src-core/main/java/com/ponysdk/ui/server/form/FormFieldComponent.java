@@ -4,6 +4,7 @@ package com.ponysdk.ui.server.form;
 import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.formfield.FormField;
 import com.ponysdk.ui.server.form.formfield.FormFieldListener;
 import com.ponysdk.ui.server.form.validator.ValidationResult;
@@ -16,7 +17,10 @@ import com.ponysdk.ui.server.list.Validable;
 public class FormFieldComponent extends PFlowPanel implements FormFieldListener, Validable, Resetable {
 
     public enum CaptionOrientation {
-        LEFT, TOP, RIGHT, BOTTOM
+        LEFT,
+        TOP,
+        RIGHT,
+        BOTTOM
     }
 
     private CaptionOrientation captionOrientation;
@@ -24,17 +28,18 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     protected PFlowPanel container = new PFlowPanel();
     protected PLabel captionLabel;
     protected PLabel errorLabel;
-    protected final FormField<?> formField;
+    protected final FormField<?, ? extends PWidget> formField;
 
-    public FormFieldComponent(final FormField<?> formField) {
+    public FormFieldComponent(final FormField<?, ? extends PWidget> formField) {
         this(null, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final FormField<?> formField) {
+    public FormFieldComponent(final String caption, final FormField<?, ? extends PWidget> formField) {
         this(caption, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation, final FormField<?> formField) {
+    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation,
+            final FormField<?, ? extends PWidget> formField) {
         this.formField = formField;
         this.container.addStyleName("ctn");
         add(container);
@@ -97,13 +102,13 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     }
 
     @Override
-    public void afterReset(final FormField<?> formField) {
+    public void afterReset(final FormField<?, ? extends PWidget> formField) {
         removeStyleName("error");
         errorLabel.setText("");
     }
 
     @Override
-    public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
+    public void afterValidation(final FormField<?, ? extends PWidget> formField, final ValidationResult validationResult) {
         if (validationResult.isValid()) {
             removeStyleName("error");
             errorLabel.setText("");

@@ -2,7 +2,6 @@
 package com.ponysdk.ui.server.form.formfield;
 
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
-import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.form.dataconverter.DataConverter;
 
 public class PasswordTextBoxFormField<T> extends TextBoxFormField<T> {
@@ -17,11 +16,6 @@ public class PasswordTextBoxFormField<T> extends TextBoxFormField<T> {
 
     public PasswordTextBoxFormField(final PPasswordTextBox textBox, final DataConverter<String, T> dataProvider) {
         super(textBox, dataProvider);
-    }
-
-    @Override
-    public PTextBox getTextBox() {
-        return textBox;
     }
 
 }

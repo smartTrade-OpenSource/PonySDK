@@ -2,48 +2,40 @@
 package com.ponysdk.ui.server.form.formfield;
 
 import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PWidget;
 
-public class CheckBoxFormField extends FormField<Boolean> {
-
-    private final PCheckBox checkBox;
+public class CheckBoxFormField extends FormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField() {
         this(new PCheckBox());
     }
 
-    public CheckBoxFormField(final PCheckBox textBox) {
-        super(null);
-        this.checkBox = textBox;
-    }
-
-    @Override
-    public PWidget asWidget() {
-        return checkBox;
+    public CheckBoxFormField(final PCheckBox widget) {
+        super(widget, null);
     }
 
     @Override
     public void reset0() {
-        checkBox.setValue(false);
+        widget.setValue(false);
     }
 
     @Override
     public Boolean getValue() {
-        return checkBox.getValue();
+        return widget.getValue();
     }
 
     @Override
     public void setValue(final Boolean value) {
-        checkBox.setValue(value);
+        widget.setValue(value);
     }
 
     @Override
     protected String getStringValue() {
-        return checkBox.getValue().toString();
+        return widget.getValue().toString();
     }
 
-    public PCheckBox getCheckBox() {
-        return checkBox;
+    @Override
+    public void setEnabled(final boolean enabled) {
+        widget.setEnabled(enabled);
     }
 
 }

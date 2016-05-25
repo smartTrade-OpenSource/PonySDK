@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,8 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.Date;
-
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
@@ -38,7 +36,6 @@ import com.ponysdk.ui.server.form.FormFieldComponent;
 import com.ponysdk.ui.server.form.FormFieldComponent.CaptionOrientation;
 import com.ponysdk.ui.server.form.formfield.CheckBoxFormField;
 import com.ponysdk.ui.server.form.formfield.DateBoxFormField;
-import com.ponysdk.ui.server.form.formfield.FormField;
 import com.ponysdk.ui.server.form.formfield.StringListBoxFormField;
 import com.ponysdk.ui.server.form.formfield.StringTextBoxFormField;
 import com.ponysdk.ui.server.form.validator.CompositeFieldValidator;
@@ -63,15 +60,15 @@ public class FormPageActivity extends SamplePageActivity {
 
         final Form form = new Form();
 
-        final FormField<String> field1 = new StringTextBoxFormField();
+        final StringTextBoxFormField field1 = new StringTextBoxFormField();
         field1.setValidator(new NotEmptyFieldValidator());
-        final FormField<String> field2 = new StringTextBoxFormField();
+        final StringTextBoxFormField field2 = new StringTextBoxFormField();
         field2.setValidator(new DoubleFieldValidator());
-        final FormField<String> field3 = new StringTextBoxFormField();
+        final StringTextBoxFormField field3 = new StringTextBoxFormField();
         field3.setValidator(new CompositeFieldValidator(new NotEmptyFieldValidator(), new DoubleFieldValidator()));
-        final FormField<String> field4 = new StringTextBoxFormField();
+        final StringTextBoxFormField field4 = new StringTextBoxFormField();
         field4.setValidator(new CompositeFieldValidator(new NotEmptyFieldValidator(), new EmailFieldValidator()));
-        final FormField<Boolean> field5 = new CheckBoxFormField();
+        final CheckBoxFormField field5 = new CheckBoxFormField();
         field5.setValidator(new UncheckedFieldValidator());
 
         final PListBox listBox = new PListBox(true);
@@ -82,19 +79,19 @@ public class FormPageActivity extends SamplePageActivity {
         listBox.addItem("Item 5");
         listBox.addItem("Item 6");
 
-        final FormField<String> field6 = new StringListBoxFormField(listBox);
+        final StringListBoxFormField field6 = new StringListBoxFormField(listBox);
         field6.setValidator(new NotEmptyFieldValidator());
 
-        final FormField<Date> field7 = new DateBoxFormField();
+        final DateBoxFormField field7 = new DateBoxFormField();
         field7.setValidator(new NotEmptyFieldValidator());
 
-        final FormField<Date> field8 = new DateBoxFormField();
+        final DateBoxFormField field8 = new DateBoxFormField();
         field7.setValidator(new NotEmptyFieldValidator());
 
-        final FormField<String> field9 = new StringTextBoxFormField();
+        final StringTextBoxFormField field9 = new StringTextBoxFormField();
         field9.setValidator(new NotEmptyFieldValidator());
 
-        final FormField<String> field10 = new StringTextBoxFormField();
+        final StringTextBoxFormField field10 = new StringTextBoxFormField();
         field10.setValidator(new TwinFieldValidator("Field doesn't match", field9));
 
         form.addFormField(field1);

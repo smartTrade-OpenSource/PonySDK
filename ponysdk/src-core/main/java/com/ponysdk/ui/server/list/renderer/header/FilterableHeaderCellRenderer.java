@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,17 +24,19 @@
 package com.ponysdk.ui.server.list.renderer.header;
 
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.form.formfield.FormField;
 import com.ponysdk.ui.server.list.FilterListener;
 import com.ponysdk.ui.server.list.Sortable;
 
 public class FilterableHeaderCellRenderer extends ComplexHeaderCellRenderer {
 
-    public FilterableHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
+    public FilterableHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key) {
         this(caption, formField, key, null);
     }
 
-    public FilterableHeaderCellRenderer(final String caption, final FormField<?> formField, final String key, final FilterListener filterListener) {
+    public FilterableHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key,
+            final FilterListener filterListener) {
         super(caption, formField, key, filterListener);
     }
 

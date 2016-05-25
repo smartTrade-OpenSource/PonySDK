@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -72,11 +72,11 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         final LongTextBoxFormField keyRowFormField = new LongTextBoxFormField();
         final IntegerTextBoxFormField toRowFormField = new IntegerTextBoxFormField();
 
-        addRowFormField.getTextBox().setPlaceholder("Row index (add)");
-        removeRowFormField.getTextBox().setPlaceholder("Row index (remove)");
-        removeRowByKeyFormField.getTextBox().setPlaceholder("Row key (remove)");
-        keyRowFormField.getTextBox().setPlaceholder("Row key (move)");
-        toRowFormField.getTextBox().setPlaceholder("Row index (move)");
+        addRowFormField.getWidget().setPlaceholder("Row index (add)");
+        removeRowFormField.getWidget().setPlaceholder("Row index (remove)");
+        removeRowByKeyFormField.getWidget().setPlaceholder("Row key (remove)");
+        keyRowFormField.getWidget().setPlaceholder("Row key (move)");
+        toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
         final PButton addButton = new PButton("Add a row");
         addButton.addClickHandler(new PClickHandler() {

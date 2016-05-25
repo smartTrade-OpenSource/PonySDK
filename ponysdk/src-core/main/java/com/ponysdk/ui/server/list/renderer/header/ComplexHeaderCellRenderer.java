@@ -36,6 +36,7 @@ import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PGrid;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
@@ -54,7 +55,7 @@ import com.ponysdk.ui.server.list.Validable;
 public class ComplexHeaderCellRenderer
         implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
-    protected final FormField<?> formField;
+    protected final FormField<?, ? extends PWidget> formField;
     protected final String key;
 
     protected PGrid panel;
@@ -64,11 +65,11 @@ public class ComplexHeaderCellRenderer
 
     protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<>();
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key) {
         this(caption, formField, key, null);
     }
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?> formField, final String key,
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key,
             final FilterListener filterListener) {
         this.formField = formField;
         this.key = key;
@@ -181,12 +182,12 @@ public class ComplexHeaderCellRenderer
     }
 
     @Override
-    public void afterReset(final FormField<?> formField) {
+    public void afterReset(final FormField<?, ? extends PWidget> formField) {
         formField.asWidget().removeStyleName("validation-error");
     }
 
     @Override
-    public void afterValidation(final FormField<?> formField, final ValidationResult validationResult) {
+    public void afterValidation(final FormField<?, ? extends PWidget> formField, final ValidationResult validationResult) {
         if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error"))
             formField.asWidget().addStyleName("validation-error");
         else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error"))
