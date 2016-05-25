@@ -478,4 +478,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " #" + ID;
+    }
+
 }

@@ -84,15 +84,17 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         this.headerText = headerText;
         this.openImage = openImage;
         this.closeImage = closeImage;
-        openImage.saveAdd(openImage.getID(), ID);
-        closeImage.saveAdd(closeImage.getID(), ID);
     }
 
     @Override
     protected boolean attach(final int windowID) {
-        openImage.attach(windowID);
-        closeImage.attach(windowID);
-        return super.attach(windowID);
+        // WORKAROUND : element and sub elements need to be created before any add
+        final boolean openImageResult = openImage.attach(windowID);
+        final boolean closeImageResult = closeImage.attach(windowID);
+        final boolean result = super.attach(windowID);
+        if (openImageResult) openImage.executeAdd(openImage.getID(), ID);
+        if (closeImageResult) closeImage.executeAdd(closeImage.getID(), ID);
+        return result;
     }
 
     @Override
@@ -127,19 +129,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     public void setContent(final PWidget w) {
         // Validate
-        if (w == content) {
-            return;
-        }
+        if (w == content) return;
 
         // Detach new child.
-        if (w != null) {
-            w.removeFromParent();
-        }
+        if (w != null) w.removeFromParent();
 
         // Remove old child.
-        if (content != null) {
-            remove(content);
-        }
+        if (content != null) remove(content);
 
         // Logical attach.
         content = w;
@@ -162,11 +158,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void add(final PWidget w) {
-        if (this.getContent() == null) {
-            setContent(w);
-        } else {
-            throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
-        }
+        if (this.getContent() == null) setContent(w);
+        else throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
     }
 
     @Override
@@ -184,8 +177,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         if (w == getContent()) {
             setContent(null);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     private final void adopt(final PWidget child) {

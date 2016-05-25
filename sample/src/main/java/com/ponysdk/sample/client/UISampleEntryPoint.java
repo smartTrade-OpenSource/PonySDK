@@ -104,7 +104,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onDataReceived(final PObject object, final JsonObject instruction) {
-                System.err.println(object + "" + instruction);
+                System.err.println(object + " : " + instruction);
             }
         });
 
@@ -187,7 +187,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PTextArea());
         boxContainer.add(createPTextBox());
         boxContainer.add(new PToolbar());
-        //boxContainer.add(createTree());
+        boxContainer.add(createTree());
         boxContainer.add(new PTwinListBox());
         boxContainer.add(new PVerticalPanel());
 

@@ -65,25 +65,33 @@ public abstract class PComplexPanel extends PPanel {
             child.attach(windowID);
         } else {
             throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : " + child.getWindowID() + ", new window : "
-                            + windowID);
+                    "Widget " + child + " already attached to an other window, current window : " + child.getWindowID()
+                            + ", new window : " + windowID);
         }
     }
 
     public void insert(final PWidget child, final int beforeIndex) {
         assertNotMe(child);
 
-        child.removeFromParent();
+        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+            child.removeFromParent();
 
-        if (children == null) children = new PWidgetCollection(this);
+            if (children == null) children = new PWidgetCollection(this);
 
-        children.insert(child, beforeIndex);
-        adopt(child);
+            children.insert(child, beforeIndex);
+            adopt(child);
 
-        if (children.size() - 1 == beforeIndex) {
-            executeAdd(child.getID(), ID);
+            if (children.size() - 1 == beforeIndex) {
+                child.saveAdd(child.getID(), ID);
+                child.attach(windowID);
+            } else {
+                child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+                child.attach(windowID);
+            }
         } else {
-            executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+            throw new IllegalAccessError(
+                    "Widget " + child + " already attached to an other window, current window : " + child.getWindowID()
+                            + ", new window : " + windowID);
         }
     }
 
