@@ -188,7 +188,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(createPTextBox());
         boxContainer.add(new PToolbar());
         boxContainer.add(createTree());
-        boxContainer.add(new PTwinListBox());
+        boxContainer.add(new PTwinListBox<Object>());
         boxContainer.add(new PVerticalPanel());
 
         PRootPanel.get().add(boxContainer);
@@ -233,16 +233,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(child);
 
         final AtomicInteger i = new AtomicInteger(100);
-        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                final PLabel label = new PLabel();
-                windowContainer.add(label);
-                label.setText("Window 3 " + i.incrementAndGet());
-                windowContainer.add(new PCheckBox("Checkbox"));
-            }
-        }, 5, 5, TimeUnit.SECONDS);
+        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
+            final PLabel label = new PLabel();
+            windowContainer.add(label);
+            label.setText("Window 3 " + i.incrementAndGet());
+            windowContainer.add(new PCheckBox("Checkbox"));
+        } , 5, 5, TimeUnit.SECONDS);
 
         w3.open();
 
@@ -259,16 +255,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         w2.open();
 
         final AtomicInteger i = new AtomicInteger();
-        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                final PLabel label = new PLabel();
-                windowContainer.add(label);
-                label.setText("Window 2 " + i.incrementAndGet());
-                windowContainer.add(new PCheckBox("Checkbox"));
-            }
-        }, 5, 5, TimeUnit.SECONDS);
+        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
+            final PLabel label = new PLabel();
+            windowContainer.add(label);
+            label.setText("Window 2 " + i.incrementAndGet());
+            windowContainer.add(new PCheckBox("Checkbox"));
+        } , 5, 5, TimeUnit.SECONDS);
         return w2;
     }
 
@@ -282,16 +274,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(child);
 
         final AtomicInteger i = new AtomicInteger();
-        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                final PLabel label = new PLabel();
-                label.setText("Window 1 " + i.incrementAndGet());
-                windowContainer.add(label);
-                windowContainer.add(new PCheckBox("Checkbox"));
-            }
-        }, 10, 10, TimeUnit.SECONDS);
+        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
+            final PLabel label = new PLabel();
+            label.setText("Window 1 " + i.incrementAndGet());
+            windowContainer.add(label);
+            windowContainer.add(new PCheckBox("Checkbox"));
+        } , 10, 10, TimeUnit.SECONDS);
         return w;
     }
 

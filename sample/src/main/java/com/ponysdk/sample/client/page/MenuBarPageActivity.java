@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,7 +24,6 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.PCommand;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
@@ -72,30 +71,12 @@ public class MenuBarPageActivity extends SamplePageActivity {
         menuBar.addItem("File", fileBar);
 
         final PMenuItem newItem = new PMenuItem("New");
-        newItem.setCommand(new PCommand() {
-
-            @Override
-            public void execute() {
-                PNotificationManager.notify("Menu Selection, " + newItem.getText(), Notification.HUMANIZED);
-            }
-        });
+        newItem.setCommand(() -> PNotificationManager.notify("Menu Selection, " + newItem.getText(), Notification.HUMANIZED));
         final PMenuItem openItem = new PMenuItem("Open");
-        openItem.setCommand(new PCommand() {
-
-            @Override
-            public void execute() {
-                PNotificationManager.notify("Menu Selection, " + openItem.getText(), Notification.HUMANIZED);
-            }
-        });
+        openItem.setCommand(() -> PNotificationManager.notify("Menu Selection, " + openItem.getText(), Notification.HUMANIZED));
 
         final PMenuItem closeItem = new PMenuItem("Close");
-        openItem.setCommand(new PCommand() {
-
-            @Override
-            public void execute() {
-                PNotificationManager.notify("Menu Selection, " + closeItem.getText(), Notification.HUMANIZED);
-            }
-        });
+        openItem.setCommand(() -> PNotificationManager.notify("Menu Selection, " + closeItem.getText(), Notification.HUMANIZED));
 
         fileBar.addItem(newItem);
         fileBar.addItem(openItem);
@@ -107,21 +88,9 @@ public class MenuBarPageActivity extends SamplePageActivity {
         fileBar.addItem("Recent", recentItem);
 
         final PMenuItem recent1 = new PMenuItem("recent1");
-        recent1.setCommand(new PCommand() {
-
-            @Override
-            public void execute() {
-                PNotificationManager.notify("Menu Selection, " + recent1.getText(), Notification.HUMANIZED);
-            }
-        });
+        recent1.setCommand(() -> PNotificationManager.notify("Menu Selection, " + recent1.getText(), Notification.HUMANIZED));
         final PMenuItem recent2 = new PMenuItem("recent2");
-        recent2.setCommand(new PCommand() {
-
-            @Override
-            public void execute() {
-                PNotificationManager.notify("Menu Selection, " + recent2.getText(), Notification.HUMANIZED);
-            }
-        });
+        recent2.setCommand(() -> PNotificationManager.notify("Menu Selection, " + recent2.getText(), Notification.HUMANIZED));
 
         recentItem.addItem(recent1);
         recentItem.addSeparator();

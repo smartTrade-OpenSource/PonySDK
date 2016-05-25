@@ -16,13 +16,13 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="applicationName" value="sample" />
 		<property name="applicationDescription" value="sample" />
 		<property name="applicationContextName" value="sample" />
-		<property name="clientConfigFile" value="client_application.xml" />
+		<property name="clientConfigFile" value="etc/client_application.xml" />
 		<property name="sessionTimeout" value="20" />
 		<property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
-                <value>bootstrap.js</value>
-                <value>widget.js</value>
+                <value>script/bootstrap.js</value>
+                <value>script/widget.js</value>
                 <value>script/sample.js</value>
                 <value>script/less.js</value>
             </list>
