@@ -52,8 +52,7 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
 
                 @Override
                 public void onChange(final ChangeEvent event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }

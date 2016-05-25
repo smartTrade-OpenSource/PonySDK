@@ -89,8 +89,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.INDEX, event.getSelectedItem());
@@ -103,8 +102,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     // eventInstruction.put(Model.TYPE_EVENT);
                     eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
                     eventInstruction.put(ClientToServerModel.INDEX, event.getItem());

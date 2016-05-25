@@ -48,11 +48,6 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void init() {
-        super.init();
-    }
-
-    @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);

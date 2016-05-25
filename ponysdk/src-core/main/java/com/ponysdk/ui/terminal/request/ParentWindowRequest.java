@@ -27,9 +27,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class ParentWindowRequest implements RequestBuilder {
@@ -45,7 +47,19 @@ public class ParentWindowRequest implements RequestBuilder {
         this.callback = callback;
 
         exportOnDataReceived();
+
+        final JSONObject jsoObject = new JSONObject();
+        jsoObject.put(ClientToServerModel.NATIVE.toStringValue(), new JSONNumber(HandlerModel.HANDLER_OPEN_HANDLER.getValue()));
+        sendToParent(windowID, jsoObject.getJavaScriptObject());
+        setReadyWindow(windowID);
     }
+
+    /**
+     * To Main terminal
+     */
+    public static native void setReadyWindow(final String windowID) /*-{
+                                                                    $wnd.opener.pony.setReadyWindow(windowID);
+                                                                    }-*/;
 
     /**
      * To Main terminal

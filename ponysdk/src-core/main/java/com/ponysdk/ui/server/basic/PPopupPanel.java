@@ -101,13 +101,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public PPopupPanel(final boolean autoHide, final int windowID) {
         this.visible = false;
         this.autoHide = autoHide;
-
-        removeFromParent();
-
-        final PRootPanel root = windowID != PWindow.EMPTY_WINDOW_ID ? PRootPanel.get(windowID) : PRootPanel.get();
-
-        root.add(this);
-        root.adopt(this);
     }
 
     public PPopupPanel() {
@@ -116,6 +109,20 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public PPopupPanel(final boolean autoHide) {
         this(autoHide, PWindow.EMPTY_WINDOW_ID);
+    }
+
+    @Override
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final PRootPanel root = windowID != PWindow.MAIN_WINDOW_ID ? PRootPanel.get(windowID) : PRootPanel.get();
+
+            final PWidget child = root.getChild(ID);
+            if (child == null) root.add(this);
+        }
+
+        return result;
     }
 
     @Override

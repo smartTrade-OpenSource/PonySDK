@@ -54,15 +54,13 @@ public class PTScript extends AbstractPTObject {
             if (ServerToClientModel.COMMAND_ID.equals(commandId.getModel())) {
                 try {
                     final Object result = evalWithCallback(scriptToEval);
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     eventInstruction.put(ClientToServerModel.COMMAND_ID, commandId.getLongValue());
                     eventInstruction.put(ClientToServerModel.RESULT, result == null ? "" : result.toString());
                     uiService.sendDataToServer(eventInstruction);
                 } catch (final Throwable e) {
                     log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
-                    final PTInstruction eventInstruction = new PTInstruction();
-                    eventInstruction.setObjectID(getObjectID());
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                     eventInstruction.put(ClientToServerModel.COMMAND_ID, commandId.getLongValue());
                     eventInstruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
                     uiService.sendDataToServer(eventInstruction);

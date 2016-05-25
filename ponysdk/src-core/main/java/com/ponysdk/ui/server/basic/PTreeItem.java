@@ -22,7 +22,7 @@ public class PTreeItem extends PObject {
 
     private boolean isRoot = false;
 
-    private String html;
+    private String html = null;
 
     private final List<PTreeItem> children = new ArrayList<>();
 
@@ -32,26 +32,28 @@ public class PTreeItem extends PObject {
 
     private PWidget widget;
 
-    PTreeItem(final boolean isRoot, final String html) {
-        this.isRoot = isRoot;
+    public PTreeItem() {
+    }
+
+    public PTreeItem(final PWidget widget) {
+        this.widget = widget;
+    }
+
+    public PTreeItem(final String html) {
         this.html = html;
     }
 
     PTreeItem(final boolean isRoot) {
-        this(isRoot, null);
+        this.isRoot = isRoot;
     }
 
-    public PTreeItem() {
-        this(false, null);
-    }
-
-    public PTreeItem(final String html) {
-        this(false, html);
-    }
-
-    public PTreeItem(final PWidget widget) {
-        this();
-        this.widget = widget;
+    @Override
+    protected boolean attach(final int windowID) {
+        final boolean result = super.attach(windowID);
+        for (final PTreeItem item : children) {
+            item.attach(windowID);
+        }
+        return result;
     }
 
     @Override
@@ -62,9 +64,6 @@ public class PTreeItem extends PObject {
     }
 
     private void setWidget() {
-        if (widget == null)
-            return;
-
         if (widget.getParent() != null) {
             widget.removeFromParent();
         }
@@ -76,7 +75,7 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.adopt(widget, this);
-            executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
+            saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
         }
     }
 
@@ -100,10 +99,8 @@ public class PTreeItem extends PObject {
 
     final void setTree(final PTree tree) {
         this.tree = tree;
-        if (isRoot) {
-            executeAdd(tree.getID(), ID);
-        }
-        setWidget();
+        if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) saveAdd(tree.getID(), ID);
+        if (widget != null) setWidget();
     }
 
     public PTree getTree() {
@@ -117,14 +114,16 @@ public class PTreeItem extends PObject {
     public PTreeItem insertItem(final int beforeIndex, final PTreeItem item) {
         children.add(beforeIndex, item);
         item.setTree(tree);
-        executeAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+        item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+        item.attach(windowID);
         return item;
     }
 
     public PTreeItem addItem(final PTreeItem item) {
         children.add(item);
         item.setTree(tree);
-        executeAdd(item.getID(), ID);
+        item.saveAdd(item.getID(), ID);
+        item.attach(windowID);
         return item;
     }
 

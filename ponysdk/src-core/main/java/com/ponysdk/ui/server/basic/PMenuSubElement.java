@@ -21,28 +21,8 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.model;
+package com.ponysdk.ui.server.basic;
 
-public enum HandlerModel {
+public abstract class PMenuSubElement extends PWidget {
 
-    HANDLER_DOM_HANDLER,
-    HANDLER_EMBEDED_STREAM_REQUEST_HANDLER,
-    HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER,
-    HANDLER_DATE_VALUE_CHANGE_HANDLER,
-    HANDLER_KEY_SHOW_RANGE,
-    HANDLER_CHANGE_HANDLER,
-    HANDLER_POPUP_POSITION_CALLBACK,
-    HANDLER_RESIZE_HANDLER,
-    HANDLER_STRING_VALUE_CHANGE_HANDLER,
-    HANDLER_COMMAND,
-    HANDLER_BEFORE_SELECTION_HANDLER,
-    HANDLER_SELECTION_HANDLER,
-    HANDLER_STRING_SELECTION_HANDLER,
-    HANDLER_STREAM_REQUEST_HANDLER,
-    HANDLER_SHOW_RANGE,
-    HANDLER_OPEN_HANDLER;
-
-    public byte getValue() {
-        return (byte) ordinal();
-    }
 }

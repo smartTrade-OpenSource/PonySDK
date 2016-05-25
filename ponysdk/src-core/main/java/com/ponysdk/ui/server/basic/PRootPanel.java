@@ -34,8 +34,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
- * never created directly. Rather, they are accessed via
- * {@link PRootPanel#get()} .
+ * never created directly. Rather, they are accessed via {@link PRootPanel#get()} .
  * <p>
  * Most applications will add widgets to the default root panel in their
  * {@link EntryPoint#start(UIContext)} methods.

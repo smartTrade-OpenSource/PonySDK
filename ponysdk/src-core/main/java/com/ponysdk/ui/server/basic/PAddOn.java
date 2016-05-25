@@ -73,8 +73,8 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void init0() {
+        super.init0();
         addNativeHandler(this);
     }
 
