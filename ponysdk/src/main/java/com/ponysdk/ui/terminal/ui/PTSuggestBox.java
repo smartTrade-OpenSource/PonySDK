@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -49,7 +49,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
     private SuggestOracle oracle;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.ORACLE
         final int oracleID = buffer.getBinaryModel().getIntValue();
         // ServerToClientModel.TEXTBOX_ID
@@ -77,7 +77,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -113,7 +113,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         private MultiWordSuggestOracle oracle;
 
         @Override
-        public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+        public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
             super.create(buffer, objectId, uiService);
 
             this.oracle = new MultiWordSuggestOracle();

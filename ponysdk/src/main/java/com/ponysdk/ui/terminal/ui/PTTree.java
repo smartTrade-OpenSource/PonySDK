@@ -27,7 +27,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -43,7 +43,7 @@ public class PTTree extends PTWidget<Tree> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
@@ -63,7 +63,7 @@ public class PTTree extends PTWidget<Tree> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
         uiObject.remove(asWidget(ptObject));
     }
 

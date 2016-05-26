@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -47,7 +47,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     private DefaultFormat defaultFormat;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.PICKER
         datePicker = (PTDatePicker) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
         // ServerToClientModel.DATE_FORMAT_PATTERN
@@ -85,7 +85,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
             final DateBox dateBox = cast();
             final TextBox textBox = dateBox.getTextBox();
@@ -109,7 +109,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         }
     }
 
-    protected void triggerEvent(final UIService uiService, final DateBox dateBox) {
+    protected void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
         instruction.put(ClientToServerModel.VALUE, dateBox.getTextBox().getText());

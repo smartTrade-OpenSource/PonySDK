@@ -24,7 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.MenuBar;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -36,7 +36,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
     private boolean isVertical;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         isVertical = buffer.getBinaryModel().getBooleanValue();
 
         super.create(buffer, objectId, uiService);
@@ -75,7 +75,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
             uiObject.removeItem(menuItem.cast());

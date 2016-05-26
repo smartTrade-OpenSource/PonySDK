@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.ui.widget.richtexttoolbar.RichTextToolbar;
 
@@ -32,7 +32,7 @@ public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
     private PTRichTextArea richTextArea;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.WIDGET_ID
         richTextArea = (PTRichTextArea) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
 

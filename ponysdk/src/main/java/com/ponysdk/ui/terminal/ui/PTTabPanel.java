@@ -29,7 +29,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -39,10 +39,10 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTTabPanel extends PTWidget<TabPanel> {
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         this.uiService = uiService;
@@ -83,7 +83,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
@@ -115,7 +115,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
         uiObject.remove(asWidget(ptObject));
     }
 

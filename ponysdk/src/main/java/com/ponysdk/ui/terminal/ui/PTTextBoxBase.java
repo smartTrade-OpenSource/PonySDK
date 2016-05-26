@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -36,7 +36,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBase<T, String> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 

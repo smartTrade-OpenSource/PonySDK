@@ -23,8 +23,8 @@ dependencies {
 	compile project(':ponysdk')
 
 	java2html 'de.java2html:java2html:5.0'
-    spring 'org.springframework:spring-aop:4.1.4.RELEASE'
-    spring 'org.springframework:spring-expression:4.1.4.RELEASE'
+    spring 'org.springframework:spring-aop:4.2.3.RELEASE'
+    spring 'org.springframework:spring-expression:4.2.3.RELEASE'
 }
 
 task runCodeServer(type: JavaExec) {
@@ -40,4 +40,13 @@ task runSampleSpring(type: JavaExec) {
   classpath += files(buildDir.getAbsolutePath() + '/gwt')
   main = 'com.ponysdk.impl.main.MainSpring'
   jvmArgs = ['-server', '-Xmx128m']
+}
+
+task runSampleTrading(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  main = 'com.ponysdk.impl.main.Main'
+  jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
+             '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
+             '-Dponysdk.application.javascripts=script/bootstrap.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less' ]
 }

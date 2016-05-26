@@ -26,12 +26,7 @@ package com.ponysdk.ui.terminal.request;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
+import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class ParentWindowRequest implements RequestBuilder {
@@ -48,9 +43,6 @@ public class ParentWindowRequest implements RequestBuilder {
 
         exportOnDataReceived();
 
-        final JSONObject jsoObject = new JSONObject();
-        jsoObject.put(ClientToServerModel.NATIVE.toStringValue(), new JSONNumber(HandlerModel.HANDLER_OPEN_HANDLER.getValue()));
-        sendToParent(windowID, jsoObject.getJavaScriptObject());
         setReadyWindow(windowID);
     }
 
@@ -65,18 +57,16 @@ public class ParentWindowRequest implements RequestBuilder {
      * To Main terminal
      */
     @Override
-    public void send(final String s) {
-        final JSONObject jsoObject = new JSONObject();
-        jsoObject.put(ClientToServerModel.DATA.toStringValue(), new JSONString(s));
-        sendToParent(windowID, jsoObject.getJavaScriptObject());
+    public void send(final JSONValue value) {
+        sendToParent(value.toString());
     }
 
     /**
      * To Main terminal
      */
-    public static native void sendToParent(final String objectID, final JavaScriptObject data) /*-{
-                                                                                               $wnd.opener.pony.sendDataToServer(objectID, data);
-                                                                                               }-*/;
+    public static native void sendToParent(final String data) /*-{
+                                                                        $wnd.opener.pony.sendDataToServer(data);
+                                                                        }-*/;
 
     /**
      * From Main terminal to the matching window terminal

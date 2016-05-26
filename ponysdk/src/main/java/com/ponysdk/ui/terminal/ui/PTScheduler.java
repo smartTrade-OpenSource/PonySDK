@@ -29,7 +29,6 @@ import java.util.Map;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.ponysdk.ui.terminal.UIBuilder;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.event.CommunicationErrorEvent;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
@@ -42,14 +41,14 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
     private final Map<Long, SchedulerCommand> commandByIDs = new HashMap<>();
     private boolean hasCommunicationError = false;
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     public PTScheduler() {
         UIBuilder.getRootEventBus().addHandler(CommunicationErrorEvent.TYPE, this);
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.uiService = uiService;
     }
@@ -90,7 +89,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
     }
 
     @Override
-    public void gc(final UIService uiService) {
+    public void gc(final UIBuilder uiService) {
         for (final SchedulerCommand command : commandByIDs.values()) {
             command.cancel();
         }
@@ -99,13 +98,13 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected abstract class SchedulerCommand implements RepeatingCommand {
 
-        protected final UIService uiService;
+        protected final UIBuilder uiService;
         protected final int schedulerID;
         protected final long commandID;
         protected final int delay;
         protected boolean cancelled = false;
 
-        public SchedulerCommand(final UIService uiService, final int schedulerID, final long commandID,
+        public SchedulerCommand(final UIBuilder uiService, final int schedulerID, final long commandID,
                 final int delay) {
             this.uiService = uiService;
             this.schedulerID = schedulerID;
@@ -120,7 +119,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected class FixRateCommand extends SchedulerCommand {
 
-        public FixRateCommand(final UIService uiService, final int schedulerID, final long commandID, final int delay) {
+        public FixRateCommand(final UIBuilder uiService, final int schedulerID, final long commandID, final int delay) {
             super(uiService, schedulerID, commandID, delay);
         }
 
@@ -143,7 +142,7 @@ public class PTScheduler extends AbstractPTObject implements CommunicationErrorE
 
     protected class FixDelayCommand extends SchedulerCommand {
 
-        public FixDelayCommand(final UIService uiService, final int schedulerID, final long commandID,
+        public FixDelayCommand(final UIBuilder uiService, final int schedulerID, final long commandID,
                 final int delay) {
             super(uiService, schedulerID, commandID, delay);
         }

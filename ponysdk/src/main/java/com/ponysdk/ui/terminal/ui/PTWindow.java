@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -55,12 +55,12 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     private String name;
     private String features;
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     private boolean ponySDKStarted = false;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         if (log.isLoggable(Level.INFO))
@@ -90,6 +90,9 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
+
+            window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -97,10 +100,14 @@ public class PTWindow extends AbstractPTObject implements EventListener {
             return true;
         }
         if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
-            window.close();
+            close();
             return true;
         }
         return false;
+    }
+
+    public void close() {
+        window.close();
     }
 
     @Override
@@ -111,10 +118,10 @@ public class PTWindow extends AbstractPTObject implements EventListener {
                 final MessageEvent messageEvent = (MessageEvent) event;
                 uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
             } else if (WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(type)) {
-                PTWindowManager.get().unregister(this);
                 final PTInstruction instruction = new PTInstruction(objectID);
                 instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
                 uiService.sendDataToServer(instruction);
+                PTWindowManager.get().unregister(this);
             }
         }
     }
@@ -128,6 +135,10 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     public void setReady() {
         ponySDKStarted = true;
+
+        final PTInstruction instruction = new PTInstruction(objectID);
+        instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
+        uiService.sendDataToServer(instruction);
     }
 
 }

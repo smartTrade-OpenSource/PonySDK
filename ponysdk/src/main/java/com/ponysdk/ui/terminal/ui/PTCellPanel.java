@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
@@ -36,10 +36,10 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.uiService = uiService;
     }

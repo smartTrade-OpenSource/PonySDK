@@ -30,7 +30,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -65,7 +65,7 @@ public class PTRadioButton extends PTCheckBox {
     }
 
     @Override
-    protected void addValueChangeHandler(final UIService uiService) {
+    protected void addValueChangeHandler(final UIBuilder uiService) {
         final RadioButton radioButton = cast();
 
         radioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -86,7 +86,7 @@ public class PTRadioButton extends PTCheckBox {
         });
     }
 
-    protected void fireInstruction(final int objectID, final UIService uiService, final boolean value) {
+    protected void fireInstruction(final int objectID, final UIBuilder uiService, final boolean value) {
         final PTInstruction instruction = new PTInstruction(objectID);
         instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
         instruction.put(ClientToServerModel.VALUE_CHECKBOX, value);

@@ -9,7 +9,7 @@ import com.ponysdk.core.UIContext;
 
 public class PString {
 
-    private static final String MESSAGES_CORE = "MessagesCore";
+    private static final String MESSAGES_CORE = "conf/MessagesCore";
 
     private ResourceBundle coreResourceBundle;
 

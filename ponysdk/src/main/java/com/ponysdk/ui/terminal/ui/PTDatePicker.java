@@ -31,7 +31,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -51,7 +51,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
             final DatePicker picker = cast();
             picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
@@ -80,7 +80,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
     }
 
-    protected void triggerEvent(final DatePicker picker, final UIService uiService,
+    protected void triggerEvent(final DatePicker picker, final UIBuilder uiService,
             final ValueChangeEvent<Date> event) {
         long date = -1;
         int year = -1;

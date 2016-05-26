@@ -31,6 +31,8 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class PToolbar implements IsPWidget, HasPWidgets {
 
+    public static final String HUNDRED_PERCENT = "100%";
+
     private final PHorizontalPanel panel = new PHorizontalPanel();
 
     public PToolbar() {
@@ -51,7 +53,7 @@ public class PToolbar implements IsPWidget, HasPWidgets {
     @Override
     public void add(final PWidget w) {
         panel.add(w);
-        panel.setCellHeight(w, Size.HUNDRED_PERCENT);
+        panel.setCellHeight(w, HUNDRED_PERCENT);
     }
 
     @Override

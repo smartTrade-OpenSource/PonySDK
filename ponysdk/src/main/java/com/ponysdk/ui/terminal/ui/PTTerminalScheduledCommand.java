@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -39,10 +39,10 @@ public class PTTerminalScheduledCommand extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTTerminalScheduledCommand.class.getName());
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         // ServerToClientModel.FIXDELAY

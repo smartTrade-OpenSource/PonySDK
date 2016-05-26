@@ -28,7 +28,7 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -38,10 +38,10 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         this.uiService = uiService;
@@ -76,7 +76,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_RESIZE_HANDLER.equals(handlerModel)) {
             cast().resizeHandler = true;
             cast().objectId = getObjectID();
@@ -96,7 +96,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
         protected SendResizeCommand command;
 
         protected boolean resizeHandler = false;
-        protected UIService uiService = null;
+        protected UIBuilder uiService = null;
         protected int objectId = -1;
 
         @Override

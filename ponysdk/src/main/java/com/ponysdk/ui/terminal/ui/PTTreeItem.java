@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -42,7 +42,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     private String text;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.TEXT
         this.text = buffer.getBinaryModel().getStringValue();
 

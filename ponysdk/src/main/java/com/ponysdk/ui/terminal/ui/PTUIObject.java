@@ -28,7 +28,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.UIObject;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -42,7 +42,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     private Object nativeObject;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.uiObject = createUIObject();
         uiService.registerUIObject(this.objectID, uiObject);
@@ -129,7 +129,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         return super.update(buffer, binaryModel);
     }
 
-    public UIObject asWidget(final int objectID, final UIService uiService) {
+    public UIObject asWidget(final int objectID, final UIBuilder uiService) {
         final PTObject ptObject = uiService.getPTObject(objectID);
         return asWidget(ptObject);
     }

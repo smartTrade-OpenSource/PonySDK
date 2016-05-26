@@ -36,10 +36,10 @@ import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
+import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PWindow extends PObject implements PNativeHandler {
@@ -103,26 +103,27 @@ public class PWindow extends PObject implements PNativeHandler {
 
     @Override
     public void onNativeEvent(final PNativeEvent event) {
-        final int nativeValue = event.getJsonObject().getInt(ClientToServerModel.NATIVE.toStringValue());
-        if (HandlerModel.HANDLER_OPEN_HANDLER.getValue() == nativeValue) {
-            WindowManager.registerWindow(this);
-            while (!stackedInstructions.isEmpty()) {
-                stackedInstructions.poll().run();
-            }
-        }
     }
 
     @Override
-    public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
-            WindowManager.unregisterWindow(this);
+    public void onClientData(final JsonObject event) {
+        if (event.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
+            PWindowManager.registerWindow(this);
+            while (!stackedInstructions.isEmpty()) {
+                stackedInstructions.poll().run();
+            }
+            final POpenEvent e = new POpenEvent(this);
+            for (final POpenHandler h : openHandlers) {
+                h.onOpen(e);
+            }
+        } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
+            PWindowManager.unregisterWindow(this);
             final PCloseEvent e = new PCloseEvent(this);
             for (final PCloseHandler h : closeHandlers) {
                 h.onClose(e);
             }
-            return;
         } else {
-            super.onClientData(instruction);
+            super.onClientData(event);
         }
     }
 
@@ -155,7 +156,7 @@ public class PWindow extends PObject implements PNativeHandler {
     }
 
     public void add(final IsPWidget widget) {
-        if (WindowManager.get().getWindow(ID) == this) add0(widget);
+        if (PWindowManager.get().getWindow(ID) == this) add0(widget);
         else stackedInstructions.add(() -> add0(widget));
     }
 

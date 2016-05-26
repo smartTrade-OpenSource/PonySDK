@@ -23,7 +23,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -38,7 +38,7 @@ public abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectID, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectID, final UIBuilder uiService) {
         this.objectID = objectID;
     }
 
@@ -52,19 +52,19 @@ public abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
     }
 
     @Override
-    public void removeHandler(final ReaderBuffer buffer, final UIService uiService) {
+    public void removeHandler(final ReaderBuffer buffer, final UIBuilder uiService) {
     }
 
     @Override
-    public void gc(final UIService uiService) {
+    public void gc(final UIBuilder uiService) {
     }
 
     @Override
