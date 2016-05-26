@@ -37,6 +37,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -178,6 +179,17 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
         }
     }
 
+    /**
+     * From other terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final String jsObject) {
+        uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
+    }
+
+    /**
+     * From Main terminal to the server
+     */
     @Export
     public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
         final PTInstruction instruction = new PTInstruction(objectID);

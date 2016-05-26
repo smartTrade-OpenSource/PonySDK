@@ -28,7 +28,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -42,7 +42,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     private PImageResource closeImageResource;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.TEXT
         headerText = buffer.getBinaryModel().getStringValue();
         // ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG
@@ -66,7 +66,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
         return new DisclosurePanel(openImageResource, closeImageResource, headerText);
     }
 
-    private void addHandlers(final ReaderBuffer buffer, final UIService uiService) {
+    private void addHandlers(final ReaderBuffer buffer, final UIBuilder uiService) {
         uiObject.addCloseHandler(new CloseHandler<DisclosurePanel>() {
 
             @Override

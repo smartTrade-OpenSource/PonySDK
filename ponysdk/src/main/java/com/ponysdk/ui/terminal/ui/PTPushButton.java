@@ -24,7 +24,7 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.PushButton;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public class PTPushButton extends PTCustomButton<PushButton> {
@@ -32,7 +32,7 @@ public class PTPushButton extends PTCustomButton<PushButton> {
     private PTImage image;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         image = (PTImage) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
 
         super.create(buffer, objectId, uiService);

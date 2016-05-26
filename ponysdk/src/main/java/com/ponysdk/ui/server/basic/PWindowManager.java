@@ -1,26 +1,25 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.UIContext;
 
-public class WindowManager {
+public class PWindowManager {
 
     private static final String ROOT = "WindowManager";
 
     private final Map<Integer, PWindow> windows = new HashMap<>();
 
-    private WindowManager() {
+    private PWindowManager() {
     }
 
-    public static WindowManager get() {
+    public static PWindowManager get() {
         final UIContext session = UIContext.get();
-        WindowManager windowManager = session.getAttribute(ROOT);
+        PWindowManager windowManager = session.getAttribute(ROOT);
         if (windowManager == null) {
-            windowManager = new WindowManager();
+            windowManager = new PWindowManager();
             session.setAttribute(ROOT, windowManager);
         }
         return windowManager;
@@ -46,8 +45,10 @@ public class WindowManager {
         return windows.get(windowID);
     }
 
-    public Collection<PWindow> getWindows() {
-        return windows.values();
+    public void closeAll() {
+        for (final PWindow window : windows.values()) {
+            window.close();
+        }
     }
 
 }

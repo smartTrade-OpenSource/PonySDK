@@ -32,6 +32,7 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor;
+import com.ponysdk.core.concurrent.UIScheduledThreadPoolExecutor.UIRunnable;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
@@ -97,6 +98,8 @@ import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.terminal.PUnit;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
+
+    private PLabel child2;
 
     @Override
     public void start(final UIContext uiContext) {
@@ -193,7 +196,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         PRootPanel.get().add(boxContainer);
 
-        final PLabel child2 = new PLabel("Label2");
+        child2 = new PLabel("Label2");
         child2.addClickHandler(new PClickHandler() {
 
             @Override
@@ -233,7 +236,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(child);
 
         final AtomicInteger i = new AtomicInteger(100);
-        UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
+        final UIRunnable scheduleAtFixedRate = UIScheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
             final PLabel label = new PLabel();
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
@@ -241,6 +244,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         } , 5, 5, TimeUnit.SECONDS);
 
         w3.open();
+
+        w3.addCloseHandler((event) -> scheduleAtFixedRate.cancel());
 
         return w3;
     }
@@ -271,6 +276,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         w.add(windowContainer);
         final PLabel child = new PLabel("Window 1");
         child.setText("Modified Window 1");
+
+        child.addClickHandler((event) -> {
+            child2.setText("Touched by God");
+            PScript.execute("alert('coucou');");
+            child.setText("Clicked Window 1");
+        });
+
         windowContainer.add(child);
 
         final AtomicInteger i = new AtomicInteger();

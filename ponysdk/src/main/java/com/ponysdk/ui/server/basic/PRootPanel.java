@@ -46,10 +46,6 @@ public class PRootPanel extends PAbsolutePanel {
 
     private final String id;
 
-    private PRootPanel(final String id) {
-        this(PWindow.EMPTY_WINDOW_ID, id);
-    }
-
     private PRootPanel(final int windowID, final String id) {
         super(windowID);
         this.id = id;

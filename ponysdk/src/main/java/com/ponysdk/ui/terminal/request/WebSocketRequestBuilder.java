@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal.request;
 
+import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 
 public class WebSocketRequestBuilder implements RequestBuilder {
@@ -34,8 +35,8 @@ public class WebSocketRequestBuilder implements RequestBuilder {
     }
 
     @Override
-    public void send(final String s) {
-        webSocketClient.send(s);
+    public void send(final JSONValue value) {
+        webSocketClient.send(value.toString());
     }
 
 }

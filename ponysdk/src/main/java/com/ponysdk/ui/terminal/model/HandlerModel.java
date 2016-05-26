@@ -39,8 +39,7 @@ public enum HandlerModel {
     HANDLER_SELECTION_HANDLER,
     HANDLER_STRING_SELECTION_HANDLER,
     HANDLER_STREAM_REQUEST_HANDLER,
-    HANDLER_SHOW_RANGE,
-    HANDLER_OPEN_HANDLER;
+    HANDLER_SHOW_RANGE;
 
     public byte getValue() {
         return (byte) ordinal();

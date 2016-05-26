@@ -40,7 +40,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -59,7 +59,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     protected boolean autoHide;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         final BinaryModel binaryModel = buffer.getBinaryModel();
         if (ServerToClientModel.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
             autoHide = binaryModel.getBooleanValue();
@@ -86,7 +86,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         };
     }
 
-    protected void addCloseHandler(final UIService uiService) {
+    protected void addCloseHandler(final UIBuilder uiService) {
         cast().addCloseHandler(new CloseHandler<PopupPanel>() {
 
             @Override
@@ -99,7 +99,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_POPUP_POSITION_CALLBACK.equals(handlerModel)) {
             final PopupPanel popup = cast();
             popup.setVisible(true);

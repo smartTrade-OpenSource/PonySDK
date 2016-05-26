@@ -78,7 +78,7 @@ import com.ponysdk.ui.terminal.ui.PTStreamResource;
 import com.ponysdk.ui.terminal.ui.PTWindow;
 import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
-public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpResponseReceivedEvent.Handler,
+public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler,
         HttpRequestSendEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
@@ -89,7 +89,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final List<PTInstruction> stackedInstructions = new ArrayList<>();
+    private final List<JSONObject> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
     // private final Map<Integer, JSONObject> incomingMessageQueue = new HashMap<>();
@@ -151,7 +151,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    @Override
     public void onCommunicationError(final Throwable exception) {
         rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
@@ -205,8 +204,27 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
 
+                    // Type
+                    BinaryModel model = buffer.getBinaryModel();
+
+                    while (buffer.hasRemaining()) {
+                        model = buffer.getBinaryModel();
+                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
+                            if (model.getIntValue() != requestedWindowId) {
+                                buffer.rewind(model);
+                                break;
+                            } else {
+                                // Type
+                                model = buffer.getBinaryModel();
+                            }
+                        } else if (model.isBeginKey()) {
+                            buffer.rewind(model);
+                            break;
+                        }
+                    }
+
                     // FIXME To be remove
-                    update(buffer);
+                    // update(buffer);
                 }
             } else {
                 buffer.rewind(windowIdModel);
@@ -244,7 +262,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    @Override
     public void update(final JSONValue data) {
         JSONArray jsonArray = data.isArray();
         if (jsonArray == null)
@@ -256,7 +273,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    @Override
     public void stackError(final PTInstruction currentInstruction, final Throwable e) {
         String msg;
         if (e.getMessage() == null)
@@ -371,6 +387,8 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         pendingClose = true;
         sendDataToServer(buffer);
 
+        PTWindowManager.closeAll();
+
         // TODO nciaravola no need
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -398,7 +416,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         lastReceived = receivedSeqNum;
     }
 
-    @Override
     public PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
@@ -407,7 +424,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         return ptObject;
     }
 
-    @Override
     public void stackInstrution(final PTInstruction instruction) {
         if (!updateMode)
             sendDataToServer(instruction);
@@ -415,7 +431,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
             stackedInstructions.add(instruction);
     }
 
-    @Override
     public void flushEvents() {
         if (stackedInstructions.isEmpty())
             return;
@@ -425,7 +440,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         stackedInstructions.clear();
     }
 
-    @Override
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
@@ -437,7 +451,11 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         sendDataToServer(instruction);
     }
 
-    public void sendDataToServer(final List<PTInstruction> instructions) {
+    public void sendDataToServer(final JSONValue instruction) {
+        requestBuilder.send(instruction);
+    }
+
+    public void sendDataToServer(final List<JSONObject> instructions) {
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < instructions.size(); i++) {
             // TODO Weird set, always 0 ???
@@ -447,15 +465,13 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         sendDataToServer(jsonArray);
     }
 
-    @Override
-    public void sendDataToServer(final PTInstruction instruction) {
+    public void sendDataToServer(final JSONObject instruction) {
         final JSONArray jsonArray = new JSONArray();
         jsonArray.set(0, instruction);
 
         sendDataToServer(jsonArray);
     }
 
-    @Override
     public void sendDataToServer(final ReaderBuffer buffer) {
     }
 
@@ -476,7 +492,7 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         if (log.isLoggable(Level.FINE))
             log.log(Level.FINE, "Data to send " + requestData.toString());
 
-        requestBuilder.send(requestData.toString());
+        requestBuilder.send(requestData);
     }
 
     private Timer scheduleLoadingMessageBox() {
@@ -557,14 +573,12 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         }
     }
 
-    @Override
     public PTObject getPTObject(final int id) {
         final PTObject ptObject = objectByID.get(id);
         if (ptObject == null) log.warning("PTObject #" + id + " not found");
         return ptObject;
     }
 
-    @Override
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
         if (objectID != null)
@@ -572,7 +586,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         return null;
     }
 
-    @Override
     public void registerUIObject(final int ID, final UIObject uiObject) {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
@@ -623,7 +636,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
-    @Override
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
     }
@@ -636,7 +648,6 @@ public class UIBuilder implements ValueChangeHandler<String>, UIService, HttpRes
 
     // FIXME REMOVE
     @Deprecated
-    @Override
     public void processInstruction(final PTInstruction instruction) throws Exception {
         log.severe("Deprecated UIBuilder#processInstruction() method, don't use it : " + instruction);
     }

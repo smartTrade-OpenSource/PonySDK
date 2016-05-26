@@ -26,7 +26,6 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.ui.terminal.UIBuilder;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.HandlerModel;
@@ -42,7 +41,7 @@ public class PTImage extends PTWidget<Image> {
     private int height = -1;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         final BinaryModel urlModel = buffer.getBinaryModel();
         if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
             final BinaryModel leftModel = buffer.getBinaryModel();
@@ -75,7 +74,7 @@ public class PTImage extends PTWidget<Image> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
             // ServerToClientModel.STREAM_REQUEST_ID
             cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"

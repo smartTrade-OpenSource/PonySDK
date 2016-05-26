@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public abstract class PTPanel<T extends Panel> extends PTWidget<T> {
@@ -44,7 +44,7 @@ public abstract class PTPanel<T extends Panel> extends PTWidget<T> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIService uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
         uiObject.remove(asWidget(ptObject));
     }
 

@@ -71,7 +71,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.ui.terminal.DomHandlerType;
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -107,7 +107,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_DOM_HANDLER.equals(handlerModel)) {
             // ServerToClientModel.DOM_HANDLER_CODE
             final DomHandlerType domHandlerType = DomHandlerType.values()[buffer.getBinaryModel().getByteValue()];
@@ -118,7 +118,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     @Override
-    public void removeHandler(final ReaderBuffer buffer, final UIService uiService) {
+    public void removeHandler(final ReaderBuffer buffer, final UIBuilder uiService) {
         /*
          * FIXME
          * if (buffer.containsKey(HandlerModel.HANDLER_DOM_HANDLER)) {
@@ -147,7 +147,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     @Override
-    public Widget asWidget(final int objectID, final UIService uiService) {
+    public Widget asWidget(final int objectID, final UIBuilder uiService) {
         return asWidget(uiService.getPTObject(objectID));
     }
 
@@ -164,7 +164,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     protected void triggerMouseEvent(final DomHandlerType domHandlerType,
-            final UIService uiService, final MouseEvent<?> event) {
+            final UIBuilder uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
         final JSONArray eventInfo = new JSONArray();
         eventInfo.set(0, new JSONNumber(event.getClientX()));
@@ -187,7 +187,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         preventOrStopEvent(event);
     }
 
-    private void triggerDomEvent(final DomHandlerType domHandlerType, final UIService uiService, final DomEvent<?> event) {
+    private void triggerDomEvent(final DomHandlerType domHandlerType, final UIBuilder uiService, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
         uiService.sendDataToServer(asWidget(), eventInstruction);
         preventOrStopEvent(event);
@@ -199,7 +199,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         return eventInstruction;
     }
 
-    private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType, final UIService uiService) {
+    private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType, final UIBuilder uiService) {
         final Widget widget = asWidget();
         switch (domHandlerType) {
             case CLICK:

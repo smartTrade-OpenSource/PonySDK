@@ -82,6 +82,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private static Logger log = LoggerFactory.getLogger(PWidget.class);
 
+    public static final String HUNDRED_PERCENT = "100%";
+
     protected PWidget parent;
 
     protected Object data;
@@ -297,8 +299,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setSizeFull() {
-        this.width = Size.HUNDRED_PERCENT;
-        this.height = Size.HUNDRED_PERCENT;
+        this.width = HUNDRED_PERCENT;
+        this.height = HUNDRED_PERCENT;
         saveUpdate(ServerToClientModel.WIDGET_FULL_SIZE);
     }
 

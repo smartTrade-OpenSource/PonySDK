@@ -56,11 +56,11 @@ public class PRootLayoutPanel extends PLayoutPanel {
     }
 
     public static PRootLayoutPanel get() {
-        return get(PWindow.EMPTY_WINDOW_ID, null);
+        return get(PWindow.MAIN_WINDOW_ID, null);
     }
 
     public static PRootLayoutPanel get(final String id) {
-        return get(PWindow.EMPTY_WINDOW_ID, id);
+        return get(PWindow.MAIN_WINDOW_ID, id);
     }
 
     public static PRootLayoutPanel get(final int windowID, final String id) {

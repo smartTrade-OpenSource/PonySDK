@@ -16,7 +16,8 @@ public class PTWindowManager {
 
     private final Map<Integer, PTWindow> windowById = new HashMap<>();
 
-    private PTWindowManager() {}
+    private PTWindowManager() {
+    }
 
     public static PTWindowManager get() {
         return instance;
@@ -35,5 +36,11 @@ public class PTWindowManager {
     @Export("getWindow")
     public static PTWindow getWindow(final int windowID) {
         return get().windowById.get(windowID);
+    }
+
+    public static final void closeAll() {
+        for (final PTWindow window : get().windowById.values()) {
+            window.close();
+        }
     }
 }

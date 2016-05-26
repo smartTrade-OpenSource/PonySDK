@@ -26,7 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.ponysdk.ui.terminal.UIService;
+import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -37,10 +37,10 @@ public class PTScript extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTScript.class.getName());
 
-    private UIService uiService;
+    private UIBuilder uiService;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.uiService = uiService;
     }

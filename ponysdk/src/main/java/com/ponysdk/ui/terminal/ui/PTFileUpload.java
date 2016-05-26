@@ -33,7 +33,6 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.ui.terminal.UIBuilder;
-import com.ponysdk.ui.terminal.UIService;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
@@ -48,7 +47,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
     final FileUpload fileUpload = new FileUpload();
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIService uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         uiObject.setEncoding(FormPanel.ENCODING_MULTIPART);
@@ -75,7 +74,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIService uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_CHANGE_HANDLER.equals(handlerModel)) {
             fileUpload.addChangeHandler(new ChangeHandler() {
 

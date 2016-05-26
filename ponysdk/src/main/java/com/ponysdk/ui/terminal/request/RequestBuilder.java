@@ -23,8 +23,10 @@
 
 package com.ponysdk.ui.terminal.request;
 
+import com.google.gwt.json.client.JSONValue;
+
 public interface RequestBuilder {
 
-    public abstract void send(String s);
+    public abstract void send(JSONValue requestData);
 
 }

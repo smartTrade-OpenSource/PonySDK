@@ -31,6 +31,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.event.HttpRequestSendEvent;
@@ -54,10 +55,10 @@ public class HttpRequestBuilder implements RequestBuilder {
     }
 
     @Override
-    public void send(final String s) {
+    public void send(final JSONValue s) {
         try {
             UIBuilder.getRootEventBus().fireEvent(new HttpRequestSendEvent());
-            requestBuilder.sendRequest(s, new com.google.gwt.http.client.RequestCallback() {
+            requestBuilder.sendRequest(s.toString(), new com.google.gwt.http.client.RequestCallback() {
 
                 @Override
                 public void onResponseReceived(final Request request, final Response response) {
