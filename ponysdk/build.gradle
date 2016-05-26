@@ -40,8 +40,6 @@ dependencies {
     xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
     
     gwtdev 'com.google.gwt:gwt-dev:2.7.0'
-	//gwtdev 'javax.validation:validation-api:1.0.0.GA'
-    //gwtdev 'javax.validation:validation-api:1.0.0.GA-sources'
 
 	compile('javax.validation:validation-api:1.0.0.GA') {
         artifact {
