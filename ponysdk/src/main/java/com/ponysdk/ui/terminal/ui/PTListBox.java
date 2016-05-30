@@ -34,7 +34,6 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -46,40 +45,40 @@ public class PTListBox extends PTFocusWidget<ListBox> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_CHANGE_HANDLER.equals(handlerModel)) {
-            uiObject.addChangeHandler(new ChangeHandler() {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        super.create(buffer, objectId, uiService);
+        addHandler(uiService);
+    }
 
-                @Override
-                public void onChange(final ChangeEvent event) {
-                    final int selectedIndex = uiObject.getSelectedIndex();
-                    if (selectedIndex == -1) {
-                        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                        // eventInstruction.put(Model.TYPE_EVENT);
-                        eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
-                        eventInstruction.put(ClientToServerModel.VALUE, "-1");
-                        uiService.sendDataToServer(uiObject, eventInstruction);
-                    } else {
-                        String selectedIndexes = selectedIndex + "";
-                        for (int i = 0; i < uiObject.getItemCount(); i++) {
-                            if (uiObject.isItemSelected(i)) {
-                                if (i != selectedIndex) {
-                                    selectedIndexes += "," + i;
-                                }
+    private void addHandler(final UIBuilder uiService) {
+        uiObject.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(final ChangeEvent event) {
+                final int selectedIndex = uiObject.getSelectedIndex();
+                if (selectedIndex == -1) {
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                    // eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
+                    eventInstruction.put(ClientToServerModel.VALUE, "-1");
+                    uiService.sendDataToServer(uiObject, eventInstruction);
+                } else {
+                    String selectedIndexes = selectedIndex + "";
+                    for (int i = 0; i < uiObject.getItemCount(); i++) {
+                        if (uiObject.isItemSelected(i)) {
+                            if (i != selectedIndex) {
+                                selectedIndexes += "," + i;
                             }
                         }
-                        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                        // eventInstruction.put(Model.TYPE_EVENT);
-                        eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
-                        eventInstruction.put(ClientToServerModel.VALUE, selectedIndexes);
-                        uiService.sendDataToServer(uiObject, eventInstruction);
                     }
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                    // eventInstruction.put(Model.TYPE_EVENT);
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
+                    eventInstruction.put(ClientToServerModel.VALUE, selectedIndexes);
+                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
-            });
-            return;
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+            }
+        });
     }
 
     @Override

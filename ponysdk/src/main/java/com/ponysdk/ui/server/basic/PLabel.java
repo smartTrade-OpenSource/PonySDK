@@ -52,8 +52,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a
- * &lt;div&gt; element, causing it to be displayed with block layout.
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
+ * widget uses a &lt;div&gt; element, causing it to be displayed with block
+ * layout.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
@@ -61,9 +62,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
 
-    private static final String DEFAULT_TEXT_VALUE = null;
-
-    private String text = DEFAULT_TEXT_VALUE;
+    private String text;
 
     public PLabel() {
     }
@@ -75,7 +74,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

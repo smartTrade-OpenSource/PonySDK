@@ -42,7 +42,6 @@ import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
@@ -84,9 +83,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     @Override
     protected void init0() {
         super.init0();
-
         if (this.containsEmptyItem) addItem(EMPTY, null);
-        saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
     }
 
     @Override
@@ -246,8 +243,10 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         checkIndex(index);
         this.selectedIndex = index;
 
-        if (isMultipleSelect && selected) selectedIndexes.add(index);
-        else selectedIndexes.remove(index);
+        if (isMultipleSelect && selected)
+            selectedIndexes.add(index);
+        else
+            selectedIndexes.remove(index);
 
         saveUpdate(ServerToClientModel.SELECTED, selected, ServerToClientModel.INDEX, index);
     }
@@ -270,8 +269,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void addChangeHandler(final PChangeHandler handler) {
-        if (handlers == null)
-            handlers = new ArrayList<>();
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
@@ -332,13 +330,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void checkItem(final String label) {
-        if (label == null)
-            throw new NullPointerException("Null item is unsupported");
+        if (label == null) throw new NullPointerException("Null item is unsupported");
     }
 
     private void checkIndex(final int index) {
-        if (index >= getItemCount())
-            throw new IndexOutOfBoundsException();
+        if (index >= getItemCount()) throw new IndexOutOfBoundsException();
     }
 
     public List<Integer> getSelectedIndexes() {

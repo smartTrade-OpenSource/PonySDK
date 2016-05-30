@@ -35,17 +35,17 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PButton extends PButtonBase {
 
-	public PButton() {
-		super();
-	}
+    public PButton() {
+        super();
+    }
 
-	public PButton(final String text) {
-		super(text);
-	}
+    public PButton(final String text) {
+        super(text);
+    }
 
-	@Override
-	protected WidgetType getWidgetType() {
-		return WidgetType.BUTTON;
-	}
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.BUTTON;
+    }
 
 }

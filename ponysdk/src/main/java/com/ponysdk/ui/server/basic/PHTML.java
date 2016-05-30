@@ -24,6 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
@@ -45,10 +47,11 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PHTML extends PLabel implements PHasHTML {
 
-    private static final boolean DEFAULT_WORD_WRAP_VALUE = false;
+    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
+    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
     private String html;
-    private boolean wordWrap = DEFAULT_WORD_WRAP_VALUE;
+    private boolean wordWrap = false;
 
     public PHTML() {
         super();
@@ -67,8 +70,8 @@ public class PHTML extends PLabel implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
-        if (wordWrap != DEFAULT_WORD_WRAP_VALUE) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
+        if (html != null) parser.parse(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        if (wordWrap != false) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override
@@ -85,7 +88,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
     public boolean isWordWrap() {
