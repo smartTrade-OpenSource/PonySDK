@@ -24,6 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
@@ -34,11 +36,11 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
-    private static final String DEFAULT_TEXT_VALUE = null;
-    private static final String DEFAULT_HTML_VALUE = null;
+    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
+    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
-    private String text = DEFAULT_TEXT_VALUE;
-    private String html = DEFAULT_HTML_VALUE;
+    private String text;
+    private String html;
 
     public PButtonBase() {
     }
@@ -50,8 +52,8 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
-        if (this.html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.html != null) parser.parse(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
     @Override
@@ -70,7 +72,7 @@ public abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
     @Override

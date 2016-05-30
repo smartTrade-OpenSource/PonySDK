@@ -1,6 +1,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -10,37 +11,40 @@ import org.timepedia.exporter.client.Export;
 
 public class PTWindowManager {
 
-    private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
+	private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
-    private static PTWindowManager instance = new PTWindowManager();
+	private static PTWindowManager instance = new PTWindowManager();
 
-    private final Map<Integer, PTWindow> windowById = new HashMap<>();
+	private final Map<Integer, PTWindow> windowById = new HashMap<>();
 
-    private PTWindowManager() {
-    }
+	private PTWindowManager() {
+	}
 
-    public static PTWindowManager get() {
-        return instance;
-    }
+	public static PTWindowManager get() {
+		return instance;
+	}
 
-    public void register(final PTWindow window) {
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Register window : " + window.getObjectID());
+	public void register(final PTWindow window) {
+		if (log.isLoggable(Level.INFO))
+			log.log(Level.INFO, "Register window : " + window.getObjectID());
 
-        windowById.put(window.getObjectID(), window);
-    }
+		windowById.put(window.getObjectID(), window);
+	}
 
-    public void unregister(final PTWindow window) {
-        windowById.remove(window.getObjectID());
-    }
+	public void unregister(final PTWindow window) {
+		windowById.remove(window.getObjectID());
+	}
 
-    @Export("getWindow")
-    public static PTWindow getWindow(final int windowID) {
-        return get().windowById.get(windowID);
-    }
+	@Export("getWindow")
+	public static PTWindow getWindow(final int windowID) {
+		return get().windowById.get(windowID);
+	}
 
-    public static final void closeAll() {
-        for (final PTWindow window : get().windowById.values()) {
-            window.close();
-        }
-    }
+	public static final void closeAll() {
+		final Collection<PTWindow> windows = get().windowById.values();
+		for (final PTWindow window : windows) {
+			get().unregister(window);
+			window.close();
+		}
+	}
 }

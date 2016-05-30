@@ -12,60 +12,61 @@ import com.ponysdk.core.tools.ListenerCollection;
 
 public class SessionManager {
 
-    private final Map<String, Session> sessionsById = new ConcurrentHashMap<>();
+	private final Map<String, PSession> sessionsById = new ConcurrentHashMap<>();
 
-    private static SessionManager INSTANCE = new SessionManager();
-    private final ListenerCollection<SessionListener> sessionListeners = new ListenerCollection<>();
+	private static SessionManager INSTANCE = new SessionManager();
+	private final ListenerCollection<SessionListener> sessionListeners = new ListenerCollection<>();
 
-    public static SessionManager get() {
-        return INSTANCE;
-    }
+	public static SessionManager get() {
+		return INSTANCE;
+	}
 
-    public Session getSession(final String id) {
-        return sessionsById.get(id);
-    }
+	public PSession getSession(final String id) {
+		return sessionsById.get(id);
+	}
 
-    public Collection<Session> getSessions() {
-        return sessionsById.values();
-    }
+	public Collection<PSession> getSessions() {
+		return sessionsById.values();
+	}
 
-    public Collection<Application> getApplications() {
-        final List<Application> applications = new ArrayList<>();
-        for (final Session session : sessionsById.values()) {
-            final Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
-            if (application != null) applications.add(application);
-        }
-        return applications;
-    }
+	public Collection<Application> getApplications() {
+		final List<Application> applications = new ArrayList<>();
+		for (final PSession session : sessionsById.values()) {
+			final Application application = (Application) session.getAttribute(Application.class.getCanonicalName());
+			if (application != null)
+				applications.add(application);
+		}
+		return applications;
+	}
 
-    public Application getApplication(final Session session) {
-        return (Application) session.getAttribute(Application.class.getCanonicalName());
-    }
+	public Application getApplication(final PSession session) {
+		return (Application) session.getAttribute(Application.class.getCanonicalName());
+	}
 
-    public void setApplication(final String id, Application application) {
-        getSession(id).setAttribute(Application.class.getCanonicalName(), application);
-    }
+	public void setApplication(final String id, final Application application) {
+		getSession(id).setAttribute(Application.class.getCanonicalName(), application);
+	}
 
-    public void registerSessionListener(final SessionListener listener) {
-        sessionListeners.register(listener);
-    }
+	public void registerSessionListener(final SessionListener listener) {
+		sessionListeners.register(listener);
+	}
 
-    public void unregisterSessionListener(final SessionListener listener) {
-        sessionListeners.unregister(listener);
-    }
+	public void unregisterSessionListener(final SessionListener listener) {
+		sessionListeners.unregister(listener);
+	}
 
-    void registerSession(final Session session) {
-        sessionsById.put(session.getId(), session);
-        for (final SessionListener listener : sessionListeners) {
-            listener.sessionCreated(session);
-        }
-    }
+	void registerSession(final PSession session) {
+		sessionsById.put(session.getId(), session);
+		for (final SessionListener listener : sessionListeners) {
+			listener.onSessionCreated(session);
+		}
+	}
 
-    Session unregisterSession(final String sessionID) {
-        final Session session = sessionsById.remove(sessionID);
-        for (final SessionListener listener : sessionListeners) {
-            listener.sessionDestroyed(session);
-        }
-        return session;
-    }
+	PSession unregisterSession(final String sessionID) {
+		final PSession session = sessionsById.remove(sessionID);
+		for (final SessionListener listener : sessionListeners) {
+			listener.onSessionDestroyed(session);
+		}
+		return session;
+	}
 }

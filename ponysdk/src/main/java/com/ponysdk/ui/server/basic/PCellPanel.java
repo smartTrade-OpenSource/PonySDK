@@ -31,23 +31,20 @@ import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel whose child widgets are contained within the cells of a table.
- * Each cell's size may be set independently. Each child widget can take up a subset of its cell and
- * can be aligned within it.
+ * A panel whose child widgets are contained within the cells of a table. Each
+ * cell's size may be set independently. Each child widget can take up a subset
+ * of its cell and can be aligned within it.
  */
 public abstract class PCellPanel extends PComplexPanel {
 
-    private static final Integer DEFAULT_BORDER_WIDTH_VALUE = null;
-    private static final Integer DEFAULT_SPACING_VALUE = null;
-
-    private Integer borderWidth = DEFAULT_BORDER_WIDTH_VALUE;
-    private Integer spacing = DEFAULT_SPACING_VALUE;
+    private Integer borderWidth;
+    private Integer spacing;
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.borderWidth != DEFAULT_BORDER_WIDTH_VALUE) parser.parse(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
-        if (this.spacing != DEFAULT_SPACING_VALUE) parser.parse(ServerToClientModel.SPACING, this.spacing);
+        if (this.borderWidth != null) parser.parse(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        if (this.spacing != null) parser.parse(ServerToClientModel.SPACING, this.spacing);
     }
 
     public void setBorderWidth(final Integer borderWidth) {
@@ -63,13 +60,11 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
-        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue(), ServerToClientModel.WIDGET_ID,
-                widget.getID());
+        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue(), ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
-        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue(), ServerToClientModel.WIDGET_ID,
-                widget.getID());
+        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue(), ServerToClientModel.WIDGET_ID, widget.getID());
     }
 
     public void setCellHeight(final PWidget widget, final String height) {

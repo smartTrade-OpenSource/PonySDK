@@ -3,8 +3,8 @@ package com.ponysdk.core.servlet;
 
 public interface SessionListener {
 
-    void sessionCreated(Session session);
+	void onSessionCreated(PSession session);
 
-    void sessionDestroyed(Session session);
+	void onSessionDestroyed(PSession session);
 
 }

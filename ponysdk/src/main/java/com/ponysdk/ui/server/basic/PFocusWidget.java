@@ -54,12 +54,11 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers,
-        HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
+public abstract class PFocusWidget extends PWidget
+        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
-
     private boolean focused = false;
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;

@@ -30,7 +30,6 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -42,21 +41,18 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
     }
 
     @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        super.create(buffer, objectId, uiService);
+        addValueChangeHandler(uiService);
+    }
+
+    @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
             uiObject.setValue(binaryModel.getBooleanValue());
             return true;
         }
         return super.update(buffer, binaryModel);
-    }
-
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
-            addValueChangeHandler(uiService);
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
     }
 
     protected void addValueChangeHandler(final UIBuilder uiService) {

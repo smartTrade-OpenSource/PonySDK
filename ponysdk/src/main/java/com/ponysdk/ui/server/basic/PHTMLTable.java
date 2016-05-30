@@ -35,15 +35,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.ponysdk.ui.server.model.ServerBinaryModel;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and
  * {@link PFlexTable}.
  */
-public abstract class PHTMLTable extends PPanel {
+public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     protected class Row implements Comparable<Row> {
 
@@ -103,8 +101,7 @@ public abstract class PHTMLTable extends PPanel {
         public void removeStyleName(final int row, final String styleName) {
             final Set<String> styles = styleNames.get(row);
 
-            if (styles == null)
-                return;
+            if (styles == null) return;
 
             if (styles.remove(styleName)) {
                 saveUpdate(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName, ServerToClientModel.ROW, row);
@@ -149,34 +146,6 @@ public abstract class PHTMLTable extends PPanel {
         }
     }
 
-    public class PCellFormatter {
-
-        public void addStyleName(final int row, final int column, final String styleName) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-
-        public void removeStyleName(final int row, final int column, final String styleName) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-
-        public void setStyleName(final int row, final int column, final String styleName) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-
-        public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue()),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-
-        public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue()),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-    }
-
     public class PColumnFormatter {
 
         public void setWidth(final int column, final String width) {
@@ -200,7 +169,7 @@ public abstract class PHTMLTable extends PPanel {
 
     private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
 
-    private PCellFormatter cellFormatter;
+    private T cellFormatter;
 
     private final PColumnFormatter columnFormatter = new PColumnFormatter();
 
@@ -213,15 +182,13 @@ public abstract class PHTMLTable extends PPanel {
     private final PRowFormatter rowFormatter = new PRowFormatter();
 
     public int getRowCount() {
-        if (columnByRow.isEmpty())
-            return 0;
+        if (columnByRow.isEmpty()) return 0;
         return columnByRow.lastKey().value + 1;
     }
 
     public int getCellCount(final int row) {
         final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn == null || cellByColumn.isEmpty())
-            return 0;
+        if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
         return cellByColumn.lastKey() + 1;
     }
 
@@ -232,7 +199,7 @@ public abstract class PHTMLTable extends PPanel {
         }
     }
 
-    public PCellFormatter getCellFormatter() {
+    public T getCellFormatter() {
         return cellFormatter;
     }
 
@@ -272,8 +239,7 @@ public abstract class PHTMLTable extends PPanel {
 
     public void removeRow(final int row) {
         final TreeMap<Integer, PWidget> widgetByColumn = columnByRow.remove(new Row(row));
-        if (widgetByColumn == null)
-            return;
+        if (widgetByColumn == null) return;
         getRowFormatter().removeRowStyle(row);
 
         final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
@@ -351,7 +317,7 @@ public abstract class PHTMLTable extends PPanel {
         saveUpdate(ServerToClientModel.CELL_SPACING, spacing);
     }
 
-    protected void setCellFormatter(final PCellFormatter cellFormatter) {
+    protected void setCellFormatter(final T cellFormatter) {
         this.cellFormatter = cellFormatter;
     }
 
@@ -366,8 +332,7 @@ public abstract class PHTMLTable extends PPanel {
             addWidgetToMap(row, column, widget);
 
             // Physical attach.
-            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
             widget.attach(windowID);
 
             adopt(widget);
@@ -384,8 +349,7 @@ public abstract class PHTMLTable extends PPanel {
 
     private PWidget removeWidgetFromMap(final PWidget widget) {
         final Cell cell = cellByWidget.remove(widget);
-        if (cell == null)
-            return null; // already removed
+        if (cell == null) return null; // already removed
         final Row row = new Row(cell.row);
         final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
         if (cellByColumn != null) {

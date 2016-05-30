@@ -61,10 +61,6 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation {
 
-    // TODO nciaravola must be moved in PTDisclosurePanel
-    private static final String CLOSED = "images/disclosure_closed.png";
-    private static final String OPENNED = "images/disclosure_openned.png";
-
     private boolean animationEnabled = false;
     private PWidget content;
     private boolean isOpen;
@@ -73,36 +69,21 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     private final List<POpenHandler> openHandlers = new ArrayList<>();
 
     private final String headerText;
-    private final PImage openImage;
-    private final PImage closeImage;
 
     public PDisclosurePanel(final String headerText) {
-        this(headerText, new PImage(OPENNED, 0, 0, 14, 14), new PImage(CLOSED, 0, 0, 14, 14));
-    }
-
-    public PDisclosurePanel(final String headerText, final PImage openImage, final PImage closeImage) {
         this.headerText = headerText;
-        this.openImage = openImage;
-        this.closeImage = closeImage;
-    }
-
-    @Override
-    protected boolean attach(final int windowID) {
-        // WORKAROUND : element and sub elements need to be created before any add
-        final boolean openImageResult = openImage.attach(windowID);
-        final boolean closeImageResult = closeImage.attach(windowID);
-        final boolean result = super.attach(windowID);
-        if (openImageResult) openImage.executeAdd(openImage.getID(), ID);
-        if (closeImageResult) closeImage.executeAdd(closeImage.getID(), ID);
-        return result;
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.TEXT, headerText);
-        parser.parse(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        parser.parse(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
+
+        // TODO add ImageResources parametters ..
+        // parser.parse(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG,
+        // openImage.getID());
+        // parser.parse(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG,
+        // closeImage.getID());
     }
 
     @Override
@@ -158,8 +139,10 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void add(final PWidget w) {
-        if (this.getContent() == null) setContent(w);
-        else throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
+        if (this.getContent() == null)
+            setContent(w);
+        else
+            throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
     }
 
     @Override

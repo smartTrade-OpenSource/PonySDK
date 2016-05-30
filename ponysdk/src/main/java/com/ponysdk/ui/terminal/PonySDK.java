@@ -36,11 +36,15 @@ import org.timepedia.exporter.client.Exportable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ClosingEvent;
+import com.google.gwt.user.client.Window.ClosingHandler;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -48,6 +52,7 @@ import com.ponysdk.ui.terminal.request.ParentWindowRequest;
 import com.ponysdk.ui.terminal.request.RequestCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketClient2;
+import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
 
@@ -55,179 +60,181 @@ import elemental.client.Browser;
 @Export(value = "ponysdk", all = false)
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
-    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
+	private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
-    private static PonySDK INSTANCE;
-    private static final UIBuilder uiBuilder = new UIBuilder();
+	private static PonySDK INSTANCE;
+	private static final UIBuilder uiBuilder = new UIBuilder();
 
-    private int applicationViewID;
+	private int applicationViewID;
 
-    private WebSocketClient2 socketClient;
+	private WebSocketClient2 socketClient;
 
-    private final List<StartupListener> listener = new ArrayList<>();
+	private final List<StartupListener> listener = new ArrayList<>();
 
-    private PonySDK() {
-    }
+	private PonySDK() {
+		Window.addWindowClosingHandler(new ClosingHandler() {
 
-    @ExportConstructor
-    public static PonySDK constructor() {
-        if (INSTANCE == null) {
-            INSTANCE = new PonySDK();
-            GWT.setUncaughtExceptionHandler(INSTANCE);
-            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
-        }
-        return INSTANCE;
-    }
+			@Override
+			public void onWindowClosing(final ClosingEvent event) {
+				PTWindowManager.closeAll();
+			}
+		});
+		Window.addCloseHandler(new CloseHandler<Window>() {
 
-    @Export
-    public void start() {
-        try {
-            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
-            final elemental.html.Window window = Browser.getWindow();
-            final elemental.html.Window opener = window.getOpener();
+			@Override
+			public void onClose(final CloseEvent<Window> event) {
+				PTWindowManager.closeAll();
+			}
+		});
+	}
 
-            if (opener == null) {
-                Integer viewID = null;
-                final Storage storage = Storage.getSessionStorageIfSupported();
-                if (storage != null) {
-                    final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
-                    if (v != null && !v.isEmpty())
-                        viewID = Integer.parseInt(v);
-                }
+	@ExportConstructor
+	public static PonySDK constructor() {
+		if (INSTANCE == null) {
+			INSTANCE = new PonySDK();
+			GWT.setUncaughtExceptionHandler(INSTANCE);
+			if (log.isLoggable(Level.INFO))
+				log.info("Creating PonySDK instance");
+		}
+		return INSTANCE;
+	}
 
-                if (log.isLoggable(Level.INFO)) log.info("View ID : " + viewID);
+	@Export
+	public void start() {
+		try {
+			if (log.isLoggable(Level.INFO))
+				log.info("Starting PonySDK instance");
+			final elemental.html.Window window = Browser.getWindow();
+			final elemental.html.Window opener = window.getOpener();
 
-                applicationViewID = viewID != null ? viewID : 0;
+			if (opener == null) {
+				Integer viewID = null;
+				final Storage storage = Storage.getSessionStorageIfSupported();
+				if (storage != null) {
+					final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
+					if (v != null && !v.isEmpty())
+						viewID = Integer.parseInt(v);
+				}
 
-                final StringBuilder builder = new StringBuilder();
-                builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
-                builder.append("ws?");
-                builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID).append("&");
-                builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
-                builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
-                builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
+				if (log.isLoggable(Level.INFO))
+					log.info("View ID : " + viewID);
 
-                socketClient = new WebSocketClient2(builder.toString(), new WebSocketCallback() {
+				applicationViewID = viewID != null ? viewID : 0;
 
-                    @Override
-                    public void connected() {
-                        if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-                        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
-                    }
+				final StringBuilder builder = new StringBuilder();
+				builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
+				builder.append("ws?");
+				builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID)
+						.append("&");
+				builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
+				builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
+				builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-                    @Override
-                    public void disconnected() {
-                        if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-                        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-                    }
+				socketClient = new WebSocketClient2(builder.toString(), new WebSocketCallback() {
 
-                    /**
-                     * Message from server to Main terminal
-                     */
-                    @Override
-                    public void message(final ReaderBuffer buffer) {
-                        try {
-                            uiBuilder.updateMainTerminal(buffer);
-                        } catch (final Exception e) {
-                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
-                        }
-                    }
+					@Override
+					public void connected() {
+						if (log.isLoggable(Level.INFO))
+							log.info("WebSoket connected");
+						uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
+					}
 
-                });
-            } else {
-                final String windowId = Window.Location.getParameter("wid");
-                uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
+					@Override
+					public void disconnected() {
+						if (log.isLoggable(Level.INFO))
+							log.info("WebSoket disconnected");
+						uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
+					}
 
-                    /**
-                     * Message from Main terminal to the matching terminal
-                     */
-                    @Override
-                    public void onDataReceived(final ReaderBuffer buffer) {
-                        uiBuilder.update(buffer);
-                    }
+					/**
+					 * Message from server to Main terminal
+					 */
+					@Override
+					public void message(final ReaderBuffer buffer) {
+						try {
+							uiBuilder.updateMainTerminal(buffer);
+						} catch (final Exception e) {
+							log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+						}
+					}
 
-                    @Override
-                    public void onDataReceived(final JSONObject object) {
-                    }
+				});
+			} else {
+				final String windowId = Window.Location.getParameter("wid");
+				uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
 
-                    @Override
-                    public void onError(final Throwable exception) {
-                    }
-                }));
+					/**
+					 * Message from Main terminal to the matching terminal
+					 */
+					@Override
+					public void onDataReceived(final ReaderBuffer buffer) {
+						uiBuilder.update(buffer);
+					}
 
-                // window.addEventListener("storage", this, false);
+					@Override
+					public void onDataReceived(final JSONObject object) {
+					}
 
-                //                final Event createEvent = opener.getDocument().createEvent("ponysdk.onstarted");
-                //                window.dispatchEvent(createEvent);
+					@Override
+					public void onError(final Throwable exception) {
+					}
+				}));
+			}
 
-                // exportWindowReceiver(window);
-                // window.getDocument().addEventListener("message", new
-                // EventListener() {
-                //
-                // @Override
-                // public void handleEvent(final Event event) {
-                // GWT.log("data received in window : " + event);
-                // final MessageEvent messageEvent = (MessageEvent) event;
-                // uiBuilder.update(JSONParser.parseStrict((String)
-                // messageEvent.getData()).isObject());
-                // }
-                // }, false);
-            }
+		} catch (final Throwable e) {
+			log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
+		}
+	}
 
-        } catch (final Throwable e) {
-            log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
-        }
-    }
+	/**
+	 * From other terminal to the server
+	 */
+	@Export
+	public void sendDataToServer(final String jsObject) {
+		uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
+	}
 
-    /**
-     * From other terminal to the server
-     */
-    @Export
-    public void sendDataToServer(final String jsObject) {
-        uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
-    }
+	/**
+	 * From Main terminal to the server
+	 */
+	@Export
+	public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
+		final PTInstruction instruction = new PTInstruction(objectID);
+		instruction.put(ClientToServerModel.NATIVE, jsObject);
+		uiBuilder.sendDataToServer(instruction);
+	}
 
-    /**
-     * From Main terminal to the server
-     */
-    @Export
-    public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
-        final PTInstruction instruction = new PTInstruction(objectID);
-        instruction.put(ClientToServerModel.NATIVE, jsObject);
-        uiBuilder.sendDataToServer(instruction);
-    }
+	@Export
+	public void setReadyWindow(final int windowID) {
+		uiBuilder.setReadyWindow(windowID);
+	}
 
-    @Export
-    public void setReadyWindow(final int windowID) {
-        uiBuilder.setReadyWindow(windowID);
-    }
+	@Export
+	public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+		uiBuilder.registerCommunicationError(communicationErrorClosure);
+	}
 
-    @Export
-    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-        uiBuilder.registerCommunicationError(communicationErrorClosure);
-    }
+	@Export
+	public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+		uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
+	}
 
-    @Export
-    public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
-        uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
-    }
+	@Export
+	public void executeInstruction(final JavaScriptObject jso) {
+		uiBuilder.executeInstruction(jso);
+	}
 
-    @Export
-    public void executeInstruction(final JavaScriptObject jso) {
-        uiBuilder.executeInstruction(jso);
-    }
+	@Override
+	public void onUncaughtException(final Throwable e) {
+		log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
 
-    @Override
-    public void onUncaughtException(final Throwable e) {
-        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
+		if (uiBuilder != null) {
+			final PTInstruction instruction = new PTInstruction();
+			instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
+			uiBuilder.sendDataToServer(instruction);
+		}
+	}
 
-        if (uiBuilder != null) {
-            final PTInstruction instruction = new PTInstruction();
-            instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-            uiBuilder.sendDataToServer(instruction);
-        }
-    }
-
-    public static native void reload() /*-{$wnd.location.reload();}-*/;
+	public static native void reload() /*-{$wnd.location.reload();}-*/;
 
 }

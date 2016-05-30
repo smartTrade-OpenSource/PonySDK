@@ -30,13 +30,15 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget
- * to take up the remaining space in its center.
+ * A panel that lays its child widgets out "docked" at its outer edges, and
+ * allows its last widget to take up the remaining space in its center.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
- * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
- * DockLayoutPanel contains children tagged with the cardinal directions, and center:
+ * DockLayoutPanel contains children tagged with the cardinal directions, and
+ * center:
  * <p>
  * <dl>
  * <dt>center</dt>
@@ -55,13 +57,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     private final PUnit unit;
 
     public enum Direction {
-        NORTH,
-        EAST,
-        SOUTH,
-        WEST,
-        CENTER,
-        LINE_START,
-        LINE_END;
+        NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END;
 
         public byte getValue() {
             return (byte) ordinal();
@@ -125,12 +121,11 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Detach new child.
         child.removeFromParent();
         // Logical attach.
-        getOrBuildChildrenCollection().add(child);
+        children.add(child);
         // Adopt.
         adopt(child);
 
-        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
-                new ServerBinaryModel(ServerToClientModel.SIZE, size));
+        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()), new ServerBinaryModel(ServerToClientModel.SIZE, size));
         child.attach(windowID);
     }
 

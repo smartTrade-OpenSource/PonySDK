@@ -23,47 +23,134 @@
 
 package com.ponysdk.core.stm;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.Json;
 import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.Parser;
+import com.ponysdk.core.ParserImpl;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.servlet.Request;
-import com.ponysdk.core.servlet.Response;
+import com.ponysdk.core.servlet.PRequest;
+import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.useragent.UserAgent;
 
-public interface TxnContext {
+public class TxnContext implements TxnListener {
 
-    void flush();
+	private static final Logger log = LoggerFactory.getLogger(TxnContext.class);
 
-    Parser getParser();
+	private WebSocket socket;
 
-    JsonObject getJsonObject();
+	private boolean flushNow = false;
 
-    UserAgent getUserAgent();
+	private Parser parser;
 
-    String getRemoteAddr();
+	private Application application;
 
-    Application getApplication();
+	private final Map<String, Object> parameters = new HashMap<>();
 
-    void setApplication(Application application);
+	private PRequest request;
 
-    void setAttribute(String name, Object value);
+	private UIContext uiContext;
 
-    Object getAttribute(String name);
+	public void setSocket(final WebSocket socket) {
+		this.socket = socket;
+		this.parser = new ParserImpl(socket);
+	}
 
-    void setRequest(Request request);
+	public void flush() {
+		parser.reset();
+	}
 
-    void setResponse(Response response);
+	public void flushNow() {
+		flushNow = true;
+		Txn.get().addTnxListener(this);
+	}
 
-    int getSeqNum();
+	@Override
+	public void beforeFlush(final TxnContext txnContext) {
+		if (!flushNow)
+			return;
 
-    String getHistoryToken();
+		flushNow = false;
 
-    UIContext getUIContext();
+		Txn.get().flush();
+	}
 
-    void setUIContext(UIContext uiContext);
+	@Override
+	public void beforeRollback() {
+	}
 
-    void sendHeartBeat();
+	@Override
+	public void afterFlush(final TxnContext txnContext) {
+	}
+
+	public Parser getParser() {
+		return parser;
+	}
+
+	public void setRequest(final PRequest request) {
+		this.request = request;
+	}
+
+	public JsonObject getJsonObject() {
+		try {
+			return Json.createReader(request.getReader()).readObject();
+		} catch (final IOException e) {
+			log.error("Cannot build reader from HTTP request", e);
+		}
+
+		return null;
+	}
+
+	public UserAgent getUserAgent() {
+		return null;
+	}
+
+	public String getRemoteAddr() {
+		return null;
+	}
+
+	public Application getApplication() {
+		return application;
+	}
+
+	public void setApplication(final Application application) {
+		this.application = application;
+	}
+
+	public void setAttribute(final String name, final Object value) {
+		parameters.put(name, value);
+	}
+
+	public Object getAttribute(final String name) {
+		return parameters.get(name);
+	}
+
+	public int getSeqNum() {
+		return 0;
+	}
+
+	public String getHistoryToken() {
+		return null;
+	}
+
+	public UIContext getUIContext() {
+		return uiContext;
+	}
+
+	public void setUIContext(final UIContext uiContext) {
+		this.uiContext = uiContext;
+	}
+
+	public void sendHeartBeat() {
+		socket.sendHeartBeat();
+	}
 
 }

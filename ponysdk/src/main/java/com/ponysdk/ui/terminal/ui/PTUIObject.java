@@ -41,17 +41,17 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     private Object nativeObject;
 
+    protected abstract T createUIObject();
+
+    public T cast() {
+        return uiObject;
+    }
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.uiObject = createUIObject();
         uiService.registerUIObject(this.objectID, uiObject);
-    }
-
-    protected abstract T createUIObject();
-
-    public T cast() {
-        return uiObject;
     }
 
     @Override
@@ -66,8 +66,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         }
         if (ServerToClientModel.PUT_PROPERTY_KEY.equals(binaryModel.getModel())) {
             // ServerToClientModel.PROPERTY_VALUE
-            uiObject.getElement().setPropertyString(binaryModel.getStringValue(),
-                    buffer.getBinaryModel().getStringValue());
+            uiObject.getElement().setPropertyString(binaryModel.getStringValue(), buffer.getBinaryModel().getStringValue());
             return true;
         }
         if (ServerToClientModel.PUT_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
@@ -109,8 +108,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         }
         if (ServerToClientModel.PUT_STYLE_KEY.equals(binaryModel.getModel())) {
             // ServerToClientModel.STYLE_VALUE
-            uiObject.getElement().getStyle().setProperty(binaryModel.getStringValue(),
-                    buffer.getBinaryModel().getStringValue());
+            uiObject.getElement().getStyle().setProperty(binaryModel.getStringValue(), buffer.getBinaryModel().getStringValue());
             return true;
         }
         if (ServerToClientModel.REMOVE_STYLE_KEY.equals(binaryModel.getModel())) {

@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.TimeZone;
 
 import javax.json.JsonObject;
 
@@ -38,13 +37,12 @@ import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTDatePicker;
 
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
-    private ListenerCollection<PValueChangeHandler<Date>> handlers;
+    private final ListenerCollection<PValueChangeHandler<Date>> handlers = new ListenerCollection<>();
     private final ListenerCollection<PShowRangeHandler<Date>> showRangeHandlers = new ListenerCollection<>();
 
     private Date date;
@@ -52,23 +50,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int year = -1;
     private int month = -1;
     private int day = -1;
-
-    public PDatePicker() {
-    }
-
-    /**
-     * @deprecated Useless
-     */
-    @Deprecated
-    public PDatePicker(final TimeZone timeZone) {
-        this();
-    }
-
-    @Override
-    protected void init0() {
-        super.init0();
-        saveAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -105,18 +86,17 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        if (handlers == null) handlers = new ListenerCollection<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        return handlers != null ? handlers.remove(handler) : false;
+        return handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<Date>> getValueChangeHandlers() {
-        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
+        return Collections.unmodifiableCollection(handlers);
     }
 
     public Collection<PShowRangeHandler<Date>> getShowRangeHandlers() {
@@ -124,7 +104,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     public void addShowRangeHandler(final PShowRangeHandler<Date> handler) {
-        if (showRangeHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_KEY_SHOW_RANGE);
         showRangeHandlers.add(handler);
     }
 
@@ -135,7 +114,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
         this.date = event.getValue();
-        for (final PValueChangeHandler<Date> handler : getValueChangeHandlers()) {
+        for (final PValueChangeHandler<Date> handler : handlers) {
             handler.onValueChange(event);
         }
     }

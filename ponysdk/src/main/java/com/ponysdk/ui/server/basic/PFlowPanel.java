@@ -26,13 +26,10 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A panel that formats its child widgets using the default HTML layout behavior.
+ * A panel that formats its child widgets using the default HTML layout
+ * behavior.
  */
 public class PFlowPanel extends PComplexPanel {
-
-    public PFlowPanel() {
-        super();
-    }
 
     @Override
     protected WidgetType getWidgetType() {

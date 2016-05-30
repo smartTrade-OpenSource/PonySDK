@@ -32,7 +32,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * within its cells. It must be resized explicitly to the desired number of rows
  * and columns.
  */
-public class PGrid extends PHTMLTable {
+public class PGrid extends PHTMLTable<PCellFormatter> {
 
     private final int columns;
     private final int rows;
@@ -50,7 +50,7 @@ public class PGrid extends PHTMLTable {
     @Override
     protected void init0() {
         super.init0();
-        setCellFormatter(new PCellFormatter());
+        setCellFormatter(new PCellFormatter(this));
     }
 
     @Override

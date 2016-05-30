@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.AbstractApplicationManager;
 import com.ponysdk.core.Application;
 import com.ponysdk.core.socket.ConnectionListener;
-import com.ponysdk.core.stm.TxnSocketContext;
+import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
@@ -120,15 +120,15 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private ConnectionListener listener;
 
-        private TxnSocketContext context;
+        private TxnContext context;
 
         private Session session;
 
-        private final SocketRequest request;
+        private final PRequest request;
 
         public JettyWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
             System.err.println(req.getHeader("User-Agent") + " : " + UserAgent.parseUserAgentString(req.getHeader("User-Agent")));
-            request = new SocketRequest(req);
+            request = new PRequest(req);
         }
 
         @Override
@@ -142,7 +142,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
             this.session = session;
 
-            context = new TxnSocketContext();
+            context = new TxnContext();
             context.setRequest(request);
             context.setSocket(this);
 

@@ -36,6 +36,8 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
+    private static final String OPENNED = "images/disclosure_openned.png";
+    private static final String CLOSED = "images/disclosure_closed.png";
 
     private String headerText;
     private PImageResource openImageResource;
@@ -43,18 +45,11 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        // ServerToClientModel.TEXT
         headerText = buffer.getBinaryModel().getStringValue();
-        // ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG
-        final int openImg = buffer.getBinaryModel().getIntValue();
-        // ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG
-        final int closeImg = buffer.getBinaryModel().getIntValue();
 
-        final PTImage open = (PTImage) uiService.getPTObject(openImg);
-        final PTImage close = (PTImage) uiService.getPTObject(closeImg);
-
-        openImageResource = new PImageResource(open.cast());
-        closeImageResource = new PImageResource(close.cast());
+        // TODO nciaravola pass url + size in parameters
+        openImageResource = new PImageResource(OPENNED, 0, 0, 14, 14);
+        closeImageResource = new PImageResource(CLOSED, 0, 0, 14, 14);
 
         super.create(buffer, objectId, uiService);
 

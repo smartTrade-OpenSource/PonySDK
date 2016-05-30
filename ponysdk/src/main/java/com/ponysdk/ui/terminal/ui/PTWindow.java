@@ -43,102 +43,100 @@ import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
 
-    private static final Logger log = Logger.getLogger(PTWindow.class.getName());
+	private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
-    private static final String WINDOW_EVENT_TYPE_MESSAGE = "message";
-    private static final String WINDOW_EVENT_TYPE_BEFORE_UNLOAD = "beforeunload";
+	private static final String WINDOW_EVENT_TYPE_MESSAGE = "message";
+	private static final String WINDOW_EVENT_TYPE_BEFORE_UNLOAD = "beforeunload";
 
-    private static final String EMPTY = "";
+	private static final String EMPTY = "";
 
-    private Window window;
-    private String url;
-    private String name;
-    private String features;
+	private Window window;
+	private String url;
+	private String name;
+	private String features;
 
-    private UIBuilder uiService;
+	private UIBuilder uiService;
 
-    private boolean ponySDKStarted = false;
+	private boolean ponySDKStarted = false;
 
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
+	@Override
+	public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+		super.create(buffer, objectId, uiService);
 
-        if (log.isLoggable(Level.INFO))
-            log.log(Level.INFO, "PTWindowID created : " + objectID);
+		if (log.isLoggable(Level.INFO))
+			log.log(Level.INFO, "PTWindowID created : " + objectID);
 
-        this.uiService = uiService;
+		this.uiService = uiService;
 
-        // ServerToClientModel.URL
-        url = buffer.getBinaryModel().getStringValue();
-        if (url == null)
-            url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
+		url = buffer.getBinaryModel().getStringValue();
+		if (url == null)
+			url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
 
-        // ServerToClientModel.NAME
-        name = buffer.getBinaryModel().getStringValue();
-        if (name == null)
-            name = EMPTY;
+		name = buffer.getBinaryModel().getStringValue();
+		if (name == null)
+			name = EMPTY;
 
-        // ServerToClientModel.FEATURES
-        features = buffer.getBinaryModel().getStringValue();
-        if (features == null)
-            features = EMPTY;
+		features = buffer.getBinaryModel().getStringValue();
+		if (features == null)
+			features = EMPTY;
 
-        PTWindowManager.get().register(this);
-    }
+		PTWindowManager.get().register(this);
+	}
 
-    @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
-            window = Browser.getWindow().open(url, name, features);
+	@Override
+	public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+		if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
+			window = Browser.getWindow().open(url, name, features);
+			window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+			return true;
+		}
+		if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+			window.postMessage(binaryModel.getStringValue(), "*");
+			return true;
+		}
+		if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
+			close();
+			return true;
+		}
+		return false;
+	}
 
-            window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+	public void close() {
+		window.removeEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this);
+		window.close();
+	}
 
-            return true;
-        }
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
-            window.postMessage(binaryModel.getStringValue(), "*");
-            return true;
-        }
-        if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
-            close();
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public void handleEvent(final Event event) {
+		if (event.getCurrentTarget() == window) {
+			final String type = event.getType();
+			if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
+				final MessageEvent messageEvent = (MessageEvent) event;
+				uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
+			} else if (WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(type)) {
+				final PTInstruction instruction = new PTInstruction(objectID);
+				instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
+				uiService.sendDataToServer(instruction);
+				PTWindowManager.get().unregister(this);
+			}
+		}
+	}
 
-    public void close() {
-        window.close();
-    }
+	public void postMessage(final ReaderBuffer buffer) {
+		if (ponySDKStarted)
+			postMessage(buffer, window);
+		else
+			log.log(Level.WARNING, "No window set");
+	}
 
-    @Override
-    public void handleEvent(final Event event) {
-        if (event.getCurrentTarget() == window) {
-            final String type = event.getType();
-            if (WINDOW_EVENT_TYPE_MESSAGE.equals(type)) {
-                final MessageEvent messageEvent = (MessageEvent) event;
-                uiService.update(JSONParser.parseStrict((String) messageEvent.getData()).isObject());
-            } else if (WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(type)) {
-                final PTInstruction instruction = new PTInstruction(objectID);
-                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
-                uiService.sendDataToServer(instruction);
-                PTWindowManager.get().unregister(this);
-            }
-        }
-    }
+	public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
 
-    public void postMessage(final ReaderBuffer buffer) {
-        if (ponySDKStarted) postMessage(buffer, window);
-        else log.log(Level.WARNING, "No window set");
-    }
+	public void setReady() {
+		ponySDKStarted = true;
 
-    public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
-
-    public void setReady() {
-        ponySDKStarted = true;
-
-        final PTInstruction instruction = new PTInstruction(objectID);
-        instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
-        uiService.sendDataToServer(instruction);
-    }
+		final PTInstruction instruction = new PTInstruction(objectID);
+		instruction.put(ClientToServerModel.HANDLER_OPEN_HANDLER);
+		uiService.sendDataToServer(instruction);
+	}
 
 }

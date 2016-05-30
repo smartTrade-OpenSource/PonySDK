@@ -26,7 +26,7 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A standard push-button widget.
+ * A standard button widget.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-Button</dt>
@@ -35,17 +35,17 @@ import com.ponysdk.ui.terminal.WidgetType;
  */
 public class PButton extends PButtonBase {
 
-    public PButton() {
-        super();
-    }
+	public PButton() {
+		super();
+	}
 
-    public PButton(final String text) {
-        super(text);
-    }
+	public PButton(final String text) {
+		super(text);
+	}
 
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.BUTTON;
-    }
+	@Override
+	protected WidgetType getWidgetType() {
+		return WidgetType.BUTTON;
+	}
 
 }

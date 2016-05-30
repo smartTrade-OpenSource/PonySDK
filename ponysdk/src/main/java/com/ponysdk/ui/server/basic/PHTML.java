@@ -45,10 +45,9 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PHTML extends PLabel implements PHasHTML {
 
-    private static final String DEFAULT_HTML_VALUE = null;
     private static final boolean DEFAULT_WORD_WRAP_VALUE = false;
 
-    private String html = DEFAULT_HTML_VALUE;
+    private String html;
     private boolean wordWrap = DEFAULT_WORD_WRAP_VALUE;
 
     public PHTML() {
@@ -68,7 +67,7 @@ public class PHTML extends PLabel implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (html != null) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
         if (wordWrap != DEFAULT_WORD_WRAP_VALUE) parser.parse(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 

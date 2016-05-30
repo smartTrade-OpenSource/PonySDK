@@ -3,45 +3,43 @@ package com.ponysdk.core.servlet;
 
 import javax.servlet.http.HttpSession;
 
-import com.ponysdk.core.stm.TxnSocketContext;
+import com.ponysdk.core.stm.TxnContext;
 
-public class PonySDKSession implements Session {
+public class PSession {
 
 	private final HttpSession session;
 
-	private TxnSocketContext socketContext;
+	private TxnContext socketContext;
 
-	public PonySDKSession(final HttpSession session) {
+	public PSession(final HttpSession session) {
 		this.session = session;
 	}
 
-	@Override
+	public HttpSession getHttpSession() {
+		return session;
+	}
+
 	public String getId() {
 		return session.getId();
 	}
 
-	@Override
 	public void setAttribute(final String name, final Object value) {
 		session.setAttribute(name, value);
 	}
 
-	@Override
 	public Object getAttribute(final String name) {
 		return session.getAttribute(name);
 	}
 
-	@Override
 	public void invalidate() {
 		session.invalidate();
 	}
 
-	@Override
-	public void setSocketContext(final TxnSocketContext context) {
+	public void setSocketContext(final TxnContext context) {
 		this.socketContext = context;
 	}
 
-	@Override
-	public TxnSocketContext getSocketContext() {
+	public TxnContext getSocketContext() {
 		return socketContext;
 	}
 

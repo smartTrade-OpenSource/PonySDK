@@ -23,46 +23,27 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A flexible table that creates cells on demand. It can be jagged (that is,
  * each row can contain a different number of cells) and individual cells can be
  * set to span multiple rows or columns.
  */
-public class PFlexTable extends PHTMLTable {
-
-    public PFlexTable() {
-        super();
-    }
+public class PFlexTable extends PHTMLTable<PFlexCellFormatter> {
 
     @Override
     protected void init0() {
         super.init0();
-        setCellFormatter(new PFlexCellFormatter());
+        setCellFormatter(new PFlexCellFormatter(this));
     }
 
     public PFlexCellFormatter getFlexCellFormatter() {
-        return (PFlexCellFormatter) getCellFormatter();
+        return getCellFormatter();
     }
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.FLEX_TABLE;
-    }
-
-    public class PFlexCellFormatter extends PCellFormatter {
-
-        public void setColSpan(final int row, final int column, final int colSpan) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_COL_SPAN, colSpan),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
-
-        public void setRowSpan(final int row, final int column, final int rowSpan) {
-            saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_ROW_SPAN, rowSpan),
-                    new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-        }
     }
 }

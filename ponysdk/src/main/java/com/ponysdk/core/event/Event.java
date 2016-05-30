@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,92 +23,77 @@
 
 package com.ponysdk.core.event;
 
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Event<H extends EventHandler> {
 
-    public static class Type<H> {
+	public static class Type<H> {
 
-        private static int nextHashCode;
+		private static AtomicInteger nextHashCode;
 
-        private final int index;
+		private final int index;
 
-        public Type() {
-            index = ++nextHashCode;
-        }
+		public Type() {
+			index = nextHashCode.incrementAndGet();
+		}
 
-        @Override
-        public final int hashCode() {
-            return index;
-        }
+		@Override
+		public final int hashCode() {
+			return index;
+		}
 
-        @Override
-        public String toString() {
-            return "Event type";
-        }
-    }
+		@Override
+		public String toString() {
+			return "Event type";
+		}
+	}
 
-    private static long count = 0;
+	private static AtomicLong count = new AtomicLong();
 
-    private final long eventID;
+	private final long eventID;
 
-    private UUID uuid;
+	private Object source;
 
-    private Object source;
+	private Object data;
 
-    private Object data;
+	public Object getData() {
+		return data;
+	}
 
-    public Object getData() {
-        return data;
-    }
+	public void setData(final Object data) {
+		this.data = data;
+	}
 
-    public void setData(final Object data) {
-        this.data = data;
-    }
+	protected Event(final Object source) {
+		this.source = source;
+		eventID = count.getAndIncrement();
+	}
 
-    protected Event(final Object source) {
-        this.source = source;
-        eventID = count++;
-    }
+	public Object getSource() {
+		return source;
+	}
 
-    protected Event(final Object source, final UUID uuid) {
-        this.source = source;
-        this.uuid = uuid;
-        eventID = count++;
-    }
+	public String toDebugString() {
+		String name = this.getClass().getName();
+		name = name.substring(name.lastIndexOf(".") + 1);
+		return "event: " + name + ":";
+	}
 
-    public Object getSource() {
-        return source;
-    }
+	@Override
+	public String toString() {
+		return "An event type";
+	}
 
-    public String toDebugString() {
-        String name = this.getClass().getName();
-        name = name.substring(name.lastIndexOf(".") + 1);
-        return "event: " + name + ":";
-    }
+	public long getEventID() {
+		return eventID;
+	}
 
-    @Override
-    public String toString() {
-        return "An event type";
-    }
+	void setSource(final Object source) {
+		this.source = source;
+	}
 
-    public long getEventID() {
-        return eventID;
-    }
+	public abstract Type<H> getAssociatedType();
 
-    public UUID getUUID() {
-        return uuid;
-    }
-
-    public void setUUID(final UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    void setSource(final Object source) {
-        this.source = source;
-    }
-
-    public abstract Type<H> getAssociatedType();
-
-    protected abstract void dispatch(H handler);
+	protected abstract void dispatch(H handler);
 }

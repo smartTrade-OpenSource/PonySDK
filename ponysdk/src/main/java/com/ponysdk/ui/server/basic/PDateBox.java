@@ -41,7 +41,6 @@ import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
@@ -86,12 +85,6 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     protected boolean attach(final int windowID) {
         datePicker.attach(windowID);
         return super.attach(windowID);
-    }
-
-    @Override
-    protected void init0() {
-        super.init0();
-        executeAddHandler(HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -163,8 +156,10 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public String getDisplayedValue() {
-        if (getValue() == null) return EMPTY;
-        else return getDateFormat().format(getValue());
+        if (getValue() == null)
+            return EMPTY;
+        else
+            return getDateFormat().format(getValue());
     }
 
     @Override

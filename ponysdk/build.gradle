@@ -195,6 +195,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
         attributes("Date": timestamp + " / " + new Date().toGMTString())
     }
 }
+task myJavadoc(type: Javadoc) {
+  source = sourceSets.main.allJava
+  //destinationDir = reporting.file("rest-api-docs")
+  //options.docletpath = configurations.jaxDoclet.files.asType(List)
+  //options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
+  //options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
+}
+
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'

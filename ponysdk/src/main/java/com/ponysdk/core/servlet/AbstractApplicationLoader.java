@@ -61,7 +61,7 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
             log.info("HTTP Session created: {}", httpSessionEvent.getSession().getId());
         }
 
-        SessionManager.get().registerSession(new PonySDKSession(httpSessionEvent.getSession()));
+        SessionManager.get().registerSession(new PSession(httpSessionEvent.getSession()));
     }
 
     @Override

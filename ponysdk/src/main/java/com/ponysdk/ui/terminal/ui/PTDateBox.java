@@ -36,7 +36,6 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTDateBox.MyDateBox;
@@ -48,12 +47,10 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        // ServerToClientModel.PICKER
         datePicker = (PTDatePicker) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
-        // ServerToClientModel.DATE_FORMAT_PATTERN
         defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(buffer.getBinaryModel().getStringValue()));
-
         super.create(buffer, objectId, uiService);
+        addValueChangeHandler(uiService);
     }
 
     @Override
@@ -84,29 +81,24 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         return super.update(buffer, binaryModel);
     }
 
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
-            final DateBox dateBox = cast();
-            final TextBox textBox = dateBox.getTextBox();
-            dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+    private void addValueChangeHandler(final UIBuilder uiService) {
+        final DateBox dateBox = cast();
+        final TextBox textBox = dateBox.getTextBox();
+        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
-                @Override
-                public void onValueChange(final ValueChangeEvent<Date> event) {
-                    triggerEvent(uiService, dateBox);
-                }
+            @Override
+            public void onValueChange(final ValueChangeEvent<Date> event) {
+                triggerEvent(uiService, dateBox);
+            }
 
-            });
-            textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+        });
+        textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 
-                @Override
-                public void onValueChange(final ValueChangeEvent<String> event) {
-                    triggerEvent(uiService, dateBox);
-                }
-            });
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+            @Override
+            public void onValueChange(final ValueChangeEvent<String> event) {
+                triggerEvent(uiService, dateBox);
+            }
+        });
     }
 
     protected void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {

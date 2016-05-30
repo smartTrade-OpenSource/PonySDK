@@ -32,9 +32,9 @@ import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A panel that includes a header (top), footer (bottom), and content (middle) area. The header and
- * footer areas resize naturally. The content area is allocated all of the remaining space between
- * the header and footer area.
+ * A panel that includes a header (top), footer (bottom), and content (middle)
+ * area. The header and footer areas resize naturally. The content area is
+ * allocated all of the remaining space between the header and footer area.
  */
 public class PHeaderPanel extends PPanel {
 
@@ -94,7 +94,6 @@ public class PHeaderPanel extends PPanel {
 
     @Override
     public boolean remove(final PWidget child) {
-
         if (child.getParent() != this) return false;
 
         orphan(child);

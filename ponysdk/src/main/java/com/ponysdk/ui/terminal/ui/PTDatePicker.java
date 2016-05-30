@@ -35,7 +35,6 @@ import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
@@ -51,37 +50,36 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
-            final DatePicker picker = cast();
-            picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-                @Override
-                public void onValueChange(final ValueChangeEvent<Date> event) {
-                    triggerEvent(picker, uiService, event);
-                }
-            });
-        } else if (HandlerModel.HANDLER_SHOW_RANGE.equals(handlerModel)) {
-            final DatePicker picker = cast();
-            picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
-
-                @Override
-                public void onShowRange(final ShowRangeEvent<Date> event) {
-                    final PTInstruction instruction = new PTInstruction(getObjectID());
-                    // FIXME
-                    instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
-                    instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
-                    instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
-                    uiService.sendDataToServer(picker, instruction);
-                }
-            });
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        super.create(buffer, objectId, uiService);
+        addHandlers(uiService);
     }
 
-    protected void triggerEvent(final DatePicker picker, final UIBuilder uiService,
-            final ValueChangeEvent<Date> event) {
+    private void addHandlers(final UIBuilder uiService) {
+        final DatePicker picker = cast();
+
+        picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
+
+            @Override
+            public void onValueChange(final ValueChangeEvent<Date> event) {
+                triggerEvent(picker, uiService, event);
+            }
+        });
+        picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
+
+            @Override
+            public void onShowRange(final ShowRangeEvent<Date> event) {
+                final PTInstruction instruction = new PTInstruction(getObjectID());
+                // FIXME
+                instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
+                instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
+                instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
+                uiService.sendDataToServer(picker, instruction);
+            }
+        });
+    }
+
+    protected void triggerEvent(final DatePicker picker, final UIBuilder uiService, final ValueChangeEvent<Date> event) {
         long date = -1;
         int year = -1;
         int month = -1;

@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.ui.server.model.ServerBinaryModel;
@@ -34,7 +33,7 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public abstract class PComplexPanel extends PPanel {
 
-    protected PWidgetCollection children;
+    protected PWidgetCollection children = new PWidgetCollection(this);
 
     public PComplexPanel() {
     }
@@ -55,18 +54,13 @@ public abstract class PComplexPanel extends PPanel {
 
         if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
             child.removeFromParent();
-
-            if (children == null) children = new PWidgetCollection(this);
-
             children.add(child);
             adopt(child);
 
             child.saveAdd(child.getID(), ID);
             child.attach(windowID);
         } else {
-            throw new IllegalAccessError(
-                    "Widget " + child + " already attached to an other window, current window : " + child.getWindowID()
-                            + ", new window : " + windowID);
+            throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : " + child.getWindowID() + ", new window : " + windowID);
         }
     }
 
@@ -75,8 +69,6 @@ public abstract class PComplexPanel extends PPanel {
 
         if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
             child.removeFromParent();
-
-            if (children == null) children = new PWidgetCollection(this);
 
             children.insert(child, beforeIndex);
             adopt(child);
@@ -89,65 +81,51 @@ public abstract class PComplexPanel extends PPanel {
                 child.attach(windowID);
             }
         } else {
-            throw new IllegalAccessError(
-                    "Widget " + child + " already attached to an other window, current window : " + child.getWindowID()
-                            + ", new window : " + windowID);
+            throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : " + child.getWindowID() + ", new window : " + windowID);
         }
     }
 
     @Override
     public boolean remove(final PWidget w) {
-        if (w.getParent() == this && children != null) {
+        if (children.remove(w)) {
             orphan(w);
-            if (children.remove(w)) {
-                saveRemove(w.getID(), ID);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+            saveRemove(w.getID(), ID);
+            return true;
         }
+
+        return false;
     }
 
     public boolean remove(final int index) {
         return remove(getWidget(index));
     }
 
-    protected PWidgetCollection getOrBuildChildrenCollection() {
-        if (children == null) children = new PWidgetCollection(this);
-        return children;
-    }
-
     protected PWidget getChild(final long objectID) {
-        if (children != null) {
-            for (final PWidget w : children) {
-                if (w.getID() == objectID) return w;
-            }
+        for (final PWidget w : children) {
+            if (w.getID() == objectID) return w;
         }
         return null;
     }
 
     public int getWidgetCount() {
-        return children != null ? children.size() : 0;
+        return children.size();
     }
 
     public PWidget getWidget(final int index) {
-        return children != null ? children.get(index) : null;
+        return children.get(index);
     }
 
     public int getWidgetIndex(final PWidget child) {
-        return children != null ? children.indexOf(child) : -1;
+        return children.indexOf(child);
     }
 
     @Override
     public Iterator<PWidget> iterator() {
-        return children != null ? children.iterator() : Collections.emptyIterator();
+        return children.iterator();
     }
 
     void assertIsChild(final PWidget widget) {
-        if (widget != null && widget.getParent() != this)
-            throw new IllegalStateException("The specified widget is not a child of this panel");
+        if (widget != null && widget.getParent() != this) throw new IllegalStateException("The specified widget is not a child of this panel");
     }
 
     void assertNotMe(final PWidget widget) {

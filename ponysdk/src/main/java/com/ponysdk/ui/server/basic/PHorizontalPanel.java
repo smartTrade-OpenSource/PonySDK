@@ -23,6 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
@@ -36,9 +38,6 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     private PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.ALIGN_LEFT;
     private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
 
-    public PHorizontalPanel() {
-    }
-
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.HORIZONTAL_PANEL;
@@ -46,12 +45,14 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
 
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
+        if (Objects.equals(this.horizontalAlignment, horizontalAlignment)) return;
         this.horizontalAlignment = horizontalAlignment;
         saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
     }
 
     @Override
     public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
+        if (Objects.equals(this.verticalAlignment, verticalAlignment)) return;
         this.verticalAlignment = verticalAlignment;
         saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
     }

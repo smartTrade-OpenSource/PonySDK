@@ -36,11 +36,11 @@ import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * A standard check box widget. This class also serves as a base class for {@link PRadioButton}.
+ * A standard check box widget. This class also serves as a base class for
+ * {@link PRadioButton}.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
@@ -51,11 +51,9 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
-    private static final Boolean DEFAULT_VALUE_VALUE = Boolean.FALSE;
-
     private List<PValueChangeHandler<Boolean>> handlers;
 
-    private Boolean value = DEFAULT_VALUE_VALUE;
+    private Boolean value = Boolean.FALSE;
 
     /**
      * Creates a check box with no label.
@@ -74,15 +72,9 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    protected void init0() {
-        super.init0();
-        saveAddHandler(HandlerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
-    }
-
-    @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.value != DEFAULT_VALUE_VALUE) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.value);
+        if (this.value != Boolean.FALSE) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override
@@ -133,7 +125,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         this.value = event.getValue();
-        for (final PValueChangeHandler<Boolean> handler : getValueChangeHandlers()) {
+        if (handlers == null) return;
+        for (final PValueChangeHandler<Boolean> handler : handlers) {
             handler.onValueChange(event);
         }
     }
