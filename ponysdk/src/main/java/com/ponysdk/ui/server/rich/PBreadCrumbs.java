@@ -1,12 +1,11 @@
 
-package com.ponysdk.ui.server.breadcrumbs;
+package com.ponysdk.ui.server.rich;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -24,7 +23,7 @@ public class PBreadCrumbs extends PElement {
 
     public PBreadCrumbs() {
         super("ul");
-        addStyleName(PonySDKTheme.BREADCRUMBS);
+        addStyleName("breadcrumbs");
     }
 
     public void addItem(final String item) {

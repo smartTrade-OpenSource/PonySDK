@@ -24,7 +24,6 @@
 package com.ponysdk.ui.server.rich;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
 import com.ponysdk.ui.server.basic.PDialogBox;
@@ -46,8 +45,8 @@ public class PConfirmDialog extends PDialogBox {
         return show(windowCaption, new PLabel(message), okCaption, cancelCaption, confirmDialogHandler);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption,
-            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption,
+            final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
         confirmDialog.setPopupPositionAndShow(new PPositionCallback() {
 
@@ -65,17 +64,17 @@ public class PConfirmDialog extends PDialogBox {
 
     }
 
-    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption,
-            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption,
+            final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = new PConfirmDialog();
-        confirmDialog.setStyleName(PonySDKTheme.DIALOGBOX);
+        confirmDialog.setStyleName("pconfirm-dialog");
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
         final PVerticalPanel dialogContent = new PVerticalPanel();
         dialogContent.setWidth("100%");
         dialogContent.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
+        controlsPanel.setStyleName("controls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
         controlsPanel.setWidth("100%");
 
@@ -102,7 +101,8 @@ public class PConfirmDialog extends PDialogBox {
                 public void onClick(final PClickEvent clickEvent) {
                     if (confirmDialogHandler != null) {
                         if (confirmDialogHandler.onOK(confirmDialog)) confirmDialog.hide();
-                    } else confirmDialog.hide();
+                    } else
+                        confirmDialog.hide();
                 }
             });
 
@@ -122,8 +122,7 @@ public class PConfirmDialog extends PDialogBox {
         return show(windowCaption, content, PString.get("dialog.ok"), null, null);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content,
-            final PConfirmDialogHandler confirmDialogHandler) {
+    public static PDialogBox show(final String windowCaption, final PWidget content, final PConfirmDialogHandler confirmDialogHandler) {
         return show(windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 

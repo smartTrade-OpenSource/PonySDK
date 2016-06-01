@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.

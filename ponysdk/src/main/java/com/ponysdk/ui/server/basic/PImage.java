@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that displays the image at a given URL. The image can be in

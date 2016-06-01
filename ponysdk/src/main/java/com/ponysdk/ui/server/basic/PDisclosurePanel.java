@@ -31,6 +31,8 @@ import java.util.List;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
@@ -38,8 +40,6 @@ import com.ponysdk.ui.server.basic.event.PCloseHandler;
 import com.ponysdk.ui.server.basic.event.POpenEvent;
 import com.ponysdk.ui.server.basic.event.POpenHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that consists of a header and a content panel that discloses the

@@ -31,12 +31,12 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.JavascriptAddOn;
 import com.ponysdk.ui.terminal.JavascriptAddOnFactory;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTAddOn extends AbstractPTObject {
 

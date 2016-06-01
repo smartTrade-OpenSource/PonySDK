@@ -8,7 +8,7 @@
  *============================================================================*/
 package com.ponysdk.ui.server.model;
 
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 
 /**
  * @author nvelin

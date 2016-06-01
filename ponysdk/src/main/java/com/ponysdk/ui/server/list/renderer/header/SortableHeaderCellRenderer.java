@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,11 +28,8 @@ import java.util.List;
 
 import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.list.FilterListener;
 import com.ponysdk.ui.server.list.HasCriteria;
 import com.ponysdk.ui.server.list.Queriable;
@@ -62,14 +59,9 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
     }
 
     private void builGUI() {
-        title.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
-        title.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
-                sort(nextSortingType);
-            }
+        title.addStyleName("sortable");
+        title.addClickHandler((event) -> {
+            sort(HeaderSortingHelper.getNextSortingType(sortingType));
         });
     }
 
@@ -84,7 +76,6 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
     @Override
     public List<Criterion> getCriteria() {
-
         final Criterion criterion = new Criterion(key);
         criterion.setSortingType(sortingType);
 
@@ -93,9 +84,8 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
     @Override
     public void sort(final SortingType newSortingType) {
-        title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
         title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
-        this.sortingType = newSortingType;
+        sortingType = newSortingType;
         title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
         if (SortingType.NONE != newSortingType) {
             filterListener.onSort(this);

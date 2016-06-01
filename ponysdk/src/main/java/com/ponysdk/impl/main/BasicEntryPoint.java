@@ -54,8 +54,8 @@ public class BasicEntryPoint implements EntryPoint {
 
         final PFlowPanel flowPanel = new PFlowPanel();
         //
-        //        final PGrid grid = new PGrid(200, 200);
-        //        PRootPanel.get().add(grid);
+        // final PGrid grid = new PGrid(200, 200);
+        // PRootPanel.get().add(grid);
 
         PRootPanel.get().add(flowPanel);
 
@@ -84,13 +84,13 @@ public class BasicEntryPoint implements EntryPoint {
 
         //
 
-        //        int i = 0;
-        //        while (true) {
-        //            final PElement child = new PElement("div");
-        //            child.setInnerText(i++ + " => Element ");
-        //            child.setStyleProperty("border", "1px solid red");
-        //            flowPanel.add(child);
-        //        }
+        // int i = 0;
+        // while (true) {
+        // final PElement child = new PElement("div");
+        // child.setInnerText(i++ + " => Element ");
+        // child.setStyleProperty("border", "1px solid red");
+        // flowPanel.add(child);
+        // }
 
         // final PTextBox textBox = new PTextBox(k + " => Button");
         //
@@ -153,14 +153,16 @@ public class BasicEntryPoint implements EntryPoint {
         // public void run() {
         // final Random random = new Random();
         //
-        // final String currentTimeMillis = Long.toString(random.nextInt(500000));
+        // final String currentTimeMillis =
+        // Long.toString(random.nextInt(500000));
         // for (int k = 0; k < 100; k++) {
         // labels.get(k).setText(currentTimeMillis);
         // }
         // }
         // }, 0, 200, TimeUnit.MILLISECONDS);
 
-        // PScript.execute("window.alert('coucoucou' + (1 + 6));", new ExecutionCallback() {
+        // PScript.execute("window.alert('coucoucou' + (1 + 6));", new
+        // ExecutionCallback() {
         //
         // @Override
         // public void onSuccess(final String msg) {}

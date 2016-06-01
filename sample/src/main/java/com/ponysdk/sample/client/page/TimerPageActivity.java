@@ -24,6 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,148 +33,149 @@ import com.ponysdk.core.place.Place;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PScheduler;
-import com.ponysdk.ui.server.basic.PScheduler.RepeatingCommand;
 import com.ponysdk.ui.server.basic.PTerminalScheduledCommand;
+import com.ponysdk.ui.server.basic.PTerminalScheduler;
+import com.ponysdk.ui.server.basic.PTerminalScheduler.RepeatingCommand;
 import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PTimer;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
 public class TimerPageActivity extends SamplePageActivity {
 
-    protected long time1 = 0;
-    protected long time2 = 0;
-    protected AtomicLong time3 = new AtomicLong();
+	protected long time1 = 0;
+	protected long time2 = 0;
+	protected AtomicLong time3 = new AtomicLong();
 
-    protected PTimer timer;
+	protected PTimer timer;
 
-    private final PTextBox textBox = new PTextBox("1000");
-    private final PVerticalPanel panel = new PVerticalPanel();
-    private UIRunnable scheduleAtFixedRate;
-    private PLabel labelScheduler;
-    private PLabel label;
+	private final PTextBox textBox = new PTextBox("1000");
+	private final PVerticalPanel panel = new PVerticalPanel();
+	private UIRunnable scheduleAtFixedRate;
+	private PLabel labelScheduler;
+	private PLabel label;
 
-    public TimerPageActivity() {
-        super("Timer", "Extra");
-    }
+	public TimerPageActivity() {
+		super("Timer", "Extra");
+	}
 
-    @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
+	@Override
+	protected void onFirstShowPage() {
+		super.onFirstShowPage();
 
-        label = new PLabel("0");
+		label = new PLabel("0");
 
-        final PButton scheduleRepeatingButton = new PButton("Start");
-        scheduleRepeatingButton.addClickHandler(new PClickHandler() {
+		final PButton scheduleRepeatingButton = new PButton("Start");
+		scheduleRepeatingButton.addClickHandler(new PClickHandler() {
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                timer.scheduleRepeating(Integer.valueOf(textBox.getText()));
-            }
-        });
-        panel.add(new PLabel("Simple repeating timer"));
-        panel.add(label);
-        panel.add(textBox);
-        panel.add(scheduleRepeatingButton);
+			@Override
+			public void onClick(final PClickEvent clickEvent) {
+				timer.scheduleRepeating(Integer.valueOf(textBox.getText()));
+			}
+		});
+		panel.add(new PLabel("Simple repeating timer"));
+		panel.add(label);
+		panel.add(textBox);
+		panel.add(scheduleRepeatingButton);
 
-        // Fixed delay
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
-        final PLabel dateLabel = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
-        panel.add(new PHTML("<br>"));
-        panel.add(new PLabel("Fixed delay timer"));
-        panel.add(dateLabel);
-        final PButton fixedDelayButton = new PButton("Start");
-        fixedDelayButton.addClickHandler(new PClickHandler() {
+		// Fixed delay
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
+		final PLabel dateLabel = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
+		panel.add(new PHTML("<br>"));
+		panel.add(new PLabel("Fixed delay timer"));
+		panel.add(dateLabel);
+		final PButton fixedDelayButton = new PButton("Start");
+		fixedDelayButton.addClickHandler(new PClickHandler() {
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PScheduler.scheduleFixedDelay(new RepeatingCommand() {
+			@Override
+			public void onClick(final PClickEvent clickEvent) {
+				PTerminalScheduler.scheduleFixedDelay(new RepeatingCommand() {
 
-                    @Override
-                    public boolean execute() {
-                        dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime()));
-                        return true;
-                    }
-                }, 1000);
-            }
-        });
-        panel.add(fixedDelayButton);
+					@Override
+					public boolean execute() {
+						dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime()));
+						return true;
+					}
+				}, Duration.ofMillis(1000));
+			}
+		});
+		panel.add(fixedDelayButton);
 
-        // Client side only
-        panel.add(new PHTML("<br>"));
-        panel.add(new PLabel("Timer (terminal side)"));
-        final PButton changeColorsBUtton = new PButton("Start");
-        changeColorsBUtton.addClickHandler(new PClickHandler() {
+		// Client side only
+		panel.add(new PHTML("<br>"));
+		panel.add(new PLabel("Timer (terminal side)"));
+		final PButton changeColorsBUtton = new PButton("Start");
+		changeColorsBUtton.addClickHandler(new PClickHandler() {
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                final PTerminalScheduledCommand deferred1 = new PTerminalScheduledCommand() {
+			@Override
+			public void onClick(final PClickEvent event) {
+				final PTerminalScheduledCommand deferred1 = new PTerminalScheduledCommand() {
 
-                    @Override
-                    protected void run() {
-                        changeColorsBUtton.setStyleProperty("color", "blue");
-                    }
-                };
-                deferred1.schedule(2000);
+					@Override
+					protected void run() {
+						changeColorsBUtton.setStyleProperty("color", "blue");
+					}
+				};
+				deferred1.schedule(2000);
 
-                final PTerminalScheduledCommand deferred2 = new PTerminalScheduledCommand() {
+				final PTerminalScheduledCommand deferred2 = new PTerminalScheduledCommand() {
 
-                    @Override
-                    protected void run() {
-                        changeColorsBUtton.setStyleProperty("color", "orange");
-                    }
-                };
-                deferred2.schedule(4000);
+					@Override
+					protected void run() {
+						changeColorsBUtton.setStyleProperty("color", "orange");
+					}
+				};
+				deferred2.schedule(4000);
 
-                final PTerminalScheduledCommand deferred3 = new PTerminalScheduledCommand() {
+				final PTerminalScheduledCommand deferred3 = new PTerminalScheduledCommand() {
 
-                    @Override
-                    protected void run() {
-                        changeColorsBUtton.setStyleProperty("color", "black");
-                    }
-                };
-                deferred3.schedule(6000);
-            }
-        });
-        panel.add(changeColorsBUtton);
+					@Override
+					protected void run() {
+						changeColorsBUtton.setStyleProperty("color", "black");
+					}
+				};
+				deferred3.schedule(6000);
+			}
+		});
+		panel.add(changeColorsBUtton);
 
-        labelScheduler = new PLabel("0");
+		labelScheduler = new PLabel("0");
 
-        panel.add(new PLabel("UI Scheduler"));
-        panel.add(labelScheduler);
+		panel.add(new PLabel("UI Scheduler"));
+		panel.add(labelScheduler);
 
-        examplePanel.setWidget(panel);
+		examplePanel.setWidget(panel);
 
-    }
+	}
 
-    @Override
-    protected void onShowPage(final Place place) {
-        super.onShowPage(place);
-        timer = new PTimer() {
+	@Override
+	protected void onShowPage(final Place place) {
+		super.onShowPage(place);
+		timer = new PTimer() {
 
-            @Override
-            public void run() {
-                time1++;
-                label.setText("" + time1);
-            }
-        };
-        // scheduleAtFixedRate = UIScheduledThreadPoolExecutor.get().scheduleAtFixedRate(new Runnable() {
-        //
-        // @Override
-        // public void run() {
-        // labelScheduler.setText(time2++ + "");
-        //
-        // }
-        // }, 0, 500, TimeUnit.MILLISECONDS);
-    }
+			@Override
+			public void run() {
+				time1++;
+				label.setText("" + time1);
+			}
+		};
+		// scheduleAtFixedRate =
+		// UIScheduledThreadPoolExecutor.get().scheduleAtFixedRate(new
+		// Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// labelScheduler.setText(time2++ + "");
+		//
+		// }
+		// }, 0, 500, TimeUnit.MILLISECONDS);
+	}
 
-    @Override
-    protected void onLeavingPage() {
-        super.onLeavingPage();
-        timer.cancel();
-        scheduleAtFixedRate.cancel();
-    }
+	@Override
+	protected void onLeavingPage() {
+		super.onLeavingPage();
+		timer.cancel();
+		scheduleAtFixedRate.cancel();
+	}
 
 }

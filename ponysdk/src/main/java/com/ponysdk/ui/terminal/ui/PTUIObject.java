@@ -28,10 +28,10 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.UIObject;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 

@@ -40,7 +40,8 @@ public class ExportableData<T> implements Serializable {
 
     private String timezone;
 
-    public ExportableData() {}
+    public ExportableData() {
+    }
 
     public T getData() {
         return data;

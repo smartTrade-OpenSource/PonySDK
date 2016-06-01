@@ -21,60 +21,32 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.server.rich;
 
-import java.util.Iterator;
-
-import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.event.HasPWidgets;
+import com.ponysdk.ui.server.basic.PHorizontalPanel;
+import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
-public class PToolbar implements IsPWidget, HasPWidgets {
+public class PToolbar extends PHorizontalPanel {
 
     public static final String HUNDRED_PERCENT = "100%";
 
-    private final PHorizontalPanel panel = new PHorizontalPanel();
-
     public PToolbar() {
-        panel.setStyleName(PonySDKTheme.TOOLBAR);
-        panel.setVerticalAlignment(PVerticalAlignment.ALIGN_MIDDLE);
-    }
-
-    @Override
-    public PWidget asWidget() {
-        return panel;
-    }
-
-    @Override
-    public Iterator<PWidget> iterator() {
-        return panel.iterator();
+        setStyleName("ptoolbar");
+        setVerticalAlignment(PVerticalAlignment.ALIGN_MIDDLE);
     }
 
     @Override
     public void add(final PWidget w) {
-        panel.add(w);
-        panel.setCellHeight(w, HUNDRED_PERCENT);
-    }
-
-    @Override
-    public void add(final IsPWidget w) {
-        add(w.asWidget());
+        super.add(w);
+        setCellHeight(w, HUNDRED_PERCENT);
     }
 
     public void addSepararator() {
         final PSimplePanel separator = new PSimplePanel();
-        separator.addStyleName(PonySDKTheme.TOOLBAR_SEPARATOR);
-        panel.add(separator);
-    }
-
-    @Override
-    public void clear() {
-        panel.clear();
-    }
-
-    @Override
-    public boolean remove(final PWidget w) {
-        return panel.remove(w);
+        separator.addStyleName("ptoolbar-separator");
+        add(separator);
     }
 
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.list;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PButton;
@@ -31,9 +30,9 @@ import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PToolbar;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.rich.PToolbar;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
@@ -85,13 +84,11 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
         bottomListLayout.setWidget(searchResultTimeLabel);
 
-        simpleListView.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
-
         add(positionPanel);
         add(simpleListView.asWidget());
         add(bottomListLayout);
         setCellHorizontalAlignment(bottomListLayout, PHorizontalAlignment.ALIGN_CENTER);
-        bottomListLayout.addStyleName(PonySDKTheme.COMPLEXLIST_BOTTOM_LIST);
+        // bottomListLayout.addStyleName(PonySDKTheme.COMPLEXLIST_BOTTOM_LIST);
         add(bottomListCustomInformationLayout);
     }
 

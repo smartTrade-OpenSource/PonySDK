@@ -27,12 +27,12 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.basic.PAlignment;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 

@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.ponysdk.ui.model.ServerToClientModel;
+import com.ponysdk.ui.model.ValueTypeModel;
 import com.ponysdk.ui.terminal.UIBuilder;
 
 import elemental.client.Browser;

@@ -84,10 +84,8 @@ import com.ponysdk.ui.server.basic.PTabLayoutPanel;
 import com.ponysdk.ui.server.basic.PTabPanel;
 import com.ponysdk.ui.server.basic.PTextArea;
 import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PToolbar;
 import com.ponysdk.ui.server.basic.PTree;
 import com.ponysdk.ui.server.basic.PTreeItem;
-import com.ponysdk.ui.server.basic.PTwinListBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.PWidget;
 import com.ponysdk.ui.server.basic.PWindow;
@@ -95,6 +93,8 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.ui.server.rich.PToolbar;
+import com.ponysdk.ui.server.rich.PTwinListBox;
 import com.ponysdk.ui.terminal.PUnit;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
@@ -112,6 +112,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 		});
 
 		final PFlowPanel boxContainer = new PFlowPanel();
+
+		System.err.println(PClickEvent.TYPE);
 
 		final PWindow w1 = createWindow1();
 		// final PWindow w2 = createWindow2();
@@ -273,7 +275,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 		final PWindow w = new PWindow(null, "Window 1", null);
 		w.open();
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 2; i++) {
 			new PWindow(null, "Winddsqsdqdqs" + i, null).open();
 		}
 		final PFlowPanel windowContainer = new PFlowPanel();

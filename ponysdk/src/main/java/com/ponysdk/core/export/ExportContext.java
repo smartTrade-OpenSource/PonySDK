@@ -41,7 +41,8 @@ public class ExportContext<T> implements Serializable {
 
     private SelectionResult<T> selectionResult;
 
-    public ExportContext() {}
+    public ExportContext() {
+    }
 
     public ExportContext(final Query query, final List<ExportableField> exportableFields, final SelectionResult<T> selectionResult) {
         this.query = query;

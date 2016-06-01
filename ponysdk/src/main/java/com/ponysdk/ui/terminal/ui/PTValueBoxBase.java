@@ -26,13 +26,13 @@ package com.ponysdk.ui.terminal.ui;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ValueBoxBase;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFocusWidget<T> {
 

@@ -32,19 +32,18 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     protected static final String EMPTY = "";
 
-    private List<PValueChangeHandler<String>> handlers;
+    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
 
     private String text = EMPTY;
     private String placeholder = EMPTY;
@@ -56,12 +55,6 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     public PTextBoxBase(final String text) {
         super();
         this.text = text != null ? text : EMPTY;
-    }
-
-    @Override
-    protected void init0() {
-        super.init0();
-        saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
     }
 
     @Override
@@ -112,25 +105,23 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handlers == null) handlers = new ArrayList<>(1);
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handlers != null ? handlers.remove(handler) : false;
+        return handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
+        return Collections.unmodifiableCollection(handlers);
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this,
-                    instruction.getString(ClientToServerModel.VALUE.toStringValue()));
+            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.VALUE.toStringValue()));
             fireOnValueChange(event);
         } else {
             super.onClientData(instruction);
@@ -139,11 +130,8 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
         this.text = event.getValue();
-
-        if (handlers != null) {
-            for (final PValueChangeHandler<String> handler : handlers) {
-                handler.onValueChange(event);
-            }
+        for (final PValueChangeHandler<String> handler : handlers) {
+            handler.onValueChange(event);
         }
     }
 

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.footer;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -34,10 +33,10 @@ public class DefaultFooterView extends PSimplePanel implements FooterView {
 
     private final PVerticalPanel content = new PVerticalPanel();
 
-    public DefaultFooterView(String copyright) {
+    public DefaultFooterView(final String copyright) {
         setSizeFull();
         content.setSizeFull();
-        addStyleName(PonySDKTheme.FOOTER);
+        // addStyleName(PonySDKTheme.FOOTER);
 
         final PLabel label = new PLabel(copyright);
         content.add(label);

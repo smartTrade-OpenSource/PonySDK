@@ -24,10 +24,10 @@
 package com.ponysdk.ui.terminal.ui;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTElement extends PTComplexPanel<HTMLPanel> {
 

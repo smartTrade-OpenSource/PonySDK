@@ -6,24 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PMenuBar;
-import com.ponysdk.ui.server.basic.PMenuItem;
+import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.ui.server.basic.PAnchor;
+import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.ui.server.basic.event.PClickEvent;
+import com.ponysdk.ui.server.basic.event.PClickHandler;
 
-public class DefaultPagerView extends PHorizontalPanel implements PagerView {
+public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHandler {
 
-    private final Map<Integer, IsPWidget> items = new HashMap<>();
+    private final Map<Integer, PAnchor> items = new HashMap<>();
+    private final List<HandlerRegistration> registrations = new ArrayList<>();
 
-    private PMenuBar menuBar;
+    private final PAnchor startMenuItem = new PAnchor("<<");
+    private final PAnchor previousMenuItem = new PAnchor("<");
+    private final PAnchor nextMenuItem = new PAnchor(">");
+    private final PAnchor endMenuItem = new PAnchor(">>");
 
-    private PMenuItem startMenuItem;
-    private PMenuItem previousMenuItem;
-    private PMenuItem nextMenuItem;
-    private PMenuItem endMenuItem;
-
-    List<PagerListener> pagerListeners = new ArrayList<>();
+    private final List<PagerListener> pagerListeners = new ArrayList<>();
 
     public DefaultPagerView() {
         setVisible(false);
@@ -31,41 +30,26 @@ public class DefaultPagerView extends PHorizontalPanel implements PagerView {
     }
 
     private void initUI() {
-        menuBar = new PMenuBar();
-        addStyleName(PonySDKTheme.PAGE_NAVIGATION);
-        add(menuBar);
+        addStyleName("pager");
 
-        startMenuItem = new PMenuItem("<<");
-        menuBar.addItem(startMenuItem);
-        menuBar.addSeparator();
+        startMenuItem.addClickHandler(this);
+        previousMenuItem.addClickHandler(this);
+        nextMenuItem.addClickHandler(this);
+        endMenuItem.addClickHandler(this);
 
-        previousMenuItem = new PMenuItem("<");
-        menuBar.addItem(previousMenuItem);
-        menuBar.addSeparator();
-
-        menuBar.addSeparator();
-        nextMenuItem = new PMenuItem(">");
-        menuBar.addItem(nextMenuItem);
-        menuBar.addSeparator();
-
-        endMenuItem = new PMenuItem(">>");
-        menuBar.addItem(endMenuItem);
+        add(startMenuItem);
+        add(previousMenuItem);
+        add(nextMenuItem);
+        add(endMenuItem);
     }
 
     @Override
     public void addPageIndex(final int pageIndex) {
-        final PMenuItem item = new PMenuItem(String.valueOf(pageIndex + 1));
-        item.setCommand(getClickCommand(pageIndex));
-        menuBar.insertElement(item, 4 + items.values().size());
+        final PAnchor item = new PAnchor(String.valueOf(pageIndex + 1));
+        item.setData(pageIndex);
+        insert(item, 4 + items.values().size());
+        registrations.add(item.addClickHandler(this));
         items.put(pageIndex, item);
-    }
-
-    private Runnable getClickCommand(final int pageIndex) {
-        return () -> {
-            for (final PagerListener pagerListener : pagerListeners) {
-                pagerListener.onPageChange(pageIndex);
-            }
-        };
     }
 
     @Override
@@ -75,41 +59,60 @@ public class DefaultPagerView extends PHorizontalPanel implements PagerView {
 
     @Override
     public void clear() {
-        super.clear();
+        for (final HandlerRegistration registration : registrations) {
+            registration.removeHandler();
+        }
+
+        for (final PAnchor anchor : items.values()) {
+            anchor.removeFromParent();
+        }
+
+        registrations.clear();
         items.clear();
-        initUI();
     }
 
     @Override
     public void setStart(final boolean enabled, final int pageIndex) {
         startMenuItem.setEnabled(enabled);
-        startMenuItem.setCommand(getClickCommand(pageIndex));
+        startMenuItem.setData(pageIndex);
     }
 
     @Override
     public void setEnd(final boolean enabled, final int pageIndex) {
         endMenuItem.setEnabled(enabled);
-        endMenuItem.setCommand(getClickCommand(pageIndex));
-
+        endMenuItem.setData(pageIndex);
     }
 
     @Override
     public void setPrevious(final boolean enabled, final int pageIndex) {
         previousMenuItem.setEnabled(enabled);
-        previousMenuItem.setCommand(getClickCommand(pageIndex));
+        previousMenuItem.setData(pageIndex);
     }
 
     @Override
     public void setNext(final boolean enabled, final int pageIndex) {
         nextMenuItem.setEnabled(enabled);
-        nextMenuItem.setCommand(getClickCommand(pageIndex));
+        nextMenuItem.setData(pageIndex);
     }
 
     @Override
     public void setSelectedPage(final int pageIndex) {
-        final PMenuItem item = (PMenuItem) items.get(pageIndex).asWidget();
+        final PAnchor item = items.get(pageIndex);
         item.setEnabled(false);
-        item.setStyleName(PonySDKTheme.PAGE_NAVIGATION_ITEM_SELECTED);
+        item.addStyleName("selected");
+    }
+
+    @Override
+    public void onClick(final PClickEvent event) {
+        final PAnchor source = (PAnchor) event.getSource();
+        final Integer pageIndex = (Integer) source.getData();
+
+        if (pageIndex != null) {
+            for (final PagerListener pagerListener : pagerListeners) {
+                pagerListener.onPageChange(pageIndex);
+            }
+        }
+
     }
 
 }

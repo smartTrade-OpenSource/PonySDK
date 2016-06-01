@@ -4,7 +4,8 @@ package com.ponysdk.core.activity;
 import com.ponysdk.core.place.Place;
 
 /**
- * Finds the activity to run for a given {@link Place}, used to configure an {@link ActivityManager}.
+ * Finds the activity to run for a given {@link Place}, used to configure an
+ * {@link ActivityManager}.
  */
 @FunctionalInterface
 public interface ActivityMapper {

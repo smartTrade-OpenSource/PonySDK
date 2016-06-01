@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -40,9 +39,9 @@ import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list.SimpleListView;
 
 /**
- * Extends {@link DataGridActivity} Capable of moving columns and refreshing a set of rows instead of always
- * refreshing the entire grid
- * 
+ * Extends {@link DataGridActivity} Capable of moving columns and refreshing a
+ * set of rows instead of always refreshing the entire grid
+ *
  * @param <K>
  * @param <D>
  */
@@ -109,7 +108,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 view.addWidget(cell.getW(), cell.getCol(), cell.getRow() + 1, 1);
             }
             view.addWidget(new PSimplePanel(), col, row + 1, 1);
-            view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
+            // view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
 
         } else {
 
@@ -181,7 +180,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
         if (realRow == beforeIndex) return;
 
-        view.moveRow((realRow + 1), (beforeIndex + 1));
+        view.moveRow(realRow + 1, beforeIndex + 1);
 
         final D data = valueByKey.get(key);
         final int row = getDataIndex(data);

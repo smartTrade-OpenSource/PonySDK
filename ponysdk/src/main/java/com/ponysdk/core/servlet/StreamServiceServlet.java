@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.model.ClientToServerModel;
 
 /**
  * The server side implementation of the RPC service.
@@ -48,25 +48,21 @@ public class StreamServiceServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         streamRequest(req, resp);
     }
 
     private void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            final Application ponyApplicationSession = (Application) req.getSession()
-                    .getAttribute(Application.class.getCanonicalName());
+            final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
             final Integer ponySessionID = Integer.parseInt(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession
-                    .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+            final StreamHandler streamHandler = ponySession.removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

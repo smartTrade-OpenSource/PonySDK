@@ -28,11 +28,11 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link PCommand}

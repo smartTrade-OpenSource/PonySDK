@@ -26,8 +26,8 @@ package com.ponysdk.ui.server.basic;
 import java.util.concurrent.TimeUnit;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A command that will be deferred on the terminal.

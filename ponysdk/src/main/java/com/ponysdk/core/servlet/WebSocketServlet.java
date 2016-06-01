@@ -51,8 +51,8 @@ import com.ponysdk.core.Application;
 import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.core.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -93,8 +93,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void init() throws ServletException {
         super.init();
 
-        applicationManager = (AbstractApplicationManager) getServletContext()
-                .getAttribute(AbstractApplicationManager.class.getCanonicalName());
+        applicationManager = (AbstractApplicationManager) getServletContext().getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
         if (log.isInfoEnabled()) log.info("Initializing Buffer allocation ...");
 
@@ -160,10 +159,12 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 if (log.isInfoEnabled()) log.info("Creating a new application, {}", application.toString());
             } else {
                 // if (data.containsKey(Model.APPLICATION_VIEW_ID.getKey())) {
-                // final JsonNumber jsonNumber = data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
+                // final JsonNumber jsonNumber =
+                // data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
                 // reloadedViewID = jsonNumber.longValue();
                 // }
-                // log.info("Reloading application {} {}", reloadedViewID, context);
+                // log.info("Reloading application {} {}", reloadedViewID,
+                // context);
             }
 
             try {
@@ -191,7 +192,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void onWebSocketText(final String text) {
             if (!context.getUIContext().isDestroyed()) {
-                //onBeforeMessageReceived(text);
+                // onBeforeMessageReceived(text);
                 try {
                     context.getUIContext().notifyMessageReceived();
 
@@ -207,7 +208,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {
-                    //onAfterMessageProcessed(text);
+                    // onAfterMessageProcessed(text);
                 }
             } else {
                 if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");

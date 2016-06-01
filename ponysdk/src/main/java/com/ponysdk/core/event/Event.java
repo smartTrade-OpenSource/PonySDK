@@ -28,72 +28,72 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Event<H extends EventHandler> {
 
-	public static class Type<H> {
+    public static class Type<H> {
 
-		private static AtomicInteger nextHashCode;
+        private static AtomicInteger nextHashCode = new AtomicInteger(0);
 
-		private final int index;
+        private final int index;
 
-		public Type() {
-			index = nextHashCode.incrementAndGet();
-		}
+        public Type() {
+            index = nextHashCode.incrementAndGet();
+        }
 
-		@Override
-		public final int hashCode() {
-			return index;
-		}
+        @Override
+        public final int hashCode() {
+            return index;
+        }
 
-		@Override
-		public String toString() {
-			return "Event type";
-		}
-	}
+        @Override
+        public String toString() {
+            return "Event type";
+        }
+    }
 
-	private static AtomicLong count = new AtomicLong();
+    private static AtomicLong count = new AtomicLong();
 
-	private final long eventID;
+    private final long eventID;
 
-	private Object source;
+    private Object source;
 
-	private Object data;
+    private Object data;
 
-	public Object getData() {
-		return data;
-	}
+    public Object getData() {
+        return data;
+    }
 
-	public void setData(final Object data) {
-		this.data = data;
-	}
+    public void setData(final Object data) {
+        this.data = data;
+    }
 
-	protected Event(final Object source) {
-		this.source = source;
-		eventID = count.getAndIncrement();
-	}
+    protected Event(final Object source) {
+        this.source = source;
+        eventID = count.getAndIncrement();
+    }
 
-	public Object getSource() {
-		return source;
-	}
+    public Object getSource() {
+        return source;
+    }
 
-	public String toDebugString() {
-		String name = this.getClass().getName();
-		name = name.substring(name.lastIndexOf(".") + 1);
-		return "event: " + name + ":";
-	}
+    public String toDebugString() {
+        String name = this.getClass().getName();
+        name = name.substring(name.lastIndexOf(".") + 1);
+        return "event: " + name + ":";
+    }
 
-	@Override
-	public String toString() {
-		return "An event type";
-	}
+    @Override
+    public String toString() {
+        return "An event type";
+    }
 
-	public long getEventID() {
-		return eventID;
-	}
+    public long getEventID() {
+        return eventID;
+    }
 
-	void setSource(final Object source) {
-		this.source = source;
-	}
+    void setSource(final Object source) {
+        this.source = source;
+    }
 
-	public abstract Type<H> getAssociatedType();
+    public abstract Type<H> getAssociatedType();
 
-	protected abstract void dispatch(H handler);
+    protected abstract void dispatch(H handler);
 }

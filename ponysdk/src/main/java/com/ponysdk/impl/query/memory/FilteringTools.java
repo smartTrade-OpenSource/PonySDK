@@ -100,7 +100,9 @@ public final class FilteringTools {
             @Override
             public int compare(final Object o1, final Object o2) {
                 final String property = getProperty();
-                if (property == null) { return getComparator().compare(o1, o2); }
+                if (property == null) {
+                    return getComparator().compare(o1, o2);
+                }
 
                 try {
                     final Object value1 = getValue(o1, property.split(DOT_REGEX));
@@ -118,7 +120,9 @@ public final class FilteringTools {
     }
 
     public static List<String> filter(final List<String> datas, final String patternMatching) {
-        if (patternMatching == null || datas == null) { return datas; }
+        if (patternMatching == null || datas == null) {
+            return datas;
+        }
         final List<String> validData = new ArrayList<>();
         try {
             for (final String data : datas) {
@@ -152,7 +156,9 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> filter(final List<T> datas, final String fieldKey, final Object value) {
-        if (value == null || datas == null || fieldKey.equals(EMPTY)) { return datas; }
+        if (value == null || datas == null || fieldKey.equals(EMPTY)) {
+            return datas;
+        }
         final List<T> validData = new ArrayList<>();
         try {
             final String[] pathDetails = fieldKey.split(DOT_REGEX);
@@ -205,26 +211,32 @@ public final class FilteringTools {
     }
 
     /**
-     * Used to Filter a list of data, scoped by a <code>propertyPath</code>, according to a
-     * <code>patternName</code>. The property path is used to go as deep as one wants into each object of the
-     * <code>datas</code>. It takes form as a string representing attributes separated by dots, e.g.
+     * Used to Filter a list of data, scoped by a <code>propertyPath</code>,
+     * according to a <code>patternName</code>. The property path is used to go
+     * as deep as one wants into each object of the <code>datas</code>. It takes
+     * form as a string representing attributes separated by dots, e.g.
      * <code>attribute1.attribute2.attribute3</code><br/>
      * <br/>
-     * If an attribute is a map, the tokens <code>keys</code> or <code>values</code> can be used to retrieve
-     * the corresponding data as a Collection. E.g. <code>attribute1.mapAttribute.keys.attribute2</code>
+     * If an attribute is a map, the tokens <code>keys</code> or
+     * <code>values</code> can be used to retrieve the corresponding data as a
+     * Collection. E.g. <code>attribute1.mapAttribute.keys.attribute2</code>
      * 
      * @param <T>
-     *            the type of the data obtained with the propertyPath that is tested against the patternName
+     *            the type of the data obtained with the propertyPath that is
+     *            tested against the patternName
      * @param datas
      *            the list of data to be filtered
      * @param propertyPath
-     *            the chain of attribute representing a path deep into the data objects
+     *            the chain of attribute representing a path deep into the data
+     *            objects
      * @param patternName
      *            a string used to filter data
      * @return the list of filtered data
      */
     public static <T> List<T> filter(final List<T> datas, final String propertyPath, final String patternName) {
-        if (datas == null || patternName.equals(EMPTY) || propertyPath.equals(EMPTY)) { return datas; }
+        if (datas == null || patternName.equals(EMPTY) || propertyPath.equals(EMPTY)) {
+            return datas;
+        }
         final List<T> validData = new ArrayList<>();
         try {
             final String[] pathDetails = propertyPath.split(DOT_REGEX);
@@ -366,7 +378,9 @@ public final class FilteringTools {
                             return -1;
                         }
                         if (o1.equals(o2)) return 0;
-                        if (sortingType == SortingType.ASCENDING) { return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase()); }
+                        if (sortingType == SortingType.ASCENDING) {
+                            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
+                        }
                         return o2.toString().toLowerCase().compareTo(o1.toString().toLowerCase());
                     }
 
@@ -397,7 +411,9 @@ public final class FilteringTools {
                             return -1;
                         }
                         if (o1.equals(o2)) return 0;
-                        if (sortingType == SortingType.ASCENDING) { return o1.toLowerCase().compareTo(o2.toLowerCase()); }
+                        if (sortingType == SortingType.ASCENDING) {
+                            return o1.toLowerCase().compareTo(o2.toLowerCase());
+                        }
                         return o2.toLowerCase().compareTo(o1.toLowerCase());
                     }
 
@@ -409,7 +425,9 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> getPage(final int pageSize, final int page, final List<T> result) {
-        if ((result == null) || (result.size() == 0)) { return result; }
+        if ((result == null) || (result.size() == 0)) {
+            return result;
+        }
         if (result.size() < pageSize) return result;
         if ((page * pageSize) > result.size()) {
             // return last page

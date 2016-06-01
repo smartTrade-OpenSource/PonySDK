@@ -58,8 +58,12 @@ public class SimpleEventBus implements EventBus {
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
-        if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
-        if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
+        if (type == null) {
+            throw new NullPointerException("Cannot add a handler with a null type");
+        }
+        if (handler == null) {
+            throw new NullPointerException("Cannot add a null handler");
+        }
 
         return doAdd(type, null, handler);
     }
@@ -81,16 +85,24 @@ public class SimpleEventBus implements EventBus {
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
-        if (type == null) { throw new NullPointerException("Cannot add a handler with a null type"); }
-        if (source == null) { throw new NullPointerException("Cannot add a handler with a null source"); }
-        if (handler == null) { throw new NullPointerException("Cannot add a null handler"); }
+        if (type == null) {
+            throw new NullPointerException("Cannot add a handler with a null type");
+        }
+        if (source == null) {
+            throw new NullPointerException("Cannot add a handler with a null source");
+        }
+        if (handler == null) {
+            throw new NullPointerException("Cannot add a null handler");
+        }
 
         return doAdd(type, source, handler);
     }
 
     @Override
     public void fireEvent(final Event<?> event) {
-        if (event == null) { throw new NullPointerException("Cannot fire null event"); }
+        if (event == null) {
+            throw new NullPointerException("Cannot fire null event");
+        }
         doFire(event, null);
     }
 
@@ -101,8 +113,12 @@ public class SimpleEventBus implements EventBus {
 
     @Override
     public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
-        if (event == null) { throw new NullPointerException("Cannot fire null event"); }
-        if (source == null) { throw new NullPointerException("Cannot fire from a null source"); }
+        if (event == null) {
+            throw new NullPointerException("Cannot fire null event");
+        }
+        if (source == null) {
+            throw new NullPointerException("Cannot fire from a null source");
+        }
         doFire(event, source);
     }
 
@@ -116,10 +132,14 @@ public class SimpleEventBus implements EventBus {
 
     private void doRemoveNow(final Type<? extends EventHandler> type, final Object source, final EventHandler handler) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
-        if (sourceMap == null) { return; }
+        if (sourceMap == null) {
+            return;
+        }
 
         final Set<?> handlers = sourceMap.get(source);
-        if (handlers == null) { return; }
+        if (handlers == null) {
+            return;
+        }
 
         final boolean removed = handlers.remove(handler);
         assert removed : "redundant remove call";
@@ -212,8 +232,10 @@ public class SimpleEventBus implements EventBus {
             }
 
             for (final HandlerContext<? extends EventHandler> context : pendingHandlerRegistration) {
-                if (context.add) doAddNow(context.type, context.source, context.handler);
-                else doRemoveNow(context.type, context.source, context.handler);
+                if (context.add)
+                    doAddNow(context.type, context.source, context.handler);
+                else
+                    doRemoveNow(context.type, context.source, context.handler);
             }
 
             pendingHandlerRegistration.clear();
@@ -244,7 +266,9 @@ public class SimpleEventBus implements EventBus {
 
     private <H extends EventHandler> Collection<H> getDispatchSet(final Type<H> type, final Object source) {
         final Collection<H> directHandlers = getHandlers(type, source);
-        if (source == null) { return directHandlers; }
+        if (source == null) {
+            return directHandlers;
+        }
 
         final Collection<H> globalHandlers = getHandlers(type, null);
 
@@ -256,12 +280,16 @@ public class SimpleEventBus implements EventBus {
     @Override
     public <H extends EventHandler> Collection<H> getHandlers(final Type<H> type, final Object source) {
         final Map<Object, Set<?>> sourceMap = map.get(type);
-        if (sourceMap == null) { return Collections.emptySet(); }
+        if (sourceMap == null) {
+            return Collections.emptySet();
+        }
 
         // safe, we control the puts.
         @SuppressWarnings("unchecked")
         final Set<H> handlers = (Set<H>) sourceMap.get(source);
-        if (handlers == null) { return Collections.emptySet(); }
+        if (handlers == null) {
+            return Collections.emptySet();
+        }
 
         return new HashSet<>(handlers);
     }

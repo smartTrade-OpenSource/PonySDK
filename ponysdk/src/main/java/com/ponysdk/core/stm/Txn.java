@@ -34,8 +34,7 @@ public class Txn {
     private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
     private final Set<TxnListener> txnListener = Collections.newSetFromMap(new ConcurrentHashMap<TxnListener, Boolean>());
-    private final Set<ClientLoopListener> clientLoopListener = Collections
-            .newSetFromMap(new ConcurrentHashMap<ClientLoopListener, Boolean>());
+    private final Set<ClientLoopListener> clientLoopListener = Collections.newSetFromMap(new ConcurrentHashMap<ClientLoopListener, Boolean>());
 
     private TxnContext txnContext;
 
@@ -74,7 +73,8 @@ public class Txn {
         try {
             txnContext.flush();
         } catch (final Exception e) {
-            // final String msg = "Cannot send instructions to the browser, Session ID #" +
+            // final String msg = "Cannot send instructions to the browser,
+            // Session ID #" +
             // uiContext.getSession().getId();
             // log.error(msg, e);
             // throw new RuntimeException(msg);

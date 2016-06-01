@@ -2,7 +2,6 @@
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PFlowPanel;
@@ -57,8 +56,6 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
         panel.add(buttonAndCheckbox);
         buttonAndCheckbox.add(loginButton);
         buttonAndCheckbox.add(rememberMe);
-
-        loginButton.setStyleName(PonySDKTheme.BUTTON_BLUE);
 
         // messages
         panel.add(messagePanel);

@@ -31,15 +31,15 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.

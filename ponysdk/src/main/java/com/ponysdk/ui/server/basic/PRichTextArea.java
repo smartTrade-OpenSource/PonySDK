@@ -28,15 +28,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
 
 /**
@@ -53,15 +55,14 @@ import com.ponysdk.ui.terminal.ui.PTRichTextArea.Justification;
  */
 public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
 
+    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
+    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
+
     private String html;
 
-    private List<PValueChangeHandler<String>> handlers;
+    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
 
     private final Formatter formatter = new Formatter();
-
-    public PRichTextArea() {
-        super();
-    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -86,10 +87,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html))
-            return;
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
     public Formatter getFormatter() {
@@ -108,30 +108,20 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
         this.html = event.getValue();
 
-        if (handlers != null) {
-            for (final PValueChangeHandler<String> handler : handlers) {
-                handler.onValueChange(event);
-            }
+        for (final PValueChangeHandler<String> handler : handlers) {
+            handler.onValueChange(event);
         }
 
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handlers == null) {
-            handlers = new ArrayList<>(1);
-        } else {
-            handlers.add(handler);
-        }
+        handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handlers == null) {
-            return false;
-        } else {
-            return handlers.remove(handler);
-        }
+        return handlers.remove(handler);
     }
 
     @Override

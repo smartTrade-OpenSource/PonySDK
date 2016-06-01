@@ -26,10 +26,10 @@ package com.ponysdk.ui.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.request.RequestBuilder;
 import com.ponysdk.ui.terminal.request.WebSocketRequestBuilder;
 
@@ -41,9 +41,9 @@ import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
-public class WebSocketClient2 implements EventListener {
+public class WebSocketClient implements EventListener {
 
-    private static final Logger log = Logger.getLogger(WebSocketClient2.class.getName());
+    private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
     private static final String ARRAYBUFFER_TYPE = "arraybuffer";
 
@@ -69,7 +69,7 @@ public class WebSocketClient2 implements EventListener {
 
     private RequestBuilder requestBuilder;
 
-    public WebSocketClient2(final String url, final WebSocketCallback callback) {
+    public WebSocketClient(final String url, final WebSocketCallback callback) {
         this.callback = callback;
 
         final Window window = Browser.getWindow();

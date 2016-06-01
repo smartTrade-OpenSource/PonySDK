@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is

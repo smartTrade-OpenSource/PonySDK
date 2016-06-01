@@ -24,6 +24,7 @@
 package com.ponysdk.ui.terminal.model;
 
 import com.google.gwt.json.client.JSONObject;
+import com.ponysdk.ui.model.ServerToClientModel;
 
 /**
  * @author nvelin

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are

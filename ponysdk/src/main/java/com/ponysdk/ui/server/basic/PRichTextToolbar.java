@@ -24,8 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PRichTextToolbar extends PWidget {
 

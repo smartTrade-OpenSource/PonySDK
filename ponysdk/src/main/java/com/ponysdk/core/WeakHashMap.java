@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.PObject;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class WeakHashMap implements Map<Integer, PObject> {
 
@@ -77,8 +77,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
     public PObject get(final Object key) {
         expungeStaleEntries();
         final WeakReference<PObject> value = referenceByObjectID.get(key);
-        if (value == null)
-            return null;
+        if (value == null) return null;
         return value.get();
     }
 
@@ -89,8 +88,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
         referenceByObjectID.put(objectID, weakReference);
         objectIDByReferences.put(weakReference, objectID);
 
-        if (log.isDebugEnabled())
-            log.debug("Registering object: " + value);
+        if (log.isDebugEnabled()) log.debug("Registering object: " + value);
 
         // if (value instanceof PWidget) {
         // final PWidget widget = (PWidget) value;
@@ -110,10 +108,8 @@ public class WeakHashMap implements Map<Integer, PObject> {
         expungeStaleEntries();
         final WeakReference<PObject> reference = referenceByObjectID.remove(key);
 
-        if (log.isDebugEnabled())
-            log.debug("Removing reference on object #" + key);
-        if (reference == null)
-            return null;
+        if (log.isDebugEnabled()) log.debug("Removing reference on object #" + key);
+        if (reference == null) return null;
 
         objectIDByReferences.remove(reference);
         // parentObjectIDByReferences.remove(reference);
@@ -167,8 +163,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
             // final Integer parentObjectID =
             // parentObjectIDByReferences.remove(reference);
             final WeakReference<PObject> removedObject = referenceByObjectID.remove(objectID);
-            if (log.isDebugEnabled())
-                log.debug("Removing reference on object #" + objectID);
+            if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
 
             // if (parentObjectID != null) {
             final Parser parser = Txn.get().getParser();

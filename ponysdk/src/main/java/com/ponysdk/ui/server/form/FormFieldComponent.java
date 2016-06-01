@@ -1,7 +1,6 @@
 
 package com.ponysdk.ui.server.form;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -17,10 +16,7 @@ import com.ponysdk.ui.server.list.Validable;
 public class FormFieldComponent extends PFlowPanel implements FormFieldListener, Validable, Resetable {
 
     public enum CaptionOrientation {
-        LEFT,
-        TOP,
-        RIGHT,
-        BOTTOM
+        LEFT, TOP, RIGHT, BOTTOM
     }
 
     private CaptionOrientation captionOrientation;
@@ -38,17 +34,15 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
         this(caption, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation,
-            final FormField<?, ? extends PWidget> formField) {
+    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation, final FormField<?, ? extends PWidget> formField) {
         this.formField = formField;
-        this.container.addStyleName("ctn");
         add(container);
         buildUI(caption);
         setCaptionOrientation(captionOrientation);
     }
 
     protected void buildUI(final String caption) {
-        addStyleName(PonySDKTheme.FORM_FORMFIELD_COMPONENT);
+        addStyleName("pform-field-component");
 
         formField.addFormFieldListener(this);
         buildCaption(caption);

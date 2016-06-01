@@ -29,7 +29,7 @@ import java.util.Map;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 
 public class PCookies {
 

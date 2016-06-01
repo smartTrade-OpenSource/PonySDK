@@ -23,11 +23,11 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
 import com.ponysdk.ui.terminal.basic.PAlignment;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that lays its children
@@ -38,14 +38,6 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * </p>
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
-
-    public PLayoutPanel() {
-        this(PWindow.EMPTY_WINDOW_ID);
-    }
-
-    public PLayoutPanel(final int windowID) {
-        super(windowID);
-    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -97,11 +89,9 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         sendUpdate(child, ServerToClientModel.BOTTOM, bottom, ServerToClientModel.HEIGHT, height, unit);
     }
 
-    private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
-            final double v2, final PUnit unit) {
-        saveUpdate(new ServerBinaryModel(ServerToClientModel.UNIT, unit.getByteValue()),
-                new ServerBinaryModel(ServerToClientModel.WIDGET_ID, child.getID()), new ServerBinaryModel(key1, v1),
-                new ServerBinaryModel(key2, v2));
+    private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2, final double v2, final PUnit unit) {
+        saveUpdate(new ServerBinaryModel(ServerToClientModel.UNIT, unit.getByteValue()), new ServerBinaryModel(ServerToClientModel.WIDGET_ID, child.getID()),
+                new ServerBinaryModel(key1, v1), new ServerBinaryModel(key2, v2));
     }
 
     @Override

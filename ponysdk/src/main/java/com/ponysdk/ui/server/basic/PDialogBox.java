@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a PPopupPanel,

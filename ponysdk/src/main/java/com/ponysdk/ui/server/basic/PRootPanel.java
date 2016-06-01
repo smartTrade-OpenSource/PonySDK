@@ -29,12 +29,13 @@ import java.util.Map;
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.main.EntryPoint;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
- * never created directly. Rather, they are accessed via {@link PRootPanel#get()} .
+ * never created directly. Rather, they are accessed via
+ * {@link PRootPanel#get()} .
  * <p>
  * Most applications will add widgets to the default root panel in their
  * {@link EntryPoint#start(UIContext)} methods.
@@ -47,7 +48,7 @@ public class PRootPanel extends PAbsolutePanel {
     private final String id;
 
     private PRootPanel(final int windowID, final String id) {
-        super(windowID);
+        this.windowID = windowID;
         this.id = id;
         init();
     }

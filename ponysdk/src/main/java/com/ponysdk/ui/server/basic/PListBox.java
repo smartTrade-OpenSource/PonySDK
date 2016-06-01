@@ -37,12 +37,12 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that presents a list of choices to the user, either as a list box or
@@ -58,7 +58,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private static final String COMMA = ",";
 
-    private List<PChangeHandler> handlers;
+    private final List<PChangeHandler> handlers = new ArrayList<>();
 
     private final List<ListItem> items = new ArrayList<>();
 
@@ -269,17 +269,16 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void addChangeHandler(final PChangeHandler handler) {
-        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     public boolean removeChangeHandler(final PChangeHandler handler) {
-        return handlers != null ? handlers.remove(handler) : false;
+        return handlers.remove(handler);
     }
 
     @Override
     public Collection<PChangeHandler> getChangeHandlers() {
-        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
+        return Collections.unmodifiableCollection(handlers);
     }
 
     public void setSelectedItem(final String item, final boolean selected) {
@@ -310,10 +309,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onChange(final PChangeEvent event) {
-        if (handlers != null) {
-            for (final PChangeHandler handler : handlers) {
-                handler.onChange(event);
-            }
+        for (final PChangeHandler handler : handlers) {
+            handler.onChange(event);
         }
     }
 
@@ -384,6 +381,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         public ListItem(final String label, final Object value) {
             this.label = label;
             this.value = value;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public Object getValue() {
+            return value;
         }
 
     }

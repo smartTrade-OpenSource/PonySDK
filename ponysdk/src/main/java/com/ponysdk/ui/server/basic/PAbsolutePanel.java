@@ -26,24 +26,20 @@ package com.ponysdk.ui.server.basic;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * An absolute panel positions all of its children absolutely, allowing them to overlap.
+ * An absolute panel positions all of its children absolutely, allowing them to
+ * overlap.
  * <p>
- * Note that this panel will not automatically resize itself to allow enough room for its
- * absolutely-positioned children. It must be explicitly sized in order to make room for them.
+ * Note that this panel will not automatically resize itself to allow enough
+ * room for its absolutely-positioned children. It must be explicitly sized in
+ * order to make room for them.
  * </p>
  * <p>
- * Once a widget has been added to an absolute panel, the panel effectively "owns" the positioning
- * of the widget. Any existing positioning attributes on the widget may be modified by the panel.
+ * Once a widget has been added to an absolute panel, the panel effectively
+ * "owns" the positioning of the widget. Any existing positioning attributes on
+ * the widget may be modified by the panel.
  * </p>
  */
 public class PAbsolutePanel extends PComplexPanel {
-
-    public PAbsolutePanel() {
-    }
-
-    public PAbsolutePanel(final int windowID) {
-        super(windowID);
-    }
 
     @Override
     protected WidgetType getWidgetType() {

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,14 +21,17 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.server.rich;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.ui.server.basic.PButton;
+import com.ponysdk.ui.server.basic.PFlexTable;
+import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PListBox;
 import com.ponysdk.ui.server.basic.PListBox.ListItem;
 import com.ponysdk.ui.server.basic.event.HasPChangeHandlers;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
@@ -60,7 +63,7 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
     }
 
     public PTwinListBox(final String leftCaption, final String rightCaption, final boolean containsEmptyItem) {
-        addStyleName(PonySDKTheme.TWIN_LISTBOX);
+        addStyleName("ptwin-listbox");
         this.leftCaption = leftCaption;
         this.rightCaption = rightCaption;
         init(containsEmptyItem);
@@ -79,17 +82,17 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
         leftListBox = new PListBox(containsEmptyItem);
         leftListBox.setMultipleSelect(true);
-        leftListBox.addStyleName(PonySDKTheme.TWIN_LISTBOX_LEFT_LISTBOX);
+        leftListBox.addStyleName("left");
 
         rightListBox = new PListBox(containsEmptyItem);
         rightListBox.setMultipleSelect(true);
-        rightListBox.addStyleName(PonySDKTheme.TWIN_LISTBOX_RIGHT_LISTBOX);
+        rightListBox.addStyleName("right");
 
         setWidget(1, 0, leftListBox);
         setWidget(1, 2, rightListBox);
 
         switchButton = new PButton("<>");
-        switchButton.addStyleName(PonySDKTheme.TWIN_LISTBOX_SWITCH_BUTTON);
+        switchButton.addStyleName("switch");
         switchButton.addClickHandler(new PClickHandler() {
 
             @Override
@@ -110,11 +113,11 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
                 for (int i = leftRemovedItems.size() - 1; i >= 0; i--) {
                     final ListItem listItem = leftRemovedItems.get(i);
-                    rightListBox.addItem(listItem.label, listItem.value);
+                    rightListBox.addItem(listItem.getLabel(), listItem.getValue());
                 }
                 for (int i = rightRemovedItems.size() - 1; i >= 0; i--) {
                     final ListItem listItem = rightRemovedItems.get(i);
-                    leftListBox.addItem(listItem.label, listItem.value);
+                    leftListBox.addItem(listItem.getLabel(), listItem.getValue());
                 }
 
                 fireChangeHandler();

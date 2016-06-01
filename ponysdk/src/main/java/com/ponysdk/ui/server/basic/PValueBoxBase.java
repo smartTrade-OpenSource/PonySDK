@@ -23,16 +23,13 @@
 
 package com.ponysdk.ui.server.basic;
 
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
-    public PValueBoxBase() {
-    }
-
     /**
-     * Selects all of the text in the box. This will only work when the widget is attached to the
-     * document and not hidden.
+     * Selects all of the text in the box. This will only work when the widget
+     * is attached to the document and not hidden.
      */
     public void selectAll() {
         saveUpdate(ServerToClientModel.SELECT_ALL);

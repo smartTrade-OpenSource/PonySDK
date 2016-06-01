@@ -37,79 +37,78 @@ import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public abstract class AbstractActivity<T extends IsPWidget> implements Activity {
 
-	protected boolean firstStart = true;
-	protected boolean started = false;
+    protected boolean firstStart = true;
+    protected boolean started = false;
 
-	protected PAcceptsOneWidget world;
-	protected T view;
+    protected PAcceptsOneWidget world;
+    protected T view;
 
-	public AbstractActivity() {
-	}
+    public AbstractActivity() {
+    }
 
-	@Override
-	public void start(final PAcceptsOneWidget world, final Place place) {
-		this.world = world;
-		this.started = true;
+    @Override
+    public void start(final PAcceptsOneWidget world, final Place place) {
+        this.world = world;
+        this.started = true;
 
-		this.world.setWidget(getView());
+        this.world.setWidget(getView());
 
-		if (firstStart) {
-			buildView();
-			firstStart = false;
-		}
+        if (firstStart) {
+            buildView();
+            firstStart = false;
+        }
 
-		updateView(place);
-	}
+        updateView(place);
+    }
 
-	public T getView() {
-		return view;
-	}
+    public T getView() {
+        return view;
+    }
 
-	@Override
-	public void stop() {
-		this.started = false;
-	}
+    @Override
+    public void stop() {
+        this.started = false;
+    }
 
-	protected void buildView() {
-		// Nothing to do
-	}
+    protected void buildView() {
+        // Nothing to do
+    }
 
-	protected void updateView(final Place place) {
-		// Nothing to do
-	}
+    protected void updateView(final Place place) {
+        // Nothing to do
+    }
 
-	public void goTo(final Place place) {
-		UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
-	}
+    public void goTo(final Place place) {
+        UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
+    }
 
-	public EventBus getRootEventBus() {
-		return UIContext.getRootEventBus();
-	}
+    public EventBus getRootEventBus() {
+        return UIContext.getRootEventBus();
+    }
 
-	public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
-		return UIContext.addHandler(type, handler);
-	}
+    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+        return UIContext.addHandler(type, handler);
+    }
 
-	public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source,
-			final H handler) {
-		return UIContext.addHandlerToSource(type, source, handler);
-	}
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+        return UIContext.addHandlerToSource(type, source, handler);
+    }
 
-	@SuppressWarnings("unchecked")
-	public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
-		return addHandlerToSource(type, source, (H) this);
-	}
+    @SuppressWarnings("unchecked")
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
+        return addHandlerToSource(type, source, (H) this);
+    }
 
-	public void fireEvent(final Event<?> event) {
-		UIContext.fireEvent(event);
-	}
+    public void fireEvent(final Event<?> event) {
+        UIContext.fireEvent(event);
+    }
 
-	public void fireEventFromSource(final Event<?> event, final Object source) {
-		UIContext.fireEventFromSource(event, source);
-	}
+    public void fireEventFromSource(final Event<?> event, final Object source) {
+        UIContext.fireEventFromSource(event, source);
+    }
 
-	public void addHandler(final BroadcastEventHandler handler) {
-		UIContext.addHandler(handler);
-	}
+    public void addHandler(final BroadcastEventHandler handler) {
+        UIContext.addHandler(handler);
+    }
 
 }

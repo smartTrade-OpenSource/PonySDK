@@ -33,7 +33,8 @@ public class ExportableField implements Serializable {
 
     private String caption;
 
-    public ExportableField() {}
+    public ExportableField() {
+    }
 
     public ExportableField(String key, String caption) {
         this.key = key;

@@ -15,12 +15,11 @@ public enum Browser {
                                                                                                                                                                     // mobile
                                                                                                                                                                     // devices
     /**
-     * For some strange reason Opera uses 9.80 in the user-agent string and otherwise it is very inconsistent.
-     * Use the getVersion method if you really want to know which version it is.
+     * For some strange reason Opera uses 9.80 in the user-agent string and
+     * otherwise it is very inconsistent. Use the getVersion method if you
+     * really want to know which version it is.
      */
-    OPERA10(Manufacturer.OPERA, Browser.OPERA, 10, "Opera 10", new String[] { "Opera/9.8" }, null, BrowserType.WEB_BROWSER, RenderingEngine.PRESTO, "Version\\/(([\\d]+)\\.([\\w]+))"),
-    OPERA9(Manufacturer.OPERA, Browser.OPERA, 5, "Opera 9", new String[] { "Opera/9" }, null, BrowserType.WEB_BROWSER, RenderingEngine.PRESTO, null),
-    KONQUEROR(Manufacturer.OTHER, null, 1, "Konqueror", new String[] { "Konqueror" }, null, BrowserType.WEB_BROWSER, RenderingEngine.KHTML, "Konqueror\\/(([0-9]+)\\.?([\\w]+)?(-[\\w]+)?)"),
+    OPERA10(Manufacturer.OPERA, Browser.OPERA, 10, "Opera 10", new String[] { "Opera/9.8" }, null, BrowserType.WEB_BROWSER, RenderingEngine.PRESTO, "Version\\/(([\\d]+)\\.([\\w]+))"), OPERA9(Manufacturer.OPERA, Browser.OPERA, 5, "Opera 9", new String[] { "Opera/9" }, null, BrowserType.WEB_BROWSER, RenderingEngine.PRESTO, null), KONQUEROR(Manufacturer.OTHER, null, 1, "Konqueror", new String[] { "Konqueror" }, null, BrowserType.WEB_BROWSER, RenderingEngine.KHTML, "Konqueror\\/(([0-9]+)\\.?([\\w]+)?(-[\\w]+)?)"),
 
     /**
      * Outlook email client
@@ -28,14 +27,16 @@ public enum Browser {
     OUTLOOK(Manufacturer.MICROSOFT, null, 100, "Outlook", new String[] { "MSOffice" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.WORD, "MSOffice (([0-9]+))"), // before
                                                                                                                                                                      // IE7
     /**
-     * Microsoft Outlook 2007 identifies itself as MSIE7 but uses the html rendering engine of Word 2007.
-     * Example user agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; SLCC1; .NET CLR 2.0.50727; .NET
+     * Microsoft Outlook 2007 identifies itself as MSIE7 but uses the html
+     * rendering engine of Word 2007. Example user agent: Mozilla/4.0
+     * (compatible; MSIE 7.0; Windows NT 6.0; SLCC1; .NET CLR 2.0.50727; .NET
      * CLR 3.0.04506; .NET CLR 1.1.4322; MSOffice 12)
      */
     OUTLOOK2007(Manufacturer.MICROSOFT, Browser.OUTLOOK, 107, "Outlook 2007", new String[] { "MSOffice 12" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.WORD, null), // before
                                                                                                                                                                            // IE7
     /**
-     * Outlook 2010 is still using the rendering engine of Word. http://www.fixoutlook.org
+     * Outlook 2010 is still using the rendering engine of Word.
+     * http://www.fixoutlook.org
      */
     OUTLOOK2010(Manufacturer.MICROSOFT, Browser.OUTLOOK, 108, "Outlook 2010", new String[] { "MSOffice 14" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.WORD, null), // before
                                                                                                                                                                            // IE7
@@ -46,9 +47,10 @@ public enum Browser {
     IE(Manufacturer.MICROSOFT, null, 1, "Internet Explorer", new String[] { "MSIE" }, null, BrowserType.WEB_BROWSER, RenderingEngine.TRIDENT, "MSIE (([\\d]+)\\.([\\w]+))"), // before
                                                                                                                                                                              // Mozilla
     /**
-     * Since version 7 Outlook Express is identifying itself. By detecting Outlook Express we can not identify
-     * the Internet Explorer version which is probably used for the rendering. Obviously this product is now
-     * called Windows Live Mail Desktop or just Windows Live Mail.
+     * Since version 7 Outlook Express is identifying itself. By detecting
+     * Outlook Express we can not identify the Internet Explorer version which
+     * is probably used for the rendering. Obviously this product is now called
+     * Windows Live Mail Desktop or just Windows Live Mail.
      */
     OUTLOOK_EXPRESS7(Manufacturer.MICROSOFT, Browser.IE, 110, "Windows Live Mail", new String[] { "Outlook-Express/7.0" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.TRIDENT, null), // before
                                                                                                                                                                                            // IE7,
@@ -67,8 +69,9 @@ public enum Browser {
                                                                                                                                                                                            // name
                                                                                                                                                                                            // later
     /**
-     * Since 2007 the mobile edition of Internet Explorer identifies itself as IEMobile in the user-agent. If
-     * previous versions have to be detected, use the operating system information as well.
+     * Since 2007 the mobile edition of Internet Explorer identifies itself as
+     * IEMobile in the user-agent. If previous versions have to be detected, use
+     * the operating system information as well.
      */
     IEMOBILE9(Manufacturer.MICROSOFT, Browser.IE, 123, "IE Mobile 9", new String[] { "IEMobile/9" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.TRIDENT, null), // before
                                                                                                                                                                        // MSIE
@@ -125,12 +128,15 @@ public enum Browser {
 
     OMNIWEB(Manufacturer.OTHER, null, 2, "Omniweb", new String[] { "OmniWeb" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT, null), //
 
-    SAFARI(Manufacturer.APPLE, null, 1, "Safari", new String[] { "Safari" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT, "Version\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?)"), // before
-                                                                                                                                                                                      // AppleWebKit
-    CHROME_MOBILE(Manufacturer.GOOGLE, Browser.SAFARI, 100, "Chrome Mobile", new String[] { "CrMo" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.WEBKIT, "CrMo\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"),
-    MOBILE_SAFARI(Manufacturer.APPLE, Browser.SAFARI, 2, "Mobile Safari", new String[] { "Mobile Safari", "Mobile/" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.WEBKIT, null), // before
-                                                                                                                                                                                        // Safari
-    SILK(Manufacturer.AMAZON, Browser.SAFARI, 15, "Silk", new String[] { "Silk/" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT, "Silk\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\-[\\w]+)?)"), // http://en.wikipedia.org/wiki/Amazon_Silk
+    SAFARI(Manufacturer.APPLE, null, 1, "Safari", new String[] { "Safari" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT,
+            "Version\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?)"), // before
+                                                              // AppleWebKit
+    CHROME_MOBILE(Manufacturer.GOOGLE, Browser.SAFARI, 100, "Chrome Mobile", new String[] { "CrMo" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.WEBKIT,
+            "CrMo\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"), MOBILE_SAFARI(Manufacturer.APPLE, Browser.SAFARI, 2, "Mobile Safari",
+                    new String[] { "Mobile Safari", "Mobile/" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.WEBKIT, null), // before
+                                                                                                                                  // Safari
+    SILK(Manufacturer.AMAZON, Browser.SAFARI, 15, "Silk", new String[] { "Silk/" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT,
+            "Silk\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\-[\\w]+)?)"), // http://en.wikipedia.org/wiki/Amazon_Silk
     SAFARI5(Manufacturer.APPLE, Browser.SAFARI, 3, "Safari 5", new String[] { "Version/5" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT, null), // before
                                                                                                                                                            // AppleWebKit
     SAFARI4(Manufacturer.APPLE, Browser.SAFARI, 4, "Safari 4", new String[] { "Version/4" }, null, BrowserType.WEB_BROWSER, RenderingEngine.WEBKIT, null), // before
@@ -153,15 +159,18 @@ public enum Browser {
                                                                                                                                                           // itself
                                                                                                                                                           // as
                                                                                                                                                           // AppleWebKit
-    LOTUS_NOTES(Manufacturer.OTHER, null, 3, "Lotus Notes", new String[] { "Lotus-Notes" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.OTHER, "Lotus-Notes\\/(([\\d]+)\\.([\\w]+))"), // before
-                                                                                                                                                                                           // Mozilla
+    LOTUS_NOTES(Manufacturer.OTHER, null, 3, "Lotus Notes", new String[] { "Lotus-Notes" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.OTHER,
+            "Lotus-Notes\\/(([\\d]+)\\.([\\w]+))"), // before
+                                                    // Mozilla
 
     /*
-     * Thunderbird email client, based on the same Gecko engine Firefox is using.
+     * Thunderbird email client, based on the same Gecko engine Firefox is
+     * using.
      */
-    THUNDERBIRD(Manufacturer.MOZILLA, null, 110, "Thunderbird", new String[] { "Thunderbird" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.GECKO, "Thunderbird\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"), // using
-                                                                                                                                                                                                                         // Gecko
-                                                                                                                                                                                                                         // Engine
+    THUNDERBIRD(Manufacturer.MOZILLA, null, 110, "Thunderbird", new String[] { "Thunderbird" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.GECKO,
+            "Thunderbird\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"), // using
+                                                                              // Gecko
+                                                                              // Engine
     THUNDERBIRD12(Manufacturer.MOZILLA, Browser.THUNDERBIRD, 185, "Thunderbird 12", new String[] { "Thunderbird/12" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.GECKO, null), // using
                                                                                                                                                                                      // Gecko
                                                                                                                                                                                      // Engine
@@ -195,12 +204,14 @@ public enum Browser {
                                                                                                                                                           // Engine
     FLOCK(Manufacturer.OTHER, null, 4, "Flock", new String[] { "Flock" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO, "Flock\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?)"),
 
-    FIREFOX(Manufacturer.MOZILLA, null, 10, "Firefox", new String[] { "Firefox" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO, "Firefox\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"), // using
-                                                                                                                                                                                                       // Gecko
-                                                                                                                                                                                                       // Engine
-    FIREFOX3MOBILE(Manufacturer.MOZILLA, Browser.FIREFOX, 31, "Firefox 3 Mobile", new String[] { "Firefox/3.5 Maemo" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.GECKO, null), // using
-                                                                                                                                                                                        // Gecko
-                                                                                                                                                                                        // Engine
+    FIREFOX(Manufacturer.MOZILLA, null, 10, "Firefox", new String[] { "Firefox" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO,
+            "Firefox\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?(\\.[\\w]+)?)"), // using
+                                                                          // Gecko
+                                                                          // Engine
+    FIREFOX3MOBILE(Manufacturer.MOZILLA, Browser.FIREFOX, 31, "Firefox 3 Mobile", new String[] { "Firefox/3.5 Maemo" }, null, BrowserType.MOBILE_BROWSER, RenderingEngine.GECKO,
+            null), // using
+                   // Gecko
+                   // Engine
     FIREFOX13(Manufacturer.MOZILLA, Browser.FIREFOX, 94, "Firefox 13", new String[] { "Firefox/13" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO, null), // using
                                                                                                                                                                    // Gecko
                                                                                                                                                                    // Engine
@@ -241,11 +252,13 @@ public enum Browser {
                                                                                                                                                                       // Gecko
                                                                                                                                                                       // Engine
 
-    SEAMONKEY(Manufacturer.OTHER, null, 15, "SeaMonkey", new String[] { "SeaMonkey" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO, "SeaMonkey\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?)"), // using
-                                                                                                                                                                                                 // Gecko
-                                                                                                                                                                                                 // Engine
+    SEAMONKEY(Manufacturer.OTHER, null, 15, "SeaMonkey", new String[] { "SeaMonkey" }, null, BrowserType.WEB_BROWSER, RenderingEngine.GECKO,
+            "SeaMonkey\\/(([0-9]+)\\.?([\\w]+)?(\\.[\\w]+)?)"), // using
+                                                                // Gecko
+                                                                // Engine
 
-    BOT(Manufacturer.OTHER, null, 12, "Robot/Spider", new String[] { "Googlebot", "bot", "spider", "crawler", "Feedfetcher", "Slurp", "Twiceler", "Nutch", "BecomeBot" }, null, BrowserType.ROBOT, RenderingEngine.OTHER, null),
+    BOT(Manufacturer.OTHER, null, 12, "Robot/Spider", new String[] { "Googlebot", "bot", "spider", "crawler", "Feedfetcher", "Slurp", "Twiceler", "Nutch", "BecomeBot" }, null,
+            BrowserType.ROBOT, RenderingEngine.OTHER, null),
 
     MOZILLA(Manufacturer.MOZILLA, null, 1, "Mozilla", new String[] { "Mozilla", "Moozilla" }, null, BrowserType.WEB_BROWSER, RenderingEngine.OTHER, null), // rest
                                                                                                                                                            // of
@@ -275,7 +288,8 @@ public enum Browser {
 
     EVOLUTION(Manufacturer.OTHER, null, 11, "Evolution", new String[] { "CamelHttpStream" }, null, BrowserType.EMAIL_CLIENT, RenderingEngine.OTHER, null), // http://www.go-evolution.org/Camel.Stream
 
-    LYNX(Manufacturer.OTHER, null, 13, "Lynx", new String[] { "Lynx" }, null, BrowserType.TEXT_BROWSER, RenderingEngine.OTHER, "Lynx\\/(([0-9]+)\\.([\\d]+)\\.?([\\w-+]+)?\\.?([\\w-+]+)?)"),
+    LYNX(Manufacturer.OTHER, null, 13, "Lynx", new String[] { "Lynx" }, null, BrowserType.TEXT_BROWSER, RenderingEngine.OTHER,
+            "Lynx\\/(([0-9]+)\\.([\\d]+)\\.?([\\w-+]+)?\\.?([\\w-+]+)?)"),
 
     DOWNLOAD(Manufacturer.OTHER, null, 16, "Downloading Tool", new String[] { "cURL", "wget" }, null, BrowserType.TEXT_BROWSER, RenderingEngine.OTHER, null),
 
@@ -284,7 +298,8 @@ public enum Browser {
     private final short id;
     private final String name;
     private final String[] aliases;
-    private final String[] excludeList; // don't match when these values are in the agent-string
+    private final String[] excludeList; // don't match when these values are in
+                                        // the agent-string
     private final BrowserType browserType;
     private final Manufacturer manufacturer;
     private final RenderingEngine renderingEngine;
@@ -292,8 +307,8 @@ public enum Browser {
     private List<Browser> children;
     private Pattern versionRegEx;
 
-    private Browser(final Manufacturer manufacturer, final Browser parent, final int versionId, final String name, final String[] aliases, final String[] exclude, final BrowserType browserType, final RenderingEngine renderingEngine,
-            final String versionRegexString) {
+    private Browser(final Manufacturer manufacturer, final Browser parent, final int versionId, final String name, final String[] aliases, final String[] exclude,
+            final BrowserType browserType, final RenderingEngine renderingEngine, final String versionRegexString) {
         this.id = (short) ((manufacturer.getId() << 8) + (byte) versionId);
         this.name = name;
         this.parent = parent;
@@ -321,15 +336,18 @@ public enum Browser {
 
     private Pattern getVersionRegEx() {
         if (this.versionRegEx == null) {
-            if (this.getGroup() != this) return this.getGroup().getVersionRegEx();
-            else return null;
+            if (this.getGroup() != this)
+                return this.getGroup().getVersionRegEx();
+            else
+                return null;
         }
         return this.versionRegEx;
     }
 
     /**
-     * Detects the detailed version information of the browser. Depends on the userAgent to be available.
-     * Returns null if it can not detect the version information.
+     * Detects the detailed version information of the browser. Depends on the
+     * userAgent to be available. Returns null if it can not detect the version
+     * information.
      * 
      * @return Version
      */
@@ -341,7 +359,8 @@ public enum Browser {
                 final String fullVersionString = matcher.group(1);
                 final String majorVersion = matcher.group(2);
                 String minorVersion = "0";
-                if (matcher.groupCount() > 2) // usually but not always there is a minor version
+                if (matcher.groupCount() > 2) // usually but not always there is
+                                              // a minor version
                     minorVersion = matcher.group(3);
                 return new Version(fullVersionString, majorVersion, minorVersion);
             }
@@ -374,12 +393,15 @@ public enum Browser {
      * @return top level browser family
      */
     public Browser getGroup() {
-        if (this.parent != null) { return parent.getGroup(); }
+        if (this.parent != null) {
+            return parent.getGroup();
+        }
         return this;
     }
 
     /*
-     * Checks if the given user-agent string matches to the browser. Only checks for one specific browser.
+     * Checks if the given user-agent string matches to the browser. Only checks
+     * for one specific browser.
      */
     public boolean isInUserAgentString(final String agentString) {
         for (final String alias : aliases) {
@@ -389,8 +411,9 @@ public enum Browser {
     }
 
     /**
-     * Checks if the given user-agent does not contain one of the tokens which should not match. In most cases
-     * there are no excluding tokens, so the impact should be small.
+     * Checks if the given user-agent does not contain one of the tokens which
+     * should not match. In most cases there are no excluding tokens, so the
+     * impact should be small.
      * 
      * @param agentString
      * @return
@@ -409,19 +432,24 @@ public enum Browser {
             if (this.children.size() > 0) {
                 for (final Browser childBrowser : this.children) {
                     final Browser match = childBrowser.checkUserAgent(agentString);
-                    if (match != null) { return match; }
+                    if (match != null) {
+                        return match;
+                    }
                 }
             }
-            // if children didn't match we continue checking the current to prevent false positives
-            if (!this.containsExcludeToken(agentString)) { return this; }
+            // if children didn't match we continue checking the current to
+            // prevent false positives
+            if (!this.containsExcludeToken(agentString)) {
+                return this;
+            }
 
         }
         return null;
     }
 
     /**
-     * Iterates over all Browsers to compare the browser signature with the user agent string. If no match can
-     * be found Browser.UNKNOWN will be returned.
+     * Iterates over all Browsers to compare the browser signature with the user
+     * agent string. If no match can be found Browser.UNKNOWN will be returned.
      * 
      * @param agentString
      * @return Browser
@@ -431,7 +459,9 @@ public enum Browser {
             // only check top level objects
             if (browser.parent == null) {
                 final Browser match = browser.checkUserAgent(agentString);
-                if (match != null) { return match; // either current operatingSystem or a child object
+                if (match != null) {
+                    return match; // either current operatingSystem or a child
+                                  // object
                 }
             }
         }
@@ -439,8 +469,8 @@ public enum Browser {
     }
 
     /**
-     * Returns the enum constant of this type with the specified id. Throws IllegalArgumentException if the
-     * value does not exist.
+     * Returns the enum constant of this type with the specified id. Throws
+     * IllegalArgumentException if the value does not exist.
      * 
      * @param id
      * @return

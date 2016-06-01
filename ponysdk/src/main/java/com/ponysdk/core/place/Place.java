@@ -24,11 +24,13 @@
 package com.ponysdk.core.place;
 
 /**
- * Represents a bookmarkable location in an app. Implementations are expected to provide correct
- * {@link Object#equals(Object)} and {@link Object#hashCode()} methods.
+ * Represents a bookmarkable location in an app. Implementations are expected to
+ * provide correct {@link Object#equals(Object)} and {@link Object#hashCode()}
+ * methods.
  */
 public interface Place {
 
-    Place NOWHERE = new Place() {};
+    Place NOWHERE = new Place() {
+    };
 
 }

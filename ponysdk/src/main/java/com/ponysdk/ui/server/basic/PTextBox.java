@@ -23,8 +23,8 @@
 
 package com.ponysdk.ui.server.basic;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard single-line text box.

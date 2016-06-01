@@ -28,8 +28,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
 
 public abstract class PKeyPressFilterHandler implements PKeyPressHandler {
 

@@ -45,13 +45,12 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
+import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.request.ParentWindowRequest;
 import com.ponysdk.ui.terminal.request.RequestCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
-import com.ponysdk.ui.terminal.socket.WebSocketClient2;
 import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
@@ -67,25 +66,34 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
 	private int applicationViewID;
 
-	private WebSocketClient2 socketClient;
+	private WebSocketClient socketClient;
 
 	private final List<StartupListener> listener = new ArrayList<>();
 
 	private PonySDK() {
-		Window.addWindowClosingHandler(new ClosingHandler() {
+	    
+	    final elemental.html.Window window = Browser.getWindow();
+            final elemental.html.Window opener = window.getOpener();
 
-			@Override
-			public void onWindowClosing(final ClosingEvent event) {
-				PTWindowManager.closeAll();
-			}
-		});
-		Window.addCloseHandler(new CloseHandler<Window>() {
-
-			@Override
-			public void onClose(final CloseEvent<Window> event) {
-				PTWindowManager.closeAll();
-			}
-		});
+            if (opener == null) {
+                Window.addWindowClosingHandler(new ClosingHandler() {
+                    
+                    @Override
+                    public void onWindowClosing(final ClosingEvent event) {
+                        PTWindowManager.closeAll();  
+                    }
+                });
+                Window.addCloseHandler(new CloseHandler<Window>() {
+                    
+                    @Override
+                    public void onClose(final CloseEvent<Window> event) {
+                        PTWindowManager.closeAll();
+                    }
+                });
+                
+            }
+	    
+	    
 	}
 
 	@ExportConstructor
@@ -130,7 +138,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 				builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
 				builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-				socketClient = new WebSocketClient2(builder.toString(), new WebSocketCallback() {
+				socketClient = new WebSocketClient(builder.toString(), new WebSocketCallback() {
 
 					@Override
 					public void connected() {
@@ -189,7 +197,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 	/**
 	 * From other terminal to the server
 	 */
-	@Export
+	@Export 
 	public void sendDataToServer(final String jsObject) {
 		uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
 	}

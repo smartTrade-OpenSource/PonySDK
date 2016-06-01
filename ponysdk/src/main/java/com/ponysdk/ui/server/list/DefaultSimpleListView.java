@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.list;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PFlexTable;
 
@@ -31,7 +30,7 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     public DefaultSimpleListView() {
         super();
-        addStyleName(PonySDKTheme.SIMPLELIST);
+        // addStyleName(PonySDKTheme.SIMPLELIST);
     }
 
     @Override
@@ -55,12 +54,12 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void selectRow(final int row) {
-        getRowFormatter().addStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        getRowFormatter().addStyleName(row + 1, "selected");
     }
 
     @Override
     public void unSelectRow(final int row) {
-        getRowFormatter().removeStyleName(row + 1, PonySDKTheme.SIMPLELIST_SELECTEDROW);
+        getRowFormatter().removeStyleName(row + 1, "selected");
     }
 
     @Override
@@ -110,9 +109,11 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     }
 
     @Override
-    public void moveRow(final int index, final int beforeIndex) {}
+    public void moveRow(final int index, final int beforeIndex) {
+    }
 
     @Override
-    public void moveColumn(final int index, final int beforeIndex) {}
+    public void moveColumn(final int index, final int beforeIndex) {
+    }
 
 }

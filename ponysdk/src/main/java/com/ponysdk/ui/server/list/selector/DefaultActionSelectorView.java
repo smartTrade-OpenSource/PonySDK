@@ -3,7 +3,6 @@ package com.ponysdk.ui.server.list.selector;
 
 import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PMenuBar;
 import com.ponysdk.ui.server.basic.PMenuItem;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -15,7 +14,6 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorView 
     private final PMenuItem selectNoneMenuItem;
 
     public DefaultActionSelectorView() {
-        addStyleName(PonySDKTheme.MENUBAR_LIGHT);
         final PMenuBar menuBarAction = new PMenuBar(true);
         addItem("", menuBarAction);
         selectAllMenuItem = new PMenuItem(PString.get("list.selector.all"));

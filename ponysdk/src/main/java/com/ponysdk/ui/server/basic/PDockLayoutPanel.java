@@ -24,10 +24,10 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and

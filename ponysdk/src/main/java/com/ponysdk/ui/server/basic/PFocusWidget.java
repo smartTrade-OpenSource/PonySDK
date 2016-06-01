@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.ui.server.basic.event.HasPBlurHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
@@ -49,7 +50,6 @@ import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
 import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * Abstract base class for most widgets that can receive keyboard focus.

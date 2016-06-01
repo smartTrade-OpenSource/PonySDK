@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 
 public class DefaultScrollablePageView extends DefaultPageView {
@@ -31,6 +30,6 @@ public class DefaultScrollablePageView extends DefaultPageView {
     @Override
     protected void buildBody() {
         body = new PScrollPanel();
-        body.addStyleName(PonySDKTheme.PAGE_BODY);
+        body.addStyleName("body");
     }
 }

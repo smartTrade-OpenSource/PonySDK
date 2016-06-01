@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import com.ponysdk.ui.model.HandlerModel;
 import com.ponysdk.ui.terminal.UIBuilder;
 import com.ponysdk.ui.terminal.model.BinaryModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
 
 public abstract class AbstractPTObject implements PTObject {

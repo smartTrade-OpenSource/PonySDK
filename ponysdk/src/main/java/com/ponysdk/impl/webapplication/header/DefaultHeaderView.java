@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.header;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
@@ -40,10 +39,10 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
     public DefaultHeaderView(final String title) {
         setSizeFull();
 
-        gridLayout.addStyleName(PonySDKTheme.HEADER);
+        // gridLayout.addStyleName(PonySDKTheme.HEADER);
 
         final PLabel logo = new PLabel(title);
-        logo.addStyleName(PonySDKTheme.HEADER_LOGO);
+        // logo.addStyleName(PonySDKTheme.HEADER_LOGO);
 
         gridLayout.add(logo);
         gridLayout.setCellHorizontalAlignment(logo, PHorizontalAlignment.ALIGN_LEFT);

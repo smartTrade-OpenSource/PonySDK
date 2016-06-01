@@ -34,8 +34,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and
@@ -376,8 +376,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     @Override
     public Iterator<PWidget> iterator() {
-        final List<PWidget> emptyList = Collections.emptyList();
-        return emptyList.iterator();
+        return Collections.emptyIterator();
     }
 
     public PRowFormatter getRowFormatter() {

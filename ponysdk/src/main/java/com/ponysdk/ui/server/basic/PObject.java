@@ -32,13 +32,13 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.PNativeEvent;
 import com.ponysdk.ui.server.basic.event.PNativeHandler;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * The superclass for all PonySDK objects.
@@ -51,19 +51,14 @@ public abstract class PObject {
 
     private ListenerCollection<PNativeHandler> nativeHandlers;
 
-    protected int windowID;
+    protected int windowID = PWindow.EMPTY_WINDOW_ID;
 
     private boolean initialized = false;
 
     protected final Queue<Runnable> stackedInstructions = new LinkedList<>();
 
     PObject() {
-        this(PWindow.EMPTY_WINDOW_ID);
-    }
-
-    PObject(final int windowID) {
         UIContext.get().registerObject(this);
-        this.windowID = windowID;
     }
 
     protected boolean attach(final int windowID) {
@@ -73,8 +68,7 @@ public abstract class PObject {
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
@@ -113,8 +107,7 @@ public abstract class PObject {
     }
 
     public void bindTerminalFunction(final String functionName) {
-        if (nativeBindingFunction != null)
-            throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+        if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
         nativeBindingFunction = functionName;
 
@@ -122,15 +115,13 @@ public abstract class PObject {
     }
 
     public void sendToNative(final JsonObject data) {
-        if (nativeBindingFunction == null)
-            throw new IllegalAccessError("Object not bind to a native function");
+        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
         saveUpdate(ServerToClientModel.NATIVE, data);
     }
 
     public void addNativeHandler(final PNativeHandler handler) {
-        if (nativeHandlers == null)
-            nativeHandlers = new ListenerCollection<>();
+        if (nativeHandlers == null) nativeHandlers = new ListenerCollection<>();
 
         nativeHandlers.register(handler);
     }
@@ -170,8 +161,10 @@ public abstract class PObject {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAdd(objectID, parentObjectID, binaryModels);
-        else stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeAdd(objectID, parentObjectID, binaryModels);
+        else
+            stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
     protected void executeAdd(final int objectID, final int parentObjectID) {
@@ -194,8 +187,10 @@ public abstract class PObject {
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
-        else stackedInstructions.add(() -> executeAddHandler(type));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeAddHandler(type);
+        else
+            stackedInstructions.add(() -> executeAddHandler(type));
     }
 
     protected void executeAddHandler(final HandlerModel type) {
@@ -208,8 +203,10 @@ public abstract class PObject {
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
-        else stackedInstructions.add(() -> executeRemoveHandler());
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeRemoveHandler();
+        else
+            stackedInstructions.add(() -> executeRemoveHandler());
     }
 
     protected void executeRemoveHandler() {
@@ -221,8 +218,10 @@ public abstract class PObject {
     }
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
-        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeRemove(objectID, parentObjectID);
+        else
+            stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
     protected void executeRemove(final int objectID, final int parentObjectID) {
@@ -242,14 +241,15 @@ public abstract class PObject {
         saveUpdate(new ServerBinaryModel(model, value));
     }
 
-    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
-            final Object value2) {
+    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2, final Object value2) {
         saveUpdate(new ServerBinaryModel(model1, value1), new ServerBinaryModel(model2, value2));
     }
 
     protected void saveUpdate(final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(binaryModels);
-        else stackedInstructions.add(() -> executeUpdate(binaryModels));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeUpdate(binaryModels);
+        else
+            stackedInstructions.add(() -> executeUpdate(binaryModels));
     }
 
     protected void executeUpdate(final ServerToClientModel model, final Object value) {

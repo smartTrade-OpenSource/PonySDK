@@ -23,7 +23,6 @@
 
 package com.ponysdk.ui.server.rich;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PDialogBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
@@ -34,8 +33,8 @@ import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 /**
- * POptionPane makes it easy to pop up a standard dialog box that prompts users for a value or
- * informs them of something.
+ * POptionPane makes it easy to pop up a standard dialog box that prompts users
+ * for a value or informs them of something.
  */
 public class POptionPane {
 
@@ -53,22 +52,20 @@ public class POptionPane {
         return showConfirmDialog(handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType) {
         return showConfirmDialog(handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType, final PMessageType messageType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType,
+            final PMessageType messageType) {
         return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType, final PMessageType messageType, final String... options) {
+    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType,
+            final String... options) {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
-        dialogBox.setStyleName(PonySDKTheme.DIALOGBOX);
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
         dialogBox.setTitle(title);
@@ -79,7 +76,7 @@ public class POptionPane {
         final PLabel content = new PLabel(message);
         panel.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName(PonySDKTheme.DIALOGBOX_CONTROLS);
+        controlsPanel.setStyleName("controls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {
@@ -108,16 +105,16 @@ public class POptionPane {
 
     private static String[] getOptions(final POptionType optionType) {
         switch (optionType) {
-            case DEFAULT_OPTION:
-                return new String[] { POption.OK_OPTION.getName() };
-            case OK_CANCEL_OPTION:
-                return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-            case YES_NO_CANCEL_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-            case YES_NO_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
-            default:
-                break;
+        case DEFAULT_OPTION:
+            return new String[] { POption.OK_OPTION.getName() };
+        case OK_CANCEL_OPTION:
+            return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+        case YES_NO_CANCEL_OPTION:
+            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+        case YES_NO_OPTION:
+            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
+        default:
+            break;
         }
         return null;
     }
@@ -128,11 +125,7 @@ public class POptionPane {
     }
 
     public enum POption {
-        CANCEL_OPTION("CANCEL"),
-        CLOSED_OPTION("CLOSED"),
-        NO_OPTION("NO"),
-        OK_OPTION("OK"),
-        YES_OPTION("YES");
+        CANCEL_OPTION("CANCEL"), CLOSED_OPTION("CLOSED"), NO_OPTION("NO"), OK_OPTION("OK"), YES_OPTION("YES");
 
         private final String name;
 
@@ -150,18 +143,11 @@ public class POptionPane {
     }
 
     public enum POptionType {
-        DEFAULT_OPTION,
-        OK_CANCEL_OPTION,
-        YES_NO_CANCEL_OPTION,
-        YES_NO_OPTION
+        DEFAULT_OPTION, OK_CANCEL_OPTION, YES_NO_CANCEL_OPTION, YES_NO_OPTION
     }
 
     public enum PMessageType {
-        PLAIN_MESSAGE(""),
-        ERROR_MESSAGE("Error"),
-        INFORMATION_MESSAGE("Info"),
-        WARNING_MESSAGE("Warning"),
-        QUESTION_MESSAGE("Question");
+        PLAIN_MESSAGE(""), ERROR_MESSAGE("Error"), INFORMATION_MESSAGE("Info"), WARNING_MESSAGE("Warning"), QUESTION_MESSAGE("Question");
 
         private final String name;
 

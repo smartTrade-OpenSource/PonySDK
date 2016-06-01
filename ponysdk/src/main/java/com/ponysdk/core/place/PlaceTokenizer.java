@@ -2,7 +2,8 @@
 package com.ponysdk.core.place;
 
 /**
- * Implemented by objects responsible for text serialization and deserialization of Place objects.
+ * Implemented by objects responsible for text serialization and deserialization
+ * of Place objects.
  * 
  * @param <P>
  *            a subtype of {@link Place}

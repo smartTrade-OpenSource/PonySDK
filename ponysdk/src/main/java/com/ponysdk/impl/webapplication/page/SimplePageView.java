@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 
@@ -33,7 +32,7 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
 
     public SimplePageView(final String pageTitle) {
         setSizeFull();
-        addStyleName(PonySDKTheme.PAGE);
+        addStyleName("page");
         body = buildBody();
         setWidget(body);
     }
@@ -43,11 +42,12 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
     }
 
     @Override
-    public void setPageTitle(final String caption) {}
+    public void setPageTitle(final String caption) {
+    }
 
     protected PSimplePanel buildBody() {
         final PSimplePanel panel = new PSimpleLayoutPanel();
-        panel.addStyleName(PonySDKTheme.PAGE_BODY);
+        panel.addStyleName("body");
         return panel;
     }
 

@@ -29,7 +29,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
+import com.ponysdk.ui.model.ClientToServerModel;
 
 /**
  * @author nvelin

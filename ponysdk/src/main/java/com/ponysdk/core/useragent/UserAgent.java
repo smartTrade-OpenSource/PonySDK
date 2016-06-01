@@ -40,9 +40,10 @@ public class UserAgent implements Serializable {
     }
 
     /**
-     * Detects the detailed version information of the browser. Depends on the userAgent to be available. Use
-     * it only after using UserAgent(String) or UserAgent.parseUserAgent(String). Returns null if it can not
-     * detect the version information.
+     * Detects the detailed version information of the browser. Depends on the
+     * userAgent to be available. Use it only after using UserAgent(String) or
+     * UserAgent.parseUserAgent(String). Returns null if it can not detect the
+     * version information.
      * 
      * @return Version
      */
@@ -65,7 +66,8 @@ public class UserAgent implements Serializable {
     }
 
     /**
-     * Returns an unique integer value of the operating system & browser combination
+     * Returns an unique integer value of the operating system & browser
+     * combination
      * 
      * @return the id
      */
@@ -119,6 +121,7 @@ public class UserAgent implements Serializable {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -133,6 +136,7 @@ public class UserAgent implements Serializable {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

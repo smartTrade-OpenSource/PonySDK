@@ -45,6 +45,9 @@ import com.ponysdk.core.event.EventHandler;
 import com.ponysdk.core.event.HandlerRegistration;
 import com.ponysdk.core.event.SimpleEventBus;
 import com.ponysdk.core.stm.Txn;
+import com.ponysdk.ui.model.ClientToServerModel;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
 import com.ponysdk.ui.server.basic.event.PBlurEvent;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -70,13 +73,11 @@ import com.ponysdk.ui.server.basic.event.PMouseOverEvent;
 import com.ponysdk.ui.server.basic.event.PMouseUpEvent;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.DomHandlerType;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
- * The base class for the majority of user-interface objects. Widget adds support for receiving
- * events from the browser and being added directly to {@link PPanel panels}.
+ * The base class for the majority of user-interface objects. Widget adds
+ * support for receiving events from the browser and being added directly to
+ * {@link PPanel panels}.
  */
 public abstract class PWidget extends PObject implements IsPWidget {
 
@@ -105,13 +106,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String styleName;
     private String stylePrimaryName;
     private String debugID;
-
-    public PWidget() {
-    }
-
-    public PWidget(final int windowID) {
-        super(windowID);
-    }
 
     public static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
@@ -226,8 +220,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleProperty(final String name, final String value) {
-        if (!Objects.equals(safeStyleProperties().put(name, value), value))
-            saveUpdate(ServerToClientModel.PUT_STYLE_KEY, name, ServerToClientModel.STYLE_VALUE, value);
+        if (!Objects.equals(safeStyleProperties().put(name, value), value)) saveUpdate(ServerToClientModel.PUT_STYLE_KEY, name, ServerToClientModel.STYLE_VALUE, value);
     }
 
     public void removeStyleProperty(final String name) {
@@ -235,13 +228,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setProperty(final String name, final String value) {
-        if (!Objects.equals(safeElementProperties().put(name, value), value))
-            saveUpdate(ServerToClientModel.PUT_PROPERTY_KEY, name, ServerToClientModel.PROPERTY_VALUE, value);
+        if (!Objects.equals(safeElementProperties().put(name, value), value)) saveUpdate(ServerToClientModel.PUT_PROPERTY_KEY, name, ServerToClientModel.PROPERTY_VALUE, value);
     }
 
     public void setAttribute(final String name, final String value) {
-        if (!Objects.equals(safeElementAttributes().put(name, value), value))
-            saveUpdate(ServerToClientModel.PUT_ATTRIBUTE_KEY, name, ServerToClientModel.ATTRIBUTE_VALUE, value);
+        if (!Objects.equals(safeElementAttributes().put(name, value), value)) saveUpdate(ServerToClientModel.PUT_ATTRIBUTE_KEY, name, ServerToClientModel.ATTRIBUTE_VALUE, value);
     }
 
     public void removeAttribute(final String name) {
@@ -277,8 +268,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public boolean hasStyleName(final String styleName) {
-        if (styleNames == null) return false;
-        else return styleNames.contains(styleName);
+        if (styleNames == null)
+            return false;
+        else
+            return styleNames.contains(styleName);
     }
 
     public Object getData() {
@@ -316,16 +309,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
     // return handlerRegistration;
     // }
 
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler,
-            final PDomEvent.Type<H> type) {
+    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
         saveRemoveHandler(HandlerModel.HANDLER_DOM_HANDLER);
         return handlerRegistration;
     }
 
     public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE,
-                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
+        return addDomHandler(handler, PKeyPressEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
     }
 
     public HandlerRegistration addDomHandler(final PKeyUpFilterHandler handler) {
@@ -336,15 +327,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return addDomHandler(handler, type, null);
     }
 
-    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type,
-            final ServerBinaryModel binaryModel) {
+    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final Type<H> type, final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
-            final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                    type.getDomHandlerType().getValue());
-            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(binaryModel1, binaryModel);
-            else stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
+            final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
+            if (windowID != PWindow.EMPTY_WINDOW_ID)
+                executeAddDomHandler(binaryModel1, binaryModel);
+            else
+                stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
         return handlerRegistration;
     }
@@ -369,67 +360,67 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (instruction.containsKey(domHandlerType)) {
             final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(domHandlerType)];
             switch (domHandler) {
-                case KEY_PRESS:
-                    fireEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
-                    break;
-                case KEY_UP:
-                    fireEvent(new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
-                    break;
-                case CLICK:
-                    fireMouseEvent(instruction, new PClickEvent(this));
-                    break;
-                case DOUBLE_CLICK:
-                    fireMouseEvent(instruction, new PDoubleClickEvent(this));
-                    break;
-                case MOUSE_OVER:
-                    fireMouseEvent(instruction, new PMouseOverEvent(this));
-                    break;
-                case MOUSE_OUT:
-                    fireMouseEvent(instruction, new PMouseOutEvent(this));
-                    break;
-                case MOUSE_DOWN:
-                    fireMouseEvent(instruction, new PMouseDownEvent(this));
-                    break;
-                case MOUSE_UP:
-                    fireMouseEvent(instruction, new PMouseUpEvent(this));
-                    break;
-                case FOCUS:
-                    fireEvent(new PFocusEvent(this));
-                    break;
-                case BLUR:
-                    fireEvent(new PBlurEvent(this));
-                    break;
-                case DRAG_START:
-                    fireEvent(new PDragStartEvent(this));
-                    break;
-                case DRAG_END:
-                    fireEvent(new PDragEndEvent(this));
-                    break;
-                case DRAG_ENTER:
-                    fireEvent(new PDragEnterEvent(this));
-                    break;
-                case DRAG_LEAVE:
-                    fireEvent(new PDragLeaveEvent(this));
-                    break;
-                case DRAG_OVER:
-                    fireEvent(new PDragOverEvent(this));
-                    break;
-                case DROP:
-                    final PDropEvent dropEvent = new PDropEvent(this);
-                    final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
-                    if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
-                        dropEvent.setDragSource(source);
-                    }
-                    fireEvent(dropEvent);
-                    break;
-                case CONTEXT_MENU:
-                    fireEvent(new PContextMenuEvent(this));
-                    break;
-                case CHANGE_HANDLER:
-                default:
-                    log.error("Dom Handler not implemented: " + domHandler);
-                    break;
+            case KEY_PRESS:
+                fireEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                break;
+            case KEY_UP:
+                fireEvent(new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                break;
+            case CLICK:
+                fireMouseEvent(instruction, new PClickEvent(this));
+                break;
+            case DOUBLE_CLICK:
+                fireMouseEvent(instruction, new PDoubleClickEvent(this));
+                break;
+            case MOUSE_OVER:
+                fireMouseEvent(instruction, new PMouseOverEvent(this));
+                break;
+            case MOUSE_OUT:
+                fireMouseEvent(instruction, new PMouseOutEvent(this));
+                break;
+            case MOUSE_DOWN:
+                fireMouseEvent(instruction, new PMouseDownEvent(this));
+                break;
+            case MOUSE_UP:
+                fireMouseEvent(instruction, new PMouseUpEvent(this));
+                break;
+            case FOCUS:
+                fireEvent(new PFocusEvent(this));
+                break;
+            case BLUR:
+                fireEvent(new PBlurEvent(this));
+                break;
+            case DRAG_START:
+                fireEvent(new PDragStartEvent(this));
+                break;
+            case DRAG_END:
+                fireEvent(new PDragEndEvent(this));
+                break;
+            case DRAG_ENTER:
+                fireEvent(new PDragEnterEvent(this));
+                break;
+            case DRAG_LEAVE:
+                fireEvent(new PDragLeaveEvent(this));
+                break;
+            case DRAG_OVER:
+                fireEvent(new PDragOverEvent(this));
+                break;
+            case DROP:
+                final PDropEvent dropEvent = new PDropEvent(this);
+                final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
+                if (instruction.containsKey(dragSrc)) {
+                    final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                    dropEvent.setDragSource(source);
+                }
+                fireEvent(dropEvent);
+                break;
+            case CONTEXT_MENU:
+                fireEvent(new PContextMenuEvent(this));
+                break;
+            case CHANGE_HANDLER:
+            default:
+                log.error("Dom Handler not implemented: " + domHandler);
+                break;
             }
         } else {
             super.onClientData(instruction);
@@ -476,7 +467,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void removeFromParent() {
-        if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
+        if (parent instanceof HasPWidgets)
+            ((HasPWidgets) parent).remove(this);
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 

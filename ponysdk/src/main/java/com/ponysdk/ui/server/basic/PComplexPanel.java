@@ -25,8 +25,8 @@ package com.ponysdk.ui.server.basic;
 
 import java.util.Iterator;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.
@@ -34,13 +34,6 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
 public abstract class PComplexPanel extends PPanel {
 
     protected PWidgetCollection children = new PWidgetCollection(this);
-
-    public PComplexPanel() {
-    }
-
-    public PComplexPanel(final int windowID) {
-        super(windowID);
-    }
 
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {

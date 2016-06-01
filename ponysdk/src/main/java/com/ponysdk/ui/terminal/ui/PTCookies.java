@@ -26,9 +26,9 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.Date;
 
 import com.google.gwt.user.client.Cookies;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.model.BinaryModel;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 public class PTCookies extends AbstractPTObject {
 

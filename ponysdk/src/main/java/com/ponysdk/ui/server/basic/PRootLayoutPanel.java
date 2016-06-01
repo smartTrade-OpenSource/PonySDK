@@ -30,11 +30,12 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A singleton implementation of {@link PLayoutPanel} that always attaches itself to the document
- * body (i.e. {@link PRootPanel#get()}).
+ * A singleton implementation of {@link PLayoutPanel} that always attaches
+ * itself to the document body (i.e. {@link PRootPanel#get()}).
  * <p>
- * NOTE: This widget will <em>only</em> work in standards mode, which requires that the HTML page in
- * which it is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * NOTE: This widget will <em>only</em> work in standards mode, which requires
+ * that the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
  */
 public class PRootLayoutPanel extends PLayoutPanel {
@@ -42,7 +43,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     private static final String KEY = PRootLayoutPanel.class.getSimpleName();
 
     private PRootLayoutPanel(final int windowID) {
-        super(windowID);
+        this.windowID = windowID;
         init();
     }
 

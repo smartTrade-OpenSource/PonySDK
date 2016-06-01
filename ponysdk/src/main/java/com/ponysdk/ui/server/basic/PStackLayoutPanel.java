@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.HandlerModel;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
 import com.ponysdk.ui.server.basic.event.HasPWidgets;
@@ -37,8 +39,6 @@ import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.PUnit;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.HandlerModel;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time, with a header for

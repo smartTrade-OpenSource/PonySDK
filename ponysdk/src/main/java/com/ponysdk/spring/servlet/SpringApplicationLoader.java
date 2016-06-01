@@ -77,16 +77,15 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
                 final String clientConfigFile = applicationManagerOption.getClientConfigFile();
                 if (StringUtils.isEmpty(clientConfigFile))
                     configurations.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
-                else configurations.add(clientConfigFile);
+                else
+                    configurations.add(clientConfigFile);
 
                 EntryPoint entryPoint = null;
 
-                try (final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-                        configurations.toArray(new String[0]))) {
+                try (final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations.toArray(new String[0]))) {
                     entryPoint = applicationContext.getBean(EntryPoint.class);
 
-                    final Map<String, InitializingActivity> initializingPages = applicationContext
-                            .getBeansOfType(InitializingActivity.class);
+                    final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
                     if (initializingPages != null && !initializingPages.isEmpty()) {
                         for (final InitializingActivity p : initializingPages.values()) {
                             p.afterContextInitialized();

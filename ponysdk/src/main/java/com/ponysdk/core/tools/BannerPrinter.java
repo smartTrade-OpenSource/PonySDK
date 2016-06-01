@@ -42,9 +42,12 @@ public class BannerPrinter implements Appendable {
 
     public void appendNewLine() {
         for (int i = 0; i < columnCount; i++) {
-            if (i == 0) append(COLUMN_SEPARATOR);
-            else if (i == columnCount - 1) append(COLUMN_SEPARATOR);
-            else append(SPACE);
+            if (i == 0)
+                append(COLUMN_SEPARATOR);
+            else if (i == columnCount - 1)
+                append(COLUMN_SEPARATOR);
+            else
+                append(SPACE);
         }
         append(NEW_LINE);
     }
@@ -59,9 +62,12 @@ public class BannerPrinter implements Appendable {
         append(COLUMN_SEPARATOR);
 
         for (int i = 1; i < columnCount - 1; i++) {
-            if (i < startIndex) append(SPACE);
-            else if (i > startIndex + text.length() - 1) append(SPACE);
-            else append(text.charAt(i - startIndex));
+            if (i < startIndex)
+                append(SPACE);
+            else if (i > startIndex + text.length() - 1)
+                append(SPACE);
+            else
+                append(text.charAt(i - startIndex));
         }
 
         append(COLUMN_SEPARATOR);

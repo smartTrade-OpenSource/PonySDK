@@ -6,6 +6,7 @@
 	
 	<entry-point class='com.ponysdk.ui.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />
+	<source path='model' />
 
 	<inherits name="com.google.gwt.user.Debug" />
 	<set-property name="gwt.enableDebugId" value="true" />

@@ -33,130 +33,125 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.main.EntryPoint;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.stm.TxnContext;
+import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.exception.ServerException;
-import com.ponysdk.ui.terminal.model.ClientToServerModel;
 
 public abstract class AbstractApplicationManager {
 
-	private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
-	private final ApplicationManagerOption options;
+    private final ApplicationManagerOption options;
 
-	public AbstractApplicationManager() {
-		this(new ApplicationManagerOption());
-	}
+    public AbstractApplicationManager() {
+        this(new ApplicationManagerOption());
+    }
 
-	public AbstractApplicationManager(final ApplicationManagerOption options) {
-		this.options = options;
-		log.info(options.toString());
-	}
+    public AbstractApplicationManager(final ApplicationManagerOption options) {
+        this.options = options;
+        log.info(options.toString());
+    }
 
-	public void process(final TxnContext context) throws Exception {
-		if (context.getApplication() != null) {
-			fireInstructions(context.getJsonObject(), context);
-		} else {
-			final Integer reloadedViewID = null;
-			boolean isNewHttpSession = false;
-			Application application = context.getApplication();
-			if (application == null) {
-				application = new Application(context, options);
-				context.setApplication(application);
+    public void process(final TxnContext context) throws Exception {
+        if (context.getApplication() != null) {
+            fireInstructions(context.getJsonObject(), context);
+        } else {
+            final Integer reloadedViewID = null;
+            boolean isNewHttpSession = false;
+            Application application = context.getApplication();
+            if (application == null) {
+                application = new Application(context, options);
+                context.setApplication(application);
 
-				isNewHttpSession = true;
-				log.info("Creating a new application, {}", application.toString());
-			} else {
-				// if
-				// (data.containsKey(Model.APPLICATION_VIEW_ID.toStringValue()))
-				// {
-				// final JsonNumber jsonNumber =
-				// data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
-				// reloadedViewID = jsonNumber.longValue();
-				// }
-				// log.info("Reloading application {} {}", reloadedViewID,
-				// context);
-			}
+                isNewHttpSession = true;
+                log.info("Creating a new application, {}", application.toString());
+            } else {
+                // if
+                // (data.containsKey(Model.APPLICATION_VIEW_ID.toStringValue()))
+                // {
+                // final JsonNumber jsonNumber =
+                // data.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue());
+                // reloadedViewID = jsonNumber.longValue();
+                // }
+                // log.info("Reloading application {} {}", reloadedViewID,
+                // context);
+            }
 
-			startApplication(context, application, isNewHttpSession, reloadedViewID);
-		}
-	}
+            startApplication(context, application, isNewHttpSession, reloadedViewID);
+        }
+    }
 
-	public void startApplication(final TxnContext context, final Application application,
-			final boolean isNewHttpSession, final Integer reloadedViewID) throws Exception {
-		synchronized (context) {
-			final UIContext uiContext = new UIContext(application, context);
-			UIContext.setCurrent(uiContext);
+    public void startApplication(final TxnContext context, final Application application, final boolean isNewHttpSession, final Integer reloadedViewID) throws Exception {
+        synchronized (context) {
+            final UIContext uiContext = new UIContext(application, context);
+            UIContext.setCurrent(uiContext);
 
-			if (reloadedViewID != null) {
-				final UIContext previousUIContext = application.getUIContext(reloadedViewID);
-				if (previousUIContext != null)
-					previousUIContext.destroy();
-			}
+            if (reloadedViewID != null) {
+                final UIContext previousUIContext = application.getUIContext(reloadedViewID);
+                if (previousUIContext != null) previousUIContext.destroy();
+            }
 
-			try {
-				final Txn txn = Txn.get();
-				txn.begin(context);
-				try {
+            try {
+                final Txn txn = Txn.get();
+                txn.begin(context);
+                try {
 
-					final int receivedSeqNum = context.getSeqNum();
-					uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
+                    final int receivedSeqNum = context.getSeqNum();
+                    uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
 
-					final EntryPoint entryPoint = initializeUIContext(uiContext);
+                    final EntryPoint entryPoint = initializeUIContext(uiContext);
 
-					final String historyToken = context.getHistoryToken();
+                    final String historyToken = context.getHistoryToken();
 
-					if (historyToken != null && !historyToken.isEmpty()) {
-						uiContext.getHistory().newItem(historyToken, false);
-					}
+                    if (historyToken != null && !historyToken.isEmpty()) {
+                        uiContext.getHistory().newItem(historyToken, false);
+                    }
 
-					if (isNewHttpSession) {
-						entryPoint.start(uiContext);
-					} else {
-						entryPoint.restart(uiContext);
-					}
+                    if (isNewHttpSession) {
+                        entryPoint.start(uiContext);
+                    } else {
+                        entryPoint.restart(uiContext);
+                    }
 
-					txn.commit();
-				} catch (final Throwable e) {
-					log.error("Cannot send instructions to the browser " + context, e);
-					txn.rollback();
-				}
-			} finally {
-				UIContext.remove();
-			}
-		}
-	}
+                    txn.commit();
+                } catch (final Throwable e) {
+                    log.error("Cannot send instructions to the browser " + context, e);
+                    txn.rollback();
+                }
+            } finally {
+                UIContext.remove();
+            }
+        }
+    }
 
-	public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
-		final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-		if (jsonObject.containsKey(applicationInstructions)) {
-			// final int key =
-			// jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue()).intValue();
-			final int key = 1;
+    public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
+        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+        if (jsonObject.containsKey(applicationInstructions)) {
+            // final int key =
+            // jsonObject.getJsonNumber(Model.APPLICATION_VIEW_ID.toStringValue()).intValue();
+            final int key = 1;
 
-			final Application applicationSession = context.getApplication();
-			if (applicationSession == null)
-				throw new ServerException(ServerException.INVALID_SESSION,
-						"Invalid session, please reload your application (viewID #" + key + ").");
+            final Application applicationSession = context.getApplication();
+            if (applicationSession == null) throw new ServerException(ServerException.INVALID_SESSION, "Invalid session, please reload your application (viewID #" + key + ").");
 
-			final UIContext uiContext = context.getUIContext();
-			if (uiContext == null)
-				throw new ServerException(ServerException.INVALID_SESSION,
-						"Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
+            final UIContext uiContext = context.getUIContext();
+            if (uiContext == null)
+                throw new ServerException(ServerException.INVALID_SESSION, "Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
 
-			uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
-		}
-	}
+            uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
+        }
+    }
 
-	private void process(final UIContext uiContext, final JsonArray applicationInstructions) {
-		for (int i = 0; i < applicationInstructions.size(); i++) {
-			final JsonObject item = applicationInstructions.getJsonObject(i);
-			uiContext.fireClientData(item);
-		}
-	}
+    private void process(final UIContext uiContext, final JsonArray applicationInstructions) {
+        for (int i = 0; i < applicationInstructions.size(); i++) {
+            final JsonObject item = applicationInstructions.getJsonObject(i);
+            uiContext.fireClientData(item);
+        }
+    }
 
-	protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
+    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
 
-	public ApplicationManagerOption getOptions() {
-		return options;
-	}
+    public ApplicationManagerOption getOptions() {
+        return options;
+    }
 
 }

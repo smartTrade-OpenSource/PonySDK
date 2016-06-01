@@ -15,14 +15,18 @@ public class UmbrellaException extends RuntimeException {
 
     protected static Throwable makeCause(final Set<Throwable> causes) {
         final Iterator<Throwable> iterator = causes.iterator();
-        if (!iterator.hasNext()) { return null; }
+        if (!iterator.hasNext()) {
+            return null;
+        }
 
         return iterator.next();
     }
 
     protected static String makeMessage(final Set<Throwable> causes) {
         final int count = causes.size();
-        if (count == 0) { return null; }
+        if (count == 0) {
+            return null;
+        }
 
         final StringBuilder b = new StringBuilder(count == 1 ? ONE : count + MULTIPLE);
         boolean first = true;

@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel that includes a header (top), footer (bottom), and content (middle)
@@ -41,14 +41,6 @@ public class PHeaderPanel extends PPanel {
     private PWidget header;
     private PWidget content;
     private PWidget footer;
-
-    public PHeaderPanel() {
-        super();
-    }
-
-    public PHeaderPanel(final int windowID) {
-        super(windowID);
-    }
 
     public void resize() {
         saveUpdate(ServerToClientModel.RESIZE);

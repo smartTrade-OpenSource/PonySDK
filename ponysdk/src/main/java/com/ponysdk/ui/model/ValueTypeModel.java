@@ -21,19 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.ui.terminal.model;
+package com.ponysdk.ui.model;
 
 public enum ValueTypeModel {
 
-    NULL((byte) 0),
-    BOOLEAN((byte) 1),
-    BYTE((byte) 1),
-    SHORT((byte) 2),
-    INTEGER((byte) 4),
-    LONG((byte) 8), // FIXME
+    NULL((byte) 0), BOOLEAN((byte) 1), BYTE((byte) 1), SHORT((byte) 2), INTEGER((byte) 4), LONG((byte) 8), // FIXME
     DOUBLE((byte) 16), // FIXME
-    STRING((byte) -1),
-    JSON_OBJECT((byte) -1);
+    STRING((byte) -1), JSON_OBJECT((byte) -1);
 
     private int size;
 

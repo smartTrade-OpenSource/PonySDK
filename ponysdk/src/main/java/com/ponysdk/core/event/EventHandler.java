@@ -23,5 +23,5 @@
 
 package com.ponysdk.core.event;
 
-
-public interface EventHandler {}
+public interface EventHandler {
+}

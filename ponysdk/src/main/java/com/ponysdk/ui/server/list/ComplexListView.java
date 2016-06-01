@@ -26,8 +26,8 @@ package com.ponysdk.ui.server.list;
 import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PToolbar;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.rich.PToolbar;
 
 public interface ComplexListView extends SimpleListView {
 

@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PDockLayoutPanel;
 import com.ponysdk.ui.server.basic.PFlowPanel;
@@ -60,7 +59,7 @@ public class DefaultPageView implements PageView {
 
     private void buildUI() {
         panel = new PSimpleLayoutPanel();
-        panel.addStyleName(PonySDKTheme.PAGE);
+        panel.addStyleName("page");
         buildHeader();
         buildBody();
         buildLayout();
@@ -75,20 +74,20 @@ public class DefaultPageView implements PageView {
 
     protected void buildHeader() {
         header = new PFlowPanel();
-        header.addStyleName(PonySDKTheme.PAGE_HEADER);
+        header.addStyleName("header");
         buildTitle();
     }
 
     protected void buildTitle() {
         title = new PLabel(pageTitle);
         title.setText(pageTitle);
-        title.addStyleName(PonySDKTheme.PAGE_HEADER_CAPTION);
+        title.addStyleName("caption");
         header.add(title);
     }
 
     protected void buildBody() {
         body = new PSimpleLayoutPanel();
-        body.addStyleName(PonySDKTheme.PAGE_BODY);
+        body.addStyleName("body");
     }
 
     @Override

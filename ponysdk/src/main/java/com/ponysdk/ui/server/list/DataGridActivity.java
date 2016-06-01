@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,14 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PSimplePanel;
 import com.ponysdk.ui.server.basic.PWidget;
 
 /***
  * A Grid of data that supports paging and columns.
- * 
+ *
  * @see DataGridColumnDescriptor
  */
 public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
@@ -52,21 +51,11 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
-        this.view.asWidget().addStyleName(PonySDKTheme.COMPLEXLIST);
     }
 
     public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
         view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0, 1);
-        addFillColumn();
-    }
-
-    protected void addFillColumn() {
-        final PSimplePanel widget = new PSimplePanel();
-        view.removeCellStyle(0, colCount - 1, PonySDKTheme.FILL_COLUMN);
-        view.addWidget(widget, colCount, 0, 1);
-        view.addCellStyle(0, colCount, PonySDKTheme.FILL_COLUMN);
-        view.addHeaderStyle(PonySDKTheme.COMPLEXLIST_COLUMNHEADER_COMPLEX);
     }
 
     public void setData(final int row, final D data) {
@@ -77,18 +66,18 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             view.addWidget(renderCell, col++, row + 1, 1);
         }
         view.addWidget(new PSimplePanel(), col, row + 1, 1);
-        view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
     }
 
-    protected void updateRowIndex(final int min) {}
+    protected void updateRowIndex(final int min) {
+    }
 
     public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
         if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
 
         rows.add(row, null);
 
-        view.insertRow((row + 1));
-        view.addWidget(widget, column, (row + 1), colSpan);
+        view.insertRow(row + 1);
+        view.addWidget(widget, column, row + 1, colSpan);
         updateRowIndex(row);
     }
 
@@ -107,8 +96,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         // views include grid header (consumes 1 line) + data
         // therefore for a given "data", index is n in rows and n+1 in view
         int subRow = fatherRow + 1;
-        for (final Iterator<D> dataIt = datas.iterator(); dataIt.hasNext();) {
-            final D data = dataIt.next();
+        for (final D data : datas) {
             this.rows.add(subRow, data);
             this.view.insertRow(subRow + 1);
             this.view.addRowStyle(subRow + 1, "pony-SimpleList-SubRow");

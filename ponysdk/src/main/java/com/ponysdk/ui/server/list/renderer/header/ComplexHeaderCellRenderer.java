@@ -31,14 +31,11 @@ import java.util.List;
 import com.ponysdk.core.query.Criterion;
 import com.ponysdk.core.query.SortingType;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PGrid;
 import com.ponysdk.ui.server.basic.PKeyCodes;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
 import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.ui.server.form.formfield.FormField;
@@ -52,8 +49,7 @@ import com.ponysdk.ui.server.list.Resetable;
 import com.ponysdk.ui.server.list.Sortable;
 import com.ponysdk.ui.server.list.Validable;
 
-public class ComplexHeaderCellRenderer
-        implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
+public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
     protected final FormField<?, ? extends PWidget> formField;
     protected final String key;
@@ -69,8 +65,7 @@ public class ComplexHeaderCellRenderer
         this(caption, formField, key, null);
     }
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key,
-            final FilterListener filterListener) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key, final FilterListener filterListener) {
         this.formField = formField;
         this.key = key;
         builGUI(caption);
@@ -96,25 +91,20 @@ public class ComplexHeaderCellRenderer
 
     protected void buildGrid() {
         panel = new PGrid(2, 1);
-        panel.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX);
+        panel.addStyleName("header");
         panel.setWidget(1, 0, formField.asWidget());
     }
 
     protected void buildCaption(final String s) {
         caption = new PLabel(s);
-        caption.addStyleName(PonySDKTheme.COMPLEXLIST_HEADERCELLRENDERER_COMPLEX_SORTABLE);
-        caption.addClickHandler(new PClickHandler() {
+        caption.addClickHandler((PClickEvent) -> {
+            caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
+            final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
+            sort(nextSortingType);
+            caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
-                final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
-                sort(nextSortingType);
-                caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(nextSortingType));
-
-                for (final FilterListener filterListener : filterListeners) {
-                    filterListener.onSort(ComplexHeaderCellRenderer.this);
-                }
+            for (final FilterListener filterListener : filterListeners) {
+                filterListener.onSort(ComplexHeaderCellRenderer.this);
             }
         });
         panel.setWidget(0, 0, caption);
@@ -190,8 +180,7 @@ public class ComplexHeaderCellRenderer
     public void afterValidation(final FormField<?, ? extends PWidget> formField, final ValidationResult validationResult) {
         if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error"))
             formField.asWidget().addStyleName("validation-error");
-        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error"))
-            formField.asWidget().removeStyleName("validation-error");
+        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error")) formField.asWidget().removeStyleName("validation-error");
     }
 
     @Override

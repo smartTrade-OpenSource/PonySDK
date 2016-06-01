@@ -11,7 +11,8 @@ public class HTTPServletContext {
     private final ThreadLocal<HttpServletRequest> servletRequests = new ThreadLocal<>();
     private final ThreadLocal<HttpServletResponse> servletResponses = new ThreadLocal<>();
 
-    private HTTPServletContext() {}
+    private HTTPServletContext() {
+    }
 
     public static HTTPServletContext get() {
         return instance;

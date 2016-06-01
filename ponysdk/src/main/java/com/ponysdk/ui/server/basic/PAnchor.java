@@ -24,11 +24,13 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.PHasHTML;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.
@@ -39,13 +41,12 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
-    private static final String DEFAULT_TEXT_VALUE = null;
-    private static final String DEFAULT_HTML_VALUE = null;
-    private static final String DEFAULT_HREF_VALUE = null;
+    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
+    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
-    private String text = DEFAULT_TEXT_VALUE;
-    private String html = DEFAULT_HTML_VALUE;
-    private String href = DEFAULT_HREF_VALUE;
+    private String text;
+    private String html;
+    private String href;
 
     public PAnchor() {
     }
@@ -76,9 +77,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.text != DEFAULT_TEXT_VALUE) parser.parse(ServerToClientModel.TEXT, this.text);
-        if (this.href != DEFAULT_HREF_VALUE) parser.parse(ServerToClientModel.HREF, this.href);
-        if (this.html != DEFAULT_HTML_VALUE) parser.parse(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        if (text != null) parser.parse(ServerToClientModel.TEXT, text);
+        if (href != null) parser.parse(ServerToClientModel.HREF, href);
+        if (html != null) parser.parse(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
     @Override
@@ -128,7 +129,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        executeUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        executeUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
     }
 
 }

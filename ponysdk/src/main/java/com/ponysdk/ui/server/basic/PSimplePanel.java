@@ -40,14 +40,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     private PWidget widget;
 
-    public PSimplePanel() {
-        super();
-    }
-
-    public PSimplePanel(final int windowID) {
-        super(windowID);
-    }
-
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SIMPLE_PANEL;

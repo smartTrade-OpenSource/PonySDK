@@ -28,42 +28,42 @@ import java.time.Duration;
 
 public class Result<T> implements Serializable {
 
-	private static final long serialVersionUID = -8598967363564331854L;
+    private static final long serialVersionUID = -8598967363564331854L;
 
-	private T data;
+    private T data;
 
-	private int fullSize;
+    private int fullSize;
 
-	private Duration executionDuration;
+    private Duration executionDuration;
 
-	public Result() {
-	}
+    public Result() {
+    }
 
-	public Result(final T data) {
-		this.data = data;
-	}
+    public Result(final T data) {
+        this.data = data;
+    }
 
-	public void setData(final T data) {
-		this.data = data;
-	}
+    public void setData(final T data) {
+        this.data = data;
+    }
 
-	public T getData() {
-		return data;
-	}
+    public T getData() {
+        return data;
+    }
 
-	public void setFullSize(final int fullSize) {
-		this.fullSize = fullSize;
-	}
+    public void setFullSize(final int fullSize) {
+        this.fullSize = fullSize;
+    }
 
-	public int getFullSize() {
-		return fullSize;
-	}
+    public int getFullSize() {
+        return fullSize;
+    }
 
-	public Duration getExecutionDuration() {
-		return executionDuration;
-	}
+    public Duration getExecutionDuration() {
+        return executionDuration;
+    }
 
-	public void setExecutionDuration(final Duration executionTime) {
-		this.executionDuration = executionTime;
-	}
+    public void setExecutionDuration(final Duration executionTime) {
+        this.executionDuration = executionTime;
+    }
 }

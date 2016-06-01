@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,7 +26,6 @@ package com.ponysdk.impl.webapplication.notification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.ui.server.basic.PAnchor;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PScrollPanel;
@@ -45,7 +44,7 @@ public class LogConsolePanel extends PScrollPanel {
     protected PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     public LogConsolePanel(final String caption) {
-        addStyleName(PonySDKTheme.LOG_CONSOLE);
+        // addStyleName(PonySDKTheme.LOG_CONSOLE);
         setSizeFull();
 
         content.setSizeFull();
@@ -53,14 +52,14 @@ public class LogConsolePanel extends PScrollPanel {
 
         initActionPanel();
         logsPanel.setSizeFull();
-        logsPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_LOGS);
+        // logsPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_LOGS);
         content.add(actionPanel);
         content.add(logsPanel);
     }
 
     private void initActionPanel() {
         actionPanel = new PHorizontalPanel();
-        actionPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_ACTIONS);
+        // actionPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_ACTIONS);
 
         final PAnchor clearLogs = new PAnchor("Clear logs");
 

@@ -26,9 +26,9 @@ package com.ponysdk.ui.server.basic;
 import java.util.Objects;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each

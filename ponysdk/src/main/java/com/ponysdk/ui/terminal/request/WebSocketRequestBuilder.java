@@ -24,13 +24,13 @@
 package com.ponysdk.ui.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.ui.terminal.socket.WebSocketClient2;
+import com.ponysdk.ui.terminal.socket.WebSocketClient;
 
 public class WebSocketRequestBuilder implements RequestBuilder {
 
-    private final WebSocketClient2 webSocketClient;
+    private final WebSocketClient webSocketClient;
 
-    public WebSocketRequestBuilder(final WebSocketClient2 webSocketClient) {
+    public WebSocketRequestBuilder(final WebSocketClient webSocketClient) {
         this.webSocketClient = webSocketClient;
     }
 

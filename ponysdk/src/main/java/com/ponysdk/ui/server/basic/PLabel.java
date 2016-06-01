@@ -28,6 +28,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.core.event.HandlerRegistration;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPAllDragAndDropHandlers;
 import com.ponysdk.ui.server.basic.event.HasPClickHandlers;
 import com.ponysdk.ui.server.basic.event.HasPDoubleClickHandlers;
@@ -49,7 +50,6 @@ import com.ponysdk.ui.server.basic.event.PDropEvent;
 import com.ponysdk.ui.server.basic.event.PDropHandler;
 import com.ponysdk.ui.server.basic.event.PHasText;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This

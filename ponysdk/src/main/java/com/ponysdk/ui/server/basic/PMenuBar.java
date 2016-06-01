@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.server.basic.event.HasPAnimation;
 import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
-import com.ponysdk.ui.terminal.model.ServerToClientModel;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
@@ -89,14 +89,15 @@ import com.ponysdk.ui.terminal.model.ServerToClientModel;
  * <dd>the inner element of the cell</dd>
  * </dl>
  * <p>
- * MenuBar elements in UiBinder template files can have a <code>vertical</code> boolean attribute
- * (which defaults to false), and may have only MenuItem elements as children. MenuItems may contain
- * HTML and MenuBars.
+ * MenuBar elements in UiBinder template files can have a <code>vertical</code>
+ * boolean attribute (which defaults to false), and may have only MenuItem
+ * elements as children. MenuItems may contain HTML and MenuBars.
  * </p>
  */
 public class PMenuBar extends PWidget implements HasPAnimation {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
+    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
+    // menuItem only
     private final List<PMenuSubElement> items = new ArrayList<>();
 
     private boolean animationEnabled = false;
@@ -165,14 +166,6 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         return elt;
     }
 
-    /**
-     * @deprecated Useless method, called {@link #insertElement(PMenuSubElement, int)}
-     */
-    @Deprecated
-    public PMenuItem insertItem(final PMenuItem elt, final int beforeIndex) throws IndexOutOfBoundsException {
-        return insertElement(elt, beforeIndex);
-    }
-
     public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, elt);
         elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
@@ -194,14 +187,6 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public void addSeparator() {
         addElement(new PMenuItemSeparator());
-    }
-
-    /**
-     * @deprecated Useless method, called {@link #insertElement(PMenuSubElement, int)}
-     */
-    @Deprecated
-    public PMenuItemSeparator insertSeparator(final PMenuItemSeparator elt, final int beforeIndex) {
-        return insertElement(elt, beforeIndex);
     }
 
     public void clearItems() {
