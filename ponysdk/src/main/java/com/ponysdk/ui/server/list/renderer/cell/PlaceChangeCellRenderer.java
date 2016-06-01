@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,12 +26,10 @@ package com.ponysdk.ui.server.list.renderer.cell;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.place.Place;
 import com.ponysdk.core.place.PlaceChangeRequestEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.list.refreshable.Cell;
 
-public class PlaceChangeCellRenderer extends AbstractCellRenderer<String> {
+public class PlaceChangeCellRenderer extends AbstractCellRenderer<String, PAnchor> {
 
     private final Place place;
 
@@ -40,15 +38,13 @@ public class PlaceChangeCellRenderer extends AbstractCellRenderer<String> {
     }
 
     @Override
-    public IsPWidget render0(final int row, final String value) {
+    public PAnchor render0(final int row, final String value) {
         final PAnchor anchor = new PAnchor(value);
-        anchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                UIContext.fireEvent(new PlaceChangeRequestEvent(PlaceChangeCellRenderer.this, place));
-            }
-        });
+        anchor.addClickHandler((event) -> UIContext.fireEvent(new PlaceChangeRequestEvent(PlaceChangeCellRenderer.this, place)));
         return anchor;
+    }
+
+    @Override
+    public void update(final String value, final Cell<String, PAnchor> previous) {
     }
 }

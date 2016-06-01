@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -31,15 +31,16 @@ import com.ponysdk.ui.server.list.valueprovider.ValueProvider;
 
 /**
  * Defines a {@link DataGrid} column
- * 
+ *
  * @param <D>
  * @param <V>
+ * @param <W>
  */
-public class DataGridColumnDescriptor<D, V> {
+public class DataGridColumnDescriptor<D, V, W extends IsPWidget> {
 
     protected HeaderCellRenderer headerCellRenderer;
-    protected CellRenderer<V> cellRenderer;
-    protected CellRenderer<V> subCellRenderer;
+    protected CellRenderer<V, W> cellRenderer;
+    protected CellRenderer<V, W> subCellRenderer;
     protected ValueProvider<D, V> valueProvider;
 
     public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
@@ -50,11 +51,11 @@ public class DataGridColumnDescriptor<D, V> {
         return headerCellRenderer;
     }
 
-    public void setCellRenderer(final CellRenderer<V> cellRenderer) {
+    public void setCellRenderer(final CellRenderer<V, W> cellRenderer) {
         this.cellRenderer = cellRenderer;
     }
 
-    public CellRenderer<V> getCellRenderer() {
+    public CellRenderer<V, W> getCellRenderer() {
         return cellRenderer;
     }
 
@@ -66,23 +67,24 @@ public class DataGridColumnDescriptor<D, V> {
         return valueProvider;
     }
 
-    public CellRenderer<V> getSubCellRenderer() {
+    public CellRenderer<V, W> getSubCellRenderer() {
         return subCellRenderer;
     }
 
-    public void setSubCellRenderer(final CellRenderer<V> subCellRenderer) {
+    public void setSubCellRenderer(final CellRenderer<V, W> subCellRenderer) {
         this.subCellRenderer = subCellRenderer;
     }
 
-    public IsPWidget renderCell(final int row, final D data) {
+    public W renderCell(final int row, final D data) {
         if (cellRenderer == null) throw new IllegalArgumentException("CellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
         return cellRenderer.render(row, valueProvider.getValue(data));
     }
 
-    public IsPWidget renderSubCell(final int row, final D data) {
+    public W renderSubCell(final int row, final D data) {
         if (subCellRenderer == null) throw new IllegalArgumentException("SubCellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
         return subCellRenderer.render(row, valueProvider.getValue(data));
     }
+
 }

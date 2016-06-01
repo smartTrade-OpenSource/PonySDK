@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,13 +23,17 @@
 
 package com.ponysdk.ui.server.list.renderer.cell;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.list.refreshable.Cell;
 
-public class LabelCellRenderer<D> extends AbstractCellRenderer<D> {
+public class LabelCellRenderer<D> extends AbstractCellRenderer<D, PLabel> {
 
     @Override
-    public IsPWidget render0(final int rowCount, final D value) {
+    public PLabel render0(final int rowCount, final D value) {
         return new PLabel(value.toString());
+    }
+
+    @Override
+    public void update(final D value, final Cell<D, PLabel> previous) {
     }
 }
