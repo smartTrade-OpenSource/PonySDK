@@ -111,11 +111,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        PScript.execute("alert('coucou');");
-
         final PFlowPanel boxContainer = new PFlowPanel();
 
         System.err.println(PClickEvent.TYPE);
+
+        PScript.execute("alert('coucou Main');");
 
         final PWindow w1 = createWindow1();
         // final PWindow w2 = createWindow2();
@@ -275,6 +275,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public PWindow createWindow1() {
         final PWindow w = new PWindow(null, "Window 1", null);
         w.open();
+
+        PScript.execute(w.getWindowID(), "alert('coucou Window1');");
 
         for (int i = 0; i < 2; i++) {
             new PWindow(null, "Winddsqsdqdqs" + i, null).open();

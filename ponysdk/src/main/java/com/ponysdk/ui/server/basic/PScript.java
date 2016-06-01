@@ -58,11 +58,11 @@ public class PScript extends PObject {
         return WidgetType.SCRIPT;
     }
 
-    public static PScript get() {
+    private static PScript get() {
         return get(PWindow.MAIN_WINDOW_ID);
     }
 
-    public static PScript get(final int windowID) {
+    private static PScript get(final int windowID) {
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
@@ -72,8 +72,16 @@ public class PScript extends PObject {
         return script;
     }
 
+    public static void execute(final int windowID, final String js) {
+        execute(windowID, js, null, null);
+    }
+
     public static void execute(final String js) {
         execute(js, null, null);
+    }
+
+    public static void execute(final int windowID, final String js, final ExecutionCallback callback) {
+        execute(windowID, js, callback, null);
     }
 
     public static void execute(final String js, final ExecutionCallback callback) {
@@ -84,8 +92,16 @@ public class PScript extends PObject {
         execute(js, null, period);
     }
 
+    public static void execute(final int windowID, final String js, final Duration period) {
+        execute(windowID, js, null, period);
+    }
+
     public static void execute(final String js, final ExecutionCallback callback, final Duration period) {
         get().executeScript(js, callback, period);
+    }
+
+    public static void execute(final int windowID, final String js, final ExecutionCallback callback, final Duration period) {
+        get(windowID).executeScript(js, callback, period);
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
