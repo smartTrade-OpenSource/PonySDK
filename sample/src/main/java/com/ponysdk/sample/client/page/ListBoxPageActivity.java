@@ -26,9 +26,9 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class ListBoxPageActivity extends SamplePageActivity {
 

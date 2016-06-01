@@ -33,12 +33,12 @@ import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.ui.server.basic.PDateBox;
 import com.ponysdk.ui.server.basic.PDatePicker;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PShowRangeEvent;
 import com.ponysdk.ui.server.basic.event.PShowRangeHandler;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class DatePickerPageActivity extends SamplePageActivity {
 

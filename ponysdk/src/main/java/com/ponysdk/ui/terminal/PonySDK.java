@@ -51,6 +51,7 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import com.ponysdk.ui.terminal.request.ParentWindowRequest;
 import com.ponysdk.ui.terminal.request.RequestCallback;
 import com.ponysdk.ui.terminal.socket.WebSocketCallback;
+import com.ponysdk.ui.terminal.socket.WebSocketClient;
 import com.ponysdk.ui.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
@@ -71,29 +72,28 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 	private final List<StartupListener> listener = new ArrayList<>();
 
 	private PonySDK() {
-	    
-	    final elemental.html.Window window = Browser.getWindow();
-            final elemental.html.Window opener = window.getOpener();
 
-            if (opener == null) {
-                Window.addWindowClosingHandler(new ClosingHandler() {
-                    
-                    @Override
-                    public void onWindowClosing(final ClosingEvent event) {
-                        PTWindowManager.closeAll();  
-                    }
-                });
-                Window.addCloseHandler(new CloseHandler<Window>() {
-                    
-                    @Override
-                    public void onClose(final CloseEvent<Window> event) {
-                        PTWindowManager.closeAll();
-                    }
-                });
-                
-            }
-	    
-	    
+		final elemental.html.Window window = Browser.getWindow();
+		final elemental.html.Window opener = window.getOpener();
+
+		if (opener == null) {
+			Window.addWindowClosingHandler(new ClosingHandler() {
+
+				@Override
+				public void onWindowClosing(final ClosingEvent event) {
+					PTWindowManager.closeAll();
+				}
+			});
+			Window.addCloseHandler(new CloseHandler<Window>() {
+
+				@Override
+				public void onClose(final CloseEvent<Window> event) {
+					PTWindowManager.closeAll();
+				}
+			});
+
+		}
+
 	}
 
 	@ExportConstructor
@@ -197,7 +197,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 	/**
 	 * From other terminal to the server
 	 */
-	@Export 
+	@Export
 	public void sendDataToServer(final String jsObject) {
 		uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
 	}

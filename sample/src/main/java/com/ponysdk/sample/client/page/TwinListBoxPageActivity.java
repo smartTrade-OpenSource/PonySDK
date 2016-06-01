@@ -24,9 +24,9 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 import com.ponysdk.ui.server.rich.PTwinListBox;
 
 public class TwinListBoxPageActivity extends SamplePageActivity {

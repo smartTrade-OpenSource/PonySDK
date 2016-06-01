@@ -26,7 +26,6 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.event.PChangeEvent;
 import com.ponysdk.ui.server.basic.event.PChangeHandler;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
@@ -44,6 +43,7 @@ import com.ponysdk.ui.server.form.validator.EmailFieldValidator;
 import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
 import com.ponysdk.ui.server.form.validator.TwinFieldValidator;
 import com.ponysdk.ui.server.form.validator.UncheckedFieldValidator;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
 
 public class FormPageActivity extends SamplePageActivity {

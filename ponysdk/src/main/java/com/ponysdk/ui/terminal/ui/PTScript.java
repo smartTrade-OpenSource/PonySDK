@@ -51,7 +51,17 @@ public class PTScript extends AbstractPTObject {
             // ServerToClientModel.EVAL
             final String scriptToEval = binaryModel.getStringValue();
             final BinaryModel commandId = buffer.getBinaryModel();
+            final long commandID = -1;
+            final int delay = -1;
+
             if (ServerToClientModel.COMMAND_ID.equals(commandId.getModel())) {
+
+
+                final BinaryModel delayModel = buffer.getBinaryModel();
+                if(ServerToClientModel.FIXDELAY.equals(delayModel.getModel())
+
+
+
                 try {
                     final Object result = evalWithCallback(scriptToEval);
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());

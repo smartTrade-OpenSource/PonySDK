@@ -1,6 +1,7 @@
 
 package com.ponysdk.core.concurrent;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,11 +18,11 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.core.UIContextListener;
 import com.ponysdk.core.stm.Txn;
 
-public class UIScheduledThreadPoolExecutor implements UIContextListener {
+public class PScheduler implements UIContextListener {
 
-    private static Logger log = LoggerFactory.getLogger(UIScheduledThreadPoolExecutor.class);
+    private static Logger log = LoggerFactory.getLogger(PScheduler.class);
 
-    private static UIScheduledThreadPoolExecutor INSTANCE;
+    private static PScheduler INSTANCE;
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
@@ -31,52 +32,41 @@ public class UIScheduledThreadPoolExecutor implements UIContextListener {
             @Override
             public Thread newThread(final Runnable r) {
                 final Thread t = new Thread(r);
-                t.setName(UIScheduledThreadPoolExecutor.class.getName() + "-" + i++);
+                t.setName(PScheduler.class.getName() + "-" + i++);
                 t.setDaemon(true);
                 return t;
             }
         });
-        INSTANCE = new UIScheduledThreadPoolExecutor(executor);
+        INSTANCE = new PScheduler(executor);
     }
 
     protected final ScheduledThreadPoolExecutor executor;
     protected Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
 
-    private UIScheduledThreadPoolExecutor(final ScheduledThreadPoolExecutor executor) {
-        log.info("Initializing UIScheduledThreadPoolExecutor");
+    private PScheduler(final ScheduledThreadPoolExecutor executor) {
+        log.info("Initializing PScheduler");
         this.executor = executor;
     }
 
-    private void checkUIState() {
-        if (UIContext.get() == null) throw new IllegalAccessError("UIScheduledThreadPoolExecutor must be called from UI client code");
+    public static UIRunnable schedule(final Runnable runnable, final Duration duration) {
+        return INSTANCE.schedule0(runnable, duration);
     }
 
-    public static UIRunnable schedule(final Runnable runnable, final long delay, final TimeUnit unit) {
-        return INSTANCE.schedule0(runnable, delay, unit);
-    }
-
-    public UIRunnable schedule0(final Runnable runnable, final long delay, final TimeUnit unit) {
-        checkUIState();
+    public UIRunnable schedule0(final Runnable runnable, final Duration duration) {
         final UIRunnable uiRunnable = new UIRunnable(runnable, false);
-        final ScheduledFuture<?> future = executor.schedule(uiRunnable, delay, unit);
-        uiRunnable.setFuture(future);
-
+        uiRunnable.setFuture(executor.schedule(uiRunnable, duration.toMillis(), TimeUnit.MILLISECONDS));
         registerTask(uiRunnable);
-
         return uiRunnable;
     }
 
-    public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
-        return INSTANCE.scheduleAtFixedRate0(runnable, initialDelay, period, unit);
+    public static UIRunnable scheduleAtFixedDelay(final Runnable runnable, final Duration delay, final Duration period) {
+        return INSTANCE.scheduleAtFixedRate0(runnable, delay, period);
     }
 
-    public UIRunnable scheduleAtFixedRate0(final Runnable runnable, final long initialDelay, final long period, final TimeUnit unit) {
-        checkUIState();
+    public UIRunnable scheduleAtFixedRate0(final Runnable runnable, final Duration delay, final Duration period) {
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
-        final ScheduledFuture<?> future = executor.scheduleAtFixedRate(uiRunnable, initialDelay, period, unit);
-        uiRunnable.setFuture(future);
+        uiRunnable.setFuture(executor.scheduleAtFixedRate(uiRunnable, delay.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS));
         registerTask(uiRunnable);
-
         return uiRunnable;
     }
 
@@ -85,8 +75,6 @@ public class UIScheduledThreadPoolExecutor implements UIContextListener {
     }
 
     public UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
-        checkUIState();
-
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, initialDelay, delay, unit);
         uiRunnable.setFuture(future);
@@ -107,15 +95,16 @@ public class UIScheduledThreadPoolExecutor implements UIContextListener {
         public UIRunnable(final Runnable runnable, final boolean repeated) {
             this.uiContext = UIContext.get();
             this.runnable = runnable;
-
             this.repeated = repeated;
         }
 
         @Override
         public void run() {
             try {
-                if (cancelled) return;
-                if (!execute()) cancel();
+                if (cancelled)
+                    return;
+                if (!execute())
+                    cancel();
             } catch (final Throwable throwable) {
                 log.error("Error occurred", throwable);
                 cancel();

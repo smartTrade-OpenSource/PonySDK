@@ -60,8 +60,16 @@ public class Parser {
         }
     }
 
+    public int getPosition() {
+        if (buffer == null)
+            buffer = socket.getBuffer();
+        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+        return socketBuffer.position();
+    }
+
     public void beginObject() {
-        if (buffer == null) buffer = socket.getBuffer();
+        if (buffer == null)
+            buffer = socket.getBuffer();
 
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
@@ -72,14 +80,16 @@ public class Parser {
     }
 
     public void endObject() {
-        if (buffer.getSocketBuffer().position() >= 4096) reset();
+        if (buffer.getSocketBuffer().position() >= 4096)
+            reset();
     }
 
     public void parse(final ServerToClientModel model, final Object value) {
         if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled()) log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
+                if (log.isDebugEnabled())
+                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
                 return;
             } else {
                 lastUpdatedID = newUpdatedID;
@@ -128,7 +138,8 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
     }
@@ -138,21 +149,24 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final byte value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final short value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putShort(value);
     }
 
     private void parse(final ServerToClientModel model, final int value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         socketBuffer.putInt(value);
@@ -163,12 +177,14 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final String value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + (value != null ? value.length() : 0) + " => " + value);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + (value != null ? value.length() : 0) + " => " + value);
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         final ByteBuffer utf8StringBuffer = UTF8StringToByteBuffer(value);
         socketBuffer.putInt(utf8StringBuffer != null ? utf8StringBuffer.capacity() : 0);
-        if (utf8StringBuffer != null) socketBuffer.put(utf8StringBuffer);
+        if (utf8StringBuffer != null)
+            socketBuffer.put(utf8StringBuffer);
     }
 
     private static ByteBuffer UTF8StringToByteBuffer(final String value) {

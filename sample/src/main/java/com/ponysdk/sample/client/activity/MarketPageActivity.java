@@ -39,7 +39,6 @@ import com.ponysdk.ui.server.basic.PElement;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PWidget;
@@ -49,6 +48,7 @@ import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
 import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
 import com.ponysdk.ui.server.basic.event.PDragStartEvent;
 import com.ponysdk.ui.server.basic.event.PDropEvent;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class MarketPageActivity extends PageActivity {
 

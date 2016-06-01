@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
 
@@ -54,7 +55,8 @@ public class Txn {
 
     public void commit() {
         final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
+        if (txn.txnContext == null)
+            throw new RuntimeException("Call begin() before commit() a transaction.");
         fireClientLoopEnd();
         fireBeforeFlush();
         flush();
@@ -64,7 +66,8 @@ public class Txn {
 
     public void rollback() {
         final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
+        if (txn.txnContext == null)
+            throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
         transactions.remove();
     }
@@ -80,6 +83,14 @@ public class Txn {
             // throw new RuntimeException(msg);
             throw new RuntimeException("TMP", e);
         }
+    }
+
+    public static ModelWriter getWriter() {
+        return get().getWriter0();
+    }
+
+    public ModelWriter getWriter0() {
+        return txnContext.getWriter();
     }
 
     public Parser getParser() {

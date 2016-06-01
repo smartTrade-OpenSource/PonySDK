@@ -39,6 +39,7 @@ import com.ponysdk.core.UIContext;
 import com.ponysdk.core.servlet.PRequest;
 import com.ponysdk.core.socket.WebSocket;
 import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
 
@@ -58,9 +59,12 @@ public class TxnContext implements TxnListener {
 
     private UIContext uiContext;
 
+    private ModelWriter modelWriter;
+
     public void setSocket(final WebSocket socket) {
         this.socket = socket;
         this.parser = new Parser(socket);
+        this.modelWriter = new ModelWriter(parser);
     }
 
     public void flush() {
@@ -74,7 +78,8 @@ public class TxnContext implements TxnListener {
 
     @Override
     public void beforeFlush(final TxnContext txnContext) {
-        if (!flushNow) return;
+        if (!flushNow)
+            return;
 
         flushNow = false;
 
@@ -87,6 +92,10 @@ public class TxnContext implements TxnListener {
 
     @Override
     public void afterFlush(final TxnContext txnContext) {
+    }
+
+    public ModelWriter getWriter() {
+        return modelWriter;
     }
 
     public Parser getParser() {

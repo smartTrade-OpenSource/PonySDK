@@ -24,11 +24,11 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PRadioButton;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
 import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class RadioButtonPageActivity extends SamplePageActivity implements PValueChangeHandler<Boolean> {
 

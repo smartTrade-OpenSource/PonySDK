@@ -31,11 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.ponysdk.core.event.StreamHandler;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PFileUpload;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class FileUploadPageActivity extends SamplePageActivity {
 

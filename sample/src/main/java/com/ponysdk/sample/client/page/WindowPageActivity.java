@@ -31,7 +31,6 @@ import com.ponysdk.ui.server.basic.PFlexTable;
 import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PRootLayoutPanel;
 import com.ponysdk.ui.server.basic.PScript;
 import com.ponysdk.ui.server.basic.PTextBox;
@@ -41,6 +40,7 @@ import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 import com.ponysdk.ui.server.basic.event.PCloseEvent;
 import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 

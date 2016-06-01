@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -32,6 +33,8 @@ import com.ponysdk.core.Parser;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.core.stm.Txn;
 import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.writer.ModelWriter;
+import com.ponysdk.core.writer.ModelWriterCallback;
 import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.model.HandlerModel;
 import com.ponysdk.ui.model.ServerToClientModel;
@@ -64,7 +67,8 @@ public abstract class PObject {
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
-            if (!initialized) init();
+            if (!initialized)
+                init();
 
             return true;
         } else if (this.windowID != windowID) {
@@ -76,7 +80,8 @@ public abstract class PObject {
     protected void init() {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID)
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_CREATE, ID);
         parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
@@ -107,7 +112,8 @@ public abstract class PObject {
     }
 
     public void bindTerminalFunction(final String functionName) {
-        if (nativeBindingFunction != null) throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+        if (nativeBindingFunction != null)
+            throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
 
         nativeBindingFunction = functionName;
 
@@ -115,13 +121,15 @@ public abstract class PObject {
     }
 
     public void sendToNative(final JsonObject data) {
-        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
+        if (nativeBindingFunction == null)
+            throw new IllegalAccessError("Object not bind to a native function");
 
         saveUpdate(ServerToClientModel.NATIVE, data);
     }
 
     public void addNativeHandler(final PNativeHandler handler) {
-        if (nativeHandlers == null) nativeHandlers = new ListenerCollection<>();
+        if (nativeHandlers == null)
+            nativeHandlers = new ListenerCollection<>();
 
         nativeHandlers.register(handler);
     }
@@ -148,11 +156,15 @@ public abstract class PObject {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
         final PObject other = (PObject) obj;
-        if (ID != other.ID) return false;
+        if (ID != other.ID)
+            return false;
         return true;
     }
 
@@ -174,16 +186,17 @@ public abstract class PObject {
     protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID)
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
+                if (binaryModel != null)
+                    parser.parse(binaryModel.getKey(), binaryModel.getValue());
             }
         }
         parser.endObject();
-        // UIContext.get().assignParentID(objectID, parentObjectID);
     }
 
     protected void saveAddHandler(final HandlerModel type) {
@@ -196,7 +209,8 @@ public abstract class PObject {
     protected void executeAddHandler(final HandlerModel type) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID)
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
         parser.endObject();
@@ -212,7 +226,8 @@ public abstract class PObject {
     protected void executeRemoveHandler() {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID)
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         parser.endObject();
     }
@@ -227,7 +242,8 @@ public abstract class PObject {
     protected void executeRemove(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID)
+            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
@@ -253,21 +269,35 @@ public abstract class PObject {
     }
 
     protected void executeUpdate(final ServerToClientModel model, final Object value) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(new ServerBinaryModel(model, value));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeUpdate(new ServerBinaryModel(model, value));
+    }
+
+    protected void writeUpdate(final ModelWriterCallback callback) {
+        try (final ModelWriter writer = Txn.getWriter()) {
+            if (windowID != PWindow.MAIN_WINDOW_ID) {
+                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+            }
+            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+
+            callback.doWrite(writer);
+        } catch (final IOException e) {
+            // TODO Error ???
+        }
     }
 
     private void executeUpdate(final ServerBinaryModel... binaryModels) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        if (binaryModels != null) {
-            for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
-            }
+        final ModelWriter writer = Txn.getWriter();
+
+        if (windowID != PWindow.MAIN_WINDOW_ID) {
+            writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+        }
+        writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+        for (final ServerBinaryModel model : binaryModels) {
+            writer.writeModel(model);
         }
 
-        parser.endObject();
+        writer.close();
     }
 
     @Override

@@ -26,7 +26,6 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PEvent;
 import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PNotificationManager;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
@@ -35,6 +34,7 @@ import com.ponysdk.ui.server.basic.event.PContextMenuHandler;
 import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
 import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
 import com.ponysdk.ui.server.basic.event.PMouseEvent;
+import com.ponysdk.ui.server.rich.PNotificationManager;
 
 public class HTMLPageActivity extends SamplePageActivity {
 

@@ -23,9 +23,9 @@
 
 package com.ponysdk.ui.server.basic;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
 
@@ -41,13 +41,13 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * This class allows to execute native Java-script code.
  */
-public abstract class PScript extends PObject {
+public class PScript extends PObject {
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
-
     private static final Logger log = LoggerFactory.getLogger(PScript.class);
 
     private long executionID = 0;
+
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
     private PScript() {
@@ -70,61 +70,46 @@ public abstract class PScript extends PObject {
     }
 
     public static void execute(final String js) {
-        get().executeScript(js);
+        execute(js, null, null);
     }
 
     public static void execute(final String js, final ExecutionCallback callback) {
-        get().executeScript(js, callback);
+        execute(js, callback, null);
     }
 
-    public static void executeDeffered(final String js, final int delay, final TimeUnit unit) {
-        get().executeScriptDeffered(js, null, delay, unit);
+    public static void execute(final String js, final Duration period) {
+        execute(js, null, period);
     }
 
-    public static void executeDeffered(final String js, final ExecutionCallback callback, final int delay,
-            final TimeUnit unit) {
-        get().executeScriptDeffered(js, callback, delay, unit);
+    public static void execute(final String js, final ExecutionCallback callback, final Duration period) {
+        get().executeScript(js, callback, period);
     }
 
-    private void executeScript(final String js) {
-        saveUpdate(new ServerBinaryModel(ServerToClientModel.EVAL, js));
-    }
+    private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
+        executionID += executionID;
+        callbacksByID.put(executionID, callback);
 
-    private void executeScript(final String js, final ExecutionCallback callback) {
-        final long id = executionID++;
-        callbacksByID.put(id, callback);
-
-        saveUpdate(new ServerBinaryModel(ServerToClientModel.EVAL, js),
-                new ServerBinaryModel(ServerToClientModel.COMMAND_ID, executionID++));
-    }
-
-    private void executeScriptDeffered(final String js, final ExecutionCallback callback,
-            final int delay, final TimeUnit unit) {
-        final PTerminalScheduledCommand command = new PTerminalScheduledCommand() {
-
-            @Override
-            protected void run() {
-                try {
-                    if (callback == null) executeScript(js);
-                    else executeScript(js, callback);
-                } catch (final Exception e) {
-                    log.error("Exception while execution the script " + js, e);
-                }
+        writeUpdate((writer) -> {
+            writer.writeModel(new ServerBinaryModel(ServerToClientModel.EVAL, js));
+            if (callback != null) {
+                writer.writeModel(new ServerBinaryModel(ServerToClientModel.COMMAND_ID, executionID));
             }
-        };
-        command.schedule(unit.toMillis(delay));
+            if (period != null) {
+                writer.writeModel(new ServerBinaryModel(ServerToClientModel.FIXDELAY, period.toMillis()));
+            }
+        });
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+            if (callback != null)
+                callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
+            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+            if (callback != null)
+                callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
         } else {
             super.onClientData(instruction);
         }

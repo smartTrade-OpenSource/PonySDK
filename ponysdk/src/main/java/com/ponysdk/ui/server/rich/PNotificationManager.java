@@ -21,9 +21,17 @@
  * the License.
  */
 
-package com.ponysdk.ui.server.basic;
+package com.ponysdk.ui.server.rich;
 
+import java.time.Duration;
+
+import com.ponysdk.core.concurrent.PScheduler;
+import com.ponysdk.ui.server.basic.IsPWidget;
+import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.basic.PPopupPanel;
 import com.ponysdk.ui.server.basic.PPopupPanel.PPositionCallback;
+import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.basic.PWindow;
 import com.ponysdk.ui.server.basic.event.PClickEvent;
 import com.ponysdk.ui.server.basic.event.PClickHandler;
 
@@ -280,19 +288,13 @@ public class PNotificationManager {
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
                 popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
-                if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
+                if (closingAnimation != null)
+                    popupPanel.addStyleName(closingAnimation);
             }
         });
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        final PTerminalScheduledCommand hideCommand = new PTerminalScheduledCommand() {
-
-            @Override
-            protected void run() {
-                popupPanel.hide();
-            }
-        };
-        hideCommand.schedule(delayBeforeClosing);
+        PScheduler.schedule(() -> popupPanel.hide(), Duration.ofMillis(delayBeforeClosing));
     }
 }

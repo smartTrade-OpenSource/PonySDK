@@ -28,8 +28,8 @@ import java.util.Date;
 import com.ponysdk.core.event.BusinessEvent;
 import com.ponysdk.impl.webapplication.notification.renderer.NotificationTypeRenderer;
 import com.ponysdk.impl.webapplication.notification.renderer.PLabelRenderer;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
+import com.ponysdk.ui.server.rich.PNotificationManager;
+import com.ponysdk.ui.server.rich.PNotificationManager.Notification;
 
 public class DefaultNotificationView extends LogConsolePanel implements NotificationView {
 
