@@ -59,7 +59,11 @@ public class PScheduler implements UIContextListener {
         return uiRunnable;
     }
 
-    public static UIRunnable scheduleAtFixedDelay(final Runnable runnable, final Duration delay, final Duration period) {
+    public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final Duration period) {
+        return scheduleAtFixedRate(runnable, Duration.ZERO, period);
+    }
+
+    public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final Duration delay, final Duration period) {
         return INSTANCE.scheduleAtFixedRate0(runnable, delay, period);
     }
 
@@ -70,13 +74,13 @@ public class PScheduler implements UIContextListener {
         return uiRunnable;
     }
 
-    public static UIRunnable scheduleWithFixedDelay(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
-        return INSTANCE.scheduleWithFixedDelay0(runnable, initialDelay, delay, unit);
+    public static UIRunnable scheduleWithFixedDelay(final Runnable runnable, final Duration delay, final Duration period) {
+        return INSTANCE.scheduleWithFixedDelay0(runnable, delay.toMillis(), delay.toMillis());
     }
 
-    public UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long initialDelay, final long delay, final TimeUnit unit) {
+    public UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long delayMillis, final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, initialDelay, delay, unit);
+        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis, TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 

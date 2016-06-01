@@ -23,12 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.time.Duration;
+
+import com.ponysdk.core.concurrent.PScheduler;
 import com.ponysdk.ui.server.basic.PButton;
 import com.ponysdk.ui.server.basic.PCheckBox;
 import com.ponysdk.ui.server.basic.PHorizontalPanel;
 import com.ponysdk.ui.server.basic.PLabel;
 import com.ponysdk.ui.server.basic.PPasswordTextBox;
-import com.ponysdk.ui.server.basic.PTerminalScheduledCommand;
 import com.ponysdk.ui.server.basic.PTextArea;
 import com.ponysdk.ui.server.basic.PTextBox;
 import com.ponysdk.ui.server.basic.PVerticalPanel;
@@ -86,10 +88,12 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                if (masked.getText().isEmpty()) return;
+                if (masked.getText().isEmpty())
+                    return;
 
                 String replaceChar = " ";
-                if (!replacement.getText().isEmpty()) replaceChar = replacement.getText().substring(0, 1);
+                if (!replacement.getText().isEmpty())
+                    replaceChar = replacement.getText().substring(0, 1);
                 maskedTextBox.applyMask(masked.getText(), showMask.getValue(), replaceChar);
             }
         });
@@ -110,17 +114,10 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         panel.add(new PLabel("Text area:"));
         panel.add(textArea);
         panel.add(maskPanel);
-
         panel.add(new PLabel("AddOn test (javascript reverse)"));
-        final PTextBox boxToReverse = new PTextBox();
-        final PTerminalScheduledCommand deffered = new PTerminalScheduledCommand() {
 
-            @Override
-            protected void run() {
-                panel.add(boxToReverse);
-            }
-        };
-        deffered.schedule(1500);
+        final PTextBox boxToReverse = new PTextBox();
+        PScheduler.schedule(() -> panel.add(boxToReverse), Duration.ofMillis(1500));
 
         examplePanel.setWidget(panel);
     }

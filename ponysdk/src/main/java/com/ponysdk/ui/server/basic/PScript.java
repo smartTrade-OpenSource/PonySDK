@@ -44,13 +44,13 @@ import com.ponysdk.ui.terminal.WidgetType;
 public class PScript extends PObject {
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
-    private static final Logger log = LoggerFactory.getLogger(PScript.class);
 
     private long executionID = 0;
 
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
-    private PScript() {
+    private PScript(final int windowID) {
+        this.windowID = windowID;
     }
 
     @Override
@@ -59,11 +59,14 @@ public class PScript extends PObject {
     }
 
     public static PScript get() {
+        return get(PWindow.MAIN_WINDOW_ID);
+    }
+
+    public static PScript get(final int windowID) {
         final UIContext session = UIContext.get();
-        PScript script = session.getAttribute(SCRIPT_KEY);
+        PScript script = session.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
-            script = new PScript() {
-            };
+            script = new PScript(windowID);
             session.setAttribute(SCRIPT_KEY, script);
         }
         return script;

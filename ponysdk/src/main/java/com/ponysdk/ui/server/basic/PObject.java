@@ -287,17 +287,18 @@ public abstract class PObject {
     }
 
     private void executeUpdate(final ServerBinaryModel... binaryModels) {
-        final ModelWriter writer = Txn.getWriter();
-
-        if (windowID != PWindow.MAIN_WINDOW_ID) {
-            writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+        try (final ModelWriter writer = Txn.getWriter()) {
+            if (windowID != PWindow.MAIN_WINDOW_ID) {
+                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+            }
+            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+            for (final ServerBinaryModel model : binaryModels) {
+                writer.writeModel(model);
+            }
+        } catch (final IOException e) {
+            // TODO Error ???
         }
-        writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
-        for (final ServerBinaryModel model : binaryModels) {
-            writer.writeModel(model);
-        }
 
-        writer.close();
     }
 
     @Override

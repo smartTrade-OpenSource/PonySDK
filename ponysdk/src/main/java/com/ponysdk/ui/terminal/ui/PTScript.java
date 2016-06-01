@@ -26,6 +26,7 @@ package com.ponysdk.ui.terminal.ui;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.user.client.Timer;
 import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.UIBuilder;
@@ -48,44 +49,93 @@ public class PTScript extends AbstractPTObject {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.EVAL.equals(binaryModel.getModel())) {
-            // ServerToClientModel.EVAL
-            final String scriptToEval = binaryModel.getStringValue();
-            final BinaryModel commandId = buffer.getBinaryModel();
-            final long commandID = -1;
-            final int delay = -1;
+            long commandID = -1;
+            int delayMillis = -1;
 
-            if (ServerToClientModel.COMMAND_ID.equals(commandId.getModel())) {
+            final String script = binaryModel.getStringValue();
 
+            final BinaryModel commandIdModel = buffer.getBinaryModel();
 
-                final BinaryModel delayModel = buffer.getBinaryModel();
-                if(ServerToClientModel.FIXDELAY.equals(delayModel.getModel())
-
-
-
-                try {
-                    final Object result = evalWithCallback(scriptToEval);
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.COMMAND_ID, commandId.getLongValue());
-                    eventInstruction.put(ClientToServerModel.RESULT, result == null ? "" : result.toString());
-                    uiService.sendDataToServer(eventInstruction);
-                } catch (final Throwable e) {
-                    log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.COMMAND_ID, commandId.getLongValue());
-                    eventInstruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-                    uiService.sendDataToServer(eventInstruction);
-                }
+            if (ServerToClientModel.COMMAND_ID.equals(commandIdModel.getModel())) {
+                commandID = commandIdModel.getLongValue();
             } else {
-                buffer.rewind(commandId);
-                try {
-                    eval(scriptToEval);
-                } catch (final Throwable e) {
-                    log.log(Level.SEVERE, "PTScript exception for : " + scriptToEval, e);
-                }
+                buffer.rewind(commandIdModel);
+            }
+
+            final BinaryModel delayModel = buffer.getBinaryModel();
+            if (ServerToClientModel.FIXDELAY.equals(delayModel.getModel())) {
+                delayMillis = delayModel.getIntValue();
+            } else {
+                buffer.rewind(delayModel);
+            }
+
+            if (commandID == -1) {
+                eval(script, delayMillis);
+            } else {
+                evalWithCallback(script, commandID, delayMillis);
             }
             return true;
         }
         return super.update(buffer, binaryModel);
+
+    }
+
+    private void eval(final String script, final int delayMillis) {
+        if (delayMillis == -1) {
+            try {
+                eval(script);
+            } catch (final Throwable t) {
+                log.log(Level.SEVERE, "PTScript exception for" + script, t);
+            }
+        } else {
+            new Timer() {
+                @Override
+                public void run() {
+                    try {
+                        eval(script);
+                    } catch (final Throwable t) {
+                        log.log(Level.SEVERE, "PTScript exception for" + script, t);
+                    }
+                }
+            }.schedule(delayMillis);
+        }
+    }
+
+    private void evalWithCallback(final String script, final long commandID, final int delayMillis) {
+        if (delayMillis == -1) {
+            try {
+                sendResult(commandID, evalWithCallback(script));
+            } catch (final Throwable t) {
+                log.log(Level.SEVERE, "PTScript exception for" + script, t);
+                sendError(commandID, t);
+            }
+        } else {
+            new Timer() {
+                @Override
+                public void run() {
+                    try {
+                        sendResult(commandID, evalWithCallback(script));
+                    } catch (final Throwable t) {
+                        log.log(Level.SEVERE, "PTScript exception for" + script, t);
+                        sendError(commandID, t);
+                    }
+                }
+            }.schedule(delayMillis);
+        }
+    }
+
+    private void sendResult(final long commandID, final Object result) {
+        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+        eventInstruction.put(ClientToServerModel.COMMAND_ID, commandID);
+        eventInstruction.put(ClientToServerModel.RESULT, result == null ? "" : result.toString());
+        uiService.sendDataToServer(eventInstruction);
+    }
+
+    private void sendError(final long commandID, final Throwable t) {
+        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+        eventInstruction.put(ClientToServerModel.COMMAND_ID, commandID);
+        eventInstruction.put(ClientToServerModel.ERROR_MSG, t.getMessage());
+        uiService.sendDataToServer(eventInstruction);
     }
 
     public static native void eval(String script) /*-{
