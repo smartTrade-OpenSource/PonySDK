@@ -113,10 +113,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         PScript.execute("alert('coucou');");
 
-        if (true) {
-            return;
-        }
-
         final PFlowPanel boxContainer = new PFlowPanel();
 
         System.err.println(PClickEvent.TYPE);
