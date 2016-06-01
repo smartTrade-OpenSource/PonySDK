@@ -50,7 +50,7 @@ public class PScript extends PObject {
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
     private PScript(final int windowID) {
-        this.windowID = windowID;
+        attach(windowID);
     }
 
     @Override
@@ -89,12 +89,10 @@ public class PScript extends PObject {
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
-        executionID += executionID;
-        callbacksByID.put(executionID, callback);
-
         writeUpdate((writer) -> {
             writer.writeModel(new ServerBinaryModel(ServerToClientModel.EVAL, js));
             if (callback != null) {
+                callbacksByID.put(++executionID, callback);
                 writer.writeModel(new ServerBinaryModel(ServerToClientModel.COMMAND_ID, executionID));
             }
             if (period != null) {

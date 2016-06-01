@@ -111,6 +111,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
+        PScript.execute("alert('coucou');");
+
+        if (true) {
+            return;
+        }
+
         final PFlowPanel boxContainer = new PFlowPanel();
 
         System.err.println(PClickEvent.TYPE);
@@ -181,7 +187,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PRichTextArea richTextArea = new PRichTextArea();
         boxContainer.add(richTextArea);
         boxContainer.add(new PRichTextToolbar(richTextArea));
-        PScript.execute("alert('coucou');");
         boxContainer.add(new PScrollPanel());
         boxContainer.add(new PSimpleLayoutPanel());
         boxContainer.add(new PSimplePanel());
