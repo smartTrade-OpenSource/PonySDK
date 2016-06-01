@@ -46,7 +46,8 @@ import com.ponysdk.ui.terminal.Dictionnary.PROPERTY;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A text box that shows a {@link PDatePicker} when the user focuses on it. <h3>CSS Style Rules</h3>
+ * A text box that shows a {@link PDatePicker} when the user focuses on it.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-DateBox</dt>
  * <dd>default style name</dd>
@@ -158,6 +159,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     @Override
     public void setValue(final Date date) {
         this.date = date;
+        datePicker.setValue(date);
         final Update update = new Update(getID());
         update.put(PROPERTY.VALUE, date != null ? dateFormat.format(date) : "");
         Txn.get().getTxnContext().save(update);
