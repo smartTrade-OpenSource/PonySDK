@@ -152,7 +152,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class PStackLayoutPanel extends PComposite
     @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
 
     @Override

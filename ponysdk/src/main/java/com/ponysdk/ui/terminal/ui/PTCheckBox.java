@@ -61,8 +61,7 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
             @Override
             public void onValueChange(final ValueChangeEvent<Boolean> event) {
                 final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
-                instruction.put(ClientToServerModel.VALUE_CHECKBOX, event.getValue());
+                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });

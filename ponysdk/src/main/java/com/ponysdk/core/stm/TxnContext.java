@@ -23,15 +23,11 @@
 
 package com.ponysdk.core.stm;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.Parser;
@@ -42,8 +38,6 @@ import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
-
-    private static final Logger log = LoggerFactory.getLogger(TxnContext.class);
 
     private WebSocket socket;
 
@@ -107,13 +101,7 @@ public class TxnContext implements TxnListener {
     }
 
     public JsonObject getJsonObject() {
-        try {
-            return Json.createReader(request.getReader()).readObject();
-        } catch (final IOException e) {
-            log.error("Cannot build reader from HTTP request", e);
-        }
-
-        return null;
+        return Json.createReader(request.getReader()).readObject();
     }
 
     public UserAgent getUserAgent() {

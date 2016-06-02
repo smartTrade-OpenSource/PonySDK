@@ -1,7 +1,6 @@
 
 package com.ponysdk.core.servlet;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -17,7 +16,7 @@ public class PRequest {
         this.request = request;
     }
 
-    public Reader getReader() throws IOException {
+    public Reader getReader() {
         return reader;
     }
 

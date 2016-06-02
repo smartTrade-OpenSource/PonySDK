@@ -96,8 +96,9 @@ public class PWindow extends PObject {
 
     @Override
     public void onClientData(final JsonObject event) {
-        if (event.containsKey(ClientToServerModel.HANDLER_OPEN_HANDLER.toStringValue())) {
+        if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             PWindowManager.registerWindow(this);
+            PScript.registerWindow(ID);
             while (!stackedInstructions.isEmpty()) {
                 stackedInstructions.poll().run();
             }
@@ -105,7 +106,7 @@ public class PWindow extends PObject {
             for (final POpenHandler h : openHandlers) {
                 h.onOpen(e);
             }
-        } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
+        } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             final PCloseEvent e = new PCloseEvent(this);
             for (final PCloseHandler h : closeHandlers) {

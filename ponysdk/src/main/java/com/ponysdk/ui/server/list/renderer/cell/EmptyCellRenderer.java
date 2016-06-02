@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,16 +23,20 @@
 
 package com.ponysdk.ui.server.list.renderer.cell;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
+import com.ponysdk.ui.server.list.refreshable.Cell;
 
-public class EmptyCellRenderer<V> implements CellRenderer<V> {
+public class EmptyCellRenderer<V> implements CellRenderer<V, PLabel> {
 
     private static final String EMPTY_VALUE = "";
 
     @Override
-    public IsPWidget render(final int row, final V value) {
+    public PLabel render(final int row, final V value) {
         return new PLabel(EMPTY_VALUE);
+    }
+
+    @Override
+    public void update(final V value, final Cell<V, PLabel> previous) {
     }
 
 }

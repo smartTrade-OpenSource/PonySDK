@@ -74,7 +74,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     private boolean started = false;
 
     private PonySDK() {
-
         final elemental.html.Window window = Browser.getWindow();
         final elemental.html.Window opener = window.getOpener();
 

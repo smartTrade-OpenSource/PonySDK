@@ -58,9 +58,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 final int selectedIndex = uiObject.getSelectedIndex();
                 if (selectedIndex == -1) {
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
-                    eventInstruction.put(ClientToServerModel.VALUE, "-1");
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, "-1");
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 } else {
                     String selectedIndexes = selectedIndex + "";
@@ -72,9 +70,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                         }
                     }
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
-                    eventInstruction.put(ClientToServerModel.VALUE, selectedIndexes);
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes);
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             }

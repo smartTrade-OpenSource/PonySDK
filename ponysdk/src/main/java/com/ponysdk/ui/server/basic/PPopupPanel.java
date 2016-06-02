@@ -204,7 +204,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void setPopupPositionAndShow(final PPositionCallback callback) {
         this.positionCallback = callback;
         this.showing = true;
-        saveAddHandler(HandlerModel.HANDLER_POPUP_POSITION_CALLBACK);
+        saveAddHandler(HandlerModel.HANDLER_POPUP_POSITION);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
@@ -224,7 +224,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
             saveUpdate(ServerToClientModel.POPUP_POSITION_AND_SHOW);
-        } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE_HANDLER.toStringValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             this.showing = false;
             fireOnClose();
         } else {

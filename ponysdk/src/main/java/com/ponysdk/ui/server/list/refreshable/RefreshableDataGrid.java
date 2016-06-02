@@ -47,22 +47,13 @@ import com.ponysdk.ui.server.list.SimpleListView;
  */
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
-    protected final Map<K, Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> cells = new HashMap<>();
+    protected final Map<K, Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> cells = new HashMap<>();
 
     protected final List<K> keyByIndex = new ArrayList<>();
     protected final Map<K, D> valueByKey = new HashMap<>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
         super(listView);
-    }
-
-    @Override
-    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
-        throw new IllegalArgumentException("use RefreshableDataGridColumnDescriptor instead of DataGridColumnDescriptor");
-    }
-
-    public void addDataGridColumnDescriptor(final RefreshableDataGridColumnDescriptor<D, ?, ?> columnDescriptor) {
-        super.addDataGridColumnDescriptor(columnDescriptor);
     }
 
     @Override
@@ -82,7 +73,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setData(final K key, final D data) {
-        Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) {
             final int row = getRowCount();
             map = new HashMap<>();
@@ -97,7 +88,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             int col = 0;
 
             for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
-                final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
+                final DataGridColumnDescriptor d = descriptor;
                 final Cell cell = new Cell();
                 cell.setCol(col++);
                 cell.setData(data);
@@ -118,8 +109,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             rows.add(previousIndex, data);
             valueByKey.put(key, data);
 
-            for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
-                final RefreshableDataGridColumnDescriptor d = (RefreshableDataGridColumnDescriptor) descriptor;
+            for (final DataGridColumnDescriptor<D, ?, ? extends IsPWidget> descriptor : columnDescriptors) {
+                final DataGridColumnDescriptor d = descriptor;
                 final Object value = d.getValueProvider().getValue(data);
                 d.getCellRenderer().update(value, map.get(d));
                 map.get(d).setData(data);
@@ -154,11 +145,11 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         for (int i = min; i < rows.size(); i++) {
             final K k = keyByIndex.get(i);
             if (k != null) {
-                final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> cellRow = cells.get(k);
-                final Iterator<Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> iter = cellRow.entrySet().iterator();
+                final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> cellRow = cells.get(k);
+                final Iterator<Entry<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> iter = cellRow.entrySet().iterator();
                 final int realRow = i;
                 while (iter.hasNext()) {
-                    final Entry<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> entry = iter.next();
+                    final Entry<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> entry = iter.next();
                     entry.getValue().setRow(realRow);
                 }
             }
@@ -172,10 +163,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public void moveRow(final K key, final int beforeIndex) {
-        final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) throw new IndexOutOfBoundsException("cell not found");
 
-        final Cell<D, ?> cell = map.entrySet().iterator().next().getValue();
+        final Cell<D, ? extends IsPWidget> cell = map.entrySet().iterator().next().getValue();
         final int realRow = cell.getRow();
 
         if (realRow == beforeIndex) return;
@@ -201,16 +192,16 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public int getRow(final K key) {
-        final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) return -1;
         return map.entrySet().iterator().next().getValue().getRow();
     }
 
     @SuppressWarnings("unchecked")
-    public <W extends IsPWidget> Collection<Cell<D, W>> getColumn(final RefreshableDataGridColumnDescriptor<D, ?, W> descriptor) {
+    public <W extends IsPWidget> Collection<Cell<D, W>> getColumn(final DataGridColumnDescriptor<D, ?, W> descriptor) {
         final List<Cell<D, W>> c = new ArrayList<>();
-        final Collection<Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>>> values = cells.values();
-        for (final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map : values) {
+        final Collection<Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> values = cells.values();
+        for (final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map : values) {
             final Cell<D, W> cell = (Cell<D, W>) map.get(descriptor);
             if (cell != null) c.add(cell);
         }
@@ -218,7 +209,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public D getData(final K key) {
-        final Map<RefreshableDataGridColumnDescriptor<K, D, ?>, Cell<D, ?>> map = cells.get(key);
+        final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) return null;
         return map.entrySet().iterator().next().getValue().getData();
     }

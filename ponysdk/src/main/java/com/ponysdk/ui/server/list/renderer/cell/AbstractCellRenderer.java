@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,19 +26,20 @@ package com.ponysdk.ui.server.list.renderer.cell;
 import com.ponysdk.ui.server.basic.IsPWidget;
 import com.ponysdk.ui.server.basic.PLabel;
 
-public abstract class AbstractCellRenderer<V> implements CellRenderer<V> {
+public abstract class AbstractCellRenderer<V, W extends IsPWidget> implements CellRenderer<V, W> {
 
     private static String DASH = "-";
 
     protected String nullDisplay = DASH;
 
+    @SuppressWarnings("unchecked")
     @Override
-    public final IsPWidget render(final int row, final V value) {
-        if (value == null) return new PLabel(nullDisplay);
+    public final W render(final int row, final V value) {
+        if (value == null) return (W) new PLabel(nullDisplay);
         return render0(row, value);
     }
 
-    public abstract IsPWidget render0(int row, V value);
+    public abstract W render0(int row, V value);
 
     public void setNullDisplay(final String nullDisPlay) {
         this.nullDisplay = nullDisPlay;

@@ -113,8 +113,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PFlowPanel boxContainer = new PFlowPanel();
 
-        System.err.println(PClickEvent.TYPE);
-
         PScript.execute("alert('coucou Main');");
 
         final PWindow w1 = createWindow1();
@@ -175,8 +173,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PPopupPanel());
         boxContainer.add(new PPopupPanel(true));
 
-        boxContainer.add(new PPushButton(new PImage())); // FIXME Test with
-                                                         // image
+        boxContainer.add(new PPushButton(new PImage())); // FIXME Test with image
 
         boxContainer.add(new PRadioButton("RadioLabel"));
         boxContainer.add(new PRadioButton("RadioName", "RadioLabel"));
@@ -244,7 +241,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -268,7 +265,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -276,7 +273,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow w = new PWindow(null, "Window 1", null);
         w.open();
 
-        PScript.execute(w.getWindowID(), "alert('coucou Window1');");
+        PScript.execute(w.getID(), "alert('coucou Window1');");
+        PScript.execute(w.getID(), "console.log('coucou Window1');");
 
         for (int i = 0; i < 2; i++) {
             new PWindow(null, "Winddsqsdqdqs" + i, null).open();
@@ -300,7 +298,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
@@ -339,6 +337,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PMenuBar pMenuBar = new PMenuBar(true);
         pMenuBar.addItem(new PMenuItem("Menu 1", new PMenuBar()));
         pMenuBar.addItem(new PMenuItem("Menu 2", true, new PMenuBar()));
+        pMenuBar.addItem(new PMenuItem("Menu 3", () -> System.err.println("Menu click")));
         pMenuBar.addSeparator();
         return pMenuBar;
     }
