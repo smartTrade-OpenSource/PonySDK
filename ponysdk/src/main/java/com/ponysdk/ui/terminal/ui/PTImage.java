@@ -72,7 +72,7 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
             // ServerToClientModel.STREAM_REQUEST_ID
             cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
                     + buffer.getBinaryModel().getIntValue());

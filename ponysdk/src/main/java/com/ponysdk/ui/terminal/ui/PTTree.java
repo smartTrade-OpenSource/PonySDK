@@ -44,16 +44,14 @@ public class PTTree extends PTWidget<Tree> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<TreeItem> event) {
                     final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
-                    eventInstruction.put(ClientToServerModel.WIDGET_ID, ptObject.getObjectID());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, ptObject.getObjectID());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });

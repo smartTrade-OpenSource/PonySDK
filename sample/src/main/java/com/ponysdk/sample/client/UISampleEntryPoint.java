@@ -339,6 +339,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PMenuBar pMenuBar = new PMenuBar(true);
         pMenuBar.addItem(new PMenuItem("Menu 1", new PMenuBar()));
         pMenuBar.addItem(new PMenuItem("Menu 2", true, new PMenuBar()));
+        pMenuBar.addItem(new PMenuItem("Menu 3", () -> System.err.println("Menu click")));
         pMenuBar.addSeparator();
         return pMenuBar;
     }

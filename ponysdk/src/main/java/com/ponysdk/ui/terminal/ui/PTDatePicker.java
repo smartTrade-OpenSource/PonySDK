@@ -70,7 +70,6 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             @Override
             public void onShowRange(final ShowRangeEvent<Date> event) {
                 final PTInstruction instruction = new PTInstruction(getObjectID());
-                // FIXME
                 instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
                 instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
                 instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
@@ -94,8 +93,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         }
 
         final PTInstruction instruction = new PTInstruction(getObjectID());
-        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(ClientToServerModel.DATE, date);
+        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE, date);
         instruction.put(ClientToServerModel.YEAR, year);
         instruction.put(ClientToServerModel.MONTH, month);
         instruction.put(ClientToServerModel.DAY, day);

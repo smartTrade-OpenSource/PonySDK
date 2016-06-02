@@ -108,7 +108,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_DOM_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_DOM.equals(handlerModel)) {
             // ServerToClientModel.DOM_HANDLER_CODE
             final DomHandlerType domHandlerType = DomHandlerType.values()[buffer.getBinaryModel().getByteValue()];
             addDomHandler(buffer, domHandlerType, uiService);
@@ -335,7 +335,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
+                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE);
                             changeHandlerInstruction.put(ClientToServerModel.VALUE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);

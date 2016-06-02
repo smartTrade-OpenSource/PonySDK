@@ -89,6 +89,7 @@ public class PTScript extends AbstractPTObject {
             }
         } else {
             new Timer() {
+
                 @Override
                 public void run() {
                     try {
@@ -111,6 +112,7 @@ public class PTScript extends AbstractPTObject {
             }
         } else {
             new Timer() {
+
                 @Override
                 public void run() {
                     try {

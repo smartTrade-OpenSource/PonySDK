@@ -77,22 +77,26 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     public PMenuItem(final String text, final boolean asHTML) {
-        if (asHTML) this.html = text;
-        else this.text = text;
+        if (asHTML)
+            this.html = text;
+        else
+            this.text = text;
     }
 
     @Override
     protected boolean attach(final int windowID) {
         final boolean result = super.attach(windowID);
-        subMenu.attach(windowID);
+        if (subMenu != null) subMenu.attach(windowID);
         return result;
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
-        else parser.parse(ServerToClientModel.TEXT, text);
+        if (html != null)
+            parser.parse(ServerToClientModel.HTML, html);
+        else
+            parser.parse(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -118,8 +122,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     public void setHTML(final String html) {
-        if (Objects.equals(this.html, html))
-            return;
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
         saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
     }
@@ -142,11 +145,8 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
-        final String handlerKeyKey = ClientToServerModel.HANDLER_KEY.toStringValue();
-        if (event.containsKey(handlerKeyKey)) {
-            final String handlerKey = event.getString(handlerKeyKey);
-            if (ClientToServerModel.HANDLER_KEY_COMMAND.toStringValue().equals(handlerKey)) cmd.run();
-            else super.onClientData(event);
+        if (event.containsKey(ClientToServerModel.HANDLER_COMMAND.toStringValue())) {
+            cmd.run();
         } else {
             super.onClientData(event);
         }

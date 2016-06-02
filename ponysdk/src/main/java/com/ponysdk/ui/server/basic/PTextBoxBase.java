@@ -120,9 +120,9 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
-            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.VALUE.toStringValue()));
-            fireOnValueChange(event);
+        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
+            String value = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
+            fireOnValueChange(new PValueChangeEvent<>(this, value));
         } else {
             super.onClientData(instruction);
         }

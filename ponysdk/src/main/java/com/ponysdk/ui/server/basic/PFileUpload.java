@@ -44,8 +44,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
-public class PFileUpload extends PWidget
-        implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
+public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
@@ -66,7 +65,7 @@ public class PFileUpload extends PWidget
     @Override
     protected void init0() {
         super.init0();
-        saveAddHandler(HandlerModel.HANDLER_CHANGE_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_CHANGE);
     }
 
     @Override
@@ -76,13 +75,13 @@ public class PFileUpload extends PWidget
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
-            final String fileName = jsonObject.getString(ClientToServerModel.FILE_NAME.toStringValue());
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
+            final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             if (fileName != null) {
                 setFileName(fileName);
             }
             onChange(new PChangeEvent(this));
-        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SUBMIT_COMPLETE_HANDLER.toStringValue())) {
+        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SUBMIT_COMPLETE.toStringValue())) {
             onSubmitComplete();
         } else {
             super.onClientData(jsonObject);

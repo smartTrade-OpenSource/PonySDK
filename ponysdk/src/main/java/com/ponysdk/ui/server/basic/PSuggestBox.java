@@ -79,8 +79,7 @@ import com.ponysdk.ui.terminal.WidgetType;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>,
-        PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
+public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private List<PSelectionHandler<PSuggestion>> selectionHandler;
 
@@ -103,8 +102,8 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     @Override
     protected void init0() {
         super.init0();
-        saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-        saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE);
+        saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION);
     }
 
     @Override
@@ -123,12 +122,12 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.toStringValue())) {
-            final String text = instruction.getString(ClientToServerModel.TEXT.toStringValue());
+        if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
+            final String text = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
-        } else if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_SELECTION_HANDLER.toStringValue())) {
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue())) {
             this.replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
-            this.displayString = instruction.getString(ClientToServerModel.DISPLAY_STRING.toStringValue());
+            this.displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestion>(this, suggestion));
@@ -258,11 +257,11 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
         @Override
         public void addAll(final Collection<String> collection) {
-            //saveUpdate(Model.SUGGESTIONS, collection);
+            // saveUpdate(Model.SUGGESTIONS, collection);
         }
 
         public void setDefaultSuggestions(final Collection<String> collection) {
-            //saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
+            // saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
         }
 
         public void clear() {

@@ -103,8 +103,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     protected void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
-        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE_HANDLER);
-        instruction.put(ClientToServerModel.VALUE, dateBox.getTextBox().getText());
+        instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);
     }
 

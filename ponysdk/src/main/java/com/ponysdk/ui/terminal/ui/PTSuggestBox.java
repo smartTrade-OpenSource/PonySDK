@@ -56,8 +56,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         ptTextBox = (PTTextBox) uiService.getPTObject(buffer.getBinaryModel().getIntValue());
 
         oracle = oracleByID.get(oracleID);
-        if (oracle == null)
-            throw new RuntimeException("Oracle #" + oracleID + " not registered");
+        if (oracle == null) throw new RuntimeException("Oracle #" + oracleID + " not registered");
 
         super.create(buffer, objectId, uiService);
     }
@@ -78,27 +77,23 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
             uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
 
                 @Override
                 public void onValueChange(final ValueChangeEvent<String> event) {
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-                    eventInstruction.put(ClientToServerModel.TEXT, event.getValue());
+                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
-        } else if (HandlerModel.HANDLER_STRING_SELECTION_HANDLER.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Suggestion> event) {
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION_HANDLER);
-                    eventInstruction.put(ClientToServerModel.DISPLAY_STRING, event.getSelectedItem().getDisplayString());
+                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
                     eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
@@ -128,26 +123,21 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                 return true;
             }
             /*
-             * FIXME
-             * if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final JSONArray jsonArray = binaryModel.get().isArray();
-             * for (int i = 0; i < jsonArray.size(); i++) {
-             * oracle.add(jsonArray.get(i).isString().stringValue());
-             * }
-             * return true;
-             * }
+             * FIXME if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
+             * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
+             * i = 0; i < jsonArray.size(); i++) {
+             * oracle.add(jsonArray.get(i).isString().stringValue()); } return
+             * true; }
              */
             /*
-             * FIXME
-             * if (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final List<String> defaultSuggestions = new ArrayList<>();
-             * final JSONArray jsonArray = binaryModel.get().isArray();
-             * for (int i = 0; i < jsonArray.size(); i++) {
-             * defaultSuggestions.add(jsonArray.get(i).isString().stringValue());
-             * }
-             * oracle.setDefaultSuggestionsFromText(defaultSuggestions);
-             * return true;
-             * }
+             * FIXME if
+             * (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
+             * final List<String> defaultSuggestions = new ArrayList<>(); final
+             * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
+             * 0; i < jsonArray.size(); i++) {
+             * defaultSuggestions.add(jsonArray.get(i).isString().stringValue())
+             * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
+             * return true; }
              */
             if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
                 oracle.clear();

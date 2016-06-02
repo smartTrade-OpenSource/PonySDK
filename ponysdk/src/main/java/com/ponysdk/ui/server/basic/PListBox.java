@@ -93,8 +93,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE_HANDLER.toStringValue())) {
-            final String data = jsonObject.getString(ClientToServerModel.VALUE.toStringValue());
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
+            final String data = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             final String[] tokens = data.split(COMMA);
             final List<Integer> selectedItems = new ArrayList<>();
 

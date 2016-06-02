@@ -303,7 +303,7 @@ public class UIContext {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.getValue());
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, 0);
         parser.parse(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();
@@ -316,7 +316,7 @@ public class UIContext {
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.getValue());
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, 0);
         parser.parse(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         parser.endObject();

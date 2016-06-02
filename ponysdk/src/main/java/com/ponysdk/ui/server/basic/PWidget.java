@@ -311,7 +311,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-        saveRemoveHandler(HandlerModel.HANDLER_DOM_HANDLER);
+        saveRemoveHandler(HandlerModel.HANDLER_DOM);
         return handlerRegistration;
     }
 
@@ -344,7 +344,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM_HANDLER.getValue());
+        parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
         if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {

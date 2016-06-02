@@ -72,7 +72,8 @@ public abstract class PObject {
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError(
+                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
@@ -257,7 +258,8 @@ public abstract class PObject {
         saveUpdate(new ServerBinaryModel(model, value));
     }
 
-    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2, final Object value2) {
+    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
+            final Object value2) {
         saveUpdate(new ServerBinaryModel(model1, value1), new ServerBinaryModel(model2, value2));
     }
 
@@ -273,19 +275,6 @@ public abstract class PObject {
             executeUpdate(new ServerBinaryModel(model, value));
     }
 
-    protected void writeUpdate(final ModelWriterCallback callback) {
-        try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.MAIN_WINDOW_ID) {
-                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            }
-            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
-
-            callback.doWrite(writer);
-        } catch (final IOException e) {
-            // TODO Error ???
-        }
-    }
-
     private void executeUpdate(final ServerBinaryModel... binaryModels) {
         try (final ModelWriter writer = Txn.getWriter()) {
             if (windowID != PWindow.MAIN_WINDOW_ID) {
@@ -298,7 +287,19 @@ public abstract class PObject {
         } catch (final IOException e) {
             // TODO Error ???
         }
+    }
 
+    protected void writeUpdate(final ModelWriterCallback callback) {
+        try (final ModelWriter writer = Txn.getWriter()) {
+            if (windowID != PWindow.MAIN_WINDOW_ID) {
+                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+            }
+            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+
+            callback.doWrite(writer);
+        } catch (final IOException e) {
+            // TODO Error ???
+        }
     }
 
     @Override

@@ -39,8 +39,6 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
 
-    private static final Logger log = LoggerFactory.getLogger(TxnContext.class);
-
     private WebSocket socket;
 
     private boolean flushNow = false;
