@@ -94,27 +94,28 @@ public class PWindow extends PObject {
         saveUpdate(ServerToClientModel.CLOSE, true);
     }
 
-	@Override
-	public void onClientData(final JsonObject event) {
-		if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
-			PWindowManager.registerWindow(this);
-			while (!stackedInstructions.isEmpty()) {
-				stackedInstructions.poll().run();
-			}
-			final POpenEvent e = new POpenEvent(this);
-			for (final POpenHandler h : openHandlers) {
-				h.onOpen(e);
-			}
-		} else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
-			PWindowManager.unregisterWindow(this);
-			final PCloseEvent e = new PCloseEvent(this);
-			for (final PCloseHandler h : closeHandlers) {
-				h.onClose(e);
-			}
-		} else {
-			super.onClientData(event);
-		}
-	}
+    @Override
+    public void onClientData(final JsonObject event) {
+        if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
+            PWindowManager.registerWindow(this);
+            PScript.registerWindow(ID);
+            while (!stackedInstructions.isEmpty()) {
+                stackedInstructions.poll().run();
+            }
+            final POpenEvent e = new POpenEvent(this);
+            for (final POpenHandler h : openHandlers) {
+                h.onOpen(e);
+            }
+        } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
+            PWindowManager.unregisterWindow(this);
+            final PCloseEvent e = new PCloseEvent(this);
+            for (final PCloseHandler h : closeHandlers) {
+                h.onClose(e);
+            }
+        } else {
+            super.onClientData(event);
+        }
+    }
 
     public void addCloseHandler(final PCloseHandler handler) {
         closeHandlers.add(handler);

@@ -48,8 +48,7 @@ public class PScript extends PObject {
 
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
-    private PScript(final int windowID) {
-        attach(windowID);
+    private PScript() {
     }
 
     @Override
@@ -65,10 +64,16 @@ public class PScript extends PObject {
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
-            script = new PScript(windowID);
-            session.setAttribute(SCRIPT_KEY, script);
+            script = new PScript();
+            session.setAttribute(SCRIPT_KEY + windowID, script);
+            if (PWindowManager.get().getWindow(windowID) != null) script.attach(windowID);
         }
         return script;
+    }
+
+    protected static void registerWindow(final int windowID) {
+        final PScript script = UIContext.get().getAttribute(SCRIPT_KEY + windowID);
+        if (script != null) script.attach(windowID);
     }
 
     public static void execute(final int windowID, final String js) {
@@ -104,7 +109,7 @@ public class PScript extends PObject {
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
-        writeUpdate((writer) -> {
+        saveUpdate((writer) -> {
             writer.writeModel(ServerToClientModel.EVAL, js);
             if (callback != null) {
                 callbacksByID.put(++executionID, callback);

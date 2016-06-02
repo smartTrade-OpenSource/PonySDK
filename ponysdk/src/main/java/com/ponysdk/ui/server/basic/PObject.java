@@ -264,10 +264,13 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeUpdate(binaryModels);
-        else
-            stackedInstructions.add(() -> executeUpdate(binaryModels));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(binaryModels);
+        else stackedInstructions.add(() -> executeUpdate(binaryModels));
+    }
+
+    protected void saveUpdate(final ModelWriterCallback callback) {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) writeUpdate(callback);
+        else stackedInstructions.add(() -> writeUpdate(callback));
     }
 
     protected void executeUpdate(final ServerToClientModel model, final Object value) {
