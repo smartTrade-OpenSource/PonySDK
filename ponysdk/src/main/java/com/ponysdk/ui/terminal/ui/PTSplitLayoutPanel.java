@@ -77,7 +77,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_RESIZE_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
             cast().resizeHandler = true;
             cast().objectId = getObjectID();
             cast().uiService = uiService;
@@ -104,8 +104,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
             super.onResize();
 
             if (resizeHandler) {
-                if (command != null)
-                    command.cancelled = true;
+                if (command != null) command.cancelled = true;
 
                 command = new SendResizeCommand();
 
@@ -119,8 +118,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
             @Override
             public boolean execute() {
-                if (cancelled)
-                    return false;
+                if (cancelled) return false;
 
                 int i = 0;
                 final JSONArray jsonArray = new JSONArray();
@@ -136,9 +134,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 }
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction(objectId);
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_RESIZE_HANDLER);
-                    eventInstruction.put(ClientToServerModel.VALUE, jsonArray);
+                    eventInstruction.put(ClientToServerModel.HANDLER_RESIZE, jsonArray);
                     uiService.sendDataToServer(eventInstruction);
                 }
 

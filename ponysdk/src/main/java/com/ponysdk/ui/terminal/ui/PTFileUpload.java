@@ -62,7 +62,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             @Override
             public void onSubmitComplete(final SubmitCompleteEvent event) {
                 final PTInstruction instruction = new PTInstruction(objectId);
-                instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE);
                 uiService.sendDataToServer(uiObject, instruction);
             }
         });
@@ -75,25 +75,23 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_CHANGE_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
             fileUpload.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
-                    eventInstruction.put(ClientToServerModel.FILE_NAME, fileUpload.getFilename());
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
                     uiService.sendDataToServer(fileUpload, eventInstruction);
                 }
             });
-        } else if (HandlerModel.HANDLER_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + buffer.getBinaryModel().getIntValue();
+        } else if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                    + buffer.getBinaryModel().getIntValue();
             getFrame().setUrl(action);
-        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST_HANDLER.equals(handlerModel)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + buffer.getBinaryModel().getIntValue();
+        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                    + buffer.getBinaryModel().getIntValue();
             uiObject.setAction(action);
             uiObject.submit();
         } else {

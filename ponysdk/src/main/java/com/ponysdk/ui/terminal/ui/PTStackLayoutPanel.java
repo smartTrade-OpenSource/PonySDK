@@ -71,27 +71,27 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_SELECTION_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
             uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
 
                 @Override
                 public void onSelection(final SelectionEvent<Integer> event) {
+                    // FIXME not read on the server side
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION);
                     eventInstruction.put(ClientToServerModel.VALUE, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
             return;
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION_HANDLER.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
             uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
 
                 @Override
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
+                    // FIXME not read on the server side
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    // eventInstruction.put(Model.TYPE_EVENT);
-                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION_HANDLER);
+                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION);
                     eventInstruction.put(ClientToServerModel.VALUE, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }

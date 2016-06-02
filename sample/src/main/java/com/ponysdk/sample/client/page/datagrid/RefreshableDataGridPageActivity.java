@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -34,9 +34,9 @@ import com.ponysdk.ui.server.basic.PFlowPanel;
 import com.ponysdk.ui.server.basic.PHTML;
 import com.ponysdk.ui.server.basic.PScrollPanel;
 import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
 import com.ponysdk.ui.server.list.refreshable.Cell;
-import com.ponysdk.ui.server.list.refreshable.RefreshableCellRenderer;
-import com.ponysdk.ui.server.list.refreshable.RefreshableDataGridColumnDescriptor;
+import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
 import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.ui.server.list.valueprovider.IdentityValueProvider;
 
@@ -80,13 +80,14 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         }
     }
 
-    protected void onPonyStock(final PonyStock data) {}
+    protected void onPonyStock(final PonyStock data) {
+    }
 
-    protected RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newCountDescriptor() {
-        final RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> countDescriptor = new RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newCountDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> countDescriptor = new DataGridColumnDescriptor<>();
         countDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Stock"));
         countDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        countDescriptor.setCellRenderer(new RefreshableCellRenderer<PonyStock, PHTML>() {
+        countDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
 
             @Override
             public PHTML render(final int row, final PonyStock value) {
@@ -102,11 +103,11 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return countDescriptor;
     }
 
-    protected RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newPriceDescriptor() {
-        final RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> priceDescriptor = new RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newPriceDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> priceDescriptor = new DataGridColumnDescriptor<>();
         priceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Price"));
         priceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        priceDescriptor.setCellRenderer(new RefreshableCellRenderer<PonyStock, PHTML>() {
+        priceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
 
             @Override
             public PHTML render(final int row, final PonyStock value) {
@@ -122,11 +123,11 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return priceDescriptor;
     }
 
-    protected RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newRaceDescriptor() {
-        final RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> raceDescriptor = new RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newRaceDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> raceDescriptor = new DataGridColumnDescriptor<>();
         raceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
         raceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        raceDescriptor.setCellRenderer(new RefreshableCellRenderer<PonyStock, PHTML>() {
+        raceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
 
             @Override
             public PHTML render(final int row, final PonyStock value) {
@@ -142,11 +143,11 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return raceDescriptor;
     }
 
-    protected RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newIDDescriptor() {
-        final RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML> idDescriptor = new RefreshableDataGridColumnDescriptor<PonyStock, PonyStock, PHTML>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newIDDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> idDescriptor = new DataGridColumnDescriptor<>();
         idDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("ID"));
         idDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        idDescriptor.setCellRenderer(new RefreshableCellRenderer<PonyStock, PHTML>() {
+        idDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
 
             @Override
             public PHTML render(final int row, final PonyStock value) {

@@ -30,7 +30,7 @@ public class PWindowManager {
     }
 
     static void unregisterWindow(final PWindow window) {
-        get().registerWindow0(window);
+        get().unregisterWindow0(window);
     }
 
     public void registerWindow0(final PWindow window) {

@@ -47,13 +47,13 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_CHANGE_HANDLER.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
             uiObject.addChangeHandler(new ChangeHandler() {
 
                 @Override
                 public void onChange(final ChangeEvent event) {
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE_HANDLER);
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE);
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });

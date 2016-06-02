@@ -77,8 +77,7 @@ public class PTRadioButton extends PTCheckBox {
                 if (cast().getName() != null) {
                     final PTRadioButton previouslySelected = lastSelectedRadioButtonByGroup.get(cast().getName());
                     if (previouslySelected != null && !previouslySelected.equals(radioButton)) {
-                        fireInstruction(previouslySelected.getObjectID(), uiService,
-                                previouslySelected.cast().getValue());
+                        fireInstruction(previouslySelected.getObjectID(), uiService, previouslySelected.cast().getValue());
                     }
                     lastSelectedRadioButtonByGroup.put(radioButton.getName(), PTRadioButton.this);
                 }
@@ -88,8 +87,7 @@ public class PTRadioButton extends PTCheckBox {
 
     protected void fireInstruction(final int objectID, final UIBuilder uiService, final boolean value) {
         final PTInstruction instruction = new PTInstruction(objectID);
-        instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE_HANDLER);
-        instruction.put(ClientToServerModel.VALUE_CHECKBOX, value);
+        instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, value);
         uiService.sendDataToServer(cast(), instruction);
     }
 

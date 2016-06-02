@@ -60,189 +60,189 @@ import elemental.client.Browser;
 @Export(value = "ponysdk", all = false)
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
-	private static final Logger log = Logger.getLogger(PonySDK.class.getName());
+    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
-	private static PonySDK INSTANCE;
-	private static final UIBuilder uiBuilder = new UIBuilder();
+    private static PonySDK INSTANCE;
+    private static final UIBuilder uiBuilder = new UIBuilder();
 
-	private int applicationViewID;
+    private int applicationViewID;
 
-	private WebSocketClient socketClient;
+    private WebSocketClient socketClient;
 
-	private final List<StartupListener> listener = new ArrayList<>();
+    private final List<StartupListener> listener = new ArrayList<>();
 
-	private PonySDK() {
+    private PonySDK() {
 
-		final elemental.html.Window window = Browser.getWindow();
-		final elemental.html.Window opener = window.getOpener();
+        final elemental.html.Window window = Browser.getWindow();
+        final elemental.html.Window opener = window.getOpener();
 
-		if (opener == null) {
-			Window.addWindowClosingHandler(new ClosingHandler() {
+        if (opener == null) {
+            Window.addWindowClosingHandler(new ClosingHandler() {
 
-				@Override
-				public void onWindowClosing(final ClosingEvent event) {
-					PTWindowManager.closeAll();
-				}
-			});
-			Window.addCloseHandler(new CloseHandler<Window>() {
+                @Override
+                public void onWindowClosing(final ClosingEvent event) {
+                    PTWindowManager.closeAll();
+                }
+            });
+            Window.addCloseHandler(new CloseHandler<Window>() {
 
-				@Override
-				public void onClose(final CloseEvent<Window> event) {
-					PTWindowManager.closeAll();
-				}
-			});
+                @Override
+                public void onClose(final CloseEvent<Window> event) {
+                    PTWindowManager.closeAll();
+                }
+            });
 
-		}
+        }
 
-	}
+    }
 
-	@ExportConstructor
-	public static PonySDK constructor() {
-		if (INSTANCE == null) {
-			INSTANCE = new PonySDK();
-			GWT.setUncaughtExceptionHandler(INSTANCE);
-			if (log.isLoggable(Level.INFO))
-				log.info("Creating PonySDK instance");
-		}
-		return INSTANCE;
-	}
+    @ExportConstructor
+    public static PonySDK constructor() {
+        if (INSTANCE == null) {
+            INSTANCE = new PonySDK();
+            GWT.setUncaughtExceptionHandler(INSTANCE);
+            if (log.isLoggable(Level.INFO))
+                log.info("Creating PonySDK instance");
+        }
+        return INSTANCE;
+    }
 
-	@Export
-	public void start() {
-		try {
-			if (log.isLoggable(Level.INFO))
-				log.info("Starting PonySDK instance");
-			final elemental.html.Window window = Browser.getWindow();
-			final elemental.html.Window opener = window.getOpener();
+    @Export
+    public void start() {
+        try {
+            if (log.isLoggable(Level.INFO))
+                log.info("Starting PonySDK instance");
+            final elemental.html.Window window = Browser.getWindow();
+            final elemental.html.Window opener = window.getOpener();
 
-			if (opener == null) {
-				Integer viewID = null;
-				final Storage storage = Storage.getSessionStorageIfSupported();
-				if (storage != null) {
-					final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
-					if (v != null && !v.isEmpty())
-						viewID = Integer.parseInt(v);
-				}
+            if (opener == null) {
+                Integer viewID = null;
+                final Storage storage = Storage.getSessionStorageIfSupported();
+                if (storage != null) {
+                    final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
+                    if (v != null && !v.isEmpty())
+                        viewID = Integer.parseInt(v);
+                }
 
-				if (log.isLoggable(Level.INFO))
-					log.info("View ID : " + viewID);
+                if (log.isLoggable(Level.INFO))
+                    log.info("View ID : " + viewID);
 
-				applicationViewID = viewID != null ? viewID : 0;
+                applicationViewID = viewID != null ? viewID : 0;
 
-				final StringBuilder builder = new StringBuilder();
-				builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
-				builder.append("ws?");
-				builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID)
-						.append("&");
-				builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
-				builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
-				builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
+                final StringBuilder builder = new StringBuilder();
+                builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
+                builder.append("ws?");
+                builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID)
+                        .append("&");
+                builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
+                builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
+                builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-				socketClient = new WebSocketClient(builder.toString(), new WebSocketCallback() {
+                socketClient = new WebSocketClient(builder.toString(), new WebSocketCallback() {
 
-					@Override
-					public void connected() {
-						if (log.isLoggable(Level.INFO))
-							log.info("WebSoket connected");
-						uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
-					}
+                    @Override
+                    public void connected() {
+                        if (log.isLoggable(Level.INFO))
+                            log.info("WebSoket connected");
+                        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
+                    }
 
-					@Override
-					public void disconnected() {
-						if (log.isLoggable(Level.INFO))
-							log.info("WebSoket disconnected");
-						uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-					}
+                    @Override
+                    public void disconnected() {
+                        if (log.isLoggable(Level.INFO))
+                            log.info("WebSoket disconnected");
+                        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
+                    }
 
-					/**
-					 * Message from server to Main terminal
-					 */
-					@Override
-					public void message(final ReaderBuffer buffer) {
-						try {
-							uiBuilder.updateMainTerminal(buffer);
-						} catch (final Exception e) {
-							log.log(Level.SEVERE, "Cannot parse " + buffer, e);
-						}
-					}
+                    /**
+                     * Message from server to Main terminal
+                     */
+                    @Override
+                    public void message(final ReaderBuffer buffer) {
+                        try {
+                            uiBuilder.updateMainTerminal(buffer);
+                        } catch (final Exception e) {
+                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+                        }
+                    }
 
-				});
-			} else {
-				final String windowId = Window.Location.getParameter("wid");
-				uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
+                });
+            } else {
+                final String windowId = Window.Location.getParameter("wid");
+                uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
 
-					/**
-					 * Message from Main terminal to the matching terminal
-					 */
-					@Override
-					public void onDataReceived(final ReaderBuffer buffer) {
-						uiBuilder.update(buffer);
-					}
+                    /**
+                     * Message from Main terminal to the matching terminal
+                     */
+                    @Override
+                    public void onDataReceived(final ReaderBuffer buffer) {
+                        uiBuilder.update(buffer);
+                    }
 
-					@Override
-					public void onDataReceived(final JSONObject object) {
-					}
+                    @Override
+                    public void onDataReceived(final JSONObject object) {
+                    }
 
-					@Override
-					public void onError(final Throwable exception) {
-					}
-				}));
-			}
+                    @Override
+                    public void onError(final Throwable exception) {
+                    }
+                }));
+            }
 
-		} catch (final Throwable e) {
-			log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
-		}
-	}
+        } catch (final Throwable e) {
+            log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * From other terminal to the server
-	 */
-	@Export
-	public void sendDataToServer(final String jsObject) {
-		uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
-	}
+    /**
+     * From other terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final String jsObject) {
+        uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
+    }
 
-	/**
-	 * From Main terminal to the server
-	 */
-	@Export
-	public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
-		final PTInstruction instruction = new PTInstruction(objectID);
-		instruction.put(ClientToServerModel.NATIVE, jsObject);
-		uiBuilder.sendDataToServer(instruction);
-	}
+    /**
+     * From Main terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
+        final PTInstruction instruction = new PTInstruction(objectID);
+        instruction.put(ClientToServerModel.NATIVE, jsObject);
+        uiBuilder.sendDataToServer(instruction);
+    }
 
-	@Export
-	public void setReadyWindow(final int windowID) {
-		uiBuilder.setReadyWindow(windowID);
-	}
+    @Export
+    public void setReadyWindow(final int windowID) {
+        uiBuilder.setReadyWindow(windowID);
+    }
 
-	@Export
-	public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-		uiBuilder.registerCommunicationError(communicationErrorClosure);
-	}
+    @Export
+    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+        uiBuilder.registerCommunicationError(communicationErrorClosure);
+    }
 
-	@Export
-	public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
-		uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
-	}
+    @Export
+    public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+        uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
+    }
 
-	@Export
-	public void executeInstruction(final JavaScriptObject jso) {
-		uiBuilder.executeInstruction(jso);
-	}
+    @Export
+    public void executeInstruction(final JavaScriptObject jso) {
+        uiBuilder.executeInstruction(jso);
+    }
 
-	@Override
-	public void onUncaughtException(final Throwable e) {
-		log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
+    @Override
+    public void onUncaughtException(final Throwable e) {
+        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
 
-		if (uiBuilder != null) {
-			final PTInstruction instruction = new PTInstruction();
-			instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-			uiBuilder.sendDataToServer(instruction);
-		}
-	}
+        if (uiBuilder != null) {
+            final PTInstruction instruction = new PTInstruction();
+            instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
+            uiBuilder.sendDataToServer(instruction);
+        }
+    }
 
-	public static native void reload() /*-{$wnd.location.reload();}-*/;
+    public static native void reload() /*-{$wnd.location.reload();}-*/;
 
 }

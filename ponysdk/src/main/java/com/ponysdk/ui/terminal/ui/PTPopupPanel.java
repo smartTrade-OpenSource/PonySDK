@@ -92,7 +92,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             @Override
             public void onClose(final CloseEvent<PopupPanel> event) {
                 final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_CLOSE_HANDLER);
+                instruction.put(ClientToServerModel.HANDLER_CLOSE);
                 uiService.sendDataToServer(cast(), instruction);
             }
         });
@@ -100,7 +100,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_POPUP_POSITION_CALLBACK.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_POPUP_POSITION.equals(handlerModel)) {
             final PopupPanel popup = cast();
             popup.setVisible(true);
             popup.show();

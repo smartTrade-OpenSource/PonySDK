@@ -1,7 +1,6 @@
 
 package com.ponysdk.ui.terminal.ui;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,9 +39,7 @@ public class PTWindowManager {
     }
 
     public static final void closeAll() {
-        final Collection<PTWindow> windows = get().windowById.values();
-        for (final PTWindow window : windows) {
-            get().unregister(window);
+        for (final PTWindow window : get().windowById.values()) {
             window.close();
         }
     }

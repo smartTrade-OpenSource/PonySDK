@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.UIContext;
 import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.model.ServerToClientModel;
-import com.ponysdk.ui.server.model.ServerBinaryModel;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
@@ -49,8 +48,7 @@ public class PScript extends PObject {
 
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
-    private PScript(final int windowID) {
-        attach(windowID);
+    private PScript() {
     }
 
     @Override
@@ -66,10 +64,16 @@ public class PScript extends PObject {
         final UIContext session = UIContext.get();
         PScript script = session.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
-            script = new PScript(windowID);
-            session.setAttribute(SCRIPT_KEY, script);
+            script = new PScript();
+            session.setAttribute(SCRIPT_KEY + windowID, script);
+            if (PWindowManager.get().getWindow(windowID) != null) script.attach(windowID);
         }
         return script;
+    }
+
+    protected static void registerWindow(final int windowID) {
+        final PScript script = UIContext.get().getAttribute(SCRIPT_KEY + windowID);
+        if (script != null) script.attach(windowID);
     }
 
     public static void execute(final int windowID, final String js) {
@@ -105,14 +109,14 @@ public class PScript extends PObject {
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
-        writeUpdate((writer) -> {
-            writer.writeModel(new ServerBinaryModel(ServerToClientModel.EVAL, js));
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.EVAL, js);
             if (callback != null) {
                 callbacksByID.put(++executionID, callback);
-                writer.writeModel(new ServerBinaryModel(ServerToClientModel.COMMAND_ID, executionID));
+                writer.writeModel(ServerToClientModel.COMMAND_ID, executionID);
             }
             if (period != null) {
-                writer.writeModel(new ServerBinaryModel(ServerToClientModel.FIXDELAY, period.toMillis()));
+                writer.writeModel(ServerToClientModel.FIXDELAY, period.toMillis());
             }
         });
     }
@@ -120,11 +124,13 @@ public class PScript extends PObject {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+            final ExecutionCallback callback = callbacksByID
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
             if (callback != null)
                 callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID.remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+            final ExecutionCallback callback = callbacksByID
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
             if (callback != null)
                 callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
         } else {

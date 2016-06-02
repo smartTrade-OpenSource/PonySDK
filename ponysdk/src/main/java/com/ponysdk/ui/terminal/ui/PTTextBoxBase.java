@@ -47,8 +47,7 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
             @Override
             public void onValueChange(final ValueChangeEvent<String> event) {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-                eventInstruction.put(ClientToServerModel.VALUE, event.getValue());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
                 uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });

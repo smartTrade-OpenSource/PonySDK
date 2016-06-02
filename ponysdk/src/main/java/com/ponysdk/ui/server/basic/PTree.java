@@ -142,13 +142,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
+        saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         selectionHandlers.remove(handler);
-        saveRemoveHandler(HandlerModel.HANDLER_SELECTION_HANDLER);
+        saveRemoveHandler(HandlerModel.HANDLER_SELECTION);
     }
 
     @Override
@@ -158,10 +158,9 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        final String handlerSelection = ClientToServerModel.HANDLER_SELECTION_HANDLER.toStringValue();
-        if (instruction.containsKey(handlerSelection)) {
-            final PTreeItem treeItem = UIContext.get().getObject(instruction.getJsonNumber(handlerSelection).intValue());
-            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, treeItem);
+        if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
+            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, UIContext.get().getObject(widgetId));
             for (final PSelectionHandler<PTreeItem> handler : getSelectionHandlers()) {
                 handler.onSelection(selectionEvent);
             }

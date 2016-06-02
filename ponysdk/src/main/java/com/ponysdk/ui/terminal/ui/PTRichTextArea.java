@@ -95,29 +95,29 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
         if (ServerToClientModel.FONT_SIZE.equals(binaryModel.getModel())) {
             final FontSize fontSize = FontSize.valueOf(binaryModel.getStringValue());
             switch (fontSize) {
-                case LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
-                    break;
-                case SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
-                    break;
-                case MEDIUM:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
-                    break;
-                case X_LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
-                    break;
-                case X_SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
-                    break;
-                case XX_LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
-                    break;
-                case XX_SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
-                    break;
-                default:
-                    break;
+            case LARGE:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
+                break;
+            case SMALL:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
+                break;
+            case MEDIUM:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
+                break;
+            case X_LARGE:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
+                break;
+            case X_SMALL:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
+                break;
+            case XX_LARGE:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
+                break;
+            case XX_SMALL:
+                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
+                break;
+            default:
+                break;
             }
             return true;
         }
@@ -127,26 +127,16 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
     @Override
     public void onBlur(final BlurEvent event) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
-        instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE_HANDLER);
-        instruction.put(ClientToServerModel.HTML, uiObject.getHTML());
+        instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, uiObject.getHTML());
         uiService.sendDataToServer(uiObject, instruction);
     }
 
     public enum FontSize {
-        LARGE,
-        MEDIUM,
-        SMALL,
-        X_LARGE,
-        X_SMALL,
-        XX_LARGE,
-        XX_SMALL;
+        LARGE, MEDIUM, SMALL, X_LARGE, X_SMALL, XX_LARGE, XX_SMALL;
     }
 
     public enum Justification {
-        CENTER,
-        FULL,
-        LEFT,
-        RIGHT;
+        CENTER, FULL, LEFT, RIGHT;
     }
 
 }
