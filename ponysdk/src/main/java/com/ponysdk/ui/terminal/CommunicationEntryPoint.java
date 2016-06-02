@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -36,10 +36,22 @@ public class CommunicationEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         ExporterUtil.exportAll();
-        onLoadImpl();
+
+        if (useExternalStart()) {
+            onModuleLoaded();
+        } else {
+            final PonySDK ponysdk = PonySDK.constructor();
+            ponysdk.start();
+        }
+
     }
 
-    private native void onLoadImpl() /*-{
-                                     if ($wnd.onPonySDKModuleLoaded && typeof $wnd.onPonySDKModuleLoaded == 'function') $wnd.onPonySDKModuleLoaded();
-                                     }-*/;
+    private native boolean useExternalStart() /*-{
+                                              if ($wnd.onPonySDKModuleLoaded && typeof $wnd.onPonySDKModuleLoaded == 'function') return true;
+                                              return false;
+                                              }-*/;
+
+    private native void onModuleLoaded() /*-{
+                                         if ($wnd.onPonySDKModuleLoaded && typeof $wnd.onPonySDKModuleLoaded == 'function') $wnd.onPonySDKModuleLoaded();
+                                         }-*/;
 }

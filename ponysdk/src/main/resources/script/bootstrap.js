@@ -120,44 +120,6 @@ function onPonySDKModuleLoaded() {
     reconnectionCheck.initCheck();
 }
 
-var theWS = window.WebSocket;
-
-function CustomWebSocket(server) {
-	var that = this;
-	var ws = new theWS(server);
-
-	this.send = function(message) {
-		ws.send(message);
-	}
-
-	this.close = function() {
-		ws.close();
-	}
-
-	this.onopen0 = function() {
-		that.onopen();
-	}
-
-	this.onmessage0 = function(response) {
-		if(response.data) {
-			var msg = JSON.parse(response.data);
-			if(msg['4']!=null) return;
-			pony.executeInstruction(msg);
-		}
-	}
-
-	this.onclose0 = function(m) {
-		reconnectionCheck.onCheckError();
-		that.onclose(m);
-	}
-
-	ws.onopen = this.onopen0;
-	ws.onmessage = this.onmessage0;
-	ws.onclose = this.onclose0;
-}
-
-window.WebSocket = CustomWebSocket;
-
 function notifyConnectionLostListeners() {
 	for(var i=0; i<document.onConnectionLostListeners.length; i++) {
 		try {
