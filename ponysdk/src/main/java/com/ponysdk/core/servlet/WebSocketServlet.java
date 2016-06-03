@@ -84,7 +84,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         public Buffer() {
             socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-            // charBuffer = CharBuffer.allocate(DEFAULT_BUFFER_SIZE);
         }
 
     }
