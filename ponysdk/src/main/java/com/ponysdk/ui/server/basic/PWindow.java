@@ -23,9 +23,7 @@
 
 package com.ponysdk.ui.server.basic;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import javax.json.JsonObject;
@@ -45,7 +43,6 @@ public class PWindow extends PObject {
     public static final int EMPTY_WINDOW_ID = -2;
     public static final int MAIN_WINDOW_ID = -1;
 
-    private final List<Runnable> postedCommands = new ArrayList<>();
     private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<>();
     private final ListenerCollection<POpenHandler> openHandlers = new ListenerCollection<>();
 
@@ -84,7 +81,8 @@ public class PWindow extends PObject {
     }
 
     public boolean open() {
-        if (opened) return false;
+        if (opened)
+            return false;
         saveUpdate(ServerToClientModel.OPEN, true);
         opened = true;
         return opened;
@@ -127,10 +125,6 @@ public class PWindow extends PObject {
 
     public void removeCloseHandler(final PCloseHandler handler) {
         closeHandlers.remove(handler);
-    }
-
-    protected void postOpenerCommand(final Runnable runnable) {
-        postedCommands.add(runnable);
     }
 
     public boolean isLoaded() {
