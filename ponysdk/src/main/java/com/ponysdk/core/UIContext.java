@@ -147,26 +147,15 @@ public class UIContext {
     }
 
     public void execute(final Runnable runnable) {
-        if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
+        if (log.isDebugEnabled())
+            log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
-                    // final Long receivedSeqNum = checkClientMessage(data,
-                    // uiContext);
-
-                    // if (receivedSeqNum != null) {
                     runnable.run();
-
-                    // final List<JsonObject> datas =
-                    // uiContext.expungeIncomingMessageQueue(receivedSeqNum);
-                    // for (final JsonObject jsoObject : datas) {
-                    // process(uiContext, jsoObject);
-                    // }
-                    // }
-
                     txn.commit();
                 } catch (final Throwable e) {
                     log.error("Cannot process client instruction", e);
@@ -189,7 +178,8 @@ public class UIContext {
     }
 
     private void fireOnData(final List<Object> data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listenerCollection.isEmpty())
+            return;
         try {
             for (final DataListener listener : listenerCollection) {
                 for (final Object object : data) {
@@ -202,7 +192,8 @@ public class UIContext {
     }
 
     private void fireOnData(final Object data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listenerCollection.isEmpty())
+            return;
         try {
             for (final DataListener listener : listenerCollection) {
                 listener.onData(data);
@@ -281,18 +272,10 @@ public class UIContext {
         weakReferences.put(object.getID(), object);
     }
 
-    // public void assignParentID(final int objectID, final int parentID) {
-    // weakReferences.assignParentID(objectID, parentID);
-    // }
-
     @SuppressWarnings("unchecked")
     public <T> T getObject(final int objectID) {
         return (T) weakReferences.get(objectID);
     }
-
-    // public Session getSession() {
-    // return application.getSession();
-    // }
 
     public StreamHandler removeStreamListener(final int streamID) {
         return streamListenerByID.remove(streamID);
@@ -466,7 +449,8 @@ public class UIContext {
 
         final int previous = lastReceived;
         if (previous + 1 != receivedSeqNum) {
-            if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
+            if (lastSyncErrorTimestamp <= 0)
+                lastSyncErrorTimestamp = System.currentTimeMillis();
             return false;
         }
         lastReceived = receivedSeqNum;
@@ -484,7 +468,8 @@ public class UIContext {
     }
 
     public List<JsonObject> expungeIncomingMessageQueue(final int receivedSeqNum) {
-        if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
+        if (incomingMessageQueue.isEmpty())
+            return Collections.emptyList();
 
         final List<JsonObject> datas = new ArrayList<>();
         int expected = receivedSeqNum + 1;
@@ -561,11 +546,15 @@ public class UIContext {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
         final UIContext other = (UIContext) obj;
-        if (uiContextID != other.uiContextID) return false;
+        if (uiContextID != other.uiContextID)
+            return false;
         return true;
     }
 
