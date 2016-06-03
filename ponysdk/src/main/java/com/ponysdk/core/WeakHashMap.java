@@ -90,16 +90,6 @@ public class WeakHashMap implements Map<Integer, PObject> {
 
         if (log.isDebugEnabled()) log.debug("Registering object: " + value);
 
-        // if (value instanceof PWidget) {
-        // final PWidget widget = (PWidget) value;
-        // if (widget.getParent() != null) {
-        // if (log.isDebugEnabled()) log.debug("Attaching object #" + objectID +
-        // " to parent: " + widget);
-        // parentObjectIDByReferences.put(weakReference,
-        // widget.getParent().getID());
-        // }
-        // }
-
         return value;
     }
 
@@ -112,7 +102,6 @@ public class WeakHashMap implements Map<Integer, PObject> {
         if (reference == null) return null;
 
         objectIDByReferences.remove(reference);
-        // parentObjectIDByReferences.remove(reference);
 
         return reference.get();
     }
@@ -145,42 +134,23 @@ public class WeakHashMap implements Map<Integer, PObject> {
         return null;
     }
 
-    // public void assignParentID(final Integer objectID, final Integer
-    // parentObjectID) {
-    // if (referenceByObjectID.get(objectID) == null) {
-    // log.warn("Unkwnown reference to object: " + objectID);
-    // return;
-    // }
-    // parentObjectIDByReferences.put(referenceByObjectID.get(objectID),
-    // parentObjectID);
-    // }
-
     private void expungeStaleEntries() {
         Reference<? extends PObject> reference = null;
-
         while ((reference = queue.poll()) != null) {
             final Integer objectID = objectIDByReferences.remove(reference);
-            // final Integer parentObjectID =
-            // parentObjectIDByReferences.remove(reference);
             final WeakReference<PObject> removedObject = referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
-
-            // if (parentObjectID != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
 
             if (removedObject.get() instanceof PWidget) {
-                System.err.println("GC object ");
                 final PWidget widget = (PWidget) removedObject.get();
                 final int windowID = widget.getWindowID();
                 parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             }
 
             parser.parse(ServerToClientModel.TYPE_GC, objectID);
-
-            // parser.parse(Model.PARENT_OBJECT_ID, parentObjectID);
             parser.endObject();
-            // }
         }
     }
 
