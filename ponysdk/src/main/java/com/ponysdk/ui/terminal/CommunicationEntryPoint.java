@@ -23,6 +23,7 @@
 
 package com.ponysdk.ui.terminal;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.timepedia.exporter.client.ExporterUtil;
@@ -38,8 +39,12 @@ public class CommunicationEntryPoint implements EntryPoint {
         ExporterUtil.exportAll();
 
         if (useExternalStart()) {
+            if (log.isLoggable(Level.INFO))
+                log.info("'onPonySDKModuleLoaded' is detected, PonySDK must be instanciate by an external javascript");
             onModuleLoaded();
         } else {
+            if (log.isLoggable(Level.INFO))
+                log.info("Create PonySDK using the default entry point");
             final PonySDK ponysdk = PonySDK.constructor();
             ponysdk.start();
         }
