@@ -94,7 +94,10 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
 
             if (styles.add(styleName)) {
-                saveUpdate(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName, ServerToClientModel.ROW, row);
+                saveUpdate((writer) -> {
+                    writer.writeModel(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
+                    writer.writeModel(ServerToClientModel.ROW, row);
+                });
             }
         }
 
@@ -104,7 +107,10 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             if (styles == null) return;
 
             if (styles.remove(styleName)) {
-                saveUpdate(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName, ServerToClientModel.ROW, row);
+                saveUpdate((writer) -> {
+                    writer.writeModel(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                    writer.writeModel(ServerToClientModel.ROW, row);
+                });
             }
         }
 
@@ -118,7 +124,10 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             styles.clear();
             styles.add(styleName);
 
-            saveUpdate(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName, ServerToClientModel.ROW, row);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName);
+                writer.writeModel(ServerToClientModel.ROW, row);
+            });
         }
 
         protected void insertRowStyle(final int row) {
@@ -149,19 +158,31 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     public class PColumnFormatter {
 
         public void setWidth(final int column, final String width) {
-            saveUpdate(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width, ServerToClientModel.COLUMN, column);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width);
+                writer.writeModel(ServerToClientModel.COLUMN, column);
+            });
         }
 
         public void addStyleName(final int column, final String styleName) {
-            saveUpdate(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName, ServerToClientModel.COLUMN, column);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
+                writer.writeModel(ServerToClientModel.COLUMN, column);
+            });
         }
 
         public void removeStyleName(final int column, final String styleName) {
-            saveUpdate(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName, ServerToClientModel.COLUMN, column);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                writer.writeModel(ServerToClientModel.COLUMN, column);
+            });
         }
 
         public void setStyleName(final int column, final String styleName) {
-            saveUpdate(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName, ServerToClientModel.COLUMN, column);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
+                writer.writeModel(ServerToClientModel.COLUMN, column);
+            });
         }
     }
 
@@ -234,7 +255,9 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate(ServerToClientModel.CLEAR);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CLEAR);
+        });
     }
 
     public void removeRow(final int row) {
@@ -258,7 +281,9 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
 
-        saveUpdate(ServerToClientModel.CLEAR_ROW, row);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CLEAR_ROW, row);
+        });
     }
 
     public void insertRow(final int row) {
@@ -273,7 +298,9 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        saveUpdate(ServerToClientModel.INSERT_ROW, row);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.INSERT_ROW, row);
+        });
     }
 
     @Override
@@ -304,17 +331,23 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        saveUpdate(ServerToClientModel.BORDER_WIDTH, width);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.BORDER_WIDTH, width);
+        });
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        saveUpdate(ServerToClientModel.CELL_PADDING, padding);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CELL_PADDING, padding);
+        });
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        saveUpdate(ServerToClientModel.CELL_SPACING, spacing);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CELL_SPACING, spacing);
+        });
     }
 
     protected void setCellFormatter(final T cellFormatter) {
@@ -332,7 +365,8 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             addWidgetToMap(row, column, widget);
 
             // Physical attach.
-            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row), new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
             widget.attach(windowID);
 
             adopt(widget);

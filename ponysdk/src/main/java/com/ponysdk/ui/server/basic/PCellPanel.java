@@ -50,29 +50,45 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        executeUpdate(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        });
     }
 
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        executeUpdate(ServerToClientModel.SPACING, this.spacing);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SPACING, this.spacing);
+        });
     }
 
-    public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment horizontalAlignment) {
-        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue(), ServerToClientModel.WIDGET_ID, widget.getID());
+    public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
-    public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment verticalAlignment) {
-        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue(), ServerToClientModel.WIDGET_ID, widget.getID());
+    public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment align) {
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
-        saveUpdate(ServerToClientModel.CELL_HEIGHT, height, ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CELL_HEIGHT, height);
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
-        saveUpdate(ServerToClientModel.CELL_WIDTH, width, ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CELL_WIDTH, width);
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     public Integer getBorderWidth() {

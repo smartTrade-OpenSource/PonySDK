@@ -136,49 +136,65 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate(ServerToClientModel.POPUP_MODAL, modal);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_MODAL, modal);
+        });
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
-        saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
+        });
     }
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
-            saveUpdate(ServerToClientModel.POPUP_DRAGGABLE);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.POPUP_DRAGGABLE);
+            });
         }
     }
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled);
+        });
     }
 
     public void center() {
         this.center = true;
         this.showing = true;
-        saveUpdate(ServerToClientModel.POPUP_CENTER);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_CENTER);
+        });
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate(ServerToClientModel.POPUP_SHOW);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.POPUP_SHOW);
+            });
         }
     }
 
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate(ServerToClientModel.POPUP_HIDE);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.POPUP_HIDE);
+            });
         }
     }
 
     public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
-        saveUpdate(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
+        });
     }
 
     @Override
@@ -198,7 +214,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         leftPosition = left;
         topPosition = top;
 
-        saveUpdate(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition, ServerToClientModel.POPUP_POSITION_TOP, topPosition);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
+            writer.writeModel(ServerToClientModel.POPUP_POSITION_TOP, topPosition);
+        });
     }
 
     public void setPopupPositionAndShow(final PPositionCallback callback) {
@@ -223,7 +242,9 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
-            saveUpdate(ServerToClientModel.POPUP_POSITION_AND_SHOW);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.POPUP_POSITION_AND_SHOW);
+            });
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             this.showing = false;
             fireOnClose();

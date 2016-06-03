@@ -44,7 +44,8 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
-public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
+public class PFileUpload extends PWidget
+        implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
@@ -95,7 +96,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public void setName(final String name) {
         this.name = name;
-        saveUpdate(ServerToClientModel.NAME, name);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.NAME, name);
+        });
     }
 
     public void submit() {
@@ -117,7 +120,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, PChangeH
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(ServerToClientModel.ENABLED, enabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ENABLED, enabled);
+        });
     }
 
     public String getFileName() {

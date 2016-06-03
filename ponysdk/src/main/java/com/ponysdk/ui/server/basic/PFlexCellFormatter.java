@@ -1,7 +1,6 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.model.ServerToClientModel;
-import com.ponysdk.ui.server.model.ServerBinaryModel;
 
 public class PFlexCellFormatter extends PCellFormatter {
 
@@ -10,12 +9,18 @@ public class PFlexCellFormatter extends PCellFormatter {
     }
 
     public void setColSpan(final int row, final int column, final int colSpan) {
-        table.saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_COL_SPAN, colSpan), new ServerBinaryModel(ServerToClientModel.ROW, row),
-                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+        table.saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SET_COL_SPAN, colSpan);
+            writer.writeModel(ServerToClientModel.ROW, row);
+            writer.writeModel(ServerToClientModel.COLUMN, column);
+        });
     }
 
     public void setRowSpan(final int row, final int column, final int rowSpan) {
-        table.saveUpdate(new ServerBinaryModel(ServerToClientModel.SET_ROW_SPAN, rowSpan), new ServerBinaryModel(ServerToClientModel.ROW, row),
-                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+        table.saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SET_ROW_SPAN, rowSpan);
+            writer.writeModel(ServerToClientModel.ROW, row);
+            writer.writeModel(ServerToClientModel.COLUMN, column);
+        });
     }
 }

@@ -182,7 +182,9 @@ public class PStackLayoutPanel extends PComposite
     }
 
     public void showWidget(final PWidget widget) {
-        saveUpdate(ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     /**
@@ -193,12 +195,16 @@ public class PStackLayoutPanel extends PComposite
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(ServerToClientModel.ANIMATION_DURATION, duration);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration);
+        });
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(ServerToClientModel.ANIMATE, duration);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATE, duration);
+        });
     }
 
     public int getAnimationDuration() {

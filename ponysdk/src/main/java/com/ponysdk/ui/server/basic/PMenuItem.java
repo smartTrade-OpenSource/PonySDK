@@ -24,6 +24,8 @@
 package com.ponysdk.ui.server.basic;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.json.JsonObject;
 
@@ -41,6 +43,9 @@ import com.ponysdk.ui.terminal.WidgetType;
  * {com.google.gwt.user.client.ui.Accessibility} for more information.
  */
 public class PMenuItem extends PMenuSubElement implements PHasHTML {
+
+    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
+    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
     private String text;
 
@@ -112,7 +117,9 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TEXT, text);
+        });
     }
 
     @Override
@@ -124,12 +131,16 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, this.html.replace("\"", "\\\""));
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        });
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(ServerToClientModel.ENABLED, enabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ENABLED, enabled);
+        });
     }
 
     private void setSubMenu(final PMenuBar subMenu) {

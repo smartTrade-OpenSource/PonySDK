@@ -44,17 +44,21 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     }
 
     @Override
-    public void setHorizontalAlignment(final PHorizontalAlignment horizontalAlignment) {
-        if (Objects.equals(this.horizontalAlignment, horizontalAlignment)) return;
-        this.horizontalAlignment = horizontalAlignment;
-        saveUpdate(ServerToClientModel.HORIZONTAL_ALIGNMENT, horizontalAlignment.getValue());
+    public void setHorizontalAlignment(final PHorizontalAlignment align) {
+        if (Objects.equals(this.horizontalAlignment, align)) return;
+        this.horizontalAlignment = align;
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
+        });
     }
 
     @Override
-    public void setVerticalAlignment(final PVerticalAlignment verticalAlignment) {
-        if (Objects.equals(this.verticalAlignment, verticalAlignment)) return;
-        this.verticalAlignment = verticalAlignment;
-        saveUpdate(ServerToClientModel.VERTICAL_ALIGNMENT, verticalAlignment.getValue());
+    public void setVerticalAlignment(final PVerticalAlignment align) {
+        if (Objects.equals(this.verticalAlignment, align)) return;
+        this.verticalAlignment = align;
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
+        });
     }
 
     public PHorizontalAlignment getHorizontalAlignment() {

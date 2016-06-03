@@ -79,7 +79,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
+public class PSuggestBox extends PWidget
+        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestion>, HasPSelectionHandlers<PSuggestion> {
 
     private List<PSelectionHandler<PSuggestion>> selectionHandler;
 
@@ -161,7 +162,9 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public void setLimit(final int limit) {
         this.limit = limit;
-        saveUpdate(ServerToClientModel.LIMIT, limit);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.LIMIT, limit);
+        });
     }
 
     public void setText(final String text) {
@@ -252,20 +255,28 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
         @Override
         public void add(final String suggestion) {
-            saveUpdate(ServerToClientModel.SUGGESTION, suggestion);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.SUGGESTION, suggestion);
+            });
         }
 
         @Override
         public void addAll(final Collection<String> collection) {
-            // saveUpdate(Model.SUGGESTIONS, collection);
+            //            saveUpdate((writer) -> {
+            //                writer.writeModel(ServerToClientModel.SUGGESTIONS, collection);
+            //            });
         }
 
         public void setDefaultSuggestions(final Collection<String> collection) {
-            // saveUpdate(Model.DEFAULT_SUGGESTIONS, collection);
+            //            saveUpdate((writer) -> {
+            //                writer.writeModel(ServerToClientModel.DEFAULT_SUGGESTIONS, collection);
+            //            });
         }
 
         public void clear() {
-            saveUpdate(ServerToClientModel.CLEAR);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.CLEAR);
+            });
         }
 
         @Override

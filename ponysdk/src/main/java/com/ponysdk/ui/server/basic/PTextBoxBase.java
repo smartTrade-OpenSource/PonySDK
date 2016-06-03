@@ -79,7 +79,9 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TEXT, this.text);
+        });
     }
 
     @Override
@@ -96,7 +98,9 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder);
+        });
     }
 
     public String getPlaceholder() {
@@ -121,7 +125,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
-            String value = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
+            final String value = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             fireOnValueChange(new PValueChangeEvent<>(this, value));
         } else {
             super.onClientData(instruction);

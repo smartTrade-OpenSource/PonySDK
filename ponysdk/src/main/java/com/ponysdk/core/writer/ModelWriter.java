@@ -27,7 +27,6 @@ import java.io.IOException;
 
 import com.ponysdk.core.Parser;
 import com.ponysdk.ui.model.ServerToClientModel;
-import com.ponysdk.ui.server.model.ServerBinaryModel;
 
 public class ModelWriter implements AutoCloseable {
 
@@ -37,10 +36,8 @@ public class ModelWriter implements AutoCloseable {
         this.parser = parser;
     }
 
-    @Deprecated
-    public void writeModel(final ServerBinaryModel model) {
-        if (model == null) return;
-        writeModel(model.getKey(), model.getValue());
+    public void writeModel(final ServerToClientModel model) {
+        writeModel(model, null);
     }
 
     public void writeModel(final ServerToClientModel model, final Object value) {

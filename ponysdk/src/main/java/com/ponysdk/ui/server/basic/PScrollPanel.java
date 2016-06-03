@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -37,7 +37,9 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     public void setHorizontalScrollPosition(final int position) {
-        saveUpdate(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position);
+        });
     }
 
     public void scrollToBottom() {
@@ -57,6 +59,8 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     private void scrollTo(final int type) {
-        saveUpdate(ServerToClientModel.SCROLL_TO, type);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SCROLL_TO, type);
+        });
     }
 }

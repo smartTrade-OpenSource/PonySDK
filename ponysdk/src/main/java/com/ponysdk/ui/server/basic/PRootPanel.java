@@ -116,7 +116,9 @@ public class PRootPanel extends PAbsolutePanel {
         clear();
 
         if (clearDom) {
-            saveUpdate(ServerToClientModel.CLEAR_DOM, clearDom);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom);
+            });
         }
     }
 }

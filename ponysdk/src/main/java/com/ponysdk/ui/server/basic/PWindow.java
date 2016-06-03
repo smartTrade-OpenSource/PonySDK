@@ -81,15 +81,18 @@ public class PWindow extends PObject {
     }
 
     public boolean open() {
-        if (opened)
-            return false;
-        saveUpdate(ServerToClientModel.OPEN, true);
+        if (opened) return false;
         opened = true;
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.OPEN, opened);
+        });
         return opened;
     }
 
     public void close() {
-        saveUpdate(ServerToClientModel.CLOSE, true);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.CLOSE, true);
+        });
     }
 
     @Override

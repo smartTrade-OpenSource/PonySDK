@@ -120,9 +120,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow window3 = new PWindow(null, "d", null);
         window3.open();
 
-        if (true)
-            return;
-
         final PFlowPanel boxContainer = new PFlowPanel();
 
         PScript.execute("alert('coucou Main');");
@@ -254,7 +251,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -278,7 +275,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -311,7 +308,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
