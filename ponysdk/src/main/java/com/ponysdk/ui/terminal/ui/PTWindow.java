@@ -60,18 +60,22 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO))
+            log.log(Level.INFO, "PTWindowID created : " + objectID);
 
         this.uiService = uiService;
 
         url = buffer.getBinaryModel().getStringValue();
-        if (url == null) url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
+        if (url == null)
+            url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
 
         name = buffer.getBinaryModel().getStringValue();
-        if (name == null) name = EMPTY;
+        if (name == null)
+            name = EMPTY;
 
         features = buffer.getBinaryModel().getStringValue();
-        if (features == null) features = EMPTY;
+        if (features == null)
+            features = EMPTY;
 
         PTWindowManager.get().register(this);
     }
@@ -88,14 +92,17 @@ public class PTWindow extends AbstractPTObject implements EventListener {
             return true;
         }
         if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
-            close();
+            close(false);
             return true;
         }
         return false;
     }
 
-    public void close() {
-        window.removeEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this);
+    public void close(final boolean forced) {
+        if (forced) {
+            PTWindowManager.get().unregister(this);
+            window.removeEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this);
+        }
         window.close();
     }
 
