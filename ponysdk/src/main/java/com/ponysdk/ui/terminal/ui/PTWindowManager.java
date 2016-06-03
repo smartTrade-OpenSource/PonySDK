@@ -1,6 +1,7 @@
 
 package com.ponysdk.ui.terminal.ui;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -14,7 +15,7 @@ public class PTWindowManager {
 
     private static PTWindowManager instance = new PTWindowManager();
 
-    private final Map<Integer, PTWindow> windowById = new HashMap<>();
+    private final Map<Integer, PTWindow> windows = new HashMap<>();
 
     private PTWindowManager() {
     }
@@ -26,20 +27,21 @@ public class PTWindowManager {
     public void register(final PTWindow window) {
         if (log.isLoggable(Level.INFO))
             log.log(Level.INFO, "Register window : " + window.getObjectID());
-        windowById.put(window.getObjectID(), window);
+        windows.put(window.getObjectID(), window);
     }
 
     public void unregister(final PTWindow window) {
-        windowById.remove(window.getObjectID());
+        windows.remove(window.getObjectID());
     }
 
     @Export("getWindow")
     public static PTWindow getWindow(final int windowID) {
-        return get().windowById.get(windowID);
+        return get().windows.get(windowID);
     }
 
     public static final void closeAll() {
-        for (final PTWindow window : get().windowById.values()) {
+        final Collection<PTWindow> values = get().windows.values();
+        for (final PTWindow window : values) {
             window.close(true);
         }
     }

@@ -37,6 +37,7 @@ import com.ponysdk.ui.terminal.model.ReaderBuffer;
 import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
+import elemental.events.EventRemover;
 import elemental.html.Window;
 
 public class PTWindow extends AbstractPTObject implements EventListener {
@@ -55,6 +56,8 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     private UIBuilder uiService;
 
     private boolean ponySDKStarted = false;
+
+    private EventRemover eventRemover;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
@@ -84,7 +87,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
-            window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+            eventRemover = window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -100,8 +103,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     public void close(final boolean forced) {
         if (forced) {
-            PTWindowManager.get().unregister(this);
-            window.removeEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this);
+            eventRemover.remove();
         }
         window.close();
     }

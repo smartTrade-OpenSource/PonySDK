@@ -23,8 +23,6 @@
 
 package com.ponysdk.ui.terminal;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,8 +64,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     private int applicationViewID;
 
     private WebSocketClient socketClient;
-
-    private final List<StartupListener> listener = new ArrayList<>();
 
     private boolean started = false;
 
