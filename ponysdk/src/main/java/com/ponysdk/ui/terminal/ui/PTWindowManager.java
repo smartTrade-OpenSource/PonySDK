@@ -24,8 +24,8 @@ public class PTWindowManager {
     }
 
     public void register(final PTWindow window) {
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Register window : " + window.getObjectID());
-
+        if (log.isLoggable(Level.INFO))
+            log.log(Level.INFO, "Register window : " + window.getObjectID());
         windowById.put(window.getObjectID(), window);
     }
 
@@ -40,7 +40,7 @@ public class PTWindowManager {
 
     public static final void closeAll() {
         for (final PTWindow window : get().windowById.values()) {
-            window.close();
+            window.close(true);
         }
     }
 }
