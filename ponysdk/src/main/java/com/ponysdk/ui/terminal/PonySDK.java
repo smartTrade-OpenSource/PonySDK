@@ -43,8 +43,6 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.Window.ClosingEvent;
-import com.google.gwt.user.client.Window.ClosingHandler;
 import com.ponysdk.ui.model.ClientToServerModel;
 import com.ponysdk.ui.terminal.instruction.PTInstruction;
 import com.ponysdk.ui.terminal.model.ReaderBuffer;
@@ -74,26 +72,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     private boolean started = false;
 
     private PonySDK() {
-        final elemental.html.Window window = Browser.getWindow();
-        final elemental.html.Window opener = window.getOpener();
-
-        if (opener == null) {
-            Window.addWindowClosingHandler(new ClosingHandler() {
-
-                @Override
-                public void onWindowClosing(final ClosingEvent event) {
-                    PTWindowManager.closeAll();
-                }
-            });
-            Window.addCloseHandler(new CloseHandler<Window>() {
-
-                @Override
-                public void onClose(final CloseEvent<Window> event) {
-                    PTWindowManager.closeAll();
-                }
-            });
-        }
-
     }
 
     @ExportConstructor
@@ -119,6 +97,15 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
             final elemental.html.Window opener = window.getOpener();
 
             if (opener == null) {
+                Window.addCloseHandler(new CloseHandler<Window>() {
+
+                    @Override
+                    public void onClose(final CloseEvent<Window> event) {
+                        socketClient.close();
+                        PTWindowManager.closeAll();
+                    }
+                });
+
                 Integer viewID = null;
                 final Storage storage = Storage.getSessionStorageIfSupported();
                 if (storage != null) {
@@ -246,7 +233,4 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
             uiBuilder.sendDataToServer(instruction);
         }
     }
-
-    public static native void reload() /*-{$wnd.location.reload();}-*/;
-
 }
