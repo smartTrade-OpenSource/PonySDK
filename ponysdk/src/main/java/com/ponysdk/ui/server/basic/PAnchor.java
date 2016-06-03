@@ -105,7 +105,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
-        executeUpdate(ServerToClientModel.HREF, this.href);
+
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HREF, this.href);
+        });
     }
 
     @Override
@@ -117,7 +120,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        executeUpdate(ServerToClientModel.TEXT, this.text);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TEXT, this.text);
+        });
     }
 
     @Override
@@ -129,7 +134,9 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        executeUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        });
     }
 
 }

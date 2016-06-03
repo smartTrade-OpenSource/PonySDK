@@ -109,7 +109,9 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     }
 
     public void update(final JsonObject jsonObject) {
-        saveUpdate(ServerToClientModel.NATIVE, jsonObject);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.NATIVE, jsonObject);
+        });
     }
 
     @Override

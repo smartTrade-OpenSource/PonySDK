@@ -123,7 +123,9 @@ public class PImage extends PFocusWidget {
 
     public void setUrl(final String url) {
         this.url = url;
-        saveUpdate(ServerToClientModel.IMAGE_URL, url);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.IMAGE_URL, url);
+        });
     }
 
     public String getUrl() {

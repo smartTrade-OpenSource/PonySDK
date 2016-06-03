@@ -57,7 +57,13 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     private final PUnit unit;
 
     public enum Direction {
-        NORTH, EAST, SOUTH, WEST, CENTER, LINE_START, LINE_END;
+        NORTH,
+        EAST,
+        SOUTH,
+        WEST,
+        CENTER,
+        LINE_START,
+        LINE_END;
 
         public byte getValue() {
             return (byte) ordinal();
@@ -110,11 +116,17 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public void setWidgetSize(final PWidget widget, final double size) {
-        saveUpdate(ServerToClientModel.WIDGET_SIZE, size, ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.WIDGET_SIZE, size);
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
-        saveUpdate(ServerToClientModel.WIDGET_HIDDEN, hidden, ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.WIDGET_HIDDEN, hidden);
+            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        });
     }
 
     public void add(final PWidget child, final Direction direction, final double size) {
@@ -125,13 +137,16 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Adopt.
         adopt(child);
 
-        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()), new ServerBinaryModel(ServerToClientModel.SIZE, size));
+        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
+                new ServerBinaryModel(ServerToClientModel.SIZE, size));
         child.attach(windowID);
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(ServerToClientModel.ANIMATE, duration);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATE, duration);
+        });
     }
 
     public PUnit getUnit() {

@@ -73,7 +73,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  * &lt;g:header> element can hold html, or a &lt;g:customHeader> element can
  * hold a widget.
  */
-public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
+public class PTabLayoutPanel extends PComplexPanel
+        implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
 
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
@@ -114,7 +115,8 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     }
 
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
-        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText), new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -136,7 +138,9 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void selectTab(final int index) {
         if (index >= getWidgetCount()) throw new IndexOutOfBoundsException();
         this.selectedItemIndex = index;
-        saveUpdate(ServerToClientModel.SELECTED_INDEX, index);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SELECTED_INDEX, index);
+        });
     }
 
     @Override
@@ -179,11 +183,13 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
-                handler.onSelection(new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
+                handler.onSelection(
+                        new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())) {
             for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
-                handler.onBeforeSelection(new PBeforeSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
+                handler.onBeforeSelection(new PBeforeSelectionEvent<>(this,
+                        instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
             }
         } else {
             super.onClientData(instruction);
@@ -207,7 +213,9 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      */
     public void setAnimationDuration(final int duration) {
         this.animationDuration = duration;
-        saveUpdate(ServerToClientModel.ANIMATION_DURATION, duration);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration);
+        });
     }
 
     /**
@@ -217,12 +225,16 @@ public class PTabLayoutPanel extends PComplexPanel implements HasPBeforeSelectio
      *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate(ServerToClientModel.VERTICAL, isVertical);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.VERTICAL, isVertical);
+        });
     }
 
     @Override
     public void animate(final int duration) {
-        saveUpdate(ServerToClientModel.ANIMATE, duration);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ANIMATE, duration);
+        });
     }
 
     public int getAnimationDuration() {

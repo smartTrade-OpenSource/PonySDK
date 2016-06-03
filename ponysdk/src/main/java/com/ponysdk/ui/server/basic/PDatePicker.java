@@ -127,11 +127,15 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(ServerToClientModel.DATE, date != null ? date.getTime() : -1);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.DATE, date != null ? date.getTime() : -1);
+        });
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(ServerToClientModel.TIME, date != null ? date.getTime() : -1);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TIME, date != null ? date.getTime() : -1);
+        });
     }
 
     /**
@@ -139,21 +143,30 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        saveUpdate(ServerToClientModel.DATE_ENABLED, dateToString(dates), ServerToClientModel.ENABLED, enabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.DATE_ENABLED, dateToString(dates));
+            writer.writeModel(ServerToClientModel.ENABLED, enabled);
+        });
     }
 
     /**
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates), ServerToClientModel.STYLE_NAME, styleName);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
+            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
+        });
     }
 
     /**
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates), ServerToClientModel.STYLE_NAME, styleName);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
+            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
+        });
     }
 
     private static final String dateToString(final Collection<Date> dates) {

@@ -94,7 +94,9 @@ public class PTreeItem extends PObject {
 
     public void setHTML(final String html) {
         this.html = html;
-        saveUpdate(ServerToClientModel.TEXT, html);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TEXT, html);
+        });
     }
 
     final void setTree(final PTree tree) {
@@ -138,7 +140,9 @@ public class PTreeItem extends PObject {
 
     public void setSelected(final boolean selected) {
         this.selected = selected;
-        saveUpdate(ServerToClientModel.SELECTED, selected);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.SELECTED, selected);
+        });
     }
 
     public boolean isSelected() {
@@ -147,7 +151,9 @@ public class PTreeItem extends PObject {
 
     public void setState(final boolean open) {
         this.open = open;
-        saveUpdate(ServerToClientModel.STATE, open);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.STATE, open);
+        });
     }
 
     public boolean getState() {

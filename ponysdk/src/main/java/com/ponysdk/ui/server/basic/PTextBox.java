@@ -24,7 +24,6 @@
 package com.ponysdk.ui.server.basic;
 
 import com.ponysdk.ui.model.ServerToClientModel;
-import com.ponysdk.ui.server.model.ServerBinaryModel;
 
 /**
  * A standard single-line text box.
@@ -78,7 +77,9 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setMaxLength(final int length) {
         this.maxLength = length;
-        saveUpdate(ServerToClientModel.MAX_LENGTH, length);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.MAX_LENGTH, length);
+        });
     }
 
     /**
@@ -89,7 +90,9 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setVisibleLength(final int length) {
         this.visibleLength = length;
-        saveUpdate(ServerToClientModel.VISIBLE_LENGTH, visibleLength);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.VISIBLE_LENGTH, visibleLength);
+        });
     }
 
     public void applyMask(final String mask) {
@@ -109,9 +112,11 @@ public class PTextBox extends PTextBoxBase {
      *            replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
-        saveUpdate(new ServerBinaryModel(ServerToClientModel.MASK, pattern),
-                new ServerBinaryModel(ServerToClientModel.VISIBILITY, showMask),
-                new ServerBinaryModel(ServerToClientModel.REPLACEMENT_STRING, freeSymbol));
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.MASK, pattern);
+            writer.writeModel(ServerToClientModel.VISIBILITY, showMask);
+            writer.writeModel(ServerToClientModel.REPLACEMENT_STRING, freeSymbol);
+        });
     }
 
 }

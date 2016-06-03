@@ -77,7 +77,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void setText(final String text) {
         this.html = text;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TEXT, text);
+        });
     }
 
     @Override
@@ -89,7 +91,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        });
     }
 
     public Formatter getFormatter() {
@@ -99,7 +103,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
-            fireOnValueChange(new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
+            fireOnValueChange(new PValueChangeEvent<>(this,
+                    instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(instruction);
         }
@@ -132,87 +137,129 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public class Formatter {
 
         public void createLink(final String url) {
-            saveUpdate(ServerToClientModel.CREATE_LINK, url);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.CREATE_LINK, url);
+            });
         }
 
         public void insertHorizontalRule() {
-            saveUpdate(ServerToClientModel.INSERT_HORIZONTAL_RULE);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.INSERT_HORIZONTAL_RULE);
+            });
         }
 
         public void insertHTML(final String html) {
-            saveUpdate(ServerToClientModel.INSERT_HTML, html);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.INSERT_HTML, html);
+            });
         }
 
         public void insertImage(final String url) {
-            saveUpdate(ServerToClientModel.IMAGE_URL, url);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.IMAGE_URL, url);
+            });
         }
 
         public void insertOrderedList() {
-            saveUpdate(ServerToClientModel.ORDERED);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.ORDERED);
+            });
         }
 
         public void insertUnorderedList() {
-            saveUpdate(ServerToClientModel.UNORDERED);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.UNORDERED);
+            });
         }
 
         public void setBackColor(final String color) {
-            saveUpdate(ServerToClientModel.BACK_COLOR, color);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.BACK_COLOR, color);
+            });
         }
 
         public void setFontName(final String name) {
-            saveUpdate(ServerToClientModel.FONT_NAME, name);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.FONT_NAME, name);
+            });
         }
 
         public void setFontSize(final String fontSize) {
-            saveUpdate(ServerToClientModel.FONT_SIZE, fontSize);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.FONT_SIZE, fontSize);
+            });
         }
 
         public void setForeColor(final String color) {
-            saveUpdate(ServerToClientModel.FONT_COLOR, color);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.FONT_COLOR, color);
+            });
         }
 
         public void setJustification(final Justification justification) {
-            saveUpdate(ServerToClientModel.JUSTIFICATION, justification.name());
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.JUSTIFICATION, justification.name());
+            });
         }
 
         public void toggleBold() {
-            saveUpdate(ServerToClientModel.TOGGLE_BOLD);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.TOGGLE_BOLD);
+            });
         }
 
         public void toggleItalic() {
-            saveUpdate(ServerToClientModel.TOGGLE_ITALIC);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.TOGGLE_ITALIC);
+            });
         }
 
         public void toggleSubscript() {
-            saveUpdate(ServerToClientModel.TOGGLE_SUBSCRIPT);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.TOGGLE_SUBSCRIPT);
+            });
         }
 
         public void toggleUnderline() {
-            saveUpdate(ServerToClientModel.TOGGLE_UNDERLINE);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.TOGGLE_UNDERLINE);
+            });
         }
 
         public void leftIndent() {
-            saveUpdate(ServerToClientModel.LEFT_INDENT);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.LEFT_INDENT);
+            });
         }
 
         public void redo() {
-            saveUpdate(ServerToClientModel.REDO);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.REDO);
+            });
         }
 
         public void removeFormat() {
-            saveUpdate(ServerToClientModel.REMOVE_FORMAT);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.REMOVE_FORMAT);
+            });
         }
 
         public void removeLink() {
-            saveUpdate(ServerToClientModel.REMOVE_LINK);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.REMOVE_LINK);
+            });
         }
 
         public void rightIndent() {
-            saveUpdate(ServerToClientModel.TOGGLE_RIGHT_INDENT);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.TOGGLE_RIGHT_INDENT);
+            });
         }
 
         public void selectAll() {
-            saveUpdate(ServerToClientModel.SELECT_ALL);
+            saveUpdate((writer) -> {
+                writer.writeModel(ServerToClientModel.SELECT_ALL);
+            });
         }
     }
 

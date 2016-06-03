@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,8 +27,10 @@ import com.ponysdk.ui.model.ServerToClientModel;
 import com.ponysdk.ui.terminal.WidgetType;
 
 /**
- * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a PPopupPanel,
- * calls to {@link #setWidth(String)} and {@link #setHeight(String)} will set the width and height of the
+ * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a
+ * PPopupPanel,
+ * calls to {@link #setWidth(String)} and {@link #setHeight(String)} will set the width and height
+ * of the
  * dialog box itself, even if a widget has not been added as yet.
  * <h3>CSS Style Rules</h3>
  * <ul>
@@ -43,7 +45,8 @@ import com.ponysdk.ui.terminal.WidgetType;
  * <li>.gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the content is located }</li>
+ * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the content is located }
+ * </li>
  * <li>.gwt-DialogBox .dialogMiddleCenterInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleRight { the middle right cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleRightInner { the inner element of the cell }</li>
@@ -74,7 +77,9 @@ public class PDialogBox extends PDecoratedPopupPanel {
 
     public void setCaption(final String caption) {
         this.caption = caption;
-        saveUpdate(ServerToClientModel.POPUP_CAPTION, caption);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.POPUP_CAPTION, caption);
+        });
     }
 
     public String getCaption() {

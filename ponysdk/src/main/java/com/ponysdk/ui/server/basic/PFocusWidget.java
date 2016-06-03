@@ -55,7 +55,8 @@ import com.ponysdk.ui.server.basic.event.PMouseOverHandler;
  * Abstract base class for most widgets that can receive keyboard focus.
  */
 public abstract class PFocusWidget extends PWidget
-        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers, HasPBlurHandlers {
+        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers,
+        HasPBlurHandlers {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -121,32 +122,42 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(ServerToClientModel.ENABLED, enabled);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ENABLED, enabled);
+        });
     }
 
     public void setTabindex(final int tabindex) {
         if (this.tabindex == tabindex) return;
         this.tabindex = tabindex;
-        saveUpdate(ServerToClientModel.TABINDEX, tabindex);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.TABINDEX, tabindex);
+        });
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
-        saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
+        });
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
-        saveUpdate(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest);
+        });
     }
 
     @Override
     public void setFocus(final boolean focused) {
         if (Objects.equals(this.focused, focused)) return;
         this.focused = focused;
-        saveUpdate(ServerToClientModel.FOCUSED, focused);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.FOCUSED, focused);
+        });
     }
 
     public boolean isEnabled() {
@@ -177,7 +188,9 @@ public abstract class PFocusWidget extends PWidget
                 @Override
                 public void onClick(final PClickEvent event) {
                     handler.onClick(event);
-                    saveUpdate(ServerToClientModel.END_OF_PROCESSING);
+                    saveUpdate((writer) -> {
+                        writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
+                    });
                 }
             }, PClickEvent.TYPE);
         } else {
@@ -193,7 +206,9 @@ public abstract class PFocusWidget extends PWidget
                 @Override
                 public void onDoubleClick(final PDoubleClickEvent event) {
                     handler.onDoubleClick(event);
-                    saveUpdate(ServerToClientModel.END_OF_PROCESSING);
+                    saveUpdate((writer) -> {
+                        writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
+                    });
                 }
             };
 

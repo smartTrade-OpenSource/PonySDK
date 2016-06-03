@@ -118,14 +118,18 @@ public abstract class PObject {
 
         nativeBindingFunction = functionName;
 
-        saveUpdate(ServerToClientModel.BIND, functionName);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.BIND, functionName);
+        });
     }
 
     public void sendToNative(final JsonObject data) {
         if (nativeBindingFunction == null)
             throw new IllegalAccessError("Object not bind to a native function");
 
-        saveUpdate(ServerToClientModel.NATIVE, data);
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.NATIVE, data);
+        });
     }
 
     public void addNativeHandler(final PNativeHandler handler) {
@@ -201,13 +205,11 @@ public abstract class PObject {
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeAddHandler(type);
-        else
-            stackedInstructions.add(() -> executeAddHandler(type));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
+        else stackedInstructions.add(() -> executeAddHandler(type));
     }
 
-    protected void executeAddHandler(final HandlerModel type) {
+    private void executeAddHandler(final HandlerModel type) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID)
@@ -218,13 +220,11 @@ public abstract class PObject {
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeRemoveHandler();
-        else
-            stackedInstructions.add(() -> executeRemoveHandler());
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
+        else stackedInstructions.add(() -> executeRemoveHandler());
     }
 
-    protected void executeRemoveHandler() {
+    private void executeRemoveHandler() {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID)
@@ -234,13 +234,11 @@ public abstract class PObject {
     }
 
     protected void saveRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeRemove(objectID, parentObjectID);
-        else
-            stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
+        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
-    protected void executeRemove(final int objectID, final int parentObjectID) {
+    private void executeRemove(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID)
@@ -250,49 +248,12 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    protected void saveUpdate(final ServerToClientModel model) {
-        saveUpdate(model, null);
-    }
-
-    protected void saveUpdate(final ServerToClientModel model, final Object value) {
-        saveUpdate(new ServerBinaryModel(model, value));
-    }
-
-    protected void saveUpdate(final ServerToClientModel model1, final Object value1, final ServerToClientModel model2,
-            final Object value2) {
-        saveUpdate(new ServerBinaryModel(model1, value1), new ServerBinaryModel(model2, value2));
-    }
-
-    protected void saveUpdate(final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeUpdate(binaryModels);
-        else stackedInstructions.add(() -> executeUpdate(binaryModels));
-    }
-
     protected void saveUpdate(final ModelWriterCallback callback) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) writeUpdate(callback);
         else stackedInstructions.add(() -> writeUpdate(callback));
     }
 
-    protected void executeUpdate(final ServerToClientModel model, final Object value) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeUpdate(new ServerBinaryModel(model, value));
-    }
-
-    private void executeUpdate(final ServerBinaryModel... binaryModels) {
-        try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.MAIN_WINDOW_ID) {
-                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            }
-            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
-            for (final ServerBinaryModel model : binaryModels) {
-                writer.writeModel(model);
-            }
-        } catch (final IOException e) {
-            // TODO Error ???
-        }
-    }
-
-    protected void writeUpdate(final ModelWriterCallback callback) {
+    private void writeUpdate(final ModelWriterCallback callback) {
         try (final ModelWriter writer = Txn.getWriter()) {
             if (windowID != PWindow.MAIN_WINDOW_ID) {
                 writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
