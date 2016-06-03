@@ -31,8 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -119,7 +117,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     public void init(final int ID, final RequestBuilder requestBuilder) {
-        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
+        if (log.isLoggable(Level.INFO))
+            log.info("Init request builder");
 
         UIBuilder.sessionID = ID;
         this.requestBuilder = requestBuilder;
@@ -153,13 +152,15 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     public void onCommunicationError(final Throwable exception) {
         rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
-        if (pendingClose) return;
+        if (pendingClose)
+            return;
 
         if (loadingMessageBox == null) {
             // First load failed
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0) return;
+                if (codeException.getStatusCode() == 0)
+                    return;
             }
             log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application", exception);
             return;
@@ -275,7 +276,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
         final PTObject ptObject = uiFactory.newUIObject(this, widgetType);
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
             ptObject.create(buffer, objectIdValue, this);
             objectByID.put(objectIdValue, ptObject);
         } else {
@@ -290,7 +292,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final int parentId = buffer.getBinaryModel().getIntValue();
         final PTObject parentObject = getPTObject(parentId);
         if (parentObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
         } else {
             log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId);
@@ -303,12 +306,14 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         do {
             binaryModel = buffer.getBinaryModel();
             if (!BinaryModel.NULL.equals(binaryModel)) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
+                if (log.isLoggable(Level.FINE))
+                    log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
                 result = ptObject.update(buffer, binaryModel);
             }
         } while (result && buffer.hasRemaining());
 
-        if (!result) buffer.rewind(binaryModel);
+        if (!result)
+            buffer.rewind(binaryModel);
     }
 
     private void processRemove(final ReaderBuffer buffer, final int objectId) {
@@ -322,14 +327,16 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             parentObject = getPTObject(parentId);
 
         if (parentObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove : " + ptObject);
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Remove : " + ptObject);
             parentObject.remove(buffer, ptObject, this);
         } else
             log.warning("Cannot remove a garbaged object #" + objectId);
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add handler " + handlerModel);
+        if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, "Add handler " + handlerModel);
         if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel, this);
         } else {
@@ -345,19 +352,22 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove handler : " + ptObject);
+            if (log.isLoggable(Level.FINE))
+                log.log(Level.FINE, "Remove handler : " + ptObject);
             ptObject.removeHandler(buffer, this);
         }
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + token);
+        if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, "History instruction : " + token);
         final String oldToken = History.getToken();
 
         // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.getBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
-            if (fireEvents) History.fireCurrentHistoryState();
+            if (fireEvents)
+                History.fireCurrentHistoryState();
         } else {
             History.newItem(token, fireEvents);
         }
@@ -365,19 +375,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void processClose(final ReaderBuffer buffer) {
         pendingClose = true;
-        sendDataToServer(buffer);
-
+        // sendDataToServer(buffer);
         PTWindowManager.closeAll();
-
-        // TODO nciaravola no need
-
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                PonySDK.reload();
-            }
-        });
+        Window.Location.reload();
     }
 
     private void processGC(final int objectId) {
@@ -390,14 +390,16 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     protected void updateIncomingSeqNum(final long receivedSeqNum) {
         final long previous = lastReceived;
-        if (previous + 1 != receivedSeqNum) log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
+        if (previous + 1 != receivedSeqNum)
+            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
         lastReceived = receivedSeqNum;
     }
 
     public PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
-        if (uiObject != null) objectIDByWidget.remove(uiObject);
+        if (uiObject != null)
+            objectIDByWidget.remove(uiObject);
         return ptObject;
     }
 
@@ -409,7 +411,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     public void flushEvents() {
-        if (stackedInstructions.isEmpty()) return;
+        if (stackedInstructions.isEmpty())
+            return;
 
         sendDataToServer(stackedInstructions);
 
@@ -420,7 +423,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
-                if (source != null) log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
+                if (source != null)
+                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
             }
         }
         sendDataToServer(instruction);
@@ -464,14 +468,16 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             requestData.put(ClientToServerModel.APPLICATION_ERRORS, errors);
         }
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
+        if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData);
     }
 
     private Timer scheduleLoadingMessageBox() {
 
-        if (loadingMessageBox == null) return null;
+        if (loadingMessageBox == null)
+            return null;
 
         final Timer timer = new Timer() {
 
@@ -499,7 +505,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 @Override
                 public void onClick(final ClickEvent event) {
                     History.newItem("");
-                    PonySDK.reload();
+                    Window.Location.reload();
                 }
             });
 
@@ -545,13 +551,15 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     public PTObject getPTObject(final int id) {
         final PTObject ptObject = objectByID.get(id);
-        if (ptObject == null) log.warning("PTObject #" + id + " not found");
+        if (ptObject == null)
+            log.warning("PTObject #" + id + " not found");
         return ptObject;
     }
 
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
-        if (objectID != null) return getPTObject(objectID);
+        if (objectID != null)
+            return getPTObject(objectID);
         return null;
     }
 
@@ -563,12 +571,14 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     @Override
     public void onHttpRequestSend(final HttpRequestSendEvent event) {
         numberOfrequestInProgress++;
-        if (timer == null) timer = scheduleLoadingMessageBox();
+        if (timer == null)
+            timer = scheduleLoadingMessageBox();
     }
 
     @Override
     public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
+        if (numberOfrequestInProgress > 0)
+            numberOfrequestInProgress--;
         hideLoadingMessageBox();
     }
 
@@ -606,17 +616,12 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     // FIXME REMOVE
     @Deprecated
-    public void processInstruction(final PTInstruction instruction) throws Exception {
-        log.severe("Deprecated UIBuilder#processInstruction() method, don't use it : " + instruction);
-    }
-
-    // FIXME REMOVE
-    @Deprecated
     public void executeInstruction(final JavaScriptObject jso) {
         final JSONObject data = new JSONObject(jso);
 
         JSONArray jsonArray = data.isArray();
-        if (jsonArray == null) jsonArray = data.isObject().get(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
+        if (jsonArray == null)
+            jsonArray = data.isObject().get(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
