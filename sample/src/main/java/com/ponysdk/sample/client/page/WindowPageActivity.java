@@ -152,7 +152,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             super(null, name, features);
         }
 
-        //@Override
+        // @Override
         protected void onLoad() {
             rootLayoutPanel = PRootLayoutPanel.get();
 
@@ -175,14 +175,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
                     }
                 }
             });
-            final PButton postMessage = new PButton("Post message");
-            postMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    MyWindow.this.postOpenerCommand(new SayHelloCommand());
-                }
-            });
             final PButton execJs = new PButton("Exec javascript");
             execJs.addClickHandler(new PClickHandler() {
 
@@ -193,17 +185,8 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             });
             flow.add(addMessage);
             flow.add(clearMessage);
-            flow.add(postMessage);
             flow.add(execJs);
             rootLayoutPanel.add(flow);
-        }
-
-        private class SayHelloCommand implements Runnable {
-
-            @Override
-            public void run() {
-                PNotificationManager.showHumanizedNotification("Hello from popup");
-            }
         }
 
     }
