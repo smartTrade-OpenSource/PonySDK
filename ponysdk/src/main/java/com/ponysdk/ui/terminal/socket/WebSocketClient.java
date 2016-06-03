@@ -104,11 +104,13 @@ public class WebSocketClient implements EventListener {
 
                 try {
                     final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-                    // Get the first element on the message, always a key of element of the Model enum
+                    // Get the first element on the message, always a key of
+                    // element of the Model enum
                     final BinaryModel type = buffer.getBinaryModel();
 
                     if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
+                        if (log.isLoggable(Level.FINE))
+                            log.log(Level.FINE, "Heart beat");
                         sendHeartbeat();
                     } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
                         callback.message(buffer);
@@ -123,14 +125,6 @@ public class WebSocketClient implements EventListener {
     }
 
     private void sendHeartbeat() {
-        // Only send one character, no need a json message
-        /*
-         * final JSONObject jsonObject = new JSONObject();
-         * jsonObject.put(Model.HEARTBEAT.toStringValue(), JSONNull.getInstance());
-         * jsonObject.put(Model.APPLICATION_VIEW_ID.toStringValue(), new
-         * JSONNumber(UIBuilder.sessionID));
-         * send(jsonObject.toString());
-         */
         send(ClientToServerModel.HEARTBEAT.toStringValue());
     }
 
