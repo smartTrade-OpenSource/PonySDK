@@ -95,8 +95,6 @@ public class PScheduler implements UIContextListener {
         private ScheduledFuture<?> future;
         private final boolean repeated;
 
-        long a = 0;
-
         UIRunnable(final Runnable runnable, final boolean repeated) {
             this.uiContext = UIContext.get();
             this.runnable = runnable;
@@ -130,10 +128,6 @@ public class PScheduler implements UIContextListener {
             try {
                 begin();
                 try {
-                    a++;
-                    if (a % 2000 == 0) {
-                        log.info("#####################    TASK in EXECUTION ##########");
-                    }
                     final Txn txn = Txn.get();
                     txn.begin(uiContext.getContext());
                     try {
@@ -178,8 +172,6 @@ public class PScheduler implements UIContextListener {
 
     private void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUiContext();
-        log.info("#####################    REGISTER TASK FOR UICONTEX {} ##########", uiContext.getID());
-
         uiContext.addUIContextListener(this);
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
@@ -192,7 +184,6 @@ public class PScheduler implements UIContextListener {
     @Override
     public void onUIContextDestroyed(final UIContext uiContext) {
         final Set<UIRunnable> runnables = runnablesByUIContexts.remove(uiContext);
-        log.info("#####################    REMOVE TASK FOR UICONTEX {} / TASKS {} ##########", uiContext.getID(), runnables.size());
         if (runnables != null) {
             runnables.forEach(runnable -> runnable.cancel());
         }

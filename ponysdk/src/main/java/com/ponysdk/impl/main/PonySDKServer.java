@@ -54,7 +54,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -69,7 +69,7 @@ public class PonySDKServer {
 
         final GzipHandler gzip = new GzipHandler();
         final HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { context });
+        handlers.setHandlers(new Handler[]{context});
         gzip.setHandler(handlers);
 
         server.setHandler(gzip);
@@ -161,7 +161,7 @@ public class PonySDKServer {
     }
 
     public void stop() throws Exception {
-        if (server != null) server.stop();
+        server.stop();
     }
 
     public void setApplicationLoader(final ApplicationLoader applicationLoader) {
