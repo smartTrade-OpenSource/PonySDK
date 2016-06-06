@@ -1,0 +1,36 @@
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
+allprojects{
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    version = '1.0.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'com.ponysdk'
+                artifactId project.name
+
+                from components.java
+            }
+        }
+    }
+}
+
+
