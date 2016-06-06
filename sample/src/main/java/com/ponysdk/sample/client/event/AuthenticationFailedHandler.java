@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public interface AuthenticationFailedHandler extends EventHandler {
 
-    public void onAuthenticationFailed(AuthenticationFailedEvent event);
+    void onAuthenticationFailed(AuthenticationFailedEvent event);
 }

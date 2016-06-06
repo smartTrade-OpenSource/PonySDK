@@ -1,8 +1,8 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 
 public interface MenuView extends IsPWidget, HasPSelectionHandlers<MenuItem> {
 

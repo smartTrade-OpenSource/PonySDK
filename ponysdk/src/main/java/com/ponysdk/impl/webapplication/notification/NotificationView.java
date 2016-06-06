@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
 
 public interface NotificationView extends IsPWidget, PAcceptsOneWidget {
 

@@ -11,7 +11,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="applicationManagerOption" ref="applicationManagerOption" />
 	</bean>
 
-	<bean name="applicationManagerOption" class="com.ponysdk.core.ApplicationManagerOption">
+	<bean name="applicationManagerOption" class="com.ponysdk.core.server.application.ApplicationManagerOption">
 		<property name="applicationID" value="sample" />
 		<property name="applicationName" value="sample" />
 		<property name="applicationDescription" value="sample" />
@@ -21,7 +21,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
-                <value>script/bootstrap.js</value>
+				<value>script/encoding.js</value>
+				<value>script/bootstrap.js</value>
                 <value>script/widget.js</value>
                 <value>script/sample.js</value>
             </list>

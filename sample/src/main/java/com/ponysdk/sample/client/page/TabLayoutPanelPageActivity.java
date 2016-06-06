@@ -25,23 +25,23 @@ package com.ponysdk.sample.client.page;
 
 import java.util.Arrays;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTabLayoutPanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.server.rich.PNotificationManager;
-import com.ponysdk.ui.terminal.PUnit;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 

@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.basic.PSimplePanel;
 
 public interface PageView extends IsPWidget, PAcceptsOneWidget {
 

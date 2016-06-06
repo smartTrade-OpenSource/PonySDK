@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.ui.activity.AbstractActivity;
 
 public class EmptyPageActivity extends AbstractActivity<PageView> {
 

@@ -43,7 +43,7 @@ public enum RenderingEngine {
 
     String name;
 
-    private RenderingEngine(final String name) {
+    RenderingEngine(final String name) {
         this.name = name;
     }
 

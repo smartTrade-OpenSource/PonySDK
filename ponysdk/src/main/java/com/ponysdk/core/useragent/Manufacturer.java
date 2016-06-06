@@ -91,7 +91,7 @@ public enum Manufacturer {
     private final byte id;
     private final String name;
 
-    private Manufacturer(final int id, final String name) {
+    Manufacturer(final int id, final String name) {
         this.id = (byte) id;
         this.name = name;
     }

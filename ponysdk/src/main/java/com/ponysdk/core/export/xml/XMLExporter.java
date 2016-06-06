@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;

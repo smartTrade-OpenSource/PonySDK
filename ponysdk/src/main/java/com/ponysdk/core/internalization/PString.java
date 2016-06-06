@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.ponysdk.core.UIContext;
+import com.ponysdk.core.server.application.UIContext;
 
 public class PString {
 

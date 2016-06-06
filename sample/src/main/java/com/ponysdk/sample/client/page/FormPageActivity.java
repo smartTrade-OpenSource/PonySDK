@@ -23,28 +23,28 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.form.Form;
-import com.ponysdk.ui.server.form.FormFieldComponent;
-import com.ponysdk.ui.server.form.FormFieldComponent.CaptionOrientation;
-import com.ponysdk.ui.server.form.formfield.CheckBoxFormField;
-import com.ponysdk.ui.server.form.formfield.DateBoxFormField;
-import com.ponysdk.ui.server.form.formfield.StringListBoxFormField;
-import com.ponysdk.ui.server.form.formfield.StringTextBoxFormField;
-import com.ponysdk.ui.server.form.validator.CompositeFieldValidator;
-import com.ponysdk.ui.server.form.validator.DoubleFieldValidator;
-import com.ponysdk.ui.server.form.validator.EmailFieldValidator;
-import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
-import com.ponysdk.ui.server.form.validator.TwinFieldValidator;
-import com.ponysdk.ui.server.form.validator.UncheckedFieldValidator;
-import com.ponysdk.ui.server.rich.PNotificationManager;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.FormFieldComponent;
+import com.ponysdk.core.ui.form.FormFieldComponent.CaptionOrientation;
+import com.ponysdk.core.ui.form.formfield.CheckBoxFormField;
+import com.ponysdk.core.ui.form.formfield.DateBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.validator.CompositeFieldValidator;
+import com.ponysdk.core.ui.form.validator.DoubleFieldValidator;
+import com.ponysdk.core.ui.form.validator.EmailFieldValidator;
+import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.core.ui.form.validator.TwinFieldValidator;
+import com.ponysdk.core.ui.form.validator.UncheckedFieldValidator;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FormPageActivity extends SamplePageActivity {
 

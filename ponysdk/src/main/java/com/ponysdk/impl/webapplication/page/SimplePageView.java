@@ -23,8 +23,8 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
 
 public class SimplePageView extends PSimpleLayoutPanel implements PageView {
 

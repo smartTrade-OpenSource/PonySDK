@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.SystemEvent;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.SystemEvent;
 import com.ponysdk.sample.client.datamodel.User;
 
 public class AuthenticationSucceedEvent extends SystemEvent<AuthenticationSucceedHandler> {

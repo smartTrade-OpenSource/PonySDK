@@ -23,14 +23,8 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.terminal.PUnit;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.*;
 
 public class DefaultPageView implements PageView {
 

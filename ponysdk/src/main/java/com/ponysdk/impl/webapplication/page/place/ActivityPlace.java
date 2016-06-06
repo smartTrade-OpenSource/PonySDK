@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.activity.Activity;
+import com.ponysdk.core.ui.activity.Activity;
 
 public class ActivityPlace extends PagePlace implements HasActivity {
 

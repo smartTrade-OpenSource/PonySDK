@@ -5,11 +5,11 @@ document.onConnectionLostListeners = [];
 
 document.onPonyLoaded = function(callback) {
 	document.onPonyLoadedListeners.push(callback);
-}
+};
 
 document.onConnectionLost = function(callback) {
 	document.onConnectionLostListeners.push(callback);
-}
+};
 
 window.webappsdk = {};
 var reconnectionInProgress = false;
@@ -34,7 +34,7 @@ Check.prototype = {
                         if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
                         else reconnectionCheck.onCheckError();
                     }
-                }
+                };
 
                 xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
                 xmlhttp.send();
@@ -93,9 +93,15 @@ Check.prototype = {
             reconnectionCheck.currentInitCheck = setTimeout(reconnectionCheck.initCheck, reconnectionCheck.delay_heartbeat);
         }
     }
-}
+};
 
 var reconnectionCheck;
+
+var textDecoder = new TextDecoder('utf-8')
+
+function decode(buffer) {
+    return textDecoder.decode(new Uint8Array(buffer));
+}
 
 function onPonySDKModuleLoaded() {
 	console.log("onPonySDKModuleLoaded");

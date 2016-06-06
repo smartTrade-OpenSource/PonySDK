@@ -23,8 +23,9 @@
 
 package com.ponysdk.core;
 
-import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 public class StreamResource {
 

@@ -26,12 +26,10 @@ package com.ponysdk.impl.webapplication.notification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class LogConsolePanel extends PScrollPanel {
 
@@ -44,7 +42,6 @@ public class LogConsolePanel extends PScrollPanel {
     protected PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     public LogConsolePanel(final String caption) {
-        // addStyleName(PonySDKTheme.LOG_CONSOLE);
         setSizeFull();
 
         content.setSizeFull();
@@ -52,24 +49,14 @@ public class LogConsolePanel extends PScrollPanel {
 
         initActionPanel();
         logsPanel.setSizeFull();
-        // logsPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_LOGS);
         content.add(actionPanel);
         content.add(logsPanel);
     }
 
     private void initActionPanel() {
         actionPanel = new PHorizontalPanel();
-        // actionPanel.addStyleName(PonySDKTheme.LOG_CONSOLE_ACTIONS);
-
         final PAnchor clearLogs = new PAnchor("Clear logs");
-
-        clearLogs.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                logsPanel.clear();
-            }
-        });
+        clearLogs.addClickHandler(event -> logsPanel.clear());
         actionPanel.add(clearLogs);
     }
 

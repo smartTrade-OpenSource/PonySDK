@@ -23,18 +23,18 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PEvent;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PContextMenuEvent;
-import com.ponysdk.ui.server.basic.event.PContextMenuHandler;
-import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
-import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
-import com.ponysdk.ui.server.basic.event.PMouseEvent;
-import com.ponysdk.ui.server.rich.PNotificationManager;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PEvent;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
+import com.ponysdk.core.ui.basic.event.PContextMenuHandler;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
+import com.ponysdk.core.ui.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class HTMLPageActivity extends SamplePageActivity {
 

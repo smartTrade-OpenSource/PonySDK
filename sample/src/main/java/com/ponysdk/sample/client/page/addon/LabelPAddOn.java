@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.page.addon;
 
-import com.ponysdk.ui.server.basic.PAddOn;
-import com.ponysdk.ui.server.basic.PAddOn.Javascript;
-import com.ponysdk.ui.server.basic.PElement;
+import com.ponysdk.core.ui.basic.PAddOn;
+import com.ponysdk.core.ui.basic.PAddOn.Javascript;
+import com.ponysdk.core.ui.basic.PElement;
 
 @Javascript("st-label")
 public class LabelPAddOn extends PAddOn<PElement> {

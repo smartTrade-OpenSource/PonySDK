@@ -21,12 +21,12 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.servlet.ApplicationLoader;
-import com.ponysdk.core.servlet.BootstrapServlet;
-import com.ponysdk.core.servlet.ServletContextFilter;
-import com.ponysdk.core.servlet.StreamServiceServlet;
-import com.ponysdk.core.servlet.WebSocketServlet;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.ApplicationLoader;
+import com.ponysdk.core.server.servlet.BootstrapServlet;
+import com.ponysdk.core.server.servlet.ServletContextFilter;
+import com.ponysdk.core.server.servlet.StreamServiceServlet;
+import com.ponysdk.core.server.servlet.WebSocketServlet;
 
 public class PonySDKServer {
 

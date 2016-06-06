@@ -25,14 +25,10 @@ package com.ponysdk.impl.main;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.statistic.TerminalDataReceiver;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PElement;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PRootPanel;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 
 public class BasicEntryPoint implements EntryPoint {
 
@@ -77,7 +73,7 @@ public class BasicEntryPoint implements EntryPoint {
         // button.addClickHandler(new PClickHandler() {
         //
         // @Override
-        // public void onClick(final PClickEvent event) {
+        // public void onClick(final PClickEvent eventbus) {
         // button.setText("" + System.currentTimeMillis());
         // }
         // });
@@ -97,8 +93,8 @@ public class BasicEntryPoint implements EntryPoint {
         // textBox.addValueChangeHandler(new PValueChangeHandler<String>() {
         //
         // @Override
-        // public void onValueChange(final PValueChangeEvent<String> event) {
-        // System.err.println("On value Changed : " + event.getValue());
+        // public void onValueChange(final PValueChangeEvent<String> eventbus) {
+        // System.err.println("On value Changed : " + eventbus.getValue());
         // }
         // });
 
@@ -209,12 +205,6 @@ public class BasicEntryPoint implements EntryPoint {
         // System.err.println("Time to flush : " + (stop - start));
 
         // uiContext.getHistory().newItem("", false);
-    }
-
-    @Override
-    public void restart(final UIContext uiContext) {
-        start(uiContext);
-        // session.getHistory().newItem("", false);
     }
 
 }

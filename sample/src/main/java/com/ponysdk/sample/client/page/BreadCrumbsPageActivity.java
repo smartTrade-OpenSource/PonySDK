@@ -23,16 +23,16 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.server.rich.PBreadCrumbs;
-import com.ponysdk.ui.server.rich.PNotificationManager;
-import com.ponysdk.ui.server.rich.PBreadCrumbs.ItemLevel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.rich.PBreadCrumbs;
+import com.ponysdk.core.ui.rich.PNotificationManager;
+import com.ponysdk.core.ui.rich.PBreadCrumbs.ItemLevel;
 
 public class BreadCrumbsPageActivity extends SamplePageActivity {
 

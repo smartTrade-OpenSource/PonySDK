@@ -30,72 +30,72 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.concurrent.PScheduler;
-import com.ponysdk.core.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.statistic.TerminalDataReceiver;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LabelPAddOn;
-import com.ponysdk.ui.server.basic.PAbsolutePanel;
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PCookies;
-import com.ponysdk.ui.server.basic.PDateBox;
-import com.ponysdk.ui.server.basic.PDatePicker;
-import com.ponysdk.ui.server.basic.PDecoratedPopupPanel;
-import com.ponysdk.ui.server.basic.PDecoratorPanel;
-import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PDisclosurePanel;
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PElement;
-import com.ponysdk.ui.server.basic.PFileUpload;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PFocusPanel;
-import com.ponysdk.ui.server.basic.PGrid;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PHeaderPanel;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PLayoutPanel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PMenuBar;
-import com.ponysdk.ui.server.basic.PMenuItem;
-import com.ponysdk.ui.server.basic.PObject;
-import com.ponysdk.ui.server.basic.PPasswordTextBox;
-import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PPushButton;
-import com.ponysdk.ui.server.basic.PRadioButton;
-import com.ponysdk.ui.server.basic.PRichTextArea;
-import com.ponysdk.ui.server.basic.PRichTextToolbar;
-import com.ponysdk.ui.server.basic.PRootPanel;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
-import com.ponysdk.ui.server.basic.PStackLayoutPanel;
-import com.ponysdk.ui.server.basic.PTabLayoutPanel;
-import com.ponysdk.ui.server.basic.PTabPanel;
-import com.ponysdk.ui.server.basic.PTextArea;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PTree;
-import com.ponysdk.ui.server.basic.PTreeItem;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
-import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
-import com.ponysdk.ui.server.rich.PToolbar;
-import com.ponysdk.ui.server.rich.PTwinListBox;
-import com.ponysdk.ui.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PDecoratedPopupPanel;
+import com.ponysdk.core.ui.basic.PDecoratorPanel;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PDisclosurePanel;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFocusPanel;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PHeaderPanel;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PImage;
+import com.ponysdk.core.ui.basic.PKeyCodes;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PLayoutPanel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PMenuItem;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PPasswordTextBox;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PPushButton;
+import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PRichTextToolbar;
+import com.ponysdk.core.ui.basic.PRootPanel;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabPanel;
+import com.ponysdk.core.ui.basic.PTextArea;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.rich.PToolbar;
+import com.ponysdk.core.ui.rich.PTwinListBox;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -110,6 +110,80 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 System.err.println(object + " : " + instruction);
             }
         });
+
+        final PFlowPanel flowPanel = new PFlowPanel();
+        PRootPanel.get().add(flowPanel);
+
+        final PElement label1 = new PElement("div");
+        final PElement label2 = new PElement("div");
+        final PElement label3 = new PElement("div");
+        final PElement label4 = new PElement("div");
+        final PElement label5 = new PElement("div");
+        final PElement label6 = new PElement("div");
+        final PElement label7 = new PElement("div");
+        final PElement label8 = new PElement("div");
+        final PElement label9 = new PElement("div");
+        final PElement label10 = new PElement("div");
+        final PElement label11 = new PElement("div");
+        final PElement label12 = new PElement("div");
+        final PElement label13 = new PElement("div");
+        final PElement label14 = new PElement("div");
+        final PElement label15 = new PElement("div");
+        final PElement label16 = new PElement("div");
+        final PElement label17 = new PElement("div");
+        final PElement label18 = new PElement("div");
+        final PElement label19 = new PElement("div");
+        final PElement label20 = new PElement("div");
+
+        flowPanel.add(label1);
+        flowPanel.add(label2);
+        flowPanel.add(label3);
+        flowPanel.add(label4);
+        flowPanel.add(label5);
+        flowPanel.add(label6);
+        flowPanel.add(label7);
+        flowPanel.add(label8);
+        flowPanel.add(label9);
+        flowPanel.add(label10);
+        flowPanel.add(label11);
+        flowPanel.add(label12);
+        flowPanel.add(label13);
+        flowPanel.add(label14);
+        flowPanel.add(label15);
+        flowPanel.add(label16);
+        flowPanel.add(label17);
+        flowPanel.add(label18);
+        flowPanel.add(label19);
+        flowPanel.add(label20);
+
+        PScheduler.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                label1.setInnerHTML("<div style='color:red'>" + "gros pédé ô ç " + "</div>");
+                label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
+                label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label5.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
+                label6.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label7.setInnerHTML("<div style='color:orange'>" + System.nanoTime() + "</div>");
+                label8.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label9.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label10.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label11.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label12.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label13.setInnerHTML("<div style='color:green'>" + System.nanoTime() + "</div>");
+                label14.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label15.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label16.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label17.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label18.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label19.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+                label20.setInnerHTML("<div style='color:yellow'>" + System.nanoTime() + "</div>");
+            }
+        }, Duration.ofMillis(5));
+
+        if (true) return;
 
         final PWindow window = new PWindow(null, "a", null);
         window.open();
@@ -251,7 +325,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -275,7 +349,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -308,14 +382,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
+        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
-    }
-
-    @Override
-    public void restart(final UIContext uiContext) {
-        start(uiContext);
-        // session.getHistory().newItem("", false);
     }
 
     @Override

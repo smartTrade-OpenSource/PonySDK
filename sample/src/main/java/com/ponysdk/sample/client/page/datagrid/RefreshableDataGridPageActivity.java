@@ -25,20 +25,20 @@ package com.ponysdk.sample.client.page.datagrid;
 
 import java.util.Arrays;
 
-import com.ponysdk.core.UIContext;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.sample.client.page.SamplePageActivity;
-import com.ponysdk.ui.server.basic.DataListener;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
-import com.ponysdk.ui.server.list.refreshable.Cell;
-import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
-import com.ponysdk.ui.server.list.valueprovider.IdentityValueProvider;
+import com.ponysdk.core.ui.basic.DataListener;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.refreshable.Cell;
+import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 
 public class RefreshableDataGridPageActivity extends SamplePageActivity implements DataListener {
 

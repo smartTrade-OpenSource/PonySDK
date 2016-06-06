@@ -27,7 +27,7 @@ import java.util.Collection;
 
 public interface PageProvider {
 
-    public PageActivity getPageActivity(String pageName);
+    PageActivity getPageActivity(String pageName);
 
-    public Collection<PageActivity> getPageActivities();
+    Collection<PageActivity> getPageActivities();
 }

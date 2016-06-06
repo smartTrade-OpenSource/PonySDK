@@ -101,7 +101,7 @@ Widget.prototype.update = function( d ) {
 };
 
 Widget.new = function(javaClass, obj) {
-	var clazz = function(name, a, b) { Widget.call(this, name, a, b); }
+	var clazz = function(name, a, b) { Widget.call(this, name, a, b); };
 	obj.__proto__ = Object.create( Widget.prototype );
 	clazz.prototype = Object.create( obj );
 	clazz.prototype.javaClass = javaClass;
@@ -128,7 +128,7 @@ Widget.registerBindedWidget = function(className, jsClass) {
 			}
 		}
 		return addon;
-	}
+	};
 	if(document.ponyLoaded) {
 		pony.registerAddOnFactory(className, callback);
 	} else {

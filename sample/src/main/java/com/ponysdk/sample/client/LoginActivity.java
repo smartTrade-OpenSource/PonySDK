@@ -23,16 +23,16 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
-import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PKeyPressEvent;
-import com.ponysdk.ui.server.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.PKeyCodes;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
 
 public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
 

@@ -23,8 +23,10 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.activity.Activity;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.footer.FooterActivity;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
 import com.ponysdk.impl.webapplication.menu.MenuActivity;
@@ -33,7 +35,6 @@ import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
 import com.ponysdk.impl.webapplication.page.place.HasActivity;
 import com.ponysdk.impl.webapplication.page.place.HasPageName;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
 
 public class ApplicationActivity implements Activity {
 
@@ -72,7 +73,7 @@ public class ApplicationActivity implements Activity {
             final HasPageName pagePlace = (HasPageName) place;
             final PageActivity pageActivity = pageProvider.getPageActivity(pagePlace.getPageName());
 
-            if (!com.ponysdk.core.security.SecurityManager.checkPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
+            if (!UIContext.hasPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
 
             if (currentPageActivity != null) {
                 currentPageActivity.leave();

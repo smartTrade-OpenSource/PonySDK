@@ -2,9 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/build/build.iml" filepath="$PROJECT_DIR$/build/build.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ponysdk/ponysdk.iml" filepath="$PROJECT_DIR$/ponysdk/ponysdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PonySDK.iml" filepath="$PROJECT_DIR$/.idea/modules/PonySDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk.iml" filepath="$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk.iml" group="ponysdk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk_main.iml" filepath="$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk_main.iml" group="ponysdk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk_test.iml" filepath="$PROJECT_DIR$/.idea/modules/ponysdk/ponysdk_test.iml" group="ponysdk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/sample.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/sample.iml" group="sample" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/sample_main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/sample_main.iml" group="sample" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/sample_test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/sample_test.iml" group="sample" />
     </modules>
   </component>
 </project>

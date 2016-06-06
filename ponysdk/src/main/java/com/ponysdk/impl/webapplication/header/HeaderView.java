@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.webapplication.header;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public interface HeaderView extends IsPWidget, PAcceptsOneWidget {
 

@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
-import com.ponysdk.core.event.EventHandler;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.sample.client.event.DemoBusinessEvent.DemoBusinessEventHandler;
 
 public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
@@ -47,7 +47,7 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
     }
 
     @Override
-    public com.ponysdk.core.event.Event.Type<DemoBusinessEventHandler> getAssociatedType() {
+    public com.ponysdk.core.ui.eventbus.Event.Type<DemoBusinessEventHandler> getAssociatedType() {
         return TYPE;
     }
 

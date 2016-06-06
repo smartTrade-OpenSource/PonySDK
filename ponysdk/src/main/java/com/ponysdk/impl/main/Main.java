@@ -25,10 +25,10 @@ package com.ponysdk.impl.main;
 
 import java.util.Arrays;
 
-import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.servlet.ApplicationLoader;
-import com.ponysdk.core.servlet.JavaApplicationLoader;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.server.servlet.ApplicationLoader;
+import com.ponysdk.core.server.servlet.JavaApplicationLoader;
 
 public class Main {
 

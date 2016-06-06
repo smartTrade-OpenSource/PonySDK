@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.ponysdk.core.server.application.UIContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class DefaultPageProvider implements PageProvider {
     private void initPagePermissions() {
         allActivePageActivities = new LinkedHashMap<>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
-            if (com.ponysdk.core.security.SecurityManager.checkPermission(entry.getValue().getPermission())) {
+            if (UIContext.hasPermission(entry.getValue().getPermission())) {
                 allActivePageActivities.put(entry.getKey(), entry.getValue());
             } else {
                 log.info("Permission " + entry.getValue().getPermission() + " not found for the page activity  #" + entry.getKey());

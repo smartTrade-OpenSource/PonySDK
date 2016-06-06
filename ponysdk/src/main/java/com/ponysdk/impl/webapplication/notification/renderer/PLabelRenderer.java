@@ -1,8 +1,8 @@
 
 package com.ponysdk.impl.webapplication.notification.renderer;
 
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public class PLabelRenderer implements NotificationTypeRenderer<String> {
 

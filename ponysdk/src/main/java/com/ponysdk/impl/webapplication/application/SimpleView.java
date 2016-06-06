@@ -23,11 +23,11 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
-import com.ponysdk.ui.terminal.PUnit;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
 
 public class SimpleView extends PDockLayoutPanel implements ApplicationView {
 

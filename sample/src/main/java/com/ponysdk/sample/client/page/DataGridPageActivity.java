@@ -26,53 +26,53 @@ package com.ponysdk.sample.client.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.query.Query;
+import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
-import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.server.form.Form;
-import com.ponysdk.ui.server.form.FormFieldComponent;
-import com.ponysdk.ui.server.form.event.SubmitFormEvent;
-import com.ponysdk.ui.server.form.event.SubmitFormHandler;
-import com.ponysdk.ui.server.form.formfield.IntegerTextBoxFormField;
-import com.ponysdk.ui.server.form.formfield.ListBoxFormField;
-import com.ponysdk.ui.server.form.formfield.StringTextBoxFormField;
-import com.ponysdk.ui.server.form.formfield.TextBoxFormField;
-import com.ponysdk.ui.server.form.validator.IntegerFieldValidator;
-import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
-import com.ponysdk.ui.server.list.DataGridActivity;
-import com.ponysdk.ui.server.list.DataGridColumnDescriptor;
-import com.ponysdk.ui.server.list.DefaultSimpleListView;
-import com.ponysdk.ui.server.list.dataprovider.RemoteDataProvider;
-import com.ponysdk.ui.server.list.paging.DefaultPagerView;
-import com.ponysdk.ui.server.list.paging.Pager;
-import com.ponysdk.ui.server.list.refreshable.Cell;
-import com.ponysdk.ui.server.list.renderer.cell.CellRenderer;
-import com.ponysdk.ui.server.list.renderer.cell.LabelCellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.ComplexHeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.FilterableHeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.HeaderCellRenderer;
-import com.ponysdk.ui.server.list.renderer.header.StringHeaderCellRenderer;
-import com.ponysdk.ui.server.list.selector.CompositeSelectorView;
-import com.ponysdk.ui.server.list.selector.DefaultActionSelectorView;
-import com.ponysdk.ui.server.list.selector.DefaultInfoSelectorView;
-import com.ponysdk.ui.server.list.selector.Selector;
-import com.ponysdk.ui.server.list.selector.SelectorCheckBox;
-import com.ponysdk.ui.server.list.valueprovider.BeanValueProvider;
-import com.ponysdk.ui.server.list.valueprovider.IdentityValueProvider;
-import com.ponysdk.ui.server.rich.PConfirmDialog;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.FormFieldComponent;
+import com.ponysdk.core.ui.form.event.SubmitFormEvent;
+import com.ponysdk.core.ui.form.event.SubmitFormHandler;
+import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.ListBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.TextBoxFormField;
+import com.ponysdk.core.ui.form.validator.IntegerFieldValidator;
+import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.core.ui.list.DataGridActivity;
+import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.DefaultSimpleListView;
+import com.ponysdk.core.ui.list.dataprovider.RemoteDataProvider;
+import com.ponysdk.core.ui.list.paging.DefaultPagerView;
+import com.ponysdk.core.ui.list.paging.Pager;
+import com.ponysdk.core.ui.list.refreshable.Cell;
+import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
+import com.ponysdk.core.ui.list.renderer.cell.LabelCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.ComplexHeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.FilterableHeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.core.ui.list.selector.CompositeSelectorView;
+import com.ponysdk.core.ui.list.selector.DefaultActionSelectorView;
+import com.ponysdk.core.ui.list.selector.DefaultInfoSelectorView;
+import com.ponysdk.core.ui.list.selector.Selector;
+import com.ponysdk.core.ui.list.selector.SelectorCheckBox;
+import com.ponysdk.core.ui.list.valueprovider.BeanValueProvider;
+import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
+import com.ponysdk.core.ui.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler {
 
@@ -313,19 +313,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
                     @Override
                     public boolean onOK(final PDialogBox p) {
-                        if (createPony.isValid()) {
-                            // final Pony pony = new Pony(null, nameFormField.getValue(), ageFormField.getValue(),
-                            // raceFormField.getValue());
-                            // final CreatePonyCommand command = new CreatePonyCommand(pony);
-                            // final Pony newPony = command.execute();
-                            // if (command.isSuccessfull()) {
-                            // final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
-                            // event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
-                            // fireEvent(event);
-                            // }
-                            return true;
-                        }
-                        return false;
+                        return createPony.isValid();
                     }
                 });
 

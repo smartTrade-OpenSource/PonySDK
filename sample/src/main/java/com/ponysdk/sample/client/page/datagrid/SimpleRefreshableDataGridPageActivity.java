@@ -24,14 +24,14 @@
 package com.ponysdk.sample.client.page.datagrid;
 
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.celltable.SimpleTableView;
-import com.ponysdk.ui.server.form.formfield.IntegerTextBoxFormField;
-import com.ponysdk.ui.server.form.formfield.LongTextBoxFormField;
-import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.celltable.SimpleTableView;
+import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 
 public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 

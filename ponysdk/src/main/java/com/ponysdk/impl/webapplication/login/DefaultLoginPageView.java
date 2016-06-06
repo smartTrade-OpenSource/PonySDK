@@ -2,16 +2,9 @@
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPasswordTextBox;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 

@@ -25,6 +25,6 @@ package com.ponysdk.impl.webapplication.page.place;
 
 public interface HasPageName {
 
-    public String getPageName();
+    String getPageName();
 
 }

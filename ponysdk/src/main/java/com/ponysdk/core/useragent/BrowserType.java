@@ -30,7 +30,7 @@ public enum BrowserType {
 
     private String name;
 
-    private BrowserType(final String name) {
+    BrowserType(final String name) {
         this.name = name;
     }
 

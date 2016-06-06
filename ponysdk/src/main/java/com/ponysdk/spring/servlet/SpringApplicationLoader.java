@@ -36,11 +36,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
-import com.ponysdk.core.AbstractApplicationManager;
-import com.ponysdk.core.ApplicationManagerOption;
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.main.EntryPoint;
-import com.ponysdk.core.servlet.AbstractApplicationLoader;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.server.servlet.AbstractApplicationLoader;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 
 public class SpringApplicationLoader extends AbstractApplicationLoader {

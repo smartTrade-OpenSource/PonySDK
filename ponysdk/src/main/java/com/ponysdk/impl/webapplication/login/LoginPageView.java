@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.webapplication.login;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 
 public interface LoginPageView extends IsPWidget {
 

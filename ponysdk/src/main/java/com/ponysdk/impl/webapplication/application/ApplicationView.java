@@ -23,8 +23,9 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PSimplePanel;
+
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PSimplePanel;
 
 public interface ApplicationView extends IsPWidget {
 

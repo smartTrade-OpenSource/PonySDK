@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.activity;
 
-import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.activity.ActivityMapper;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.activity.Activity;
+import com.ponysdk.core.ui.activity.ActivityMapper;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.page.SimplePageView;
 import com.ponysdk.sample.client.place.LoginPlace;
 

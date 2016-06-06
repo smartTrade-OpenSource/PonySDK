@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.header;
 
-import com.ponysdk.core.activity.AbstractActivity;
+import com.ponysdk.core.ui.activity.AbstractActivity;
 
 public class HeaderActivity extends AbstractActivity<HeaderView> {
 

@@ -23,10 +23,10 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.event.BroadcastEventHandler;
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.ui.activity.AbstractActivity;
+import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
+import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 
 public class NotificationActivity extends AbstractActivity<NotificationView> implements BroadcastEventHandler, InitializingActivity {

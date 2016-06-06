@@ -23,12 +23,12 @@
 
 package com.ponysdk.impl.webapplication.login;
 
-import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
-import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.activity.AbstractActivity;
+import com.ponysdk.core.ui.basic.PKeyCodes;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 
 public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPageView> implements PClickHandler {
 

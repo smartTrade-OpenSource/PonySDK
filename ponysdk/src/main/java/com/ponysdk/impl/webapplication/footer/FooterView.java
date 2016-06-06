@@ -23,8 +23,8 @@
 
 package com.ponysdk.impl.webapplication.footer;
 
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 
 public interface FooterView extends IsPWidget, PAcceptsOneWidget {
 

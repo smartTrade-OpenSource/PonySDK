@@ -1,7 +1,7 @@
 
 package com.ponysdk.impl.webapplication.notification.renderer;
 
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public interface NotificationTypeRenderer<T> {
 

@@ -1,8 +1,5 @@
 build
-src-generated
-.gradle
 bin
-classes
 /doc
 /javadoc.xml
 .classpath

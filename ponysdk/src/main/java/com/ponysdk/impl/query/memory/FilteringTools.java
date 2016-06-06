@@ -39,11 +39,11 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.query.Criterion;
-import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Query.QueryMode;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.core.query.SortingType;
+import com.ponysdk.core.server.service.query.Criterion;
+import com.ponysdk.core.server.service.query.Query;
+import com.ponysdk.core.server.service.query.Query.QueryMode;
+import com.ponysdk.core.server.service.query.Result;
+import com.ponysdk.core.server.service.query.SortingType;
 
 public final class FilteringTools {
 
@@ -87,7 +87,7 @@ public final class FilteringTools {
         return data;
     }
 
-    public static final BeanComparator getPropertyComparator(final String propertyName) {
+    public static BeanComparator getPropertyComparator(final String propertyName) {
         return new BeanComparator((null != propertyName) ? propertyName : "name");
     }
 
@@ -115,10 +115,6 @@ public final class FilteringTools {
         };
     }
 
-    public static String emptyIfNull(final String str) {
-        return (str != null) ? str : EMPTY;
-    }
-
     public static List<String> filter(final List<String> datas, final String patternMatching) {
         if (patternMatching == null || datas == null) {
             return datas;
@@ -134,13 +130,12 @@ public final class FilteringTools {
                 // Now we can filter our data against the pattern
                 final String text = normalisePattern(patternMatching.trim());
                 final Pattern pattern = Pattern.compile(REGEX_BEGIN + text + REGEX_END, Pattern.CASE_INSENSITIVE);
-                Matcher matcher = null;
-                matcher = pattern.matcher(data);
-                if ((matcher != null) && matcher.find()) {
+                Matcher matcher = pattern.matcher(data);
+                if (matcher.find()) {
                     validData.add(data);
                 } else {
                     matcher = pattern.matcher("");
-                    if ((matcher != null) && matcher.find()) {
+                    if (matcher.find()) {
                         validData.add(data);
                     }
                 }
@@ -172,29 +167,29 @@ public final class FilteringTools {
                 // Now we can filter our data against the pattern
                 final String text = normalisePattern(value.toString().trim());
                 final Pattern pattern = Pattern.compile(REGEX_BEGIN + text + REGEX_END, Pattern.CASE_INSENSITIVE);
-                Matcher matcher = null;
+                Matcher matcher ;
                 if (val instanceof Collection<?>) {
                     final Collection<?> collection = (Collection<?>) val;
                     for (final Object item : collection) {
                         matcher = pattern.matcher(item.toString());
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                             break;
                         }
                     }
                     if (collection.isEmpty()) {
                         matcher = pattern.matcher("");
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                         }
                     }
                 } else if (val.toString() != null) {
                     matcher = pattern.matcher(val.toString());
-                    if ((matcher != null) && matcher.find()) {
+                    if (matcher.find()) {
                         validData.add(data);
                     } else {
                         matcher = pattern.matcher("");
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                         }
                     }
@@ -220,17 +215,13 @@ public final class FilteringTools {
      * If an attribute is a map, the tokens <code>keys</code> or
      * <code>values</code> can be used to retrieve the corresponding data as a
      * Collection. E.g. <code>attribute1.mapAttribute.keys.attribute2</code>
-     * 
-     * @param <T>
-     *            the type of the data obtained with the propertyPath that is
-     *            tested against the patternName
-     * @param datas
-     *            the list of data to be filtered
-     * @param propertyPath
-     *            the chain of attribute representing a path deep into the data
-     *            objects
-     * @param patternName
-     *            a string used to filter data
+     *
+     * @param <T>          the type of the data obtained with the propertyPath that is
+     *                     tested against the patternName
+     * @param datas        the list of data to be filtered
+     * @param propertyPath the chain of attribute representing a path deep into the data
+     *                     objects
+     * @param patternName  a string used to filter data
      * @return the list of filtered data
      */
     public static <T> List<T> filter(final List<T> datas, final String propertyPath, final String patternName) {
@@ -288,7 +279,7 @@ public final class FilteringTools {
     public static <T> Object getValue(final T currentData, final String[] pathDetails) throws Exception {
         final int lastIndex = pathDetails.length - 1;
         int curIndex = 0;
-        Object val = null;
+        Object val;
         Object tmpVal = PropertyUtils.getProperty(currentData, pathDetails[curIndex]);
         if (tmpVal == null) return null;
         curIndex++;

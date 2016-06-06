@@ -29,12 +29,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.celltable.SimpleTableView;
-import com.ponysdk.ui.server.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.celltable.SimpleTableView;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 
 public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 

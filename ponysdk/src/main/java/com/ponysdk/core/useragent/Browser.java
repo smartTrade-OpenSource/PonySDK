@@ -307,7 +307,7 @@ public enum Browser {
     private List<Browser> children;
     private Pattern versionRegEx;
 
-    private Browser(final Manufacturer manufacturer, final Browser parent, final int versionId, final String name, final String[] aliases, final String[] exclude,
+    Browser(final Manufacturer manufacturer, final Browser parent, final int versionId, final String name, final String[] aliases, final String[] exclude,
             final BrowserType browserType, final RenderingEngine renderingEngine, final String versionRegexString) {
         this.id = (short) ((manufacturer.getId() << 8) + (byte) versionId);
         this.name = name;

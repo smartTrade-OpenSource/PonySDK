@@ -23,20 +23,20 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.query.Query;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PSuggestBox;
-import com.ponysdk.ui.server.basic.PSuggestBox.PMultiWordSuggestOracle;
-import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PSuggestBox;
+import com.ponysdk.core.ui.basic.PSuggestBox.PMultiWordSuggestOracle;
+import com.ponysdk.core.ui.basic.PSuggestOracle.PSuggestion;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
 

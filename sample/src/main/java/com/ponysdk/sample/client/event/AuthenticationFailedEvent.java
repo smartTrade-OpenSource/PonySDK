@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
+import com.ponysdk.core.ui.eventbus.Event;
 
 public class AuthenticationFailedEvent extends BusinessEvent<AuthenticationFailedHandler> {
 

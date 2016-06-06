@@ -26,7 +26,7 @@ package com.ponysdk.core.export;
 import java.io.Serializable;
 import java.util.List;
 
-import com.ponysdk.core.query.Criterion;
+import com.ponysdk.core.server.service.query.Criterion;
 
 public class ExportableData<T> implements Serializable {
 

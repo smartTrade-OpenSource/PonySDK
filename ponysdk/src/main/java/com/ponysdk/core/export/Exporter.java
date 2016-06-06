@@ -5,12 +5,12 @@ import java.util.List;
 
 public interface Exporter<T> {
 
-    public String name();
+    String name();
 
     /**
      * @return custom success message
      * @throws Exception
      */
-    public String export(List<ExportableField> exportableFields, List<T> records) throws Exception;
+    String export(List<ExportableField> exportableFields, List<T> records) throws Exception;
 
 }

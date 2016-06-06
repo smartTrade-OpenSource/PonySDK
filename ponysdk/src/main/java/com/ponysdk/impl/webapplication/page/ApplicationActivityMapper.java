@@ -1,9 +1,9 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.core.activity.Activity;
-import com.ponysdk.core.activity.ActivityMapper;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.activity.Activity;
+import com.ponysdk.core.ui.activity.ActivityMapper;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.application.ApplicationActivity;
 import com.ponysdk.impl.webapplication.page.place.LoginPlace;
 

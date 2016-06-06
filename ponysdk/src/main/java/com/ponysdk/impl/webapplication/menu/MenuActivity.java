@@ -23,14 +23,14 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.activity.AbstractActivity;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.impl.webapplication.page.PageProvider;
 import com.ponysdk.impl.webapplication.page.place.HasPageName;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
 
 public class MenuActivity extends AbstractActivity<MenuView> implements PSelectionHandler<MenuItem> {
 

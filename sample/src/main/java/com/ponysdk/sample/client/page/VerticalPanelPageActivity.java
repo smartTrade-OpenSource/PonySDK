@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class VerticalPanelPageActivity extends SamplePageActivity {
 

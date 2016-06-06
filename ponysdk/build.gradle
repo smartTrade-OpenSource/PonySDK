@@ -140,7 +140,7 @@ javadoc {
 }
 
 task gwtc (dependsOn: classes, type: JavaExec) {
-	inputs.files fileTree('src/main/java/com/ponysdk/ui/terminal')
+	inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
     outputs.files fileTree(gwtOutputDirName)
     description = "GWT compile to JavaScript (production mode)"
     main = 'com.google.gwt.dev.Compiler'
@@ -157,7 +157,7 @@ task gwtc (dependsOn: classes, type: JavaExec) {
         'gwt',
         '-localWorkers',
         Runtime.getRuntime().availableProcessors(),
-        'com.ponysdk.ui.PonyTerminal'
+        'com.ponysdk.core.PonyTerminal'
     ]
  
     maxHeapSize = '512M'

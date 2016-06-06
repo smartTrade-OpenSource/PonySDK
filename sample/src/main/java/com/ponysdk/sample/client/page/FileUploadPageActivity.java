@@ -28,14 +28,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFileUpload;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSubmitCompleteHandler;
-import com.ponysdk.ui.server.rich.PNotificationManager;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FileUploadPageActivity extends SamplePageActivity {
 

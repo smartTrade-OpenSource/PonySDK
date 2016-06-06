@@ -23,10 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PDecoratorPanel;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PDecoratorPanel;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
 
 public class DecoratorPanelPageActivity extends SamplePageActivity {
 

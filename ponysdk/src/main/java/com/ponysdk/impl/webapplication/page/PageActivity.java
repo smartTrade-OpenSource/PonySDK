@@ -26,9 +26,9 @@ package com.ponysdk.impl.webapplication.page;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.ponysdk.core.activity.AbstractActivity;
-import com.ponysdk.core.place.Place;
-import com.ponysdk.core.security.Permission;
+import com.ponysdk.core.ui.activity.AbstractActivity;
+import com.ponysdk.core.ui.place.Place;
+import com.ponysdk.core.server.application.Permission;
 
 public abstract class PageActivity extends AbstractActivity<PageView> implements InitializingActivity {
 

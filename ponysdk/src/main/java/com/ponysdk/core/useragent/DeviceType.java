@@ -30,7 +30,7 @@ public enum DeviceType {
 
     String name;
 
-    private DeviceType(final String name) {
+    DeviceType(final String name) {
         this.name = name;
     }
 

@@ -25,8 +25,8 @@ package com.ponysdk.core.writer;
 
 import java.io.IOException;
 
-import com.ponysdk.core.Parser;
-import com.ponysdk.ui.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.model.ServerToClientModel;
 
 public class ModelWriter implements AutoCloseable {
 
@@ -41,9 +41,9 @@ public class ModelWriter implements AutoCloseable {
     }
 
     public void writeModel(final ServerToClientModel model, final Object value) {
-        if (parser.getPosition() == 0) {
-            parser.beginObject();
-        }
+        final int position = parser.getPosition();
+        if (position == -1) return;
+        if (position == 0) parser.beginObject();
         parser.parse(model, value);
     }
 

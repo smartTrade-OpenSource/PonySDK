@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
 
 public class DefaultScrollablePageView extends DefaultPageView {
 

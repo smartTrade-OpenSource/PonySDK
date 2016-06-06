@@ -24,21 +24,21 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PCloseEvent;
-import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.server.rich.PClosableDialogBox;
-import com.ponysdk.ui.server.rich.PConfirmDialog;
-import com.ponysdk.ui.server.rich.POptionPane;
-import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
-import com.ponysdk.ui.server.rich.POptionPane.POptionType;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.rich.PClosableDialogBox;
+import com.ponysdk.core.ui.rich.PConfirmDialog;
+import com.ponysdk.core.ui.rich.POptionPane;
+import com.ponysdk.core.ui.rich.POptionPane.PActionHandler;
+import com.ponysdk.core.ui.rich.POptionPane.POptionType;
 
 public class DialogBoxPageActivity extends SamplePageActivity {
 
@@ -96,7 +96,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
             }
         });
 
-        addLabel("A confirm dialog listenening on the close event");
+        addLabel("A confirm dialog listenening on the close eventbus");
         final PButton anchor4 = addButton("Open");
         anchor4.addClickHandler(new PClickHandler() {
 
@@ -122,7 +122,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
             }
         });
 
-        addLabel("A confirm dialog listenening on the close event");
+        addLabel("A confirm dialog listenening on the close eventbus");
         final PButton anchor5 = addButton("Open");
         anchor5.addClickHandler(new PClickHandler() {
 

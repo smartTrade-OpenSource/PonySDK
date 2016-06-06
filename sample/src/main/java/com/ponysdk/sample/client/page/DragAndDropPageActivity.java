@@ -23,18 +23,18 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
-import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
-import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
-import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
-import com.ponysdk.ui.server.basic.event.PDragStartEvent;
-import com.ponysdk.ui.server.basic.event.PDragStartHandler;
-import com.ponysdk.ui.server.basic.event.PDropEvent;
-import com.ponysdk.ui.server.basic.event.PDropHandler;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartHandler;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PDropHandler;
 
 public class DragAndDropPageActivity extends SamplePageActivity {
 

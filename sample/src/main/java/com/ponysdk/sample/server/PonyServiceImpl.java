@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Application;
-import com.ponysdk.core.servlet.SessionManager;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 

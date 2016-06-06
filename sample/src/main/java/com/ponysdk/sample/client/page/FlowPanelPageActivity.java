@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFlowPanel;
 
 public class FlowPanelPageActivity extends SamplePageActivity {
 

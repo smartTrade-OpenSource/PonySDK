@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.export.event;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
+import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.export.Exporter;
 
 public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {

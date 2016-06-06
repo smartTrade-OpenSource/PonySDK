@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page.place;
 
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.place.Place;
 
 public class PagePlace implements Place, HasPageName {
 

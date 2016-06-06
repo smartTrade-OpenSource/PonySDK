@@ -218,8 +218,8 @@ public enum OperatingSystem {
     private final OperatingSystem parent;
     private List<OperatingSystem> children;
 
-    private OperatingSystem(final Manufacturer manufacturer, final OperatingSystem parent, final int versionId, final String name, final String[] aliases, final String[] exclude,
-            final DeviceType deviceType, final String versionRegexString) {
+    OperatingSystem(final Manufacturer manufacturer, final OperatingSystem parent, final int versionId, final String name, final String[] aliases, final String[] exclude,
+                    final DeviceType deviceType, final String versionRegexString) {
         this.manufacturer = manufacturer;
         this.parent = parent;
         this.children = new ArrayList<>();

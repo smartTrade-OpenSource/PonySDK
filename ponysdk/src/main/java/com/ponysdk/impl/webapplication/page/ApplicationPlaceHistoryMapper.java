@@ -1,9 +1,9 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.core.event.EventBus;
-import com.ponysdk.core.place.DefaultPlaceHistoryMapper;
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.eventbus.EventBus;
+import com.ponysdk.core.ui.place.DefaultPlaceHistoryMapper;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
 public class ApplicationPlaceHistoryMapper extends DefaultPlaceHistoryMapper {

@@ -23,17 +23,17 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
-import com.ponysdk.ui.server.rich.PNotificationManager;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent.LayoutResizeData;
+import com.ponysdk.core.ui.rich.PNotificationManager;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
 
 public class SplitPanelPageActivity extends SamplePageActivity {
 
