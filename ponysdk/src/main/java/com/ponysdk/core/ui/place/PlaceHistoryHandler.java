@@ -2,8 +2,6 @@
 package com.ponysdk.core.ui.place;
 
 import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

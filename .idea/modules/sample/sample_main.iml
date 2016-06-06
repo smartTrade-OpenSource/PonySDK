@@ -20,8 +20,8 @@
     <orderEntry type="library" name="Gradle: javax.validation:validation-api:sources:1.0.0.GA" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.springframework:spring-aop:4.2.3.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: com.google.gwt:gwt-user:2.7.0" level="project" />
-    <orderEntry type="library" name="Gradle: org.timepedia.exporter:gwtexporter:2.5.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.springframework:spring-expression:4.2.3.RELEASE" level="project" />
+    <orderEntry type="library" name="Gradle: org.timepedia.exporter:gwtexporter:2.5.1" level="project" />
     <orderEntry type="library" name="Gradle: com.google.gwt:gwt-elemental:2.7.0" level="project" />
     <orderEntry type="library" name="Gradle: org.ow2.asm:asm:5.0.4" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-core:4.2.3.RELEASE" level="project" />

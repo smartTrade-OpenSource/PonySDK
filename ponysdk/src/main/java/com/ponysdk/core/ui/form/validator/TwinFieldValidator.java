@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.form.validator;
 
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.form.formfield.FormField;
 
 public class TwinFieldValidator implements FieldValidator {

@@ -27,7 +27,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
-import com.ponysdk.core.server.servlet.ConnectionListener;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.tools.ListenerCollection;

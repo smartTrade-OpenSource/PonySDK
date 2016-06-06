@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;

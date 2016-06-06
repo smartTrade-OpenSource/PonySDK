@@ -26,8 +26,6 @@ package com.ponysdk.core.ui.rich;
 import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PConfirmDialog extends PDialogBox {
 
