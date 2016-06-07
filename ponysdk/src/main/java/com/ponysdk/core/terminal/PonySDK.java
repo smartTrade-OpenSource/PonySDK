@@ -36,7 +36,6 @@ import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
@@ -46,7 +45,6 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.ParentWindowRequest;
 import com.ponysdk.core.terminal.request.RequestCallback;
-import com.ponysdk.core.terminal.socket.WebSocketCallback;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
@@ -123,35 +121,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                 builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
                 builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
 
-                socketClient = new WebSocketClient(builder.toString(), new WebSocketCallback() {
-
-                    @Override
-                    public void connected() {
-                        if (log.isLoggable(Level.INFO))
-                            log.info("WebSoket connected");
-                        uiBuilder.init(applicationViewID, socketClient.getRequestBuilder());
-                    }
-
-                    @Override
-                    public void disconnected() {
-                        if (log.isLoggable(Level.INFO))
-                            log.info("WebSoket disconnected");
-                        uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-                    }
-
-                    /**
-                     * Message from server to Main terminal
-                     */
-                    @Override
-                    public void message(final ReaderBuffer buffer) {
-                        try {
-                            uiBuilder.updateMainTerminal(buffer);
-                        } catch (final Exception e) {
-                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
-                        }
-                    }
-
-                });
+                socketClient = new WebSocketClient(builder.toString(), uiBuilder, applicationViewID);
             } else {
                 final String windowId = Window.Location.getParameter("wid");
                 uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
@@ -164,13 +134,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                         uiBuilder.update(buffer);
                     }
 
-                    @Override
-                    public void onDataReceived(final JSONObject object) {
-                    }
-
-                    @Override
-                    public void onError(final Throwable exception) {
-                    }
                 }));
             }
 

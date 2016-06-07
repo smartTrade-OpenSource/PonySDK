@@ -28,9 +28,9 @@ import java.util.logging.Logger;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
 import elemental.client.Browser;
@@ -41,90 +41,71 @@ import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
-public class WebSocketClient implements EventListener {
+public class WebSocketClient {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
     private static final String ARRAYBUFFER_TYPE = "arraybuffer";
 
-    private enum EventType {
-        OPEN("open"),
-        CLOSE("close"),
-        MESSAGE("message");
-
-        private String text;
-
-        EventType(final String text) {
-            this.text = text;
-        }
-
-        public String getText() {
-            return text;
-        }
-    }
-
     private final WebSocket webSocket;
 
-    private final WebSocketCallback callback;
-
-    private RequestBuilder requestBuilder;
-
-    public WebSocketClient(final String url, final WebSocketCallback callback) {
-        this.callback = callback;
-
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final int applicationViewID) {
         final Window window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
 
-        webSocket.setOnclose(this);
-        webSocket.setOnerror(this);
-        webSocket.setOnmessage(this);
-        webSocket.setOnopen(this);
-        webSocket.setBinaryType(ARRAYBUFFER_TYPE);
-    }
+        webSocket.setOnopen(new EventListener() {
 
-    public RequestBuilder getRequestBuilder() {
-        return requestBuilder;
+            @Override
+            public void handleEvent(final Event event) {
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+                uiBuilder.init(applicationViewID, new WebSocketRequestBuilder(WebSocketClient.this));
+            }
+        });
+        webSocket.setOnclose(new EventListener() {
+
+            @Override
+            public void handleEvent(final Event event) {
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
+                uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
+            }
+        });
+        //webSocket.setOnerror(this);
+        webSocket.setOnmessage(new EventListener() {
+
+            /**
+             * Message from server to Main terminal
+             */
+            @Override
+            public void handleEvent(final Event event) {
+                final ArrayBuffer arrayBuffer = (ArrayBuffer) ((MessageEvent) event).getData();
+                try {
+                    final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+                    // Get the first element on the message, always a key of
+                    // element of the Model enum
+                    final BinaryModel type = buffer.readBinaryModel();
+
+                    if (type.getModel() == ServerToClientModel.HEARTBEAT) {
+                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
+                        send(ClientToServerModel.HEARTBEAT.toStringValue());
+                    } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
+                        try {
+                            uiBuilder.updateMainTerminal(buffer);
+                        } catch (final Exception e) {
+                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+                        }
+                    } else {
+                        log.severe("Unknown model : " + type.getModel());
+                    }
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+                }
+            }
+        });
+        webSocket.setBinaryType(ARRAYBUFFER_TYPE);
     }
 
     public void send(final String message) {
         webSocket.send(message);
-    }
-
-    @Override
-    public void handleEvent(final Event event) {
-        if (EventType.OPEN.getText().equals(event.getType())) {
-            requestBuilder = new WebSocketRequestBuilder(this);
-            callback.connected();
-        } else if (EventType.CLOSE.getText().equals(event.getType())) {
-            callback.disconnected();
-        } else if (EventType.MESSAGE.getText().equals(event.getType())) {
-            ArrayBuffer arrayBuffer = null;
-            try {
-                arrayBuffer = (ArrayBuffer) ((MessageEvent) event).getData();
-
-                final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-                // Get the first element on the message, always a key of
-                // element of the Model enum
-                final BinaryModel type = buffer.readBinaryModel();
-
-
-                if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                    if (log.isLoggable(Level.SEVERE))
-                        log.log(Level.SEVERE, "Heart beat");
-                    sendHeartbeat();
-                } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
-                    callback.message(buffer);
-                } else {
-                    log.severe("Unknown model : " + type.getModel());
-                }
-            } catch (final Exception e) {
-                log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
-            }
-        }
-    }
-
-    private void sendHeartbeat() {
-        send(ClientToServerModel.HEARTBEAT.toStringValue());
     }
 
     public void close() {

@@ -23,14 +23,10 @@
 
 package com.ponysdk.core.terminal.request;
 
-import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public interface RequestCallback {
 
     void onDataReceived(ReaderBuffer buffer);
 
-    void onError(Throwable exception);
-
-    void onDataReceived(JSONObject object);
 }
