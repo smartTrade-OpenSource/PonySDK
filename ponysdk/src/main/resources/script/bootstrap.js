@@ -38,7 +38,7 @@ Check.prototype = {
 
                 xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
                 xmlhttp.send();
-                
+
                 /* Avoid JQuery dependencies
             	$.ajax({
                     url: reconnectionCheck.getCheckUrl(),
@@ -97,17 +97,11 @@ Check.prototype = {
 
 var reconnectionCheck;
 
-var textDecoder = new TextDecoder('utf-8')
-
-function decode(buffer) {
-    return textDecoder.decode(new Uint8Array(buffer));
-}
-
 function onPonySDKModuleLoaded() {
 	console.log("onPonySDKModuleLoaded");
 	pony = new ponysdk();
 	document.ponyLoaded = true;
-	
+
 	for(var i=0; i<document.onPonyLoadedListeners.length; i++) {
 		try {
 			document.onPonyLoadedListeners[i](pony);
@@ -119,7 +113,7 @@ function onPonySDKModuleLoaded() {
 	pony.registerCommunicationError(function(code, message){
 		// Do Nothing
 	});
-	
+
 	pony.start();
 
 	reconnectionCheck = new Check();
@@ -134,4 +128,13 @@ function notifyConnectionLostListeners() {
 			throw "cannot call onConnectionLostListeners callback: " + document.onConnectionLostListeners[i] + ", error " + error;
 		}
 	}
+}
+
+// Decode ArrayBuffer from server
+var textDecoder = null;
+if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
+
+function decode(buffer) {
+    if(textDecoder != null) return textDecoder.decode(buffer);
+    else return UTF8.getStringFromBytes(new Uint8Array(buffer));
 }
