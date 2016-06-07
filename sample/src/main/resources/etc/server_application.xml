@@ -21,8 +21,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
-				<value>script/encoding.js</value>
-				<value>script/bootstrap.js</value>
+                <value>script/fromcodepoint.js</value>
+                <value>script/UTF8.js</value>
+                <value>script/bootstrap.js</value>
                 <value>script/widget.js</value>
                 <value>script/sample.js</value>
             </list>

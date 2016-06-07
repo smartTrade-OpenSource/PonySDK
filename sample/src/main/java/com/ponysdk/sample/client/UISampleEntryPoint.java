@@ -34,11 +34,6 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.main.EntryPoint;
-import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.sample.client.page.addon.LabelPAddOn;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
@@ -94,8 +89,13 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.sample.client.event.UserLoggedOutEvent;
+import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.ponysdk.sample.client.page.addon.LabelPAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -160,7 +160,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void run() {
-                label1.setInnerHTML("<div style='color:red'>" + "gros pédé ô ç " + "</div>");
+                label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &��{" + "</div>");
                 label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
                 label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
                 label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
@@ -181,9 +181,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 label19.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
                 label20.setInnerHTML("<div style='color:yellow'>" + System.nanoTime() + "</div>");
             }
-        }, Duration.ofMillis(5));
-
-        if (true) return;
+        }, Duration.ofMillis(5000));
 
         final PWindow window = new PWindow(null, "a", null);
         window.open();
@@ -325,7 +323,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -349,7 +347,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -382,7 +380,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 

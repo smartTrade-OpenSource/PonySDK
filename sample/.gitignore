@@ -3,3 +3,4 @@ bin
 src-generated
 .classpath
 /sample.iml
+/log/
