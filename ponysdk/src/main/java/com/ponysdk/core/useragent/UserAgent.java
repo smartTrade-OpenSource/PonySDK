@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.useragent;
 
@@ -14,7 +36,7 @@ public class UserAgent implements Serializable {
     public UserAgent(final OperatingSystem operatingSystem, final Browser browser) {
         this.operatingSystem = operatingSystem;
         this.browser = browser;
-        this.id = ((operatingSystem.getId() << 16) + browser.getId());
+        this.id = (operatingSystem.getId() << 16) + browser.getId();
     }
 
     public UserAgent(final String userAgentString) {
@@ -27,7 +49,7 @@ public class UserAgent implements Serializable {
 
         this.operatingSystem = operatingSystem;
         this.browser = browser;
-        this.id = ((operatingSystem.getId() << 16) + browser.getId());
+        this.id = (operatingSystem.getId() << 16) + browser.getId();
         this.userAgentString = userAgentString;
     }
 
@@ -44,7 +66,7 @@ public class UserAgent implements Serializable {
      * userAgent to be available. Use it only after using UserAgent(String) or
      * UserAgent.parseUserAgent(String). Returns null if it can not detect the
      * version information.
-     * 
+     *
      * @return Version
      */
     public Version getBrowserVersion() {
@@ -68,7 +90,7 @@ public class UserAgent implements Serializable {
     /**
      * Returns an unique integer value of the operating system & browser
      * combination
-     * 
+     *
      * @return the id
      */
     public int getId() {
@@ -85,7 +107,7 @@ public class UserAgent implements Serializable {
 
     /**
      * Returns UserAgent based on specified unique id
-     * 
+     *
      * @param id
      * @return
      */
@@ -101,7 +123,7 @@ public class UserAgent implements Serializable {
 
     /**
      * Returns UserAgent based on combined string representation
-     * 
+     *
      * @param name
      * @return
      */
@@ -121,22 +143,22 @@ public class UserAgent implements Serializable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((browser == null) ? 0 : browser.hashCode());
+        result = prime * result + (browser == null ? 0 : browser.hashCode());
         result = prime * result + id;
-        result = prime * result + ((operatingSystem == null) ? 0 : operatingSystem.hashCode());
+        result = prime * result + (operatingSystem == null ? 0 : operatingSystem.hashCode());
         return result;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

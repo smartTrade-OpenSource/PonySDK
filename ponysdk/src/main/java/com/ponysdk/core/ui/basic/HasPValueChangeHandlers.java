@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collection;
 
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import java.util.Collection;
-
 /**
- * A widget that implements this interface is a public source of {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent} events.
- * 
+ * A widget that implements this interface is a public source of
+ * {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent} events.
+ *
  * @param <T>
  *            the value about to be changed
  */

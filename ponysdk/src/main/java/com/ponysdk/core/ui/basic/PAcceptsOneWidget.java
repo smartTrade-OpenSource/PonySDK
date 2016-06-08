@@ -1,5 +1,12 @@
 /*
- * Copyright 2008 Google Inc.
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,11 +26,12 @@ package com.ponysdk.core.ui.basic;
 /**
  * Implemented by displays that can be given accept an {@link IsPWidget} to show.
  */
+@FunctionalInterface
 public interface PAcceptsOneWidget {
 
     /**
      * Set the only widget of the receiver, replacing the previous widget if there was one.
-     * 
+     *
      * @param w
      *            the widget, or <code>null</code> to remove the widget
      * @see PSimplePanel

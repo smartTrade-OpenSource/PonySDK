@@ -31,9 +31,6 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.model.ClientToServerModel;
 
-/**
- * @author nvelin
- */
 public class PTInstruction extends JSONObject {
 
     public PTInstruction() {

@@ -26,9 +26,6 @@ package com.ponysdk.core.terminal.model;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
 
-/**
- * @author nvelin
- */
 public class BinaryModel {
 
     public static final BinaryModel NULL = new BinaryModel(null, 0);

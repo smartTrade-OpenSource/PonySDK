@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
-import com.ponysdk.core.model.ClientToServerModel;
 
 /**
  * The server side implementation of the RPC service.
@@ -57,12 +57,14 @@ public class StreamServiceServlet extends HttpServlet {
         streamRequest(req, resp);
     }
 
-    private void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
+    private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            final Application ponyApplicationSession = (Application) req.getSession().getAttribute(Application.class.getCanonicalName());
+            final Application ponyApplicationSession = (Application) req.getSession()
+                    .getAttribute(Application.class.getCanonicalName());
             final Integer ponySessionID = Integer.parseInt(req.getParameter("ponySessionID"));
             final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession.removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+            final StreamHandler streamHandler = ponySession
+                    .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

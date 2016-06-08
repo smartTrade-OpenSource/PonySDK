@@ -178,6 +178,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     }
 
     @Export
+    @Deprecated
     public void executeInstruction(final JavaScriptObject jso) {
         uiBuilder.executeInstruction(jso);
     }
