@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.server.servlet;
 
@@ -19,7 +41,8 @@ public class CommunicationSanityChecker {
 
     private static final int CHECK_PERIOD = 1000;
     private static final int MAX_THREAD_CHECKER = Integer
-            .parseInt(System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
+            .parseInt(System.getProperty("communication.sanity.checker.thread.count",
+                    String.valueOf(Runtime.getRuntime().availableProcessors())));
 
     private final UIContext uiContext;
 
@@ -31,21 +54,24 @@ public class CommunicationSanityChecker {
 
     protected final AtomicBoolean started = new AtomicBoolean(false);
 
-    protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER, new ThreadFactory() {
+    protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
+            new ThreadFactory() {
 
-        private int i = 0;
+                private int i = 0;
 
-        @Override
-        public Thread newThread(final Runnable r) {
-            final Thread t = new Thread(r);
-            t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-            t.setDaemon(true);
-            return t;
-        }
-    });
+                @Override
+                public Thread newThread(final Runnable r) {
+                    final Thread t = new Thread(r);
+                    t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
 
     protected enum CommunicationState {
-        OK, SUSPECT, KO
+        OK,
+        SUSPECT,
+        KO
     }
 
     public CommunicationSanityChecker(final UIContext uiContext) {
@@ -68,7 +94,7 @@ public class CommunicationSanityChecker {
                 } catch (final Throwable e) {
                     log.error("[{}] Error while checking communication state", uiContext, e);
                 }
-            }, 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            } , 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
             log.info("Started. HeartbeatPeriod: {} ms, {}", uiContext, heartBeatPeriod);
         }
@@ -103,33 +129,37 @@ public class CommunicationSanityChecker {
     protected void checkCommunicationState() {
         final long now = System.currentTimeMillis();
         switch (currentState) {
-        case OK:
-            if (isCommunicationSuspectedToBeNonFunctional(now)) {
-                suspectTime = now;
-                currentState = CommunicationState.SUSPECT;
-                if (log.isDebugEnabled()) log.debug("[{}] No message have been received, communication suspected to be non functional, sending heartbeat...", uiContext);
-                uiContext.sendHeartBeat();
-            }
-            break;
-        case SUSPECT:
-            if (lastReceivedTime < suspectTime) {
-                if (now - suspectTime >= heartBeatPeriod) {
-                    // No message have been received since we suspected the
-                    // communication to be non functional
-                    if (log.isInfoEnabled())
-                        log.info("[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed", uiContext);
-                    currentState = CommunicationState.KO;
-                    stop();
-                    uiContext.destroy();
+            case OK:
+                if (isCommunicationSuspectedToBeNonFunctional(now)) {
+                    suspectTime = now;
+                    currentState = CommunicationState.SUSPECT;
+                    if (log.isDebugEnabled()) log.debug(
+                            "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
+                            uiContext);
+                    uiContext.sendHeartBeat();
                 }
-            } else {
-                currentState = CommunicationState.OK;
-                suspectTime = -1;
-            }
-            break;
-        case KO:
-        default:
-            break;
+                break;
+            case SUSPECT:
+                if (lastReceivedTime < suspectTime) {
+                    if (now - suspectTime >= heartBeatPeriod) {
+                        // No message have been received since we suspected the
+                        // communication to be non functional
+                        if (log.isInfoEnabled())
+                            log.info(
+                                    "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
+                                    uiContext);
+                        currentState = CommunicationState.KO;
+                        stop();
+                        uiContext.destroy();
+                    }
+                } else {
+                    currentState = CommunicationState.OK;
+                    suspectTime = -1;
+                }
+                break;
+            case KO:
+            default:
+                break;
         }
 
         // uiContext.sendHeartBeat();

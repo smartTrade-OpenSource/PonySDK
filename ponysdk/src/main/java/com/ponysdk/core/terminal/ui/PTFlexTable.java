@@ -32,11 +32,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTFlexTable extends PTHTMLTable {
 
+    private static final String PONY_FLEX_TABLE_STYLE_NAME = "pony-PFlexTable";
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
-        this.uiObject.addStyleName("pony-PFlexTable");
+        this.uiObject.addStyleName(PONY_FLEX_TABLE_STYLE_NAME);
     }
 
     @Override

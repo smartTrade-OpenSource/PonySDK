@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -32,9 +32,12 @@ import org.apache.commons.beanutils.PropertyUtils;
 
 public class PropertyUtil {
 
-    public static String getProperty(final Object bean, final String property) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private static final String NA = "NA";
+
+    public static String getProperty(final Object bean, final String property)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         final String propertyPath = property;
-        Object propertyValue = "NA";
+        Object propertyValue = NA;
         if (propertyPath != null) {
 
             final String[] tokens = propertyPath.split("\\.");
@@ -51,7 +54,7 @@ public class PropertyUtil {
                         for (final Object object : propertyList) {
                             values.add(getPropertyValue(object, tokens[i]));
                         }
-                        if (values.isEmpty()) propertyValue = "NA";
+                        if (values.isEmpty()) propertyValue = NA;
                         else propertyValue = values;
                     } else if (propertyValue instanceof Map<?, ?>) {
                         final Map<?, ?> propertyMap = (Map<?, ?>) propertyValue;
@@ -61,23 +64,24 @@ public class PropertyUtil {
                         }
                         propertyValue = values;
                     } else {
-                        propertyValue = "NA";
+                        propertyValue = NA;
                     }
                 }
             }
         }
-        return String.valueOf(propertyValue == null ? "NA" : propertyValue);
+        return String.valueOf(propertyValue == null ? NA : propertyValue);
     }
 
-    public static Object getPropertyValue(final Object bean, final String propertyName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public static Object getPropertyValue(final Object bean, final String propertyName)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Object propertyValue;
         if (PropertyUtils.isReadable(bean, propertyName)) {
             propertyValue = PropertyUtils.getProperty(bean, propertyName);
             if (propertyValue == null) {
-                propertyValue = "NA";
+                propertyValue = NA;
             }
         } else {
-            propertyValue = "NA";
+            propertyValue = NA;
         }
         return propertyValue;
     }

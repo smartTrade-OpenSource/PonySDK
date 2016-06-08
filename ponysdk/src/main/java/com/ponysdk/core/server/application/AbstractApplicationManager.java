@@ -30,10 +30,10 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
 
@@ -95,7 +95,7 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    private void process(final UIContext uiContext, final JsonArray applicationInstructions) {
+    private static void process(final UIContext uiContext, final JsonArray applicationInstructions) {
         for (int i = 0; i < applicationInstructions.size(); i++) {
             final JsonObject item = applicationInstructions.getJsonObject(i);
             uiContext.fireClientData(item);

@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;
 

@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTPushButton extends PTCustomButton<PushButton> {
+public class PTPushButton extends PTButtonBase<PushButton> {
 
     private PTImage image;
 

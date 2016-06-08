@@ -70,14 +70,14 @@ public enum WidgetType {
     DISCLOSURE_PANEL,
     DECORATED_POPUP_PANEL,
     DIALOG_BOX,
-    SUGGESTBOX,
-    MULTIWORD_SUGGEST_ORACLE,
     DECORATOR_PANEL,
     ELEMENT,
     FOCUS_PANEL,
     SCRIPT,
     WINDOW,
-    HEADER_PANEL;
+    HEADER_PANEL,
+    SUGGESTBOX,
+    MULTIWORD_SUGGEST_ORACLE;
 
     public byte getValue() {
         return (byte) ordinal();

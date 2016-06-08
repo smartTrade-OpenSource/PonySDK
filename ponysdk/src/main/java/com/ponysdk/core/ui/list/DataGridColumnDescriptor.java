@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.ui.list;
 
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.ValueProvider;
 
 /**
- * Defines a {@link DataGrid} column
+ * Defines a {@link com.google.gwt.user.cellview.client.DataGrid} column
  *
  * @param <D>
  * @param <V>

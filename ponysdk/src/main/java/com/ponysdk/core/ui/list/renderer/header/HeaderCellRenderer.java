@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,17 +24,16 @@
 package com.ponysdk.core.ui.list.renderer.header;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.list.DataGridActivity;
-import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 
 /**
  * <p>
- * Way to display a the column Header of a {@link DataGridActivity}
+ * Way to display a the column Header of a {@link com.ponysdk.core.ui.list.DataGridActivity}
  * </p>
  * <p>
- * Defined in a {@link DataGridColumnDescriptor}
+ * Defined in a {@link com.ponysdk.core.ui.list.DataGridColumnDescriptor}
  * </p>
  */
+@FunctionalInterface
 public interface HeaderCellRenderer {
 
     IsPWidget render();

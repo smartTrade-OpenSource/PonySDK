@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.terminal.ui.widget.richtexttoolbar;
 
@@ -23,15 +45,18 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A sample toolbar for use with {@link RichTextArea}. It provides a simple UI for all rich text formatting,
+ * A sample toolbar for use with {@link RichTextArea}. It provides a simple UI for all rich text
+ * formatting,
  * dynamically displayed only for the available functionality.
  */
 @SuppressWarnings("deprecation")
 public class RichTextToolbar extends Composite {
 
     /**
-     * This {@link ClientBundle} is used for all the button icons. Using a bundle allows all of these images
-     * to be packed into a single image, which saves a lot of HTTP requests, drastically improving startup
+     * This {@link ClientBundle} is used for all the button icons. Using a bundle allows all of
+     * these images
+     * to be packed into a single image, which saves a lot of HTTP requests, drastically improving
+     * startup
      * time.
      */
     public interface Images extends ClientBundle {
@@ -150,7 +175,8 @@ public class RichTextToolbar extends Composite {
     }
 
     /**
-     * We use an inner EventHandler class to avoid exposing eventbus methods on the RichTextToolbar itself.
+     * We use an inner EventHandler class to avoid exposing eventbus methods on the RichTextToolbar
+     * itself.
      */
     private class EventHandler implements ClickHandler, ChangeHandler, KeyUpHandler {
 
@@ -239,7 +265,8 @@ public class RichTextToolbar extends Composite {
         }
     }
 
-    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] { RichTextArea.FontSize.XX_SMALL, RichTextArea.FontSize.X_SMALL, RichTextArea.FontSize.SMALL, RichTextArea.FontSize.MEDIUM,
+    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] { RichTextArea.FontSize.XX_SMALL,
+            RichTextArea.FontSize.X_SMALL, RichTextArea.FontSize.SMALL, RichTextArea.FontSize.MEDIUM,
             RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE, RichTextArea.FontSize.XX_LARGE };
 
     private final Images images = (Images) GWT.create(Images.class);
@@ -279,7 +306,7 @@ public class RichTextToolbar extends Composite {
 
     /**
      * Creates a new toolbar that drives the given rich text area.
-     * 
+     *
      * @param richText
      *            the rich text area to be controlled
      */
