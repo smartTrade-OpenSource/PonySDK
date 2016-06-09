@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.servlet.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,11 +57,11 @@ public class Application {
         uiContexts.put(uiContext.getID(), uiContext);
     }
 
-    void unregisterUIContext(final long uiContextID) {
+    void unregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
             log.info("Invalidate session, all ui contexts have been destroyed");
-            // session.invalidate();
+            SessionManager.get().getSession(sessionID).invalidate();
         }
     }
 

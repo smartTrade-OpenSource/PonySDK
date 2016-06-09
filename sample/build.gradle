@@ -11,8 +11,9 @@ repositories {
 configurations {
 	java2html
 	spring
+    jetty
 	compile {
-		extendsFrom java2html
+		extendsFrom java2html,jetty
 	}
 	runtime {
 		extendsFrom java2html, spring
@@ -25,13 +26,17 @@ dependencies {
 	java2html 'de.java2html:java2html:5.0'
     spring 'org.springframework:spring-aop:4.2.3.RELEASE'
     spring 'org.springframework:spring-expression:4.2.3.RELEASE'
+
+    jetty 'org.eclipse.jetty.websocket:websocket-client:9.3.9.v20160517'
+
 }
 
 task runCodeServer(type: JavaExec) {
   classpath = project(':ponysdk').configurations.gwtdev
   classpath += sourceSets.main.runtimeClasspath
   main = 'com.google.gwt.dev.codeserver.CodeServer'
-  args = ['-src', '../ponysdk/src/main/java', 'com.ponysdk.core.PonyTerminal']
+  args = ['-src', '../ponysdk/src/main/java', 'com.ponysdk.core' +
+          '.PonyTerminal']
   jvmArgs = ['-server', '-Xmx1024m']
 }
 

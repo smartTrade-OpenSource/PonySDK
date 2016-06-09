@@ -120,9 +120,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void onWebSocketConnect(final Session session) {
-            if (log.isInfoEnabled()) log.info("WebSocket connected from {}", session.getRemoteAddress());
-
-            if (log.isInfoEnabled()) log.info("######### Session ID > " + request.getSessionId());
+            if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}", session.getRemoteAddress(),request.getSessionId());
 
             this.session = session;
             this.context = new TxnContext();
