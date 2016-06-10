@@ -5,12 +5,9 @@
     <option name="ANALYSIS_IN_BACKGROUND" value="true" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d52aa1b3-766c-4153-bdbf-60cbf42d416d" name="Default" comment="add gradle + clean modules">
+    <list default="true" id="d52aa1b3-766c-4153-bdbf-60cbf42d416d" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Application.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Application.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/build.gradle" afterPath="$PROJECT_DIR$/sample/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" />
     </list>
     <ignored path="PonySDK.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -80,7 +77,7 @@
       <file leaf-file-name="ApplicationLoader.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/ApplicationLoader.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
+            <state relative-caret-position="0">
               <caret line="31" column="17" selection-start-line="31" selection-start-column="17" selection-end-line="31" selection-end-column="17" />
               <folding />
             </state>
@@ -90,7 +87,7 @@
       <file leaf-file-name="Application.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Application.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
+            <state relative-caret-position="0">
               <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
               <folding />
             </state>
@@ -100,32 +97,78 @@
       <file leaf-file-name="WebSocketServlet.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="436">
-              <caret line="269" column="32" selection-start-line="269" selection-start-column="32" selection-end-line="269" selection-end-column="32" />
+            <state relative-caret-position="315">
+              <caret line="56" column="30" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SessionManager.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/SessionManager.java">
+      <file leaf-file-name="RootEventBus.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/RootEventBus.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="424">
-              <caret line="99" column="0" selection-start-line="99" selection-start-column="0" selection-end-line="99" selection-end-column="0" />
+            <state relative-caret-position="-66">
+              <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SimpleEventBus.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/SimpleEventBus.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="256">
+              <caret line="339" column="18" selection-start-line="339" selection-start-column="18" selection-end-line="339" selection-end-column="18" />
               <folding>
-                <element signature="e#1765#1766#0" expanded="true" />
-                <element signature="e#1808#1809#0" expanded="true" />
+                <element signature="e#11740#11741#0" expanded="true" />
+                <element signature="e#11790#11791#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AbstractApplicationLoader.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/AbstractApplicationLoader.java">
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ponysdk/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="178">
-              <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+            <state relative-caret-position="315">
+              <caret line="15" column="25" selection-start-line="15" selection-start-column="25" selection-end-line="15" selection-end-column="25" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PScheduler.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="214">
+              <caret line="191" column="17" selection-start-line="191" selection-start-column="17" selection-end-line="191" selection-end-column="17" />
+              <folding>
+                <element signature="e#1620#1621#0" expanded="true" />
+                <element signature="e#1676#1677#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Permission.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Permission.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SessionManager.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/SessionManager.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="85" column="46" selection-start-line="85" selection-start-column="46" selection-end-line="85" selection-end-column="46" />
+              <folding>
+                <element signature="e#1765#1766#0" expanded="true" />
+                <element signature="e#1808#1809#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -1017,15 +1060,15 @@
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceHistoryHandler.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/StringListBoxFormField.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/validator/TwinFieldValidator.java" />
-        <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/UIContext.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/socket/WebSocketClient.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/PonySDK.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/main/PonySDKServer.java" />
-        <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" />
         <option value="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" />
         <option value="$PROJECT_DIR$/sample/build.gradle" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Application.java" />
         <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java" />
+        <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/UIContext.java" />
+        <option value="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" />
       </list>
     </option>
   </component>
@@ -1152,6 +1195,108 @@
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk_test">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk_main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk/src/main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk_main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk/src/main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="java">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="com/ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk_main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="ponysdk/src/main">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="java">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="com/ponysdk">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="impl">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
         <subPane subId="Default">
           <PATH>
@@ -1180,7 +1325,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Font" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -1216,173 +1361,11 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="UPDATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/Exporter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/csv/CSVExporter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/csv/CSVExporterFactory.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/util/PropertyUtil.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/xml/XMLExporter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/export/xml/XMLExporterFactory.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/internalization/PString.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/model/ClientToServerModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/model/HandlerModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/model/ServerToClientModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/model/WidgetType.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/AbstractApplicationManager.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/service/PonyService.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/service/PonyServiceRegistry.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/BannerPrinter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/CommunicationSanityChecker.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/ConnectionListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/HTTPServletContext.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/PRequest.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/ServletContextFilter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/SessionManager.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/StreamServiceServlet.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/CommunicationErrorHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/PUnit.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/PonySDK.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/StartupListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/basic/PTAlignment.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/instruction/PTInstruction.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/model/BinaryModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/PTFlexTable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/PTPushButton.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/PTWindow.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/PTWindowManager.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/widget/mask/TextBoxMaskedDecorator.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/widget/richtexttoolbar/RichTextToolbar.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/tools/ListenerCollection.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/activity/ActivityMapper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/DataListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/Focusable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/HasPAlignment.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/HasPHorizontalAlignment.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/HasPValueChangeHandlers.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/HasPVerticalAlignment.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PAbsolutePanel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PAcceptsOneWidget.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PAnimatedLayout.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PCellFormatter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PFlexCellFormatter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PKeyCodes.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PSuggestOracle.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PTreeItem.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PWindowManager.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/alignment/PAlignment.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDragEndEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDragEnterEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDragLeaveEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDragOverEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDragStartEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PDropEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PHumanInputEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PKeyEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PKeyPressEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PKeyUpEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PMouseDownEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PMouseEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PMouseOutEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PMouseOverEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/event/PMouseUpEvent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/BroadcastEventHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/EventBusAware.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/HandlerRegistration.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/StreamHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/UmbrellaException.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/extension/PAddOn.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/Form.java</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/FormFieldComponent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/DataConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/DateConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/DoubleConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/FloatConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/IdentityConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/IntegerConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/dataconverter/LongConverter.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/event/SubmitFormHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/CheckBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/DateBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/DoubleTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/FloatTextBoxFormField.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/FormField.java</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/FormFieldListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/IntegerTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/ListBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/LongTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/PasswordTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/StringListBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/StringPasswordTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/StringTextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/formfield/TextBoxFormField.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/validator/FieldValidator.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/form/validator/ValidationResult.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/DataGridColumnDescriptor.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/FieldDescriptor.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/FilterListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/HasCriteria.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/HasFilterListeners.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/HasPData.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/HasQueriable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/PSelectionModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/Queriable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/Resetable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/Sortable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/Validable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/dataprovider/RemoteDataProvider.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/paging/DefaultPagerView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/paging/PagerListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/paging/PagerView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/refreshable/Cell.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/renderer/cell/AbstractCellRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/renderer/cell/RefreshableLabelCellRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/renderer/header/HeaderCellRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/renderer/header/HeaderSortingHelper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/CompositeSelectorView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/DefaultActionSelectorView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/DefaultInfoSelectorView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/Selectable.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/SelectableListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/Selector.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/SelectorCheckBox.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/SelectorView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/selector/SelectorViewListener.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/valueprovider/ValueProvider.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/main/EntryPoint.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/model/ServerBinaryModel.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/DefaultPlaceHistoryMapper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceChangeHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceChangeRequestHandler.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/list/renderer/header/ComplexHeaderCellRenderer.java</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceHistoryHandler.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceHistoryMapper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/place/PlaceTokenizer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/renderer/RenderFactory.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/renderer/Renderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/rich/PBreadCrumbs.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/rich/PClosableDialogBox.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/statistic/TerminalDataReceiver.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/Browser.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/BrowserType.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/DeviceType.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/Manufacturer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/OperatingSystem.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/RenderingEngine.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/UserAgent.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/useragent/Version.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/main/PonySDKServer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/header/HeaderView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/login/DefaultLoginPageView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/menu/MenuItem.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/menu/MenuView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/notification/NotificationView.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/notification/renderer/NotificationTypeRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/notification/renderer/PHTMLRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/notification/renderer/PLabelRenderer.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/page/ApplicationActivityMapper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/page/ApplicationPlaceHistoryMapper.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/page/InitializingActivity.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/page/place/HasActivity.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/impl/webapplication/page/place/HasPageName.java</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/spring/ListLoader.java</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Created" />
@@ -1397,7 +1380,7 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="true" />
           <option name="myId" value="REMOVED_FROM_REPOSITORY" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/ui/PTCustomButton.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/build/.project</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Restored" />
@@ -1479,7 +1462,7 @@
       </FILE-GROUP>
     </UpdatedFiles>
   </component>
-  <component name="RunManager" selected="Gradle.PonySDK:sample [:sample:runSampleSpring]">
+  <component name="RunManager" selected="PHPUnit.PonySDK">
     <configuration default="false" name="PonySDK" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
       <TestRunner directory="$PROJECT_DIR$" />
       <method />
@@ -1769,7 +1752,7 @@
       <workItem from="1465137402172" duration="22837000" />
       <workItem from="1465213606725" duration="1860000" />
       <workItem from="1465281963792" duration="1148000" />
-      <workItem from="1465308111447" duration="3339000" />
+      <workItem from="1465308111447" duration="7452000" />
     </task>
     <task id="LOCAL-00001" summary="Fix race + clean">
       <created>1465208593810</created>
@@ -1799,11 +1782,18 @@
       <option name="project" value="LOCAL" />
       <updated>1465218345098</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fix httpsession destroy">
+      <created>1465453592341</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1465453592341</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43572000" />
+    <option name="totallyTimeSpent" value="47685000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1816,25 +1806,27 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.6036932" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39772728" sideWeight="0.14216478" order="13" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.328125" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.328125" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.328125" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3338068" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Spring" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32890365" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5056818" sideWeight="0.49676898" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13893376" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24232633" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Problems" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43607953" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32956383" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32875606" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.48579547" sideWeight="0.85783523" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48579547" sideWeight="0.85783523" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1842,7 +1834,6 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32956383" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.6036932" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.65625" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -1862,7 +1853,8 @@
     <MESSAGE value="Fix race + clean" />
     <MESSAGE value="remove unsued import" />
     <MESSAGE value="add gradle + clean modules" />
-    <option name="LAST_COMMIT_MESSAGE" value="add gradle + clean modules" />
+    <MESSAGE value="fix httpsession destroy" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix httpsession destroy" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1879,29 +1871,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/security/SecurityManager.java" />
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Permission.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="25" column="13" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/request/WebSocketRequestBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="28" column="13" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/terminal/request/RequestBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="27" column="27" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.gwt/gwt-elemental/2.7.0/6bf12bca65f574d826f162e718fe75e6ce0a4606/gwt-elemental-2.7.0-sources.jar!/elemental/client/Browser.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="337">
@@ -1994,6 +1963,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="766">
           <caret line="166" column="5" selection-start-line="166" selection-start-column="5" selection-end-line="166" selection-end-column="5" />
+          <folding>
+            <element signature="e#5466#5467#0" expanded="false" />
+            <element signature="e#5542#5543#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2127,14 +2100,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="116">
-          <caret line="189" column="5" selection-start-line="189" selection-start-column="5" selection-end-line="189" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/basic/PSuggestBox.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="371">
@@ -2182,14 +2147,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/ApplicationLoader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="31" column="17" selection-start-line="31" selection-start-column="17" selection-end-line="31" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.gwt/gwt-user/2.7.0/bdc7af42581745d3d79c2efe0b514f432b998a5b/gwt-user-2.7.0.jar!/javax/servlet/http/HttpSession.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="454">
@@ -2198,35 +2155,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/UIContext.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-324">
-          <caret line="68" column="35" selection-start-line="68" selection-start-column="32" selection-end-line="68" selection-end-column="35" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/AbstractApplicationLoader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
+        <state relative-caret-position="0">
           <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="269" column="32" selection-start-line="269" selection-start-column="32" selection-end-line="269" selection-end-column="32" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Application.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
+        <state relative-caret-position="0">
           <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
           <folding />
         </state>
@@ -2234,12 +2173,85 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/SessionManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="424">
-          <caret line="99" column="0" selection-start-line="99" selection-start-column="0" selection-end-line="99" selection-end-column="0" />
+        <state relative-caret-position="0">
+          <caret line="85" column="46" selection-start-line="85" selection-start-column="46" selection-end-line="85" selection-end-column="46" />
           <folding>
             <element signature="e#1765#1766#0" expanded="true" />
             <element signature="e#1808#1809#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/ApplicationLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="31" column="17" selection-start-line="31" selection-start-column="17" selection-end-line="31" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/servlet/WebSocketServlet.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="56" column="30" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/Permission.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/RootEventBus.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-66">
+          <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/eventbus/SimpleEventBus.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="339" column="18" selection-start-line="339" selection-start-column="18" selection-end-line="339" selection-end-column="18" />
+          <folding>
+            <element signature="e#11740#11741#0" expanded="true" />
+            <element signature="e#11790#11791#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="214">
+          <caret line="191" column="17" selection-start-line="191" selection-start-column="17" selection-end-line="191" selection-end-column="17" />
+          <folding>
+            <element signature="e#1620#1621#0" expanded="true" />
+            <element signature="e#1676#1677#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/application/UIContext.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="349" column="16" selection-start-line="349" selection-start-column="16" selection-end-line="349" selection-end-column="16" />
+          <folding>
+            <element signature="e#12281#12282#0" expanded="true" />
+            <element signature="e#12336#12337#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ponysdk/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="15" column="25" selection-start-line="15" selection-start-column="25" selection-end-line="15" selection-end-column="25" />
+          <folding />
         </state>
       </provider>
     </entry>

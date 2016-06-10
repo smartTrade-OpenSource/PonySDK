@@ -47,6 +47,10 @@ public class PScheduler implements UIContextListener {
         this.executor = executor;
     }
 
+    public static UIRunnable schedule(final Runnable runnable) {
+        return schedule(runnable, Duration.ZERO);
+    }
+
     public static UIRunnable schedule(final Runnable runnable, final Duration duration) {
         return INSTANCE.schedule0(runnable, duration);
     }
