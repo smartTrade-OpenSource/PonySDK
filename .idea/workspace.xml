@@ -7,7 +7,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d52aa1b3-766c-4153-bdbf-60cbf42d416d" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/server/concurrent/PScheduler.java" />
     </list>
     <ignored path="PonySDK.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -1752,7 +1751,7 @@
       <workItem from="1465137402172" duration="22837000" />
       <workItem from="1465213606725" duration="1860000" />
       <workItem from="1465281963792" duration="1148000" />
-      <workItem from="1465308111447" duration="7452000" />
+      <workItem from="1465308111447" duration="7464000" />
     </task>
     <task id="LOCAL-00001" summary="Fix race + clean">
       <created>1465208593810</created>
@@ -1789,11 +1788,18 @@
       <option name="project" value="LOCAL" />
       <updated>1465453592341</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="fix httpsession destroy">
+      <created>1465573605592</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1465573605592</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="47685000" />
+    <option name="totallyTimeSpent" value="47697000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
