@@ -31,7 +31,10 @@ import java.util.List;
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PKeyCodes;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.form.formfield.FormField;
@@ -45,9 +48,10 @@ import com.ponysdk.core.ui.list.Resetable;
 import com.ponysdk.core.ui.list.Sortable;
 import com.ponysdk.core.ui.list.Validable;
 
-public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
+public class ComplexHeaderCellRenderer
+        implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
-    protected final FormField<?, ? extends PWidget> formField;
+    protected final FormField<?, ? extends IsPWidget> formField;
     protected final String key;
 
     protected PGrid panel;
@@ -57,11 +61,12 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
 
     protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<>();
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends IsPWidget> formField, final String key) {
         this(caption, formField, key, null);
     }
 
-    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends PWidget> formField, final String key, final FilterListener filterListener) {
+    public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends IsPWidget> formField, final String key,
+            final FilterListener filterListener) {
         this.formField = formField;
         this.key = key;
         builGUI(caption);
@@ -168,15 +173,16 @@ public class ComplexHeaderCellRenderer implements Queriable, HeaderCellRenderer,
     }
 
     @Override
-    public void afterReset(final FormField<?, ? extends PWidget> formField) {
+    public void afterReset(final FormField<?, ? extends IsPWidget> formField) {
         formField.asWidget().removeStyleName("validation-error");
     }
 
     @Override
-    public void afterValidation(final FormField<?, ? extends PWidget> formField, final ValidationResult validationResult) {
+    public void afterValidation(final FormField<?, ? extends IsPWidget> formField, final ValidationResult validationResult) {
         if (!validationResult.isValid() && !formField.asWidget().hasStyleName("validation-error"))
             formField.asWidget().addStyleName("validation-error");
-        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error")) formField.asWidget().removeStyleName("validation-error");
+        else if (validationResult.isValid() && formField.asWidget().hasStyleName("validation-error"))
+            formField.asWidget().removeStyleName("validation-error");
     }
 
     @Override

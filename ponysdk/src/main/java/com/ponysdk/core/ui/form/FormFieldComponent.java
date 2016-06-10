@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form;
 
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -122,13 +123,13 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     }
 
     @Override
-    public void afterReset(final FormField<?, ? extends PWidget> formField) {
+    public void afterReset(final FormField<?, ? extends IsPWidget> formField) {
         removeStyleName("error");
         errorLabel.setText("");
     }
 
     @Override
-    public void afterValidation(final FormField<?, ? extends PWidget> formField, final ValidationResult validationResult) {
+    public void afterValidation(final FormField<?, ? extends IsPWidget> formField, final ValidationResult validationResult) {
         if (validationResult.isValid()) {
             removeStyleName("error");
             errorLabel.setText("");

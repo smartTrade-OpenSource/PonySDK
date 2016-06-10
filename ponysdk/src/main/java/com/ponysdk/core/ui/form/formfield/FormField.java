@@ -28,7 +28,6 @@ import java.util.Set;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
@@ -36,9 +35,9 @@ import com.ponysdk.core.ui.list.Resetable;
 import com.ponysdk.core.ui.list.Validable;
 
 /**
- * A field of a {@link Form} that can be validated or reset
+ * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or reset
  */
-public abstract class FormField<T, W extends PWidget> implements IsPWidget, Validable, Resetable {
+public abstract class FormField<T, W extends IsPWidget> implements IsPWidget, Validable, Resetable {
 
     private final Set<FormFieldListener> listeners = new HashSet<>();
 
@@ -107,7 +106,7 @@ public abstract class FormField<T, W extends PWidget> implements IsPWidget, Vali
 
     @Override
     public PWidget asWidget() {
-        return getWidget();
+        return getWidget().asWidget();
     }
 
     public W getWidget() {
