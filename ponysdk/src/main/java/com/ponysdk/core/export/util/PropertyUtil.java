@@ -36,11 +36,9 @@ public class PropertyUtil {
 
     public static String getProperty(final Object bean, final String property)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        final String propertyPath = property;
         Object propertyValue = NA;
-        if (propertyPath != null) {
-
-            final String[] tokens = propertyPath.split("\\.");
+        if (property != null) {
+            final String[] tokens = property.split("\\.");
             propertyValue = getPropertyValue(bean, tokens[0]);
             for (int i = 1; i < tokens.length; i++) {
                 if (tokens[i].equals("toString")) {

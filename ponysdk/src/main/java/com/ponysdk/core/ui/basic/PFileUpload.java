@@ -147,9 +147,7 @@ public class PFileUpload extends PWidget
 
     @Override
     public void onSubmitComplete() {
-        for (final PSubmitCompleteHandler handler : submitCompleteHandlers) {
-            handler.onSubmitComplete();
-        }
+        submitCompleteHandlers.forEach(PSubmitCompleteHandler::onSubmitComplete);
     }
 
     @Override

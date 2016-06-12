@@ -72,8 +72,8 @@ public class PTInstruction extends JSONObject {
         put(key.toStringValue(), new JSONObject(value));
     }
 
-    public JSONValue put(final ClientToServerModel key, final JSONValue jsonValue) {
-        return put(key.toStringValue(), jsonValue);
+    public void put(final ClientToServerModel key, final JSONValue jsonValue) {
+        put(key.toStringValue(), jsonValue);
     }
 
 }

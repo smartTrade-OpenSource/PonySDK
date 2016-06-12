@@ -35,7 +35,7 @@ public class PonyServiceRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(PonyServiceRegistry.class);
 
-    private static Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
     public static void registerPonyService(final PonyService service) {
 
@@ -43,12 +43,10 @@ public class PonyServiceRegistry {
 
         getGeneralizations(service.getClass(), classes);
 
-        for (final Class<?> clazz : classes) {
-            if (PonyService.class.isAssignableFrom(clazz)) {
-                registeredServices.put(clazz, service);
-                log.info("Service registered #" + clazz);
-            }
-        }
+        classes.stream().filter(clazz -> PonyService.class.isAssignableFrom(clazz)).forEach(clazz -> {
+            registeredServices.put(clazz, service);
+            log.info("Service registered #" + clazz);
+        });
     }
 
     public static void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {

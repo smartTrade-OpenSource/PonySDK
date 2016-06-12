@@ -121,8 +121,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                     uiService.sendDataToServer(cast(), eventInstruction);
                 }
             });
-
-            return;
         } else {
             super.addHandler(buffer, handlerModel, uiService);
         }

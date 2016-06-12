@@ -26,7 +26,7 @@ package com.ponysdk.core.weak;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
-    private final Map<Integer, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
+    private final Map<Integer, Reference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
 
     private final Map<WeakReference<PObject>, Integer> objectIDByReferences = new ConcurrentHashMap<>();
 
@@ -77,7 +77,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
     @Override
     public PObject get(final Object key) {
         expungeStaleEntries();
-        final WeakReference<PObject> value = referenceByObjectID.get(key);
+        final Reference<PObject> value = referenceByObjectID.get(key);
         if (value == null) return null;
         return value.get();
     }
@@ -97,7 +97,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
     @Override
     public PObject remove(final Object key) {
         expungeStaleEntries();
-        final WeakReference<PObject> reference = referenceByObjectID.remove(key);
+        final Reference<PObject> reference = referenceByObjectID.remove(key);
 
         if (log.isDebugEnabled()) log.debug("Removing reference on object #" + key);
         if (reference == null) return null;
@@ -139,17 +139,18 @@ public class WeakHashMap implements Map<Integer, PObject> {
         Reference<? extends PObject> reference;
         while ((reference = queue.poll()) != null) {
             final Integer objectID = objectIDByReferences.remove(reference);
-            final WeakReference<PObject> removedObject = referenceByObjectID.remove(objectID);
-            if (log.isDebugEnabled()) log.debug("Removing reference on object #" + objectID);
+            final Reference<PObject> removedObject = referenceByObjectID.remove(objectID);
+            if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
             try (final ModelWriter writer = Txn.getWriter()) {
-                if (removedObject.get() instanceof PWidget) {
-                    final int windowID = removedObject.get().getWindowID();
+                final PObject pObject = removedObject.get();
+                if (pObject == null) continue;
+                final int windowID = pObject.getWindowID();
+                if (windowID != PWindow.MAIN_WINDOW_ID) {
                     writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
                 }
                 writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
             } catch (IOException e) {
-
             }
         }
     }

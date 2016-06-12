@@ -23,19 +23,14 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.list.FilterListener;
-import com.ponysdk.core.ui.list.HasCriteria;
-import com.ponysdk.core.ui.list.Queriable;
-import com.ponysdk.core.ui.list.Resetable;
-import com.ponysdk.core.ui.list.Sortable;
-import com.ponysdk.core.ui.list.Validable;
+import com.ponysdk.core.ui.list.*;
+
+import java.util.Collections;
+import java.util.List;
 
 public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer, HasCriteria, Sortable {
 
@@ -78,8 +73,7 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
     public List<Criterion> getCriteria() {
         final Criterion criterion = new Criterion(key);
         criterion.setSortingType(sortingType);
-
-        return Arrays.asList(criterion);
+        return Collections.singletonList(criterion);
     }
 
     @Override

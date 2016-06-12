@@ -147,7 +147,7 @@ public class PScript extends PObject {
 
     public static class PScriptExecutionLogger implements ExecutionCallback {
 
-        private static Logger log = LoggerFactory.getLogger(PScriptExecutionLogger.class);
+        private static final Logger log = LoggerFactory.getLogger(PScriptExecutionLogger.class);
 
         @Override
         public void onFailure(final String msg) {

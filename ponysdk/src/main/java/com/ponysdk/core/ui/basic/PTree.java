@@ -52,9 +52,6 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
  * <dt>.gwt-Tree .gwt-TreeItem-selected</dt>
  * <dd>a selected tree item</dd>
  * </dl>
- * <p>
- * <h3>Example</h3> {@example http://ponysdk.com/sample/#Tree}
- * </p>
  */
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation {
 

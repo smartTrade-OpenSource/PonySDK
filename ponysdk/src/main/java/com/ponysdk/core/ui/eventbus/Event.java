@@ -30,7 +30,7 @@ public abstract class Event<H extends EventHandler> {
 
     public static class Type<H> {
 
-        private static AtomicInteger nextHashCode = new AtomicInteger(0);
+        private static final AtomicInteger nextHashCode = new AtomicInteger(0);
 
         private final int index;
 

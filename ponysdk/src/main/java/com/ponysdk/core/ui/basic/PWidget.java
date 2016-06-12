@@ -49,7 +49,7 @@ import java.util.*;
  */
 public abstract class PWidget extends PObject implements IsPWidget {
 
-    private static Logger log = LoggerFactory.getLogger(PWidget.class);
+    private static final Logger log = LoggerFactory.getLogger(PWidget.class);
 
     private static final String HUNDRED_PERCENT = "100%";
 

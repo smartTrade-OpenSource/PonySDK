@@ -46,7 +46,7 @@ public class Application {
 
     private final ApplicationManagerOption options;
 
-    private String sessionID;
+    private final String sessionID;
 
     public Application(String sessionID, final ApplicationManagerOption options) {
         this.options = options;

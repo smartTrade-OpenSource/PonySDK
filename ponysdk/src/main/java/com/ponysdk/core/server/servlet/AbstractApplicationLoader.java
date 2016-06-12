@@ -39,7 +39,7 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationLoader.class);
 
-    protected ApplicationManagerOption applicationManagerOption;
+    private ApplicationManagerOption applicationManagerOption;
 
     private AbstractApplicationManager applicationManager;
 
@@ -74,7 +74,8 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     private void printWelcomBanner() {
         final BannerPrinter bannerPrinter = new BannerPrinter(60);
-        bannerPrinter.appendNewEmptyLine(2);
+        bannerPrinter.appendNewEmptyLine();
+        bannerPrinter.appendNewEmptyLine();
         bannerPrinter.appendLineSeparator();
         bannerPrinter.appendCenteredLine("PonySDK http://www.ponysdk.com");
         bannerPrinter.appendCenteredLine("WEB  APPLICATION");
@@ -88,7 +89,8 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     private void printGoodbyeBanner() {
         final BannerPrinter bannerPrinter = new BannerPrinter(60);
-        bannerPrinter.appendNewEmptyLine(2);
+        bannerPrinter.appendNewEmptyLine();
+        bannerPrinter.appendNewEmptyLine();
         bannerPrinter.appendLineSeparator();
         bannerPrinter.appendCenteredLine("Context Destroyed");
         bannerPrinter.appendCenteredLine(applicationManagerOption.getApplicationID());

@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -40,7 +39,7 @@ public class MenuItem {
     public MenuItem(final String name, final String category) {
         this.name = name;
         if (category == null) this.categories = Collections.emptyList();
-        else this.categories = Arrays.asList(category);
+        else this.categories = Collections.singletonList(category);
     }
 
     public String getName() {

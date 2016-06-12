@@ -35,7 +35,7 @@ public enum ValueTypeModel {
     STRING((byte) -1),
     JSON_OBJECT((byte) -1);
 
-    private int size;
+    private final int size;
 
     ValueTypeModel(final byte size) {
         this.size = size;

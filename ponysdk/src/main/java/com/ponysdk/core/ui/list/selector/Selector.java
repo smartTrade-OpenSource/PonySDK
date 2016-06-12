@@ -73,21 +73,15 @@ public class Selector<T> implements SelectorViewListener, SelectableListener, Re
     public void onSelectionChange(final SelectionMode mode) {
         switch (mode) {
             case NONE:
-                for (final Selectable<T> selectable : selectableList) {
-                    selectable.unselect();
-                }
+                selectableList.forEach(Selectable::unselect);
                 numberOfSelectedItems = 0;
                 break;
             case PAGE:
-                for (final Selectable<T> selectable : selectableList) {
-                    selectable.select();
-                }
+                selectableList.forEach(Selectable::select);
                 numberOfSelectedItems = selectableList.size();
                 break;
             case FULL:
-                for (final Selectable<T> selectable : selectableList) {
-                    selectable.select();
-                }
+                selectableList.forEach(Selectable::select);
                 numberOfSelectedItems = fullSize;
                 break;
             case PARTIAL:

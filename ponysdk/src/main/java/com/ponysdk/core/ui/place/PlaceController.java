@@ -40,8 +40,6 @@ public class PlaceController implements PlaceChangeRequestHandler {
 
     /**
      * GoTo Page with history
-     * 
-     * @param place
      */
     public void goTo(final Place place) {
         UIContext.fireEvent(new PlaceChangeEvent(this, place));

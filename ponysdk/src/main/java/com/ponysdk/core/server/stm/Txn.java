@@ -32,7 +32,7 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
 
-    private static ThreadLocal<Txn> transactions = new ThreadLocal<>();
+    private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
     private final Set<TxnListener> txnListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 

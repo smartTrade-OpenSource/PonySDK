@@ -33,8 +33,6 @@ import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 public class DefaultHeaderView extends PSimplePanel implements HeaderView {
 
-    private final PHorizontalPanel gridLayout = new PHorizontalPanel();
-
     private final PHorizontalPanel actionPanel = new PHorizontalPanel();
 
     public DefaultHeaderView(final String title) {
@@ -42,6 +40,7 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
 
         final PLabel logo = new PLabel(title);
 
+        PHorizontalPanel gridLayout = new PHorizontalPanel();
         gridLayout.add(logo);
         gridLayout.setCellHorizontalAlignment(logo, PHorizontalAlignment.ALIGN_LEFT);
         gridLayout.setCellVerticalAlignment(logo, PVerticalAlignment.ALIGN_MIDDLE);

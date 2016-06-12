@@ -113,15 +113,14 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                 applicationViewID = viewID != null ? viewID : 0;
 
-                final StringBuilder builder = new StringBuilder();
-                builder.append(GWT.getHostPageBaseURL().replaceFirst("http", "ws"));
-                builder.append("ws?");
-                builder.append(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID).append("&");
-                builder.append(ClientToServerModel.APPLICATION_START.toStringValue()).append("&");
-                builder.append(ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0).append("&");
-                builder.append(ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken());
+                String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") +
+                        "ws?" +
+                        ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID + "&" +
+                        ClientToServerModel.APPLICATION_START.toStringValue() + "&" +
+                        ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0 + "&" +
+                        ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
 
-                socketClient = new WebSocketClient(builder.toString(), uiBuilder, applicationViewID);
+                socketClient = new WebSocketClient(builder, uiBuilder, applicationViewID);
             } else {
                 final String windowId = Window.Location.getParameter("wid");
                 uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {

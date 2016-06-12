@@ -53,15 +53,11 @@ public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
     }
 
     public void onCheck() {
-        for (final SelectableListener selectableListener : listeners) {
-            selectableListener.onSelect();
-        }
+        listeners.forEach(SelectableListener::onSelect);
     }
 
     public void onUncheck() {
-        for (final SelectableListener selectableListener : listeners) {
-            selectableListener.onUnselect();
-        }
+        listeners.forEach(SelectableListener::onUnselect);
     }
 
     @Override

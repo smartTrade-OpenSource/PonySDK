@@ -421,10 +421,9 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
                 return;
             }
 
-            final int from = pos;
-            final int to = from + 1;
+            final int to = pos + 1;
 
-            if (value.remove(from, to)) {
+            if (value.remove(pos, to)) {
                 refresh(pos);
             } else {
                 setCursorPos(pos);

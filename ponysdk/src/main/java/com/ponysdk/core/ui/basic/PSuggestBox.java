@@ -84,9 +84,6 @@ public class PSuggestBox extends PWidget
 
     private int limit;
 
-    private String replacementString;
-    private String displayString;
-
     public PSuggestBox() {
         this(new PMultiWordSuggestOracle());
     }
@@ -122,8 +119,8 @@ public class PSuggestBox extends PWidget
             final String text = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue())) {
-            this.replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
-            this.displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
+            String replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
+            String displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<PSuggestOracle.PSuggestion>(this, suggestion));

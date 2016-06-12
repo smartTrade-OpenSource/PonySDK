@@ -230,6 +230,5 @@ public class SimpleTable extends PElement {
     }
 
     private void checkColumnBound(final int beforeIndex) {
-        return;
     }
 }

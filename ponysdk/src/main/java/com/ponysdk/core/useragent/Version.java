@@ -25,9 +25,9 @@ package com.ponysdk.core.useragent;
 
 public class Version {
 
-    String version;
-    String majorVersion;
-    String minorVersion;
+    final String version;
+    final String majorVersion;
+    final String minorVersion;
 
     public Version(final String version, final String majorVersion, final String minorVersion) {
         super();

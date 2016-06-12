@@ -64,9 +64,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class UIContext {
 
-    private static ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
+    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
 
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
+
+    private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private int objectCounter = 1;
 
@@ -94,8 +96,6 @@ public class UIContext {
     private int nextSent = 0;
     private long lastSyncErrorTimestamp = 0;
     private final Map<Integer, JsonObject> incomingMessageQueue = new HashMap<>();
-
-    private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
 
@@ -169,9 +169,7 @@ public class UIContext {
         if (listenerCollection.isEmpty()) return;
         try {
             for (final DataListener listener : listenerCollection) {
-                for (final Object object : data) {
-                    listener.onData(object);
-                }
+                data.forEach((object) -> listener.onData(object));
             }
         } catch (final Throwable e) {
             log.error("Cannot send data", e);
@@ -522,20 +520,16 @@ public class UIContext {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (ID ^ ID >>> 32);
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UIContext uiContext = (UIContext) o;
+        return ID == uiContext.ID;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        final UIContext other = (UIContext) obj;
-        return ID == other.ID;
+    public int hashCode() {
+        return Objects.hash(ID);
     }
 
     @Override

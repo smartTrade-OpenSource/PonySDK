@@ -23,22 +23,20 @@
 
 package com.ponysdk.core.terminal.request;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ParentWindowRequest implements RequestBuilder {
 
     private static final Logger log = Logger.getLogger(ParentWindowRequest.class.getName());
 
-    protected final RequestCallback callback;
+    private final RequestCallback callback;
 
-    private final String windowID;
 
     public ParentWindowRequest(final String windowID, final RequestCallback callback) {
-        this.windowID = windowID;
         this.callback = callback;
 
         exportOnDataReceived();

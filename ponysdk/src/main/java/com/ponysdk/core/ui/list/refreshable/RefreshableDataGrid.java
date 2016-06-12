@@ -23,20 +23,15 @@
 
 package com.ponysdk.core.ui.list.refreshable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Extends {@link DataGridActivity} Capable of moving columns and refreshing a
@@ -47,10 +42,9 @@ import com.ponysdk.core.ui.list.SimpleListView;
  */
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
-    protected final Map<K, Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> cells = new HashMap<>();
-
-    protected final List<K> keyByIndex = new ArrayList<>();
-    protected final Map<K, D> valueByKey = new HashMap<>();
+    private final Map<K, Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> cells = new HashMap<>();
+    private final List<K> keyByIndex = new ArrayList<>();
+    private final Map<K, D> valueByKey = new HashMap<>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
         super(listView);
@@ -71,7 +65,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         throw new RuntimeException("Use removeByKey(key)");
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void setData(final K key, final D data) {
         Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) {
@@ -88,21 +82,17 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             int col = 0;
 
             for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
-                final DataGridColumnDescriptor d = descriptor;
                 final Cell cell = new Cell();
                 cell.setCol(col++);
                 cell.setData(data);
                 cell.setRow(row);
-                cell.setValue(d.getValueProvider().getValue(data));
-                cell.setW(d.getCellRenderer().render(row, cell.getValue()));
-                map.put(d, cell);
+                cell.setValue(descriptor.getValueProvider().getValue(data));
+                cell.setW(descriptor.getCellRenderer().render(row, cell.getValue()));
+                map.put(descriptor, cell);
                 view.addWidget(cell.getW(), cell.getCol(), cell.getRow() + 1, 1);
             }
             view.addWidget(new PSimplePanel(), col, row + 1, 1);
-            // view.addRowStyle(row + 1, PonySDKTheme.SIMPLELIST_ROW);
-
         } else {
-
             final D previousData = valueByKey.remove(key);
             final int previousIndex = rows.indexOf(previousData);
             rows.remove(previousIndex);
@@ -146,11 +136,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             final K k = keyByIndex.get(i);
             if (k != null) {
                 final Map<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> cellRow = cells.get(k);
-                final Iterator<Entry<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>>> iter = cellRow.entrySet().iterator();
-                final int realRow = i;
-                while (iter.hasNext()) {
-                    final Entry<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> entry = iter.next();
-                    entry.getValue().setRow(realRow);
+                for (Entry<DataGridColumnDescriptor<K, D, ? extends IsPWidget>, Cell<D, ? extends IsPWidget>> entry : cellRow.entrySet()) {
+                    entry.getValue().setRow(i);
                 }
             }
         }

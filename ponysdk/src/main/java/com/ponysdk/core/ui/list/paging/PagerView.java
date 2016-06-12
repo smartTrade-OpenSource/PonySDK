@@ -25,9 +25,6 @@ package com.ponysdk.core.ui.list.paging;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 
-/**
- * View of a {@link com.ponysdk.core.ui.list.paging.Pager<T>}
- */
 public interface PagerView extends IsPWidget {
 
     void addPagerListener(PagerListener pagerListener);

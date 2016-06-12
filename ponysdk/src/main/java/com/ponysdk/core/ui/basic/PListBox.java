@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
 
@@ -113,7 +114,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final ListItem groupItem = new ListGroupItem(group);
         this.items.add(groupItem);
 
-        items.forEach((item) ->  this.items.add(new ListItem(item, item)));
+        items.forEach((item) -> this.items.add(new ListItem(item, item)));
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
@@ -188,7 +189,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void removeItem(final String label) {
         checkItem(label);
         int currentIndex = 0;
-        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext(); ) {
             final ListItem item = iterator.next();
             if (Objects.equals(item.label, label)) {
                 selectedIndexes.remove(currentIndex);
@@ -202,7 +203,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void removeValue(final Object value) {
         int currentIndex = 0;
-        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext(); ) {
             final ListItem item = iterator.next();
             if (Objects.equals(item.value, value)) {
                 selectedIndexes.remove(currentIndex);
@@ -345,19 +346,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public List<String> getSelectedItems() {
-        final List<String> items = new ArrayList<>();
-        for (final Integer index : selectedIndexes) {
-            items.add(this.items.get(index).label);
-        }
-        return items;
+        return selectedIndexes.stream().map(index -> this.items.get(index).label).collect(Collectors.toList());
     }
 
     public List<Object> getSelectedValues() {
-        final List<Object> values = new ArrayList<>();
-        for (final Integer index : selectedIndexes) {
-            values.add(this.items.get(index).value);
-        }
-        return values;
+        return selectedIndexes.stream().map(index -> this.items.get(index).value).collect(Collectors.toList());
     }
 
     public void setVisibleItemCount(final int visibleItemCount) {

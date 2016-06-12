@@ -23,14 +23,10 @@
 
 package com.ponysdk.core.terminal.model;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.terminal.UIBuilder;
-
 import elemental.client.Browser;
 import elemental.html.ArrayBuffer;
 import elemental.html.Uint8Array;
@@ -38,9 +34,7 @@ import elemental.html.Window;
 
 public class ReaderBuffer {
 
-    private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
-
-    public static final byte TRUE = 1;
+    private static final byte TRUE = 1;
 
     private final ArrayBuffer message;
     private int position;
@@ -56,54 +50,49 @@ public class ReaderBuffer {
         return position;
     }
 
-    public int getByteLength() {
+    private int getByteLength() {
         return message.getByteLength();
     }
 
     public BinaryModel readBinaryModel() {
         if (!hasRemaining()) return BinaryModel.NULL;
-        try {
-            final ServerToClientModel key = ServerToClientModel.values()[getShort()];
-            int size = ValueTypeModel.SHORT.getSize();
+        final ServerToClientModel key = ServerToClientModel.values()[getShort()];
+        int size = ValueTypeModel.SHORT.getSize();
 
-            switch (key.getTypeModel()) {
-                case NULL:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, size);
-                case BOOLEAN:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getBoolean(), size);
-                case BYTE:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getByte(), size);
-                case SHORT:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getShort(), size);
-                case INTEGER:
-                    size += key.getTypeModel().getSize();
-                    return new BinaryModel(key, getInt(), size);
-                case LONG:
-                    // TODO Read really a long
-                    // return new BinaryModel(key, getLong(), size);
-                case DOUBLE:
-                    // TODO Read really a double
-                    // return new BinaryModel(key, getDouble(), size);
-                case STRING:
-                    size += ValueTypeModel.INTEGER.getSize();
-                    final int messageSize = getInt();
-                    size += messageSize;
-                    return new BinaryModel(key, getString(messageSize), size);
-                case JSON_OBJECT:
-                    size += ValueTypeModel.INTEGER.getSize();
-                    final int jsonSize = getInt();
-                    size += jsonSize;
-                    return new BinaryModel(key, getJson(jsonSize), size);
-                default:
-                    throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
-            }
-        } catch (final Exception e) {
-            // log.log(Level.SEVERE, "Cannot parse " + getString(), e);
-            throw e;
+        switch (key.getTypeModel()) {
+            case NULL:
+                size += key.getTypeModel().getSize();
+                return new BinaryModel(key, size);
+            case BOOLEAN:
+                size += key.getTypeModel().getSize();
+                return new BinaryModel(key, getBoolean(), size);
+            case BYTE:
+                size += key.getTypeModel().getSize();
+                return new BinaryModel(key, getByte(), size);
+            case SHORT:
+                size += key.getTypeModel().getSize();
+                return new BinaryModel(key, getShort(), size);
+            case INTEGER:
+                size += key.getTypeModel().getSize();
+                return new BinaryModel(key, getInt(), size);
+            case LONG:
+                // TODO Read really a long
+                // return new BinaryModel(key, getLong(), size);
+            case DOUBLE:
+                // TODO Read really a double
+                // return new BinaryModel(key, getDouble(), size);
+            case STRING:
+                size += ValueTypeModel.INTEGER.getSize();
+                final int messageSize = getInt();
+                size += messageSize;
+                return new BinaryModel(key, getString(messageSize), size);
+            case JSON_OBJECT:
+                size += ValueTypeModel.INTEGER.getSize();
+                final int jsonSize = getInt();
+                size += jsonSize;
+                return new BinaryModel(key, getJson(jsonSize), size);
+            default:
+                throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
         }
     }
 
@@ -148,22 +137,13 @@ public class ReaderBuffer {
         return result;
     }
 
-    private long getLong() {
-        throw new IllegalArgumentException("Not implemented yet");
-    }
-
-    private double getDouble() {
-        throw new IllegalArgumentException("Not implemented yet");
-    }
-
-    public JSONObject getJson(final int msgSize) {
-        return JSONParser.parseStrict(getString(msgSize)).isObject();
-    }
-
-    private String getString() {
-        final String result = fromCharCode(message.slice(position));
-        position = message.getByteLength();
-        return result;
+    private JSONObject getJson(final int msgSize) {
+        String s = getString(msgSize);
+        if(s != null){
+            return JSONParser.parseStrict(s).isObject();
+        }else{
+            return null;
+        }
     }
 
     private String getString(final int end) {

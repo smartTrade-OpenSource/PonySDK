@@ -30,6 +30,7 @@ import java.util.Map;
 
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -81,14 +82,8 @@ public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHan
 
     @Override
     public void clear() {
-        for (final HandlerRegistration registration : registrations) {
-            registration.removeHandler();
-        }
-
-        for (final PAnchor anchor : items.values()) {
-            anchor.removeFromParent();
-        }
-
+        registrations.forEach(HandlerRegistration::removeHandler);
+        items.values().forEach(PWidget::removeFromParent);
         registrations.clear();
         items.clear();
     }

@@ -113,9 +113,7 @@ public class BootstrapServlet extends HttpServlet {
 
     protected String getPath(final HttpServletRequest request) {
         final String contextPath = request.getContextPath();
-        final String requestURI = request.getRequestURI();
-        final String extraPathInfo = requestURI.replaceFirst(contextPath, "");
-        return extraPathInfo;
+        return request.getRequestURI().replaceFirst(contextPath, "");
     }
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws IOException {
@@ -194,12 +192,12 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<!-- Powered by PonySDK http://www.ponysdk.com -->");
         writer.newLine();
-        writer.append("<title>" + application.getApplicationName() + "</title>");
+        writer.append("<title>").append(application.getApplicationName()).append("</title>");
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         writer.newLine();
         for (final String m : meta) {
-            writer.append("<meta " + m + ">");
+            writer.append("<meta ").append(m).append(">");
             writer.newLine();
         }
 
@@ -211,14 +209,14 @@ public class BootstrapServlet extends HttpServlet {
         for (final String style : stylesheets) {
             final String contentType = new MimetypesFileTypeMap().getContentType(style);
             if (!contentType.equals("text/css"))
-                writer.append("<link rel=\"stylesheet/less\" type=\"" + contentType + "\" href=\"" + style + "\">");
+                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
             else
-                writer.append("<link rel=\"stylesheet\" type=\"" + contentType + "\" href=\"" + style + "\">");
+                writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
             writer.newLine();
         }
 
         for (final String script : javascripts) {
-            writer.append("<script type=\"text/javascript\" src=\"" + script + "\"></script>");
+            writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
             writer.newLine();
         }
 
@@ -247,7 +245,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
-        writer.append("<div id=\"loading\">Loading " + application.getApplicationName() + "...</div>");
+        writer.append("<div id=\"loading\">Loading ").append(application.getApplicationName()).append("...</div>");
     }
 
     protected void addNoScript(final BufferedWriter writer) throws IOException {

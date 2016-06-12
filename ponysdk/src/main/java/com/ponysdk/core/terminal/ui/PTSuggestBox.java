@@ -44,7 +44,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    public static Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
+    private static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
 

@@ -412,7 +412,7 @@ public enum PKeyCodes {
 
     CONTEXT_MENU(93),
     /**
-     * Key code for {@link KeyCodes#,WIN_,LEFT_META} that Firefox fires for the meta key.
+     * Key code for {@link PKeyCodes#} that Firefox fires for the meta key.
      */
     MAC_FF_META(224), // Firefox (Gecko) fires this for the meta key instead of 91
 
@@ -439,16 +439,15 @@ public enum PKeyCodes {
 
     WIN_IME(229);
 
-    private static Map<Integer, PKeyCodes> codesByKey;
+    private static Map<Integer, PKeyCodes> codesByKey = new HashMap<>();
 
     static {
-        codesByKey = new HashMap<>();
         for (final PKeyCodes code : PKeyCodes.values()) {
             codesByKey.put(code.getCode(), code);
         }
     }
 
-    private int code;
+    private final int code;
 
     PKeyCodes(final int code) {
         this.code = code;

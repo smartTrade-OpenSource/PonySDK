@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.list.selector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.core.ui.basic.PWidget;
@@ -33,9 +34,7 @@ public class CompositeSelectorView implements SelectorView {
     private final List<SelectorView> views = new ArrayList<>();
 
     public CompositeSelectorView(final SelectorView... views) {
-        for (final SelectorView selectorView : views) {
-            this.views.add(selectorView);
-        }
+        Collections.addAll(this.views, views);
     }
 
     @Override

@@ -20,9 +20,9 @@ import com.ponysdk.core.server.stm.Txn;
 
 public class PScheduler implements UIContextListener {
 
-    private static Logger log = LoggerFactory.getLogger(PScheduler.class);
+    private static final Logger log = LoggerFactory.getLogger(PScheduler.class);
 
-    private static PScheduler INSTANCE;
+    private static final PScheduler INSTANCE;
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
@@ -41,7 +41,7 @@ public class PScheduler implements UIContextListener {
     }
 
     private final ScheduledThreadPoolExecutor executor;
-    private Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
+    private final Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
 
     private PScheduler(final ScheduledThreadPoolExecutor executor) {
         this.executor = executor;

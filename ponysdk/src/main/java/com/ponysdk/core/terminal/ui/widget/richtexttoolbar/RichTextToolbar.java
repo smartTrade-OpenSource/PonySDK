@@ -265,11 +265,10 @@ public class RichTextToolbar extends Composite {
         }
     }
 
-    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] { RichTextArea.FontSize.XX_SMALL,
+    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[]{RichTextArea.FontSize.XX_SMALL,
             RichTextArea.FontSize.X_SMALL, RichTextArea.FontSize.SMALL, RichTextArea.FontSize.MEDIUM,
-            RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE, RichTextArea.FontSize.XX_LARGE };
+            RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE, RichTextArea.FontSize.XX_LARGE};
 
-    private final Images images = (Images) GWT.create(Images.class);
     private final Strings strings = (Strings) GWT.create(Strings.class);
     private final EventHandler handler = new EventHandler();
 
@@ -277,9 +276,6 @@ public class RichTextToolbar extends Composite {
     private final RichTextArea.BasicFormatter basic;
     private final RichTextArea.ExtendedFormatter extended;
 
-    private final VerticalPanel outer = new VerticalPanel();
-    private final HorizontalPanel topPanel = new HorizontalPanel();
-    private final HorizontalPanel bottomPanel = new HorizontalPanel();
     private ToggleButton bold;
     private ToggleButton italic;
     private ToggleButton underline;
@@ -307,15 +303,17 @@ public class RichTextToolbar extends Composite {
     /**
      * Creates a new toolbar that drives the given rich text area.
      *
-     * @param richText
-     *            the rich text area to be controlled
+     * @param richText the rich text area to be controlled
      */
     public RichTextToolbar(final RichTextArea richText) {
         this.richText = richText;
         this.basic = richText.getBasicFormatter();
         this.extended = richText.getExtendedFormatter();
 
+        VerticalPanel outer = new VerticalPanel();
+        HorizontalPanel topPanel = new HorizontalPanel();
         outer.add(topPanel);
+        HorizontalPanel bottomPanel = new HorizontalPanel();
         outer.add(bottomPanel);
         topPanel.setWidth("100%");
         bottomPanel.setWidth("100%");
@@ -324,6 +322,7 @@ public class RichTextToolbar extends Composite {
         setStyleName("gwt-RichTextToolbar");
         richText.addStyleName("hasRichTextToolbar");
 
+        Images images = GWT.create(Images.class);
         if (basic != null) {
             topPanel.add(bold = createToggleButton(images.bold(), strings.bold()));
             topPanel.add(italic = createToggleButton(images.italic(), strings.italic()));

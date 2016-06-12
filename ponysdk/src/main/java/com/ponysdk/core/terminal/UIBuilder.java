@@ -81,7 +81,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
-    private static EventBus rootEventBus = new SimpleEventBus();
+    private static final EventBus rootEventBus = new SimpleEventBus();
 
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
@@ -198,7 +198,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
 
                     // Type
-                    BinaryModel model = buffer.readBinaryModel();
+                    BinaryModel model;
+
+                    buffer.readBinaryModel();
 
                     while (buffer.hasRemaining()) {
                         model = buffer.readBinaryModel();
@@ -208,7 +210,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                                 break;
                             } else {
                                 // Type
-                                model = buffer.readBinaryModel();
+                                buffer.readBinaryModel();
                             }
                         } else if (model.isBeginKey()) {
                             buffer.rewind(model);
@@ -373,7 +375,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void processClose(final ReaderBuffer buffer) {
         pendingClose = true;
-        // sendDataToServer(buffer);
         PTWindowManager.closeAll();
         Window.Location.reload();
     }
@@ -393,7 +394,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         lastReceived = receivedSeqNum;
     }
 
-    public PTObject unRegisterObject(final int objectId) {
+    private PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
         if (uiObject != null)

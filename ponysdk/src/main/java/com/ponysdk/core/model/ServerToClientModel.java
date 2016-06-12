@@ -222,7 +222,7 @@ public enum ServerToClientModel {
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
     TEXTBOX_ID(ValueTypeModel.INTEGER);
 
-    private ValueTypeModel type;
+    private final ValueTypeModel type;
 
     ServerToClientModel(final ValueTypeModel size) {
         this.type = size;

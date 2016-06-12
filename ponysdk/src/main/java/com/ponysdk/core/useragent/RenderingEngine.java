@@ -63,7 +63,7 @@ public enum RenderingEngine {
      */
     OTHER("Other");
 
-    String name;
+    final String name;
 
     RenderingEngine(final String name) {
         this.name = name;

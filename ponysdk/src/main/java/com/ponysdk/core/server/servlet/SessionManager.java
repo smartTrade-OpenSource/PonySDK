@@ -38,10 +38,10 @@ import com.ponysdk.core.tools.ListenerCollection;
 
 public class SessionManager {
 
+    private static final SessionManager INSTANCE = new SessionManager();
+
     private final Map<String, HttpSession> sessionsById = new ConcurrentHashMap<>();
     private final Map<String, Application> applicationsBySessionID = new ConcurrentHashMap<>();
-
-    private static SessionManager INSTANCE = new SessionManager();
     private final ListenerCollection<HttpSessionListener> sessionListeners = new ListenerCollection<>();
 
     public static SessionManager get() {

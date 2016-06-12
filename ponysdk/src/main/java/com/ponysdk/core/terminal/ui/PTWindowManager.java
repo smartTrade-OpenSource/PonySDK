@@ -35,7 +35,7 @@ public class PTWindowManager {
 
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
-    private static PTWindowManager instance = new PTWindowManager();
+    private static final PTWindowManager instance = new PTWindowManager();
 
     private final Map<Integer, PTWindow> windows = new HashMap<>();
 

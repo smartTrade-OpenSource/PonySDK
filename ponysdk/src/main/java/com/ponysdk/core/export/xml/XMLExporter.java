@@ -95,20 +95,20 @@ public class XMLExporter<T> implements Exporter<T> {
     public StringBuilder convert(final List<ExportableField> exportableFields, final List<T> pojos, String rootName) throws Exception {
         rootName = StringEscapeUtils.escapeXml(rootName);
         final StringBuilder s = new StringBuilder();
-        s.append("<" + rootName + "s>");
+        s.append("<").append(rootName).append("s>");
         for (final T pojo : pojos) {
-            s.append("<" + rootName + ">");
+            s.append("<").append(rootName).append(">");
             for (final ExportableField exportableField : exportableFields) {
                 String normalizedCaption = exportableField.getCaption().replace(" ", "").replace(".", "_").replace("/", "Per");
                 normalizedCaption = StringEscapeUtils.escapeXml(normalizedCaption);
-                s.append("<" + normalizedCaption + ">");
+                s.append("<").append(normalizedCaption).append(">");
                 s.append(StringEscapeUtils.escapeXml(getDisplayValue(pojo, exportableField)));
                 s.append("</" + normalizedCaption + ">");
             }
-            s.append("</" + rootName + ">");
+            s.append("</").append(rootName).append(">");
 
         }
-        s.append("</" + rootName + "s>");
+        s.append("</").append(rootName).append("s>");
         return s;
     }
 

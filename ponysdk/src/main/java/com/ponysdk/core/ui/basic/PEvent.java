@@ -64,10 +64,9 @@ public enum PEvent {
     OUCHEVENTS(0x100000 | 0x200000 | 0x400000 | 0x800000),
     GESTUREEVENTS(0x1000000 | 0x2000000 | 0x4000000);
 
-    private static Map<Integer, PEvent> eventsByCode;
+    private static final Map<Integer, PEvent> eventsByCode = new HashMap<>();
 
     static {
-        eventsByCode = new HashMap<>();
         for (final PEvent code : PEvent.values()) {
             eventsByCode.put(code.getCode(), code);
         }

@@ -39,7 +39,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTRadioButton extends PTCheckBox {
 
-    private static Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<>();
+    private static final Map<String, PTRadioButton> lastSelectedRadioButtonByGroup = new HashMap<>();
 
     @Override
     protected CheckBox createUIObject() {

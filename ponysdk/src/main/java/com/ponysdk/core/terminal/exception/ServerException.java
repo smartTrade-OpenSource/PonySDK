@@ -27,7 +27,7 @@ public class ServerException extends Exception {
 
     private static final long serialVersionUID = -2064816487726122645L;
 
-    public static int INVALID_SESSION = 600;
+    public static final int INVALID_SESSION = 600;
 
     private final int code;
 

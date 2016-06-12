@@ -56,13 +56,7 @@ public class BannerPrinter implements Appendable {
         }
     }
 
-    public void appendNewEmptyLine(final int lineCount) {
-        for (int i = 0; i < lineCount; i++) {
-            appendNewEmptyLine();
-        }
-    }
-
-    public void appendNewLine() {
+    private void appendNewLine() {
         for (int i = 0; i < columnCount; i++) {
             if (i == 0)
                 append(COLUMN_SEPARATOR);

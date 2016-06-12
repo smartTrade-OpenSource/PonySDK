@@ -59,7 +59,7 @@ public class TxnContext implements TxnListener {
         this.modelWriter = new ModelWriter(parser);
     }
 
-    public void flush() {
+    void flush() {
         parser.reset();
     }
 

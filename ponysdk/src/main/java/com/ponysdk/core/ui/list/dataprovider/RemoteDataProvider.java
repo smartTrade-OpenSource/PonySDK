@@ -92,11 +92,9 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
 
     @Override
     public void onSort(final Sortable aSortable) {
-        for (final Sortable sortable : sortableList) {
-            if (!sortable.equals(aSortable)) {
-                sortable.sort(SortingType.NONE);
-            }
-        }
+        sortableList.stream().filter(sortable -> !sortable.equals(aSortable)).forEach(sortable -> {
+            sortable.sort(SortingType.NONE);
+        });
         hasData.setData(getData());
     }
 

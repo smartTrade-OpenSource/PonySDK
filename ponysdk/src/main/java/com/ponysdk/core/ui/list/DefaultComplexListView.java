@@ -39,8 +39,6 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     private final PSimplePanel pagingLayout = new PSimplePanel();
 
-    private final PSimplePanel positionPanel = new PSimplePanel();
-
     private final PSimplePanel topListLayout = new PSimplePanel();
 
     private final PSimplePanel bottomListLayout = new PSimplePanel();
@@ -73,6 +71,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         headerPanel.add(topListLayout);
         headerPanel.setWidth("100%");
 
+        PSimplePanel positionPanel = new PSimplePanel();
         positionPanel.setWidget(headerPanel);
 
         bottomListLayout.setWidget(searchResultTimeLabel);

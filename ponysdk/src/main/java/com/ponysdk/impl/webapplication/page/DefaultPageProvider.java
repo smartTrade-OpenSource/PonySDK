@@ -78,9 +78,7 @@ public class DefaultPageProvider implements PageProvider {
     }
 
     public void setPageActivities(final Collection<PageActivity> pageActivities) {
-        for (final PageActivity pageActivity : pageActivities) {
-            addPageActivity(pageActivity);
-        }
+        pageActivities.forEach(this::addPageActivity);
     }
 
 }

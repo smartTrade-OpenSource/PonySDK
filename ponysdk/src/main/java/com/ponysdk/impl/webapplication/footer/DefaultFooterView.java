@@ -31,10 +31,9 @@ import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 public class DefaultFooterView extends PSimplePanel implements FooterView {
 
-    private final PVerticalPanel content = new PVerticalPanel();
-
     public DefaultFooterView(final String copyright) {
         setSizeFull();
+        PVerticalPanel content = new PVerticalPanel();
         content.setSizeFull();
 
         final PLabel label = new PLabel(copyright);

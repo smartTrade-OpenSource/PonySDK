@@ -167,7 +167,7 @@ public final class FilteringTools {
                 // Now we can filter our data against the pattern
                 final String text = normalisePattern(value.toString().trim());
                 final Pattern pattern = Pattern.compile(REGEX_BEGIN + text + REGEX_END, Pattern.CASE_INSENSITIVE);
-                Matcher matcher ;
+                Matcher matcher;
                 if (val instanceof Collection<?>) {
                     final Collection<?> collection = (Collection<?>) val;
                     for (final Object item : collection) {
@@ -242,24 +242,24 @@ public final class FilteringTools {
                     final Collection<?> collection = (Collection<?>) val;
                     for (final Object item : collection) {
                         matcher = pattern.matcher(item.toString());
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                             break;
                         }
                     }
                     if (collection.isEmpty()) {
                         matcher = pattern.matcher("");
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                         }
                     }
                 } else if (val.toString() != null) {
                     matcher = pattern.matcher(val.toString());
-                    if ((matcher != null) && matcher.find()) {
+                    if (matcher.find()) {
                         validData.add(data);
                     } else {
                         matcher = pattern.matcher("");
-                        if ((matcher != null) && matcher.find()) {
+                        if (matcher.find()) {
                             validData.add(data);
                         }
                     }

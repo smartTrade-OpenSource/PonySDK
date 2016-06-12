@@ -23,9 +23,11 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Objects;
+
 public class Permission {
 
-    public static Permission ALLOWED = new Permission("ALLOWED");
+    public static final Permission ALLOWED = new Permission("ALLOWED");
 
     private final String key;
 
@@ -34,23 +36,16 @@ public class Permission {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getKey() == null) ? 0 : getKey().hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Permission that = (Permission) o;
+        return Objects.equals(key, that.key);
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        final Permission other = (Permission) obj;
-        if (getKey() == null) {
-            if (other.getKey() != null) return false;
-        } else if (!getKey().equals(other.getKey())) return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(key);
     }
 
     public String getKey() {

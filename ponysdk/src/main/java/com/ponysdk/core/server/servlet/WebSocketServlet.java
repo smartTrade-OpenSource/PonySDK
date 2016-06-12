@@ -34,15 +34,12 @@ import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtens
 import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
 import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import java.io.EOFException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.util.concurrent.*;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
@@ -50,31 +47,27 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
-
     private static final int NUMBER_OF_BUFFERS = 50;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
-    public int maxIdleTime = 1000000;
+    private int maxIdleTime = 1000000;
 
     private AbstractApplicationManager applicationManager;
 
     private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(NUMBER_OF_BUFFERS);
 
+    private WebsocketMonitor monitor;
+
     public class Buffer {
 
-        ByteBuffer socketBuffer;
-        CharBuffer charBuffer;
+        final ByteBuffer socketBuffer;
+
+        private Buffer() {
+            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+        }
 
         public ByteBuffer getSocketBuffer() {
             return socketBuffer;
-        }
-
-        public CharBuffer getCharBuffer() {
-            return charBuffer;
-        }
-
-        public Buffer() {
-            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
         }
 
     }
@@ -102,7 +95,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.getExtensionFactory().register("x-webkit-deflate-frame", XWebkitDeflateFrameExtension.class);
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.setCreator((final ServletUpgradeRequest req, final ServletUpgradeResponse resp) -> new WebSocket(req, resp));
+        factory.setCreator((req, resp) -> new WebSocket(req, monitor));
     }
 
     public class WebSocket implements WebSocketListener {
@@ -113,14 +106,17 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private final PRequest request;
 
-        WebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
+        private final WebsocketMonitor monitor;
+
+        WebSocket(final ServletUpgradeRequest req, WebsocketMonitor monitor) {
             log.info(req.getHeader("User-Agent"));
-            request = new PRequest(req);
+            this.request = new PRequest(req);
+            this.monitor = monitor;
         }
 
         @Override
         public void onWebSocketConnect(final Session session) {
-            if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}", session.getRemoteAddress(),request.getSessionId());
+            if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}", session.getRemoteAddress(), request.getSessionId());
 
             this.session = session;
             this.context = new TxnContext();
@@ -168,7 +164,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void onWebSocketText(final String text) {
             if (context.getUIContext().isLiving()) {
-                // onBeforeMessageReceived(text);
+                if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
                 try {
                     context.getUIContext().notifyMessageReceived();
 
@@ -184,7 +180,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {
-                    // onAfterMessageProcessed(text);
+                    if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
                 }
             } else {
                 if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");
@@ -214,8 +210,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public void flush(final Buffer buffer) {
             if (buffer != null) {
                 if (context.getUIContext().isLiving()) {
-                    if (session != null && session.isOpen()) {
-                        // onBeforeSendMessage();
+                    if (isSessionOpen()) {
                         try {
                             final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
@@ -225,8 +220,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                             buffers.put(buffer);
                         } catch (final Throwable t) {
                             log.error("Cannot flush to WebSocket", t);
-                        } finally {
-                            // onAfterMessageSent();
                         }
                     } else {
                         if (log.isDebugEnabled()) log.debug("Session is down");
@@ -239,18 +232,17 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             }
         }
 
-        public void flush(final ByteBuffer socketBuffer) {
-            if (session != null && session.isOpen() && socketBuffer.position() != 0) {
+        private void flush(final ByteBuffer socketBuffer) {
+            if (socketBuffer.position() != 0) {
+                if (monitor != null) monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
                 socketBuffer.flip();
                 try {
                     final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
                     sendBytesByFuture.get(25, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    if (e instanceof EOFException) {
-                        if (log.isInfoEnabled()) log.info("Remote Connection is closed");
-                    } else {
-                        log.error("Cannot stream data");
-                    }
+                    log.error("Cannot stream data", e);
+                } finally {
+                    if (monitor != null) monitor.onAfterFlush(WebSocket.this);
                 }
             }
         }
@@ -259,23 +251,30 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          * Send heart beat to the terminal
          */
         public void sendHeartBeat() {
-            final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
-            socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
-            flush(socketBuffer);
+            if (isSessionOpen()) {
+                final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
+                socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
+                flush(socketBuffer);
+            }
         }
 
         public void close() {
-            if (session != null) {
+            if (isSessionOpen()) {
                 log.info("Closing websocket programaticly");
                 session.close();
             }
         }
 
-
+        final boolean isSessionOpen() {
+            return session != null && session.isOpen();
+        }
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
         this.maxIdleTime = maxIdleTime;
     }
 
+    public void setWebsocketMonitor(WebsocketMonitor monitor) {
+        this.monitor = monitor;
+    }
 }

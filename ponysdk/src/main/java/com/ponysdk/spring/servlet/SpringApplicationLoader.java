@@ -87,9 +87,7 @@ public class SpringApplicationLoader extends AbstractApplicationLoader {
 
                     final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
                     if (initializingPages != null && !initializingPages.isEmpty()) {
-                        for (final InitializingActivity p : initializingPages.values()) {
-                            p.afterContextInitialized();
-                        }
+                        initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
                     }
                 }
 
