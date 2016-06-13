@@ -136,7 +136,11 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     private Date asDate(final String s) {
-        return new Date(Long.parseLong(s));
+        try {
+            return new Date(Long.parseLong(s));
+        } catch (final NumberFormatException e) {
+            return null;
+        }
     }
 
 }
