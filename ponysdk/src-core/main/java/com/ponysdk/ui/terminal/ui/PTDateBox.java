@@ -91,9 +91,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     @Override
     public void update(final PTInstruction update, final UIService uiService) {
         final MyDateBox dateBox = cast();
-
         if (update.containsKey(PROPERTY.VALUE)) {
-            dateBox.getTextBox().setText(update.getString(PROPERTY.VALUE));
+            dateBox.getTextBox().setValue(update.getString(PROPERTY.VALUE));
         } else if (update.containsKey(PROPERTY.DATE_FORMAT)) {
             final DefaultFormat format = new DefaultFormat(DateTimeFormat.getFormat(update.getString(PROPERTY.DATE_FORMAT)));
             dateBox.setFormat(format);
