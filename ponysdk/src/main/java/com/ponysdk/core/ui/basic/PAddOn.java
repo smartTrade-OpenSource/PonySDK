@@ -23,27 +23,25 @@
 
 package com.ponysdk.core.ui.basic;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PNativeEvent;
 import com.ponysdk.core.ui.basic.event.PNativeHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.*;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * AddOn are used to bind server side object with javascript object
  */
-public abstract class PAddOn<T extends PObject> extends PObject implements PNativeHandler {
+public abstract class PAddOn extends PObject implements PNativeHandler {
 
     private static final String ARGUMENTS_PROPERTY_NAME = "arg";
     private static final String METHOD_PROPERTY_NAME = "m";
@@ -51,27 +49,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     private static final Logger log = LoggerFactory.getLogger(PAddOn.class);
 
-    private static final int LIMIT = 1000;
-
     protected boolean attached = false;
-    protected List<JsonObjectBuilder> pendingDataToSend = new ArrayList<>();
-
-    private final T widget;
-
-    public PAddOn() {
-        this(null);
-    }
-
-    public PAddOn(final T widget) {
-        this.widget = widget;
-        if(widget == null) return;
-
-        if(PWindow.EMPTY_WINDOW_ID !=  widget.getWindowID()){
-            attach(widget.getWindowID());
-        }else {
-
-        }
-    }
 
     @Override
     protected void init0() {
@@ -80,32 +58,14 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.FACTORY, getModuleName(getClass()));
-        if (widget != null) {
-            parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
-        }
+    public boolean attach(final int windowID) {
+        return super.attach(windowID);
     }
 
-    public static String getModuleName(final Class<?> clazz) {
-        Class<?> obj = clazz;
-
-        while (!obj.isAnnotationPresent(Javascript.class)) {
-            obj = obj.getSuperclass();
-            if (obj == null)
-                throw new IllegalArgumentException("Annotation not found for " + clazz.getCanonicalName());
-        }
-
-        final Javascript jsAnnotation = obj.getAnnotation(Javascript.class);
-        String moduleName = jsAnnotation.value();
-
-        // if no name, take the className, because new pattern es6 classes friendly:
-        // java class name == es6 class name == XXXXAddon
-        if (moduleName.isEmpty())
-            moduleName = obj.getCanonicalName();
-
-        return moduleName;
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        parser.parse(ServerToClientModel.FACTORY, getClass().getCanonicalName());
     }
 
     public void update(final JsonObject jsonObject) {
@@ -124,10 +84,10 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
             if (jsonObject.containsKey(ATTACH_PROPERTY_NAME)) {
                 attached = jsonObject.getBoolean(ATTACH_PROPERTY_NAME);
                 if (attached) {
-                    sendPendingJSONData();
                     onAttached();
-                } else
-                    log.debug("Object detached " + this);
+                } else {
+                    onDetached();
+                }
             }
         } catch (final Exception e) {
             log.error("Cannot read native eventbus", e);
@@ -143,13 +103,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     protected void onAttached() {
     }
 
-    protected void sendPendingJSONData() {
-        final Iterator<JsonObjectBuilder> iterator = pendingDataToSend.iterator();
-        while (iterator.hasNext()) {
-            final JsonObjectBuilder next = iterator.next();
-            update(next.build());
-            iterator.remove();
-        }
+    protected void onDetached() {
     }
 
     public void setJSLogLevel(final int logLevel) {
@@ -187,24 +141,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
             builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
         }
 
-        if (!attached) {
-            if (pendingDataToSend.size() < LIMIT)
-                pendingDataToSend.add(builder);
-        } else {
-            update(builder.build());
-        }
-    }
-
-    public T asWidget() {
-        return widget;
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface Javascript {
-
-        String value() default "";
-
+        update(builder.build());
     }
 
 }

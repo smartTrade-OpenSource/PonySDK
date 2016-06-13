@@ -23,14 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.*;
-
-import javax.json.JsonObject;
-import java.util.*;
+import com.ponysdk.core.ui.basic.event.HasPAnimation;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.basic.event.POpenEvent;
+import com.ponysdk.core.ui.basic.event.POpenHandler;
 
 /**
  * A widget that consists of a header and a content panel that discloses the
@@ -101,13 +110,16 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     public void setContent(final PWidget w) {
         // Validate
-        if (w == content) return;
+        if (w == content)
+            return;
 
         // Detach new child.
-        if (w != null) w.removeFromParent();
+        if (w != null)
+            w.removeFromParent();
 
         // Remove old child.
-        if (content != null) remove(content);
+        if (content != null)
+            remove(content);
 
         // Logical attach.
         content = w;
@@ -164,7 +176,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     public void setOpen(final boolean isOpen) {
         if (this.isOpen != isOpen) {
             this.isOpen = isOpen;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN, isOpen));
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN_CLOSE, isOpen));
         }
     }
 

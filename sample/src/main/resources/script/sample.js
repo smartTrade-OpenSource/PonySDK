@@ -1,6 +1,7 @@
 /* global Widget */
 "use strict";
-Widget.new("st-label", {
+Widget.new("com.ponysdk.sample.client.page.addon.LoggerAddOn", 
+{
 	
 	init: function() {
 		console.log("LabelPAddOn created");

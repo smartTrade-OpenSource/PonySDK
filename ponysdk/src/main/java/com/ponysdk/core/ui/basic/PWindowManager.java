@@ -63,12 +63,21 @@ public class PWindowManager {
         windows.remove(window.getID());
     }
 
+    public static void addWindowListener() {
+    }
+
     public PWindow getWindow(final int windowID) {
         return windows.get(windowID);
     }
 
     public void closeAll() {
         windows.forEach((id, window) -> window.close());
+    }
+
+    interface RegisterWindowListener {
+        void registered(int windowID);
+
+        void unregistered(int windowID);
     }
 
 }

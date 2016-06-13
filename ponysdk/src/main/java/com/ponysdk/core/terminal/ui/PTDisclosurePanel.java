@@ -90,7 +90,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.OPEN_CLOSE.equals(binaryModel.getModel())) {
             uiObject.setOpen(binaryModel.getBooleanValue());
             return true;
         }

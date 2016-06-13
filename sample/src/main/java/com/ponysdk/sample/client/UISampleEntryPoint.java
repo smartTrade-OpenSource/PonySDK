@@ -28,8 +28,6 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
@@ -62,7 +60,6 @@ import com.ponysdk.core.ui.basic.PLayoutPanel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
-import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PPasswordTextBox;
 import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PPushButton;
@@ -92,10 +89,9 @@ import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
-import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.sample.client.page.addon.LabelPAddOn;
+import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -108,10 +104,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel flowPanel = new PFlowPanel();
         PRootPanel.get().add(flowPanel);
 
+        final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
+        a.open();
 
-        createPAddOn();
+        final LoggerAddOn addon = createPAddOn();
+        addon.attach(a.getID());
 
-        if(true) return;
+        final LoggerAddOn addon = createPAddOn();
+        addon.attach(a.getID());
+
+        if (true)
+            return;
 
         final PElement label1 = new PElement("div");
         final PElement label2 = new PElement("div");
@@ -322,7 +325,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -346,7 +349,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -379,7 +382,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
+        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
@@ -472,10 +475,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return flowPanel;
     }
 
-    private static final LabelPAddOn createPAddOn() {
-        final PElement label = new PElement("div");
-        PRootPanel.get().add(label);
-        final LabelPAddOn labelPAddOn = new LabelPAddOn(label);
+    private static final LoggerAddOn createPAddOn() {
+        final LoggerAddOn labelPAddOn = new LoggerAddOn();
         labelPAddOn.log("addon logger test");
         return labelPAddOn;
     }

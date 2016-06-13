@@ -23,6 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -31,12 +38,6 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
-
-import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 public class PWindow extends PObject {
 
@@ -78,15 +79,14 @@ public class PWindow extends PObject {
         parser.parse(ServerToClientModel.FEATURES, features);
     }
 
-    public boolean open() {
-        if (opened) return false;
-        opened = true;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN, opened));
-        return opened;
+    public void open() {
+        if (!opened)
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
     }
 
     public void close() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE, true));
+        if (opened)
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
     }
 
     @Override
@@ -97,10 +97,12 @@ public class PWindow extends PObject {
             while (!stackedInstructions.isEmpty()) {
                 stackedInstructions.poll().run();
             }
+            this.opened = true;
             final POpenEvent e = new POpenEvent(this);
             openHandlers.forEach(handler -> handler.onOpen(e));
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
+            this.opened = false;
             final PCloseEvent e = new PCloseEvent(this);
             closeHandlers.forEach(handler -> handler.onClose(e));
         } else {
@@ -145,6 +147,10 @@ public class PWindow extends PObject {
         static final String PARENT = "_parent";
         static final String SELF = "_self";
         static final String TOP = "_top";
+    }
+
+    public boolean isOpened() {
+        return opened;
     }
 
 }

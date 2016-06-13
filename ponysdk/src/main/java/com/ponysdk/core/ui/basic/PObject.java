@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,11 +41,6 @@ import com.ponysdk.core.ui.basic.event.PNativeHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * The superclass for all PonySDK objects.
@@ -65,18 +66,25 @@ public abstract class PObject {
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
-            if (!initialized)
+
+            final PWindow window = PWindowManager.get().getWindow(windowID);
+
+            if (window != null && window.isOpened()) {
                 init();
+            } else {
+                PWindowManager.get().addWindowListener(windowId -> PObject::init());
+            }
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
 
     protected void init() {
+        if (initialized)
+            return;
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.MAIN_WINDOW_ID)
@@ -139,7 +147,6 @@ public abstract class PObject {
         }
     }
 
-
     @Override
     public int hashCode() {
         return ID;
@@ -189,8 +196,10 @@ public abstract class PObject {
     }
 
     void saveAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
-        else stackedInstructions.add(() -> executeAddHandler(type));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeAddHandler(type);
+        else
+            stackedInstructions.add(() -> executeAddHandler(type));
     }
 
     private void executeAddHandler(final HandlerModel type) {
@@ -204,8 +213,10 @@ public abstract class PObject {
     }
 
     void saveRemoveHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
-        else stackedInstructions.add(this::executeRemoveHandler);
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeRemoveHandler();
+        else
+            stackedInstructions.add(this::executeRemoveHandler);
     }
 
     private void executeRemoveHandler() {
@@ -218,8 +229,10 @@ public abstract class PObject {
     }
 
     void saveRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
-        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            executeRemove(objectID, parentObjectID);
+        else
+            stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
     private void executeRemove(final int objectID, final int parentObjectID) {
@@ -233,8 +246,10 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) writeUpdate(callback);
-        else stackedInstructions.add(() -> writeUpdate(callback));
+        if (windowID != PWindow.EMPTY_WINDOW_ID)
+            writeUpdate(callback);
+        else
+            stackedInstructions.add(() -> writeUpdate(callback));
     }
 
     private void writeUpdate(final ModelWriterCallback callback) {

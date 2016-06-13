@@ -21,22 +21,33 @@
  * the License.
  */
 
-package com.ponysdk.sample.client.page.addon;
+package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.ui.basic.PAddOn;
-import com.ponysdk.core.ui.basic.PAddOn.Javascript;
-import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
 
-@Javascript("st-label")
-public class LabelPAddOn extends PAddOn<PElement> {
+public abstract class PAddOnComposite extends PAddOn {
 
-    public LabelPAddOn(final PElement widget) {
-        super(widget);
+    private PWidget widget;
+
+    public PAddOnComposite(final IsPWidget widget) {
+        this.widget = widget.asWidget();
+        if (widget == null)
+            return;
+
+        if (PWindow.EMPTY_WINDOW_ID != this.widget.getWindowID()) {
+            attach(this.widget.getWindowID());
+        } else {
+
+        }
     }
 
-    public void log(final String value) {
-        if (value != null) callBindedMethod("logWithText", value);
-        else callBindedMethod("log");
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
+        if (widget != null) {
+            parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
+        }
     }
 
 }
