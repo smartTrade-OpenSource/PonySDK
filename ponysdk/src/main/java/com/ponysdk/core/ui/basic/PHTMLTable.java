@@ -138,7 +138,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
                 } else
                     temp.put(entry.getKey(), entry.getValue());
             }
-            temp.put(row, new HashSet<String>());
+            temp.put(row, new HashSet<>());
             styleNames = temp;
         }
 
@@ -255,9 +255,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CLEAR);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
     }
 
     public void removeRow(final int row) {
@@ -298,9 +296,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.INSERT_ROW, row);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_ROW, row));
     }
 
     @Override
@@ -331,23 +327,17 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.BORDER_WIDTH, width);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, width));
     }
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_PADDING, padding);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_PADDING, padding));
     }
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_SPACING, spacing);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_SPACING, spacing));
     }
 
     protected void setCellFormatter(final T cellFormatter) {

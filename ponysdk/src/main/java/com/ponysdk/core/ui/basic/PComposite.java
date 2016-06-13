@@ -50,9 +50,7 @@ public abstract class PComposite extends PWidget {
         this.widget = child;
         child.setParent(this);
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID()));
     }
 
 }

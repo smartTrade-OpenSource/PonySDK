@@ -103,16 +103,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput(new TerminalDataReceiver() {
-
-            @Override
-            public void onDataReceived(final PObject object, final JsonObject instruction) {
-                System.err.println(object + " : " + instruction);
-            }
-        });
+        uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
         final PFlowPanel flowPanel = new PFlowPanel();
         PRootPanel.get().add(flowPanel);
+
+
+        createPAddOn();
+
+        if(true) return;
 
         final PElement label1 = new PElement("div");
         final PElement label2 = new PElement("div");
@@ -160,7 +159,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void run() {
-                label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &éç{" + "</div>");
+                label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &ï¿½ï¿½{" + "</div>");
                 label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
                 label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
                 label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
@@ -475,12 +474,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static final LabelPAddOn createPAddOn() {
         final PElement label = new PElement("div");
+        PRootPanel.get().add(label);
         final LabelPAddOn labelPAddOn = new LabelPAddOn(label);
-        final StringBuilder sb = new StringBuilder(70000);
-        sb.append("aa");
-        for (int i = 0; i < 1; i++)
-            sb.append("a");
-        labelPAddOn.log(sb.append("z").toString());
+        labelPAddOn.log("addon logger test");
         return labelPAddOn;
     }
 

@@ -35,13 +35,9 @@ public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
     protected PlaceTokenizer<Place> placeTokenizer;
 
     public DefaultPlaceHistoryMapper(final EventBus eventBus) {
-        eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeHandler() {
-
-            @Override
-            public void onPlaceChange(final PlaceChangeEvent event) {
-                final Place place = event.getNewPlace();
-                placeContextByToken.put(getToken(place), place);
-            }
+        eventBus.addHandler(PlaceChangeEvent.TYPE, event -> {
+            final Place place = event.getNewPlace();
+            placeContextByToken.put(getToken(place), place);
         });
     }
 

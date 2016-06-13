@@ -28,6 +28,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.useragent.UserAgent;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
@@ -127,7 +128,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
             Application application = SessionManager.get().getApplication(sessionId);
             if (application == null) {
-                application = new Application(sessionId, applicationManager.getOptions());
+                application = new Application(sessionId, applicationManager.getOptions(), UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
                 SessionManager.get().setApplication(sessionId, application);
             }
 

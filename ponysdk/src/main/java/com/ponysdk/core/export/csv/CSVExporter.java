@@ -63,43 +63,39 @@ public class CSVExporter<T> implements Exporter<T> {
     @Override
     public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
         final StreamResource streamResource = new StreamResource();
-        streamResource.open(new StreamHandler() {
-
-            @Override
-            public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
+        streamResource.open((req, response) -> {
+            try {
+                response.reset();
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
+                final PrintWriter printer = response.getWriter();
                 try {
-                    response.reset();
-                    response.setContentType("text/csv");
-                    response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".csv");
-                    final PrintWriter printer = response.getWriter();
-                    try {
-                        final Iterator<ExportableField> iter = exportableFields.iterator();
+                    final Iterator<ExportableField> iter = exportableFields.iterator();
 
-                        while (iter.hasNext()) {
-                            final ExportableField exportableField = iter.next();
-                            final String header = exportableField.getCaption();
-                            printer.print(header);
-                            if (iter.hasNext()) printer.print(DELIMITER);
+                    while (iter.hasNext()) {
+                        final ExportableField exportableField = iter.next();
+                        final String header = exportableField.getCaption();
+                        printer.print(header);
+                        if (iter.hasNext()) printer.print(DELIMITER);
+                    }
+
+                    printer.println();
+                    for (final T row : records) {
+                        for (final ExportableField exportableField : exportableFields) {
+                            printer.print(getDisplayValue(row, exportableField));
+                            printer.print(DELIMITER);
                         }
-
                         printer.println();
-                        for (final T row : records) {
-                            for (final ExportableField exportableField : exportableFields) {
-                                printer.print(getDisplayValue(row, exportableField));
-                                printer.print(DELIMITER);
-                            }
-                            printer.println();
-                            printer.flush();
-                        }
-                    } catch (final Exception e) {
-                        log.error("Error when exporting", e);
-                    } finally {
                         printer.flush();
-                        printer.close();
                     }
                 } catch (final Exception e) {
                     log.error("Error when exporting", e);
+                } finally {
+                    printer.flush();
+                    printer.close();
                 }
+            } catch (final Exception e) {
+                log.error("Error when exporting", e);
             }
         });
 

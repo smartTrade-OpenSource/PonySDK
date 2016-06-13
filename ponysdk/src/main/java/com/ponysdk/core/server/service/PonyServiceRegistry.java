@@ -43,7 +43,7 @@ public class PonyServiceRegistry {
 
         getGeneralizations(service.getClass(), classes);
 
-        classes.stream().filter(clazz -> PonyService.class.isAssignableFrom(clazz)).forEach(clazz -> {
+        classes.stream().filter(PonyService.class::isAssignableFrom).forEach(clazz -> {
             registeredServices.put(clazz, service);
             log.info("Service registered #" + clazz);
         });

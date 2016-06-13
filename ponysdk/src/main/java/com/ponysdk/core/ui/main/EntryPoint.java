@@ -30,8 +30,6 @@ public interface EntryPoint {
 
     /**
      * Newly created session.
-     *
-     * @param uiContext
      */
     void start(UIContext uiContext);
 

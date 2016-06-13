@@ -27,6 +27,7 @@ import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.model.WidgetType;
@@ -65,6 +66,10 @@ public class PFileUpload extends PWidget
     }
 
     @Override
+    protected void enrichOnInit(Parser parser) {
+    }
+
+    @Override
     protected WidgetType getWidgetType() {
         return WidgetType.FILE_UPLOAD;
     }
@@ -91,9 +96,7 @@ public class PFileUpload extends PWidget
 
     public void setName(final String name) {
         this.name = name;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.NAME, name);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
     }
 
     public void submit() {

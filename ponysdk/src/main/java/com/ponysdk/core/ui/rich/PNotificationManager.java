@@ -154,13 +154,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
         popupPanel.addStyleName("closing");
         popupPanel.center();
 
@@ -172,13 +166,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
         popupPanel.addStyleName("closing");
         popupPanel.center();
 
@@ -190,13 +178,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
         addAutoCloseTimer(popupPanel, warningDuration);
@@ -207,13 +189,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
         addAutoCloseTimer(popupPanel, warningDuration);
@@ -225,13 +201,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
     }
@@ -242,13 +212,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                popupPanel.hide();
-            }
-        }, PClickEvent.TYPE);
+        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
     }
@@ -278,18 +242,14 @@ public class PNotificationManager {
     }
 
     private static void displayAtBottomRight(final PPopupPanel popupPanel, final String closingAnimation) {
-        popupPanel.setPopupPositionAndShow(new PPopupPanel.PPositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
-                popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
-                if (closingAnimation != null)
-                    popupPanel.addStyleName(closingAnimation);
-            }
+        popupPanel.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
+            popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
+            if (closingAnimation != null)
+                popupPanel.addStyleName(closingAnimation);
         });
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PScheduler.schedule(() -> popupPanel.hide(), Duration.ofMillis(delayBeforeClosing));
+        PScheduler.schedule(popupPanel::hide, Duration.ofMillis(delayBeforeClosing));
     }
 }

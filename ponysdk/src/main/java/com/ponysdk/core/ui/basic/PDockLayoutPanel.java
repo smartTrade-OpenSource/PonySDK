@@ -144,9 +144,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void animate(final int duration) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATE, duration);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration));
     }
 
     public PUnit getUnit() {

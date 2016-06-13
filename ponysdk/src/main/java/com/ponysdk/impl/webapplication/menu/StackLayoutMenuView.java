@@ -134,17 +134,13 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             final PAnchor category = new PAnchor(categoryNode.name);
             applyPadding(categoryNode, category);
             applyExpandableStyle(categoryNode, category);
-            category.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent clickEvent) {
-                    if (categoryNode.open) {
-                        collapseNode(categoryNode);
-                        applyExpandableStyle(categoryNode, category);
-                    } else {
-                        expandNode(categoryNode);
-                        applyExpandableStyle(categoryNode, category);
-                    }
+            category.addClickHandler(clickEvent -> {
+                if (categoryNode.open) {
+                    collapseNode(categoryNode);
+                    applyExpandableStyle(categoryNode, category);
+                } else {
+                    expandNode(categoryNode);
+                    applyExpandableStyle(categoryNode, category);
                 }
             });
 

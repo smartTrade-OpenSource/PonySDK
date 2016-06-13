@@ -226,7 +226,6 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     public boolean isToggleDisplayAllowed(final PWidget w) {
         final SplitInfoHolder info = getWidgetInfo(w);
-        if (info == null) return false;
-        return info.toggleDisplayAllowed;
+        return info != null && info.toggleDisplayAllowed;
     }
 }

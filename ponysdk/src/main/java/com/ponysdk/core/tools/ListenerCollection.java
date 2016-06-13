@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ListenerCollection<C> implements Collection<C> {
 
-    private final Set<C> listeners = Collections.newSetFromMap(new ConcurrentHashMap<C, Boolean>());
+    private final Set<C> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public boolean register(final C listener) {
         return listeners.add(listener);

@@ -46,7 +46,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHorizontalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
         });
@@ -55,7 +55,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetVerticalPosition(final PWidget child, final PAlignment position) {
         assertIsChild(child);
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
         });
@@ -64,7 +64,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         assertIsChild(widget);
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.WIDGET_HIDDEN, hidden);
             writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
         });
@@ -112,8 +112,6 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void animate(final int duration) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATE, duration);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration));
     }
 }

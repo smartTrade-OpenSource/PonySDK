@@ -37,7 +37,6 @@ public class PRichTextToolbar extends PWidget {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.WIDGET_ID, richTextArea.getID());
     }
 

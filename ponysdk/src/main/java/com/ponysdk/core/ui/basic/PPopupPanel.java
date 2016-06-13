@@ -126,7 +126,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
         if (autoHide) parser.parse(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
     }
 
@@ -136,9 +135,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_MODAL, modal);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_MODAL, modal));
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
@@ -150,51 +147,39 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setDraggable(final boolean draggable) {
         if (draggable) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.POPUP_DRAGGABLE);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_DRAGGABLE));
         }
     }
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
     public void center() {
         this.center = true;
         this.showing = true;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_CENTER);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_CENTER));
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.POPUP_SHOW);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_SHOW));
         }
     }
 
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.POPUP_HIDE);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_HIDE));
         }
     }
 
     public void setGlassStyleName(final String glassStyleName) {
         this.glassStyleName = glassStyleName;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
     }
 
     @Override
@@ -254,9 +239,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     private void fireOnClose() {
-        for (final PCloseHandler handler : listeners) {
-            handler.onClose(new PCloseEvent(this));
-        }
+        listeners.forEach(handler -> handler.onClose(new PCloseEvent(this)));
     }
 
     public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {

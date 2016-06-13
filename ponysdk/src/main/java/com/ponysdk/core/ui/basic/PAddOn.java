@@ -23,6 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.PNativeEvent;
+import com.ponysdk.core.ui.basic.event.PNativeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.*;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,21 +39,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-
-import com.ponysdk.core.ui.basic.event.PNativeEvent;
-import com.ponysdk.core.ui.basic.event.PNativeHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
 
 /**
  * AddOn are used to bind server side object with javascript object
@@ -70,18 +64,24 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
 
     public PAddOn(final T widget) {
         this.widget = widget;
+        if(widget == null) return;
+
+        if(PWindow.EMPTY_WINDOW_ID !=  widget.getWindowID()){
+            attach(widget.getWindowID());
+        }else {
+
+        }
     }
 
     @Override
     protected void init0() {
         super.init0();
-        addNativeHandler(this);
+        setNativeHandler(this);
     }
 
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
         parser.parse(ServerToClientModel.FACTORY, getModuleName(getClass()));
         if (widget != null) {
             parser.parse(ServerToClientModel.WIDGET_ID, widget.getID());
@@ -109,9 +109,7 @@ public abstract class PAddOn<T extends PObject> extends PObject implements PNati
     }
 
     public void update(final JsonObject jsonObject) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.NATIVE, jsonObject);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, jsonObject));
     }
 
     @Override

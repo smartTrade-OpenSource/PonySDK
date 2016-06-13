@@ -30,10 +30,6 @@ import com.ponysdk.core.ui.basic.PElement;
 @Javascript("st-label")
 public class LabelPAddOn extends PAddOn<PElement> {
 
-    public LabelPAddOn() {
-        super();
-    }
-
     public LabelPAddOn(final PElement widget) {
         super(widget);
     }

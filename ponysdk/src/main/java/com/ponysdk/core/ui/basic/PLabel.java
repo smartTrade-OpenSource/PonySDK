@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.Objects;
-
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
+
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
@@ -72,9 +72,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TEXT, this.text);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
     }
 
     @Override

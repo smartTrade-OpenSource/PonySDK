@@ -355,26 +355,21 @@ public final class FilteringTools {
         for (final Criterion criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
             if (sortingType != null && sortingType != SortingType.NONE) {
-                final Comparator<T> comparator = new Comparator<T>() {
-
-                    @Override
-                    public int compare(final T o1, final T o2) {
-                        if (o1 == null && o2 == null) return 0;
-                        if (o1 == null) {
-                            if (sortingType == SortingType.ASCENDING) return -1;
-                            return 1;
-                        }
-                        if (o2 == null) {
-                            if (sortingType == SortingType.ASCENDING) return 1;
-                            return -1;
-                        }
-                        if (o1.equals(o2)) return 0;
-                        if (sortingType == SortingType.ASCENDING) {
-                            return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
-                        }
-                        return o2.toString().toLowerCase().compareTo(o1.toString().toLowerCase());
+                final Comparator<T> comparator = (o1, o2) -> {
+                    if (o1 == null && o2 == null) return 0;
+                    if (o1 == null) {
+                        if (sortingType == SortingType.ASCENDING) return -1;
+                        return 1;
                     }
-
+                    if (o2 == null) {
+                        if (sortingType == SortingType.ASCENDING) return 1;
+                        return -1;
+                    }
+                    if (o1.equals(o2)) return 0;
+                    if (sortingType == SortingType.ASCENDING) {
+                        return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
+                    }
+                    return o2.toString().toLowerCase().compareTo(o1.toString().toLowerCase());
                 };
                 datas = sortByPropertyName(datas, criterion.getPojoProperty(), comparator);
             }
@@ -388,26 +383,21 @@ public final class FilteringTools {
         for (final Criterion criterion : criteria) {
             final SortingType sortingType = criterion.getSortingType();
             if (sortingType != null && sortingType != SortingType.NONE) {
-                final Comparator<String> comparator = new Comparator<String>() {
-
-                    @Override
-                    public int compare(final String o1, final String o2) {
-                        if (o1 == null && o2 == null) return 0;
-                        if (o1 == null) {
-                            if (sortingType == SortingType.ASCENDING) return -1;
-                            return 1;
-                        }
-                        if (o2 == null) {
-                            if (sortingType == SortingType.ASCENDING) return 1;
-                            return -1;
-                        }
-                        if (o1.equals(o2)) return 0;
-                        if (sortingType == SortingType.ASCENDING) {
-                            return o1.toLowerCase().compareTo(o2.toLowerCase());
-                        }
-                        return o2.toLowerCase().compareTo(o1.toLowerCase());
+                final Comparator<String> comparator = (o1, o2) -> {
+                    if (o1 == null && o2 == null) return 0;
+                    if (o1 == null) {
+                        if (sortingType == SortingType.ASCENDING) return -1;
+                        return 1;
                     }
-
+                    if (o2 == null) {
+                        if (sortingType == SortingType.ASCENDING) return 1;
+                        return -1;
+                    }
+                    if (o1.equals(o2)) return 0;
+                    if (sortingType == SortingType.ASCENDING) {
+                        return o1.toLowerCase().compareTo(o2.toLowerCase());
+                    }
+                    return o2.toLowerCase().compareTo(o1.toLowerCase());
                 };
                 Collections.sort(datas, comparator);
             }

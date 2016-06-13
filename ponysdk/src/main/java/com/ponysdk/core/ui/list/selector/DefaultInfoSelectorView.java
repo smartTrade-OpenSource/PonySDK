@@ -45,22 +45,14 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
         setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
         setStyleName("pony-ComplexList-OptionSelectionPanel");
         setVisible(false);
-        selectAllAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final SelectorViewListener listener : selectorViewListeners) {
-                    listener.onSelectionChange(SelectionMode.FULL);
-                }
+        selectAllAnchor.addClickHandler(event -> {
+            for (final SelectorViewListener listener : selectorViewListeners) {
+                listener.onSelectionChange(SelectionMode.FULL);
             }
         });
-        selectNoneAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final SelectorViewListener listener : selectorViewListeners) {
-                    listener.onSelectionChange(SelectionMode.NONE);
-                }
+        selectNoneAnchor.addClickHandler(event -> {
+            for (final SelectorViewListener listener : selectorViewListeners) {
+                listener.onSelectionChange(SelectionMode.NONE);
             }
         });
     }

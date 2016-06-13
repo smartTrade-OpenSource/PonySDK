@@ -54,8 +54,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Creates an anchor with its text specified.
      *
-     * @param text
-     *            the anchor's text
+     * @param text the anchor's text
      */
     public PAnchor(final String text) {
         this(text, null);
@@ -64,10 +63,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Creates an anchor with its text and href (target URL) specified.
      *
-     * @param text
-     *            the anchor's text
-     * @param href
-     *            the url to which it will link
+     * @param text the anchor's text
+     * @param href the url to which it will link
      */
     public PAnchor(final String text, final String href) {
         this.text = text;
@@ -99,16 +96,13 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Sets the anchor's href (the url to which it links).
      *
-     * @param href
-     *            the anchor's href
+     * @param href the anchor's href
      */
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.HREF, this.href);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HREF, this.href));
     }
 
     @Override
@@ -120,9 +114,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TEXT, this.text);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
     }
 
     @Override
@@ -134,9 +126,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
     }
 
 }

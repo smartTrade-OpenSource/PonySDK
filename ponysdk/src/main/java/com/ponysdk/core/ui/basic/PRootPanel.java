@@ -55,7 +55,6 @@ public class PRootPanel extends PAbsolutePanel {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.ROOT_ID, id);
     }
 

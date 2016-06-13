@@ -77,9 +77,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
 
     public void setCaption(final String caption) {
         this.caption = caption;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_CAPTION, caption);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_CAPTION, caption));
     }
 
     public String getCaption() {

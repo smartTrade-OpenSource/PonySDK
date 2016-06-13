@@ -40,17 +40,13 @@ public class PConfirmDialog extends PDialogBox {
     public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption,
                                   final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
-        confirmDialog.setPopupPositionAndShow(new PPositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
-                if (offsetHeight > windowHeight) {
-                    content.setHeight(windowHeight - 100 + "px");
-                    confirmDialog.setHeight(windowHeight - 100 + "px");
-                }
-                confirmDialog.setWidth(offsetWidth + 35 + "px");
-                confirmDialog.center();
+        confirmDialog.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
+            if (offsetHeight > windowHeight) {
+                content.setHeight(windowHeight - 100 + "px");
+                confirmDialog.setHeight(windowHeight - 100 + "px");
             }
+            confirmDialog.setWidth(offsetWidth + 35 + "px");
+            confirmDialog.center();
         });
         return confirmDialog;
 

@@ -65,7 +65,7 @@ public class Query {
     }
 
     public void setCriteria(final List<Criterion> criteria) {
-        criteria.forEach(criterion -> addCriterion(criterion));
+        criteria.forEach(this::addCriterion);
     }
 
     public Criterion getCriterion(final String pojoProperty) {

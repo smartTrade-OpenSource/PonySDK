@@ -25,9 +25,9 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.ui.PTDatePicker;
 import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
@@ -64,7 +64,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
             year = jsonObject.getInt(ClientToServerModel.YEAR.toStringValue());
             month = jsonObject.getInt(ClientToServerModel.MONTH.toStringValue());
             day = jsonObject.getInt(ClientToServerModel.DAY.toStringValue());
-            onValueChange(new PValueChangeEvent<Date>(this, date));
+            onValueChange(new PValueChangeEvent<>(this, date));
         } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SHOW_RANGE.toStringValue())) {
             final long start = jsonObject.getJsonNumber(ClientToServerModel.START_DATE.toStringValue()).longValue();
             final long end = jsonObject.getJsonNumber(ClientToServerModel.END_DATE.toStringValue()).longValue();
@@ -126,15 +126,11 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.DATE, date != null ? date.getTime() : -1);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DATE, date != null ? date.getTime() : -1));
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TIME, date != null ? date.getTime() : -1);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TIME, date != null ? date.getTime() : -1));
     }
 
     /**

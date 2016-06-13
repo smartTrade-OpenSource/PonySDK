@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+
+import java.util.Objects;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each
@@ -50,21 +50,17 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, borderWidth));
     }
 
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SPACING, this.spacing);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SPACING, spacing));
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
         });
@@ -85,7 +81,7 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.CELL_WIDTH, width);
             writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
         });

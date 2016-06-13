@@ -50,9 +50,8 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     @Override
     protected boolean attach(final int windowID) {
         final boolean result = super.attach(windowID);
-        final Iterator<PWidget> child = iterator();
-        while (child.hasNext()) {
-            child.next().attach(windowID);
+        for (PWidget pWidget : this) {
+            pWidget.attach(windowID);
         }
         return result;
     }
@@ -62,7 +61,7 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
         child.setParent(this);
     }
 
-    protected final void orphan(final PWidget child) {
+    final void orphan(final PWidget child) {
         assert child.getParent() == this;
         child.setParent(null);
     }

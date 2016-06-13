@@ -41,7 +41,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
-    protected static final String EMPTY = "";
+    private static final String EMPTY = "";
 
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
 
@@ -59,7 +59,6 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
         if (!EMPTY.equals(text)) parser.parse(ServerToClientModel.TEXT, this.text);
         if (!EMPTY.equals(placeholder)) parser.parse(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
@@ -79,9 +78,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TEXT, this.text);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
     }
 
     @Override
@@ -98,9 +95,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder));
     }
 
     public String getPlaceholder() {

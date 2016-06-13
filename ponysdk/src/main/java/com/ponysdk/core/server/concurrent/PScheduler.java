@@ -189,7 +189,7 @@ public class PScheduler implements UIContextListener {
     public void onUIContextDestroyed(final UIContext uiContext) {
         final Set<UIRunnable> runnables = runnablesByUIContexts.remove(uiContext);
         if (runnables != null) {
-            runnables.forEach(runnable -> runnable.cancel());
+            runnables.forEach(UIRunnable::cancel);
         }
     }
 

@@ -105,7 +105,7 @@ public class Txn {
     }
 
     private void fireBeforeRollback() {
-        txnListeners.forEach(listener -> listener.beforeRollback());
+        txnListeners.forEach(TxnListener::beforeRollback);
     }
 
 }

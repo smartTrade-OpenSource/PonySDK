@@ -373,7 +373,7 @@ public enum Browser {
      */
     public boolean isInUserAgentString(final String agentString) {
         for (final String alias : aliases) {
-            if (agentString.toLowerCase().indexOf(alias.toLowerCase()) != -1) return true;
+            if (agentString.toLowerCase().contains(alias.toLowerCase())) return true;
         }
         return false;
     }

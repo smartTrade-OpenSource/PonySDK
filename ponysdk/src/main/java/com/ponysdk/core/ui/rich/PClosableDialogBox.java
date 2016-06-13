@@ -96,12 +96,6 @@ public class PClosableDialogBox extends PPopupPanel {
     }
 
     public void displayAtCenter() {
-        setPopupPositionAndShow(new PPositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
-                setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2);
-            }
-        });
+        setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
     }
 }

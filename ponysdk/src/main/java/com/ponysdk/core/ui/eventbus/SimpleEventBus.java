@@ -166,13 +166,7 @@ public class SimpleEventBus implements EventBus {
             defferedAdd(type, source, handler);
         }
 
-        return new HandlerRegistration() {
-
-            @Override
-            public void removeHandler() {
-                doRemove(type, source, handler);
-            }
-        };
+        return () -> doRemove(type, source, handler);
     }
 
     private <H extends EventHandler> void defferedAdd(final Type<H> type, final Object source, final H handler) {

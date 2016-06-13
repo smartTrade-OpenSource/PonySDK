@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 
 /**
  * A flexible table that creates cells on demand. It can be jagged (that is,
@@ -36,6 +37,10 @@ public class PFlexTable extends PHTMLTable<PFlexCellFormatter> {
     protected void init0() {
         super.init0();
         setCellFormatter(new PFlexCellFormatter(this));
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
     }
 
     public PFlexCellFormatter getFlexCellFormatter() {

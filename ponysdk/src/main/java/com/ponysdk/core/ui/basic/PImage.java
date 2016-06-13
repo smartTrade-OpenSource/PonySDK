@@ -104,7 +104,6 @@ public class PImage extends PFocusWidget {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-
         if (url != null) {
             parser.parse(ServerToClientModel.IMAGE_URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
@@ -123,9 +122,7 @@ public class PImage extends PFocusWidget {
 
     public void setUrl(final String url) {
         this.url = url;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.IMAGE_URL, url);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.IMAGE_URL, url));
     }
 
     public String getUrl() {
@@ -137,7 +134,7 @@ public class PImage extends PFocusWidget {
         streamResource.embed(streamListener, this);
     }
 
-    public static class ClassPathURL {
+    private static class ClassPathURL {
 
         private final URL url;
 
@@ -145,7 +142,7 @@ public class PImage extends PFocusWidget {
             url = getClass().getClassLoader().getResource(resourcePath);
         }
 
-        public final String toUrl() {
+        final String toUrl() {
             String imageToBase64 = null;
 
             try (InputStream in = url.openStream()) {

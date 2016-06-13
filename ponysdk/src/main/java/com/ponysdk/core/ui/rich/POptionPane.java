@@ -79,13 +79,7 @@ public class POptionPane {
         for (final String option : options) {
             final PButton button = new PButton(option);
             button.ensureDebugId("optionpane[" + option + "]");
-            button.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent clickEvent) {
-                    handler.onAction(dialogBox, option);
-                }
-            });
+            button.addClickHandler(clickEvent -> handler.onAction(dialogBox, option));
             controlsPanel.add(button);
         }
 

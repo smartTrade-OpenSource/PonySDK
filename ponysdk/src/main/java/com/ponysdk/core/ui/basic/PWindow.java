@@ -23,28 +23,28 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
-import javax.json.JsonObject;
-
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class PWindow extends PObject {
 
-    public static final int EMPTY_WINDOW_ID = -2;
+    static final int EMPTY_WINDOW_ID = -2;
     public static final int MAIN_WINDOW_ID = -1;
 
-    private final ListenerCollection<PCloseHandler> closeHandlers = new ListenerCollection<>();
-    private final ListenerCollection<POpenHandler> openHandlers = new ListenerCollection<>();
+    private final List<PCloseHandler> closeHandlers = new ArrayList<>();
+    private final List<POpenHandler> openHandlers = new ArrayList<>();
 
     private final String url;
 
@@ -81,16 +81,12 @@ public class PWindow extends PObject {
     public boolean open() {
         if (opened) return false;
         opened = true;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.OPEN, opened);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN, opened));
         return opened;
     }
 
     public void close() {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CLOSE, true);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE, true));
     }
 
     @Override
@@ -102,15 +98,11 @@ public class PWindow extends PObject {
                 stackedInstructions.poll().run();
             }
             final POpenEvent e = new POpenEvent(this);
-            for (final POpenHandler h : openHandlers) {
-                h.onOpen(e);
-            }
+            openHandlers.forEach(handler -> handler.onOpen(e));
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             final PCloseEvent e = new PCloseEvent(this);
-            for (final PCloseHandler h : closeHandlers) {
-                h.onClose(e);
-            }
+            closeHandlers.forEach(handler -> handler.onClose(e));
         } else {
             super.onClientData(event);
         }

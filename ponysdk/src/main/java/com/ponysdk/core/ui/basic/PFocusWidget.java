@@ -101,9 +101,7 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ENABLED, enabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
     }
 
     public void setTabindex(final int tabindex) {
@@ -117,26 +115,20 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
     }
 
     @Override
     public void setFocus(final boolean focused) {
         if (Objects.equals(this.focused, focused)) return;
         this.focused = focused;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.FOCUSED, focused);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.FOCUSED, focused));
     }
 
     public boolean isEnabled() {
@@ -162,15 +154,9 @@ public abstract class PFocusWidget extends PWidget
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
-            return addDomHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    handler.onClick(event);
-                    saveUpdate((writer) -> {
-                        writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
-                    });
-                }
+            return addDomHandler(event -> {
+                handler.onClick(event);
+                saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
             }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
@@ -180,15 +166,11 @@ public abstract class PFocusWidget extends PWidget
     @Override
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
-            final PDoubleClickHandler clickHandler = new PDoubleClickHandler() {
-
-                @Override
-                public void onDoubleClick(final PDoubleClickEvent event) {
-                    handler.onDoubleClick(event);
-                    saveUpdate((writer) -> {
-                        writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
-                    });
-                }
+            final PDoubleClickHandler clickHandler = event -> {
+                handler.onDoubleClick(event);
+                saveUpdate((writer) -> {
+                    writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
+                });
             };
 
             return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);

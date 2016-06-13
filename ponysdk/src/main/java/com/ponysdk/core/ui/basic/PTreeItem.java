@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is

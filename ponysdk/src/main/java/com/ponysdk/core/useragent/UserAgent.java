@@ -53,10 +53,6 @@ public class UserAgent implements Serializable {
         this.userAgentString = userAgentString;
     }
 
-    /**
-     * @param userAgentString
-     * @return UserAgent
-     */
     public static UserAgent parseUserAgentString(final String userAgentString) {
         return new UserAgent(userAgentString);
     }
@@ -107,9 +103,6 @@ public class UserAgent implements Serializable {
 
     /**
      * Returns UserAgent based on specified unique id
-     *
-     * @param id
-     * @return
      */
     public static UserAgent valueOf(final int id) {
         final OperatingSystem operatingSystem = OperatingSystem.valueOf((short) (id >> 16));
@@ -123,9 +116,6 @@ public class UserAgent implements Serializable {
 
     /**
      * Returns UserAgent based on combined string representation
-     *
-     * @param name
-     * @return
      */
     public static UserAgent valueOf(final String name) {
         if (name == null) throw new NullPointerException("Name is null");

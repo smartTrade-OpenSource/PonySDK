@@ -101,7 +101,6 @@ public class PSuggestBox extends PWidget
 
     @Override
     protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.ORACLE, suggestOracle.getID());
 
         // TODO nciaravola
@@ -123,7 +122,7 @@ public class PSuggestBox extends PWidget
             String displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
-            onSelection(new PSelectionEvent<PSuggestOracle.PSuggestion>(this, suggestion));
+            onSelection(new PSelectionEvent<>(this, suggestion));
         } else {
             super.onClientData(instruction);
         }
@@ -178,11 +177,7 @@ public class PSuggestBox extends PWidget
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        if (handler != null) {
-            return false;
-        } else {
-            return textBox.removeValueChangeHandler(handler);
-        }
+        return handler == null && textBox.removeValueChangeHandler(handler);
     }
 
     @Override

@@ -26,16 +26,15 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.event.PNativeEvent;
 import com.ponysdk.core.ui.basic.event.PNativeHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
-import com.ponysdk.core.model.WidgetType;
 
 import javax.json.JsonObject;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public abstract class PObject {
 
     private String nativeBindingFunction;
 
-    private ListenerCollection<PNativeHandler> nativeHandlers;
+    private PNativeHandler nativeHandler;
 
     protected int windowID = PWindow.EMPTY_WINDOW_ID;
 
@@ -98,11 +97,11 @@ public abstract class PObject {
     protected void init0() {
     }
 
-    public int getWindowID() {
-        return windowID;
+    protected void enrichOnInit(final Parser parser) {
     }
 
-    protected void enrichOnInit(final Parser parser) {
+    public int getWindowID() {
+        return windowID;
     }
 
     protected abstract WidgetType getWidgetType();
@@ -117,35 +116,25 @@ public abstract class PObject {
 
         nativeBindingFunction = functionName;
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.BIND, functionName);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BIND, functionName));
     }
 
     public void sendToNative(final JsonObject data) {
         if (nativeBindingFunction == null)
             throw new IllegalAccessError("Object not bind to a native function");
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.NATIVE, data);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, data));
     }
 
-    public void addNativeHandler(final PNativeHandler handler) {
-        if (nativeHandlers == null)
-            nativeHandlers = new ListenerCollection<>();
-
-        nativeHandlers.register(handler);
+    public void setNativeHandler(final PNativeHandler handler) {
+        nativeHandler = handler;
     }
 
     public void onClientData(final JsonObject event) {
-        if (nativeHandlers != null && !nativeHandlers.isEmpty()) {
+        if (nativeHandler != null) {
             final String nativeKey = ClientToServerModel.NATIVE.toStringValue();
             if (event.containsKey(nativeKey)) {
-                final PNativeEvent nativeEvent = new PNativeEvent(this, event.getJsonObject(nativeKey));
-                for (final PNativeHandler handler : nativeHandlers) {
-                    handler.onNativeEvent(nativeEvent);
-                }
+                nativeHandler.onNativeEvent(new PNativeEvent(this, event.getJsonObject(nativeKey)));
             }
         }
     }
@@ -179,7 +168,7 @@ public abstract class PObject {
             stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
-    protected void executeAdd(final int objectID, final int parentObjectID) {
+    void executeAdd(final int objectID, final int parentObjectID) {
         executeAdd(objectID, parentObjectID, (ServerBinaryModel) null);
     }
 
@@ -199,7 +188,7 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    protected void saveAddHandler(final HandlerModel type) {
+    void saveAddHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
         else stackedInstructions.add(() -> executeAddHandler(type));
     }
@@ -214,9 +203,9 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    protected void saveRemoveHandler(final HandlerModel type) {
+    void saveRemoveHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
-        else stackedInstructions.add(() -> executeRemoveHandler());
+        else stackedInstructions.add(this::executeRemoveHandler);
     }
 
     private void executeRemoveHandler() {
@@ -228,7 +217,7 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    protected void saveRemove(final int objectID, final int parentObjectID) {
+    void saveRemove(final int objectID, final int parentObjectID) {
         if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
         else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }

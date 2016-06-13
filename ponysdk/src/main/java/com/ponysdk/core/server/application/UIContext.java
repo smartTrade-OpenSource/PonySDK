@@ -29,16 +29,15 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PHistory;
+import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.eventbus.Event.Type;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.weak.WeakHashMap;
 import com.ponysdk.core.writer.ModelWriter;
-import com.ponysdk.core.ui.basic.DataListener;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +108,7 @@ public class UIContext {
 
     private final TxnContext context;
 
-    private final ListenerCollection<DataListener> listenerCollection = new ListenerCollection<>();
+    private final List<DataListener> listeners = new ArrayList<>();
 
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
@@ -128,11 +127,11 @@ public class UIContext {
     }
 
     public void addDataListener(final DataListener listener) {
-        listenerCollection.register(listener);
+        listeners.add(listener);
     }
 
     public void removeDataListener(final DataListener listener) {
-        listenerCollection.unregister(listener);
+        listeners.remove(listener);
     }
 
     public void execute(final Runnable runnable) {
@@ -166,22 +165,18 @@ public class UIContext {
     }
 
     private void fireOnData(final List<Object> data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listeners.isEmpty()) return;
         try {
-            for (final DataListener listener : listenerCollection) {
-                data.forEach((object) -> listener.onData(object));
-            }
+            listeners.forEach(listener -> data.forEach(listener::onData));
         } catch (final Throwable e) {
             log.error("Cannot send data", e);
         }
     }
 
     private void fireOnData(final Object data) {
-        if (listenerCollection.isEmpty()) return;
+        if (listeners.isEmpty()) return;
         try {
-            for (final DataListener listener : listenerCollection) {
-                listener.onData(data);
-            }
+            listeners.forEach(listener -> listener.onData(data));
         } catch (final Throwable e) {
             log.error("Cannot send data", e);
         }
@@ -355,13 +350,16 @@ public class UIContext {
         }
     }
 
-    public static boolean hasPermission(final Permission permission) {
-        return get().hasPermission0(permission);
+    public static boolean hasPermission(final String permissionKey) {
+        return get().hasPermission0(permissionKey);
     }
 
-    private boolean hasPermission0(final Permission permission) {
-        if (Permission.ALLOWED.equals(permission)) return true;
-        return permissions.containsKey(permission.getKey());
+    public static boolean hasPermission(final Permission permission) {
+        return get().hasPermission0(permission.getKey());
+    }
+
+    private boolean hasPermission0(final String permissionKey) {
+        return Permission.ALLOWED.getKey().equals(permissionKey) || permissions.containsKey(permissionKey);
     }
 
     public void setPermissions(final Map<String, Permission> permissions) {

@@ -72,22 +72,18 @@ public class XMLExporter<T> implements Exporter<T> {
     public void exportXMLString(final String fileName, final String content) throws Exception {
         // Set MIME type to binary data to prevent opening of PDF in browser window
         final StreamResource streamResource = new StreamResource();
-        streamResource.open(new StreamHandler() {
-
-            @Override
-            public void onStream(final HttpServletRequest req, final HttpServletResponse response) {
-                response.reset();
-                response.setContentType("application/xml");
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-                PrintWriter printer;
-                try {
-                    printer = response.getWriter();
-                    printer.print(content);
-                    printer.flush();
-                    printer.close();
-                } catch (final IOException e) {
-                    log.error("Error when exporting", e);
-                }
+        streamResource.open((req, response) -> {
+            response.reset();
+            response.setContentType("application/xml");
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            PrintWriter printer;
+            try {
+                printer = response.getWriter();
+                printer.print(content);
+                printer.flush();
+                printer.close();
+            } catch (final IOException e) {
+                log.error("Error when exporting", e);
             }
         });
     }

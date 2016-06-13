@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.application;
 
 import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.useragent.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +47,14 @@ public class Application {
 
     private final ApplicationManagerOption options;
 
+    private final UserAgent userAgent;
+
     private final String sessionID;
 
-    public Application(String sessionID, final ApplicationManagerOption options) {
+    public Application(String sessionID, final ApplicationManagerOption options, UserAgent userAgent) {
         this.options = options;
         this.sessionID = sessionID;
+        this.userAgent = userAgent;
     }
 
     void registerUIContext(final UIContext uiContext) {
@@ -107,6 +111,10 @@ public class Application {
 
     public String getSessionID() {
         return sessionID;
+    }
+
+    public UserAgent getUserAgent() {
+        return userAgent;
     }
 
     @Override

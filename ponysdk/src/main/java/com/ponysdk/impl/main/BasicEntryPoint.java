@@ -36,13 +36,7 @@ public class BasicEntryPoint implements EntryPoint {
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput(new TerminalDataReceiver() {
-
-            @Override
-            public void onDataReceived(final PObject object, final JsonObject instruction) {
-                System.err.println(object + "" + instruction);
-            }
-        });
+        uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + "" + instruction));
 
         // PRootPanel.get().clear(true);
 

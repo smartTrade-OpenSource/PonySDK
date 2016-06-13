@@ -23,19 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.application.UIContext;
+
+import javax.json.JsonObject;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class allows to execute native Java-script code.
@@ -49,6 +46,10 @@ public class PScript extends PObject {
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
 
     private PScript() {
+    }
+
+    @Override
+    protected void enrichOnInit(Parser parser) {
     }
 
     @Override
@@ -71,7 +72,7 @@ public class PScript extends PObject {
         return script;
     }
 
-    protected static void registerWindow(final int windowID) {
+    static void registerWindow(final int windowID) {
         final PScript script = UIContext.get().getAttribute(SCRIPT_KEY + windowID);
         if (script != null) script.attach(windowID);
     }
@@ -143,22 +144,6 @@ public class PScript extends PObject {
         void onFailure(String msg);
 
         void onSuccess(String msg);
-    }
-
-    public static class PScriptExecutionLogger implements ExecutionCallback {
-
-        private static final Logger log = LoggerFactory.getLogger(PScriptExecutionLogger.class);
-
-        @Override
-        public void onFailure(final String msg) {
-            log.error(msg);
-        }
-
-        @Override
-        public void onSuccess(final String msg) {
-            log.info(msg);
-        }
-
     }
 
 }

@@ -35,8 +35,10 @@ public class EmailFieldValidator implements FieldValidator {
         if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
 
         final String[] emails = value.split(EMAILS_SEPARATOR);
-        for (int i = 0; i < emails.length; i++) {
-            if (!emails[i].matches(VALID_MAIL_REGEX)) { return ValidationResult.newFailedValidationResult(PString.get("validator.error.email")); }
+        for (String email : emails) {
+            if (!email.matches(VALID_MAIL_REGEX)) {
+                return ValidationResult.newFailedValidationResult(PString.get("validator.error.email"));
+            }
         }
 
         return ValidationResult.newOKValidationResult();

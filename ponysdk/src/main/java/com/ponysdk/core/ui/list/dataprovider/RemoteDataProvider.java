@@ -107,7 +107,7 @@ public abstract class RemoteDataProvider<T> implements PagerListener, FilterList
     }
 
     public void reset() {
-        resatableList.forEach(resetable -> resetable.reset());
+        resatableList.forEach(Resetable::reset);
     }
 
     public Query buildQuery() {

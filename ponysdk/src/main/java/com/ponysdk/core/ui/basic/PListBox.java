@@ -136,9 +136,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final ListItem item = new ListItem(label, value);
         items.add(item);
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ITEM_INSERTED, label);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ITEM_INSERTED, label));
     }
 
     public void insertItem(final String item, final int index) {
@@ -216,9 +214,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void sendRemoveItemInstruction(final int index) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ITEM_REMOVED, index);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ITEM_REMOVED, index));
         if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
     }
 
@@ -355,9 +351,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setVisibleItemCount(final int visibleItemCount) {
         this.visibleItemCount = visibleItemCount;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
     }
 
     public int getVisibleItemCount() {
@@ -370,9 +364,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setMultipleSelect(final boolean isMultipleSelect) {
         this.isMultipleSelect = isMultipleSelect;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.MULTISELECT, isMultipleSelect);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.MULTISELECT, isMultipleSelect));
     }
 
     public class ListItem {

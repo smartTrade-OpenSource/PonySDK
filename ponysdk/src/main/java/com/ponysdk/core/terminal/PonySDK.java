@@ -92,9 +92,8 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
             if (opener == null) {
                 Window.addCloseHandler(new CloseHandler<Window>() {
-
                     @Override
-                    public void onClose(final CloseEvent<Window> event) {
+                    public void onClose(CloseEvent<Window> event) {
                         socketClient.close();
                         PTWindowManager.closeAll();
                     }
