@@ -31,6 +31,7 @@ import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.terminal.DomHandlerType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
@@ -58,8 +59,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private PWidget parent;
 
     private Set<String> styleNames;
-    private Set<PEvent> preventEvents;
-    private Set<PEvent> stopEvents;
+    private Set<PEventType> preventEvents;
+    private Set<PEventType> stopEvents;
 
     private EventBus domHandler;
 
@@ -84,12 +85,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return styleNames;
     }
 
-    private Set<PEvent> safePreventEvents() {
+    private Set<PEventType> safePreventEvents() {
         if (preventEvents == null) preventEvents = new HashSet<>();
         return preventEvents;
     }
 
-    private Set<PEvent> safeStopEvents() {
+    private Set<PEventType> safeStopEvents() {
         if (stopEvents == null) stopEvents = new HashSet<>();
         return stopEvents;
     }
@@ -240,7 +241,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return elementAttributes != null ? elementAttributes.get(key) : null;
     }
 
-    public void preventEvent(final PEvent e) {
+    public void preventEvent(final PEventType e) {
         if (safePreventEvents().add(e)) {
             saveUpdate((writer) -> {
                 writer.writeModel(ServerToClientModel.PREVENT_EVENT, e.getCode());
@@ -248,7 +249,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    public void stopEvent(final PEvent e) {
+    public void stopEvent(final PEventType e) {
         if (safeStopEvents().add(e)) {
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.STOP_EVENT, e.getCode()));
         }

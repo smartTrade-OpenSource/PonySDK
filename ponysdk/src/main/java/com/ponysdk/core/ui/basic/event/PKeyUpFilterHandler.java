@@ -29,7 +29,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.ui.basic.PKeyCodes;
+import com.ponysdk.core.ui.model.PKeyCodes;
 
 public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
 

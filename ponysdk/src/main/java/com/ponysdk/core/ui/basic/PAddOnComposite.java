@@ -31,16 +31,6 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     protected T widget;
 
     public PAddOnComposite(final T w) {
-        super();
-        create(w);
-    }
-
-    public PAddOnComposite(final T w, final String signature) {
-        super(signature);
-        create(w);
-    }
-
-    private void create(final T w) {
         widget = w;
 
         if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
