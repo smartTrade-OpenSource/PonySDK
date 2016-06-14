@@ -92,6 +92,7 @@ import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
+import com.ponysdk.sample.client.page.addon.PElementAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -107,11 +108,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
-        final LoggerAddOn addon = createPAddOn();
-        addon.attach(a.getID());
+        //final LoggerAddOn addon = createPAddOn();
+        //addon.attach(PWindow.MAIN_WINDOW_ID);
 
-        final LoggerAddOn addon = createPAddOn();
-        addon.attach(a.getID());
+        PElementAddOn elementAddOn = new PElementAddOn();
+        elementAddOn.setInnerText("Coucou");
+        flowPanel.add(elementAddOn);
+
+        PElementAddOn elementAddOn2 = new PElementAddOn();
+        elementAddOn2.setInnerText("Coucou dans window");
+        a.add(elementAddOn2);
 
         if (true)
             return;
@@ -137,26 +143,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement label19 = new PElement("div");
         final PElement label20 = new PElement("div");
 
-        flowPanel.add(label1);
-        flowPanel.add(label2);
-        flowPanel.add(label3);
-        flowPanel.add(label4);
-        flowPanel.add(label5);
-        flowPanel.add(label6);
-        flowPanel.add(label7);
-        flowPanel.add(label8);
-        flowPanel.add(label9);
-        flowPanel.add(label10);
-        flowPanel.add(label11);
-        flowPanel.add(label12);
-        flowPanel.add(label13);
-        flowPanel.add(label14);
-        flowPanel.add(label15);
-        flowPanel.add(label16);
-        flowPanel.add(label17);
-        flowPanel.add(label18);
-        flowPanel.add(label19);
-        flowPanel.add(label20);
+        //flowPanel.add(label1);
+        //flowPanel.add(label2);
+        //flowPanel.add(label3);
+        //flowPanel.add(label4);
+        //flowPanel.add(label5);
+        //flowPanel.add(label6);
+        //flowPanel.add(label7);
+        //flowPanel.add(label8);
+        //flowPanel.add(label9);
+        //flowPanel.add(label10);
+        //flowPanel.add(label11);
+        //flowPanel.add(label12);
+        //flowPanel.add(label13);
+        //flowPanel.add(label14);
+        //flowPanel.add(label15);
+        //flowPanel.add(label16);
+        //flowPanel.add(label17);
+        //flowPanel.add(label18);
+        //flowPanel.add(label19);
+        //flowPanel.add(label20);
 
         PScheduler.scheduleAtFixedRate(new Runnable() {
 

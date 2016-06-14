@@ -59,7 +59,31 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
 
     @Override
     public boolean attach(final int windowID) {
-        return super.attach(windowID);
+        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
+            this.windowID = windowID;
+
+            final PWindow window = PWindowManager.get().getWindow(windowID);
+
+            if (window != null && window.isOpened()) {
+                init();
+            } else {
+                PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
+                    @Override
+                    public void registered(int windowID) {
+                        init();
+                    }
+
+                    @Override
+                    public void unregistered(int windowID) {
+                    }
+                });
+            }
+
+            return true;
+        } else if (this.windowID != windowID) {
+            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+        }
+        return false;
     }
 
     @Override

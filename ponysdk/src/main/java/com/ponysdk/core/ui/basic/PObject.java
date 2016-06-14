@@ -59,6 +59,8 @@ public abstract class PObject {
 
     protected final Queue<Runnable> stackedInstructions = new LinkedList<>();
 
+    private AttachListener attachListener;
+
     PObject() {
         UIContext.get().registerObject(this);
     }
@@ -66,29 +68,21 @@ public abstract class PObject {
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
-
-            final PWindow window = PWindowManager.get().getWindow(windowID);
-
-            if (window != null && window.isOpened()) {
-                init();
-            } else {
-                PWindowManager.get().addWindowListener(windowId -> PObject::init());
-            }
-
+            init();
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError(
+                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
+
         return false;
     }
 
     protected void init() {
-        if (initialized)
-            return;
+        if (initialized) return;
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID)
-            parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_CREATE, ID);
         parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
@@ -96,8 +90,9 @@ public abstract class PObject {
 
         init0();
 
-        while (!stackedInstructions.isEmpty())
-            stackedInstructions.poll().run();
+        while (!stackedInstructions.isEmpty()) stackedInstructions.poll().run();
+
+        if (attachListener != null) attachListener.onAttach();
 
         initialized = true;
     }
@@ -268,6 +263,14 @@ public abstract class PObject {
     @Override
     public String toString() {
         return "ID=" + ID + ", widgetType=" + getWidgetType().name();
+    }
+
+    public void setAttachListener(AttachListener attachListener) {
+        this.attachListener = attachListener;
+    }
+
+    interface AttachListener {
+        void onAttach();
     }
 
 }

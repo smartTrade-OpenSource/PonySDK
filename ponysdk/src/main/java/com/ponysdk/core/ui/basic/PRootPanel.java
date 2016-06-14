@@ -107,17 +107,14 @@ public class PRootPanel extends PAbsolutePanel {
      * This method also provides the option to remove all children including the
      * non-widget DOM elements that are directly added.
      *
-     * @param clearDom
-     *            if {@code true} this method will also remove any DOM elements
-     *            that are not widgets.
+     * @param clearDom if {@code true} this method will also remove any DOM elements
+     *                 that are not widgets.
      */
     public void clear(final boolean clearDom) {
         clear();
 
         if (clearDom) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom));
         }
     }
 }

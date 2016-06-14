@@ -26,19 +26,30 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Parser;
 
-public abstract class PAddOnComposite extends PAddOn {
+public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implements IsPWidget {
 
-    private PWidget widget;
+    protected T widget;
 
-    public PAddOnComposite(final IsPWidget widget) {
-        this.widget = widget.asWidget();
-        if (widget == null)
-            return;
+    public PAddOnComposite(final T w) {
+        widget = w;
 
-        if (PWindow.EMPTY_WINDOW_ID != this.widget.getWindowID()) {
-            attach(this.widget.getWindowID());
+        if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
+            attach(widget.getWindowID());
         } else {
+            widget.setAttachListener(() -> attach(widget.getWindowID()));
 
+            PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
+                @Override
+                public void registered(int windowID) {
+                    if (windowID == widget.getWindowID()) {
+                        attach(widget.getWindowID());
+                    }
+                }
+
+                @Override
+                public void unregistered(int windowID) {
+                }
+            });
         }
     }
 
@@ -48,6 +59,11 @@ public abstract class PAddOnComposite extends PAddOn {
         if (widget != null) {
             parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
         }
+    }
+
+    @Override
+    public PWidget asWidget() {
+        return widget;
     }
 
 }

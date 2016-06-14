@@ -23,7 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.core.server.application.UIContext;
@@ -33,6 +35,7 @@ public class PWindowManager {
     private static final String ROOT = "WindowManager";
 
     private final Map<Integer, PWindow> windows = new HashMap<>();
+    private List<RegisterWindowListener> listeners = new ArrayList<>();
 
     private PWindowManager() {
     }
@@ -57,13 +60,19 @@ public class PWindowManager {
 
     private void registerWindow0(final PWindow window) {
         windows.put(window.getID(), window);
+        listeners.forEach(listener -> listener.registered(window.getID()));
     }
 
     private void unregisterWindow0(final PWindow window) {
         windows.remove(window.getID());
     }
 
-    public static void addWindowListener() {
+    public static void addWindowListener(RegisterWindowListener listener) {
+        get().addWindowListener0(listener);
+    }
+
+    private void addWindowListener0(RegisterWindowListener listener) {
+        this.listeners.add(listener);
     }
 
     public PWindow getWindow(final int windowID) {
