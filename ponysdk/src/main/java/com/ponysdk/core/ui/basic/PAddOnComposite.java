@@ -31,6 +31,16 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     protected T widget;
 
     public PAddOnComposite(final T w) {
+        super();
+        create(w);
+    }
+
+    public PAddOnComposite(final T w, final String signature) {
+        super(signature);
+        create(w);
+    }
+
+    private void create(final T w) {
         widget = w;
 
         if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
@@ -39,15 +49,16 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
             widget.setAttachListener(() -> attach(widget.getWindowID()));
 
             PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
+
                 @Override
-                public void registered(int windowID) {
+                public void registered(final int windowID) {
                     if (windowID == widget.getWindowID()) {
                         attach(widget.getWindowID());
                     }
                 }
 
                 @Override
-                public void unregistered(int windowID) {
+                public void unregistered(final int windowID) {
                 }
             });
         }
@@ -62,7 +73,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
-    public PWidget asWidget() {
+    public T asWidget() {
         return widget;
     }
 

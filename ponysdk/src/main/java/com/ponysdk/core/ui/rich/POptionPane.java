@@ -23,11 +23,12 @@
 
 package com.ponysdk.core.ui.rich;
 
-
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users
@@ -49,16 +50,19 @@ public class POptionPane {
         return showConfirmDialog(handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType) {
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType) {
         return showConfirmDialog(handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType,
+    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType,
             final PMessageType messageType) {
         return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title, final POptionType optionType, final PMessageType messageType,
+    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title,
+            final POptionType optionType, final PMessageType messageType,
             final String... options) {
         final POptionPane optionPane = new POptionPane();
 
@@ -96,16 +100,16 @@ public class POptionPane {
 
     private static String[] getOptions(final POptionType optionType) {
         switch (optionType) {
-        case DEFAULT_OPTION:
-            return new String[] { POption.OK_OPTION.getName() };
-        case OK_CANCEL_OPTION:
-            return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-        case YES_NO_CANCEL_OPTION:
-            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-        case YES_NO_OPTION:
-            return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
-        default:
-            break;
+            case DEFAULT_OPTION:
+                return new String[] { POption.OK_OPTION.getName() };
+            case OK_CANCEL_OPTION:
+                return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_CANCEL_OPTION:
+                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_OPTION:
+                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
+            default:
+                break;
         }
         return null;
     }
@@ -116,7 +120,11 @@ public class POptionPane {
     }
 
     public enum POption {
-        CANCEL_OPTION("CANCEL"), CLOSED_OPTION("CLOSED"), NO_OPTION("NO"), OK_OPTION("OK"), YES_OPTION("YES");
+        CANCEL_OPTION("CANCEL"),
+        CLOSED_OPTION("CLOSED"),
+        NO_OPTION("NO"),
+        OK_OPTION("OK"),
+        YES_OPTION("YES");
 
         private final String name;
 
@@ -134,11 +142,18 @@ public class POptionPane {
     }
 
     public enum POptionType {
-        DEFAULT_OPTION, OK_CANCEL_OPTION, YES_NO_CANCEL_OPTION, YES_NO_OPTION
+        DEFAULT_OPTION,
+        OK_CANCEL_OPTION,
+        YES_NO_CANCEL_OPTION,
+        YES_NO_OPTION
     }
 
     public enum PMessageType {
-        PLAIN_MESSAGE(""), ERROR_MESSAGE("Error"), INFORMATION_MESSAGE("Info"), WARNING_MESSAGE("Warning"), QUESTION_MESSAGE("Question");
+        PLAIN_MESSAGE(""),
+        ERROR_MESSAGE("Error"),
+        INFORMATION_MESSAGE("Info"),
+        WARNING_MESSAGE("Warning"),
+        QUESTION_MESSAGE("Question");
 
         private final String name;
 

@@ -30,8 +30,6 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {
 

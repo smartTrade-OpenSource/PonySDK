@@ -143,26 +143,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement label19 = new PElement("div");
         final PElement label20 = new PElement("div");
 
-        //flowPanel.add(label1);
-        //flowPanel.add(label2);
-        //flowPanel.add(label3);
-        //flowPanel.add(label4);
-        //flowPanel.add(label5);
-        //flowPanel.add(label6);
-        //flowPanel.add(label7);
-        //flowPanel.add(label8);
-        //flowPanel.add(label9);
-        //flowPanel.add(label10);
-        //flowPanel.add(label11);
-        //flowPanel.add(label12);
-        //flowPanel.add(label13);
-        //flowPanel.add(label14);
-        //flowPanel.add(label15);
-        //flowPanel.add(label16);
-        //flowPanel.add(label17);
-        //flowPanel.add(label18);
-        //flowPanel.add(label19);
-        //flowPanel.add(label20);
+        flowPanel.add(label1);
+        flowPanel.add(label2);
+        flowPanel.add(label3);
+        flowPanel.add(label4);
+        flowPanel.add(label5);
+        flowPanel.add(label6);
+        flowPanel.add(label7);
+        flowPanel.add(label8);
+        flowPanel.add(label9);
+        flowPanel.add(label10);
+        flowPanel.add(label11);
+        flowPanel.add(label12);
+        flowPanel.add(label13);
+        flowPanel.add(label14);
+        flowPanel.add(label15);
+        flowPanel.add(label16);
+        flowPanel.add(label17);
+        flowPanel.add(label18);
+        flowPanel.add(label19);
+        flowPanel.add(label20);
 
         PScheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -331,7 +331,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -355,7 +355,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -388,7 +388,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 

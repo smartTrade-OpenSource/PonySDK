@@ -51,6 +51,16 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
 
     protected boolean attached = false;
 
+    private final String signature;
+
+    public PAddOn() {
+        this.signature = getClass().getCanonicalName();
+    }
+
+    public PAddOn(final String signature) {
+        this.signature = signature;
+    }
+
     @Override
     protected void init0() {
         super.init0();
@@ -68,20 +78,22 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
                 init();
             } else {
                 PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
+
                     @Override
-                    public void registered(int windowID) {
+                    public void registered(final int windowID) {
                         init();
                     }
 
                     @Override
-                    public void unregistered(int windowID) {
+                    public void unregistered(final int windowID) {
                     }
                 });
             }
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError(
+                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
@@ -89,7 +101,7 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.FACTORY, getClass().getCanonicalName());
+        parser.parse(ServerToClientModel.FACTORY, signature);
     }
 
     public void update(final JsonObject jsonObject) {

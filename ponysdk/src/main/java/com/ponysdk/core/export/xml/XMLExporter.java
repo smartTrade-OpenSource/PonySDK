@@ -27,9 +27,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +36,6 @@ import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 public class XMLExporter<T> implements Exporter<T> {
 
