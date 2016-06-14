@@ -35,11 +35,11 @@ import com.ponysdk.core.ui.list.valueprovider.ValueProvider;
  * @param <V>
  * @param <W>
  */
-public class DataGridColumnDescriptor<D, V, W extends IsPWidget> {
+public class DataGridColumnDescriptor<D, V> {
 
     protected HeaderCellRenderer headerCellRenderer;
-    protected CellRenderer<V, W> cellRenderer;
-    protected CellRenderer<V, W> subCellRenderer;
+    protected CellRenderer<V, ? extends IsPWidget> cellRenderer;
+    protected CellRenderer<V, ? extends IsPWidget> subCellRenderer;
     protected ValueProvider<D, V> valueProvider;
 
     public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
@@ -50,11 +50,11 @@ public class DataGridColumnDescriptor<D, V, W extends IsPWidget> {
         return headerCellRenderer;
     }
 
-    public void setCellRenderer(final CellRenderer<V, W> cellRenderer) {
+    public void setCellRenderer(final CellRenderer<V, ? extends IsPWidget> cellRenderer) {
         this.cellRenderer = cellRenderer;
     }
 
-    public CellRenderer<V, W> getCellRenderer() {
+    public CellRenderer<V, ? extends IsPWidget> getCellRenderer() {
         return cellRenderer;
     }
 
@@ -66,21 +66,21 @@ public class DataGridColumnDescriptor<D, V, W extends IsPWidget> {
         return valueProvider;
     }
 
-    public CellRenderer<V, W> getSubCellRenderer() {
+    public CellRenderer<V, ? extends IsPWidget> getSubCellRenderer() {
         return subCellRenderer;
     }
 
-    public void setSubCellRenderer(final CellRenderer<V, W> subCellRenderer) {
+    public void setSubCellRenderer(final CellRenderer<V, ? extends IsPWidget> subCellRenderer) {
         this.subCellRenderer = subCellRenderer;
     }
 
-    public W renderCell(final int row, final D data) {
+    public IsPWidget renderCell(final int row, final D data) {
         if (cellRenderer == null) throw new IllegalArgumentException("CellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
         return cellRenderer.render(row, valueProvider.getValue(data));
     }
 
-    public W renderSubCell(final int row, final D data) {
+    public IsPWidget renderSubCell(final int row, final D data) {
         if (subCellRenderer == null) throw new IllegalArgumentException("SubCellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
         return subCellRenderer.render(row, valueProvider.getValue(data));
