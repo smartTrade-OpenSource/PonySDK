@@ -23,11 +23,15 @@
 
 package com.ponysdk.core.ui.list;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
-
-import java.util.*;
 
 /***
  * A Grid of data that supports paging and columns.
@@ -38,7 +42,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     protected final SimpleListView view;
     private PSelectionModel<D> setSelectionModel;
-    protected final List<DataGridColumnDescriptor<D, ?, ? extends PWidget>> columnDescriptors = new ArrayList<>();
+    protected final List<DataGridColumnDescriptor<D, ?, ? extends IsPWidget>> columnDescriptors = new ArrayList<>();
     private final Map<D, Integer> subListSizeByFather = new HashMap<>();
 
     private int colCount = 0;
@@ -49,7 +53,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         this.view = listView;
     }
 
-    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?, ? extends PWidget> columnDescriptor) {
+    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?, ? extends IsPWidget> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
         view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0, 1);
     }
@@ -239,7 +243,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         return view.asWidget();
     }
 
-    public List<DataGridColumnDescriptor<D, ?, ? extends PWidget>> getColumnDescriptors() {
+    public List<DataGridColumnDescriptor<D, ?, ? extends IsPWidget>> getColumnDescriptors() {
         return columnDescriptors;
     }
 

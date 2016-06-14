@@ -26,9 +26,12 @@ package com.ponysdk.core.ui.rich;
 import java.time.Duration;
 
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PNotificationManager {
 
@@ -37,7 +40,10 @@ public class PNotificationManager {
     public static int trayDuration = 6000;
 
     public enum Notification {
-        TRAY, HUMANIZED, WARNING_MESSAGE, ERROR_MESSAGE
+        TRAY,
+        HUMANIZED,
+        WARNING_MESSAGE,
+        ERROR_MESSAGE
     }
 
     public static void notify(final String message, final Notification notification) {
@@ -46,58 +52,58 @@ public class PNotificationManager {
 
     public static void notify(final int windowID, final String message, final Notification notification) {
         switch (notification) {
-        case TRAY:
-            showTrayNotification(windowID, new PLabel(message));
-            break;
-        case HUMANIZED:
-            showHumanizedNotification(windowID, new PLabel(message));
-            break;
-        case WARNING_MESSAGE:
-            showWarningNotification(windowID, new PLabel(message));
-            break;
-        case ERROR_MESSAGE:
-            showErrorNotification(windowID, new PLabel(message));
-            break;
-        default:
-            break;
+            case TRAY:
+                showTrayNotification(windowID, new PLabel(message));
+                break;
+            case HUMANIZED:
+                showHumanizedNotification(windowID, new PLabel(message));
+                break;
+            case WARNING_MESSAGE:
+                showWarningNotification(windowID, new PLabel(message));
+                break;
+            case ERROR_MESSAGE:
+                showErrorNotification(windowID, new PLabel(message));
+                break;
+            default:
+                break;
         }
     }
 
     public static void notify(final int windowID, final IsPWidget content, final Notification notification) {
         switch (notification) {
-        case TRAY:
-            showTrayNotification(windowID, content);
-            break;
-        case HUMANIZED:
-            showHumanizedNotification(windowID, content);
-            break;
-        case WARNING_MESSAGE:
-            showWarningNotification(windowID, content);
-            break;
-        case ERROR_MESSAGE:
-            showErrorNotification(windowID, content);
-            break;
-        default:
-            break;
+            case TRAY:
+                showTrayNotification(windowID, content);
+                break;
+            case HUMANIZED:
+                showHumanizedNotification(windowID, content);
+                break;
+            case WARNING_MESSAGE:
+                showWarningNotification(windowID, content);
+                break;
+            case ERROR_MESSAGE:
+                showErrorNotification(windowID, content);
+                break;
+            default:
+                break;
         }
     }
 
     public static void notify(final IsPWidget content, final Notification notification) {
         switch (notification) {
-        case TRAY:
-            showTrayNotification(content);
-            break;
-        case HUMANIZED:
-            showHumanizedNotification(content);
-            break;
-        case WARNING_MESSAGE:
-            showWarningNotification(content);
-            break;
-        case ERROR_MESSAGE:
-            showErrorNotification(content);
-            break;
-        default:
-            break;
+            case TRAY:
+                showTrayNotification(content);
+                break;
+            case HUMANIZED:
+                showHumanizedNotification(content);
+                break;
+            case WARNING_MESSAGE:
+                showWarningNotification(content);
+                break;
+            case ERROR_MESSAGE:
+                showErrorNotification(content);
+                break;
+            default:
+                break;
         }
     }
 
