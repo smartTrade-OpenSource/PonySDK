@@ -26,8 +26,6 @@ package com.ponysdk.sample.client.page.datagrid;
 import java.util.Arrays;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.sample.client.page.SamplePageActivity;
 import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -39,6 +37,8 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
+import com.ponysdk.sample.client.datamodel.PonyStock;
+import com.ponysdk.sample.client.page.SamplePageActivity;
 
 public class RefreshableDataGridPageActivity extends SamplePageActivity implements DataListener {
 
@@ -83,8 +83,8 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
     protected void onPonyStock(final PonyStock data) {
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newCountDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> countDescriptor = new DataGridColumnDescriptor<>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock> newCountDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock> countDescriptor = new DataGridColumnDescriptor<>();
         countDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Stock"));
         countDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
         countDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
@@ -103,8 +103,8 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return countDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newPriceDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> priceDescriptor = new DataGridColumnDescriptor<>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock> newPriceDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock> priceDescriptor = new DataGridColumnDescriptor<>();
         priceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Price"));
         priceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
         priceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
@@ -123,8 +123,8 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return priceDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newRaceDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> raceDescriptor = new DataGridColumnDescriptor<>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock> newRaceDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock> raceDescriptor = new DataGridColumnDescriptor<>();
         raceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
         raceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
         raceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
@@ -143,8 +143,8 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
         return raceDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> newIDDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock, PHTML> idDescriptor = new DataGridColumnDescriptor<>();
+    protected DataGridColumnDescriptor<PonyStock, PonyStock> newIDDescriptor() {
+        final DataGridColumnDescriptor<PonyStock, PonyStock> idDescriptor = new DataGridColumnDescriptor<>();
         idDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("ID"));
         idDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
         idDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {

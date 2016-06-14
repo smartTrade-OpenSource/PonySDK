@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
 import com.ponysdk.core.ui.basic.PDialogBox;
@@ -73,6 +72,7 @@ import com.ponysdk.core.ui.list.selector.SelectorCheckBox;
 import com.ponysdk.core.ui.list.valueprovider.BeanValueProvider;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.rich.PConfirmDialog;
+import com.ponysdk.sample.client.datamodel.Pony;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler {
 
@@ -171,7 +171,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         };
 
-        final DataGridColumnDescriptor<Pony, Pony, SelectorCheckBox<Pony>> selectColumnDescriptor = new DataGridColumnDescriptor<>();
+        final DataGridColumnDescriptor<Pony, Pony> selectColumnDescriptor = new DataGridColumnDescriptor<>();
         selectColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Select"));
         selectColumnDescriptor.setValueProvider(new IdentityValueProvider<Pony>());
         final CellRenderer<Pony, SelectorCheckBox<Pony>> selectCellRenderer = new CellRenderer<Pony, SelectorCheckBox<Pony>>() {
@@ -209,7 +209,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         selectColumnDescriptor.setCellRenderer(selectCellRenderer);
         selectColumnDescriptor.setSubCellRenderer(selectCellRenderer);
 
-        final DataGridColumnDescriptor<Pony, Pony, PLabel> descriptor = new DataGridColumnDescriptor<>();
+        final DataGridColumnDescriptor<Pony, Pony> descriptor = new DataGridColumnDescriptor<>();
         descriptor.setHeaderCellRenderer(new HeaderCellRenderer() {
 
             @Override
@@ -218,7 +218,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             }
         });
 
-        final DataGridColumnDescriptor<Pony, String, PLabel> nameColumnDescriptor = new DataGridColumnDescriptor<>();
+        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<>();
         final ComplexHeaderCellRenderer nameHeaderCellRender = new FilterableHeaderCellRenderer("Name", new StringTextBoxFormField(),
                 "name");
         nameHeaderCellRender.addFilterListener(dataProvider);
@@ -233,7 +233,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         for (int i = 0; i < 30; i++)
             ageListBox.addItem(i + " year", i);
 
-        final DataGridColumnDescriptor<Pony, String, PLabel> ageColumnDescriptor = new DataGridColumnDescriptor<>();
+        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<>();
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
         final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age",
                 new ListBoxFormField<Integer>(ageListBox), "age");
@@ -242,7 +242,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
         ageColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
 
-        final DataGridColumnDescriptor<Pony, String, PLabel> raceColumnDescriptor = new DataGridColumnDescriptor<>();
+        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<>();
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
         final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(),
                 "race");

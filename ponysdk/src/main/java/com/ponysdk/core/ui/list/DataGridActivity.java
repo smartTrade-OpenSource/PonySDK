@@ -42,7 +42,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     protected final SimpleListView view;
     private PSelectionModel<D> setSelectionModel;
-    protected final List<DataGridColumnDescriptor<D, ?, ? extends IsPWidget>> columnDescriptors = new ArrayList<>();
+    protected final List<DataGridColumnDescriptor<D, ?>> columnDescriptors = new ArrayList<>();
     private final Map<D, Integer> subListSizeByFather = new HashMap<>();
 
     private int colCount = 0;
@@ -53,7 +53,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         this.view = listView;
     }
 
-    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?, ? extends IsPWidget> columnDescriptor) {
+    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<D, ?> columnDescriptor) {
         columnDescriptors.add(columnDescriptor);
         view.addWidget(columnDescriptor.getHeaderCellRenderer().render(), colCount++, 0, 1);
     }
@@ -61,7 +61,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     public void setData(final int row, final D data) {
         int col = 0;
 
-        for (final DataGridColumnDescriptor<D, ?, ? extends IsPWidget> field : columnDescriptors) {
+        for (final DataGridColumnDescriptor<D, ?> field : columnDescriptors) {
             final IsPWidget renderCell = field.renderCell(row, data);
             view.addWidget(renderCell, col++, row + 1, 1);
         }
@@ -243,7 +243,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         return view.asWidget();
     }
 
-    public List<DataGridColumnDescriptor<D, ?, ? extends IsPWidget>> getColumnDescriptors() {
+    public List<DataGridColumnDescriptor<D, ?>> getColumnDescriptors() {
         return columnDescriptors;
     }
 

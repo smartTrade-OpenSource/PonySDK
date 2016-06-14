@@ -31,11 +31,11 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 /**
  * A widget that displays the image at a given URL. The image can be in
@@ -134,7 +134,7 @@ public class PImage extends PFocusWidget {
         streamResource.embed(streamListener, this);
     }
 
-    private static class ClassPathURL {
+    public static final class ClassPathURL {
 
         private final URL url;
 
