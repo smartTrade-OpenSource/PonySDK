@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.core.ui.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Contains the native eventbus codes.
  */
-public enum PEvent {
+public enum PEventType {
 
     ONBLUR(0x01000),
     ONCHANGE(0x00400),
@@ -64,17 +64,17 @@ public enum PEvent {
     OUCHEVENTS(0x100000 | 0x200000 | 0x400000 | 0x800000),
     GESTUREEVENTS(0x1000000 | 0x2000000 | 0x4000000);
 
-    private static final Map<Integer, PEvent> eventsByCode = new HashMap<>();
+    private static final Map<Integer, PEventType> eventsByCode = new HashMap<>();
 
     static {
-        for (final PEvent code : PEvent.values()) {
+        for (final PEventType code : PEventType.values()) {
             eventsByCode.put(code.getCode(), code);
         }
     }
 
     private int code;
 
-    PEvent(final int code) {
+    PEventType(final int code) {
         this.code = code;
     }
 
@@ -90,7 +90,7 @@ public enum PEvent {
         return this.code + "";
     }
 
-    public static PEvent fromInt(final int code) {
+    public static PEventType fromInt(final int code) {
         return eventsByCode.get(code);
     }
 }

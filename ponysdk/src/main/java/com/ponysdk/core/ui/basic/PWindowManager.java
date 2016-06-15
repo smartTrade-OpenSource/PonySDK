@@ -28,14 +28,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.server.application.UIContext;
 
 public class PWindowManager {
 
+    private static final Logger log = LoggerFactory.getLogger(PWindowManager.class);
+
     private static final String ROOT = "WindowManager";
 
     private final Map<Integer, PWindow> windows = new HashMap<>();
-    private List<RegisterWindowListener> listeners = new ArrayList<>();
+    private final List<RegisterWindowListener> listeners = new ArrayList<>();
 
     private PWindowManager() {
     }
@@ -67,16 +72,31 @@ public class PWindowManager {
         windows.remove(window.getID());
     }
 
-    public static void addWindowListener(RegisterWindowListener listener) {
+    public static final void addWindowListener(final RegisterWindowListener listener) {
         get().addWindowListener0(listener);
     }
 
-    private void addWindowListener0(RegisterWindowListener listener) {
+    private void addWindowListener0(final RegisterWindowListener listener) {
         this.listeners.add(listener);
     }
 
-    public PWindow getWindow(final int windowID) {
-        return windows.get(windowID);
+    public static final PWindow getWindow(final int windowID) {
+        if (windowID == PWindow.EMPTY_WINDOW_ID) {
+            log.error("Window ID is not already set, so no Window is associated");
+            return null;
+        } else if (windowID == PWindow.MAIN_WINDOW_ID) {
+            log.warn("Window ID is set on the main window, so no Window is associated");
+            return null;
+        } else {
+            final PWindow window = PWindowManager.get().windows.get(windowID);
+            if (window != null) {
+                log.debug("Window ID is set on window #" + windowID);
+                return window;
+            } else {
+                log.error("Window ID is set on window #" + windowID + ", but no Window is already associated");
+                return null;
+            }
+        }
     }
 
     public void closeAll() {
@@ -84,6 +104,7 @@ public class PWindowManager {
     }
 
     interface RegisterWindowListener {
+
         void registered(int windowID);
 
         void unregistered(int windowID);

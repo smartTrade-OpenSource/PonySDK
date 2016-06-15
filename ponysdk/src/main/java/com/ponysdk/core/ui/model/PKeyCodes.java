@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.core.ui.model;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -51,16 +51,6 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
 
     protected boolean attached = false;
 
-    private final String signature;
-
-    public PAddOn() {
-        this.signature = getClass().getCanonicalName();
-    }
-
-    public PAddOn(final String signature) {
-        this.signature = signature;
-    }
-
     @Override
     protected void init0() {
         super.init0();
@@ -72,7 +62,7 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
 
-            final PWindow window = PWindowManager.get().getWindow(windowID);
+            final PWindow window = PWindowManager.getWindow(windowID);
 
             if (window != null && window.isOpened()) {
                 init();
@@ -101,7 +91,11 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.FACTORY, signature);
+        parser.parse(ServerToClientModel.FACTORY, getSignature());
+    }
+
+    protected String getSignature() {
+        return getClass().getCanonicalName();
     }
 
     public void update(final JsonObject jsonObject) {

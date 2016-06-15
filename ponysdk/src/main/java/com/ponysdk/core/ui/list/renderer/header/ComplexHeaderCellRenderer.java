@@ -23,23 +23,29 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PGrid;
-import com.ponysdk.core.ui.basic.PKeyCodes;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.formfield.FormFieldListener;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
-import com.ponysdk.core.ui.list.*;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import com.ponysdk.core.ui.list.FilterListener;
+import com.ponysdk.core.ui.list.HasCriteria;
+import com.ponysdk.core.ui.list.HasFilterListeners;
+import com.ponysdk.core.ui.list.Queriable;
+import com.ponysdk.core.ui.list.Resetable;
+import com.ponysdk.core.ui.list.Sortable;
+import com.ponysdk.core.ui.list.Validable;
+import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class ComplexHeaderCellRenderer
         implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {

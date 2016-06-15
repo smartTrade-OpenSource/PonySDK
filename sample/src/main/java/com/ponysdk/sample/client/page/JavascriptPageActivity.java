@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,7 +29,6 @@ import java.util.List;
 import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PKeyCodes;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
@@ -37,6 +36,7 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class JavascriptPageActivity extends SamplePageActivity {
 

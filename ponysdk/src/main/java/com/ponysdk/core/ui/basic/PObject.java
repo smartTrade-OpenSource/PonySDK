@@ -90,7 +90,8 @@ public abstract class PObject {
 
         init0();
 
-        while (!stackedInstructions.isEmpty()) stackedInstructions.poll().run();
+        while (!stackedInstructions.isEmpty())
+            stackedInstructions.poll().run();
 
         if (attachListener != null) attachListener.onAttach();
 
@@ -105,6 +106,10 @@ public abstract class PObject {
 
     public int getWindowID() {
         return windowID;
+    }
+
+    public PWindow getWindow() {
+        return PWindowManager.getWindow(windowID);
     }
 
     protected abstract WidgetType getWidgetType();
@@ -265,11 +270,12 @@ public abstract class PObject {
         return "ID=" + ID + ", widgetType=" + getWidgetType().name();
     }
 
-    public void setAttachListener(AttachListener attachListener) {
+    public void setAttachListener(final AttachListener attachListener) {
         this.attachListener = attachListener;
     }
 
     interface AttachListener {
+
         void onAttach();
     }
 

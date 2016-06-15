@@ -134,7 +134,7 @@ public class PWindow extends PObject {
     }
 
     public void add(final IsPWidget widget) {
-        if (PWindowManager.get().getWindow(ID) == this)
+        if (PWindowManager.getWindow(ID) == this)
             add0(widget);
         else
             stackedInstructions.add(() -> add0(widget));

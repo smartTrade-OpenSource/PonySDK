@@ -23,12 +23,33 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-
 import java.util.Collection;
 import java.util.Objects;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.basic.event.HasPAllKeyHandlers;
+import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
+import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PBlurHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
@@ -157,7 +178,7 @@ public abstract class PFocusWidget extends PWidget
             return addDomHandler(event -> {
                 handler.onClick(event);
                 saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
-            }, PClickEvent.TYPE);
+            } , PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
         }
