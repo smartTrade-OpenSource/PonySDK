@@ -26,7 +26,6 @@ package com.ponysdk.core.ui.form;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.formfield.FormFieldListener;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
@@ -50,18 +49,18 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     protected PFlowPanel container = new PFlowPanel();
     protected PLabel captionLabel;
     protected PLabel errorLabel;
-    protected final FormField<?, ? extends PWidget> formField;
+    protected final FormField<?, ? extends IsPWidget> formField;
 
-    public FormFieldComponent(final FormField<?, ? extends PWidget> formField) {
+    public FormFieldComponent(final FormField<?, ? extends IsPWidget> formField) {
         this(null, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final FormField<?, ? extends PWidget> formField) {
+    public FormFieldComponent(final String caption, final FormField<?, ? extends IsPWidget> formField) {
         this(caption, CaptionOrientation.TOP, formField);
     }
 
     public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation,
-            final FormField<?, ? extends PWidget> formField) {
+            final FormField<?, ? extends IsPWidget> formField) {
         this.formField = formField;
         add(container);
         buildUI(caption);
