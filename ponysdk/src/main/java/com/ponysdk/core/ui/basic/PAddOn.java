@@ -62,7 +62,7 @@ public abstract class PAddOn extends PObject implements PNativeHandler {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;
 
-            final PWindow window = PWindowManager.get().getWindow(windowID);
+            final PWindow window = PWindowManager.getWindow(windowID);
 
             if (window != null && window.isOpened()) {
                 init();

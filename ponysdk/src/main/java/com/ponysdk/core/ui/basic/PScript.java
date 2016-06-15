@@ -23,16 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
-
-import javax.json.JsonObject;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class allows to execute native Java-script code.
@@ -49,7 +50,7 @@ public class PScript extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(Parser parser) {
+    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override
@@ -67,7 +68,7 @@ public class PScript extends PObject {
         if (script == null) {
             script = new PScript();
             session.setAttribute(SCRIPT_KEY + windowID, script);
-            if (PWindowManager.get().getWindow(windowID) != null) script.attach(windowID);
+            if (PWindowManager.getWindow(windowID) != null) script.attach(windowID);
         }
         return script;
     }

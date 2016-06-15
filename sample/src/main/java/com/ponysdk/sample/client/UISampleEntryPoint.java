@@ -54,7 +54,6 @@ import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PHeaderPanel;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PKeyCodes;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PLayoutPanel;
 import com.ponysdk.core.ui.basic.PListBox;
@@ -87,6 +86,7 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
@@ -111,11 +111,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //final LoggerAddOn addon = createPAddOn();
         //addon.attach(PWindow.MAIN_WINDOW_ID);
 
-        PElementAddOn elementAddOn = new PElementAddOn();
+        final PElementAddOn elementAddOn = new PElementAddOn();
         elementAddOn.setInnerText("Coucou");
         flowPanel.add(elementAddOn);
 
-        PElementAddOn elementAddOn2 = new PElementAddOn();
+        final PElementAddOn elementAddOn2 = new PElementAddOn();
         elementAddOn2.setInnerText("Coucou dans window");
         a.add(elementAddOn2);
 
