@@ -96,7 +96,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.getExtensionFactory().register("x-webkit-deflate-frame", XWebkitDeflateFrameExtension.class);
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.setCreator((req, resp) -> new WebSocket(req, monitor));
+        factory.setCreator((req, resp) -> new WebSocket(req));
     }
 
     public class WebSocket implements WebSocketListener {
@@ -107,12 +107,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         private final PRequest request;
 
-        private final WebsocketMonitor monitor;
-
-        WebSocket(final ServletUpgradeRequest req, WebsocketMonitor monitor) {
+        WebSocket(final ServletUpgradeRequest req) {
             log.info(req.getHeader("User-Agent"));
             this.request = new PRequest(req);
-            this.monitor = monitor;
         }
 
         @Override

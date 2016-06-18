@@ -29,6 +29,8 @@ import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
 
+import java.time.Duration;
+
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and
  * allows its last widget to take up the remaining space in its center.
@@ -143,8 +145,8 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     @Override
-    public void animate(final int duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration));
+    public void animate(final Duration duration) {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public PUnit getUnit() {

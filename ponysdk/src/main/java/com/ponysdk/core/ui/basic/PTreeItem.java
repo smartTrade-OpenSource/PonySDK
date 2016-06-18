@@ -30,6 +30,7 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is
@@ -112,10 +113,9 @@ public class PTreeItem extends PObject {
     }
 
     public void setHTML(final String html) {
+        if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TEXT, html);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, html));
     }
 
     final void setTree(final PTree tree) {
@@ -158,10 +158,9 @@ public class PTreeItem extends PObject {
     }
 
     public void setSelected(final boolean selected) {
+        if(Objects.equals(this.selected,selected)) return;
         this.selected = selected;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SELECTED, selected);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED, selected));
     }
 
     public boolean isSelected() {
@@ -169,10 +168,9 @@ public class PTreeItem extends PObject {
     }
 
     public void setState(final boolean open) {
+        if(Objects.equals(this.open,open)) return;
         this.open = open;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.STATE, open);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STATE, open));
     }
 
     public boolean getState() {

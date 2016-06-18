@@ -23,13 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -41,24 +34,13 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -71,11 +53,14 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.PTCookies;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTStreamResource;
-import com.ponysdk.core.terminal.ui.PTWindow;
-import com.ponysdk.core.terminal.ui.PTWindowManager;
+import com.ponysdk.core.terminal.ui.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -95,12 +80,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private Timer timer;
     private int numberOfrequestInProgress = 0;
 
-    private boolean updateMode;
     private boolean pendingClose;
 
     private RequestBuilder requestBuilder;
-
-    private long lastReceived = -1;
 
     public static int sessionID;
 
@@ -114,12 +96,12 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
     }
 
-    public void init(final int ID, final RequestBuilder requestBuilder) {
+    public void init(final int ID, final RequestBuilder builder) {
         if (log.isLoggable(Level.INFO))
             log.info("Init request builder");
 
         UIBuilder.sessionID = ID;
-        this.requestBuilder = requestBuilder;
+        requestBuilder = builder;
 
         loadingMessageBox = new SimplePanel();
 
@@ -192,7 +174,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 // Main terminal, we need to dispatch the eventbus
                 final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
                 if (window != null) {
-                    log.log(Level.INFO, "The main terminal send the buffer to window " + requestedWindowId);
+                    log.log(Level.FINE, "The main terminal send the buffer to window " + requestedWindowId);
                     window.postMessage(buffer);
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
@@ -250,31 +232,18 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
                 processHistory(buffer, binaryModel.getStringValue());
             } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
-                processClose(buffer);
+                processClose();
             } else {
                 log.log(Level.WARNING, "Unknown instruction type : " + binaryModel.getModel());
             }
         }
     }
 
-    public void stackError(final PTInstruction currentInstruction, final Throwable e) {
-        String msg;
-        if (e.getMessage() == null)
-            msg = "NA";
-        else
-            msg = e.getMessage();
-
-        final JSONObject jsoObject = new JSONObject();
-        jsoObject.put("message", new JSONString("PonySDK has encountered an internal error on instruction : " + currentInstruction));
-        jsoObject.put("details", new JSONString(msg));
-        stackedErrors.add(jsoObject);
-    }
-
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
         // ServerToClientModel.WIDGET_TYPE
         final WidgetType widgetType = WidgetType.values()[buffer.readBinaryModel().getByteValue()];
 
-        final PTObject ptObject = uiFactory.newUIObject(this, widgetType);
+        final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
             if (log.isLoggable(Level.FINE))
                 log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
@@ -373,7 +342,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    private void processClose(final ReaderBuffer buffer) {
+    private void processClose() {
         pendingClose = true;
         PTWindowManager.closeAll();
         Window.Location.reload();
@@ -387,13 +356,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             log.warning("Cannot GC a garbaged object #" + objectId);
     }
 
-    protected void updateIncomingSeqNum(final long receivedSeqNum) {
-        final long previous = lastReceived;
-        if (previous + 1 != receivedSeqNum)
-            log.log(Level.SEVERE, "Wrong seqnum received. Expecting #" + (previous + 1) + " but received #" + receivedSeqNum);
-        lastReceived = receivedSeqNum;
-    }
-
     private PTObject unRegisterObject(final int objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
@@ -403,10 +365,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     public void stackInstrution(final PTInstruction instruction) {
-        if (!updateMode)
-            sendDataToServer(instruction);
-        else
-            stackedInstructions.add(instruction);
+        sendDataToServer(instruction);
     }
 
     public void flushEvents() {
@@ -433,7 +392,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         requestBuilder.send(instruction);
     }
 
-    public void sendDataToServer(final List<JSONObject> instructions) {
+    private void sendDataToServer(final List<JSONObject> instructions) {
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < instructions.size(); i++) {
             // TODO Weird set, always 0 ???
@@ -450,7 +409,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         sendDataToServer(jsonArray);
     }
 
-    public void sendDataToServer(final JSONArray jsonArray) {
+    private void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
         requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
@@ -586,15 +545,11 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    public static EventBus getRootEventBus() {
-        return rootEventBus;
-    }
-
-    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+    void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
         this.communicationErrorHandler = communicationErrorClosure;
     }
 
-    public void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+    void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
@@ -602,7 +557,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         return javascriptAddOnFactories;
     }
 
-    public void setReadyWindow(final int windowID) {
+    void setReadyWindow(final int windowID) {
         final PTWindow window = PTWindowManager.getWindow(windowID);
         if (window != null)
             window.setReady();

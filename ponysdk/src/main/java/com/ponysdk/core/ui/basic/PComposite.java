@@ -34,16 +34,16 @@ import com.ponysdk.core.model.WidgetType;
  * widgets contained in a single panel.
  * </p>
  */
-public abstract class PComposite extends PWidget {
+public abstract class PComposite<T extends PWidget> extends PWidget {
 
-    private PWidget widget;
+    protected T widget;
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.COMPOSITE;
     }
 
-    protected void initWidget(final PWidget child) {
+    protected void initWidget(final T child) {
         if (this.widget != null) throw new IllegalStateException("PComposite.initWidget() may only be " + "called once.");
 
         child.removeFromParent();

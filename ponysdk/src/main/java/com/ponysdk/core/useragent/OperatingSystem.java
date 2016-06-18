@@ -272,7 +272,7 @@ public enum OperatingSystem {
     private boolean containsExcludeToken(final String agentString) {
         if (excludeList != null) {
             for (final String exclude : excludeList) {
-                if (agentString.toLowerCase().indexOf(exclude.toLowerCase()) != -1) return true;
+                if (agentString.toLowerCase().contains(exclude.toLowerCase())) return true;
             }
         }
         return false;

@@ -206,7 +206,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
             return sb.toString();
         }
 
-        public int getInsertPosition() {
+        int getInsertPosition() {
             return insertPosition;
         }
 
@@ -215,7 +215,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
             // if full, return
             if (pos >= flags.size()) return -1;
 
-            int nextPositon = -1;
+            int nextPositon;
             Flag next = null;
             for (nextPositon = pos; nextPositon < flags.size(); nextPositon++) {
                 next = flags.get(nextPositon);

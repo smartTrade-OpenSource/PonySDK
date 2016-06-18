@@ -72,7 +72,7 @@ public class PWindowManager {
         windows.remove(window.getID());
     }
 
-    public static final void addWindowListener(final RegisterWindowListener listener) {
+    public static void addWindowListener(final RegisterWindowListener listener) {
         get().addWindowListener0(listener);
     }
 
@@ -80,12 +80,9 @@ public class PWindowManager {
         this.listeners.add(listener);
     }
 
-    public static final PWindow getWindow(final int windowID) {
+    public static PWindow getWindow(final int windowID) {
         if (windowID == PWindow.EMPTY_WINDOW_ID) {
             log.error("Window ID is not already set, so no Window is associated");
-            return null;
-        } else if (windowID == PWindow.MAIN_WINDOW_ID) {
-            log.warn("Window ID is set on the main window, so no Window is associated");
             return null;
         } else {
             final PWindow window = PWindowManager.get().windows.get(windowID);

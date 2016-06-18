@@ -23,24 +23,11 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.WeakHashMap;
-
+import com.ponysdk.core.ui.eventbus.Event.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
+import java.util.*;
 
 public class RootEventBus implements EventBus {
 
@@ -204,11 +191,10 @@ public class RootEventBus implements EventBus {
 
                 final Collection<? extends EventHandler> handlers = getDispatchSet(e.getAssociatedType(), e.getSource());
 
-                final Iterator<? extends EventHandler> it = handlers.iterator();
-                while (it.hasNext()) {
+                for (EventHandler handler1 : handlers) {
                     try {
                         if (log.isDebugEnabled()) log.debug("dispatch eventbus #" + e);
-                        e.dispatch(it.next());
+                        e.dispatch(handler1);
                     } catch (final Throwable t) {
                         log.error("Cannot process fired eventbus #" + e.getAssociatedType(), t);
                         if (causes == null) {
@@ -301,7 +287,7 @@ public class RootEventBus implements EventBus {
         }
     }
 
-    class HandlerContext<H> {
+    private class HandlerContext<H> {
 
         boolean add;
 

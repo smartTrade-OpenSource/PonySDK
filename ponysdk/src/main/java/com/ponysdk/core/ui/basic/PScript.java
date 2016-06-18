@@ -58,16 +58,12 @@ public class PScript extends PObject {
         return WidgetType.SCRIPT;
     }
 
-    private static PScript get() {
-        return get(PWindow.MAIN_WINDOW_ID);
-    }
-
     private static PScript get(final int windowID) {
-        final UIContext session = UIContext.get();
-        PScript script = session.getAttribute(SCRIPT_KEY + windowID);
+        final UIContext uiContext = UIContext.get();
+        PScript script = uiContext.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
             script = new PScript();
-            session.setAttribute(SCRIPT_KEY + windowID, script);
+            uiContext.setAttribute(SCRIPT_KEY + windowID, script);
             if (PWindowManager.getWindow(windowID) != null) script.attach(windowID);
         }
         return script;
@@ -82,32 +78,32 @@ public class PScript extends PObject {
         execute(windowID, js, null, null);
     }
 
-    public static void execute(final String js) {
-        execute(js, null, null);
+    public static void execute(final PWindow window, final String js) {
+        execute(window.getID(), js, null, null);
     }
 
     public static void execute(final int windowID, final String js, final ExecutionCallback callback) {
         execute(windowID, js, callback, null);
     }
 
-    public static void execute(final String js, final ExecutionCallback callback) {
-        execute(js, callback, null);
-    }
-
-    public static void execute(final String js, final Duration period) {
-        execute(js, null, period);
+    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
+        execute(window.getID(), js, callback, null);
     }
 
     public static void execute(final int windowID, final String js, final Duration period) {
         execute(windowID, js, null, period);
     }
 
-    public static void execute(final String js, final ExecutionCallback callback, final Duration period) {
-        get().executeScript(js, callback, period);
+    public static void execute(final PWindow window, final String js, final Duration period) {
+        execute(window.getID(), js, null, period);
     }
 
     public static void execute(final int windowID, final String js, final ExecutionCallback callback, final Duration period) {
         get(windowID).executeScript(js, callback, period);
+    }
+
+    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
+        get(window.getID()).executeScript(js, callback, period);
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {

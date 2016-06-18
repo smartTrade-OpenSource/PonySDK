@@ -29,20 +29,11 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.terminal.UIBuilder;
-import com.ponysdk.core.terminal.basic.PTAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
-
-    private UIBuilder uiService;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        this.uiService = uiService;
-    }
 
     @Override
     protected LayoutPanel createUIObject() {
@@ -54,20 +45,20 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
         }
         if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetVerticalPosition(w, alignment);
             return true;
         }
         if (ServerToClientModel.UNIT.equals(binaryModel.getModel())) {
             // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             final Unit unit = PUnit.getUnit(PUnit.values()[binaryModel.getByteValue()]);
 
             final BinaryModel key1 = buffer.readBinaryModel();

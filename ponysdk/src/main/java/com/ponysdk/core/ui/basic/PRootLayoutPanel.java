@@ -31,7 +31,7 @@ import com.ponysdk.core.model.WidgetType;
 
 /**
  * A singleton implementation of {@link PLayoutPanel} that always attaches
- * itself to the document body (i.e. {@link PRootPanel#get()}).
+ * itself to the document body (i.e. {@link PRootPanel#get(int)}).
  * <p>
  * NOTE: This widget will <em>only</em> work in standards mode, which requires
  * that the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
@@ -54,14 +54,6 @@ public class PRootLayoutPanel extends PLayoutPanel {
 
     public static PRootLayoutPanel get(final int windowID) {
         return get(windowID, null);
-    }
-
-    public static PRootLayoutPanel get() {
-        return get(PWindow.MAIN_WINDOW_ID, null);
-    }
-
-    public static PRootLayoutPanel get(final String id) {
-        return get(PWindow.MAIN_WINDOW_ID, id);
     }
 
     public static PRootLayoutPanel get(final int windowID, final String id) {

@@ -43,7 +43,7 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  */
 public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
-    protected class Row implements Comparable<Row> {
+    class Row implements Comparable<Row> {
 
         private int value;
 
@@ -279,9 +279,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CLEAR_ROW, row);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_ROW, row));
     }
 
     public void insertRow(final int row) {

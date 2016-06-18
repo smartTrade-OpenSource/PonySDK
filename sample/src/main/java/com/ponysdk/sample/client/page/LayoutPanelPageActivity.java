@@ -33,6 +33,8 @@ import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 
+import java.time.Duration;
+
 public class LayoutPanelPageActivity extends SamplePageActivity {
 
     final PLayoutPanel layoutPanel = new PLayoutPanel();
@@ -72,7 +74,7 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
                 layoutPanel.setWidgetTopHeight(rightPane, 50, 100, PUnit.PX);
                 layoutPanel.setWidgetRightWidth(leftPane, 50, 200, PUnit.PX);
                 layoutPanel.setWidgetBottomHeight(leftPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(2000);
+                layoutPanel.animate(Duration.ofSeconds(2));
             }
         }, PClickEvent.TYPE);
 
@@ -85,7 +87,7 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
                 layoutPanel.setWidgetTopHeight(leftPane, 50, 100, PUnit.PX);
                 layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
                 layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(2000);
+                layoutPanel.animate(Duration.ofSeconds(2));
             }
         }, PClickEvent.TYPE);
 

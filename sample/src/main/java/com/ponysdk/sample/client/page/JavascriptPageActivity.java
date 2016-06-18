@@ -27,13 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -95,7 +90,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         commands.add(js);
         history.add(new PLabel("> " + js));
         inputTextBox.setText("");
-        PScript.execute(js, new ExecutionCallback() {
+        PScript.execute(PWindow.getMain(), js, new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {

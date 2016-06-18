@@ -23,9 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -75,7 +77,7 @@ public class PTabLayoutPanel extends PComplexPanel
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
     private Integer selectedItemIndex;
-    private int animationDuration;
+    private Duration animationDuration;
 
     public PTabLayoutPanel() {
     }
@@ -133,9 +135,7 @@ public class PTabLayoutPanel extends PComplexPanel
     public void selectTab(final int index) {
         if (index >= getWidgetCount()) throw new IndexOutOfBoundsException();
         this.selectedItemIndex = index;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SELECTED_INDEX, index);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED_INDEX, index));
     }
 
     @Override
@@ -202,37 +202,28 @@ public class PTabLayoutPanel extends PComplexPanel
 
     /**
      * Set the duration of the animated transition between tabs.
-     *
-     * @param duration
-     *            the duration in milliseconds.
      */
-    public void setAnimationDuration(final int duration) {
+    public void setAnimationDuration(Duration duration) {
+        if(Objects.equals(this.animationDuration,duration)) return;
         this.animationDuration = duration;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }
 
     /**
      * Set whether or not transitions slide in vertically or horizontally.
      *
-     * @param isVertical
-     *            true for vertical transitions, false for horizontal
+     * @param isVertical true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VERTICAL, isVertical);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VERTICAL, isVertical));
     }
 
     @Override
-    public void animate(final int duration) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATE, duration);
-        });
+    public void animate(final Duration duration) {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
-    public int getAnimationDuration() {
+    public Duration getAnimationDuration() {
         return animationDuration;
     }
 

@@ -42,49 +42,49 @@ public class BinaryModel {
     private String stringValue;
     private JSONObject jsonObject;
 
-    public BinaryModel(final ServerToClientModel key, final boolean booleanValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final boolean value, final int size) {
         this(key, size);
-        this.booleanValue = booleanValue;
+        this.booleanValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final byte byteValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final byte value, final int size) {
         this(key, size);
-        this.byteValue = byteValue;
+        this.byteValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final short shortValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final short value, final int size) {
         this(key, size);
-        this.shortValue = shortValue;
+        this.shortValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final int intValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final int value, final int size) {
         this(key, size);
-        this.intValue = intValue;
+        this.intValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final long longValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final long value, final int size) {
         this(key, size);
-        this.longValue = longValue;
+        this.longValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final double doubleValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final double value, final int size) {
         this(key, size);
-        this.doubleValue = doubleValue;
+        this.doubleValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final String stringValue, final int size) {
+    public BinaryModel(final ServerToClientModel key, final String value, final int size) {
         this(key, size);
-        this.stringValue = stringValue;
+        this.stringValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final JSONObject jsonObject, final int size) {
+    public BinaryModel(final ServerToClientModel key, final JSONObject value, final int size) {
         this(key, size);
-        this.jsonObject = jsonObject;
+        this.jsonObject = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final int size) {
+    public BinaryModel(final ServerToClientModel key, final int value) {
         this.model = key;
-        this.size = size;
+        this.size = value;
     }
 
     public ServerToClientModel getModel() {

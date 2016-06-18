@@ -28,9 +28,11 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public abstract class AbstractPTObject implements PTObject {
+abstract class AbstractPTObject implements PTObject {
 
     protected int objectID;
+
+    protected UIBuilder uiBuilder;
 
     @Override
     public int getObjectID() {
@@ -38,8 +40,9 @@ public abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectID, final UIBuilder uiService) {
-        this.objectID = objectID;
+    public void create(final ReaderBuffer buffer, final int id, final UIBuilder builder) {
+        this.objectID = id;
+        this.uiBuilder = builder;
     }
 
     @Override

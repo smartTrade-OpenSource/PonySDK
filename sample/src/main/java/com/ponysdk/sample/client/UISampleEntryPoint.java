@@ -23,64 +23,11 @@
 
 package com.ponysdk.sample.client;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.PAbsolutePanel;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.PDatePicker;
-import com.ponysdk.core.ui.basic.PDecoratedPopupPanel;
-import com.ponysdk.core.ui.basic.PDecoratorPanel;
-import com.ponysdk.core.ui.basic.PDialogBox;
-import com.ponysdk.core.ui.basic.PDisclosurePanel;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFileUpload;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PFocusPanel;
-import com.ponysdk.core.ui.basic.PGrid;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PHeaderPanel;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PLayoutPanel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PMenuItem;
-import com.ponysdk.core.ui.basic.PPasswordTextBox;
-import com.ponysdk.core.ui.basic.PPopupPanel;
-import com.ponysdk.core.ui.basic.PPushButton;
-import com.ponysdk.core.ui.basic.PRadioButton;
-import com.ponysdk.core.ui.basic.PRichTextArea;
-import com.ponysdk.core.ui.basic.PRichTextToolbar;
-import com.ponysdk.core.ui.basic.PRootPanel;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabPanel;
-import com.ponysdk.core.ui.basic.PTextArea;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PTree;
-import com.ponysdk.core.ui.basic.PTreeItem;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
@@ -91,33 +38,47 @@ import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.ponysdk.sample.client.page.addon.HighChartsStackedColumnAddOn;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
-import com.ponysdk.sample.client.page.addon.PElementAddOn;
+
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel child2;
 
+    HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PFlowPanel flowPanel = new PFlowPanel();
-        PRootPanel.get().add(flowPanel);
-
         final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
-        //final LoggerAddOn addon = createPAddOn();
-        //addon.attach(PWindow.MAIN_WINDOW_ID);
+        final LoggerAddOn addon = createPAddOn();
+        addon.attach(PWindow.getMain());
 
-        final PElementAddOn elementAddOn = new PElementAddOn();
-        elementAddOn.setInnerText("Coucou");
-        flowPanel.add(elementAddOn);
+        System.err.println(addon);
 
-        final PElementAddOn elementAddOn2 = new PElementAddOn();
-        elementAddOn2.setInnerText("Coucou dans window");
-        a.add(elementAddOn2);
+        //final PElementAddOn elementAddOn = new PElementAddOn();
+        //elementAddOn.setInnerText("Coucou");
+        //flowPanel.add(elementAddOn);
+
+
+        highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
+        PWindow.getMain().add(highChartsStackedColumnAddOn);
+        highChartsStackedColumnAddOn.setSeries("");
+
+        HighChartsStackedColumnAddOn h2 = new HighChartsStackedColumnAddOn();
+        a.add(h2);
+        h2.setSeries("");
+        //final PElementAddOn elementAddOn2 = new PElementAddOn();
+        //elementAddOn2.setInnerText("Coucou dans window");
+        //a.add(elementAddOn2);
 
         if (true)
             return;
@@ -143,26 +104,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement label19 = new PElement("div");
         final PElement label20 = new PElement("div");
 
-        flowPanel.add(label1);
-        flowPanel.add(label2);
-        flowPanel.add(label3);
-        flowPanel.add(label4);
-        flowPanel.add(label5);
-        flowPanel.add(label6);
-        flowPanel.add(label7);
-        flowPanel.add(label8);
-        flowPanel.add(label9);
-        flowPanel.add(label10);
-        flowPanel.add(label11);
-        flowPanel.add(label12);
-        flowPanel.add(label13);
-        flowPanel.add(label14);
-        flowPanel.add(label15);
-        flowPanel.add(label16);
-        flowPanel.add(label17);
-        flowPanel.add(label18);
-        flowPanel.add(label19);
-        flowPanel.add(label20);
+        //flowPanel.add(label1);
+        //flowPanel.add(label2);
+        //flowPanel.add(label3);
+        //flowPanel.add(label4);
+        //flowPanel.add(label5);
+        //flowPanel.add(label6);
+        //flowPanel.add(label7);
+        //flowPanel.add(label8);
+        //flowPanel.add(label9);
+        //flowPanel.add(label10);
+        //flowPanel.add(label11);
+        //flowPanel.add(label12);
+        //flowPanel.add(label13);
+        //flowPanel.add(label14);
+        //flowPanel.add(label15);
+        //flowPanel.add(label16);
+        //flowPanel.add(label17);
+        //flowPanel.add(label18);
+        //flowPanel.add(label19);
+        //flowPanel.add(label20);
 
         PScheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -202,7 +163,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PFlowPanel boxContainer = new PFlowPanel();
 
-        PScript.execute("alert('coucou Main');");
+        PScript.execute(PWindow.getMain(), "alert('coucou Main');");
 
         final PWindow w1 = createWindow1();
         // final PWindow w2 = createWindow2();
@@ -263,7 +224,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PPopupPanel(true));
 
         boxContainer.add(new PPushButton(new PImage())); // FIXME Test with
-                                                         // image
+        // image
 
         boxContainer.add(new PRadioButton("RadioLabel"));
         boxContainer.add(new PRadioButton("RadioName", "RadioLabel"));
@@ -285,7 +246,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PTwinListBox<Object>());
         boxContainer.add(new PVerticalPanel());
 
-        PRootPanel.get().add(boxContainer);
+        PWindow.getMain().add(boxContainer);
 
         child2 = new PLabel("Label2");
         child2.addClickHandler(new PClickHandler() {
@@ -331,7 +292,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -355,7 +316,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -376,7 +337,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         child.addClickHandler((event) -> {
             child2.setText("Touched by God");
-            PScript.execute("alert('coucou');");
+            PScript.execute(PWindow.getMain(), "alert('coucou');");
             child.setText("Clicked Window 1");
         });
 
@@ -388,7 +349,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
+        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
@@ -494,7 +455,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute("alert('" + keyUpEvent.getEventID() + "');");
+                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent.getEventID() + "');");
             }
         };
 

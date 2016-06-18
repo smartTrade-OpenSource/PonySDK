@@ -38,7 +38,6 @@ public class PTElement extends PTComplexPanel<HTMLPanel> {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.TAG
         tag = buffer.readBinaryModel().getStringValue();
-
         super.create(buffer, objectId, uiService);
     }
 

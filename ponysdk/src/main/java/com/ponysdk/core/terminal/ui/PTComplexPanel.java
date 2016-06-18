@@ -25,6 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.ComplexPanel;
 
-public abstract class PTComplexPanel<T extends ComplexPanel> extends PTPanel<T> {
+abstract class PTComplexPanel<T extends ComplexPanel> extends PTPanel<T> {
 
 }

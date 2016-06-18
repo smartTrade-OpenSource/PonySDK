@@ -33,7 +33,6 @@ import com.ponysdk.core.ui.list.valueprovider.ValueProvider;
  *
  * @param <D>
  * @param <V>
- * @param <W>
  */
 public class DataGridColumnDescriptor<D, V> {
 

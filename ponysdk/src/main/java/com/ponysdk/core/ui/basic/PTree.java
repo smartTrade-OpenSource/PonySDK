@@ -23,10 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.json.JsonObject;
 
@@ -177,9 +174,8 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if(Objects.equals(this.animationEnabled,animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled);
-        });
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 }

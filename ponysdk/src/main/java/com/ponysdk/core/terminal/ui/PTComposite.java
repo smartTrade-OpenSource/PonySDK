@@ -26,19 +26,10 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTComposite extends PTWidget<Composite> {
-
-    private UIBuilder uiService;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        this.uiService = uiService;
-    }
 
     @Override
     protected Composite createUIObject() {
@@ -48,7 +39,7 @@ public abstract class PTComposite extends PTWidget<Composite> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
-            cast().initWidget(asWidget(binaryModel.getIntValue(), uiService));
+            cast().initWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
         }
         return super.update(buffer, binaryModel);
@@ -61,7 +52,7 @@ public abstract class PTComposite extends PTWidget<Composite> {
 
     class MyComposite extends Composite {
 
-        public MyComposite() {
+        MyComposite() {
         }
 
         @Override

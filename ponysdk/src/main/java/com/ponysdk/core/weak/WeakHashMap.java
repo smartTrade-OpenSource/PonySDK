@@ -146,7 +146,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
                 final PObject pObject = removedObject.get();
                 if (pObject == null) continue;
                 final int windowID = pObject.getWindowID();
-                if (windowID != PWindow.MAIN_WINDOW_ID) {
+                if (windowID != PWindow.getMain().getID()) {
                     writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
                 }
                 writer.writeModel(ServerToClientModel.TYPE_GC, objectID);

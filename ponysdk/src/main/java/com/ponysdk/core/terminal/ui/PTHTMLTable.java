@@ -28,12 +28,12 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentC
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.basic.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.basic.PTVerticalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
+abstract class PTHTMLTable extends PTPanel<HTMLTable> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {

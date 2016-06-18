@@ -27,8 +27,8 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.basic.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.basic.PTVerticalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 

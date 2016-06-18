@@ -37,9 +37,7 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     public void setHorizontalScrollPosition(final int position) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position));
     }
 
     public void scrollToBottom() {
@@ -59,8 +57,6 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     private void scrollTo(final int type) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SCROLL_TO, type);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SCROLL_TO, type));
     }
 }

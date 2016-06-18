@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public abstract class PTPanel<T extends Panel> extends PTWidget<T> {
+abstract class PTPanel<T extends Panel> extends PTWidget<T> {
 
     private final static Logger log = Logger.getLogger(PTPanel.class.getName());
 

@@ -128,9 +128,7 @@ public abstract class PFocusWidget extends PWidget
     public void setTabindex(final int tabindex) {
         if (this.tabindex == tabindex) return;
         this.tabindex = tabindex;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TABINDEX, tabindex);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TABINDEX, tabindex));
     }
 
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
@@ -189,9 +187,7 @@ public abstract class PFocusWidget extends PWidget
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = event -> {
                 handler.onDoubleClick(event);
-                saveUpdate((writer) -> {
-                    writer.writeModel(ServerToClientModel.END_OF_PROCESSING);
-                });
+                saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
             };
 
             return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);

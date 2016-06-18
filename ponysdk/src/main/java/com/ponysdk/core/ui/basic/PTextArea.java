@@ -62,9 +62,7 @@ public class PTextArea extends PTextBoxBase {
     public void setVisibleLines(final int visibleLines) {
         if (Objects.equals(this.visibleLines, visibleLines)) return;
         this.visibleLines = visibleLines;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VISIBLE_LINES, visibleLines);
-        });
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.VISIBLE_LINES, visibleLines));
     }
 
     public int getCharacterWidth() {
@@ -74,9 +72,7 @@ public class PTextArea extends PTextBoxBase {
     public void setCharacterWidth(final int characterWidth) {
         if (Objects.equals(this.characterWidth, characterWidth)) return;
         this.characterWidth = characterWidth;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CHARACTER_WIDTH, characterWidth);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CHARACTER_WIDTH, characterWidth));
     }
 
 }

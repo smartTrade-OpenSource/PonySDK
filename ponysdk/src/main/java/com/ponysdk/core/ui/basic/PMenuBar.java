@@ -189,9 +189,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public void clearItems() {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CLEAR);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
         items.clear();
     }
 
@@ -207,9 +205,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
 }

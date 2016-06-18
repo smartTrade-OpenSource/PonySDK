@@ -85,12 +85,12 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         view.addWidget(widget, column, row, colSpan);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void insertSubList(final D fatherData, final List<D> datas) {
         if (datas.isEmpty()) return;
 
         final int fatherRow = getDataIndex(fatherData);
-        subListSizeByFather.put(fatherData, Integer.valueOf(datas.size()));
+        subListSizeByFather.put(fatherData, datas.size());
 
         // rows start includes data only
         // views include grid header (consumes 1 line) + data
@@ -115,7 +115,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
         if (subListSize != null) {
             final int subRow = fatherRow + 1;
-            for (int i = 1; i <= subListSize.intValue(); ++i) {
+            for (int i = 1; i <= subListSize; ++i) {
                 this.rows.remove(subRow);
                 this.view.removeRow(subRow + 1);
             }

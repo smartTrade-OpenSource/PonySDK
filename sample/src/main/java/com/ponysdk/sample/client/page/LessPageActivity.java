@@ -25,18 +25,11 @@ package com.ponysdk.sample.client.page;
 
 import java.util.regex.Pattern;
 
+import com.ponysdk.core.ui.basic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
-import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -80,7 +73,7 @@ public class LessPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PScript.execute("window.colors = {};");
+        PScript.execute(PWindow.getMain(), "window.colors = {};");
 
         final PFlowPanel layout = new PFlowPanel();
         layout.add(new PLabel(
@@ -213,7 +206,7 @@ public class LessPageActivity extends SamplePageActivity {
         js.append("window.colors.white = \"#" + white.getValue() + "\";");
         js.append("less.refresh();");
 
-        PScript.execute(js.toString(), new ExecutionCallback() {
+        PScript.execute(PWindow.getMain(), js.toString(), new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {

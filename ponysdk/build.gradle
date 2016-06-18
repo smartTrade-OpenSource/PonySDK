@@ -38,10 +38,10 @@ configurations {
 
 dependencies {
     xjc 'com.sun.xml.bind:jaxb-xjc:2.2.4'
-    
+
     gwtdev 'com.google.gwt:gwt-dev:2.7.0'
 
-	compile('javax.validation:validation-api:1.0.0.GA') {
+    compile('javax.validation:validation-api:1.0.0.GA') {
         artifact {
             name = 'validation-api'
             type = 'jar'
@@ -135,31 +135,29 @@ jar {
     }
 }
 
-javadoc {
-    failOnError false
-}
-
-task gwtc (dependsOn: classes, type: JavaExec) {
-	inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
+task gwtc(dependsOn: classes, type: JavaExec) {
+    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
     outputs.files fileTree(gwtOutputDirName)
     description = "GWT compile to JavaScript (production mode)"
     main = 'com.google.gwt.dev.Compiler'
- 	workingDir = buildDir
- 
-    classpath {[
-        sourceSets.main.java.srcDirs,
-        configurations.compile,
-        configurations.gwtdev
-    ]}
+    workingDir = buildDir
+
+    classpath {
+        [
+                sourceSets.main.java.srcDirs,
+                configurations.compile,
+                configurations.gwtdev
+        ]
+    }
 
     args = [
-        '-war',
-        'gwt',
-        '-localWorkers',
-        Runtime.getRuntime().availableProcessors(),
-        'com.ponysdk.core.PonyTerminal'
+            '-war',
+            'gwt',
+            '-localWorkers',
+            Runtime.getRuntime().availableProcessors(),
+            'com.ponysdk.core.PonyTerminal'
     ]
- 
+
     maxHeapSize = '512M'
 }
 
@@ -196,15 +194,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     }
 }
 task myJavadoc(type: Javadoc) {
-  source = sourceSets.main.allJava
-  //destinationDir = reporting.file("rest-api-docs")
-  //options.docletpath = configurations.jaxDoclet.files.asType(List)
-  //options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
-  //options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
+    source = sourceSets.main.allJava
+    exclude '**/com/ponysdk/core/terminal/**'
 }
 
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: myJavadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
     /**

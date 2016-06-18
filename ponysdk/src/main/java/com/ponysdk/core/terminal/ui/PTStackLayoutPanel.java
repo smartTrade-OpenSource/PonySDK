@@ -40,17 +40,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
-    private UIBuilder uiService;
     private Unit unit;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.UNIT
         unit = Unit.values()[buffer.readBinaryModel().getByteValue()];
-
-        super.create(buffer, objectId, uiService);
-
-        this.uiService = uiService;
+        super.create(buffer, objectId, uiBuilder);
     }
 
     @Override
@@ -105,7 +101,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
-            uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiService));
+            uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
         }
         if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {

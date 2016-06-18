@@ -28,8 +28,6 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class HttpResponseReceivedEvent extends GwtEvent<HttpResponseReceivedEvent.Handler> {
 
-    private final Throwable throwable;
-
     public interface Handler extends EventHandler {
 
         void onHttpResponseReceivedEvent(HttpResponseReceivedEvent event);
@@ -37,12 +35,7 @@ public class HttpResponseReceivedEvent extends GwtEvent<HttpResponseReceivedEven
 
     public static final Type<Handler> TYPE = new Type<>();
 
-    public HttpResponseReceivedEvent() {
-        this(null);
-    }
-
-    public HttpResponseReceivedEvent(final Throwable throwable) {
-        this.throwable = throwable;
+    private HttpResponseReceivedEvent() {
     }
 
     @Override
@@ -53,10 +46,6 @@ public class HttpResponseReceivedEvent extends GwtEvent<HttpResponseReceivedEven
     @Override
     protected void dispatch(final Handler handler) {
         handler.onHttpResponseReceivedEvent(this);
-    }
-
-    public Throwable getThrowable() {
-        return throwable;
     }
 
 }

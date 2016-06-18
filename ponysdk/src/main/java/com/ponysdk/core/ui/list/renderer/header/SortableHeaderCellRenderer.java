@@ -55,9 +55,7 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
 
     private void builGUI() {
         title.addStyleName("sortable");
-        title.addClickHandler((event) -> {
-            sort(HeaderSortingHelper.getNextSortingType(sortingType));
-        });
+        title.addClickHandler(event -> sort(HeaderSortingHelper.getNextSortingType(sortingType)));
     }
 
     public void setFilterListener(final FilterListener filterListener) {

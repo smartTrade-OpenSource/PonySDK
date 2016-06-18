@@ -118,9 +118,7 @@ public class PFileUpload extends PWidget
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ENABLED, enabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
     }
 
     public String getFileName() {

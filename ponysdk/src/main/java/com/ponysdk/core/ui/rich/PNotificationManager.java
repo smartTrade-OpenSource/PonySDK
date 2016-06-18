@@ -47,7 +47,7 @@ public class PNotificationManager {
     }
 
     public static void notify(final String message, final Notification notification) {
-        notify(PWindow.MAIN_WINDOW_ID, message, notification);
+        notify(PWindow.getMain().getID(), message, notification);
     }
 
     public static void notify(final int windowID, final String message, final Notification notification) {

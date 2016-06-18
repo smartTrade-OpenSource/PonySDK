@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -41,6 +35,11 @@ import com.ponysdk.core.ui.basic.event.PNativeHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+
+import javax.json.JsonObject;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * The superclass for all PonySDK objects.
@@ -55,14 +54,18 @@ public abstract class PObject {
 
     protected int windowID = PWindow.EMPTY_WINDOW_ID;
 
-    private boolean initialized = false;
+    boolean initialized = false;
 
-    protected final Queue<Runnable> stackedInstructions = new LinkedList<>();
+    final Queue<Runnable> stackedInstructions = new LinkedList<>();
 
     private AttachListener attachListener;
 
     PObject() {
         UIContext.get().registerObject(this);
+    }
+
+    protected boolean attach(final PWindow window) {
+        return attach(window.getID());
     }
 
     protected boolean attach(final int windowID) {
@@ -78,11 +81,11 @@ public abstract class PObject {
         return false;
     }
 
-    protected void init() {
+    void init() {
         if (initialized) return;
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_CREATE, ID);
         parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
@@ -182,7 +185,7 @@ public abstract class PObject {
     protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID)
+        if (windowID != PWindow.getMain().getID())
             parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
@@ -205,7 +208,7 @@ public abstract class PObject {
     private void executeAddHandler(final HandlerModel type) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID)
+        if (windowID != PWindow.getMain().getID())
             parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
         parser.parse(ServerToClientModel.OBJECT_ID, ID);
@@ -222,7 +225,7 @@ public abstract class PObject {
     private void executeRemoveHandler() {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID)
+        if (windowID != PWindow.getMain().getID())
             parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         parser.endObject();
@@ -238,7 +241,7 @@ public abstract class PObject {
     private void executeRemove(final int objectID, final int parentObjectID) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID)
+        if (windowID != PWindow.getMain().getID())
             parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
         parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
@@ -254,7 +257,7 @@ public abstract class PObject {
 
     private void writeUpdate(final ModelWriterCallback callback) {
         try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.MAIN_WINDOW_ID) {
+            if (windowID != PWindow.getMain().getID()) {
                 writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
             }
             writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);

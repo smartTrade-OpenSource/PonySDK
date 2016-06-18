@@ -23,28 +23,29 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.JavascriptAddOn;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class PTAddOn extends AbstractPTObject {
+public class PTAddOnComposite extends PTAddOn {
 
-    JavascriptAddOn addOn;
+    private List<JSONObject> pendingUpdates = new ArrayList<>();
+
+    private Widget widget;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        doCreate(buffer, objectId, uiService);
-    }
-
-    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    protected void doCreate(ReaderBuffer buffer, int objectId, UIBuilder uiService) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
@@ -56,21 +57,46 @@ public class PTAddOn extends AbstractPTObject {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        final int widgetID = binaryModel.getIntValue();
+        final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
+        widget = object.cast();
+        final Element element = widget.getElement();
+        params.put("widgetID", new JSONString(String.valueOf(widgetID)));
+        params.put("widgetElement", new JSONObject(element));
+
+        widget.addAttachHandler(new AttachEvent.Handler() {
+
+            @Override
+            public void onAttachOrDetach(final AttachEvent event) {
+                addOn.onAttachOrDetach(event.isAttached());
+                flushPendingUpdates();
+            }
+        });
+
         addOn = factory.newAddOn(params.getJavaScriptObject());
         addOn.onInit();
+        if (widget.isAttached()) {
+            addOn.onAttachOrDetach(true);
+        }
     }
 
     @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
-            final JSONObject data = binaryModel.getJsonObject();
-            doUpdate(data);
-            return true;
+    protected void doUpdate(JSONObject data) {
+        if (widget.isAttached()) {
+            flushPendingUpdates();
+            super.doUpdate(data);
+        } else {
+            pendingUpdates.add(data);
         }
-        return super.update(buffer, binaryModel);
     }
 
-    protected void doUpdate(JSONObject data){
-        addOn.update(data.getJavaScriptObject());
+    private void flushPendingUpdates() {
+        if (!pendingUpdates.isEmpty()) {
+            for (JSONObject update : pendingUpdates) {
+                super.doUpdate(update);
+            }
+            pendingUpdates.clear();
+        }
     }
 }

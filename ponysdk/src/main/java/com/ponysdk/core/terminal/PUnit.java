@@ -39,8 +39,8 @@ public enum PUnit {
 
     private final String value;
 
-    PUnit(final String value) {
-        this.value = value;
+    PUnit(final String unit) {
+        this.value = unit;
     }
 
     public String getValue() {

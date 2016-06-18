@@ -25,6 +25,7 @@ package com.ponysdk.sample.client;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.activity.ActivityManager;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.place.DefaultPlaceHistoryMapper;
@@ -33,10 +34,6 @@ import com.ponysdk.core.ui.place.PlaceHistoryHandler;
 import com.ponysdk.core.ui.place.PlaceHistoryMapper;
 import com.ponysdk.sample.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.client.place.LoginPlace;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PRootLayoutPanel;
-import com.ponysdk.core.ui.basic.PRootPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
 
 public class TradingSampleEntryPoint implements EntryPoint {
 
@@ -46,7 +43,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
     public void start(final UIContext uiContext) {
         if (uiContext.getApplication().getAttribute(USER) == null) uiContext.getHistory().newItem("", false);
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
-        PRootLayoutPanel.get().add(panel);
+        PWindow.getMain().getPRootLayoutPanel().add(panel);
 
         final EventBus eventBus = UIContext.getRootEventBus();
 
@@ -62,7 +59,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
         historyHandler.setDefaultPlace(new LoginPlace());
         historyHandler.handleCurrentHistory();
 
-        PRootPanel.get().add(createReconnectionPanel());
+        PWindow.getMain().getPRootPanel().add(createReconnectionPanel());
     }
 
     private PElement createReconnectionPanel() {

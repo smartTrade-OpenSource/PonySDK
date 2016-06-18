@@ -126,7 +126,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
-        if (windowID != PWindow.MAIN_WINDOW_ID) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+        if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
         parser.parse(ServerToClientModel.TYPE_ADD, ID);
         final String s = items.toString();
         parser.parse(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
@@ -236,9 +236,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.clear();
         selectedIndexes.clear();
 
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CLEAR);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
 
         if (containsEmptyItem) addItem(EMPTY, null);
     }

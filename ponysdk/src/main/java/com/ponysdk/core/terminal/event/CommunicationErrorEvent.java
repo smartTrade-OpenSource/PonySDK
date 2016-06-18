@@ -28,7 +28,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class CommunicationErrorEvent extends GwtEvent<CommunicationErrorEvent.Handler> {
 
-    public interface Handler extends EventHandler {
+    interface Handler extends EventHandler {
 
         void onCommunicationError(CommunicationErrorEvent event);
     }

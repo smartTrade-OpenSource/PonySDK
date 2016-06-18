@@ -116,9 +116,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.TEXT, text);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, text));
     }
 
     @Override
@@ -130,16 +128,12 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
     }
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ENABLED, enabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
     }
 
     private void setSubMenu(final PMenuBar subMenu) {

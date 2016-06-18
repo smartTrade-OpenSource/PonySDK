@@ -44,7 +44,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     private static Frame frame;
 
-    final FileUpload fileUpload = new FileUpload();
+    private final FileUpload fileUpload = new FileUpload();
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {

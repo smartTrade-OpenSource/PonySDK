@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,11 +21,30 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal.extension;
+package com.ponysdk.core.terminal.ui.alignment;
 
-import java.util.List;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
-public interface AddonList {
+public enum PTVerticalAlignment {
+    ALIGN_TOP,
+    ALIGN_MIDDLE,
+    ALIGN_BOTTOM;
 
-    List<AddonFactory> getAddonFactoryList();
+    public VerticalAlignmentConstant asVerticalAlignmentConstant() {
+        switch (this) {
+            case ALIGN_TOP:
+                return HasVerticalAlignment.ALIGN_TOP;
+            case ALIGN_MIDDLE:
+                return HasVerticalAlignment.ALIGN_MIDDLE;
+            case ALIGN_BOTTOM:
+                return HasVerticalAlignment.ALIGN_BOTTOM;
+            default:
+                throw new IllegalArgumentException("Undefined alignement");
+        }
+    }
+
+    public byte getValue() {
+        return (byte) ordinal();
+    }
 }

@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import com.ponysdk.core.terminal.PUnit;
@@ -62,7 +63,7 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         final PTabLayoutPanel tabPanel = new PTabLayoutPanel();
         tabPanel.setSizeFull();
         tabPanel.setAnimationVertical(false);
-        tabPanel.setAnimationDuration(1000);
+        tabPanel.setAnimationDuration(Duration.ofMillis(1000));
 
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
 

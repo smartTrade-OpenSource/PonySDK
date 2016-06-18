@@ -65,6 +65,7 @@ public enum WidgetType {
     FILE_UPLOAD,
     PUSH_BUTTON,
     ADDON,
+    ADDON_COMPOSITE,
     RICH_TEXT_AREA,
     RICH_TEXT_TOOLBAR,
     DISCLOSURE_PANEL,

@@ -32,9 +32,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
      * document and not hidden.
      */
     public void selectAll() {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SELECT_ALL);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECT_ALL));
     }
 
 }

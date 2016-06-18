@@ -56,7 +56,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     protected Object data;
 
-    private PWidget parent;
+    private IsPWidget parent;
 
     private Set<String> styleNames;
     private Set<PEventType> preventEvents;
@@ -68,13 +68,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
 
-    protected boolean visible = true;
+    boolean visible = true;
     private String title;
     private String width;
     private String height;
     private String styleName;
     private String stylePrimaryName;
     private String debugID;
+
+    private PAddOn addon;
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
@@ -113,17 +115,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setVisible(final boolean visible) {
         if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_VISIBLE, visible);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_VISIBLE, visible));
     }
 
     public void setWidth(final String width) {
         if (Objects.equals(this.width, width)) return;
         this.width = width;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_WIDTH, width);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_WIDTH, width));
     }
 
     public void setHeight(final String height) {
@@ -184,12 +182,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return stylePrimaryName;
     }
 
-    public PWidget getParent() {
+    public IsPWidget getParent() {
         return parent;
     }
 
-    public void setParent(final PWidget parent) {
+    void setParent(final IsPWidget parent) {
         this.parent = parent;
+    }
+
+    void bind(PAddOn addon){
+        this.addon = addon;
     }
 
     public void setStyleProperty(final String name, final String value) {
@@ -227,9 +229,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void removeAttribute(final String name) {
         if (safeElementAttributes().remove(name) != null) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name);
-            });
+            saveUpdate((writer) -> writer.writeModel(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
         }
     }
 
@@ -243,9 +243,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void preventEvent(final PEventType e) {
         if (safePreventEvents().add(e)) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.PREVENT_EVENT, e.getCode());
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.PREVENT_EVENT, e.getCode()));
         }
     }
 
@@ -270,10 +268,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public boolean hasStyleName(final String styleName) {
-        if (styleNames == null)
-            return false;
-        else
-            return styleNames.contains(styleName);
+        return styleNames != null && styleNames.contains(styleName);
     }
 
     public Object getData() {
@@ -343,7 +338,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private <H extends EventHandler> void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
         try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.MAIN_WINDOW_ID) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+            if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
             writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
             writer.writeModel(ServerToClientModel.OBJECT_ID, ID);
             if (binaryModels != null) {
@@ -473,9 +468,14 @@ public abstract class PWidget extends PObject implements IsPWidget {
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 
+    public PAddOn getAddon() {
+        return addon;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + " #" + ID;
     }
+
 
 }

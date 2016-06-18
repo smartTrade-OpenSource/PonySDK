@@ -101,21 +101,21 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         });
     }
 
-    protected void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
+    private void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, dateBox.getTextBox().getText());
         uiService.sendDataToServer(dateBox, instruction);
     }
 
-    public static class MyDateBox extends DateBox {
+    static class MyDateBox extends DateBox {
 
         private Date defaultMonth = null;
 
-        public MyDateBox(final DatePicker picker, final Date date, final Format format) {
+        MyDateBox(final DatePicker picker, final Date date, final Format format) {
             super(picker, date, format);
         }
 
-        public void setDefaultMonth(final long m) {
+        void setDefaultMonth(final long m) {
             defaultMonth = new Date(m);
         }
 

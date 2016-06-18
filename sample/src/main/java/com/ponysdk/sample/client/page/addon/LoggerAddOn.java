@@ -23,9 +23,10 @@
 
 package com.ponysdk.sample.client.page.addon;
 
-import com.ponysdk.core.ui.basic.PAddOn;
+import com.ponysdk.core.ui.basic.AbstractPAddOn;
+import com.ponysdk.core.ui.basic.event.PNativeEvent;
 
-public class LoggerAddOn extends PAddOn {
+public class LoggerAddOn extends AbstractPAddOn {
 
     public void log(final String value) {
         if (value != null)
@@ -34,4 +35,8 @@ public class LoggerAddOn extends PAddOn {
             callBindedMethod("log");
     }
 
+    @Override
+    public void onNativeEvent(PNativeEvent event) {
+
+    }
 }

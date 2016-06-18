@@ -23,28 +23,19 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.user.client.Timer;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class PTScript extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTScript.class.getName());
-
-    private UIBuilder uiService;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        this.uiService = uiService;
-    }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -130,14 +121,14 @@ public class PTScript extends AbstractPTObject {
         final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.COMMAND_ID, commandID);
         eventInstruction.put(ClientToServerModel.RESULT, result == null ? "" : result.toString());
-        uiService.sendDataToServer(eventInstruction);
+        uiBuilder.sendDataToServer(eventInstruction);
     }
 
     private void sendError(final long commandID, final Throwable t) {
         final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.COMMAND_ID, commandID);
         eventInstruction.put(ClientToServerModel.ERROR_MSG, t.getMessage());
-        uiService.sendDataToServer(eventInstruction);
+        uiBuilder.sendDataToServer(eventInstruction);
     }
 
     public static native void eval(String script) /*-{

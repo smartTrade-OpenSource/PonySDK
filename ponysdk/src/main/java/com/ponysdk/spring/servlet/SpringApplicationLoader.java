@@ -23,77 +23,16 @@
 
 package com.ponysdk.spring.servlet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletContextEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.XmlWebApplicationContext;
-
 import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.server.servlet.AbstractApplicationLoader;
-import com.ponysdk.impl.webapplication.page.InitializingActivity;
 
 public class SpringApplicationLoader extends AbstractApplicationLoader {
 
     public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
-    public static final String CLIENT_CONFIG_LOCATION = "ponysdk.spring.application.client.configuration.file";
-
-    private static final Logger log = LoggerFactory.getLogger(SpringApplicationLoader.class);
-
-    private XmlWebApplicationContext context;
 
     @Override
-    public void contextDestroyed(final ServletContextEvent event) {
-        log.info("Closing Spring context");
-        try {
-            if (this.context != null) {
-                this.context.close();
-            }
-        } catch (final Exception e) {
-            log.error("Failure during Spring context closure", e);
-        }
-
-        super.contextDestroyed(event);
-    }
-
-    @Override
-    public AbstractApplicationManager createApplicationManager(final ApplicationManagerOption applicationManagerOption) {
-        return new AbstractApplicationManager(applicationManagerOption) {
-
-            @Override
-            protected EntryPoint initializeUIContext(final UIContext uiContext) {
-                final List<String> configurations = new ArrayList<>();
-
-                final String clientConfigFile = applicationManagerOption.getClientConfigFile();
-                if (StringUtils.isEmpty(clientConfigFile))
-                    configurations.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
-                else
-                    configurations.add(clientConfigFile);
-
-                EntryPoint entryPoint = null;
-
-                try (final ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations.toArray(new String[0]))) {
-                    entryPoint = applicationContext.getBean(EntryPoint.class);
-
-                    final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-                    if (initializingPages != null && !initializingPages.isEmpty()) {
-                        initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
-                    }
-                }
-
-                return entryPoint;
-            }
-        };
+    public AbstractApplicationManager createApplicationManager() {
+        return new SpringApplicationManager(applicationManagerOption);
     }
 
 }

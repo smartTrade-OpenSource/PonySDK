@@ -23,29 +23,27 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.util.Calendar;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.http.HttpSessionEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import java.util.Calendar;
 
 public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationLoader.class);
 
-    private ApplicationManagerOption applicationManagerOption;
+    protected ApplicationManagerOption applicationManagerOption;
 
     private AbstractApplicationManager applicationManager;
 
     @Override
     public void start() {
-        applicationManager = createApplicationManager(applicationManagerOption);
+        applicationManager = createApplicationManager();
         printWelcomBanner();
     }
 
@@ -109,13 +107,13 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
     }
 
     @Override
-    public void setApplicationManagerOption(final ApplicationManagerOption applicationManagerOption) {
-        this.applicationManagerOption = applicationManagerOption;
+    public ApplicationManagerOption getApplicationManagerOption() {
+        return applicationManagerOption;
     }
 
     @Override
-    public ApplicationManagerOption getApplicationManagerOption() {
-        return applicationManagerOption;
+    public void setApplicationManagerOption(final ApplicationManagerOption applicationManagerOption) {
+        this.applicationManagerOption = applicationManagerOption;
     }
 
 }

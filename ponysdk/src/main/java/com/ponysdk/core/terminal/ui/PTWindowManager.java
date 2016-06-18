@@ -52,7 +52,7 @@ public class PTWindowManager {
         windows.put(window.getObjectID(), window);
     }
 
-    public void unregister(final PTWindow window) {
+    void unregister(final PTWindow window) {
         windows.remove(window.getObjectID());
     }
 

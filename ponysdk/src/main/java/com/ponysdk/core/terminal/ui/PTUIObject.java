@@ -35,8 +35,6 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
-    private static final String FONT_SIZE = "fontSize";
-
     protected T uiObject;
 
     private Object nativeObject;
@@ -48,10 +46,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        this.uiObject = createUIObject();
-        uiService.registerUIObject(this.objectID, uiObject);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        uiObject = createUIObject();
+        uiBuilder.registerUIObject(objectID, uiObject);
     }
 
     @Override

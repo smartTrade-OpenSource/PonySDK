@@ -48,7 +48,7 @@ import com.ponysdk.core.ui.basic.event.*;
  * its oracle. Below we show how a {@link PMultiWordSuggestOracle} can be
  * configured:
  * </p>
- *
+ * <p>
  * <pre>
  * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
  * oracle.add(&quot;Cat&quot;);
@@ -58,7 +58,7 @@ import com.ponysdk.core.ui.basic.event.*;
  *
  * PSuggestBox box = new PSuggestBox(oracle);
  * </pre>
- *
+ * <p>
  * Using the example above, if the user types "C" into the text widget, the
  * oracle will configure the suggestions with the "Cat" and "Canary"
  * suggestions. Specifically, whenever the user types a key into the text
@@ -153,9 +153,7 @@ public class PSuggestBox extends PWidget
 
     public void setLimit(final int limit) {
         this.limit = limit;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.LIMIT, limit);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.LIMIT, limit));
     }
 
     public void setText(final String text) {
@@ -242,9 +240,7 @@ public class PSuggestBox extends PWidget
 
         @Override
         public void add(final String suggestion) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.SUGGESTION, suggestion);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.SUGGESTION, suggestion));
         }
 
         @Override
@@ -261,9 +257,7 @@ public class PSuggestBox extends PWidget
         }
 
         public void clear() {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.CLEAR);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
         }
 
         @Override

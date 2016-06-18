@@ -27,6 +27,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
 
+import com.ponysdk.core.ui.basic.PWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,8 @@ public abstract class AbstractApplicationManager {
 
                 final int receivedSeqNum = context.getSeqNum();
                 uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
+
+                PWindow.initialize();
 
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
 

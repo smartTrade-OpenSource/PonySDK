@@ -95,7 +95,7 @@ public class XMLExporter<T> implements Exporter<T> {
                 normalizedCaption = StringEscapeUtils.escapeXml(normalizedCaption);
                 s.append("<").append(normalizedCaption).append(">");
                 s.append(StringEscapeUtils.escapeXml(getDisplayValue(pojo, exportableField)));
-                s.append("</" + normalizedCaption + ">");
+                s.append("</").append(normalizedCaption).append(">");
             }
             s.append("</").append(rootName).append(">");
 

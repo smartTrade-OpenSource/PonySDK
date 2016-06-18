@@ -25,6 +25,7 @@ package com.ponysdk.sample.client.page.addon;
 
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.event.PNativeEvent;
 
 public class PElementAddOn extends PAddOnComposite<PElement> {
 
@@ -36,4 +37,8 @@ public class PElementAddOn extends PAddOnComposite<PElement> {
         callBindedMethod("text", text);
     }
 
+    @Override
+    public void onNativeEvent(PNativeEvent event) {
+
+    }
 }

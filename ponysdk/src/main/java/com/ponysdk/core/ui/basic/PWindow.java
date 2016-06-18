@@ -23,42 +23,46 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class PWindow extends PObject {
 
-    static final int EMPTY_WINDOW_ID = -2;
-    public static final int MAIN_WINDOW_ID = -1;
+    static final int EMPTY_WINDOW_ID = -1;
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
 
-    private final String url;
+    private String url;
 
-    private final String name;
+    private String name;
 
-    private final String features;
+    private String features;
 
     private boolean opened = false;
 
     private final Queue<Runnable> stackedInstructions = new LinkedList<>();
 
+    PWindow() {
+        initialized = true;
+        PWindowManager.registerWindow(this);
+    }
+
     public PWindow(final String url, final String name, final String features) {
-        this.windowID = MAIN_WINDOW_ID;
+        this.windowID = getMain().getID();
         this.url = url;
         this.name = name;
         this.features = features;
@@ -142,6 +146,30 @@ public class PWindow extends PObject {
 
     private void add0(final IsPWidget widget) {
         getPRootPanel().add(widget);
+    }
+
+    public static void initialize() {
+        final UIContext uiContext = UIContext.get();
+        PWindow mainWindow = uiContext.getAttribute(PWindow.class.getCanonicalName());
+        if (mainWindow == null) {
+            mainWindow = new PWindow() {
+
+                @Override
+                public boolean isOpened() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+
+            };
+            uiContext.setAttribute(PWindow.class.getCanonicalName(), mainWindow);
+        }
+    }
+
+    public static PWindow getMain(){
+        return UIContext.get().getAttribute(PWindow.class.getCanonicalName());
     }
 
     public static class TargetAttribut {

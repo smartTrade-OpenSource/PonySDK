@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal.basic;
+package com.ponysdk.core.terminal.ui.alignment;
 
 import com.google.gwt.layout.client.Layout.Alignment;
 

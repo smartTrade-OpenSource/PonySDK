@@ -51,7 +51,7 @@ import com.ponysdk.core.terminal.ui.PTWindowManager;
 import elemental.client.Browser;
 
 @ExportPackage(value = "")
-@Export(value = "ponysdk", all = false)
+@Export(value = "ponysdk")
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());

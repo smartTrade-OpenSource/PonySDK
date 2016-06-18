@@ -38,15 +38,6 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
-    private UIBuilder uiService;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-
-        this.uiService = uiService;
-    }
-
     @Override
     protected MySplitLayoutPanel createUIObject() {
         return new MySplitLayoutPanel();
@@ -56,19 +47,19 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.MIN_SIZE.equals(binaryModel.getModel())) {
             final int minSize = binaryModel.getIntValue();
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetMinSize(w, minSize);
             return true;
         }
         if (ServerToClientModel.SNAP_CLOSED_SIZE.equals(binaryModel.getModel())) {
             final int snapClosedSize = binaryModel.getIntValue();
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
         }
         if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.equals(binaryModel.getModel())) {
             final boolean enable = binaryModel.getBooleanValue();
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetToggleDisplayAllowed(w, enable);
             return true;
         }
@@ -91,11 +82,11 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
         return (MySplitLayoutPanel) uiObject;
     }
 
-    public class MySplitLayoutPanel extends SplitLayoutPanel {
+    private class MySplitLayoutPanel extends SplitLayoutPanel {
 
-        protected SendResizeCommand command;
+        SendResizeCommand command;
 
-        protected boolean resizeHandler = false;
+        boolean resizeHandler = false;
         protected UIBuilder uiService = null;
         protected int objectId = -1;
 
@@ -114,7 +105,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
         public class SendResizeCommand implements RepeatingCommand {
 
-            public boolean cancelled = false;
+            boolean cancelled = false;
 
             @Override
             public boolean execute() {

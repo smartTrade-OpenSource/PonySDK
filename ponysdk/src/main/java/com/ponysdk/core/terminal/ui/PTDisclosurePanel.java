@@ -50,9 +50,7 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
         // TODO nciaravola pass url + size in parameters
         openImageResource = new PImageResource(OPENNED, 0, 0, 14, 14);
         closeImageResource = new PImageResource(CLOSED, 0, 0, 14, 14);
-
         super.create(buffer, objectId, uiService);
-
         addHandlers(buffer, uiService);
     }
 

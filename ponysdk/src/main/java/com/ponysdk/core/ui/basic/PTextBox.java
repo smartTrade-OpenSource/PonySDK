@@ -77,9 +77,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setMaxLength(final int length) {
         this.maxLength = length;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.MAX_LENGTH, length);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.MAX_LENGTH, length));
     }
 
     /**
@@ -90,9 +88,7 @@ public class PTextBox extends PTextBoxBase {
      */
     public void setVisibleLength(final int length) {
         this.visibleLength = length;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VISIBLE_LENGTH, visibleLength);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VISIBLE_LENGTH, visibleLength));
     }
 
     public void applyMask(final String mask) {

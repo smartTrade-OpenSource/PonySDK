@@ -29,6 +29,7 @@ import com.ponysdk.core.ui.activity.ActivityManager;
 import com.ponysdk.core.ui.activity.ActivityMapper;
 import com.ponysdk.core.ui.basic.PRootLayoutPanel;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.place.Place;
@@ -56,7 +57,7 @@ public abstract class SpringEntryPoint implements EntryPoint {
 
     protected void start(final Place place) {
         final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
-        PRootLayoutPanel.get().add(panel);
+        PRootLayoutPanel.get(PWindow.getMain().getID()).add(panel);
 
         final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);

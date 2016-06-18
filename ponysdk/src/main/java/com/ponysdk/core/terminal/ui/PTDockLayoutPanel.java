@@ -34,17 +34,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
 
-    private UIBuilder uiService;
     private Unit unit;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.UNIT
         unit = Unit.values()[buffer.readBinaryModel().getByteValue()];
-
-        super.create(buffer, objectId, uiService);
-
-        this.uiService = uiService;
+        super.create(buffer, objectId, uiBuilder);
     }
 
     @Override
@@ -57,14 +53,14 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
         if (ServerToClientModel.WIDGET_SIZE.equals(binaryModel.getModel())) {
             final double newSize = binaryModel.getDoubleValue();
             // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetSize(w, newSize);
             return true;
         }
         if (ServerToClientModel.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
             final boolean hidden = binaryModel.getBooleanValue();
             // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiService);
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHidden(w, hidden);
             return true;
         }

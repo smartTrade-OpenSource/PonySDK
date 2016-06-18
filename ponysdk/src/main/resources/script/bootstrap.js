@@ -3,18 +3,19 @@ document.ponyLoaded = false;
 document.onPonyLoadedListeners = [];
 document.onConnectionLostListeners = [];
 
-document.onPonyLoaded = function(callback) {
-	document.onPonyLoadedListeners.push(callback);
+document.onPonyLoaded = function (callback) {
+    document.onPonyLoadedListeners.push(callback);
 };
 
-document.onConnectionLost = function(callback) {
-	document.onConnectionLostListeners.push(callback);
+document.onConnectionLost = function (callback) {
+    document.onConnectionLostListeners.push(callback);
 };
 
 window.webappsdk = {};
 var reconnectionInProgress = false;
 
-var Check = function() {};
+var Check = function () {
+};
 Check.prototype = {
     errorDetected: false,
     counter: 3,
@@ -26,12 +27,12 @@ Check.prototype = {
 
     initCheck: function () {
         if (window.opener === null || typeof window.opener == "undefined") {
-            setTimeout(function() {
+            setTimeout(function () {
                 var xmlhttp = new XMLHttpRequest();
 
-                xmlhttp.onreadystatechange = function() {
+                xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-                        if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
+                        if (xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
                         else reconnectionCheck.onCheckError();
                     }
                 };
@@ -40,12 +41,12 @@ Check.prototype = {
                 xmlhttp.send();
 
                 /* Avoid JQuery dependencies
-            	$.ajax({
-                    url: reconnectionCheck.getCheckUrl(),
-                    success: reconnectionCheck.onCheckSuccess,
-                    error: reconnectionCheck.onCheckError
-                });
-                */
+                 $.ajax({
+                 url: reconnectionCheck.getCheckUrl(),
+                 success: reconnectionCheck.onCheckSuccess,
+                 error: reconnectionCheck.onCheckError
+                 });
+                 */
             }, reconnectionCheck.delay_heartbeat);
         }
     },
@@ -98,36 +99,36 @@ Check.prototype = {
 var reconnectionCheck;
 
 function onPonySDKModuleLoaded() {
-	console.log("onPonySDKModuleLoaded");
-	pony = new ponysdk();
-	document.ponyLoaded = true;
+    console.log("onPonySDKModuleLoaded");
+    pony = new ponysdk();
+    document.ponyLoaded = true;
 
-	for(var i=0; i<document.onPonyLoadedListeners.length; i++) {
-		try {
-			document.onPonyLoadedListeners[i](pony);
-		} catch (error) {
-			throw "cannot call onPonyLoaded callback: " + document.onPonyLoadedListeners[i] + ", error " + error;
-		}
-	}
+    for (var i = 0; i < document.onPonyLoadedListeners.length; i++) {
+        try {
+            document.onPonyLoadedListeners[i](pony);
+        } catch (error) {
+            throw "cannot call onPonyLoaded callback: " + document.onPonyLoadedListeners[i] + ", error " + error;
+        }
+    }
 
-	pony.registerCommunicationError(function(code, message){
-		// Do Nothing
-	});
+    pony.registerCommunicationError(function (code, message) {
+        // Do Nothing
+    });
 
-	pony.start();
+    pony.start();
 
-	reconnectionCheck = new Check();
+    reconnectionCheck = new Check();
     reconnectionCheck.initCheck();
 }
 
 function notifyConnectionLostListeners() {
-	for(var i=0; i<document.onConnectionLostListeners.length; i++) {
-		try {
-			document.onConnectionLostListeners[i]();
-		} catch (error) {
-			throw "cannot call onConnectionLostListeners callback: " + document.onConnectionLostListeners[i] + ", error " + error;
-		}
-	}
+    for (var i = 0; i < document.onConnectionLostListeners.length; i++) {
+        try {
+            document.onConnectionLostListeners[i]();
+        } catch (error) {
+            throw "cannot call onConnectionLostListeners callback: " + document.onConnectionLostListeners[i] + ", error " + error;
+        }
+    }
 }
 
 // Decode ArrayBuffer from server
@@ -135,6 +136,6 @@ var textDecoder = null;
 if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
 
 function decode(buffer) {
-    if(textDecoder != null) return textDecoder.decode(buffer);
+    if (textDecoder != null) return textDecoder.decode(buffer);
     else return UTF8.getStringFromBytes(new Uint8Array(buffer));
 }

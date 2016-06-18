@@ -154,7 +154,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
         // @Override
         protected void onLoad() {
-            rootLayoutPanel = PRootLayoutPanel.get();
+            rootLayoutPanel = PWindow.getMain().getPRootLayoutPanel();
 
             final PFlowPanel flow = new PFlowPanel();
             final PButton addMessage = new PButton("Add message");
@@ -180,7 +180,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    PScript.execute("alert('from the popup');");
+                    PScript.execute(PWindow.getMain(), "alert('from the popup');");
                 }
             });
             flow.add(addMessage);

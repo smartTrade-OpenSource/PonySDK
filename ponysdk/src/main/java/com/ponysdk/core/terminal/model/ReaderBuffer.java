@@ -139,9 +139,9 @@ public class ReaderBuffer {
 
     private JSONObject getJson(final int msgSize) {
         String s = getString(msgSize);
-        if(s != null){
+        if (s != null) {
             return JSONParser.parseStrict(s).isObject();
-        }else{
+        } else {
             return null;
         }
     }
@@ -166,4 +166,11 @@ public class ReaderBuffer {
         return position < getByteLength();
     }
 
+    @Override
+    public String toString() {
+        return "ReaderBuffer{" +
+                "window=" + window +
+                ", position=" + position +
+                '}';
+    }
 }

@@ -24,14 +24,23 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 
-public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implements IsPWidget {
+import java.util.Objects;
 
+public abstract class PAddOnComposite<T extends PWidget> extends AbstractPAddOn implements IsPWidget {
     protected T widget;
 
-    public PAddOnComposite(final T w) {
-        widget = w;
+    public PAddOnComposite(final T widget) {
+        this.widget = widget;
+
+        if (widget.getAddon() != null && !Objects.equals(widget.getAddon(), this)) {
+            throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon " + widget.getAddon());
+        }
+
+        this.widget.bind(this);
+
 
         if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
             attach(widget.getWindowID());
@@ -55,16 +64,18 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.ADDON_COMPOSITE;
+    }
+
+    @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (widget != null) {
-            parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
-        }
+        parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
     }
 
     @Override
     public T asWidget() {
         return widget;
     }
-
 }

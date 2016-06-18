@@ -23,10 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.time.Duration;
+import java.util.*;
 
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.HandlerModel;
@@ -64,7 +62,7 @@ public class PStackLayoutPanel extends PComposite
 
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
-    private int animationDuration;
+    private Duration animationDuration;
 
     private final PUnit unit;
 
@@ -172,32 +170,24 @@ public class PStackLayoutPanel extends PComposite
     }
 
     public void showWidget(final PWidget widget) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID()));
     }
 
     /**
      * Set the duration of the animated transition between children.
-     *
-     * @param duration
-     *            the duration in milliseconds.
      */
-    public void setAnimationDuration(final int duration) {
-        this.animationDuration = duration;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration);
-        });
+    public void setAnimationDuration(final Duration duration) {
+        if(Objects.equals(animationDuration,duration)) return;
+        animationDuration = duration;
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }
 
     @Override
-    public void animate(final int duration) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ANIMATE, duration);
-        });
+    public void animate(final Duration duration) {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
-    public int getAnimationDuration() {
+    public Duration getAnimationDuration() {
         return animationDuration;
     }
 

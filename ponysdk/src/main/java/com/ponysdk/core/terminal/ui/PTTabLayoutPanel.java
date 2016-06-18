@@ -40,14 +40,6 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
-    private UIBuilder uiService;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        this.uiService = uiService;
-    }
-
     @Override
     protected TabLayoutPanel createUIObject() {
         return new TabLayoutPanel(2, Unit.EM);
@@ -68,7 +60,7 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                 tabPanel.add(w, binaryModel.getStringValue());
             }
         } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
-            final PTWidget<?> ptWidget = (PTWidget<?>) uiService.getPTObject(binaryModel.getIntValue());
+            final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
                 tabPanel.insert(w, ptWidget.cast(), beforeIndexModel.getIntValue());

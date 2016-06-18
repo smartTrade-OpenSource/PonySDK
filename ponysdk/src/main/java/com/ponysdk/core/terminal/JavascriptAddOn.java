@@ -34,5 +34,5 @@ public class JavascriptAddOn extends JavaScriptObject {
 
     public final native void onInit() /*-{ this.onInit(); }-*/;
 
-    public final native void onAttach(boolean attached) /*-{ this.onAttach(attached); }-*/;
+    public final native void onAttachOrDetach(boolean attached) /*-{ this.onAttachOrDetach(attached); }-*/;
 }

@@ -30,6 +30,7 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -89,7 +90,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         setWidget(layoutPanel);
         setSizeFull();
         layoutPanel.setSizeFull();
-        layoutPanel.setAnimationDuration(100);
+        layoutPanel.setAnimationDuration(Duration.ofMillis(100));
     }
 
     @Override

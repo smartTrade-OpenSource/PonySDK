@@ -35,7 +35,7 @@ import com.ponysdk.core.model.WidgetType;
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
  * never created directly. Rather, they are accessed via
- * {@link PRootPanel#get()} .
+ * {@link PRootPanel#get(int)} .
  * <p>
  * Most applications will add widgets to the default root panel in their
  * {@link EntryPoint#start(UIContext)} methods.
@@ -60,14 +60,6 @@ public class PRootPanel extends PAbsolutePanel {
 
     public static PRootPanel get(final int windowID) {
         return get(windowID, null);
-    }
-
-    public static PRootPanel get() {
-        return get(PWindow.MAIN_WINDOW_ID, null);
-    }
-
-    public static PRootPanel get(final String id) {
-        return get(PWindow.MAIN_WINDOW_ID, id);
     }
 
     public static PRootPanel get(final int windowID, final String id) {

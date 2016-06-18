@@ -382,14 +382,11 @@ public enum Browser {
      * Checks if the given user-agent does not contain one of the tokens which
      * should not match. In most cases there are no excluding tokens, so the
      * impact should be small.
-     *
-     * @param agentString
-     * @return
      */
     private boolean containsExcludeToken(final String agentString) {
         if (excludeList != null) {
             for (final String exclude : excludeList) {
-                if (agentString.toLowerCase().indexOf(exclude.toLowerCase()) != -1) return true;
+                if (agentString.toLowerCase().contains(exclude.toLowerCase())) return true;
             }
         }
         return false;
@@ -418,9 +415,6 @@ public enum Browser {
     /**
      * Iterates over all Browsers to compare the browser signature with the user
      * agent string. If no match can be found Browser.UNKNOWN will be returned.
-     *
-     * @param agentString
-     * @return Browser
      */
     public static Browser parseUserAgentString(final String agentString) {
         for (final Browser browser : Browser.values()) {
@@ -439,9 +433,6 @@ public enum Browser {
     /**
      * Returns the enum constant of this type with the specified id. Throws
      * IllegalArgumentException if the value does not exist.
-     *
-     * @param id
-     * @return
      */
     public static Browser valueOf(final short id) {
         for (final Browser browser : Browser.values()) {

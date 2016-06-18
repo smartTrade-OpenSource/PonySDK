@@ -33,7 +33,7 @@ public interface ApplicationLoader extends ServletContextListener, HttpSessionLi
 
     void start();
 
-    AbstractApplicationManager createApplicationManager(ApplicationManagerOption option);
+    AbstractApplicationManager createApplicationManager();
 
     void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
 

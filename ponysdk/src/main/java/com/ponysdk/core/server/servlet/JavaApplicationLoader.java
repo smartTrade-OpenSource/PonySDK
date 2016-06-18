@@ -33,7 +33,7 @@ import com.ponysdk.core.ui.main.EntryPoint;
 public class JavaApplicationLoader extends AbstractApplicationLoader {
 
     @Override
-    public AbstractApplicationManager createApplicationManager(final ApplicationManagerOption applicationManagerOption) {
+    public AbstractApplicationManager createApplicationManager() {
         return new AbstractApplicationManager(applicationManagerOption) {
 
             @Override

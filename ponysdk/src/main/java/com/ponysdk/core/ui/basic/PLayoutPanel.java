@@ -28,6 +28,8 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.basic.alignment.PAlignment;
 
+import java.time.Duration;
+
 /**
  * A panel that lays its children
  * <p>
@@ -111,7 +113,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     @Override
-    public void animate(final int duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration));
+    public void animate(final Duration duration) {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 }

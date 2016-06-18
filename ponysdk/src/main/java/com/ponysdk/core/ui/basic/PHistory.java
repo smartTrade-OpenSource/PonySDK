@@ -52,12 +52,11 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * encoded on any currently supported browser (but may be in the future due to
  * future browser changes):
  * <ul>
- * <li>a-z
- * <li>A-Z
- * <li>0-9
- * <li>;,/?:@&=+$-_.!~*()
+ * <li>a-z</li>
+ * <li>A-Z</li>
+ * <li>0-9</li>
+ * <li>;,/?:@&=+$-_.!~*()</li>
  * </ul>
- * </p>
  */
 public class PHistory {
 

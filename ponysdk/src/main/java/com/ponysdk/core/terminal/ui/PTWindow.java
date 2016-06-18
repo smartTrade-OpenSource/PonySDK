@@ -60,13 +60,13 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     private EventRemover eventRemover;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
+        super.create(buffer, objectId, builder);
 
         if (log.isLoggable(Level.INFO))
             log.log(Level.INFO, "PTWindowID created : " + objectID);
 
-        this.uiService = uiService;
+        uiService = builder;
 
         url = buffer.readBinaryModel().getStringValue();
         if (url == null)

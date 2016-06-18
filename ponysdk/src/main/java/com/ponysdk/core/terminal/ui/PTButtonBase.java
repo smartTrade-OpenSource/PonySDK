@@ -28,7 +28,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public abstract class PTButtonBase<T extends ButtonBase> extends PTFocusWidget<T> {
+abstract class PTButtonBase<T extends ButtonBase> extends PTFocusWidget<T> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {

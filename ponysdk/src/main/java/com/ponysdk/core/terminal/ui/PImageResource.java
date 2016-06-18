@@ -27,7 +27,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.Image;
 
-public class PImageResource implements ImageResource {
+class PImageResource implements ImageResource {
 
     private final String uri;
 
@@ -47,7 +47,7 @@ public class PImageResource implements ImageResource {
         this.height = image.getHeight();
     }
 
-    public PImageResource(final String uri, final int left, final int top, final int width, final int height) {
+    PImageResource(final String uri, final int left, final int top, final int width, final int height) {
         this.uri = uri;
         this.left = left;
         this.top = top;

@@ -115,8 +115,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         final boolean result = super.attach(windowID);
 
         if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final PRootPanel root = windowID != PWindow.MAIN_WINDOW_ID ? PRootPanel.get(windowID) : PRootPanel.get();
-
+            final PRootPanel root = PRootPanel.get(windowID);
             final PWidget child = root.getChild(ID);
             if (child == null) root.add(this);
         }
@@ -140,9 +139,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setGlassEnabled(final boolean glassEnabled) {
         this.glassEnabled = glassEnabled;
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
-        });
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
     }
 
     public void setDraggable(final boolean draggable) {
@@ -227,9 +224,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.POPUP_POSITION_AND_SHOW);
-            });
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_POSITION_AND_SHOW));
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             this.showing = false;
             fireOnClose();

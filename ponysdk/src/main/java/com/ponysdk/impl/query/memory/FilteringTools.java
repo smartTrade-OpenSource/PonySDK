@@ -237,7 +237,7 @@ public final class FilteringTools {
                 // Now we can filter our data against the pattern
                 final String value = normalisePattern(patternName.trim());
                 final Pattern pattern = Pattern.compile(REGEX_BEGIN + value + REGEX_END, Pattern.CASE_INSENSITIVE);
-                Matcher matcher = null;
+                Matcher matcher;
                 if (val instanceof Collection<?>) {
                     final Collection<?> collection = (Collection<?>) val;
                     for (final Object item : collection) {

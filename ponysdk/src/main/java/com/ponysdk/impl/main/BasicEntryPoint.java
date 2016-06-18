@@ -24,10 +24,7 @@
 package com.ponysdk.impl.main;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PRootPanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class BasicEntryPoint implements EntryPoint {
@@ -47,7 +44,7 @@ public class BasicEntryPoint implements EntryPoint {
         // final PGrid grid = new PGrid(200, 200);
         // PRootPanel.get().add(grid);
 
-        PRootPanel.get().add(flowPanel);
+        PWindow.getMain().add(flowPanel);
 
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 100; j++) {

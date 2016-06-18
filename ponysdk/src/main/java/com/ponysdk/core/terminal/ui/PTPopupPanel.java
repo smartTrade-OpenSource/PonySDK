@@ -56,7 +56,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     private int dragStartY;
 
-    protected boolean autoHide;
+    boolean autoHide;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
@@ -80,7 +80,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
                 PTPopupPanel.this.onPreviewNativeEvent(event);
-
                 super.onPreviewNativeEvent(event);
             }
         };
@@ -210,7 +209,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         return (PopupPanel) uiObject;
     }
 
-    protected void onPreviewNativeEvent(final NativePreviewEvent event) {
+    private void onPreviewNativeEvent(final NativePreviewEvent event) {
         // NativeEvent nativeEvent = eventbus.getNativeEvent();
         //
         // if (!eventbus.isCanceled() && (eventbus.getTypeInt() == Event.ONMOUSEDOWN)

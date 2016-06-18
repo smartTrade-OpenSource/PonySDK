@@ -35,13 +35,9 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
 
-    private UIBuilder uiService;
-
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-
-        this.uiService = uiService;
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
         uiObject.addBlurHandler(this);
     }
 
@@ -128,7 +124,7 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
     public void onBlur(final BlurEvent event) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, uiObject.getHTML());
-        uiService.sendDataToServer(uiObject, instruction);
+        uiBuilder.sendDataToServer(uiObject, instruction);
     }
 
     public enum FontSize {
