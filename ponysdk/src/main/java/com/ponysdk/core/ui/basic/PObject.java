@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -30,16 +36,10 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.PNativeEvent;
-import com.ponysdk.core.ui.basic.event.PNativeHandler;
+import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * The superclass for all PonySDK objects.
@@ -50,7 +50,7 @@ public abstract class PObject {
 
     private String nativeBindingFunction;
 
-    private PNativeHandler nativeHandler;
+    private PTerminalEvent.Handler terminalHandler;
 
     protected int windowID = PWindow.EMPTY_WINDOW_ID;
 
@@ -137,15 +137,15 @@ public abstract class PObject {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, data));
     }
 
-    public void setNativeHandler(final PNativeHandler handler) {
-        nativeHandler = handler;
+    public void setTerminalHandler(final PTerminalEvent.Handler terminalHandler) {
+        this.terminalHandler = terminalHandler;
     }
 
     public void onClientData(final JsonObject event) {
-        if (nativeHandler != null) {
+        if (terminalHandler != null) {
             final String nativeKey = ClientToServerModel.NATIVE.toStringValue();
             if (event.containsKey(nativeKey)) {
-                nativeHandler.onNativeEvent(new PNativeEvent(this, event.getJsonObject(nativeKey)));
+                terminalHandler.onTerminalEvent(new PTerminalEvent(this, event.getJsonObject(nativeKey)));
             }
         }
     }

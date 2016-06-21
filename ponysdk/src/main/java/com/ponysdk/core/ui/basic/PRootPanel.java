@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
@@ -58,11 +58,11 @@ public class PRootPanel extends PAbsolutePanel {
         parser.parse(ServerToClientModel.ROOT_ID, id);
     }
 
-    public static PRootPanel get(final int windowID) {
+    protected final static PRootPanel get(final int windowID) {
         return get(windowID, null);
     }
 
-    public static PRootPanel get(final int windowID, final String id) {
+    public final static PRootPanel get(final int windowID, final String id) {
         final Map<String, PRootPanel> childs = ensureChilds(windowID);
         PRootPanel defaultRoot = childs.get(id);
         if (defaultRoot == null) {
@@ -99,8 +99,9 @@ public class PRootPanel extends PAbsolutePanel {
      * This method also provides the option to remove all children including the
      * non-widget DOM elements that are directly added.
      *
-     * @param clearDom if {@code true} this method will also remove any DOM elements
-     *                 that are not widgets.
+     * @param clearDom
+     *            if {@code true} this method will also remove any DOM elements
+     *            that are not widgets.
      */
     public void clear(final boolean clearDom) {
         clear();
