@@ -24,19 +24,14 @@
 package com.ponysdk.sample.client.page.addon;
 
 import com.ponysdk.core.ui.basic.AbstractPAddOn;
-import com.ponysdk.core.ui.basic.event.PNativeEvent;
 
 public class LoggerAddOn extends AbstractPAddOn {
 
     public void log(final String value) {
         if (value != null)
-            callBindedMethod("logWithText", value);
+            callTerminalMethod("logWithText", value);
         else
-            callBindedMethod("log");
+            callTerminalMethod("log");
     }
 
-    @Override
-    public void onNativeEvent(PNativeEvent event) {
-
-    }
 }

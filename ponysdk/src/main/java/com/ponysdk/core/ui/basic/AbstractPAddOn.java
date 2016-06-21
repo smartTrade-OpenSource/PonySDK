@@ -23,29 +23,26 @@
 
 package com.ponysdk.core.ui.basic;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.PNativeHandler;
-
-import javax.json.*;
 
 /**
  * AddOn are used to bind server side object with javascript object
  */
-public abstract class AbstractPAddOn extends PObject implements PNativeHandler, PAddOn {
+public abstract class AbstractPAddOn extends PObject implements PAddOn {
 
     private static final String ARGUMENTS_PROPERTY_NAME = "arg";
     private static final String METHOD_PROPERTY_NAME = "m";
 
     @Override
-    protected void init0() {
-        super.init0();
-        setNativeHandler(this);
-    }
-
-    @Override
-    public boolean attach(PWindow window) {
+    public boolean attach(final PWindow window) {
         return super.attach(window);
     }
 
@@ -106,18 +103,18 @@ public abstract class AbstractPAddOn extends PObject implements PNativeHandler, 
     }
 
     public void setJSLogLevel(final int logLevel) {
-        callBindedMethod("setLog", logLevel);
+        callTerminalMethod("setLog", logLevel);
     }
 
     protected void callBindedMethod(final String methodName, final JsonObjectBuilder args) {
-        callBindedMethod(methodName, args.build());
+        callTerminalMethod(methodName, args.build());
     }
 
     protected void callBindedMethod(final String methodName, final JsonArrayBuilder args) {
-        callBindedMethod(methodName, args.build());
+        callTerminalMethod(methodName, args.build());
     }
 
-    protected void callBindedMethod(final String methodName, final Object... args) {
+    protected void callTerminalMethod(final String methodName, final Object... args) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(METHOD_PROPERTY_NAME, methodName);
 

@@ -23,11 +23,39 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+import javax.json.JsonObject;
+
+import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 
-@FunctionalInterface
-public interface PNativeHandler extends EventHandler {
+public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
 
-    void onNativeEvent(PNativeEvent event);
+    public static final Type<PTerminalEvent.Handler> TYPE = new Type<>();
+    private final JsonObject jsonObject;
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onTerminalEvent(PTerminalEvent event);
+    }
+
+    public PTerminalEvent(final Object sourceComponent, final JsonObject jsonObject) {
+        super(sourceComponent);
+        this.jsonObject = jsonObject;
+    }
+
+    @Override
+    public Type<PTerminalEvent.Handler> getAssociatedType() {
+        return TYPE;
+    }
+
+    @Override
+    protected void dispatch(final PTerminalEvent.Handler handler) {
+        handler.onTerminalEvent(this);
+    }
+
+    public JsonObject getJsonObject() {
+        return jsonObject;
+    }
 
 }
