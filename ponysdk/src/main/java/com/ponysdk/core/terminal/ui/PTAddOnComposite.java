@@ -69,16 +69,15 @@ public class PTAddOnComposite extends PTAddOn {
 
             @Override
             public void onAttachOrDetach(final AttachEvent event) {
-                addOn.onAttachOrDetach(event.isAttached());
+                if (event.isAttached()) addOn.onAttached();
+                else addOn.onDetached();
                 flushPendingUpdates();
             }
         });
 
         addOn = factory.newAddOn(params.getJavaScriptObject());
         addOn.onInit();
-        if (widget.isAttached()) {
-            addOn.onAttachOrDetach(true);
-        }
+        if (widget.isAttached()) addOn.onAttached();
     }
 
     @Override

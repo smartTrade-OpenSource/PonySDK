@@ -84,7 +84,7 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
     }
 
     public String getSignature() {
-        return getClass().getCanonicalName();
+        return getClass().getSimpleName();
     }
 
     public void update(final JsonObject jsonObject) {
