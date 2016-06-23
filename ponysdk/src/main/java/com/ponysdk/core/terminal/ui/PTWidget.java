@@ -335,8 +335,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE);
-                            changeHandlerInstruction.put(ClientToServerModel.VALUE, textBox.getText());
+                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                             eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());

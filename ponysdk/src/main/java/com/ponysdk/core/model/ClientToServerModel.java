@@ -43,7 +43,6 @@ public enum ClientToServerModel {
     DOM_HANDLER_TYPE,
 
     ERROR_MSG,
-    VALUE,
     YEAR,
     MONTH,
     DAY,

@@ -74,8 +74,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                 public void onSelection(final SelectionEvent<Integer> event) {
                     // FIXME not read on the server side
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION);
-                    eventInstruction.put(ClientToServerModel.VALUE, event.getSelectedItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, event.getSelectedItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
@@ -87,8 +86,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
                 public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
                     // FIXME not read on the server side
                     final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION);
-                    eventInstruction.put(ClientToServerModel.VALUE, event.getItem());
+                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
                     uiService.sendDataToServer(uiObject, eventInstruction);
                 }
             });
