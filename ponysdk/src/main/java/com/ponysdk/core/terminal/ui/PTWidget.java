@@ -347,16 +347,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.stackInstrution(changeHandlerInstruction);
-                                        uiService.stackInstrution(eventInstruction);
-                                        uiService.flushEvents();
+                                        uiService.sendDataToServer(changeHandlerInstruction);
+                                        uiService.sendDataToServer(eventInstruction);
                                         break;
                                     }
                                 }
                             } else {
-                                uiService.stackInstrution(changeHandlerInstruction);
-                                uiService.stackInstrution(eventInstruction);
-                                uiService.flushEvents();
+                                uiService.sendDataToServer(changeHandlerInstruction);
+                                uiService.sendDataToServer(eventInstruction);
                             }
                             preventOrStopEvent(event);
                         }
@@ -377,13 +375,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
                                         uiService.sendDataToServer(widget, eventInstruction);
-                                        uiService.flushEvents();
                                         break;
                                     }
                                 }
                             } else {
                                 uiService.sendDataToServer(widget, eventInstruction);
-                                uiService.flushEvents();
                             }
                             preventOrStopEvent(event);
                         }
