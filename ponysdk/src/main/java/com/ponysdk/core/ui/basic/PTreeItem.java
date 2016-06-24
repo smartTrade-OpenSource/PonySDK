@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is
@@ -120,7 +120,7 @@ public class PTreeItem extends PObject {
 
     final void setTree(final PTree tree) {
         this.tree = tree;
-        if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) saveAdd(tree.getID(), ID);
+        if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) tree.saveAdd(tree.getID(), ID);
         if (widget != null) setWidget();
     }
 
@@ -158,7 +158,7 @@ public class PTreeItem extends PObject {
     }
 
     public void setSelected(final boolean selected) {
-        if(Objects.equals(this.selected,selected)) return;
+        if (Objects.equals(this.selected, selected)) return;
         this.selected = selected;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED, selected));
     }
@@ -168,7 +168,7 @@ public class PTreeItem extends PObject {
     }
 
     public void setState(final boolean open) {
-        if(Objects.equals(this.open,open)) return;
+        if (Objects.equals(this.open, open)) return;
         this.open = open;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.STATE, open));
     }
