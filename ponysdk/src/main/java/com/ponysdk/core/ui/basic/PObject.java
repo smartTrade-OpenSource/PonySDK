@@ -178,11 +178,7 @@ public abstract class PObject {
             stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
-    void executeAdd(final int objectID, final int parentObjectID) {
-        executeAdd(objectID, parentObjectID, (ServerBinaryModel) null);
-    }
-
-    protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
+    private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         final Parser parser = Txn.get().getParser();
         parser.beginObject();
         if (windowID != PWindow.getMain().getID())
@@ -198,7 +194,7 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    void saveAddHandler(final HandlerModel type) {
+    protected void saveAddHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID)
             executeAddHandler(type);
         else
@@ -215,7 +211,7 @@ public abstract class PObject {
         parser.endObject();
     }
 
-    void saveRemoveHandler(final HandlerModel type) {
+    protected void saveRemoveHandler(final HandlerModel type) {
         if (windowID != PWindow.EMPTY_WINDOW_ID)
             executeRemoveHandler();
         else

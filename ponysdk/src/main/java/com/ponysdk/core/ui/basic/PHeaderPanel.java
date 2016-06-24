@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
  * A panel that includes a header (top), footer (bottom), and content (middle)
@@ -67,21 +67,21 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         header = child;
-        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
+        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
     }
 
     public void setContentWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         content = child;
-        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
+        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
     }
 
     public void setFooterWidget(final PWidget child) {
         child.removeFromParent();
         adopt(child);
         footer = child;
-        executeAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
+        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
     @Override

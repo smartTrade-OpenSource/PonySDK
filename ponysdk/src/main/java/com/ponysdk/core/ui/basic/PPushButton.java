@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 
 /**
  * A normal push button with custom styling.
@@ -49,7 +49,7 @@ public class PPushButton extends PButton {
         // WORKAROUND : element and sub element need to be created before any add
         final boolean imageResult = image.attach(windowID);
         final boolean result = super.attach(windowID);
-        if (imageResult) image.executeAdd(image.getID(), ID);
+        if (imageResult) image.saveAdd(image.getID(), ID);
         return result;
     }
 

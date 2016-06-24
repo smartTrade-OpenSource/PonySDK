@@ -196,12 +196,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
 
                     // Type
-                    BinaryModel model;
-
                     buffer.readBinaryModel();
 
                     while (buffer.hasRemaining()) {
-                        model = buffer.readBinaryModel();
+                        final BinaryModel model = buffer.readBinaryModel();
                         if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
                             if (model.getIntValue() != requestedWindowId) {
                                 buffer.rewind(model);
@@ -215,9 +213,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                             break;
                         }
                     }
-
-                    // FIXME To be remove
-                    // update(buffer);
                 }
             } else {
                 buffer.rewind(windowIdModel);
