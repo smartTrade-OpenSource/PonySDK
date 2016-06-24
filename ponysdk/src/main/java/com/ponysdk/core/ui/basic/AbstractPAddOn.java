@@ -130,6 +130,10 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
                         arrayBuilder.add((Integer) object);
                     else if (object instanceof Long)
                         arrayBuilder.add((Long) object);
+                    else if (object instanceof JsonArrayBuilder)
+                        arrayBuilder.add(((JsonArrayBuilder) object).build());
+                    else if (object instanceof JsonObjectBuilder)
+                        arrayBuilder.add(((JsonObjectBuilder) object).build());
                     else
                         arrayBuilder.add(object.toString());
                 }
