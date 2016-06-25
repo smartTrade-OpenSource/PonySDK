@@ -335,8 +335,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         @Override
                         public void onKeyUp(final KeyUpEvent event) {
                             final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE);
-                            changeHandlerInstruction.put(ClientToServerModel.VALUE, textBox.getText());
+                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
 
                             final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                             eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
@@ -348,16 +347,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.stackInstrution(changeHandlerInstruction);
-                                        uiService.stackInstrution(eventInstruction);
-                                        uiService.flushEvents();
+                                        uiService.sendDataToServer(changeHandlerInstruction);
+                                        uiService.sendDataToServer(eventInstruction);
                                         break;
                                     }
                                 }
                             } else {
-                                uiService.stackInstrution(changeHandlerInstruction);
-                                uiService.stackInstrution(eventInstruction);
-                                uiService.flushEvents();
+                                uiService.sendDataToServer(changeHandlerInstruction);
+                                uiService.sendDataToServer(eventInstruction);
                             }
                             preventOrStopEvent(event);
                         }
@@ -378,13 +375,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
                                         uiService.sendDataToServer(widget, eventInstruction);
-                                        uiService.flushEvents();
                                         break;
                                     }
                                 }
                             } else {
                                 uiService.sendDataToServer(widget, eventInstruction);
-                                uiService.flushEvents();
                             }
                             preventOrStopEvent(event);
                         }

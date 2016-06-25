@@ -34,9 +34,14 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another
@@ -102,17 +107,12 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
-        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
+        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
     }
 
-    @Override
-    protected void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        // Nothing to do
-    }
-
     public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
-        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
+        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
     }
 
@@ -125,11 +125,11 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     public void add(final PWidget widget, final String tabText) {
-        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText));
+        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText));
     }
 
     public void add(final PWidget widget, final PWidget tabWidget) {
-        executeAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()));
+        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()));
     }
 
     public void selectTab(final int index) {
@@ -203,8 +203,8 @@ public class PTabLayoutPanel extends PComplexPanel
     /**
      * Set the duration of the animated transition between tabs.
      */
-    public void setAnimationDuration(Duration duration) {
-        if(Objects.equals(this.animationDuration,duration)) return;
+    public void setAnimationDuration(final Duration duration) {
+        if (Objects.equals(this.animationDuration, duration)) return;
         this.animationDuration = duration;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }
@@ -212,7 +212,8 @@ public class PTabLayoutPanel extends PComplexPanel
     /**
      * Set whether or not transitions slide in vertically or horizontally.
      *
-     * @param isVertical true for vertical transitions, false for horizontal
+     * @param isVertical
+     *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.VERTICAL, isVertical));

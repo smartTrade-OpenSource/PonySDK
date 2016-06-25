@@ -22,23 +22,13 @@ Addon.prototype.init = function () {
     throw "[" + this.name + "] abstract function Addon.init() MUST be implemented";
 };
 
-Addon.prototype.onInitDom = function () {
+Addon.prototype.onAttached = function () {
     this.jqelement = $(this.element).attr("id", this.id);
     this.initDom();
 };
 
 Addon.prototype.initDom = function () {
     // Specific behavior
-};
-
-Addon.prototype.onAttachOrDetach = function (attached) {
-    if(attached){
-        this.onInitDom();
-    }else{
-        this.onDetached();
-    }
-    //this.sendDataToServer({att: attached});
-    //if (attached === false) this.onDetached();
 };
 
 Addon.prototype.onDetached = function () {

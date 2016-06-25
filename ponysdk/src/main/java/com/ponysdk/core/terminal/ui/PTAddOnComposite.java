@@ -23,6 +23,10 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONNumber;
@@ -34,24 +38,20 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class PTAddOnComposite extends PTAddOn {
 
-    private List<JSONObject> pendingUpdates = new ArrayList<>();
+    private final List<JSONObject> pendingUpdates = new ArrayList<>();
 
     private Widget widget;
 
     @Override
-    protected void doCreate(ReaderBuffer buffer, int objectId, UIBuilder uiService) {
+    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
         if (factory == null)
-            throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: "
+            throw new IllegalArgumentException("AddOn factory not found for signature: " + signature + ". Addons registered: "
                     + factories.keySet());
 
         final JSONObject params = new JSONObject();
@@ -69,20 +69,19 @@ public class PTAddOnComposite extends PTAddOn {
 
             @Override
             public void onAttachOrDetach(final AttachEvent event) {
-                addOn.onAttachOrDetach(event.isAttached());
+                if (event.isAttached()) addOn.onAttached();
+                else addOn.onDetached();
                 flushPendingUpdates();
             }
         });
 
         addOn = factory.newAddOn(params.getJavaScriptObject());
         addOn.onInit();
-        if (widget.isAttached()) {
-            addOn.onAttachOrDetach(true);
-        }
+        if (widget.isAttached()) addOn.onAttached();
     }
 
     @Override
-    protected void doUpdate(JSONObject data) {
+    protected void doUpdate(final JSONObject data) {
         if (widget.isAttached()) {
             flushPendingUpdates();
             super.doUpdate(data);
@@ -93,7 +92,7 @@ public class PTAddOnComposite extends PTAddOn {
 
     private void flushPendingUpdates() {
         if (!pendingUpdates.isEmpty()) {
-            for (JSONObject update : pendingUpdates) {
+            for (final JSONObject update : pendingUpdates) {
                 super.doUpdate(update);
             }
             pendingUpdates.clear();

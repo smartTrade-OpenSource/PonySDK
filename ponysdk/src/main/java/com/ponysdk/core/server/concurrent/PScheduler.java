@@ -25,18 +25,19 @@ public class PScheduler implements UIContextListener {
     private static final PScheduler INSTANCE;
 
     static {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
+                new ThreadFactory() {
 
-            private int i = 0;
+                    private int i = 0;
 
-            @Override
-            public Thread newThread(final Runnable r) {
-                final Thread t = new Thread(r);
-                t.setName(PScheduler.class.getName() + "-" + i++);
-                t.setDaemon(true);
-                return t;
-            }
-        });
+                    @Override
+                    public Thread newThread(final Runnable r) {
+                        final Thread t = new Thread(r);
+                        t.setName(PScheduler.class.getName() + "-" + i++);
+                        t.setDaemon(true);
+                        return t;
+                    }
+                });
         INSTANCE = new PScheduler(executor);
     }
 
@@ -78,12 +79,13 @@ public class PScheduler implements UIContextListener {
     }
 
     public static UIRunnable scheduleWithFixedDelay(final Runnable runnable, final Duration delay, final Duration period) {
-        return INSTANCE.scheduleWithFixedDelay0(runnable, delay.toMillis(), delay.toMillis());
+        return INSTANCE.scheduleWithFixedDelay0(runnable, delay.toMillis(), period.toMillis());
     }
 
     private UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long delayMillis, final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(runnable, true);
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis, TimeUnit.MILLISECONDS);
+        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
+                TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 

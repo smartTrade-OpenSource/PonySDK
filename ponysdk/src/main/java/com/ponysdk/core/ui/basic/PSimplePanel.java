@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import com.ponysdk.core.server.application.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 
 /**
  * Base class for panels that contain only one widget.
@@ -47,7 +47,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
-    protected void enrichOnInit(Parser parser) {
+    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override
@@ -102,7 +102,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
         if (w != null) {
             // Physical attach.
-            executeAdd(w.getID(), ID);
+            w.saveAdd(w.getID(), ID);
             adopt(w);
         }
     }

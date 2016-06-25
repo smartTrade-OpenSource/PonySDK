@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.Map;
+
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -31,8 +33,6 @@ import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import java.util.Map;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -50,7 +50,7 @@ public class PTAddOn extends AbstractPTObject {
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
         if (factory == null)
-            throw new RuntimeException("AddOn factory not found for signature: " + signature + ". Addons registered: "
+            throw new IllegalArgumentException("AddOn factory not found for signature: " + signature + ". Addons registered: "
                     + factories.keySet());
 
         final JSONObject params = new JSONObject();
@@ -70,7 +70,7 @@ public class PTAddOn extends AbstractPTObject {
         return super.update(buffer, binaryModel);
     }
 
-    protected void doUpdate(JSONObject data){
+    protected void doUpdate(final JSONObject data) {
         addOn.update(data.getJavaScriptObject());
     }
 }

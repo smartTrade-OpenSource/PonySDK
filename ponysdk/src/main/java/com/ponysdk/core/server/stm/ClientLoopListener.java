@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.stm;
 
+@FunctionalInterface
 public interface ClientLoopListener {
 
     void onLoopEnd();

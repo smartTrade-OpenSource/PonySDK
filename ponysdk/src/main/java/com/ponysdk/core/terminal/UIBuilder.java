@@ -23,6 +23,13 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -39,8 +46,18 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -53,14 +70,11 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.ponysdk.core.terminal.ui.PTCookies;
+import com.ponysdk.core.terminal.ui.PTObject;
+import com.ponysdk.core.terminal.ui.PTStreamResource;
+import com.ponysdk.core.terminal.ui.PTWindow;
+import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -72,7 +86,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final List<JSONObject> stackedInstructions = new ArrayList<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
 
     private SimplePanel loadingMessageBox;
@@ -142,14 +155,16 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 if (codeException.getStatusCode() == 0)
                     return;
             }
-            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application", exception);
+            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception
+                    + "\nPlease reload your application", exception);
             return;
         }
 
         if (communicationErrorHandler != null) {
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
-                communicationErrorHandler.onCommunicationError("" + statusCodeException.getStatusCode(), statusCodeException.getMessage());
+                communicationErrorHandler.onCommunicationError("" + statusCodeException.getStatusCode(),
+                        statusCodeException.getMessage());
             } else {
                 communicationErrorHandler.onCommunicationError("x", exception.getMessage());
             }
@@ -158,7 +173,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 final StatusCodeException statusCodeException = (StatusCodeException) exception;
                 showCommunicationErrorMessage(statusCodeException);
             } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.", exception);
+                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
+                        exception);
             }
         }
     }
@@ -180,12 +196,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist");
 
                     // Type
-                    BinaryModel model;
-
                     buffer.readBinaryModel();
 
                     while (buffer.hasRemaining()) {
-                        model = buffer.readBinaryModel();
+                        final BinaryModel model = buffer.readBinaryModel();
                         if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
                             if (model.getIntValue() != requestedWindowId) {
                                 buffer.rewind(model);
@@ -199,9 +213,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                             break;
                         }
                     }
-
-                    // FIXME To be remove
-                    // update(buffer);
                 }
             } else {
                 buffer.rewind(windowIdModel);
@@ -364,19 +375,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         return ptObject;
     }
 
-    public void stackInstrution(final PTInstruction instruction) {
-        sendDataToServer(instruction);
-    }
-
-    public void flushEvents() {
-        if (stackedInstructions.isEmpty())
-            return;
-
-        sendDataToServer(stackedInstructions);
-
-        stackedInstructions.clear();
-    }
-
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
@@ -390,16 +388,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     public void sendDataToServer(final JSONValue instruction) {
         requestBuilder.send(instruction);
-    }
-
-    private void sendDataToServer(final List<JSONObject> instructions) {
-        final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < instructions.size(); i++) {
-            // TODO Weird set, always 0 ???
-            jsonArray.set(0, instructions.get(0));
-        }
-
-        sendDataToServer(jsonArray);
     }
 
     public void sendDataToServer(final JSONObject instruction) {
@@ -452,7 +440,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         actionPanel.setSize("100%", "100%");
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML("Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(new ClickHandler() {
@@ -468,7 +457,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
-            content.add(new HTML("An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -490,7 +480,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight) {
-                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2);
+                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
+                        (Window.getClientHeight() - offsetHeight) / 2);
             }
         });
     }
@@ -500,7 +491,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (event.getValue() != null && !event.getValue().isEmpty()) {
             final PTInstruction eventInstruction = new PTInstruction();
             eventInstruction.put(ClientToServerModel.TYPE_HISTORY, event.getValue());
-            stackInstrution(eventInstruction);
+            sendDataToServer(eventInstruction);
         }
     }
 

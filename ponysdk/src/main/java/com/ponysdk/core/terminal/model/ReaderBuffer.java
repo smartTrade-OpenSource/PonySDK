@@ -23,16 +23,22 @@
 
 package com.ponysdk.core.terminal.model;
 
+import java.util.logging.Logger;
+
+import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+
 import elemental.client.Browser;
 import elemental.html.ArrayBuffer;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
 
 public class ReaderBuffer {
+
+    private static final Logger log = Logger.getLogger(ReaderBuffer.class.getName());
 
     private static final byte TRUE = 1;
 
@@ -138,11 +144,11 @@ public class ReaderBuffer {
     }
 
     private JSONObject getJson(final int msgSize) {
-        String s = getString(msgSize);
-        if (s != null) {
-            return JSONParser.parseStrict(s).isObject();
-        } else {
-            return null;
+        final String s = getString(msgSize);
+        try {
+            return s != null ? JSONParser.parseStrict(s).isObject() : null;
+        } catch (final JSONException e) {
+            throw new JSONException(e.getMessage() + " : " + s, e);
         }
     }
 
@@ -168,9 +174,9 @@ public class ReaderBuffer {
 
     @Override
     public String toString() {
-        return "ReaderBuffer{" +
-                "window=" + window +
+        return "ReaderBuffer {" +
+                "window=" + window.getName() +
                 ", position=" + position +
-                '}';
+                "}";
     }
 }
