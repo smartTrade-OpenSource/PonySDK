@@ -172,6 +172,19 @@ public class ReaderBuffer {
         return position < getByteLength();
     }
 
+    /**
+     * Go directly to the next block
+     */
+    public void avoidBlock() {
+        boolean result = false;
+        while (!result && hasRemaining()) {
+            final BinaryModel binaryModel = readBinaryModel();
+            log.warning("Consume " + binaryModel + " on null PTObject");
+            result = ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel()) || binaryModel.isBeginKey();
+            if (result) rewind(binaryModel);
+        }
+    }
+
     @Override
     public String toString() {
         return "ReaderBuffer {" +

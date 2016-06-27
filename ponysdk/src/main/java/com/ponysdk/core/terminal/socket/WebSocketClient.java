@@ -91,7 +91,7 @@ public class WebSocketClient {
                         try {
                             uiBuilder.updateMainTerminal(buffer);
                         } catch (final Exception e) {
-                            log.log(Level.SEVERE, "Cannot parse " + buffer, e);
+                            log.log(Level.SEVERE, "Error while processing the " + buffer, e);
                         }
                     } else {
                         log.severe("Unknown model : " + type.getModel());
