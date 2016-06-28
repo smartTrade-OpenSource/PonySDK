@@ -26,7 +26,10 @@ package com.ponysdk.core.terminal.ui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONNumber;
@@ -39,6 +42,8 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTAddOnComposite extends PTAddOn {
+
+    private final static Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
 
     private final List<JSONObject> pendingUpdates = new ArrayList<>();
 
@@ -69,15 +74,23 @@ public class PTAddOnComposite extends PTAddOn {
 
             @Override
             public void onAttachOrDetach(final AttachEvent event) {
-                if (event.isAttached()) addOn.onAttached();
-                else addOn.onDetached();
-                flushPendingUpdates();
+                try {
+                    if (event.isAttached()) addOn.onAttached();
+                    else addOn.onDetached();
+                    flushPendingUpdates();
+                } catch (final JavaScriptException e) {
+                    log.log(Level.SEVERE, e.getMessage(), e);
+                }
             }
         });
 
-        addOn = factory.newAddOn(params.getJavaScriptObject());
-        addOn.onInit();
-        if (widget.isAttached()) addOn.onAttached();
+        try {
+            addOn = factory.newAddOn(params.getJavaScriptObject());
+            addOn.onInit();
+            if (widget.isAttached()) addOn.onAttached();
+        } catch (final JavaScriptException e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 
     @Override

@@ -24,7 +24,10 @@
 package com.ponysdk.core.terminal.ui;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,6 +38,8 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTAddOn extends AbstractPTObject {
+
+    private final static Logger log = Logger.getLogger(PTAddOn.class.getName());
 
     JavascriptAddOn addOn;
 
@@ -56,8 +61,12 @@ public class PTAddOn extends AbstractPTObject {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
-        addOn = factory.newAddOn(params.getJavaScriptObject());
-        addOn.onInit();
+        try {
+            addOn = factory.newAddOn(params.getJavaScriptObject());
+            addOn.onInit();
+        } catch (final JavaScriptException e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 
     @Override
@@ -71,6 +80,10 @@ public class PTAddOn extends AbstractPTObject {
     }
 
     protected void doUpdate(final JSONObject data) {
-        addOn.update(data.getJavaScriptObject());
+        try {
+            addOn.update(data.getJavaScriptObject());
+        } catch (final JavaScriptException e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 }
