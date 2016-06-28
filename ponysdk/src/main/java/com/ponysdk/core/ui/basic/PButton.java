@@ -43,6 +43,10 @@ public class PButton extends PButtonBase {
         super(text);
     }
 
+    public PButton(final String text, final String html) {
+        super(text, html);
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.BUTTON;

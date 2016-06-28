@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
-
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
@@ -46,6 +46,10 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     PButtonBase(final String text) {
+        this.text = text;
+    }
+
+    PButtonBase(final String text, final String html) {
         this.text = text;
     }
 

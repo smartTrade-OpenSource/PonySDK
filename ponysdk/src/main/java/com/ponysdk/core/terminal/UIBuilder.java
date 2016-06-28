@@ -276,24 +276,31 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
         } else {
-            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId);
+            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId
+                    + ", so we will consume all the buffer of this object");
+            buffer.avoidBlock();
         }
     }
 
     private void processUpdate(final ReaderBuffer buffer, final PTObject ptObject) {
-        BinaryModel binaryModel;
-        boolean result = false;
-        do {
-            binaryModel = buffer.readBinaryModel();
-            if (!BinaryModel.NULL.equals(binaryModel)) {
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
-                result = ptObject.update(buffer, binaryModel);
-            }
-        } while (result && buffer.hasRemaining());
+        if (ptObject != null) {
+            BinaryModel binaryModel;
+            boolean result = false;
+            do {
+                binaryModel = buffer.readBinaryModel();
+                if (!BinaryModel.NULL.equals(binaryModel)) {
+                    if (log.isLoggable(Level.FINE))
+                        log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
+                    result = ptObject.update(buffer, binaryModel);
+                }
+            } while (result && buffer.hasRemaining());
 
-        if (!result)
-            buffer.rewind(binaryModel);
+            if (!result)
+                buffer.rewind(binaryModel);
+        } else {
+            log.warning("Update on a null PTObject, so we will consume all the buffer of this object");
+            buffer.avoidBlock();
+        }
     }
 
     private void processRemove(final ReaderBuffer buffer, final int objectId) {
