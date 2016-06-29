@@ -23,11 +23,80 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PDecoratedPopupPanel;
+import com.ponysdk.core.ui.basic.PDecoratorPanel;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PDisclosurePanel;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFocusPanel;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PHeaderPanel;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PImage;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PLayoutPanel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PMenuItem;
+import com.ponysdk.core.ui.basic.PPasswordTextBox;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PPushButton;
+import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PRichTextToolbar;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabPanel;
+import com.ponysdk.core.ui.basic.PTextArea;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
@@ -38,47 +107,91 @@ import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.sample.client.page.addon.HighChartsStackedColumnAddOn;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
-
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.ponysdk.sample.client.page.addon.SelectizeAddon;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel child2;
 
-    HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
+    // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
 
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
-        a.open();
+        // final PWindow a = new PWindow(null, "Window 2",
+        // "resizable=yes,location=0,status=0,scrollbars=0");
+        // a.open();
 
-        final LoggerAddOn addon = createPAddOn();
-        addon.attach(PWindow.getMain());
+        // final LoggerAddOn addon = createPAddOn();
+        // addon.attach(PWindow.getMain());
 
-        System.err.println(addon);
+        // System.err.println(addon);
 
-        //final PElementAddOn elementAddOn = new PElementAddOn();
-        //elementAddOn.setInnerText("Coucou");
-        //flowPanel.add(elementAddOn);
+        // final PElementAddOn elementAddOn = new PElementAddOn();
+        // elementAddOn.setInnerText("Coucou");
+        // flowPanel.add(elementAddOn);
 
+        // highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
+        // PWindow.getMain().add(highChartsStackedColumnAddOn);
+        // highChartsStackedColumnAddOn.setSeries("");
 
-        highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
-        PWindow.getMain().add(highChartsStackedColumnAddOn);
-        highChartsStackedColumnAddOn.setSeries("");
+        // final HighChartsStackedColumnAddOn h2 = new
+        // HighChartsStackedColumnAddOn();
+        // a.add(h2);
+        // h2.setSeries("");
+        // final PElementAddOn elementAddOn2 = new PElementAddOn();
+        // elementAddOn2.setInnerText("Coucou dans window");
+        // a.add(elementAddOn2);
 
-        HighChartsStackedColumnAddOn h2 = new HighChartsStackedColumnAddOn();
-        a.add(h2);
-        h2.setSeries("");
-        //final PElementAddOn elementAddOn2 = new PElementAddOn();
-        //elementAddOn2.setInnerText("Coucou dans window");
-        //a.add(elementAddOn2);
+        final SelectizeAddon selectizeAddon = new SelectizeAddon();
+        selectizeAddon.text("test");
+        PWindow.getMain().add(selectizeAddon);
+        //
+        final Analyzer analyzer = new StandardAnalyzer();
+        final Directory directory = new RAMDirectory();
+
+        final IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        IndexWriter iwriter;
+        try {
+            iwriter = new IndexWriter(directory, config);
+            final Document doc = new Document();
+            final String text = "This is the text to be indexed.";
+            doc.add(new Field("fieldname", text, TextField.TYPE_STORED));
+            iwriter.addDocument(doc);
+            iwriter.close();
+        } catch (final IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        try {
+            // Now search the index:
+            final DirectoryReader ireader = DirectoryReader.open(directory);
+            final IndexSearcher isearcher = new IndexSearcher(ireader);
+            // Parse a simple query that searches for "text":
+            // final QueryParser parser = new QueryParser("fieldname",
+            // analyzer);
+            // parser.setFuzzyMinSim(2f);
+
+            final Term term = new Term("fieldname", "indesfed");
+            final Query query = new FuzzyQuery(term);
+            // final TopDocs hits = isearcher.search(query, 1000).scoreDocs;
+
+            // final Query query = parser.parse("indeed");
+            final ScoreDoc[] hits = isearcher.search(query, 1000).scoreDocs;
+            // Iterate through the results:
+            for (final ScoreDoc hit : hits) {
+                System.err.println("Score : " + hit.score);
+                final Document hitDoc = isearcher.doc(hit.doc);
+                System.err.println("Found document" + hitDoc.getField("fieldname").stringValue());
+            }
+            ireader.close();
+            directory.close();
+        } catch (final Exception exception) {
+            exception.printStackTrace();
+        }
 
         if (true)
             return;
@@ -104,26 +217,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement label19 = new PElement("div");
         final PElement label20 = new PElement("div");
 
-        //flowPanel.add(label1);
-        //flowPanel.add(label2);
-        //flowPanel.add(label3);
-        //flowPanel.add(label4);
-        //flowPanel.add(label5);
-        //flowPanel.add(label6);
-        //flowPanel.add(label7);
-        //flowPanel.add(label8);
-        //flowPanel.add(label9);
-        //flowPanel.add(label10);
-        //flowPanel.add(label11);
-        //flowPanel.add(label12);
-        //flowPanel.add(label13);
-        //flowPanel.add(label14);
-        //flowPanel.add(label15);
-        //flowPanel.add(label16);
-        //flowPanel.add(label17);
-        //flowPanel.add(label18);
-        //flowPanel.add(label19);
-        //flowPanel.add(label20);
+        // flowPanel.add(label1);
+        // flowPanel.add(label2);
+        // flowPanel.add(label3);
+        // flowPanel.add(label4);
+        // flowPanel.add(label5);
+        // flowPanel.add(label6);
+        // flowPanel.add(label7);
+        // flowPanel.add(label8);
+        // flowPanel.add(label9);
+        // flowPanel.add(label10);
+        // flowPanel.add(label11);
+        // flowPanel.add(label12);
+        // flowPanel.add(label13);
+        // flowPanel.add(label14);
+        // flowPanel.add(label15);
+        // flowPanel.add(label16);
+        // flowPanel.add(label17);
+        // flowPanel.add(label18);
+        // flowPanel.add(label19);
+        // flowPanel.add(label20);
 
         PScheduler.scheduleAtFixedRate(new Runnable() {
 

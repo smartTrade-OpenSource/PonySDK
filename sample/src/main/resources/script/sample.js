@@ -27,6 +27,43 @@ Addon.new("com.ponysdk.sample.client.page.addon.PElementAddOn",
 
     });
 
+Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
+    {
+        init: function () {
+        },
+
+        text: function (value) {
+             var that = this;
+        
+        
+             this.jqelement.selectize({
+                plugins: ['remove_button'],
+                delimiter: ',',
+                persist: false,
+                create: function(input) {
+                    return {
+                        value: input,
+                        text: input
+                    }
+                },
+                onItemAdd: function (value, $item) {
+                   var itemID = $item[0].getAttribute("id"); 
+                   
+                   if(itemID == null){
+                        itemID = 'item' + Date.now();
+                   }
+                
+                   pony.sendDataToServer(that.id, {
+                        id : itemID,
+                        tag: value
+                    });
+                }
+            });
+        },
+
+    });
+
+
 Addon.new("com.ponysdk.sample.client.page.addon.HighChartsStackedColumnAddOn",
     {
         init: function () {

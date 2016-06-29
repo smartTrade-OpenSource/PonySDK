@@ -23,19 +23,15 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Calendar;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.http.HttpSessionEvent;
-import java.util.Calendar;
+
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public abstract class AbstractApplicationLoader implements ApplicationLoader {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractApplicationLoader.class);
 
     protected ApplicationManagerOption applicationManagerOption;
 
@@ -50,24 +46,6 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
     @Override
     public void contextDestroyed(final ServletContextEvent event) {
         printGoodbyeBanner();
-    }
-
-    @Override
-    public void sessionCreated(final HttpSessionEvent httpSessionEvent) {
-        if (log.isInfoEnabled()) {
-            log.info("HTTP Session created: {}", httpSessionEvent.getSession().getId());
-        }
-
-        SessionManager.get().registerSession(httpSessionEvent.getSession());
-    }
-
-    @Override
-    public void sessionDestroyed(final HttpSessionEvent httpSessionEvent) {
-        if (log.isInfoEnabled()) {
-            log.info("HTTP Session Destroyed: {}", httpSessionEvent.getSession().getId());
-        }
-
-        SessionManager.get().unregisterSession(httpSessionEvent.getSession().getId());
     }
 
     private void printWelcomBanner() {

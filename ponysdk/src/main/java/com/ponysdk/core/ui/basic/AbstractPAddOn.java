@@ -71,8 +71,7 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
 
             return true;
         } else if (this.windowID != windowID) {
-            throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+            throw new IllegalAccessError("Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
@@ -84,7 +83,7 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
     }
 
     public String getSignature() {
-        return getClass().getSimpleName();
+        return getClass().getCanonicalName();
     }
 
     public void update(final JsonObject jsonObject) {

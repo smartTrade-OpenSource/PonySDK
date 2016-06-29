@@ -24,12 +24,11 @@
 package com.ponysdk.core.server.servlet;
 
 import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSessionListener;
 
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 
-public interface ApplicationLoader extends ServletContextListener, HttpSessionListener {
+public interface ApplicationLoader extends ServletContextListener {
 
     void start();
 

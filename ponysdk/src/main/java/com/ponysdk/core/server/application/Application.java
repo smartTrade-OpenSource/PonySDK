@@ -23,14 +23,16 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.useragent.UserAgent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.useragent.UserAgent;
 
 /**
  * <p>
@@ -49,11 +51,11 @@ public class Application {
 
     private final UserAgent userAgent;
 
-    private final String sessionID;
+    private final HttpSession session;
 
-    public Application(String sessionID, final ApplicationManagerOption options, UserAgent userAgent) {
+    public Application(final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
         this.options = options;
-        this.sessionID = sessionID;
+        this.session = session;
         this.userAgent = userAgent;
     }
 
@@ -65,7 +67,7 @@ public class Application {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
             log.info("Invalidate session, all ui contexts have been destroyed");
-            SessionManager.get().getSession(sessionID).invalidate();
+            session.invalidate();
         }
     }
 
@@ -79,7 +81,8 @@ public class Application {
 
     public void pushToClients(final Object message) {
         for (final UIContext uiContext : getUIContexts()) {
-            if (log.isDebugEnabled()) log.debug("Pushing to {}", uiContext);
+            if (log.isDebugEnabled())
+                log.debug("Pushing to {}", uiContext);
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
@@ -109,8 +112,8 @@ public class Application {
         return options.getApplicationID();
     }
 
-    public String getSessionID() {
-        return sessionID;
+    public HttpSession getSession() {
+        return session;
     }
 
     public UserAgent getUserAgent() {

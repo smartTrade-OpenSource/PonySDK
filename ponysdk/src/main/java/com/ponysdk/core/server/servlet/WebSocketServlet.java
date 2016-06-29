@@ -23,12 +23,17 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.useragent.UserAgent;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
@@ -39,9 +44,12 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.*;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.useragent.UserAgent;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -79,13 +87,15 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         applicationManager = (AbstractApplicationManager) getServletContext().getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
-        if (log.isInfoEnabled()) log.info("Initializing Buffer allocation ...");
+        if (log.isInfoEnabled())
+            log.info("Initializing Buffer allocation ...");
 
         for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
             buffers.add(new Buffer());
         }
 
-        if (log.isInfoEnabled()) log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * buffers.size());
+        if (log.isInfoEnabled())
+            log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * buffers.size());
     }
 
     @Override
@@ -114,24 +124,25 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         @Override
         public void onWebSocketConnect(final Session session) {
-            if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}", session.getRemoteAddress(), request.getSessionId());
+            if (log.isInfoEnabled())
+                log.info("WebSocket connected from {}, sessionID {}", session.getRemoteAddress(), request.getSession().getId());
 
             this.session = session;
             this.context = new TxnContext();
             this.context.setRequest(request);
             this.context.setSocket(this);
 
-            final String sessionId = request.getSessionId();
+            final HttpSession sessionId = request.getSession();
 
             Application application = SessionManager.get().getApplication(sessionId);
             if (application == null) {
-                application = new Application(sessionId, applicationManager.getOptions(), UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
-                SessionManager.get().setApplication(sessionId, application);
+                application = new Application(request.getSession(), applicationManager.getOptions(), UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
             }
 
             context.setApplication(application);
 
-            if (log.isInfoEnabled()) log.info("Creating a new application, {}", application.toString());
+            if (log.isInfoEnabled())
+                log.info("Creating a new application, {}", application.toString());
             try {
                 applicationManager.startApplication(context);
             } catch (final Exception e) {
@@ -162,26 +173,31 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         @Override
         public void onWebSocketText(final String text) {
             if (context.getUIContext().isLiving()) {
-                if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
+                if (monitor != null)
+                    monitor.onMessageReceived(WebSocket.this, text);
                 try {
                     context.getUIContext().notifyMessageReceived();
 
                     if (!ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                         request.setText(text);
 
-                        if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+                        if (log.isInfoEnabled())
+                            log.info("Message received from terminal : " + text);
 
                         applicationManager.fireInstructions(context.getJsonObject(), context);
                     } else {
-                        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal");
+                        if (log.isDebugEnabled())
+                            log.debug("Heartbeat received from terminal");
                     }
                 } catch (final Throwable e) {
                     log.error("Cannot process message from the browser: {}", text, e);
                 } finally {
-                    if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
+                    if (monitor != null)
+                        monitor.onMessageProcessed(WebSocket.this);
                 }
             } else {
-                if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");
+                if (log.isInfoEnabled())
+                    log.info("Message dropped, ui context is destroyed");
             }
         }
 
@@ -220,19 +236,22 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                             log.error("Cannot flush to WebSocket", t);
                         }
                     } else {
-                        if (log.isDebugEnabled()) log.debug("Session is down");
+                        if (log.isDebugEnabled())
+                            log.debug("Session is down");
                     }
                 } else {
                     throw new IllegalStateException("UI Context has been destroyed");
                 }
             } else {
-                if (log.isInfoEnabled()) log.info("Already flushed");
+                if (log.isInfoEnabled())
+                    log.info("Already flushed");
             }
         }
 
         private void flush(final ByteBuffer socketBuffer) {
             if (socketBuffer.position() != 0) {
-                if (monitor != null) monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
+                if (monitor != null)
+                    monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
                 socketBuffer.flip();
                 try {
                     final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
@@ -240,7 +259,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     log.error("Cannot stream data", e);
                 } finally {
-                    if (monitor != null) monitor.onAfterFlush(WebSocket.this);
+                    if (monitor != null)
+                        monitor.onAfterFlush(WebSocket.this);
                 }
             }
         }
@@ -272,7 +292,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         this.maxIdleTime = maxIdleTime;
     }
 
-    public void setWebsocketMonitor(WebsocketMonitor monitor) {
+    public void setWebsocketMonitor(final WebsocketMonitor monitor) {
         this.monitor = monitor;
     }
 }
