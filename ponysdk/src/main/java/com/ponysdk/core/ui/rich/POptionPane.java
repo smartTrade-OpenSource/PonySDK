@@ -114,9 +114,8 @@ public class POptionPane {
         return null;
     }
 
-    public interface PActionHandler {
-
-        void onAction(PDialogBox dialogBox, String option);
+    public PDialogBox getDialogBox() {
+        return dialogBox;
     }
 
     public enum POption {
@@ -166,8 +165,9 @@ public class POptionPane {
         }
     }
 
-    public PDialogBox getDialogBox() {
-        return dialogBox;
+    public interface PActionHandler {
+
+        void onAction(PDialogBox dialogBox, String option);
     }
 
 }

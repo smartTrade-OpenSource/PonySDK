@@ -36,12 +36,9 @@ public class RootEventBus implements EventBus {
     private final Map<Type<?>, Map<Object, Map<?, Boolean>>> map = new HashMap<>();
 
     private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
-
-    private boolean firing = false;
-
     private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
-
     private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<>();
+    private boolean firing = false;
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
@@ -167,12 +164,12 @@ public class RootEventBus implements EventBus {
         pendingHandlerRegistration.add(context);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void doAddNow(final Type type, final Object source, final Object handler) {
         ensureHandlerSet(type, source).put(handler, true);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 
@@ -296,40 +293,20 @@ public class RootEventBus implements EventBus {
         H handler;
 
         @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + getOuterType().hashCode();
-            result = prime * result + ((handler == null) ? 0 : handler.hashCode());
-            result = prime * result + ((source == null) ? 0 : source.hashCode());
-            result = prime * result + ((type == null) ? 0 : type.hashCode());
-            return result;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            HandlerContext<?> that = (HandlerContext<?>) o;
+            return add == that.add &&
+                    Objects.equals(type, that.type) &&
+                    Objects.equals(source, that.source) &&
+                    Objects.equals(handler, that.handler);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            final HandlerContext<H> other = (HandlerContext<H>) obj;
-            if (!getOuterType().equals(other.getOuterType())) return false;
-            if (handler == null) {
-                if (other.handler != null) return false;
-            } else if (!handler.equals(other.handler)) return false;
-            if (source == null) {
-                if (other.source != null) return false;
-            } else if (!source.equals(other.source)) return false;
-            if (type == null) {
-                if (other.type != null) return false;
-            } else if (!type.equals(other.type)) return false;
-            return true;
+        public int hashCode() {
+            return Objects.hash(add, type, source, handler);
         }
-
-        private RootEventBus getOuterType() {
-            return RootEventBus.this;
-        }
-
     }
 
 }

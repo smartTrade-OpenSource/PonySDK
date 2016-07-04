@@ -94,11 +94,11 @@ dependencies {
 
     compile 'javax.json:javax.json-api:1.0'
     compile 'org.glassfish:javax.json:1.0.4'
-    
+
     compile 'org.apache.lucene:lucene-core:6.1.0'
     compile 'org.apache.lucene:lucene-analyzers-common:6.1.0'
     compile 'org.apache.lucene:lucene-queryparser:6.1.0'
-    
+
 
     testCompile 'org.seleniumhq.selenium:selenium-java:2.33.0'
     testCompile 'junit:junit:4.10'
@@ -106,10 +106,8 @@ dependencies {
     runtime 'org.ow2.asm:asm:5.0.3'
 
     runtime 'com.google.gwt:gwt-codeserver:2.7.0'
-    
-    
-    
-    
+
+
 }
 
 jar {

@@ -29,6 +29,8 @@ public interface HasPData<T> {
 
     PSelectionModel<T> getSelectionModel();
 
+    void setSelectionModel(PSelectionModel<T> selectionModel);
+
     T getVisibleItem(int indexOnPage);
 
     int getVisibleItemCount();
@@ -36,7 +38,5 @@ public interface HasPData<T> {
     Iterable<T> getVisibleItems();
 
     void setData(List<T> values);
-
-    void setSelectionModel(PSelectionModel<T> selectionModel);
 
 }

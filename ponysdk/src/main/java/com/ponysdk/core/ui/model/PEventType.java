@@ -78,6 +78,10 @@ public enum PEventType {
         this.code = code;
     }
 
+    public static PEventType fromInt(final int code) {
+        return eventsByCode.get(code);
+    }
+
     public boolean equals(final int code) {
         return this.code == code;
     }
@@ -88,9 +92,5 @@ public enum PEventType {
 
     public String getCodeToString() {
         return this.code + "";
-    }
-
-    public static PEventType fromInt(final int code) {
-        return eventsByCode.get(code);
     }
 }

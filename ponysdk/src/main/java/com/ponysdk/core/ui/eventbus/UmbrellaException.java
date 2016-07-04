@@ -35,6 +35,11 @@ public class UmbrellaException extends RuntimeException {
 
     private final Set<Throwable> causes;
 
+    public UmbrellaException(final Set<Throwable> causes) {
+        super(makeMessage(causes), makeCause(causes));
+        this.causes = causes;
+    }
+
     protected static Throwable makeCause(final Set<Throwable> causes) {
         final Iterator<Throwable> iterator = causes.iterator();
         if (!iterator.hasNext()) {
@@ -62,11 +67,6 @@ public class UmbrellaException extends RuntimeException {
         }
 
         return b.toString();
-    }
-
-    public UmbrellaException(final Set<Throwable> causes) {
-        super(makeMessage(causes), makeCause(causes));
-        this.causes = causes;
     }
 
     public Set<Throwable> getCauses() {

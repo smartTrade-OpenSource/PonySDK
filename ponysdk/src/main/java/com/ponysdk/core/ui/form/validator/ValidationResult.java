@@ -28,6 +28,9 @@ package com.ponysdk.core.ui.form.validator;
  */
 public class ValidationResult {
 
+    private boolean valid;
+    private String errorMessage;
+
     public static ValidationResult newOKValidationResult() {
         final ValidationResult validationResult = new ValidationResult();
         validationResult.setValid(true);
@@ -41,23 +44,19 @@ public class ValidationResult {
         return validationResult;
     }
 
-    private boolean valid;
-
-    private String errorMessage;
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
     public void setErrorMessage(final String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public boolean isValid() {
+        return valid;
     }
 
     public void setValid(final boolean valid) {
         this.valid = valid;
-    }
-
-    public boolean isValid() {
-        return valid;
     }
 }

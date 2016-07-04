@@ -23,12 +23,11 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.google.gwt.core.client.EntryPoint;
 import org.timepedia.exporter.client.ExporterUtil;
 
-import com.google.gwt.core.client.EntryPoint;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommunicationEntryPoint implements EntryPoint {
 

@@ -37,16 +37,11 @@ import java.util.Map;
 
 public class TxnContext implements TxnListener {
 
-    private WebSocketServlet.WebSocket socket;
-
-    private boolean flushNow = false;
-
-    private Parser parser;
-
-    private Application application;
-
     private final Map<String, Object> parameters = new HashMap<>();
-
+    private WebSocketServlet.WebSocket socket;
+    private boolean flushNow = false;
+    private Parser parser;
+    private Application application;
     private PRequest request;
 
     private UIContext uiContext;

@@ -45,10 +45,6 @@ public enum PTAlignment {
      */
     STRETCH;
 
-    public byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static Alignment getAlignement(final PTAlignment alignment) {
         switch (alignment) {
             case BEGIN:
@@ -59,5 +55,9 @@ public enum PTAlignment {
                 return Alignment.STRETCH;
         }
         return null;
+    }
+
+    public byte getValue() {
+        return (byte) ordinal();
     }
 }

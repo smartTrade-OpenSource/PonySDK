@@ -28,13 +28,11 @@ import com.ponysdk.core.ui.basic.*;
 
 public class DefaultPageView implements PageView {
 
-    private int headerHeight = 40;
-
     protected PSimpleLayoutPanel panel;
     protected PFlowPanel header;
     protected PSimplePanel body;
     protected PLabel title;
-
+    private int headerHeight = 40;
     private String pageTitle;
 
     public DefaultPageView() {

@@ -54,17 +54,17 @@ public class ParentWindowRequest implements RequestBuilder {
     /**
      * To Main terminal
      */
-    @Override
-    public void send(final JSONValue value) {
-        sendToParent(value.toString());
-    }
+    public static native void sendToParent(final String data) /*-{
+                                                                        $wnd.opener.pony.sendDataToServer(data);
+                                                                        }-*/;
 
     /**
      * To Main terminal
      */
-    public static native void sendToParent(final String data) /*-{
-                                                                        $wnd.opener.pony.sendDataToServer(data);
-                                                                        }-*/;
+    @Override
+    public void send(final JSONValue value) {
+        sendToParent(value.toString());
+    }
 
     /**
      * From Main terminal to the matching window terminal

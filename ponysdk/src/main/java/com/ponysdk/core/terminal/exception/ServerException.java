@@ -25,10 +25,8 @@ package com.ponysdk.core.terminal.exception;
 
 public class ServerException extends Exception {
 
-    private static final long serialVersionUID = -2064816487726122645L;
-
     public static final int INVALID_SESSION = 600;
-
+    private static final long serialVersionUID = -2064816487726122645L;
     private final int code;
 
     public ServerException(final int code, final String cause) {

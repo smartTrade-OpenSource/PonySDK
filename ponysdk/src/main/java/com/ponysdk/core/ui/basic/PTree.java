@@ -55,10 +55,8 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
 
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
-
-    private boolean animationEnabled = false;
     private final PTreeItem root;
-
+    private boolean animationEnabled = false;
     private PTreeItem curSelection;
 
     public PTree() {

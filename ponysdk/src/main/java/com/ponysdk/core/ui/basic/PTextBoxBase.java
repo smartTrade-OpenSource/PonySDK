@@ -91,15 +91,15 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         setText(value);
     }
 
+    public String getPlaceholder() {
+        return placeholder;
+    }
+
     public void setPlaceholder(String placeholder) {
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder));
-    }
-
-    public String getPlaceholder() {
-        return placeholder;
     }
 
     @Override

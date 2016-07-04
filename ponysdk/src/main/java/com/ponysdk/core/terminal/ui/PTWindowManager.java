@@ -46,16 +46,6 @@ public class PTWindowManager {
         return instance;
     }
 
-    public void register(final PTWindow window) {
-        if (log.isLoggable(Level.INFO))
-            log.log(Level.INFO, "Register window : " + window.getObjectID());
-        windows.put(window.getObjectID(), window);
-    }
-
-    void unregister(final PTWindow window) {
-        windows.remove(window.getObjectID());
-    }
-
     @Export("getWindow")
     public static PTWindow getWindow(final int windowID) {
         return get().windows.get(windowID);
@@ -66,5 +56,15 @@ public class PTWindowManager {
         for (final PTWindow window : values) {
             window.close(true);
         }
+    }
+
+    public void register(final PTWindow window) {
+        if (log.isLoggable(Level.INFO))
+            log.log(Level.INFO, "Register window : " + window.getObjectID());
+        windows.put(window.getObjectID(), window);
+    }
+
+    void unregister(final PTWindow window) {
+        windows.remove(window.getObjectID());
     }
 }

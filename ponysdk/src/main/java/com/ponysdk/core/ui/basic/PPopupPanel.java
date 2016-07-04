@@ -72,17 +72,8 @@ import com.ponysdk.core.ui.basic.event.PCloseHandler;
  */
 public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
-    /**
-     * A callback that is used to set the position of a {@link PPopupPanel}
-     * right before it is shown.
-     */
-    public interface PPositionCallback {
-
-        void setPosition(int offsetWidth, int offsetHeight, int windowWidth, int windowHeight);
-    }
-
     private final boolean autoHide;
-
+    private final List<PCloseHandler> listeners = new ArrayList<>();
     private boolean glassEnabled;
 
     private boolean animationEnabled;
@@ -98,8 +89,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     private String glassStyleName;
 
     private PPositionCallback positionCallback;
-
-    private final List<PCloseHandler> listeners = new ArrayList<>();
 
     public PPopupPanel(final boolean autoHide) {
         this.visible = false;
@@ -137,21 +126,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_MODAL, modal));
     }
 
-    public void setGlassEnabled(final boolean glassEnabled) {
-        this.glassEnabled = glassEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
-    }
-
     public void setDraggable(final boolean draggable) {
         if (draggable) {
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_DRAGGABLE));
         }
-    }
-
-    @Override
-    public void setAnimationEnabled(final boolean animationEnabled) {
-        this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
     public void center() {
@@ -174,18 +152,24 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         }
     }
 
-    public void setGlassStyleName(final String glassStyleName) {
-        this.glassStyleName = glassStyleName;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
-    }
-
     @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
 
+    @Override
+    public void setAnimationEnabled(final boolean animationEnabled) {
+        this.animationEnabled = animationEnabled;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+    }
+
     public boolean isGlassEnabled() {
         return glassEnabled;
+    }
+
+    public void setGlassEnabled(final boolean glassEnabled) {
+        this.glassEnabled = glassEnabled;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
     }
 
     public boolean isShowing() {
@@ -251,6 +235,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         return glassStyleName;
     }
 
+    public void setGlassStyleName(final String glassStyleName) {
+        this.glassStyleName = glassStyleName;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
+    }
+
     public boolean isCenter() {
         return center;
     }
@@ -261,5 +250,14 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public int getLeftPosition() {
         return leftPosition;
+    }
+
+    /**
+     * A callback that is used to set the position of a {@link PPopupPanel}
+     * right before it is shown.
+     */
+    public interface PPositionCallback {
+
+        void setPosition(int offsetWidth, int offsetHeight, int windowWidth, int windowHeight);
     }
 }

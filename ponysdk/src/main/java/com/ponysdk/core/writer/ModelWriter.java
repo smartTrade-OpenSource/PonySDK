@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.writer;
 
-import java.io.IOException;
-
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Parser;
+
+import java.io.IOException;
 
 public class ModelWriter implements AutoCloseable {
 

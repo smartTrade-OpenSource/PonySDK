@@ -45,6 +45,10 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
         return clientX;
     }
 
+    public void setClientX(final int clientX) {
+        this.clientX = clientX;
+    }
+
     public int getClientY() {
         return clientY;
     }
@@ -53,40 +57,36 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
         this.clientY = clientY;
     }
 
-    public void setClientX(final int clientX) {
-        this.clientX = clientX;
+    public int getSourceAbsoluteLeft() {
+        return sourceAbsoluteLeft;
     }
 
     public void setSourceAbsoluteLeft(final int sourceAbsoluteLeft) {
         this.sourceAbsoluteLeft = sourceAbsoluteLeft;
     }
 
-    public int getSourceAbsoluteLeft() {
-        return sourceAbsoluteLeft;
+    public int getSourceAbsoluteTop() {
+        return sourceAbsoluteTop;
     }
 
     public void setSourceAbsoluteTop(final int sourceAbsoluteTop) {
         this.sourceAbsoluteTop = sourceAbsoluteTop;
     }
 
-    public int getSourceAbsoluteTop() {
-        return sourceAbsoluteTop;
+    public int getSourceOffsetHeight() {
+        return sourceOffsetHeight;
     }
 
     public void setSourceOffsetHeight(final int sourceOffsetHeight) {
         this.sourceOffsetHeight = sourceOffsetHeight;
     }
 
-    public int getSourceOffsetHeight() {
-        return sourceOffsetHeight;
+    public int getSourceOffsetWidth() {
+        return sourceOffsetWidth;
     }
 
     public void setSourceOffsetWidth(final int sourceOffsetWidth) {
         this.sourceOffsetWidth = sourceOffsetWidth;
-    }
-
-    public int getSourceOffsetWidth() {
-        return sourceOffsetWidth;
     }
 
     public int getNativeButton() {

@@ -46,6 +46,10 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
         return WidgetType.VERTICAL_PANEL;
     }
 
+    public PHorizontalAlignment getHorizontalAlignment() {
+        return horizontalAlignment;
+    }
+
     @Override
     public void setHorizontalAlignment(final PHorizontalAlignment align) {
         if (Objects.equals(this.horizontalAlignment, align)) return;
@@ -53,19 +57,15 @@ public class PVerticalPanel extends PCellPanel implements HasPAlignment {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue()));
     }
 
+    public PVerticalAlignment getVerticalAlignment() {
+        return verticalAlignment;
+    }
+
     @Override
     public void setVerticalAlignment(final PVerticalAlignment align) {
         if (Objects.equals(this.verticalAlignment, align)) return;
         this.verticalAlignment = align;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue()));
-    }
-
-    public PHorizontalAlignment getHorizontalAlignment() {
-        return horizontalAlignment;
-    }
-
-    public PVerticalAlignment getVerticalAlignment() {
-        return verticalAlignment;
     }
 
 }

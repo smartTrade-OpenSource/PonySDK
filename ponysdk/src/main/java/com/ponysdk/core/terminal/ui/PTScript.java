@@ -37,6 +37,16 @@ public class PTScript extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTScript.class.getName());
 
+    public static native void eval(String script) /*-{
+                                                     $wnd.eval(script);
+                                                     }-*/;
+
+    public static native Object evalWithCallback(String script) /*-{
+                                                                var r = $wnd.eval(script);
+                                                                if (typeof r=="object") return JSON.stringify(r);
+                                                                else return r;
+                                                                }-*/;
+
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.EVAL.equals(binaryModel.getModel())) {
@@ -130,15 +140,5 @@ public class PTScript extends AbstractPTObject {
         eventInstruction.put(ClientToServerModel.ERROR_MSG, t.getMessage());
         uiBuilder.sendDataToServer(eventInstruction);
     }
-
-    public static native void eval(String script) /*-{
-                                                     $wnd.eval(script);
-                                                     }-*/;
-
-    public static native Object evalWithCallback(String script) /*-{
-                                                                var r = $wnd.eval(script);
-                                                                if (typeof r=="object") return JSON.stringify(r);
-                                                                else return r;
-                                                                }-*/;
 
 }

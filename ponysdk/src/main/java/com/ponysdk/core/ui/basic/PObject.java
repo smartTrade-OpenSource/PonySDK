@@ -47,17 +47,11 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 public abstract class PObject {
 
     protected final int ID = UIContext.get().nextID();
-
-    private String nativeBindingFunction;
-
-    private PTerminalEvent.Handler terminalHandler;
-
-    protected int windowID = PWindow.EMPTY_WINDOW_ID;
-
-    boolean initialized = false;
-
     final Queue<Runnable> stackedInstructions = new LinkedList<>();
-
+    protected int windowID = PWindow.EMPTY_WINDOW_ID;
+    boolean initialized = false;
+    private String nativeBindingFunction;
+    private PTerminalEvent.Handler terminalHandler;
     private AttachListener attachListener;
 
     PObject() {

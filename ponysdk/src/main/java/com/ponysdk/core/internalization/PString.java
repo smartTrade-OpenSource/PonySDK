@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.internalization;
 
+import com.ponysdk.core.server.application.UIContext;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import com.ponysdk.core.server.application.UIContext;
 
 public class PString {
 
@@ -49,14 +49,6 @@ public class PString {
         return s;
     }
 
-    private ResourceBundle core() {
-        return coreResourceBundle;
-    }
-
-    private ResourceBundle _switchLocal(final Locale locale) {
-        return coreResourceBundle = ResourceBundle.getBundle(MESSAGES_CORE, locale);
-    }
-
     public static String get(final java.lang.String key) {
         return get().core().getString(key);
     }
@@ -67,5 +59,13 @@ public class PString {
 
     public static ResourceBundle switchLocal(final Locale locale) {
         return get()._switchLocal(locale);
+    }
+
+    private ResourceBundle core() {
+        return coreResourceBundle;
+    }
+
+    private ResourceBundle _switchLocal(final Locale locale) {
+        return coreResourceBundle = ResourceBundle.getBundle(MESSAGES_CORE, locale);
     }
 }

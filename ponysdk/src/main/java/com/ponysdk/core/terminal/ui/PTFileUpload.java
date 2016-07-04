@@ -46,6 +46,18 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     private final FileUpload fileUpload = new FileUpload();
 
+    private static Frame getFrame() {
+        /* Frame for stream resource handling */
+        if (frame == null) {
+            frame = new Frame();
+            frame.setWidth("0px");
+            frame.setHeight("0px");
+            frame.getElement().getStyle().setProperty("visibility", "hidden");
+            frame.getElement().getStyle().setProperty("position", "fixed");
+        }
+        return frame;
+    }
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
@@ -110,18 +122,6 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             return true;
         }
         return super.update(buffer, binaryModel);
-    }
-
-    private static Frame getFrame() {
-        /* Frame for stream resource handling */
-        if (frame == null) {
-            frame = new Frame();
-            frame.setWidth("0px");
-            frame.setHeight("0px");
-            frame.getElement().getStyle().setProperty("visibility", "hidden");
-            frame.getElement().getStyle().setProperty("position", "fixed");
-        }
-        return frame;
     }
 
 }

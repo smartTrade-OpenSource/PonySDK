@@ -201,15 +201,6 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     /**
-     * Set the duration of the animated transition between tabs.
-     */
-    public void setAnimationDuration(final Duration duration) {
-        if (Objects.equals(this.animationDuration, duration)) return;
-        this.animationDuration = duration;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
-    }
-
-    /**
      * Set whether or not transitions slide in vertically or horizontally.
      *
      * @param isVertical
@@ -226,6 +217,15 @@ public class PTabLayoutPanel extends PComplexPanel
 
     public Duration getAnimationDuration() {
         return animationDuration;
+    }
+
+    /**
+     * Set the duration of the animated transition between tabs.
+     */
+    public void setAnimationDuration(final Duration duration) {
+        if (Objects.equals(this.animationDuration, duration)) return;
+        this.animationDuration = duration;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }
 
 }

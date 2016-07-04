@@ -23,10 +23,9 @@
 
 package com.ponysdk.spring.client;
 
-import com.ponysdk.core.ui.basic.PHistory;
-
 import com.ponysdk.core.ui.activity.ActivityManager;
 import com.ponysdk.core.ui.activity.ActivityMapper;
+import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PRootLayoutPanel;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
 import com.ponysdk.core.ui.basic.PWindow;

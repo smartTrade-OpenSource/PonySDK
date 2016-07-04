@@ -41,13 +41,12 @@ import com.ponysdk.core.ui.basic.PWidget;
 public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     protected final SimpleListView view;
-    private PSelectionModel<D> setSelectionModel;
     protected final List<DataGridColumnDescriptor<D, ?>> columnDescriptors = new ArrayList<>();
-    private final Map<D, Integer> subListSizeByFather = new HashMap<>();
-
-    private int colCount = 0;
     protected final List<D> rows = new ArrayList<>();
+    private final Map<D, Integer> subListSizeByFather = new HashMap<>();
     protected int dataCount = 0;
+    private PSelectionModel<D> setSelectionModel;
+    private int colCount = 0;
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
@@ -163,9 +162,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
         return new Iterable<D>() {
 
-            private D next;
             private final Iterator<D> rowsIterator = rows.iterator();
-
+            private D next;
             private final Iterator<D> visibleItemIterator = new Iterator<D>() {
 
                 @Override

@@ -28,17 +28,12 @@ import java.util.List;
 
 public class Query {
 
-    public enum QueryMode {
-        PAGINATION, FULL_RESULT
-    }
-
+    private final List<Criterion> criteria = new ArrayList<>();
     private int pageSize = Integer.MAX_VALUE;
 
     private int pageNum = 0;
 
     private QueryMode queryMode = QueryMode.PAGINATION;
-
-    private final List<Criterion> criteria = new ArrayList<>();
 
     public Query() {
         super();
@@ -48,8 +43,16 @@ public class Query {
         return pageSize;
     }
 
+    public void setPageSize(final int pageSize) {
+        this.pageSize = pageSize;
+    }
+
     public int getPageNum() {
         return pageNum;
+    }
+
+    public void setPageNum(final int pageNum) {
+        this.pageNum = pageNum;
     }
 
     public void addCriterion(final Criterion criterion) {
@@ -77,19 +80,15 @@ public class Query {
         return null;
     }
 
-    public void setPageSize(final int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public void setPageNum(final int pageNum) {
-        this.pageNum = pageNum;
-    }
-
     public QueryMode getQueryMode() {
         return queryMode;
     }
 
     public void setQueryMode(final QueryMode queryMode) {
         this.queryMode = queryMode;
+    }
+
+    public enum QueryMode {
+        PAGINATION, FULL_RESULT
     }
 }

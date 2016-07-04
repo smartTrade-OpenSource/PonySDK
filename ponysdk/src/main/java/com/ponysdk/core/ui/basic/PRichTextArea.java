@@ -52,12 +52,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
     private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
-
-    private String html;
-
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
-
     private final Formatter formatter = new Formatter();
+    private String html;
 
     @Override
     protected WidgetType getWidgetType() {

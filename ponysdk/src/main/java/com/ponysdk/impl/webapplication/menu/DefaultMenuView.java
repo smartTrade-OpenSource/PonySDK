@@ -27,13 +27,10 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
 
-    private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<>();
-
     protected final Map<PTreeItem, MenuItem> itemsByTree = new LinkedHashMap<>();
     protected final Map<MenuItem, PTreeItem> treeByMenuItem = new LinkedHashMap<>();
-
     protected final PTree tree;
-
+    private final Map<String, PTreeItem> categoryByName = new LinkedHashMap<>();
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
 
     public DefaultMenuView() {

@@ -94,11 +94,6 @@ public class PFileUpload extends PWidget
         submitCompleteHandlers.add(handler);
     }
 
-    public void setName(final String name) {
-        this.name = name;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
-    }
-
     public void submit() {
         final StreamResource streamResource = new StreamResource();
         streamResource.embed(streamHandler, this);
@@ -106,6 +101,11 @@ public class PFileUpload extends PWidget
 
     public String getName() {
         return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
     }
 
     public void addStreamHandler(final StreamHandler streamHandler) {
@@ -125,6 +125,10 @@ public class PFileUpload extends PWidget
         return fileName;
     }
 
+    public void setFileName(final String fileName) {
+        this.fileName = fileName;
+    }
+
     @Override
     public void addChangeHandler(final PChangeHandler handler) {
         changeHandlers.add(handler);
@@ -133,10 +137,6 @@ public class PFileUpload extends PWidget
     @Override
     public Collection<PChangeHandler> getChangeHandlers() {
         return changeHandlers;
-    }
-
-    public void setFileName(final String fileName) {
-        this.fileName = fileName;
     }
 
     @Override

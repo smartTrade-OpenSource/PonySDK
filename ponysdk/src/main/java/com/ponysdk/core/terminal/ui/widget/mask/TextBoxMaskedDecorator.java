@@ -41,6 +41,186 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, KeyDownHandler {
 
+    private static final RegExp regExp = RegExp.compile("{{([A0]+)}}", "g");
+    private final InputValue value = new InputValue();
+    private final TextBox textBox;
+
+    public TextBoxMaskedDecorator(final TextBox textBox) {
+        this.textBox = textBox;
+        this.textBox.addKeyDownHandler(this);
+        this.textBox.addKeyPressHandler(this);
+        this.textBox.addFocusHandler(this);
+    }
+
+    public void setMask(final String mask, final boolean showMask, final char freeSymbol) {
+
+        final List<Flag> flags = new ArrayList<>();
+
+        int current = 0;
+        MatchResult matchResult = regExp.exec(mask);
+        while (matchResult != null) {
+            final String group = matchResult.getGroup(1);
+
+            // Fill forced
+            for (int i = current; i < matchResult.getIndex(); i++) {
+                final char c = mask.charAt(current);
+                flags.add(new Const(c, showMask, freeSymbol));
+                current++;
+            }
+
+            // start of group '{{'
+            current += 2;
+
+            for (int i = 0; i < group.length(); i++) {
+                if (Character.isDigit(group.charAt(i))) flags.add(new Digit(freeSymbol));
+                else flags.add(new Char(freeSymbol));
+                current++;
+            }
+
+            // end of group '}}'
+            current += 2;
+
+            matchResult = regExp.exec(mask);
+        }
+
+        // Fill forced
+        for (int i = current; i < mask.length(); i++) {
+            final char c = mask.charAt(current);
+            flags.add(new Const(c, showMask, freeSymbol));
+            current++;
+        }
+
+        value.init(flags);
+
+        final String currentText = getText();
+        for (int c = 0; c < currentText.length(); c++) {
+            final int insert = value.insert(c, currentText.charAt(c));
+            if (insert == -1) break;
+        }
+
+        final String text = value.getText();
+        setText(text);
+        setMaxLength(text.length());
+    }
+
+    @Override
+    public void onFocus(final FocusEvent event) {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                setInitialPosition();
+            }
+        });
+    }
+
+    protected void setInitialPosition() {
+        setText(value.getText());
+        setCursorPos(value.getInsertPosition());
+    }
+
+    private void refresh(final int newPosition) {
+        setText(value.getText());
+        setCursorPos(newPosition);
+    }
+
+    @Override
+    public void onKeyPress(final KeyPressEvent event) {
+
+        final int pos = getCursorPos();
+        if (getSelectionLength() > 0) clearSelection();
+
+        final int nextPos = value.insert(pos, event.getCharCode());
+        if (nextPos != -1) {
+            refresh(nextPos);
+        }
+
+        cancelKey();
+    }
+
+    @Override
+    public void onKeyDown(final KeyDownEvent event) {
+        final int pos = getCursorPos();
+        if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
+
+            if (getSelectionLength() > 0) {
+                clearSelection();
+                cancelKey();
+                return;
+            }
+
+            final int from = pos - 1;
+            final int to = from + 1;
+
+            int np = pos - 1;
+            if (np < 0) np = 0;
+
+            if (value.remove(from, to)) {
+                refresh(np);
+            } else {
+                setCursorPos(np);
+            }
+
+            cancelKey();
+        } else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
+
+            if (getSelectionLength() > 0) {
+                clearSelection();
+                cancelKey();
+                return;
+            }
+
+            final int to = pos + 1;
+
+            if (value.remove(pos, to)) {
+                refresh(pos);
+            } else {
+                setCursorPos(pos);
+            }
+
+            cancelKey();
+        }
+    }
+
+    private void clearSelection() {
+        final int from = getCursorPos();
+        final int to = from + getSelectionLength();
+        if (value.remove(from, to)) {
+            refresh(from);
+        } else {
+            setCursorPos(from);
+        }
+    }
+
+    // Delegates
+    public void cancelKey() {
+        textBox.cancelKey();
+    }
+
+    public int getCursorPos() {
+        return textBox.getCursorPos();
+    }
+
+    public void setCursorPos(final int pos) {
+        textBox.setCursorPos(pos);
+    }
+
+    public String getText() {
+        return textBox.getText();
+    }
+
+    public void setText(final String text) {
+        textBox.setText(text);
+    }
+
+    public int getSelectionLength() {
+        return textBox.getSelectionLength();
+    }
+
+    public void setMaxLength(final int length) {
+        textBox.setMaxLength(length);
+    }
+
     public static abstract class Flag {
 
         protected boolean set = false;
@@ -289,187 +469,6 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
             shift(next);
         }
 
-    }
-
-    private static final RegExp regExp = RegExp.compile("{{([A0]+)}}", "g");
-
-    private final InputValue value = new InputValue();
-    private final TextBox textBox;
-
-    public TextBoxMaskedDecorator(final TextBox textBox) {
-        this.textBox = textBox;
-        this.textBox.addKeyDownHandler(this);
-        this.textBox.addKeyPressHandler(this);
-        this.textBox.addFocusHandler(this);
-    }
-
-    public void setMask(final String mask, final boolean showMask, final char freeSymbol) {
-
-        final List<Flag> flags = new ArrayList<>();
-
-        int current = 0;
-        MatchResult matchResult = regExp.exec(mask);
-        while (matchResult != null) {
-            final String group = matchResult.getGroup(1);
-
-            // Fill forced
-            for (int i = current; i < matchResult.getIndex(); i++) {
-                final char c = mask.charAt(current);
-                flags.add(new Const(c, showMask, freeSymbol));
-                current++;
-            }
-
-            // start of group '{{'
-            current += 2;
-
-            for (int i = 0; i < group.length(); i++) {
-                if (Character.isDigit(group.charAt(i))) flags.add(new Digit(freeSymbol));
-                else flags.add(new Char(freeSymbol));
-                current++;
-            }
-
-            // end of group '}}'
-            current += 2;
-
-            matchResult = regExp.exec(mask);
-        }
-
-        // Fill forced
-        for (int i = current; i < mask.length(); i++) {
-            final char c = mask.charAt(current);
-            flags.add(new Const(c, showMask, freeSymbol));
-            current++;
-        }
-
-        value.init(flags);
-
-        final String currentText = getText();
-        for (int c = 0; c < currentText.length(); c++) {
-            final int insert = value.insert(c, currentText.charAt(c));
-            if (insert == -1) break;
-        }
-
-        final String text = value.getText();
-        setText(text);
-        setMaxLength(text.length());
-    }
-
-    @Override
-    public void onFocus(final FocusEvent event) {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                setInitialPosition();
-            }
-        });
-    }
-
-    protected void setInitialPosition() {
-        setText(value.getText());
-        setCursorPos(value.getInsertPosition());
-    }
-
-    private void refresh(final int newPosition) {
-        setText(value.getText());
-        setCursorPos(newPosition);
-    }
-
-    @Override
-    public void onKeyPress(final KeyPressEvent event) {
-
-        final int pos = getCursorPos();
-        if (getSelectionLength() > 0) clearSelection();
-
-        final int nextPos = value.insert(pos, event.getCharCode());
-        if (nextPos != -1) {
-            refresh(nextPos);
-        }
-
-        cancelKey();
-    }
-
-    @Override
-    public void onKeyDown(final KeyDownEvent event) {
-        final int pos = getCursorPos();
-        if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
-
-            if (getSelectionLength() > 0) {
-                clearSelection();
-                cancelKey();
-                return;
-            }
-
-            final int from = pos - 1;
-            final int to = from + 1;
-
-            int np = pos - 1;
-            if (np < 0) np = 0;
-
-            if (value.remove(from, to)) {
-                refresh(np);
-            } else {
-                setCursorPos(np);
-            }
-
-            cancelKey();
-        } else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
-
-            if (getSelectionLength() > 0) {
-                clearSelection();
-                cancelKey();
-                return;
-            }
-
-            final int to = pos + 1;
-
-            if (value.remove(pos, to)) {
-                refresh(pos);
-            } else {
-                setCursorPos(pos);
-            }
-
-            cancelKey();
-        }
-    }
-
-    private void clearSelection() {
-        final int from = getCursorPos();
-        final int to = from + getSelectionLength();
-        if (value.remove(from, to)) {
-            refresh(from);
-        } else {
-            setCursorPos(from);
-        }
-    }
-
-    // Delegates
-    public void cancelKey() {
-        textBox.cancelKey();
-    }
-
-    public int getCursorPos() {
-        return textBox.getCursorPos();
-    }
-
-    public String getText() {
-        return textBox.getText();
-    }
-
-    public int getSelectionLength() {
-        return textBox.getSelectionLength();
-    }
-
-    public void setCursorPos(final int pos) {
-        textBox.setCursorPos(pos);
-    }
-
-    public void setText(final String text) {
-        textBox.setText(text);
-    }
-
-    public void setMaxLength(final int length) {
-        textBox.setMaxLength(length);
     }
 
 }

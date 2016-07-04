@@ -52,13 +52,10 @@ public class ComplexHeaderCellRenderer
 
     protected final FormField<?, ? extends IsPWidget> formField;
     protected final String key;
-
+    protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<>();
     protected PGrid panel;
     protected PLabel caption;
-
     protected SortingType sortingType = SortingType.NONE;
-
-    protected final ListenerCollection<FilterListener> filterListeners = new ListenerCollection<>();
 
     public ComplexHeaderCellRenderer(final String caption, final FormField<?, ? extends IsPWidget> formField, final String key) {
         this(caption, formField, key, null);

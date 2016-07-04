@@ -50,6 +50,16 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int month = -1;
     private int day = -1;
 
+    private static String dateToString(final Collection<Date> dates) {
+        final StringBuilder asString = new StringBuilder();
+        final Iterator<Date> it = dates.iterator();
+        while (it.hasNext()) {
+            asString.append(String.valueOf(it.next().getTime()));
+            if (it.hasNext()) asString.append(PTDatePicker.DATE_SEPARATOR);
+        }
+        return asString.toString();
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.DATEPICKER;
@@ -162,16 +172,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
             writer.writeModel(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
             writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
         });
-    }
-
-    private static String dateToString(final Collection<Date> dates) {
-        final StringBuilder asString = new StringBuilder();
-        final Iterator<Date> it = dates.iterator();
-        while (it.hasNext()) {
-            asString.append(String.valueOf(it.next().getTime()));
-            if (it.hasNext()) asString.append(PTDatePicker.DATE_SEPARATOR);
-        }
-        return asString.toString();
     }
 
     public int getMonth() {

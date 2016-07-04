@@ -32,29 +32,42 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
         init: function () {
         },
 
+
+        tag: function (value) {
+            console.log(value.id);
+            console.log(value.oldTag);
+            console.log(value.newTag);
+
+            //item.setAttribute('data-value',value.tag)
+
+            this.jqelement[0].selectize.removeItem(value.oldTag)
+            this.jqelement[0].selectize.createItem(value.newTag)
+        },
+
         text: function (value) {
-             var that = this;
-        
-        
-             this.jqelement.selectize({
+            var that = this;
+
+
+            this.jqelement.selectize({
                 plugins: ['remove_button'],
                 delimiter: ',',
                 persist: false,
-                create: function(input) {
+                create: function (input) {
                     return {
                         value: input,
                         text: input
                     }
                 },
                 onItemAdd: function (value, $item) {
-                   var itemID = $item[0].getAttribute("id"); 
-                   
-                   if(itemID == null){
+                    var itemID = $item[0].getAttribute("id");
+
+                    if (itemID == null) {
                         itemID = 'item' + Date.now();
-                   }
-                
-                   pony.sendDataToServer(that.id, {
-                        id : itemID,
+                        $item[0].setAttribute("id",itemID);
+                    }
+
+                    pony.sendDataToServer(that.id, {
+                        id: itemID,
                         tag: value
                     });
                 }

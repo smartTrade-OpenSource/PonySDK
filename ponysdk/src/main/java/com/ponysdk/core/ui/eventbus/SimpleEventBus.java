@@ -23,22 +23,11 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
+import com.ponysdk.core.ui.eventbus.Event.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
+import java.util.*;
 
 public class SimpleEventBus implements EventBus {
 
@@ -47,12 +36,9 @@ public class SimpleEventBus implements EventBus {
     private final Map<Type<?>, Map<Object, Set<?>>> map = new HashMap<>();
 
     private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
-
-    private boolean firing = false;
-
     private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
-
     private final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<>();
+    private boolean firing = false;
 
     @Override
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
@@ -178,12 +164,12 @@ public class SimpleEventBus implements EventBus {
         pendingHandlerRegistration.add(context);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void doAddNow(final Type type, final Object source, final Object handler) {
         ensureHandlerSet(type, source).add(handler);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 
@@ -298,7 +284,7 @@ public class SimpleEventBus implements EventBus {
         }
     }
 
-    class HandlerContext<H> {
+    static class HandlerContext<H> {
 
         boolean add;
 
@@ -307,40 +293,20 @@ public class SimpleEventBus implements EventBus {
         H handler;
 
         @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + getOuterType().hashCode();
-            result = prime * result + ((handler == null) ? 0 : handler.hashCode());
-            result = prime * result + ((source == null) ? 0 : source.hashCode());
-            result = prime * result + ((type == null) ? 0 : type.hashCode());
-            return result;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            HandlerContext<?> that = (HandlerContext<?>) o;
+            return add == that.add &&
+                    Objects.equals(type, that.type) &&
+                    Objects.equals(source, that.source) &&
+                    Objects.equals(handler, that.handler);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            final HandlerContext<H> other = (HandlerContext<H>) obj;
-            if (!getOuterType().equals(other.getOuterType())) return false;
-            if (handler == null) {
-                if (other.handler != null) return false;
-            } else if (!handler.equals(other.handler)) return false;
-            if (source == null) {
-                if (other.source != null) return false;
-            } else if (!source.equals(other.source)) return false;
-            if (type == null) {
-                if (other.type != null) return false;
-            } else if (!type.equals(other.type)) return false;
-            return true;
+        public int hashCode() {
+            return Objects.hash(add, type, source, handler);
         }
-
-        private SimpleEventBus getOuterType() {
-            return SimpleEventBus.this;
-        }
-
     }
 
 }

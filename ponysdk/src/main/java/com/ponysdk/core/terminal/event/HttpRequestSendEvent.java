@@ -28,11 +28,6 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class HttpRequestSendEvent extends GwtEvent<HttpRequestSendEvent.Handler> {
 
-    public interface Handler extends EventHandler {
-
-        void onHttpRequestSend(HttpRequestSendEvent event);
-    }
-
     public static final Type<Handler> TYPE = new Type<>();
 
     public HttpRequestSendEvent() {}
@@ -45,6 +40,11 @@ public class HttpRequestSendEvent extends GwtEvent<HttpRequestSendEvent.Handler>
     @Override
     protected void dispatch(final Handler handler) {
         handler.onHttpRequestSend(this);
+    }
+
+    public interface Handler extends EventHandler {
+
+        void onHttpRequestSend(HttpRequestSendEvent event);
     }
 
 }

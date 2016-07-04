@@ -33,12 +33,6 @@ public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
     public static final Type<PTerminalEvent.Handler> TYPE = new Type<>();
     private final JsonObject jsonObject;
 
-    @FunctionalInterface
-    public interface Handler extends EventHandler {
-
-        void onTerminalEvent(PTerminalEvent event);
-    }
-
     public PTerminalEvent(final Object sourceComponent, final JsonObject jsonObject) {
         super(sourceComponent);
         this.jsonObject = jsonObject;
@@ -56,6 +50,12 @@ public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
 
     public JsonObject getJsonObject() {
         return jsonObject;
+    }
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onTerminalEvent(PTerminalEvent event);
     }
 
 }

@@ -43,17 +43,6 @@ public class CommunicationSanityChecker {
     private static final int MAX_THREAD_CHECKER = Integer
             .parseInt(System.getProperty("communication.sanity.checker.thread.count",
                     String.valueOf(Runtime.getRuntime().availableProcessors())));
-
-    private final UIContext uiContext;
-
-    private long heartBeatPeriod;
-    private long lastReceivedTime;
-    private RunnableScheduledFuture<?> sanityChecker;
-    private CommunicationState currentState;
-    private long suspectTime = -1;
-
-    protected final AtomicBoolean started = new AtomicBoolean(false);
-
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
             new ThreadFactory() {
 
@@ -67,12 +56,13 @@ public class CommunicationSanityChecker {
                     return t;
                 }
             });
-
-    protected enum CommunicationState {
-        OK,
-        SUSPECT,
-        KO
-    }
+    protected final AtomicBoolean started = new AtomicBoolean(false);
+    private final UIContext uiContext;
+    private long heartBeatPeriod;
+    private long lastReceivedTime;
+    private RunnableScheduledFuture<?> sanityChecker;
+    private CommunicationState currentState;
+    private long suspectTime = -1;
 
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
@@ -163,6 +153,12 @@ public class CommunicationSanityChecker {
         }
 
         // uiContext.sendHeartBeat();
+    }
+
+    protected enum CommunicationState {
+        OK,
+        SUSPECT,
+        KO
     }
 
 }

@@ -453,6 +453,10 @@ public enum PKeyCodes {
         this.code = code;
     }
 
+    public static PKeyCodes fromInt(final int code) {
+        return codesByKey.get(code);
+    }
+
     public boolean equals(final int code) {
         return this.code == code;
     }
@@ -463,9 +467,5 @@ public enum PKeyCodes {
 
     public String getCodeToString() {
         return this.code + "";
-    }
-
-    public static PKeyCodes fromInt(final int code) {
-        return codesByKey.get(code);
     }
 }

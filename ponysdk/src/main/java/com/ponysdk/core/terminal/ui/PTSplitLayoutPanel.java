@@ -84,11 +84,10 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     private class MySplitLayoutPanel extends SplitLayoutPanel {
 
-        SendResizeCommand command;
-
-        boolean resizeHandler = false;
         protected UIBuilder uiService = null;
         protected int objectId = -1;
+        SendResizeCommand command;
+        boolean resizeHandler = false;
 
         @Override
         public void onResize() {

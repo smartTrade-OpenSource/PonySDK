@@ -39,38 +39,9 @@ import com.ponysdk.core.ui.basic.event.HasPWidgets;
  */
 public class PWidgetCollection implements Iterable<PWidget> {
 
-    private class WidgetIterator implements Iterator<PWidget> {
-
-        private int index = -1;
-
-        @Override
-        public boolean hasNext() {
-            return index < (size - 1);
-        }
-
-        @Override
-        public PWidget next() {
-            if (index >= size) {
-                throw new NoSuchElementException();
-            }
-            return array[++index];
-        }
-
-        @Override
-        public void remove() {
-            if ((index < 0) || (index >= size)) {
-                throw new IllegalStateException();
-            }
-            parent.remove(array[index--]);
-        }
-    }
-
     private static final int INITIAL_SIZE = 4;
-
-    private PWidget[] array;
-
     private final HasPWidgets parent;
-
+    private PWidget[] array;
     private int size;
 
     public PWidgetCollection(final HasPWidgets parent) {
@@ -156,5 +127,31 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
     public int size() {
         return size;
+    }
+
+    private class WidgetIterator implements Iterator<PWidget> {
+
+        private int index = -1;
+
+        @Override
+        public boolean hasNext() {
+            return index < (size - 1);
+        }
+
+        @Override
+        public PWidget next() {
+            if (index >= size) {
+                throw new NoSuchElementException();
+            }
+            return array[++index];
+        }
+
+        @Override
+        public void remove() {
+            if ((index < 0) || (index >= size)) {
+                throw new IllegalStateException();
+            }
+            parent.remove(array[index--]);
+        }
     }
 }

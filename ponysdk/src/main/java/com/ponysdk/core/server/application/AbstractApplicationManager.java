@@ -47,6 +47,13 @@ public abstract class AbstractApplicationManager {
         log.info(options.toString());
     }
 
+    private static void process(final UIContext uiContext, final JsonArray applicationInstructions) {
+        for (int i = 0; i < applicationInstructions.size(); i++) {
+            final JsonObject item = applicationInstructions.getJsonObject(i);
+            uiContext.fireClientData(item);
+        }
+    }
+
     public void startApplication(final TxnContext context) throws Exception {
         final UIContext uiContext = new UIContext(context);
 
@@ -95,13 +102,6 @@ public abstract class AbstractApplicationManager {
                 throw new Exception("Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
 
             uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
-        }
-    }
-
-    private static void process(final UIContext uiContext, final JsonArray applicationInstructions) {
-        for (int i = 0; i < applicationInstructions.size(); i++) {
-            final JsonObject item = applicationInstructions.getJsonObject(i);
-            uiContext.fireClientData(item);
         }
     }
 

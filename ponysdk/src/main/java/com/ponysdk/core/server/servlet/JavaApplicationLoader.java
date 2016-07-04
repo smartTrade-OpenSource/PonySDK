@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.servlet;
 
-import javax.servlet.ServletException;
-
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
+
+import javax.servlet.ServletException;
 
 public class JavaApplicationLoader extends AbstractApplicationLoader {
 

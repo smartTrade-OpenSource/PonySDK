@@ -61,6 +61,11 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
+    public void setWidget(final IsPWidget w) {
+        setWidget(w.asWidget());
+    }
+
+    @Override
     public boolean remove(final PWidget w) {
         // Validate.
         if (widget == null || widget != w) {
@@ -105,11 +110,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
             w.saveAdd(w.getID(), ID);
             adopt(w);
         }
-    }
-
-    @Override
-    public void setWidget(final IsPWidget w) {
-        setWidget(w.asWidget());
     }
 
     @Override

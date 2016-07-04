@@ -77,9 +77,8 @@ import com.ponysdk.core.ui.basic.event.*;
 public class PSuggestBox extends PWidget
         implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion>, HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
 
-    private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
-
     private final PSuggestOracle suggestOracle;
+    private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
     private PTextBox textBox;
 
     private int limit;
@@ -151,21 +150,21 @@ public class PSuggestBox extends PWidget
         return textBox;
     }
 
+    public int getLimit() {
+        return limit;
+    }
+
     public void setLimit(final int limit) {
         this.limit = limit;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.LIMIT, limit));
     }
 
-    public void setText(final String text) {
-        textBox.setText(text);
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
     public String getText() {
         return textBox.getText();
+    }
+
+    public void setText(final String text) {
+        textBox.setText(text);
     }
 
     @Override

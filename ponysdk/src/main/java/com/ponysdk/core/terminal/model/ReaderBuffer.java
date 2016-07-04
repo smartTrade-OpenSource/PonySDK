@@ -43,14 +43,15 @@ public class ReaderBuffer {
     private static final byte TRUE = 1;
 
     private final ArrayBuffer message;
-    private int position;
-
     private final Window window;
+    private int position;
 
     public ReaderBuffer(final ArrayBuffer message) {
         this.message = message;
         this.window = Browser.getWindow();
     }
+
+    private static native String fromCharCode(ArrayBuffer buf) /*-{return $wnd.decode(buf);}-*/;
 
     public int getIndex() {
         return position;
@@ -161,8 +162,6 @@ public class ReaderBuffer {
             return null;
         }
     }
-
-    private static native String fromCharCode(ArrayBuffer buf) /*-{return $wnd.decode(buf);}-*/;
 
     public void rewind(final BinaryModel binaryModel) {
         position -= binaryModel.getSize();

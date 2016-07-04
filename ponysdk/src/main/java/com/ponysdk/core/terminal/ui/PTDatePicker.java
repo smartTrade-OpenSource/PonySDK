@@ -44,6 +44,14 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
     private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
 
+    private static Date asDate(final String timestamp) {
+        return new Date(Long.parseLong(timestamp));
+    }
+
+    private static Date asDate(final long timestamp) {
+        return timestamp != -1 ? new Date(timestamp) : null;
+    }
+
     @Override
     protected DatePicker createUIObject() {
         return new DatePicker();
@@ -139,14 +147,6 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             return true;
         }
         return super.update(buffer, binaryModel);
-    }
-
-    private static Date asDate(final String timestamp) {
-        return new Date(Long.parseLong(timestamp));
-    }
-
-    private static Date asDate(final long timestamp) {
-        return timestamp != -1 ? new Date(timestamp) : null;
     }
 
 }

@@ -43,20 +43,20 @@ public class Result<T> implements Serializable {
         this.data = data;
     }
 
-    public void setData(final T data) {
-        this.data = data;
-    }
-
     public T getData() {
         return data;
     }
 
-    public void setFullSize(final int fullSize) {
-        this.fullSize = fullSize;
+    public void setData(final T data) {
+        this.data = data;
     }
 
     public int getFullSize() {
         return fullSize;
+    }
+
+    public void setFullSize(final int fullSize) {
+        this.fullSize = fullSize;
     }
 
     public Duration getExecutionDuration() {

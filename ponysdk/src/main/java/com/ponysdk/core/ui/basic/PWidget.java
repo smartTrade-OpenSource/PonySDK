@@ -55,20 +55,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private static final String HUNDRED_PERCENT = "100%";
 
     protected Object data;
-
+    boolean visible = true;
     private IsPWidget parent;
-
     private Set<String> styleNames;
     private Set<PEventType> preventEvents;
     private Set<PEventType> stopEvents;
-
     private EventBus domHandler;
-
     private Map<String, String> styleProperties;
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
-
-    boolean visible = true;
     private String title;
     private String width;
     private String height;
@@ -112,42 +107,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return elementAttributes;
     }
 
-    public void setVisible(final boolean visible) {
-        if (Objects.equals(this.visible, visible)) return;
-        this.visible = visible;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_VISIBLE, visible));
-    }
-
-    public void setWidth(final String width) {
-        if (Objects.equals(this.width, width)) return;
-        this.width = width;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_WIDTH, width));
-    }
-
-    public void setHeight(final String height) {
-        if (Objects.equals(this.height, height)) return;
-        this.height = height;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_HEIGHT, height));
-    }
-
-    public void setTitle(final String title) {
-        if (Objects.equals(this.title, title)) return;
-        this.title = title;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_TITLE, title));
-    }
-
-    public void setStyleName(final String styleName) {
-        if (Objects.equals(this.styleName, styleName)) return;
-        this.styleName = styleName;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_NAME, styleName));
-    }
-
-    public void setStylePrimaryName(final String stylePrimaryName) {
-        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
-        this.stylePrimaryName = stylePrimaryName;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName));
-    }
-
     public void ensureDebugId(final String debugID) {
         if (Objects.equals(this.debugID, debugID)) return;
         this.debugID = debugID;
@@ -158,20 +117,50 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return title;
     }
 
+    public void setTitle(final String title) {
+        if (Objects.equals(this.title, title)) return;
+        this.title = title;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_TITLE, title));
+    }
+
     public boolean isVisible() {
         return visible;
+    }
+
+    public void setVisible(final boolean visible) {
+        if (Objects.equals(this.visible, visible)) return;
+        this.visible = visible;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_VISIBLE, visible));
     }
 
     public String getWidth() {
         return width;
     }
 
+    public void setWidth(final String width) {
+        if (Objects.equals(this.width, width)) return;
+        this.width = width;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_WIDTH, width));
+    }
+
     public String getHeight() {
         return height;
     }
 
+    public void setHeight(final String height) {
+        if (Objects.equals(this.height, height)) return;
+        this.height = height;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_HEIGHT, height));
+    }
+
     public String getStyleName() {
         return styleName;
+    }
+
+    public void setStyleName(final String styleName) {
+        if (Objects.equals(this.styleName, styleName)) return;
+        this.styleName = styleName;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_NAME, styleName));
     }
 
     public String getDebugID() {
@@ -180,6 +169,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public String getStylePrimaryName() {
         return stylePrimaryName;
+    }
+
+    public void setStylePrimaryName(final String stylePrimaryName) {
+        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
+        this.stylePrimaryName = stylePrimaryName;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName));
     }
 
     public IsPWidget getParent() {

@@ -28,13 +28,12 @@ import com.ponysdk.core.ui.eventbus.Event;
 public class PSelectionEvent<T> extends Event<PSelectionHandler<T>> {
 
     public static final Type<PSelectionHandler<?>> TYPE = new Type<>();
+    private T selectedItem;
 
     public PSelectionEvent(final Object source, final T selectedItem) {
         super(source);
         this.selectedItem = selectedItem;
     }
-
-    private T selectedItem;
 
     public T getSelectedItem() {
         return selectedItem;

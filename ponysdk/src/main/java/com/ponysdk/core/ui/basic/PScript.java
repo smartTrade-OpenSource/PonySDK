@@ -41,21 +41,10 @@ import com.ponysdk.core.server.application.UIContext;
 public class PScript extends PObject {
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
-
+    private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
     private long executionID = 0;
 
-    private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
-
     private PScript() {
-    }
-
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-    }
-
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.SCRIPT;
     }
 
     private static PScript get(final int windowID) {
@@ -104,6 +93,15 @@ public class PScript extends PObject {
 
     public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
         get(window.getID()).executeScript(js, callback, period);
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+    }
+
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.SCRIPT;
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {

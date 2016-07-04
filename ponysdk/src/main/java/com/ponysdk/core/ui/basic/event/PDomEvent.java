@@ -29,6 +29,10 @@ import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public abstract class PDomEvent<T extends EventHandler> extends Event<T> {
 
+    public PDomEvent(Object sourceComponent) {
+        super(sourceComponent);
+    }
+
     public static class Type<H extends EventHandler> extends Event.Type<H> {
 
         private final DomHandlerType domHandlerType;
@@ -42,10 +46,6 @@ public abstract class PDomEvent<T extends EventHandler> extends Event<T> {
             return domHandlerType;
         }
 
-    }
-
-    public PDomEvent(Object sourceComponent) {
-        super(sourceComponent);
     }
 
 }

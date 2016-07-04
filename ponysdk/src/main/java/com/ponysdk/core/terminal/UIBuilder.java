@@ -23,13 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -46,18 +39,8 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -70,37 +53,34 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.PTCookies;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTStreamResource;
-import com.ponysdk.core.terminal.ui.PTWindow;
-import com.ponysdk.core.terminal.ui.PTWindowManager;
+import com.ponysdk.core.terminal.ui.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
     private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private static final EventBus rootEventBus = new SimpleEventBus();
-
+    public static int sessionID;
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
-
+    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
     private int numberOfrequestInProgress = 0;
-
     private boolean pendingClose;
-
     private RequestBuilder requestBuilder;
-
-    public static int sessionID;
-
     private CommunicationErrorHandler communicationErrorHandler;
-    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     public UIBuilder() {
         History.addValueChangeHandler(this);

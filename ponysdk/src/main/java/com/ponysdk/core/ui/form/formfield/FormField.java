@@ -39,13 +39,10 @@ import com.ponysdk.core.ui.list.Validable;
  */
 public abstract class FormField<T, W extends IsPWidget> implements IsPWidget, Validable, Resetable {
 
-    private final Set<FormFieldListener> listeners = new HashSet<>();
-
-    private FieldValidator validator;
-
-    protected DataConverter<String, T> dataProvider;
-
     protected final W widget;
+    private final Set<FormFieldListener> listeners = new HashSet<>();
+    protected DataConverter<String, T> dataProvider;
+    private FieldValidator validator;
 
     public FormField(final W widget, final DataConverter<String, T> dataProvider) {
         this.widget = widget;

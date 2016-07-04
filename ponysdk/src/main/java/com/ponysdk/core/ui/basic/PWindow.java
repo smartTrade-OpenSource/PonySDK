@@ -45,16 +45,11 @@ public class PWindow extends PObject {
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
-
-    private String url;
-
-    private String name;
-
-    private String features;
-
-    private boolean opened = false;
-
     private final Queue<Runnable> stackedInstructions = new LinkedList<>();
+    private String url;
+    private String name;
+    private String features;
+    private boolean opened = false;
 
     PWindow() {
         initialized = true;
@@ -68,6 +63,30 @@ public class PWindow extends PObject {
         this.features = features;
 
         init();
+    }
+
+    public static void initialize() {
+        final UIContext uiContext = UIContext.get();
+        PWindow mainWindow = uiContext.getAttribute(PWindow.class.getCanonicalName());
+        if (mainWindow == null) {
+            mainWindow = new PWindow() {
+
+                @Override
+                public boolean isOpened() {
+                    return true;
+                }
+
+                @Override
+                public void close() {
+                }
+
+            };
+            uiContext.setAttribute(PWindow.class.getCanonicalName(), mainWindow);
+        }
+    }
+
+    public static PWindow getMain(){
+        return UIContext.get().getAttribute(PWindow.class.getCanonicalName());
     }
 
     @Override
@@ -148,28 +167,8 @@ public class PWindow extends PObject {
         getPRootPanel().add(widget);
     }
 
-    public static void initialize() {
-        final UIContext uiContext = UIContext.get();
-        PWindow mainWindow = uiContext.getAttribute(PWindow.class.getCanonicalName());
-        if (mainWindow == null) {
-            mainWindow = new PWindow() {
-
-                @Override
-                public boolean isOpened() {
-                    return true;
-                }
-
-                @Override
-                public void close() {
-                }
-
-            };
-            uiContext.setAttribute(PWindow.class.getCanonicalName(), mainWindow);
-        }
-    }
-
-    public static PWindow getMain(){
-        return UIContext.get().getAttribute(PWindow.class.getCanonicalName());
+    public boolean isOpened() {
+        return opened;
     }
 
     public static class TargetAttribut {
@@ -178,10 +177,6 @@ public class PWindow extends PObject {
         static final String PARENT = "_parent";
         static final String SELF = "_self";
         static final String TOP = "_top";
-    }
-
-    public boolean isOpened() {
-        return opened;
     }
 
 }

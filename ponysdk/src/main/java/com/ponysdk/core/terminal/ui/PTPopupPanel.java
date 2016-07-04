@@ -50,13 +50,10 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
-    private boolean dragging;
-
-    private int dragStartX;
-
-    private int dragStartY;
-
     boolean autoHide;
+    private boolean dragging;
+    private int dragStartX;
+    private int dragStartY;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {

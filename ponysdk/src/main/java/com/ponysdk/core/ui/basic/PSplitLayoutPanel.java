@@ -63,16 +63,8 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private static class SplitInfoHolder {
-
-        private int minSize = -1;
-        private int snapClosedSize = -1;
-        private boolean toggleDisplayAllowed = false;
-    }
-
     private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<>();
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
-
     public PSplitLayoutPanel() {
         super(PUnit.PX);
     }
@@ -227,5 +219,12 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public boolean isToggleDisplayAllowed(final PWidget w) {
         final SplitInfoHolder info = getWidgetInfo(w);
         return info != null && info.toggleDisplayAllowed;
+    }
+
+    private static class SplitInfoHolder {
+
+        private int minSize = -1;
+        private int snapClosedSize = -1;
+        private boolean toggleDisplayAllowed = false;
     }
 }

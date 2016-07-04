@@ -42,17 +42,13 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
-    private boolean enabled = true;
-
     private final String leftCaption;
     private final String rightCaption;
-
+    private final List<PChangeHandler> handlers = new ArrayList<>();
+    private boolean enabled = true;
     private PListBox leftListBox;
     private PListBox rightListBox;
-
     private PButton switchButton;
-
-    private final List<PChangeHandler> handlers = new ArrayList<>();
 
     public PTwinListBox() {
         this(null, null, false);
@@ -148,15 +144,15 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
         return rightListBox;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
         rightListBox.setEnabled(enabled);
         leftListBox.setEnabled(enabled);
         switchButton.setEnabled(enabled);
-    }
-
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

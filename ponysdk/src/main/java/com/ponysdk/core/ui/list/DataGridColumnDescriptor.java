@@ -41,28 +41,28 @@ public class DataGridColumnDescriptor<D, V> {
     protected CellRenderer<V, ? extends IsPWidget> subCellRenderer;
     protected ValueProvider<D, V> valueProvider;
 
-    public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
-        this.headerCellRenderer = headerCellRender;
-    }
-
     public HeaderCellRenderer getHeaderCellRenderer() {
         return headerCellRenderer;
     }
 
-    public void setCellRenderer(final CellRenderer<V, ? extends IsPWidget> cellRenderer) {
-        this.cellRenderer = cellRenderer;
+    public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
+        this.headerCellRenderer = headerCellRender;
     }
 
     public CellRenderer<V, ? extends IsPWidget> getCellRenderer() {
         return cellRenderer;
     }
 
-    public void setValueProvider(final ValueProvider<D, V> valueProvider) {
-        this.valueProvider = valueProvider;
+    public void setCellRenderer(final CellRenderer<V, ? extends IsPWidget> cellRenderer) {
+        this.cellRenderer = cellRenderer;
     }
 
     public ValueProvider<D, V> getValueProvider() {
         return valueProvider;
+    }
+
+    public void setValueProvider(final ValueProvider<D, V> valueProvider) {
+        this.valueProvider = valueProvider;
     }
 
     public CellRenderer<V, ? extends IsPWidget> getSubCellRenderer() {

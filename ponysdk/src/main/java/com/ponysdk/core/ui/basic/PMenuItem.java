@@ -131,17 +131,6 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
     }
 
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
-    }
-
-    private void setSubMenu(final PMenuBar subMenu) {
-        this.subMenu = subMenu;
-        subMenu.saveAdd(subMenu.getID(), ID);
-        subMenu.attach(windowID);
-    }
-
     public void setCommand(final Runnable cmd) {
         this.cmd = cmd;
         saveAddHandler(HandlerModel.HANDLER_COMMAND);
@@ -160,12 +149,23 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         return subMenu;
     }
 
+    private void setSubMenu(final PMenuBar subMenu) {
+        this.subMenu = subMenu;
+        subMenu.saveAdd(subMenu.getID(), ID);
+        subMenu.attach(windowID);
+    }
+
     public Runnable getCmd() {
         return cmd;
     }
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
     }
 
 }

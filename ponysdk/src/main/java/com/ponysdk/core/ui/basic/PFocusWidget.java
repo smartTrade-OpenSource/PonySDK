@@ -119,24 +119,6 @@ public abstract class PFocusWidget extends PWidget
         return getHandlerSet(PKeyUpEvent.TYPE, this);
     }
 
-    public void setEnabled(final boolean enabled) {
-        if (Objects.equals(this.enabled, enabled)) return;
-        this.enabled = enabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
-    }
-
-    public void setTabindex(final int tabindex) {
-        if (this.tabindex == tabindex) return;
-        this.tabindex = tabindex;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TABINDEX, tabindex));
-    }
-
-    public void setEnabledOnRequest(final boolean enabledOnRequest) {
-        if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
-        this.enabledOnRequest = enabledOnRequest;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
-    }
-
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
@@ -154,6 +136,12 @@ public abstract class PFocusWidget extends PWidget
         return enabled;
     }
 
+    public void setEnabled(final boolean enabled) {
+        if (Objects.equals(this.enabled, enabled)) return;
+        this.enabled = enabled;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
+    }
+
     public boolean isShowLoadingOnRequest() {
         return showLoadingOnRequest;
     }
@@ -162,12 +150,24 @@ public abstract class PFocusWidget extends PWidget
         return enabledOnRequest;
     }
 
+    public void setEnabledOnRequest(final boolean enabledOnRequest) {
+        if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
+        this.enabledOnRequest = enabledOnRequest;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
+    }
+
     public boolean isFocused() {
         return focused;
     }
 
     public int getTabindex() {
         return tabindex;
+    }
+
+    public void setTabindex(final int tabindex) {
+        if (this.tabindex == tabindex) return;
+        this.tabindex = tabindex;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TABINDEX, tabindex));
     }
 
     @Override

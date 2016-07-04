@@ -30,10 +30,7 @@ import java.util.Map;
 public enum ComparatorType {
     EQ("="), NE("!="), GT(">"), LT("<"), LE("<="), GE(">="), IN("IN"), LIKE("LIKE"), IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL");
 
-    private String name;
-
     private static final Map<ComparatorType, String> names = new HashMap<>();
-
     private static final Map<String, ComparatorType> comparatorTypeByName = new HashMap<>();
 
     static {
@@ -43,12 +40,10 @@ public enum ComparatorType {
         }
     }
 
+    private String name;
+
     ComparatorType(final String name) {
         this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public static Collection<String> getNames() {
@@ -57,6 +52,10 @@ public enum ComparatorType {
 
     public static ComparatorType fromName(final String name) {
         return comparatorTypeByName.get(name);
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

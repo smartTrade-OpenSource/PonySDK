@@ -25,12 +25,7 @@ package com.ponysdk.core.ui.eventbus;
 
 public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
 
-    public enum Level {
-        INFO, WARNING, ERROR
-    }
-
     private String businessMessage;
-
     private Level level = Level.INFO;
 
     public BusinessEvent(Object sourceComponent) {
@@ -51,6 +46,10 @@ public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
 
     public void setLevel(Level level) {
         this.level = level;
+    }
+
+    public enum Level {
+        INFO, WARNING, ERROR
     }
 
 }

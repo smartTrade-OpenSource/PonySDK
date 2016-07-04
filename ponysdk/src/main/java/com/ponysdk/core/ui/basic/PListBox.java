@@ -64,13 +64,9 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private final List<ListItem> items = new ArrayList<>();
 
     private final Set<Integer> selectedIndexes = new TreeSet<>();
-
-    protected int selectedIndex = -1;
-
-    private boolean isMultipleSelect;
-
     private final boolean containsEmptyItem;
-
+    protected int selectedIndex = -1;
+    private boolean isMultipleSelect;
     private int visibleItemCount;
 
     public PListBox() {
@@ -260,20 +256,28 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         });
     }
 
-    public void setSelectedIndex(final int index) {
-        setSelectedIndex(index, true);
-    }
-
     public int getSelectedIndex() {
         return selectedIndex;
+    }
+
+    public void setSelectedIndex(final int index) {
+        setSelectedIndex(index, true);
     }
 
     public String getSelectedItem() {
         return selectedIndex >= 0 ? items.get(selectedIndex).label : null;
     }
 
+    public void setSelectedItem(final String item) {
+        setSelectedItem(item, true);
+    }
+
     public Object getSelectedValue() {
         return selectedIndex >= 0 ? items.get(selectedIndex).value : null;
+    }
+
+    public void setSelectedValue(final Object value) {
+        setSelectedValue(value, true);
     }
 
     @Override
@@ -306,14 +310,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
                 break;
             }
         }
-    }
-
-    public void setSelectedItem(final String item) {
-        setSelectedItem(item, true);
-    }
-
-    public void setSelectedValue(final Object value) {
-        setSelectedValue(value, true);
     }
 
     @Override
@@ -355,13 +351,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         return selectedIndexes.stream().map(index -> this.items.get(index).value).collect(Collectors.toList());
     }
 
+    public int getVisibleItemCount() {
+        return visibleItemCount;
+    }
+
     public void setVisibleItemCount(final int visibleItemCount) {
         this.visibleItemCount = visibleItemCount;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
-    }
-
-    public int getVisibleItemCount() {
-        return visibleItemCount;
     }
 
     public boolean isMultipleSelect() {

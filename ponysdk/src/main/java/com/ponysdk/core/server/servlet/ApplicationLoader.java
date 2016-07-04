@@ -34,8 +34,8 @@ public interface ApplicationLoader extends ServletContextListener {
 
     AbstractApplicationManager createApplicationManager();
 
-    void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
-
     ApplicationManagerOption getApplicationManagerOption();
+
+    void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
 
 }

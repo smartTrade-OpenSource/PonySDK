@@ -63,6 +63,26 @@ public class PWindowManager {
         get().unregisterWindow0(window);
     }
 
+    public static void addWindowListener(final RegisterWindowListener listener) {
+        get().addWindowListener0(listener);
+    }
+
+    public static PWindow getWindow(final int windowID) {
+        if (windowID == PWindow.EMPTY_WINDOW_ID) {
+            log.debug("Window ID is not already set, so no Window is associated");
+            return null;
+        } else {
+            final PWindow window = PWindowManager.get().windows.get(windowID);
+            if (window != null) {
+                log.debug("Window ID is set on window #" + windowID);
+                return window;
+            } else {
+                log.debug("Window ID is set on window #" + windowID + ", but no Window is already associated");
+                return null;
+            }
+        }
+    }
+
     private void registerWindow0(final PWindow window) {
         windows.put(window.getID(), window);
         listeners.forEach(listener -> listener.registered(window.getID()));
@@ -72,28 +92,8 @@ public class PWindowManager {
         windows.remove(window.getID());
     }
 
-    public static void addWindowListener(final RegisterWindowListener listener) {
-        get().addWindowListener0(listener);
-    }
-
     private void addWindowListener0(final RegisterWindowListener listener) {
         this.listeners.add(listener);
-    }
-
-    public static PWindow getWindow(final int windowID) {
-        if (windowID == PWindow.EMPTY_WINDOW_ID) {
-            log.error("Window ID is not already set, so no Window is associated");
-            return null;
-        } else {
-            final PWindow window = PWindowManager.get().windows.get(windowID);
-            if (window != null) {
-                log.debug("Window ID is set on window #" + windowID);
-                return window;
-            } else {
-                log.error("Window ID is set on window #" + windowID + ", but no Window is already associated");
-                return null;
-            }
-        }
     }
 
     public void closeAll() {

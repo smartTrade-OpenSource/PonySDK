@@ -23,12 +23,8 @@
 
 package com.ponysdk.impl.main;
 
-import java.net.InetAddress;
-import java.net.URL;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
-
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.*;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.Server;
@@ -43,12 +39,10 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
-import com.ponysdk.core.server.servlet.BootstrapServlet;
-import com.ponysdk.core.server.servlet.ServletContextFilter;
-import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
+import javax.servlet.DispatcherType;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.EnumSet;
 
 public class PonySDKServer {
 
@@ -76,7 +70,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -91,7 +85,7 @@ public class PonySDKServer {
 
         final GzipHandler gzip = new GzipHandler();
         final HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { context });
+        handlers.setHandlers(new Handler[]{context});
         gzip.setHandler(handlers);
 
         server.setHandler(gzip);

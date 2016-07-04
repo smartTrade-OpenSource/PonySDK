@@ -37,10 +37,8 @@ public class Pager<T> implements IsPWidget {
 
     protected final int pageSize;
     protected final int pagingWindow;
-
-    protected int currentPage = 0;
-
     protected final PagerView view;
+    protected int currentPage = 0;
 
     public Pager(final PagerView view) {
         this(view, 20);

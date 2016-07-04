@@ -58,28 +58,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     private static final long serialVersionUID = 1L;
     private static final int NUMBER_OF_BUFFERS = 50;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
-
-    private int maxIdleTime = 1000000;
-
-    private AbstractApplicationManager applicationManager;
-
     private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(NUMBER_OF_BUFFERS);
-
+    private int maxIdleTime = 1000000;
+    private AbstractApplicationManager applicationManager;
     private WebsocketMonitor monitor;
-
-    public class Buffer {
-
-        final ByteBuffer socketBuffer;
-
-        private Buffer() {
-            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-        }
-
-        public ByteBuffer getSocketBuffer() {
-            return socketBuffer;
-        }
-
-    }
 
     @Override
     public void init() throws ServletException {
@@ -109,13 +91,33 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.setCreator((req, resp) -> new WebSocket(req));
     }
 
+    public void setMaxIdleTime(final int maxIdleTime) {
+        this.maxIdleTime = maxIdleTime;
+    }
+
+    public void setWebsocketMonitor(final WebsocketMonitor monitor) {
+        this.monitor = monitor;
+    }
+
+    public static class Buffer {
+
+        final ByteBuffer socketBuffer;
+
+        private Buffer() {
+            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+        }
+
+        public ByteBuffer getSocketBuffer() {
+            return socketBuffer;
+        }
+
+    }
+
     public class WebSocket implements WebSocketListener {
 
-        private TxnContext context;
-
-        private Session session;
-
         private final PRequest request;
+        private TxnContext context;
+        private Session session;
 
         WebSocket(final ServletUpgradeRequest req) {
             log.info(req.getHeader("User-Agent"));
@@ -286,13 +288,5 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         final boolean isSessionOpen() {
             return session != null && session.isOpen();
         }
-    }
-
-    public void setMaxIdleTime(final int maxIdleTime) {
-        this.maxIdleTime = maxIdleTime;
-    }
-
-    public void setWebsocketMonitor(final WebsocketMonitor monitor) {
-        this.monitor = monitor;
     }
 }

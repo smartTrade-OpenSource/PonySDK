@@ -28,13 +28,12 @@ import com.ponysdk.core.ui.eventbus.Event;
 public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> {
 
     public static final Type<PBeforeSelectionHandler<?>> TYPE = new Type<>();
+    private T selectedItem;
 
     public PBeforeSelectionEvent(final Object source, final T selectedItem) {
         super(source);
         this.selectedItem = selectedItem;
     }
-
-    private T selectedItem;
 
     public T getSelectedItem() {
         return selectedItem;

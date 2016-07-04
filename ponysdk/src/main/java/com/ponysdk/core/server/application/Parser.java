@@ -53,6 +53,24 @@ public class Parser {
         this.socket = socket;
     }
 
+    private static ByteBuffer UTF8StringToByteBuffer(final String value) {
+        try {
+            return value != null ? ByteBuffer.wrap(value.getBytes(ENCODING_CHARSET)) : null;
+        } catch (final UnsupportedEncodingException e) {
+            log.error("Cannot convert string");
+        }
+
+        /*
+         * CharsetEncoder UTF8Encoder =
+         * Charset.forName(ENCODING_CHARSET).newEncoder(); try { return
+         * UTF8Encoder.encode(value != null ? CharBuffer.wrap(value) :
+         * CharBuffer.wrap("")); } catch (final CharacterCodingException e) {
+         * log.error("Cannot convert string"); }
+         */
+
+        return null;
+    }
+
     public void reset() {
         if (buffer != null) {
             socket.flush(buffer);
@@ -179,24 +197,6 @@ public class Parser {
         final ByteBuffer utf8StringBuffer = UTF8StringToByteBuffer(value);
         socketBuffer.putInt(utf8StringBuffer != null ? utf8StringBuffer.capacity() : 0);
         if (utf8StringBuffer != null) socketBuffer.put(utf8StringBuffer);
-    }
-
-    private static ByteBuffer UTF8StringToByteBuffer(final String value) {
-        try {
-            return value != null ? ByteBuffer.wrap(value.getBytes(ENCODING_CHARSET)) : null;
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot convert string");
-        }
-
-        /*
-         * CharsetEncoder UTF8Encoder =
-         * Charset.forName(ENCODING_CHARSET).newEncoder(); try { return
-         * UTF8Encoder.encode(value != null ? CharBuffer.wrap(value) :
-         * CharBuffer.wrap("")); } catch (final CharacterCodingException e) {
-         * log.error("Cannot convert string"); }
-         */
-
-        return null;
     }
 
 }

@@ -61,15 +61,6 @@ public class PTextBox extends PTextBoxBase {
     }
 
     /**
-     * Gets the number of visible characters in the text box.
-     *
-     * @return the number of visible characters
-     */
-    public int getVisibleLength() {
-        return visibleLength;
-    }
-
-    /**
      * Sets the maximum allowable length of the text box.
      *
      * @param length
@@ -78,6 +69,15 @@ public class PTextBox extends PTextBoxBase {
     public void setMaxLength(final int length) {
         this.maxLength = length;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.MAX_LENGTH, length));
+    }
+
+    /**
+     * Gets the number of visible characters in the text box.
+     *
+     * @return the number of visible characters
+     */
+    public int getVisibleLength() {
+        return visibleLength;
     }
 
     /**

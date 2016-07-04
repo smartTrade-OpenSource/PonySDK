@@ -43,14 +43,6 @@ public enum PUnit {
         this.value = unit;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public byte getByteValue() {
-        return (byte) ordinal();
-    }
-
     public static Unit getUnit(final PUnit u) {
         switch (u) {
             case PX:
@@ -73,6 +65,14 @@ public enum PUnit {
                 return Unit.PT;
         }
         return null;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public byte getByteValue() {
+        return (byte) ordinal();
     }
 
 }

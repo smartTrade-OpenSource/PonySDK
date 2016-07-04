@@ -99,9 +99,8 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
     // menuItem only
     private final List<PMenuSubElement> items = new ArrayList<>();
-
-    private boolean animationEnabled = false;
     private final boolean vertical;
+    private boolean animationEnabled = false;
 
     public PMenuBar() {
         this(false);

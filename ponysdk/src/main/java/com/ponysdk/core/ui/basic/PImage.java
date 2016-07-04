@@ -68,16 +68,11 @@ import com.ponysdk.core.ui.eventbus.StreamHandler;
 public class PImage extends PFocusWidget {
 
     private static final Logger log = LoggerFactory.getLogger(PImage.class);
-
-    private String url;
-
     private final int left;
-
     private final int top;
-
     private final int imageWidth;
-
     private final int imageHeight;
+    private String url;
 
     public PImage() {
         this((String) null);
@@ -120,13 +115,13 @@ public class PImage extends PFocusWidget {
         return WidgetType.IMAGE;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public void setUrl(final String url) {
         this.url = url;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.IMAGE_URL, url));
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public void setStream(final StreamHandler streamListener) {

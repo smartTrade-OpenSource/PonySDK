@@ -25,10 +25,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 				<value>script/fromcodepoint.js</value>
 				<value>script/UTF8.js</value>
 				<value>script/bootstrap.js</value>
-				<value>script/addon.js</value>
-				<value>script/sample.js</value>
+				<value>script/highcharts.js</value>
 				<value>script/selectize.js</value>
-<!--                 <value>script/highcharts.js</value> -->
+				<value>script/sample.js</value>
             </list>
         </property>
         <property name="style">

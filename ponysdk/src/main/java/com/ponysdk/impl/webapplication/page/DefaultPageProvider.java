@@ -56,6 +56,10 @@ public class DefaultPageProvider implements PageProvider {
         return allActivePageActivities.values();
     }
 
+    public void setPageActivities(final Collection<PageActivity> pageActivities) {
+        pageActivities.forEach(this::addPageActivity);
+    }
+
     private void initPagePermissions() {
         allActivePageActivities = new LinkedHashMap<>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
@@ -75,10 +79,6 @@ public class DefaultPageProvider implements PageProvider {
                 allPageActivitiesDeclared.put(category, pageActivity);
             }
         }
-    }
-
-    public void setPageActivities(final Collection<PageActivity> pageActivities) {
-        pageActivities.forEach(this::addPageActivity);
     }
 
 }

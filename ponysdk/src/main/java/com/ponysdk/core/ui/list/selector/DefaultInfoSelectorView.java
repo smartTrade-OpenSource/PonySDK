@@ -33,11 +33,10 @@ import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {
 
-    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
-
     final PLabel numberOfSelectedMessage = new PLabel();
     final PAnchor selectAllAnchor = new PAnchor();
     final PAnchor selectNoneAnchor = new PAnchor();
+    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
 
     public DefaultInfoSelectorView() {
         setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);

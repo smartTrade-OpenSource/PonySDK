@@ -48,6 +48,10 @@ public class Txn {
         return txn;
     }
 
+    public static ModelWriter getWriter() {
+        return get().getWriter0();
+    }
+
     public void begin(final TxnContext txnContext) {
         this.txnContext = txnContext;
     }
@@ -78,10 +82,6 @@ public class Txn {
             // throw new RuntimeException(msg);
             // throw new RuntimeException("TMP", e);
         }
-    }
-
-    public static ModelWriter getWriter() {
-        return get().getWriter0();
     }
 
     private ModelWriter getWriter0() {

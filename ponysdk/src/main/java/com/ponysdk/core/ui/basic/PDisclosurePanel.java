@@ -61,14 +61,12 @@ import com.ponysdk.core.ui.basic.event.POpenHandler;
  */
 public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation {
 
+    private final List<PCloseHandler> closeHandlers = new ArrayList<>();
+    private final List<POpenHandler> openHandlers = new ArrayList<>();
+    private final String headerText;
     private boolean animationEnabled = false;
     private PWidget content;
     private boolean isOpen;
-
-    private final List<PCloseHandler> closeHandlers = new ArrayList<>();
-    private final List<POpenHandler> openHandlers = new ArrayList<>();
-
-    private final String headerText;
 
     public PDisclosurePanel(final String headerText) {
         this.headerText = headerText;
@@ -108,6 +106,10 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         return WidgetType.DISCLOSURE_PANEL;
     }
 
+    public PWidget getContent() {
+        return content;
+    }
+
     public void setContent(final PWidget w) {
         // Validate
         if (w == content)
@@ -129,10 +131,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
             w.saveAdd(w.getID(), getID());
             adopt(w);
         }
-    }
-
-    public PWidget getContent() {
-        return content;
     }
 
     @Override
@@ -173,13 +171,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         child.setParent(this);
     }
 
-    public void setOpen(final boolean isOpen) {
-        if (this.isOpen != isOpen) {
-            this.isOpen = isOpen;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN_CLOSE, isOpen));
-        }
-    }
-
     public void addCloseHandler(final PCloseHandler handler) {
         closeHandlers.add(handler);
     }
@@ -190,6 +181,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     public boolean isOpen() {
         return isOpen;
+    }
+
+    public void setOpen(final boolean isOpen) {
+        if (this.isOpen != isOpen) {
+            this.isOpen = isOpen;
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN_CLOSE, isOpen));
+        }
     }
 
     @Override

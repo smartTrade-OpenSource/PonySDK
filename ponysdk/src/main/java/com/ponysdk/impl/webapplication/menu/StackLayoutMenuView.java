@@ -40,51 +40,14 @@ import java.util.Map;
 
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
-    private class Node {
-
-        private PWidget ui;
-        private boolean open;
-
-        private final String name;
-        private final Node parent;
-        private final List<Node> children;
-        private final int level;
-
-        public Node(final Node parent, final String name) {
-            this.parent = parent;
-            this.name = name;
-            this.children = new ArrayList<>();
-
-            if (parent != null) {
-                this.parent.children.add(this);
-                this.level = parent.level + 1;
-            } else {
-                this.level = 0;
-            }
-
-            this.open = (level < 2);
-        }
-
-        public Node getChild(final String name) {
-            for (final Node child : children) {
-                if (child.name.equals(name)) return child;
-            }
-            return null;
-        }
-
-    }
-
     private final Node root = new Node(null, "ROOT");
-
     private final PStackLayoutPanel layoutPanel;
     private final double headerWidth = 2;// em
     private final double paddingLeft = 16;// px
-
     private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<>();
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
     private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<>();
     private PAnchor selectedItem;
-
     public StackLayoutMenuView() {
         layoutPanel = new PStackLayoutPanel(PUnit.EM);
         setWidget(layoutPanel);
@@ -248,6 +211,39 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     @Override
     public Collection<PSelectionHandler<MenuItem>> getSelectionHandlers() {
         return selectionHandlers;
+    }
+
+    private class Node {
+
+        private final String name;
+        private final Node parent;
+        private final List<Node> children;
+        private final int level;
+        private PWidget ui;
+        private boolean open;
+
+        public Node(final Node parent, final String name) {
+            this.parent = parent;
+            this.name = name;
+            this.children = new ArrayList<>();
+
+            if (parent != null) {
+                this.parent.children.add(this);
+                this.level = parent.level + 1;
+            } else {
+                this.level = 0;
+            }
+
+            this.open = (level < 2);
+        }
+
+        public Node getChild(final String name) {
+            for (final Node child : children) {
+                if (child.name.equals(name)) return child;
+            }
+            return null;
+        }
+
     }
 
 }

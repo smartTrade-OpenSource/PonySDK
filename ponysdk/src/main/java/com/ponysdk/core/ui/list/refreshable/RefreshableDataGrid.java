@@ -23,19 +23,15 @@
 
 package com.ponysdk.core.ui.list.refreshable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Extends {@link DataGridActivity} Capable of moving columns and refreshing a
@@ -69,7 +65,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         throw new RuntimeException("Use removeByKey(key)");
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void setData(final K key, final D data) {
         Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) {
@@ -103,12 +99,11 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             rows.add(previousIndex, data);
             valueByKey.put(key, data);
 
-            for (final DataGridColumnDescriptor<D, ?> descriptor : columnDescriptors) {
-                final DataGridColumnDescriptor d = descriptor;
-                final Object value = d.getValueProvider().getValue(data);
-                d.getCellRenderer().update(value, map.get(d));
-                map.get(d).setData(data);
-                map.get(d).setValue(value);
+            for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
+                final Object value = descriptor.getValueProvider().getValue(data);
+                descriptor.getCellRenderer().update(value, map.get(descriptor));
+                map.get(descriptor).setData(data);
+                map.get(descriptor).setValue(value);
             }
         }
     }

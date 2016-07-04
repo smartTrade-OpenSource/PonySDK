@@ -47,18 +47,6 @@ public abstract class PCellPanel extends PComplexPanel {
         if (this.spacing != null) parser.parse(ServerToClientModel.SPACING, this.spacing);
     }
 
-    public void setBorderWidth(final Integer borderWidth) {
-        if (Objects.equals(this.borderWidth, borderWidth)) return;
-        this.borderWidth = borderWidth;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, borderWidth));
-    }
-
-    public void setSpacing(final Integer spacing) {
-        if (Objects.equals(this.spacing, spacing)) return;
-        this.spacing = spacing;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SPACING, spacing));
-    }
-
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {
         saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
@@ -91,8 +79,20 @@ public abstract class PCellPanel extends PComplexPanel {
         return borderWidth;
     }
 
+    public void setBorderWidth(final Integer borderWidth) {
+        if (Objects.equals(this.borderWidth, borderWidth)) return;
+        this.borderWidth = borderWidth;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, borderWidth));
+    }
+
     public Integer getSpacing() {
         return spacing;
+    }
+
+    public void setSpacing(final Integer spacing) {
+        if (Objects.equals(this.spacing, spacing)) return;
+        this.spacing = spacing;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SPACING, spacing));
     }
 
 }

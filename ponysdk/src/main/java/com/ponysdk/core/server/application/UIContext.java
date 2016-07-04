@@ -68,47 +68,28 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
 
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-
-    private int objectCounter = 1;
-
-    private int streamRequestCounter = 0;
-
     private final WeakHashMap weakReferences = new WeakHashMap();
-
     private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
-
-    private Map<String, Permission> permissions = new HashMap<>();
-
     private final PHistory history = new PHistory();
-
     private final EventBus rootEventBus = new RootEventBus();
-
     private final PCookies cookies = new PCookies();
-
     private final Application application;
-
     private final Map<String, Object> attributes = new HashMap<>();
-
     private final ReentrantLock lock = new ReentrantLock();
-
+    private final Map<Integer, JsonObject> incomingMessageQueue = new HashMap<>();
+    private final int ID;
+    private final CommunicationSanityChecker communicationSanityChecker;
+    private final List<UIContextListener> uiContextListeners = new ArrayList<>();
+    private final TxnContext context;
+    private final List<DataListener> listeners = new ArrayList<>();
+    private int objectCounter = 1;
+    private int streamRequestCounter = 0;
+    private Map<String, Permission> permissions = new HashMap<>();
     private int lastReceived = -1;
     private int nextSent = 0;
     private long lastSyncErrorTimestamp = 0;
-    private final Map<Integer, JsonObject> incomingMessageQueue = new HashMap<>();
-
-    private final int ID;
-
-    private final CommunicationSanityChecker communicationSanityChecker;
-
-    private final List<UIContextListener> uiContextListeners = new ArrayList<>();
-
     private TerminalDataReceiver terminalDataReceiver;
-
     private boolean living = true;
-
-    private final TxnContext context;
-
-    private final List<DataListener> listeners = new ArrayList<>();
 
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
@@ -120,6 +101,62 @@ public class UIContext {
 
         this.communicationSanityChecker = new CommunicationSanityChecker(this);
         this.communicationSanityChecker.start();
+    }
+
+    public static UIContext get() {
+        return currentContext.get();
+    }
+
+    public static void remove() {
+        currentContext.remove();
+    }
+
+    public static void setCurrent(final UIContext uiContext) {
+        currentContext.set(uiContext);
+    }
+
+    public static <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+        return get().getEventBus().addHandler(type, handler);
+    }
+
+    public static <H extends EventHandler> void removeHandler(final Type<H> type, final H handler) {
+        get().getEventBus().removeHandler(type, handler);
+    }
+
+    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+        return get().getEventBus().addHandlerToSource(type, source, handler);
+    }
+
+    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
+        get().getEventBus().removeHandlerFromSource(type, source, handler);
+    }
+
+    public static void fireEvent(final Event<?> event) {
+        get().getEventBus().fireEvent(event);
+    }
+
+    public static void fireEventFromSource(final Event<?> event, final Object source) {
+        get().getEventBus().fireEventFromSource(event, source);
+    }
+
+    public static void addHandler(final BroadcastEventHandler handler) {
+        get().getEventBus().addHandler(handler);
+    }
+
+    public static void removeHandler(final BroadcastEventHandler handler) {
+        get().getEventBus().removeHandler(handler);
+    }
+
+    public static EventBus getRootEventBus() {
+        return get().getEventBus();
+    }
+
+    public static boolean hasPermission(final String permissionKey) {
+        return get().hasPermission0(permissionKey);
+    }
+
+    public static boolean hasPermission(final Permission permission) {
+        return get().hasPermission0(permission.getKey());
     }
 
     public int getID() {
@@ -295,67 +332,11 @@ public class UIContext {
         return cookies;
     }
 
-    public static UIContext get() {
-        return currentContext.get();
-    }
-
-    public static void remove() {
-        currentContext.remove();
-    }
-
-    public static void setCurrent(final UIContext uiContext) {
-        currentContext.set(uiContext);
-    }
-
-    public static <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
-        return get().getEventBus().addHandler(type, handler);
-    }
-
-    public static <H extends EventHandler> void removeHandler(final Type<H> type, final H handler) {
-        get().getEventBus().removeHandler(type, handler);
-    }
-
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
-        return get().getEventBus().addHandlerToSource(type, source, handler);
-    }
-
-    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
-        get().getEventBus().removeHandlerFromSource(type, source, handler);
-    }
-
-    public static void fireEvent(final Event<?> event) {
-        get().getEventBus().fireEvent(event);
-    }
-
-    public static void fireEventFromSource(final Event<?> event, final Object source) {
-        get().getEventBus().fireEventFromSource(event, source);
-    }
-
-    public static void addHandler(final BroadcastEventHandler handler) {
-        get().getEventBus().addHandler(handler);
-    }
-
-    public static void removeHandler(final BroadcastEventHandler handler) {
-        get().getEventBus().removeHandler(handler);
-    }
-
-    public static EventBus getRootEventBus() {
-        return get().getEventBus();
-    }
-
     public void close() {
         try (ModelWriter writer = Txn.getWriter()) {
             writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
         } catch (IOException e) {
         }
-    }
-
-    public static boolean hasPermission(final String permissionKey) {
-        return get().hasPermission0(permissionKey);
-    }
-
-    public static boolean hasPermission(final Permission permission) {
-        return get().hasPermission0(permission.getKey());
     }
 
     private boolean hasPermission0(final String permissionKey) {

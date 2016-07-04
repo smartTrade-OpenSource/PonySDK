@@ -38,14 +38,10 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  */
 public class PTreeItem extends PObject {
 
-    private PTree tree;
-
-    private boolean isRoot = false;
-
-    private String html = null;
-
     private final List<PTreeItem> children = new ArrayList<>();
-
+    private PTree tree;
+    private boolean isRoot = false;
+    private String html = null;
     private boolean selected;
 
     private boolean open;
@@ -118,14 +114,14 @@ public class PTreeItem extends PObject {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, html));
     }
 
+    public PTree getTree() {
+        return tree;
+    }
+
     final void setTree(final PTree tree) {
         this.tree = tree;
         if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) tree.saveAdd(tree.getID(), ID);
         if (widget != null) setWidget();
-    }
-
-    public PTree getTree() {
-        return tree;
     }
 
     public int getChildCount() {
@@ -157,24 +153,24 @@ public class PTreeItem extends PObject {
         return children.remove(item);
     }
 
+    public boolean isSelected() {
+        return selected;
+    }
+
     public void setSelected(final boolean selected) {
         if (Objects.equals(this.selected, selected)) return;
         this.selected = selected;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED, selected));
     }
 
-    public boolean isSelected() {
-        return selected;
+    public boolean getState() {
+        return open;
     }
 
     public void setState(final boolean open) {
         if (Objects.equals(this.open, open)) return;
         this.open = open;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.STATE, open));
-    }
-
-    public boolean getState() {
-        return open;
     }
 
     public PTreeItem getChild(final int index) {

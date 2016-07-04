@@ -57,14 +57,14 @@ public class PRadioButton extends PCheckBox {
         return WidgetType.RADIO_BUTTON;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
-    }
-
-    public String getName() {
-        return name;
     }
 
 }

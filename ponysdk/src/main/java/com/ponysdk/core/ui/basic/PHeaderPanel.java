@@ -55,8 +55,22 @@ public class PHeaderPanel extends PPanel {
         return content;
     }
 
+    public void setContentWidget(final PWidget child) {
+        child.removeFromParent();
+        adopt(child);
+        content = child;
+        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
+    }
+
     public PWidget getFooterWidget() {
         return footer;
+    }
+
+    public void setFooterWidget(final PWidget child) {
+        child.removeFromParent();
+        adopt(child);
+        footer = child;
+        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
     public PWidget getHeaderWidget() {
@@ -68,20 +82,6 @@ public class PHeaderPanel extends PPanel {
         adopt(child);
         header = child;
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
-    }
-
-    public void setContentWidget(final PWidget child) {
-        child.removeFromParent();
-        adopt(child);
-        content = child;
-        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
-    }
-
-    public void setFooterWidget(final PWidget child) {
-        child.removeFromParent();
-        adopt(child);
-        footer = child;
-        saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
     @Override

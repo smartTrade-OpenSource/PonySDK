@@ -23,14 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportConstructor;
-import org.timepedia.exporter.client.ExportPackage;
-import org.timepedia.exporter.client.Exportable;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -47,18 +39,22 @@ import com.ponysdk.core.terminal.request.ParentWindowRequest;
 import com.ponysdk.core.terminal.request.RequestCallback;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-
 import elemental.client.Browser;
+import org.timepedia.exporter.client.Export;
+import org.timepedia.exporter.client.ExportConstructor;
+import org.timepedia.exporter.client.ExportPackage;
+import org.timepedia.exporter.client.Exportable;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk")
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
-
-    private static PonySDK INSTANCE;
     private static final UIBuilder uiBuilder = new UIBuilder();
-
+    private static PonySDK INSTANCE;
     private int applicationViewID;
 
     private WebSocketClient socketClient;

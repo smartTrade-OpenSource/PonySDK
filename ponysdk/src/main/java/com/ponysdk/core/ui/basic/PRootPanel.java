@@ -53,11 +53,6 @@ public class PRootPanel extends PAbsolutePanel {
         init();
     }
 
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-        parser.parse(ServerToClientModel.ROOT_ID, id);
-    }
-
     protected final static PRootPanel get(final int windowID) {
         return get(windowID, null);
     }
@@ -84,6 +79,11 @@ public class PRootPanel extends PAbsolutePanel {
         }
 
         return rootByIDs;
+    }
+
+    @Override
+    protected void enrichOnInit(final Parser parser) {
+        parser.parse(ServerToClientModel.ROOT_ID, id);
     }
 
     @Override

@@ -104,12 +104,12 @@ public class ApplicationManagerOption {
         this.heartBeatPeriodTimeUnit = heartBeatPeriodTimeUnit;
     }
 
-    public void setHeartBeatPeriod(final long heartBeatPeriod) {
-        this.heartBeatPeriod = heartBeatPeriod;
-    }
-
     public long getHeartBeatPeriod() {
         return heartBeatPeriod;
+    }
+
+    public void setHeartBeatPeriod(final long heartBeatPeriod) {
+        this.heartBeatPeriod = heartBeatPeriod;
     }
 
     public TimeUnit getHeartBeatPeriodTimeUnit() {
@@ -180,12 +180,12 @@ public class ApplicationManagerOption {
         this.communicationErrorFunction = communicationErrorFunction;
     }
 
-    public void setEntryPointClass(final Class<? extends EntryPoint> entryPointClass) {
-        this.entryPointClass = entryPointClass;
-    }
-
     public Class<? extends EntryPoint> getEntryPointClass() {
         return entryPointClass;
+    }
+
+    public void setEntryPointClass(final Class<? extends EntryPoint> entryPointClass) {
+        this.entryPointClass = entryPointClass;
     }
 
     public String getClientConfigFile() {

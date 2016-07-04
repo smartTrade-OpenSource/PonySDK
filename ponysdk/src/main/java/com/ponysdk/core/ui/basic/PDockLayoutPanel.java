@@ -58,20 +58,6 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     private final PUnit unit;
 
-    public enum Direction {
-        NORTH,
-        EAST,
-        SOUTH,
-        WEST,
-        CENTER,
-        LINE_START,
-        LINE_END;
-
-        public byte getValue() {
-            return (byte) ordinal();
-        }
-    }
-
     public PDockLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
@@ -151,5 +137,19 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public PUnit getUnit() {
         return unit;
+    }
+
+    public enum Direction {
+        NORTH,
+        EAST,
+        SOUTH,
+        WEST,
+        CENTER,
+        LINE_START,
+        LINE_END;
+
+        public byte getValue() {
+            return (byte) ordinal();
+        }
     }
 }

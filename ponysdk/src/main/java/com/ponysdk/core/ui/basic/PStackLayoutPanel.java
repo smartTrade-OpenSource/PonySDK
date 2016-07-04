@@ -61,10 +61,8 @@ public class PStackLayoutPanel extends PComposite
     private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
 
     private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
-
-    private Duration animationDuration;
-
     private final PUnit unit;
+    private Duration animationDuration;
 
     public PStackLayoutPanel(final PUnit unit) {
         super();
@@ -173,15 +171,6 @@ public class PStackLayoutPanel extends PComposite
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID()));
     }
 
-    /**
-     * Set the duration of the animated transition between children.
-     */
-    public void setAnimationDuration(final Duration duration) {
-        if(Objects.equals(animationDuration,duration)) return;
-        animationDuration = duration;
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
-    }
-
     @Override
     public void animate(final Duration duration) {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
@@ -189,6 +178,15 @@ public class PStackLayoutPanel extends PComposite
 
     public Duration getAnimationDuration() {
         return animationDuration;
+    }
+
+    /**
+     * Set the duration of the animated transition between children.
+     */
+    public void setAnimationDuration(final Duration duration) {
+        if(Objects.equals(animationDuration,duration)) return;
+        animationDuration = duration;
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }
 
 }

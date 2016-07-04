@@ -47,16 +47,6 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        streamRequest(req, resp);
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        streamRequest(req, resp);
-    }
-
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             final Application ponyApplicationSession = (Application) req.getSession()
@@ -74,5 +64,15 @@ public class StreamServiceServlet extends HttpServlet {
                 log.error("Request failure", e1);
             }
         }
+    }
+
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        streamRequest(req, resp);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        streamRequest(req, resp);
     }
 }

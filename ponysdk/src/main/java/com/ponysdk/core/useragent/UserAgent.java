@@ -28,9 +28,9 @@ import java.io.Serializable;
 public class UserAgent implements Serializable {
 
     private static final long serialVersionUID = 7025462762784240212L;
+    private final int id;
     private OperatingSystem operatingSystem = OperatingSystem.UNKNOWN;
     private Browser browser = Browser.UNKNOWN;
-    private final int id;
     private String userAgentString;
 
     public UserAgent(final OperatingSystem operatingSystem, final Browser browser) {
@@ -55,6 +55,32 @@ public class UserAgent implements Serializable {
 
     public static UserAgent parseUserAgentString(final String userAgentString) {
         return new UserAgent(userAgentString);
+    }
+
+    /**
+     * Returns UserAgent based on specified unique id
+     */
+    public static UserAgent valueOf(final int id) {
+        final OperatingSystem operatingSystem = OperatingSystem.valueOf((short) (id >> 16));
+        final Browser browser = Browser.valueOf((short) (id & 0x0FFFF));
+        return new UserAgent(operatingSystem, browser);
+    }
+
+    /**
+     * Returns UserAgent based on combined string representation
+     */
+    public static UserAgent valueOf(final String name) {
+        if (name == null) throw new NullPointerException("Name is null");
+
+        final String[] elements = name.split("-");
+
+        if (elements.length == 2) {
+            final OperatingSystem operatingSystem = OperatingSystem.valueOf(elements[0]);
+            final Browser browser = Browser.valueOf(elements[1]);
+            return new UserAgent(operatingSystem, browser);
+        }
+
+        throw new IllegalArgumentException("Invalid string for userAgent " + name);
     }
 
     /**
@@ -101,34 +127,8 @@ public class UserAgent implements Serializable {
         return this.operatingSystem.toString() + "-" + this.browser.toString();
     }
 
-    /**
-     * Returns UserAgent based on specified unique id
-     */
-    public static UserAgent valueOf(final int id) {
-        final OperatingSystem operatingSystem = OperatingSystem.valueOf((short) (id >> 16));
-        final Browser browser = Browser.valueOf((short) (id & 0x0FFFF));
-        return new UserAgent(operatingSystem, browser);
-    }
-
     public String getUserAgentString() {
         return userAgentString;
-    }
-
-    /**
-     * Returns UserAgent based on combined string representation
-     */
-    public static UserAgent valueOf(final String name) {
-        if (name == null) throw new NullPointerException("Name is null");
-
-        final String[] elements = name.split("-");
-
-        if (elements.length == 2) {
-            final OperatingSystem operatingSystem = OperatingSystem.valueOf(elements[0]);
-            final Browser browser = Browser.valueOf(elements[1]);
-            return new UserAgent(operatingSystem, browser);
-        }
-
-        throw new IllegalArgumentException("Invalid string for userAgent " + name);
     }
 
     /*

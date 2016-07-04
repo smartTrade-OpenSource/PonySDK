@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.export;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.core.ui.list.selector.SelectionResult;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class ExportContext<T> implements Serializable {
 
@@ -54,12 +54,12 @@ public class ExportContext<T> implements Serializable {
         return query;
     }
 
-    public List<ExportableField> getExportableFields() {
-        return exportableFields;
-    }
-
     public void setQuery(final Query query) {
         this.query = query;
+    }
+
+    public List<ExportableField> getExportableFields() {
+        return exportableFields;
     }
 
     public void setExportableFields(final List<ExportableField> exportableFields) {

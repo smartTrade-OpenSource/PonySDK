@@ -37,21 +37,6 @@ public class Criterion {
         this.pojoProperty = key;
     }
 
-    public Criterion setSortingType(final SortingType sortingType) {
-        this.sortingType = sortingType;
-        return this;
-    }
-
-    public Criterion setComparator(final ComparatorType comparator) {
-        this.comparator = comparator;
-        return this;
-    }
-
-    public Criterion setValue(final Object value) {
-        this.value = value;
-        return this;
-    }
-
     public String getPojoProperty() {
         return pojoProperty;
     }
@@ -60,12 +45,27 @@ public class Criterion {
         return sortingType;
     }
 
+    public Criterion setSortingType(final SortingType sortingType) {
+        this.sortingType = sortingType;
+        return this;
+    }
+
     public ComparatorType getComparator() {
         return comparator;
     }
 
+    public Criterion setComparator(final ComparatorType comparator) {
+        this.comparator = comparator;
+        return this;
+    }
+
     public Object getValue() {
         return value;
+    }
+
+    public Criterion setValue(final Object value) {
+        this.value = value;
+        return this;
     }
 
     @Override

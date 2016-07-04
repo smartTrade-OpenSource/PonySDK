@@ -54,10 +54,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
     private static final String EMPTY = "";
-
-    private List<PValueChangeHandler<Date>> handlers;
-
     private final PDatePicker datePicker;
+    private List<PValueChangeHandler<Date>> handlers;
     private Date date;
     private SimpleDateFormat dateFormat;
 
@@ -135,13 +133,13 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         }
     }
 
+    public SimpleDateFormat getDateFormat() {
+        return dateFormat;
+    }
+
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern()));
-    }
-
-    public SimpleDateFormat getDateFormat() {
-        return dateFormat;
     }
 
     @Override
@@ -149,18 +147,18 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         return date;
     }
 
-    public String getDisplayedValue() {
-        if (getValue() == null)
-            return EMPTY;
-        else
-            return getDateFormat().format(getValue());
-    }
-
     @Override
     public void setValue(final Date date) {
         this.date = date;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE, date != null ? dateFormat.format(date) : EMPTY));
         datePicker.setValue(date);
+    }
+
+    public String getDisplayedValue() {
+        if (getValue() == null)
+            return EMPTY;
+        else
+            return getDateFormat().format(getValue());
     }
 
     public void setDefaultMonth(final Date date) {

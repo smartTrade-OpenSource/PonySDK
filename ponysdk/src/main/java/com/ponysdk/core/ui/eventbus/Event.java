@@ -28,6 +28,51 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Event<H extends EventHandler> {
 
+    private static AtomicLong count = new AtomicLong();
+    private final long eventID;
+    private Object source;
+    private Object data;
+
+    protected Event(final Object source) {
+        this.source = source;
+        eventID = count.getAndIncrement();
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
+    }
+
+    public Object getSource() {
+        return source;
+    }
+
+    void setSource(final Object source) {
+        this.source = source;
+    }
+
+    public String toDebugString() {
+        String name = this.getClass().getName();
+        name = name.substring(name.lastIndexOf(".") + 1);
+        return "eventbus: " + name + ":";
+    }
+
+    @Override
+    public String toString() {
+        return "An eventbus type";
+    }
+
+    public long getEventID() {
+        return eventID;
+    }
+
+    public abstract Type<H> getAssociatedType();
+
+    protected abstract void dispatch(H handler);
+
     public static class Type<H> {
 
         private static final AtomicInteger nextHashCode = new AtomicInteger(0);
@@ -48,52 +93,4 @@ public abstract class Event<H extends EventHandler> {
             return "Event type";
         }
     }
-
-    private static AtomicLong count = new AtomicLong();
-
-    private final long eventID;
-
-    private Object source;
-
-    private Object data;
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(final Object data) {
-        this.data = data;
-    }
-
-    protected Event(final Object source) {
-        this.source = source;
-        eventID = count.getAndIncrement();
-    }
-
-    public Object getSource() {
-        return source;
-    }
-
-    public String toDebugString() {
-        String name = this.getClass().getName();
-        name = name.substring(name.lastIndexOf(".") + 1);
-        return "eventbus: " + name + ":";
-    }
-
-    @Override
-    public String toString() {
-        return "An eventbus type";
-    }
-
-    public long getEventID() {
-        return eventID;
-    }
-
-    void setSource(final Object source) {
-        this.source = source;
-    }
-
-    public abstract Type<H> getAssociatedType();
-
-    protected abstract void dispatch(H handler);
 }

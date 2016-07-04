@@ -35,17 +35,7 @@ public abstract class PageActivity extends AbstractActivity<PageView> implements
     protected final String pageName;
 
     protected final Collection<String> pageCategories;
-
-    protected abstract void onInitialization();
-
-    protected abstract void onFirstShowPage();
-
-    protected abstract void onShowPage(Place place);
-
-    protected abstract void onLeavingPage();
-
     protected final Permission permission;
-
     private boolean shown = false;
 
     public PageActivity(final String pageName, final String pageCategory) {
@@ -65,6 +55,14 @@ public abstract class PageActivity extends AbstractActivity<PageView> implements
         this.pageCategories = pageCategories;
         this.permission = permission;
     }
+
+    protected abstract void onInitialization();
+
+    protected abstract void onFirstShowPage();
+
+    protected abstract void onShowPage(Place place);
+
+    protected abstract void onLeavingPage();
 
     @Override
     protected void buildView() {

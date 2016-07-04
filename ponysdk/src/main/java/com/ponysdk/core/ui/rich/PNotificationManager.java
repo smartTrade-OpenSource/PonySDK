@@ -39,13 +39,6 @@ public class PNotificationManager {
     public static int warningDuration = 6000;
     public static int trayDuration = 6000;
 
-    public enum Notification {
-        TRAY,
-        HUMANIZED,
-        WARNING_MESSAGE,
-        ERROR_MESSAGE
-    }
-
     public static void notify(final String message, final Notification notification) {
         notify(PWindow.getMain().getID(), message, notification);
     }
@@ -257,5 +250,12 @@ public class PNotificationManager {
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
         PScheduler.schedule(popupPanel::hide, Duration.ofMillis(delayBeforeClosing));
+    }
+
+    public enum Notification {
+        TRAY,
+        HUMANIZED,
+        WARNING_MESSAGE,
+        ERROR_MESSAGE
     }
 }

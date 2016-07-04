@@ -43,6 +43,218 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  */
 public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
+    private final TreeMap<Row, TreeMap<Integer, PWidget>> columnByRow = new TreeMap<>();
+    private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
+    private final PColumnFormatter columnFormatter = new PColumnFormatter();
+    private final PRowFormatter rowFormatter = new PRowFormatter();
+    private T cellFormatter;
+    private int cellPadding;
+    private int cellSpacing;
+    private int borderWidth;
+
+    public int getRowCount() {
+        if (columnByRow.isEmpty()) return 0;
+        return columnByRow.lastKey().value + 1;
+    }
+
+    public int getCellCount(final int row) {
+        final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
+        if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
+        return cellByColumn.lastKey() + 1;
+    }
+
+    public void clearCell(final int row, final int col) {
+        final PWidget widget = getWidgetFromMap(row, col);
+        if (widget != null) {
+            remove(widget);
+        }
+    }
+
+    public T getCellFormatter() {
+        return cellFormatter;
+    }
+
+    protected void setCellFormatter(final T cellFormatter) {
+        this.cellFormatter = cellFormatter;
+    }
+
+    public PColumnFormatter getColumnFormatter() {
+        return columnFormatter;
+    }
+
+    public int getCellPadding() {
+        return cellPadding;
+    }
+
+    public void setCellPadding(final int padding) {
+        cellPadding = padding;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_PADDING, padding));
+    }
+
+    public int getCellSpacing() {
+        return cellSpacing;
+    }
+
+    public void setCellSpacing(final int spacing) {
+        cellSpacing = spacing;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_SPACING, spacing));
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public void setBorderWidth(final int width) {
+        this.borderWidth = width;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, width));
+    }
+
+    public PWidget getWidget(final int row, final int column) {
+        return getWidgetFromMap(row, column);
+    }
+
+    @Override
+    public void clear() {
+        final List<PWidget> values = new ArrayList<>();
+        for (final TreeMap<Integer, PWidget> widgetByColumn : columnByRow.values()) {
+            values.addAll(widgetByColumn.values());
+        }
+
+        for (final PWidget w : values) {
+            remove(w, false);
+        }
+
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
+    }
+
+    public void removeRow(final int row) {
+        final TreeMap<Integer, PWidget> widgetByColumn = columnByRow.remove(new Row(row));
+        if (widgetByColumn == null) return;
+        getRowFormatter().removeRowStyle(row);
+
+        final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
+        for (final PWidget w : values) {
+            remove(w, false);
+        }
+
+        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
+            final Row irow = entry.getKey();
+            if (irow.value > row) {
+                for (final PWidget widget : entry.getValue().values()) {
+                    final Cell cell = cellByWidget.get(widget);
+                    cell.row = cell.row - 1;
+                }
+                irow.value = irow.value - 1;
+            }
+        }
+
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_ROW, row));
+    }
+
+    public void insertRow(final int row) {
+        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
+            final Row irow = entry.getKey();
+            if (irow.value >= row) {
+                for (final PWidget widget : entry.getValue().values()) {
+                    final Cell cell = cellByWidget.get(widget);
+                    cell.row = cell.row + 1;
+                }
+                irow.value = irow.value + 1;
+            }
+        }
+        rowFormatter.insertRowStyle(row);
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_ROW, row));
+    }
+
+    @Override
+    public boolean remove(final PWidget widget) {
+        return remove(widget, true);
+    }
+
+    private boolean remove(final PWidget widget, final boolean physicalDetach) {
+        // Validate.
+        if (widget.getParent() != this) {
+            return false;
+        }
+
+        // Orphan.
+        try {
+            orphan(widget);
+        } finally {
+            // Logical detach.
+            if (removeWidgetFromMap(widget) != null) {
+                // Physical detach.
+                if (physicalDetach) {
+                    saveRemove(widget.getID(), ID);
+                }
+            }
+        }
+        return true;
+    }
+
+    public void setWidget(final int row, final int column, final PWidget widget) {
+        if (widget != null) {
+            widget.removeFromParent();
+
+            // Removes any existing widget.
+            clearCell(row, column);
+
+            // Logical attach.
+            addWidgetToMap(row, column, widget);
+
+            // Physical attach.
+            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+            widget.attach(windowID);
+
+            adopt(widget);
+        }
+    }
+
+    private PWidget getWidgetFromMap(final int row, final int column) {
+        final Map<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
+        if (cellByColumn != null) {
+            return cellByColumn.get(column);
+        }
+        return null;
+    }
+
+    private PWidget removeWidgetFromMap(final PWidget widget) {
+        final Cell cell = cellByWidget.remove(widget);
+        if (cell == null) return null; // already removed
+        final Row row = new Row(cell.row);
+        final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
+        if (cellByColumn != null) {
+            final PWidget w = cellByColumn.remove(cell.column);
+            if (cellByColumn.isEmpty()) {
+                columnByRow.remove(row);
+            }
+            return w;
+        }
+        return null;
+    }
+
+    private void addWidgetToMap(final int row, final int column, final PWidget widget) {
+        final Row irow = new Row(row);
+        final Cell cell = new Cell(row, column);
+        cellByWidget.put(widget, cell);
+        TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(irow);
+        if (cellByColumn == null) {
+            cellByColumn = new TreeMap<>();
+            columnByRow.put(irow, cellByColumn);
+        }
+        cellByColumn.put(column, widget);
+    }
+
+    @Override
+    public Iterator<PWidget> iterator() {
+        return Collections.emptyIterator();
+    }
+
+    public PRowFormatter getRowFormatter() {
+        return rowFormatter;
+    }
+
     class Row implements Comparable<Row> {
 
         private int value;
@@ -184,225 +396,6 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
                 writer.writeModel(ServerToClientModel.COLUMN, column);
             });
         }
-    }
-
-    private final TreeMap<Row, TreeMap<Integer, PWidget>> columnByRow = new TreeMap<>();
-
-    private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
-
-    private T cellFormatter;
-
-    private final PColumnFormatter columnFormatter = new PColumnFormatter();
-
-    private int cellPadding;
-
-    private int cellSpacing;
-
-    private int borderWidth;
-
-    private final PRowFormatter rowFormatter = new PRowFormatter();
-
-    public int getRowCount() {
-        if (columnByRow.isEmpty()) return 0;
-        return columnByRow.lastKey().value + 1;
-    }
-
-    public int getCellCount(final int row) {
-        final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
-        return cellByColumn.lastKey() + 1;
-    }
-
-    public void clearCell(final int row, final int col) {
-        final PWidget widget = getWidgetFromMap(row, col);
-        if (widget != null) {
-            remove(widget);
-        }
-    }
-
-    public T getCellFormatter() {
-        return cellFormatter;
-    }
-
-    public PColumnFormatter getColumnFormatter() {
-        return columnFormatter;
-    }
-
-    public int getCellPadding() {
-        return cellPadding;
-    }
-
-    public int getCellSpacing() {
-        return cellSpacing;
-    }
-
-    public int getBorderWidth() {
-        return borderWidth;
-    }
-
-    public PWidget getWidget(final int row, final int column) {
-        return getWidgetFromMap(row, column);
-    }
-
-    @Override
-    public void clear() {
-        final List<PWidget> values = new ArrayList<>();
-        for (final TreeMap<Integer, PWidget> widgetByColumn : columnByRow.values()) {
-            values.addAll(widgetByColumn.values());
-        }
-
-        for (final PWidget w : values) {
-            remove(w, false);
-        }
-
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
-    }
-
-    public void removeRow(final int row) {
-        final TreeMap<Integer, PWidget> widgetByColumn = columnByRow.remove(new Row(row));
-        if (widgetByColumn == null) return;
-        getRowFormatter().removeRowStyle(row);
-
-        final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
-        for (final PWidget w : values) {
-            remove(w, false);
-        }
-
-        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            final Row irow = entry.getKey();
-            if (irow.value > row) {
-                for (final PWidget widget : entry.getValue().values()) {
-                    final Cell cell = cellByWidget.get(widget);
-                    cell.row = cell.row - 1;
-                }
-                irow.value = irow.value - 1;
-            }
-        }
-
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_ROW, row));
-    }
-
-    public void insertRow(final int row) {
-        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            final Row irow = entry.getKey();
-            if (irow.value >= row) {
-                for (final PWidget widget : entry.getValue().values()) {
-                    final Cell cell = cellByWidget.get(widget);
-                    cell.row = cell.row + 1;
-                }
-                irow.value = irow.value + 1;
-            }
-        }
-        rowFormatter.insertRowStyle(row);
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_ROW, row));
-    }
-
-    @Override
-    public boolean remove(final PWidget widget) {
-        return remove(widget, true);
-    }
-
-    private boolean remove(final PWidget widget, final boolean physicalDetach) {
-        // Validate.
-        if (widget.getParent() != this) {
-            return false;
-        }
-
-        // Orphan.
-        try {
-            orphan(widget);
-        } finally {
-            // Logical detach.
-            if (removeWidgetFromMap(widget) != null) {
-                // Physical detach.
-                if (physicalDetach) {
-                    saveRemove(widget.getID(), ID);
-                }
-            }
-        }
-        return true;
-    }
-
-    public void setBorderWidth(final int width) {
-        this.borderWidth = width;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, width));
-    }
-
-    public void setCellPadding(final int padding) {
-        cellPadding = padding;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_PADDING, padding));
-    }
-
-    public void setCellSpacing(final int spacing) {
-        cellSpacing = spacing;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_SPACING, spacing));
-    }
-
-    protected void setCellFormatter(final T cellFormatter) {
-        this.cellFormatter = cellFormatter;
-    }
-
-    public void setWidget(final int row, final int column, final PWidget widget) {
-        if (widget != null) {
-            widget.removeFromParent();
-
-            // Removes any existing widget.
-            clearCell(row, column);
-
-            // Logical attach.
-            addWidgetToMap(row, column, widget);
-
-            // Physical attach.
-            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-            widget.attach(windowID);
-
-            adopt(widget);
-        }
-    }
-
-    private PWidget getWidgetFromMap(final int row, final int column) {
-        final Map<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn != null) {
-            return cellByColumn.get(column);
-        }
-        return null;
-    }
-
-    private PWidget removeWidgetFromMap(final PWidget widget) {
-        final Cell cell = cellByWidget.remove(widget);
-        if (cell == null) return null; // already removed
-        final Row row = new Row(cell.row);
-        final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
-        if (cellByColumn != null) {
-            final PWidget w = cellByColumn.remove(cell.column);
-            if (cellByColumn.isEmpty()) {
-                columnByRow.remove(row);
-            }
-            return w;
-        }
-        return null;
-    }
-
-    private void addWidgetToMap(final int row, final int column, final PWidget widget) {
-        final Row irow = new Row(row);
-        final Cell cell = new Cell(row, column);
-        cellByWidget.put(widget, cell);
-        TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(irow);
-        if (cellByColumn == null) {
-            cellByColumn = new TreeMap<>();
-            columnByRow.put(irow, cellByColumn);
-        }
-        cellByColumn.put(column, widget);
-    }
-
-    @Override
-    public Iterator<PWidget> iterator() {
-        return Collections.emptyIterator();
-    }
-
-    public PRowFormatter getRowFormatter() {
-        return rowFormatter;
     }
 
 }

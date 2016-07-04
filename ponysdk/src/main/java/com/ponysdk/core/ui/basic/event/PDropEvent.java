@@ -46,12 +46,12 @@ public class PDropEvent extends PDomEvent<PDropHandler> {
         handler.onDrop(this);
     }
 
-    public void setDragSource(final PWidget source) {
-        this.dragSource = source;
-    }
-
     public PWidget getDragSource() {
         return dragSource;
+    }
+
+    public void setDragSource(final PWidget source) {
+        this.dragSource = source;
     }
 
 }

@@ -214,6 +214,37 @@ public enum OperatingSystem {
         this.deviceType = deviceType;
     }
 
+    /**
+     * Parses user agent string and returns the best match. Returns
+     * OperatingSystem.UNKNOWN if there is no match.
+     */
+    public static OperatingSystem parseUserAgentString(final String agentString) {
+        for (final OperatingSystem operatingSystem : OperatingSystem.values()) {
+            // only check top level objects
+            if (operatingSystem.parent == null) {
+                final OperatingSystem match = operatingSystem.checkUserAgent(agentString);
+                if (match != null) {
+                    return match; // either current operatingSystem or a child
+                    // object
+                }
+            }
+        }
+        return OperatingSystem.UNKNOWN;
+    }
+
+    /**
+     * Returns the enum constant of this type with the specified id. Throws
+     * IllegalArgumentException if the value does not exist.
+     */
+    public static OperatingSystem valueOf(final short id) {
+        for (final OperatingSystem operatingSystem : OperatingSystem.values()) {
+            if (operatingSystem.getId() == id) return operatingSystem;
+        }
+
+        // same behavior as standard valueOf(string) method
+        throw new IllegalArgumentException("No enum const for id " + id);
+    }
+
     public short getId() {
         return id;
     }
@@ -296,37 +327,6 @@ public enum OperatingSystem {
 
         }
         return null;
-    }
-
-    /**
-     * Parses user agent string and returns the best match. Returns
-     * OperatingSystem.UNKNOWN if there is no match.
-     */
-    public static OperatingSystem parseUserAgentString(final String agentString) {
-        for (final OperatingSystem operatingSystem : OperatingSystem.values()) {
-            // only check top level objects
-            if (operatingSystem.parent == null) {
-                final OperatingSystem match = operatingSystem.checkUserAgent(agentString);
-                if (match != null) {
-                    return match; // either current operatingSystem or a child
-                    // object
-                }
-            }
-        }
-        return OperatingSystem.UNKNOWN;
-    }
-
-    /**
-     * Returns the enum constant of this type with the specified id. Throws
-     * IllegalArgumentException if the value does not exist.
-     */
-    public static OperatingSystem valueOf(final short id) {
-        for (final OperatingSystem operatingSystem : OperatingSystem.values()) {
-            if (operatingSystem.getId() == id) return operatingSystem;
-        }
-
-        // same behavior as standard valueOf(string) method
-        throw new IllegalArgumentException("No enum const for id " + id);
     }
 
 }
