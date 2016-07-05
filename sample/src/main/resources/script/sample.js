@@ -34,19 +34,26 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
 
 
         tag: function (value) {
-            console.log(value.id);
-            console.log(value.oldTag);
-            console.log(value.newTag);
+            console.log(value.id)
+            console.log(value.oldTag)
+            console.log(value.newTag)
 
-            //item.setAttribute('data-value',value.tag)
+            if(value.found == 'no'){
+                console.log('red item')
+                this.jqelement[0].selectize.getItem(value.oldTag)[0].classList.add('unmatch')
+            }else{
+                this.jqelement[0].setAttribute('process','true')    
+                this.jqelement[0].setAttribute('type',value.type)
+                
+                console.log('remove and create')
+                this.jqelement[0].selectize.removeItem(value.oldTag, true)
+                this.jqelement[0].selectize.createItem(value.newTag + '{' + value.desc + '}' ,false)
+            }
 
-            this.jqelement[0].selectize.removeItem(value.oldTag)
-            this.jqelement[0].selectize.createItem(value.newTag)
         },
 
         text: function (value) {
             var that = this;
-
 
             this.jqelement.selectize({
                 plugins: ['remove_button'],
@@ -59,12 +66,27 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
                     }
                 },
                 onItemAdd: function (value, $item) {
+                    console.log('on add item')
+                    var process = that.jqelement[0].getAttribute('process')
+                    var type = that.jqelement[0].getAttribute('type')
+                    
+                    if(process == 'true'){
+                        that.jqelement[0].setAttribute('process','false')    
+                        that.jqelement[0].setAttribute('type','-1')
+                        
+                        if(type == '1'){
+                            $item[0].classList.add('qty-px')
+                        }
+                        
+                        return;
+                    }
+                
                     var itemID = $item[0].getAttribute("id");
 
-                    if (itemID == null) {
+                    //if (itemID == null) {
                         itemID = 'item' + Date.now();
-                        $item[0].setAttribute("id",itemID);
-                    }
+                    //    $item[0].setAttribute("id",itemID);
+                    //}
 
                     pony.sendDataToServer(that.id, {
                         id: itemID,

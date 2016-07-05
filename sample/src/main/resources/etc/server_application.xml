@@ -32,9 +32,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         </property>
         <property name="style">
             <list>
-                <value>css/sample.css</value>
                 <value>css/selectize.css</value>
                 <value>css/selectize.default.css</value>
+                <value>css/sample.css</value>
             </list>
         </property>
 	</bean>
