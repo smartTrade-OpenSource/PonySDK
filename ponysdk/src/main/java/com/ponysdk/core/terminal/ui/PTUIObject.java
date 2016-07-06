@@ -114,12 +114,12 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             return true;
         }
         if (ServerToClientModel.BIND.equals(binaryModel.getModel())) {
-            nativeObject = bind(binaryModel.getStringValue(), String.valueOf(objectID), uiObject.getElement());
+            nativeObject = bind(binaryModel.getStringValue(), objectID, uiObject.getElement());
             return true;
         }
         if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
             final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
-            sendToNative(String.valueOf(objectID), nativeObject, object.getJavaScriptObject());
+            sendToNative(objectID, nativeObject, object.getJavaScriptObject());
             return true;
         }
         return super.update(buffer, binaryModel);
@@ -137,14 +137,14 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         throw new IllegalStateException("This object is not an UIObject");
     }
 
-    private native Object bind(String functionName, String objectID, Element element) /*-{
-                                                                                      var self = this;
-                                                                                      var o = $wnd[functionName](objectID, element);
-                                                                                      return o;
-                                                                                      }-*/;
+    private native Object bind(String functionName, int objectID, Element element) /*-{
+                                                                                   var self = this;
+                                                                                   var o = $wnd[functionName](objectID, element);
+                                                                                   return o;
+                                                                                   }-*/;
 
-    private native void sendToNative(String objectID, Object nativeObject, JavaScriptObject data) /*-{
-                                                                                                  nativeObject.update(data);
-                                                                                                  }-*/;
+    private native void sendToNative(int objectID, Object nativeObject, JavaScriptObject data) /*-{
+                                                                                               nativeObject.update(data);
+                                                                                               }-*/;
 
 }
