@@ -64,12 +64,11 @@ public class PTreeItem extends PObject {
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
+    protected void init0() {
+        super.init0();
         for (final PTreeItem item : children) {
             item.attach(windowID);
         }
-        return result;
     }
 
     @Override

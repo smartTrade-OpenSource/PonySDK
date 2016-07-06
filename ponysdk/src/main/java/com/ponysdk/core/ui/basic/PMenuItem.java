@@ -29,12 +29,12 @@ import java.util.regex.Pattern;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable}
@@ -89,10 +89,9 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
+    protected void init0() {
+        super.init0();
         if (subMenu != null) subMenu.attach(windowID);
-        return result;
     }
 
     @Override

@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
-import com.ponysdk.core.model.WidgetType;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
@@ -111,12 +111,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
+    protected void init0() {
+        super.init0();
         for (final PWidget item : items) {
             item.attach(windowID);
         }
-        return result;
     }
 
     @Override
