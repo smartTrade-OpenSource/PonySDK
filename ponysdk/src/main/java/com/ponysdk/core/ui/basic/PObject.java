@@ -267,6 +267,7 @@ public abstract class PObject {
         this.attachListener = attachListener;
     }
 
+    @FunctionalInterface
     interface AttachListener {
 
         void onAttach();

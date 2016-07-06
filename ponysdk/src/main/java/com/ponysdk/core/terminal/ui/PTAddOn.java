@@ -72,8 +72,7 @@ public class PTAddOn extends AbstractPTObject {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
-            final JSONObject data = binaryModel.getJsonObject();
-            doUpdate(data);
+            doUpdate(binaryModel.getJsonObject());
             return true;
         }
         return super.update(buffer, binaryModel);
