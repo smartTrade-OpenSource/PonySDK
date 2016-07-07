@@ -32,8 +32,11 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
         init: function () {
         },
 
+        addTag: function (value) {
+            console.log(value.tag)
+        },
 
-        tag: function (value) {
+        updateTag: function (value) {
             console.log(value.id)
             console.log(value.oldTag)
             console.log(value.newTag)
@@ -42,14 +45,13 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
                 console.log('red item')
                 this.jqelement[0].selectize.getItem(value.oldTag)[0].classList.add('unmatch')
             }else{
-                this.jqelement[0].setAttribute('process','true')    
+                this.jqelement[0].setAttribute('process','true')
                 this.jqelement[0].setAttribute('type',value.type)
-                
+
                 console.log('remove and create')
                 this.jqelement[0].selectize.removeItem(value.oldTag, true)
                 this.jqelement[0].selectize.createItem(value.newTag + '{' + value.desc + '}' ,false)
             }
-
         },
 
         text: function (value) {
@@ -81,15 +83,23 @@ Addon.new("com.ponysdk.sample.client.page.addon.SelectizeAddon",
                         return;
                     }
                 
-                    var itemID = $item[0].getAttribute("id");
+                    var itemID = $item[0].getAttribute("id")
 
-                    //if (itemID == null) {
                         itemID = 'item' + Date.now();
                     //    $item[0].setAttribute("id",itemID);
                     //}
 
                     pony.sendDataToServer(that.id, {
+                        type: 'add',
                         id: itemID,
+                        tag: value
+                    });
+                },
+
+                onItemRemove: function(value, $item) {
+                    console.log('on remove item')
+                    pony.sendDataToServer(that.id, {
+                        type: 'remove',
                         tag: value
                     });
                 }

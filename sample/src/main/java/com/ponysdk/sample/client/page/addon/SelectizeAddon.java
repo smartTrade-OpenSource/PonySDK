@@ -57,7 +57,7 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
 
     IndexSearcher isearcher = null;
 
-    Pattern qtyPxPattern = Pattern.compile("\\d*\\.*\\d+@\\d*\\.*\\d+");
+    String selectedSide;
 
     enum Type {
         CLIENT, CLASS, SECURITY, TENOR, SIDE
@@ -65,8 +65,6 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
 
     public SelectizeAddon() {
         super(new PElement("input"));
-        // asWidget().setAttribute("value",
-        // "science,biology,chemistry,physics");
         setTerminalHandler(this);
 
         //
@@ -159,16 +157,17 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
     }
 
     private void addClients(final IndexWriter writer) throws IOException {
-        final Document doc1 = new Document();
+        final Document doc = new Document();
         final FieldType fieldType1 = new FieldType();
         fieldType1.setIndexOptions(IndexOptions.NONE);
         fieldType1.setStored(true);
         fieldType1.setTokenized(false);
-        doc1.add(new Field("id", "pt", fieldType1));
-        doc1.add(new Field("login", "p.task", TextField.TYPE_STORED));
-        doc1.add(new Field("fieldname", "Peter Task", TextField.TYPE_STORED));
-        doc1.add(new Field("desc", "client", TextField.TYPE_STORED));
-        writer.addDocument(doc1);
+        doc.add(new Field("id", "pt", fieldType1));
+        doc.add(new Field("login", "p.task", TextField.TYPE_STORED));
+        doc.add(new Field("fieldname", "Peter Task", TextField.TYPE_STORED));
+        doc.add(new Field("desc", "client", TextField.TYPE_STORED));
+        doc.add(new Field("type", Type.CLIENT.name(), TextField.TYPE_STORED));
+        writer.addDocument(doc);
     }
 
     private void addTenor(final IndexWriter writer) throws IOException {
@@ -188,6 +187,7 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
             fieldType2.setTokenized(false);
             doc.add(new Field("fieldname", tenor, fieldType2));
             doc.add(new Field("desc", "tenor", TextField.TYPE_STORED));
+            doc.add(new Field("type", Type.TENOR.name(), TextField.TYPE_STORED));
 
             writer.addDocument(doc);
         }
@@ -204,6 +204,7 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
         doc1.add(new Field("fieldname", "Asset SWAP", TextField.TYPE_STORED));
         doc1.add(new Field("fieldname", "SWAP", TextField.TYPE_STORED));
         doc1.add(new Field("desc", "asset class", TextField.TYPE_STORED));
+        doc1.add(new Field("type", Type.CLASS.name(), TextField.TYPE_STORED));
         iwriter.addDocument(doc1);
 
         final Document doc2 = new Document();
@@ -215,6 +216,7 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
         doc2.add(new Field("fieldname", "Single IRS", TextField.TYPE_STORED));
         doc2.add(new Field("fieldname", "IRS", TextField.TYPE_STORED));
         doc2.add(new Field("desc", "asset class", TextField.TYPE_STORED));
+        doc2.add(new Field("type", Type.CLASS.name(), TextField.TYPE_STORED));
         iwriter.addDocument(doc2);
     }
 
@@ -224,81 +226,127 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
 
     @Override
     public void onTerminalEvent(final PTerminalEvent event) {
-        final String tag = event.getJsonObject().getString("tag").toLowerCase();
-        final String tagID = event.getJsonObject().getString("id");
-        System.err.println(tag);
+        final String requestType = event.getJsonObject().getString("type");
 
-        if (tag.contains("@")) {
-            System.err.println("Qty@Px detected");
+        if("remove".equals(requestType)){
 
-            final String[] split = tag.split("@");
+        }else if("add".equals(requestType)){
+            final String tag = event.getJsonObject().getString("tag").toLowerCase();
+            final String tagID = event.getJsonObject().getString("id");
+            System.err.println(tag);
 
-            System.err.println("qty : " + split[0]);
-            System.err.println("price : " + split[1]);
+            if (tag.contains("@")) {
+                System.err.println("Qty@Px detected");
+
+                final String[] split = tag.split("@");
+
+                System.err.println("qty : " + split[0]);
+                System.err.println("price : " + split[1]);
+
+                final JsonObjectBuilder builder = Json.createObjectBuilder();
+                builder.add("id", tagID);
+                builder.add("oldTag", tag);
+                builder.add("newTag", tag);
+                builder.add("desc", "Qty@Px");
+                builder.add("found", "yes");
+                builder.add("type", "1");
+                callTerminalMethod("updateTag", builder);
+                return;
+            }
+
+            final Term term = new Term("fieldname", tag);
+            final Query query = new FuzzyQuery(term);
+            // final TopDocs hits = isearcher.search(query, 1000).scoreDocs;
+
+            // final Query query = parser.parse("indeed");
+            final ScoreDoc[] hits;
+            try {
+                hits = isearcher.search(query, 1000).scoreDocs;
+                // Iterate through the results:
+                for (final ScoreDoc hit : hits) {
+                    System.err.println("Score : " + hit.score);
+                    final Document hitDoc = isearcher.doc(hit.doc);
+                    final String stringValue = hitDoc.getField("fieldname").stringValue();
+
+                    final Type type = Type.valueOf(hitDoc.getField("fieldname").stringValue());
+
+
+                    System.err.println("Found document" + stringValue);
+                    System.err.println("Custom Data" + hitDoc.getField("id").stringValue());
+
+                    final IndexableField description = hitDoc.getField("desc");
+                    String descriptionString = "";
+                    if (description != null) {
+                        descriptionString = description.stringValue();
+                    }
+
+                    if (Objects.equals(stringValue, tag)) {
+                        return;
+                    }
+
+                    switch (type){
+                        case SIDE:
+                            if(selectedSide == null){
+                                selectedSide = stringValue;
+                            }else{
+                                final JsonObjectBuilder builder = Json.createObjectBuilder();
+                                builder.add("id", tagID);
+                                builder.add("oldTag", tag);
+                                builder.add("found", "no");
+                                builder.add("desc", "side is already selected");
+                                callTerminalMethod("updateTag", builder);
+                                return;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    final JsonObjectBuilder builder = Json.createObjectBuilder();
+                    builder.add("id", tagID);
+                    builder.add("found", "yes");
+                    builder.add("oldTag", tag);
+                    builder.add("newTag", stringValue);
+                    builder.add("desc", descriptionString);
+                    callTerminalMethod("updateTag", builder);
+                    return;
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+
+            // NO result found
 
             final JsonObjectBuilder builder = Json.createObjectBuilder();
             builder.add("id", tagID);
             builder.add("oldTag", tag);
-            builder.add("newTag", tag);
-            builder.add("desc", "Qty@Px");
-            builder.add("found", "yes");
-            builder.add("type", "1");
-            callTerminalMethod("tag", builder);
-            return;
+            builder.add("found", "no");
+            callTerminalMethod("updateTag", builder);
         }
 
-        final Term term = new Term("fieldname", tag);
-        final Query query = new FuzzyQuery(term);
-        // final TopDocs hits = isearcher.search(query, 1000).scoreDocs;
-
-        // final Query query = parser.parse("indeed");
-        final ScoreDoc[] hits;
-        try {
-            hits = isearcher.search(query, 1000).scoreDocs;
-            // Iterate through the results:
-            for (final ScoreDoc hit : hits) {
-                System.err.println("Score : " + hit.score);
-                final Document hitDoc = isearcher.doc(hit.doc);
-                final String stringValue = hitDoc.getField("fieldname").stringValue();
-                System.err.println("Found document" + stringValue);
-                System.err.println("Custom Data" + hitDoc.getField("id").stringValue());
-
-                final IndexableField description = hitDoc.getField("desc");
-                String descriptionString = "";
-                if (description != null) {
-                    descriptionString = description.stringValue();
-                }
-
-                if (Objects.equals(stringValue, tag))
-                    return;
-
-                final JsonObjectBuilder builder = Json.createObjectBuilder();
-                builder.add("id", tagID);
-                builder.add("found", "yes");
-                builder.add("oldTag", tag);
-                builder.add("newTag", stringValue);
-                builder.add("desc", descriptionString);
-                callTerminalMethod("tag", builder);
-                return;
-            }
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
-        // NO result found
-
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("id", tagID);
-        builder.add("oldTag", tag);
-        builder.add("found", "no");
-        callTerminalMethod("tag", builder);
 
     }
 
     public void selectBuy(final Boolean selected) {
+        if(selected){
+            if(selectedSide == null) {
+                final JsonObjectBuilder builder = Json.createObjectBuilder();
+                builder.add("found", "yes");
+                builder.add("tag", "Buy");
+                builder.add("desc", "side");
+                callTerminalMethod("addTag", builder);
+            }
+        }else{
+
+        }
     }
 
     public void selectSell(final Boolean selected) {
+        if(selected){
+
+        }else{
+
+        }
     }
 
 }
