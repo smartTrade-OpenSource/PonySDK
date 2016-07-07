@@ -338,7 +338,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         createPonyActivityPanel = new PFlexTable();
         createPonyActivityPanel.setWidget(0, 0, new PLabel("Add a pony"));
-        createPonyActivityPanel.getFlexCellFormatter().setColSpan(0, 0, 3);
+        createPonyActivityPanel.getCellFormatter().setColSpan(0, 0, 3);
         createPonyActivityPanel.setWidget(1, 0, new FormFieldComponent("Name", nameFormField));
         createPonyActivityPanel.setWidget(1, 1, new FormFieldComponent("Race", raceFormField));
         createPonyActivityPanel.setWidget(1, 2, new FormFieldComponent("Age", ageFormField));

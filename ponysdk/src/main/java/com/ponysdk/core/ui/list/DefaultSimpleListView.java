@@ -31,7 +31,7 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
     @Override
     public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
         setWidget(row, column, widget.asWidget());
-        if (colspan > 1) getFlexCellFormatter().setColSpan(row, column, colspan);
+        if (colspan > 1) getCellFormatter().setColSpan(row, column, colspan);
     }
 
     @Override

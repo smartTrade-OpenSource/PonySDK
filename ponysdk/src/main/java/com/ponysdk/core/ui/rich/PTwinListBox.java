@@ -68,12 +68,12 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
     private void init(final boolean containsEmptyItem) {
         if (leftCaption != null) {
             setWidget(0, 0, new PLabel(leftCaption));
-            getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_CENTER);
+            getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (rightCaption != null) {
             setWidget(0, 2, new PLabel(rightCaption));
-            getFlexCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_CENTER);
+            getCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_CENTER);
         }
 
         leftListBox = new PListBox(containsEmptyItem);

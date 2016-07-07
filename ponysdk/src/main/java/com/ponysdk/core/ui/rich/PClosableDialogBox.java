@@ -65,9 +65,9 @@ public class PClosableDialogBox extends PPopupPanel {
         layout.setWidget(0, 1, closeContainer);
         layout.setWidget(1, 0, contentContainer);
 
-        layout.getFlexCellFormatter().setColSpan(1, 0, 2);
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
+        layout.getCellFormatter().setColSpan(1, 0, 2);
+        layout.getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
+        layout.getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         layout.getRowFormatter().addStyleName(0, "header");
 
         closeContainer.addDomHandler((PClickEvent) -> hide(), PClickEvent.TYPE);
@@ -96,6 +96,7 @@ public class PClosableDialogBox extends PPopupPanel {
     }
 
     public void displayAtCenter() {
-        setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
+        setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth,
+                windowHeight) -> setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
     }
 }
