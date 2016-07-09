@@ -95,10 +95,10 @@ public abstract class PObject {
         initialized = true;
     }
 
-    protected void init0() {
+    protected void enrichOnInit(final Parser parser) {
     }
 
-    protected void enrichOnInit(final Parser parser) {
+    protected void init0() {
     }
 
     public int getWindowID() {
@@ -267,6 +267,7 @@ public abstract class PObject {
         this.attachListener = attachListener;
     }
 
+    @FunctionalInterface
     interface AttachListener {
 
         void onAttach();

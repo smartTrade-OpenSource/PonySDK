@@ -23,10 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Iterator;
 
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
-
-import java.util.Iterator;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other
@@ -48,12 +47,11 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
-        for (PWidget pWidget : this) {
+    protected void init0() {
+        super.init0();
+        for (final PWidget pWidget : this) {
             pWidget.attach(windowID);
         }
-        return result;
     }
 
     protected final void adopt(final PWidget child) {

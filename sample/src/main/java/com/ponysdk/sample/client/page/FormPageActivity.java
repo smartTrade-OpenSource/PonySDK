@@ -171,13 +171,13 @@ public class FormPageActivity extends SamplePageActivity {
         });
 
         panel.setWidget(0, 0, validateButton);
-        panel.getFlexCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
+        panel.getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
         panel.setWidget(0, 1, resetButton);
-        panel.getFlexCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
+        panel.getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         panel.setWidget(0, 2, captionOriantationList);
-        panel.getFlexCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_RIGHT);
+        panel.getCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_RIGHT);
         panel.setWidget(1, 0, formLayout);
-        panel.getFlexCellFormatter().setColSpan(1, 0, 3);
+        panel.getCellFormatter().setColSpan(1, 0, 3);
 
         examplePanel.setWidget(panel);
     }

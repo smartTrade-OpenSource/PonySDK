@@ -51,6 +51,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     PButtonBase(final String text, final String html) {
         this.text = text;
+        this.html = html;
     }
 
     @Override

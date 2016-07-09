@@ -145,7 +145,7 @@ public enum ServerToClientModel {
     POPUP_HIDE(ValueTypeModel.NULL),
     POPUP_POSITION_LEFT(ValueTypeModel.INTEGER),
     POPUP_POSITION_TOP(ValueTypeModel.INTEGER),
-    FIXDELAY(ValueTypeModel.INTEGER),
+    FIXDELAY(ValueTypeModel.LONG),
     MIN_SIZE(ValueTypeModel.INTEGER),
     SNAP_CLOSED_SIZE(ValueTypeModel.INTEGER),
     TOGGLE_DISPLAY_ALLOWED(ValueTypeModel.BOOLEAN),

@@ -23,15 +23,19 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
@@ -65,16 +69,10 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
-        root.attach(windowID);
-        return result;
-    }
-
-    @Override
     protected void init0() {
         super.init0();
         root.setTree(this);
+        root.attach(windowID);
     }
 
     @Override
@@ -172,7 +170,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
-        if(Objects.equals(this.animationEnabled,animationEnabled)) return;
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }

@@ -51,7 +51,7 @@ public class PTScript extends AbstractPTObject {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.EVAL.equals(binaryModel.getModel())) {
             long commandID = -1;
-            int delayMillis = -1;
+            long delayMillis = -1;
 
             final String script = binaryModel.getStringValue();
 
@@ -65,7 +65,7 @@ public class PTScript extends AbstractPTObject {
 
             final BinaryModel delayModel = buffer.readBinaryModel();
             if (ServerToClientModel.FIXDELAY.equals(delayModel.getModel())) {
-                delayMillis = delayModel.getIntValue();
+                delayMillis = delayModel.getLongValue();
             } else {
                 buffer.rewind(delayModel);
             }
@@ -81,7 +81,7 @@ public class PTScript extends AbstractPTObject {
 
     }
 
-    private void eval(final String script, final int delayMillis) {
+    private static final void eval(final String script, final long delayMillis) {
         if (delayMillis == -1) {
             try {
                 eval(script);
@@ -99,11 +99,11 @@ public class PTScript extends AbstractPTObject {
                         log.log(Level.SEVERE, "PTScript exception for " + script, t);
                     }
                 }
-            }.schedule(delayMillis);
+            }.schedule((int) delayMillis);
         }
     }
 
-    private void evalWithCallback(final String script, final long commandID, final int delayMillis) {
+    private void evalWithCallback(final String script, final long commandID, final long delayMillis) {
         if (delayMillis == -1) {
             try {
                 sendResult(commandID, evalWithCallback(script));
@@ -123,7 +123,7 @@ public class PTScript extends AbstractPTObject {
                         sendError(commandID, t);
                     }
                 }
-            }.schedule(delayMillis);
+            }.schedule((int) delayMillis);
         }
     }
 

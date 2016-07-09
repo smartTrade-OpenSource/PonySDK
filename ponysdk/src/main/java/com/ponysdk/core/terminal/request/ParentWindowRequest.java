@@ -23,18 +23,17 @@
 
 package com.ponysdk.core.terminal.request;
 
-import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.gwt.json.client.JSONValue;
+import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class ParentWindowRequest implements RequestBuilder {
 
     private static final Logger log = Logger.getLogger(ParentWindowRequest.class.getName());
 
     private final RequestCallback callback;
-
 
     public ParentWindowRequest(final String windowID, final RequestCallback callback) {
         this.callback = callback;
@@ -54,17 +53,17 @@ public class ParentWindowRequest implements RequestBuilder {
     /**
      * To Main terminal
      */
-    public static native void sendToParent(final String data) /*-{
-                                                                        $wnd.opener.pony.sendDataToServer(data);
-                                                                        }-*/;
-
-    /**
-     * To Main terminal
-     */
     @Override
     public void send(final JSONValue value) {
         sendToParent(value.toString());
     }
+
+    /**
+     * To Main terminal
+     */
+    public static native void sendToParent(final String data) /*-{
+                                                              $wnd.opener.pony.sendDataToServer(data);
+                                                              }-*/;
 
     /**
      * From Main terminal to the matching window terminal
