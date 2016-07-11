@@ -172,13 +172,13 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     public boolean removeItem(final int index) {
         final PMenuSubElement item = items.remove(index);
-        saveRemove(item.getID(), ID);
+        item.saveRemove(item.getID(), ID);
         return true;
     }
 
     public boolean removeItem(final PMenuSubElement elt) {
         final boolean removed = items.remove(elt);
-        if (removed) saveRemove(elt.getID(), ID);
+        if (removed) elt.saveRemove(elt.getID(), ID);
         return removed;
     }
 

@@ -28,14 +28,15 @@ import java.nio.ByteBuffer;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.servlet.WebSocketServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.WebSocketServlet.Buffer;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.servlet.WebSocketServlet;
+import com.ponysdk.core.server.servlet.WebSocketServlet.Buffer;
 
 public class Parser {
+
     private static final byte TRUE = 1;
     private static final byte FALSE = 0;
 
@@ -107,51 +108,53 @@ public class Parser {
         if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled()) log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
+                if (log.isDebugEnabled())
+                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
                 return;
             } else {
                 lastUpdatedID = newUpdatedID;
             }
-        } else if (ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model) || ServerToClientModel.TYPE_CLOSE.equals(model)
-                || ServerToClientModel.TYPE_CREATE.equals(model) || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
+        } else if (ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model)
+                || ServerToClientModel.TYPE_CLOSE.equals(model) || ServerToClientModel.TYPE_CREATE.equals(model)
+                || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
                 || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)) {
             lastUpdatedID = -1;
         }
 
         switch (model.getTypeModel()) {
-        case NULL:
-            parse(model);
-            break;
-        case BOOLEAN:
-            parse(model, (boolean) value);
-            break;
-        case BYTE:
-            parse(model, (byte) value);
-            break;
-        case SHORT:
-            parse(model, (short) value);
-            break;
-        case INTEGER:
-            parse(model, (int) value);
-            break;
-        case LONG:
-            // TODO For now, we write String
-            // parse(model, (long) value);
-            parse(model, String.valueOf(value));
-            break;
-        case DOUBLE:
-            // TODO For now, we write String
-            // parse(model, (double) value);
-            parse(model, String.valueOf(value));
-            break;
-        case STRING:
-            parse(model, (String) value);
-            break;
-        case JSON_OBJECT:
-            parse(model, (JsonObject) value);
-            break;
-        default:
-            break;
+            case NULL:
+                parse(model);
+                break;
+            case BOOLEAN:
+                parse(model, (boolean) value);
+                break;
+            case BYTE:
+                parse(model, (byte) value);
+                break;
+            case SHORT:
+                parse(model, (short) value);
+                break;
+            case INTEGER:
+                parse(model, (int) value);
+                break;
+            case LONG:
+                // TODO For now, we write String
+                // parse(model, (long) value);
+                parse(model, String.valueOf(value));
+                break;
+            case DOUBLE:
+                // TODO For now, we write String
+                // parse(model, (double) value);
+                parse(model, String.valueOf(value));
+                break;
+            case STRING:
+                parse(model, (String) value);
+                break;
+            case JSON_OBJECT:
+                parse(model, (JsonObject) value);
+                break;
+            default:
+                break;
         }
     }
 
@@ -191,7 +194,8 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final String value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + (value != null ? value.length() : 0) + " => " + value);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (size : " + (value != null ? value.length() : 0) + ")");
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
         final ByteBuffer utf8StringBuffer = UTF8StringToByteBuffer(value);

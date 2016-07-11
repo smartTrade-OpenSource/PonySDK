@@ -77,7 +77,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
             orphan(w);
         } finally {
             // Physical detach.
-            saveRemove(w.getID(), ID);
+            w.saveRemove(w.getID(), ID);
             // Logical detach.
             widget = null;
         }

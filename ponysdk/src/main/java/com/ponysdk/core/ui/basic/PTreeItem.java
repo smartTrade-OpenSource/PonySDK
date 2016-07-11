@@ -85,7 +85,7 @@ public class PTreeItem extends PObject {
 
         if (tree != null) {
             tree.orphan(widget);
-            saveRemove(widget.getID(), tree.getID());
+            widget.saveRemove(widget.getID(), tree.getID());
         }
 
         if (tree != null) {
@@ -148,7 +148,7 @@ public class PTreeItem extends PObject {
     }
 
     public boolean removeItem(final PTreeItem item) {
-        saveRemove(tree.getID(), ID);
+        tree.saveRemove(tree.getID(), ID);
         return children.remove(item);
     }
 

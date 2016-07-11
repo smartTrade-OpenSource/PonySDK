@@ -92,23 +92,19 @@ public class PHeaderPanel extends PPanel {
 
         if (child == content) {
             content = null;
-            sendRemove(child);
+            child.saveRemove(child.getID(), ID);
             return true;
         } else if (child == header) {
             header = null;
-            sendRemove(child);
+            child.saveRemove(child.getID(), ID);
             return true;
         } else if (child == footer) {
             footer = null;
-            sendRemove(child);
+            child.saveRemove(child.getID(), ID);
             return true;
         } else {
             return false;
         }
-    }
-
-    private void sendRemove(final PWidget child) {
-        saveRemove(child.getID(), ID);
     }
 
     @Override
