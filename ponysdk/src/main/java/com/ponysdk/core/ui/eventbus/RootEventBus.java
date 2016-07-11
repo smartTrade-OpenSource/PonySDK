@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,11 +23,24 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.ponysdk.core.ui.eventbus.Event.Type;
 
 public class RootEventBus implements EventBus {
 
@@ -125,7 +138,7 @@ public class RootEventBus implements EventBus {
             return;
         }
 
-        final boolean removed = handlers.remove(handler);
+        final boolean removed = Boolean.TRUE.equals(handlers.remove(handler));
         assert removed : "redundant remove call";
         if (removed && handlers.isEmpty()) {
             prune(type, source);
@@ -164,12 +177,12 @@ public class RootEventBus implements EventBus {
         pendingHandlerRegistration.add(context);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void doAddNow(final Type type, final Object source, final Object handler) {
         ensureHandlerSet(type, source).put(handler, true);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 
@@ -188,7 +201,7 @@ public class RootEventBus implements EventBus {
 
                 final Collection<? extends EventHandler> handlers = getDispatchSet(e.getAssociatedType(), e.getSource());
 
-                for (EventHandler handler1 : handlers) {
+                for (final EventHandler handler1 : handlers) {
                     try {
                         if (log.isDebugEnabled()) log.debug("dispatch eventbus #" + e);
                         e.dispatch(handler1);
@@ -293,10 +306,10 @@ public class RootEventBus implements EventBus {
         H handler;
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            HandlerContext<?> that = (HandlerContext<?>) o;
+            final HandlerContext<?> that = (HandlerContext<?>) o;
             return add == that.add &&
                     Objects.equals(type, that.type) &&
                     Objects.equals(source, that.source) &&
