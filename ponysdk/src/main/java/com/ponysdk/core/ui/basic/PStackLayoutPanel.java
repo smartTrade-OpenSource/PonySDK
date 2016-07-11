@@ -24,15 +24,23 @@
 package com.ponysdk.core.ui.basic;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time, with a header for
@@ -97,7 +105,7 @@ public class PStackLayoutPanel extends PComposite
         }
         orphan(child);
         children.remove(child);
-        saveRemove(child.getID(), ID);
+        child.saveRemove(child.getID(), ID);
         return true;
     }
 
@@ -184,7 +192,7 @@ public class PStackLayoutPanel extends PComposite
      * Set the duration of the animated transition between children.
      */
     public void setAnimationDuration(final Duration duration) {
-        if(Objects.equals(animationDuration,duration)) return;
+        if (Objects.equals(animationDuration, duration)) return;
         animationDuration = duration;
         saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
     }

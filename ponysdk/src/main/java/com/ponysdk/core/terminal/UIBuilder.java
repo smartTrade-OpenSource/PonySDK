@@ -23,6 +23,13 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -39,8 +46,18 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -53,14 +70,11 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.ponysdk.core.terminal.ui.PTCookies;
+import com.ponysdk.core.terminal.ui.PTObject;
+import com.ponysdk.core.terminal.ui.PTStreamResource;
+import com.ponysdk.core.terminal.ui.PTWindow;
+import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -284,21 +298,21 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void processRemove(final ReaderBuffer buffer, final int objectId) {
-        final int parentId = buffer.readBinaryModel().getIntValue();
-
         final PTObject ptObject = getPTObject(objectId);
-        PTObject parentObject;
-        if (parentId == -1)
-            parentObject = ptObject;
-        else
-            parentObject = getPTObject(parentId);
+        if (ptObject != null) {
+            final int parentId = buffer.readBinaryModel().getIntValue();
+            final PTObject parentObject = parentId != -1 ? getPTObject(parentId) : ptObject;
 
-        if (parentObject != null) {
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Remove : " + ptObject);
-            parentObject.remove(buffer, ptObject, this);
-        } else
-            log.warning("Cannot remove a garbaged object #" + objectId);
+            if (parentObject != null) {
+                if (log.isLoggable(Level.FINE))
+                    log.log(Level.FINE, "Remove : " + ptObject);
+                parentObject.remove(buffer, ptObject, this);
+            } else
+                log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
+        } else {
+            log.warning("Remove a null PTObject #" + objectId + ", so we will consume all the buffer of this object");
+            buffer.avoidBlock();
+        }
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {

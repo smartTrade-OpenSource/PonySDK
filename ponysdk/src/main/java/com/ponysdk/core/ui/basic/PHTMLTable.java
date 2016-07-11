@@ -185,7 +185,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             if (removeWidgetFromMap(widget) != null) {
                 // Physical detach.
                 if (physicalDetach) {
-                    saveRemove(widget.getID(), ID);
+                    widget.saveRemove(widget.getID(), ID);
                 }
             }
         }
