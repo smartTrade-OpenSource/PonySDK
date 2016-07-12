@@ -25,8 +25,6 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -287,11 +285,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public boolean removeChangeHandler(final PChangeHandler handler) {
         return handlers.remove(handler);
-    }
-
-    @Override
-    public Collection<PChangeHandler> getChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
     }
 
     public void setSelectedItem(final String item, final boolean selected) {

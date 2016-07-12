@@ -23,19 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.model.WidgetType;
-
-import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
+import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
@@ -66,7 +70,7 @@ public class PFileUpload extends PWidget
     }
 
     @Override
-    protected void enrichOnInit(Parser parser) {
+    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override
@@ -135,11 +139,6 @@ public class PFileUpload extends PWidget
     }
 
     @Override
-    public Collection<PChangeHandler> getChangeHandlers() {
-        return changeHandlers;
-    }
-
-    @Override
     public void onChange(final PChangeEvent event) {
         for (final PChangeHandler handler : changeHandlers) {
             handler.onChange(event);
@@ -149,11 +148,6 @@ public class PFileUpload extends PWidget
     @Override
     public void onSubmitComplete() {
         submitCompleteHandlers.forEach(PSubmitCompleteHandler::onSubmitComplete);
-    }
-
-    @Override
-    public Collection<PSubmitCompleteHandler> getSubmitCompleteHandlers() {
-        return submitCompleteHandlers;
     }
 
 }

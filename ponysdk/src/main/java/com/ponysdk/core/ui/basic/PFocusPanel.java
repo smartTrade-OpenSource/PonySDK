@@ -23,18 +23,64 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
+import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragEndHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragEnterHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragLeaveHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragOverHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragStartHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDropHandlers;
+import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseDownHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseOutHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseUpHandlers;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PBlurHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PDragEndEvent;
+import com.ponysdk.core.ui.basic.event.PDragEndHandler;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
+import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PDragOverHandler;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartHandler;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PDropHandler;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
+import com.ponysdk.core.ui.basic.event.PMouseDownHandler;
+import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOutHandler;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverHandler;
+import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
+import com.ponysdk.core.ui.basic.event.PMouseUpHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 /**
  * A simple panel that makes its contents focusable, and adds the ability to catch mouse and
  * keyboard events.
  */
 public class PFocusPanel extends PSimplePanel
-        implements HasPAllDragAndDropHandlers, HasPAllMouseHandlers, HasPClickHandlers, HasPAllKeyHandlers, HasPAllFocusHandlers {
+        implements HasPDragEndHandlers, HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers,
+        HasPDropHandlers, HasPMouseOverHandlers, HasPMouseOutHandlers, HasPMouseDownHandlers, HasPMouseUpHandlers, HasPClickHandlers,
+        HasPKeyUpHandlers, HasPKeyPressHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     @Override
     protected WidgetType getWidgetType() {
@@ -72,33 +118,13 @@ public class PFocusPanel extends PSimplePanel
     }
 
     @Override
-    public Collection<PKeyUpHandler> getKeyUpHandlers() {
-        return getHandlerSet(PKeyUpEvent.TYPE, this);
-    }
-
-    @Override
-    public Collection<PKeyPressHandler> getKeyPressHandlers() {
-        return getHandlerSet(PKeyPressEvent.TYPE, this);
-    }
-
-    @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         return addDomHandler(handler, PClickEvent.TYPE);
     }
 
     @Override
-    public Collection<PClickHandler> getClickHandlers() {
-        return getHandlerSet(PClickEvent.TYPE, this);
-    }
-
-    @Override
     public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
-    }
-
-    @Override
-    public Collection<PMouseOverHandler> getMouseOverHandlers() {
-        return getHandlerSet(PMouseOverEvent.TYPE, this);
     }
 
     @Override
@@ -117,28 +143,13 @@ public class PFocusPanel extends PSimplePanel
     }
 
     @Override
-    public Collection<PMouseOutHandler> getMouseOutHandlers() {
-        return getHandlerSet(PMouseOutEvent.TYPE, this);
-    }
-
-    @Override
     public HandlerRegistration addMouseDownHandler(final PMouseDownHandler handler) {
         return addDomHandler(handler, PMouseDownEvent.TYPE);
     }
 
     @Override
-    public Collection<PMouseDownHandler> getMouseDownHandlers() {
-        return getHandlerSet(PMouseDownEvent.TYPE, this);
-    }
-
-    @Override
     public HandlerRegistration addMouseUpHandler(final PMouseUpHandler handler) {
         return addDomHandler(handler, PMouseUpEvent.TYPE);
-    }
-
-    @Override
-    public Collection<PMouseUpHandler> getMouseUpHandlers() {
-        return getHandlerSet(PMouseUpEvent.TYPE, this);
     }
 
     @Override

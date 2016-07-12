@@ -26,7 +26,6 @@ package com.ponysdk.core.ui.basic;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -155,11 +154,6 @@ public class PStackLayoutPanel extends PComposite
     }
 
     @Override
-    public Collection<PBeforeSelectionHandler<Integer>> getBeforeSelectionHandlers() {
-        return Collections.unmodifiableCollection(beforeSelectionHandlers);
-    }
-
-    @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
@@ -168,11 +162,6 @@ public class PStackLayoutPanel extends PComposite
     @Override
     public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.remove(handler);
-    }
-
-    @Override
-    public Collection<PSelectionHandler<Integer>> getSelectionHandlers() {
-        return Collections.unmodifiableCollection(selectionHandlers);
     }
 
     public void showWidget(final PWidget widget) {
