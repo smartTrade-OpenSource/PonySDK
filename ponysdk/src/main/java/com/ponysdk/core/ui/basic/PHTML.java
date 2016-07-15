@@ -27,10 +27,10 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -57,8 +57,8 @@ public class PHTML extends PLabel implements PHasHTML {
         super();
     }
 
-    public PHTML(final String text) {
-        this(text, false);
+    public PHTML(final String html) {
+        this(html, false);
     }
 
     public PHTML(final String html, final boolean wordWrap) {
