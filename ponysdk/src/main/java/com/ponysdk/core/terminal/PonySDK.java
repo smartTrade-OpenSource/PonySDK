@@ -23,6 +23,14 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.timepedia.exporter.client.Export;
+import org.timepedia.exporter.client.ExportConstructor;
+import org.timepedia.exporter.client.ExportPackage;
+import org.timepedia.exporter.client.Exportable;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -39,14 +47,8 @@ import com.ponysdk.core.terminal.request.ParentWindowRequest;
 import com.ponysdk.core.terminal.request.RequestCallback;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-import elemental.client.Browser;
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportConstructor;
-import org.timepedia.exporter.client.ExportPackage;
-import org.timepedia.exporter.client.Exportable;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import elemental.client.Browser;
 
 @ExportPackage(value = "")
 @Export(value = "ponysdk")
@@ -88,8 +90,9 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
             if (opener == null) {
                 Window.addCloseHandler(new CloseHandler<Window>() {
+
                     @Override
-                    public void onClose(CloseEvent<Window> event) {
+                    public void onClose(final CloseEvent<Window> event) {
                         socketClient.close();
                         PTWindowManager.closeAll();
                     }
@@ -108,7 +111,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                 applicationViewID = viewID != null ? viewID : 0;
 
-                String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") +
+                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") +
                         "ws?" +
                         ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID + "&" +
                         ClientToServerModel.APPLICATION_START.toStringValue() + "&" +
@@ -154,6 +157,14 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
         final PTInstruction instruction = new PTInstruction(objectID);
         instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
+    }
+
+    /**
+     * From Main terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
+        sendDataToServer(Integer.parseInt(objectID), jsObject);
     }
 
     @Export

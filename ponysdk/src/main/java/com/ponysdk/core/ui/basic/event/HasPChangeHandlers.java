@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,11 +23,8 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import java.util.Collection;
-
 public interface HasPChangeHandlers {
 
     void addChangeHandler(PChangeHandler handler);
 
-    Collection<PChangeHandler> getChangeHandlers();
 }

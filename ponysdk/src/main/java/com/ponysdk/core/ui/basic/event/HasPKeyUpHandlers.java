@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import java.util.Collection;
-
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 public interface HasPKeyUpHandlers {
@@ -33,5 +31,4 @@ public interface HasPKeyUpHandlers {
 
     HandlerRegistration addKeyUpHandler(PKeyUpFilterHandler handler);
 
-    Collection<PKeyUpHandler> getKeyUpHandlers();
 }

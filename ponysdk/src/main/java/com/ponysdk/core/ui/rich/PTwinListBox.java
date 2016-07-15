@@ -24,8 +24,6 @@
 package com.ponysdk.core.ui.rich;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.ponysdk.core.ui.basic.PButton;
@@ -162,11 +160,6 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
     public boolean removeChangeHandler(final PChangeHandler handler) {
         return handlers.remove(handler);
-    }
-
-    @Override
-    public Collection<PChangeHandler> getChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
     }
 
 }

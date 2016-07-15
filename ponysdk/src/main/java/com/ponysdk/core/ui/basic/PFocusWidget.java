@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.HasPAllKeyHandlers;
 import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PBlurHandler;
@@ -55,24 +55,14 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
  * Abstract base class for most widgets that can receive keyboard focus.
  */
 public abstract class PFocusWidget extends PWidget
-        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPAllKeyHandlers, HasPFocusHandlers,
-        HasPBlurHandlers {
+        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPKeyUpHandlers,
+        HasPKeyPressHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
     private boolean focused = false;
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;
-
-    @Override
-    public Collection<PClickHandler> getClickHandlers() {
-        return getHandlerSet(PClickEvent.TYPE, this);
-    }
-
-    @Override
-    public Collection<PMouseOverHandler> getMouseOverHandlers() {
-        return getHandlerSet(PMouseOverEvent.TYPE, this);
-    }
 
     @Override
     public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
@@ -107,16 +97,6 @@ public abstract class PFocusWidget extends PWidget
     @Override
     public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
         return addDomHandler(handler, PBlurEvent.TYPE);
-    }
-
-    @Override
-    public Collection<PKeyPressHandler> getKeyPressHandlers() {
-        return getHandlerSet(PKeyPressEvent.TYPE, this);
-    }
-
-    @Override
-    public Collection<PKeyUpHandler> getKeyUpHandlers() {
-        return getHandlerSet(PKeyUpEvent.TYPE, this);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
@@ -194,11 +174,6 @@ public abstract class PFocusWidget extends PWidget
         } else {
             return addDomHandler(handler, PDoubleClickEvent.TYPE);
         }
-    }
-
-    @Override
-    public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
-        return getHandlerSet(PDoubleClickEvent.TYPE, this);
     }
 
 }

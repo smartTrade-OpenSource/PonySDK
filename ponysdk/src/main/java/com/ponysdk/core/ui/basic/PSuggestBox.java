@@ -25,17 +25,20 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a
@@ -49,6 +52,7 @@ import com.ponysdk.core.ui.basic.event.*;
  * configured:
  * </p>
  * <p>
+ * 
  * <pre>
  * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
  * oracle.add(&quot;Cat&quot;);
@@ -75,7 +79,8 @@ import com.ponysdk.core.ui.basic.event.*;
  * @see PTextBoxBase
  */
 public class PSuggestBox extends PWidget
-        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion>, HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
+        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion>,
+        HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
 
     private final PSuggestOracle suggestOracle;
     private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
@@ -117,8 +122,8 @@ public class PSuggestBox extends PWidget
             final String text = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue())) {
-            String replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
-            String displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
+            final String replacementString = instruction.getString(ClientToServerModel.REPLACEMENT_STRING.toStringValue());
+            final String displayString = instruction.getString(ClientToServerModel.HANDLER_STRING_SELECTION.toStringValue());
             this.textBox.setText(replacementString);
             final MultiWordSuggestion suggestion = new MultiWordSuggestion(replacementString, displayString);
             onSelection(new PSelectionEvent<>(this, suggestion));
@@ -198,15 +203,6 @@ public class PSuggestBox extends PWidget
     public void removeSelectionHandler(final PSelectionHandler<PSuggestOracle.PSuggestion> handler) {
         if (selectionHandler != null) {
             this.selectionHandler.remove(handler);
-        }
-    }
-
-    @Override
-    public Collection<PSelectionHandler<PSuggestOracle.PSuggestion>> getSelectionHandlers() {
-        if (selectionHandler == null) {
-            return Collections.emptyList();
-        } else {
-            return Collections.unmodifiableCollection(selectionHandler);
         }
     }
 

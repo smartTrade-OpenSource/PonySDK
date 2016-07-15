@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,13 +23,6 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.*;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +30,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
@@ -48,6 +52,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
     private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<>();
     private PAnchor selectedItem;
+
     public StackLayoutMenuView() {
         layoutPanel = new PStackLayoutPanel(PUnit.EM);
         setWidget(layoutPanel);
@@ -93,7 +98,8 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             // Sub category
             final Node parentCategory = categoryNode.parent;
             final PComplexPanel categoryPanel = categoriesByNode.get(parentCategory);
-            if (categoryPanel == null) throw new IllegalArgumentException("Category '" + categoryNode.name + "' not assigned to a parent category");
+            if (categoryPanel == null)
+                throw new IllegalArgumentException("Category '" + categoryNode.name + "' not assigned to a parent category");
 
             final PAnchor category = new PAnchor(categoryNode.name);
             applyPadding(categoryNode, category);
@@ -119,7 +125,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
 
     private void applyExpandableStyle(final Node categoryNode, final PAnchor category) {
 
-        final String left = ((categoryNode.level - 1) * paddingLeft - 10) + "px";
+        final String left = (categoryNode.level - 1) * paddingLeft - 10 + "px";
         category.setStyleProperty("backgroundPosition", left + " center");
         category.setStyleProperty("backgroundRepeat", "no-repeat");
 
@@ -208,11 +214,6 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         selectionHandlers.remove(handler);
     }
 
-    @Override
-    public Collection<PSelectionHandler<MenuItem>> getSelectionHandlers() {
-        return selectionHandlers;
-    }
-
     private class Node {
 
         private final String name;
@@ -234,7 +235,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
                 this.level = 0;
             }
 
-            this.open = (level < 2);
+            this.open = level < 2;
         }
 
         public Node getChild(final String name) {

@@ -23,14 +23,37 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragEndHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragEnterHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragLeaveHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragOverHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDragStartHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDropHandlers;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
+import com.ponysdk.core.ui.basic.event.PDragEndEvent;
+import com.ponysdk.core.ui.basic.event.PDragEndHandler;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
+import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PDragOverHandler;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartHandler;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PDropHandler;
+import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
@@ -41,7 +64,8 @@ import java.util.Objects;
  * <li>.gwt-Label { }</li>
  * </ul>
  */
-public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPAllDragAndDropHandlers {
+public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
+        HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
     private String text;
 
@@ -81,18 +105,8 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     }
 
     @Override
-    public Collection<PClickHandler> getClickHandlers() {
-        return getHandlerSet(PClickEvent.TYPE, this);
-    }
-
-    @Override
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
         return addDomHandler(handler, PDoubleClickEvent.TYPE);
-    }
-
-    @Override
-    public Collection<PDoubleClickHandler> getDoubleClickHandlers() {
-        return getHandlerSet(PDoubleClickEvent.TYPE, this);
     }
 
     @Override

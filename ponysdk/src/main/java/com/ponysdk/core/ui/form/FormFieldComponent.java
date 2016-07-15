@@ -38,10 +38,20 @@ import com.ponysdk.core.ui.list.Validable;
 public class FormFieldComponent extends PFlowPanel implements FormFieldListener, Validable, Resetable {
 
     protected final FormField<?, ? extends IsPWidget> formField;
+
     protected PFlowPanel container = new PFlowPanel();
     protected PLabel captionLabel;
     protected PLabel errorLabel;
+
     private CaptionOrientation captionOrientation;
+
+    public enum CaptionOrientation {
+        LEFT,
+        TOP,
+        RIGHT,
+        BOTTOM
+    }
+
     public FormFieldComponent(final FormField<?, ? extends IsPWidget> formField) {
         this(null, CaptionOrientation.TOP, formField);
     }
@@ -114,19 +124,22 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     @Override
     public void afterReset(final FormField<?, ? extends IsPWidget> formField) {
-        removeStyleName("error");
-        errorLabel.setText("");
+        clearError();
     }
 
     @Override
     public void afterValidation(final FormField<?, ? extends IsPWidget> formField, final ValidationResult validationResult) {
         if (validationResult.isValid()) {
-            removeStyleName("error");
-            errorLabel.setText("");
+            clearError();
         } else {
             addStyleName("error");
             errorLabel.setText(validationResult.getErrorMessage());
         }
+    }
+
+    public void clearError() {
+        removeStyleName("error");
+        errorLabel.setText("");
     }
 
     @Override
@@ -139,10 +152,4 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
         formField.reset();
     }
 
-    public enum CaptionOrientation {
-        LEFT,
-        TOP,
-        RIGHT,
-        BOTTOM
-    }
 }

@@ -26,7 +26,6 @@ package com.ponysdk.core.ui.basic;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 import javax.json.JsonObject;
@@ -155,11 +154,6 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     @Override
-    public Collection<PBeforeSelectionHandler<Integer>> getBeforeSelectionHandlers() {
-        return Collections.unmodifiableCollection(beforeSelectionHandlers);
-    }
-
-    @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
     }
@@ -170,19 +164,14 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     @Override
-    public Collection<PSelectionHandler<Integer>> getSelectionHandlers() {
-        return Collections.unmodifiableCollection(selectionHandlers);
-    }
-
-    @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
-            for (final PSelectionHandler<Integer> handler : getSelectionHandlers()) {
+            for (final PSelectionHandler<Integer> handler : selectionHandlers) {
                 handler.onSelection(
                         new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())) {
-            for (final PBeforeSelectionHandler<Integer> handler : getBeforeSelectionHandlers()) {
+            for (final PBeforeSelectionHandler<Integer> handler : beforeSelectionHandlers) {
                 handler.onBeforeSelection(new PBeforeSelectionEvent<>(this,
                         instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
             }

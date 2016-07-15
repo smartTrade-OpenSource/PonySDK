@@ -23,32 +23,65 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.terminal.DomHandlerType;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.basic.event.HasPHandlers;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
+import com.ponysdk.core.ui.basic.event.PDomEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDragEndEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
+import com.ponysdk.core.ui.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventBus;
+import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
  * support for receiving events from the browser and being added directly to
  * {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget {
+public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
 
@@ -185,7 +218,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         this.parent = parent;
     }
 
-    void bind(PAddOn addon){
+    void bind(final PAddOn addon) {
         this.addon = addon;
     }
 
@@ -317,7 +350,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type,
-                                                                       final ServerBinaryModel binaryModel) {
+            final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
@@ -341,7 +374,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     if (binaryModel != null) writer.writeModel(binaryModel.getKey(), binaryModel.getValue());
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
     }
 
@@ -452,6 +485,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         fireEvent(event);
     }
 
+    @Override
     public void fireEvent(final Event<?> event) {
         if (domHandler == null) return;
         domHandler.fireEvent(event);
@@ -471,6 +505,5 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public String toString() {
         return getClass().getSimpleName() + " #" + ID;
     }
-
 
 }
