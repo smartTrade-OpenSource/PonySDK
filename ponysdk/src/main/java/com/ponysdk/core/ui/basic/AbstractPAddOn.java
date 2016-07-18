@@ -121,24 +121,24 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
         if (args.length > 0) {
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (final Object object : args) {
-                if (object != null) {
-                    if (object instanceof JsonValue)
-                        arrayBuilder.add((JsonValue) object);
-                    else if (object instanceof Boolean)
-                        arrayBuilder.add((Boolean) object);
-                    else if (object instanceof Integer)
-                        arrayBuilder.add((Integer) object);
-                    else if (object instanceof Long)
-                        arrayBuilder.add((Long) object);
-                    else if (object instanceof Double)
-                        arrayBuilder.add((Double) object);
-                    else if (object instanceof JsonArrayBuilder)
-                        arrayBuilder.add(((JsonArrayBuilder) object).build());
-                    else if (object instanceof JsonObjectBuilder)
-                        arrayBuilder.add(((JsonObjectBuilder) object).build());
-                    else
-                        arrayBuilder.add(object.toString());
-                }
+                if (object instanceof JsonValue)
+                    arrayBuilder.add((JsonValue) object);
+                else if (object instanceof Boolean)
+                    arrayBuilder.add((Boolean) object);
+                else if (object instanceof Integer)
+                    arrayBuilder.add((Integer) object);
+                else if (object instanceof Long)
+                    arrayBuilder.add((Long) object);
+                else if (object instanceof Double)
+                    arrayBuilder.add((Double) object);
+                else if (object instanceof JsonArrayBuilder)
+                    arrayBuilder.add(((JsonArrayBuilder) object).build());
+                else if (object instanceof JsonObjectBuilder)
+                    arrayBuilder.add(((JsonObjectBuilder) object).build());
+                else if (object != null)
+                    arrayBuilder.add(object.toString());
+                else
+                    arrayBuilder.addNull();
             }
             builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
         }
