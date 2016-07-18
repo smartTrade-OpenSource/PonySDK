@@ -239,7 +239,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
                 processClose();
             } else {
-                log.log(Level.WARNING, "Unknown instruction type : " + binaryModel.getModel());
+                log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
+                buffer.avoidBlock();
             }
         }
     }
