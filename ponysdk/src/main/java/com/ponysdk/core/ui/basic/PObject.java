@@ -247,12 +247,14 @@ public abstract class PObject {
 
     private void writeUpdate(final ModelWriterCallback callback) {
         try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.getMain().getID()) {
-                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            }
-            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+            if (PWindowManager.getWindow(windowID) != null) {
+                if (windowID != PWindow.getMain().getID()) {
+                    writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+                }
+                writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
 
-            callback.doWrite(writer);
+                callback.doWrite(writer);
+            }
         } catch (final IOException e) {
             // TODO Error ???
         }

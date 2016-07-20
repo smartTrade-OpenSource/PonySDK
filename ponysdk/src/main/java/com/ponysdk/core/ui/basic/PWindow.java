@@ -23,6 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -32,12 +39,6 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
-
-import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 public class PWindow extends PObject {
 
@@ -85,7 +86,7 @@ public class PWindow extends PObject {
         }
     }
 
-    public static PWindow getMain(){
+    public static PWindow getMain() {
         return UIContext.get().getAttribute(PWindow.class.getCanonicalName());
     }
 
@@ -115,19 +116,21 @@ public class PWindow extends PObject {
     @Override
     public void onClientData(final JsonObject event) {
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
+            PWindowManager.registerWindow(this);
+            this.opened = true;
+
             while (!stackedInstructions.isEmpty()) {
                 stackedInstructions.poll().run();
             }
 
-            this.opened = true;
-
-            PWindowManager.registerWindow(this);
             PScript.registerWindow(ID);
 
             final POpenEvent e = new POpenEvent(this);
             openHandlers.forEach(handler -> handler.onOpen(e));
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
+            getPRootLayoutPanel().clear();
+            getPRootPanel().clear();
             this.opened = false;
             final PCloseEvent e = new PCloseEvent(this);
             closeHandlers.forEach(handler -> handler.onClose(e));
