@@ -44,9 +44,6 @@ public class ServletContextFilter implements Filter {
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
-            System.err.println("Request : " + request);
-
-
             HTTPServletContext.get().setContext((HttpServletRequest) request, (HttpServletResponse) response);
             try {
                 chain.doFilter(request, response);
