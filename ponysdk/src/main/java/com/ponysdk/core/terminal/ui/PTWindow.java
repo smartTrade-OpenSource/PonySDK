@@ -88,8 +88,8 @@ public class PTWindow extends AbstractPTObject implements EventListener {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
             // WORKAROUND : Add a specific method to handle IE
-            //eventRemover = window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
             eventRemover = addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+            if (eventRemover == null) eventRemover = window.addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -104,9 +104,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     }
 
     public void close(final boolean forced) {
-        if (forced) {
-            eventRemover.remove();
-        }
+        if (forced) eventRemover.remove();
         window.close();
     }
 
@@ -129,7 +127,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     public native final EventRemover addEventListener(String type, EventListener listener, boolean useCapture) /*-{
                                                                                                                var handler = @elemental.js.dom.JsElementalMixinBase::getHandlerFor(Lelemental/events/EventListener;)(listener);
-                                                                                                               if (window.addEventListener) window.addEventListener(type, handler, useCapture); // W3C DOM
+                                                                                                               if (window.addEventListener) return null; // W3C DOM
                                                                                                                else if (window.attachEvent) window.attachEvent("on" + type, handler); // IE DOM
                                                                                                                return @elemental.js.dom.JsElementalMixinBase.Remover::create(Lelemental/events/EventTarget;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(window, type, handler, useCapture);
                                                                                                                }-*/;

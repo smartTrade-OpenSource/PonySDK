@@ -29,6 +29,9 @@ import java.util.Queue;
 
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -45,6 +48,8 @@ import com.ponysdk.core.writer.ModelWriterCallback;
  * The superclass for all PonySDK objects.
  */
 public abstract class PObject {
+
+    private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
     protected final int ID = UIContext.get().nextID();
     final Queue<Runnable> stackedInstructions = new LinkedList<>();
@@ -247,12 +252,16 @@ public abstract class PObject {
 
     private void writeUpdate(final ModelWriterCallback callback) {
         try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.getMain().getID()) {
-                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            }
-            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+            if (PWindowManager.getWindow(windowID) != null) {
+                if (windowID != PWindow.getMain().getID()) {
+                    writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+                }
+                writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
 
-            callback.doWrite(writer);
+                callback.doWrite(writer);
+            } else {
+                if (log.isWarnEnabled()) log.warn("The attached window #" + windowID + " doesn't exist", toString());
+            }
         } catch (final IOException e) {
             // TODO Error ???
         }
