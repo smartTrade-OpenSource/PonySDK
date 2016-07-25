@@ -214,7 +214,7 @@ public class PTabLayoutPanel extends PComplexPanel
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(this.animationDuration, duration)) return;
         this.animationDuration = duration;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
 }

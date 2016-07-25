@@ -183,7 +183,7 @@ public class PStackLayoutPanel extends PComposite
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(animationDuration, duration)) return;
         animationDuration = duration;
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, duration.toMillis()));
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
 }
