@@ -29,9 +29,9 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.terminal.ui.alignment.PTAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.alignment.PTAlignment;
 
 public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
@@ -42,14 +42,14 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
         }
-        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);

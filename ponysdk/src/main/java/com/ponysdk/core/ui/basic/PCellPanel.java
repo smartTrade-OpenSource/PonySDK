@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
-
-import java.util.Objects;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each
@@ -49,14 +49,14 @@ public abstract class PCellPanel extends PComplexPanel {
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, align.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment align) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, align.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }

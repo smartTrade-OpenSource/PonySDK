@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.basic.alignment.PAlignment;
-
-import java.time.Duration;
 
 /**
  * A panel that lays its children
@@ -49,7 +49,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         assertIsChild(child);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, position.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, position.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
         });
     }
@@ -58,7 +58,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         assertIsChild(child);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, position.getValue());
+            writer.writeModel(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, position.getValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
         });
     }
@@ -103,7 +103,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
-                            final double v2, final PUnit unit) {
+            final double v2, final PUnit unit) {
         saveUpdate((writer) -> {
             writer.writeModel(ServerToClientModel.UNIT, unit.getByteValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
