@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.core.ui.place.PlaceChangeRequestEvent;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
+import com.ponysdk.core.ui.place.Place;
+import com.ponysdk.core.ui.place.PlaceChangeRequest;
 
 public class PlaceChangeCellRenderer extends AbstractCellRenderer<String, PAnchor> {
 
@@ -40,7 +39,7 @@ public class PlaceChangeCellRenderer extends AbstractCellRenderer<String, PAncho
     @Override
     public PAnchor render0(final int row, final String value) {
         final PAnchor anchor = new PAnchor(value);
-        anchor.addClickHandler((event) -> UIContext.fireEvent(new PlaceChangeRequestEvent(PlaceChangeCellRenderer.this, place)));
+        anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
         return anchor;
     }
 
