@@ -108,6 +108,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w != null) {
             // Physical attach.
             w.saveAdd(w.getID(), ID);
+            w.attach(windowID);
             adopt(w);
         }
     }

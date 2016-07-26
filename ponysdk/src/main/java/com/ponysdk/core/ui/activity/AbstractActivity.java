@@ -24,15 +24,15 @@
 package com.ponysdk.core.ui.activity;
 
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.Event.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.core.ui.place.PlaceChangeRequestEvent;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.place.PlaceChangeRequest;
 
 public abstract class AbstractActivity<T extends IsPWidget> implements Activity {
 
@@ -78,7 +78,7 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
     }
 
     public void goTo(final Place place) {
-        UIContext.getRootEventBus().fireEvent(new PlaceChangeRequestEvent(this, place));
+        PlaceChangeRequest.fire(this, place);
     }
 
     public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {

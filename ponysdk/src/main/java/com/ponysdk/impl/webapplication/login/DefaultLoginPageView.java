@@ -33,7 +33,7 @@ import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 
@@ -101,7 +101,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     @Override
-    public void addLoginShortcutListener(final PKeyUpHandler handler) {
+    public void addLoginShortcutListener(final PKeyUpFilterHandler handler) {
         loginTextBox.addKeyUpHandler(handler);
     }
 
@@ -111,7 +111,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     @Override
-    public void addPasswordShortcutListener(final PKeyUpHandler handler) {
+    public void addPasswordShortcutListener(final PKeyUpFilterHandler handler) {
         passwordTextBox.addKeyUpHandler(handler);
     }
 

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,7 +25,7 @@ package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 
 public interface LoginPageView extends IsPWidget {
 
@@ -35,9 +35,9 @@ public interface LoginPageView extends IsPWidget {
 
     Boolean isRememberMe();
 
-    void addLoginShortcutListener(PKeyUpHandler handler);
+    void addLoginShortcutListener(PKeyUpFilterHandler handler);
 
-    void addPasswordShortcutListener(PKeyUpHandler handler);
+    void addPasswordShortcutListener(PKeyUpFilterHandler handler);
 
     void addLoginClickHandler(PClickHandler handler);
 
