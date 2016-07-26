@@ -27,7 +27,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -56,6 +55,8 @@ public class BootstrapServlet extends HttpServlet {
     protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private static final long serialVersionUID = 6993633431616272739L;
+
+    private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
     protected final List<String> meta = new ArrayList<>();
     protected final List<String> stylesheets = new ArrayList<>();
@@ -116,7 +117,8 @@ public class BootstrapServlet extends HttpServlet {
         return request.getRequestURI().replaceFirst(contextPath, "");
     }
 
-    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws IOException {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
+            throws IOException {
         request.getSession();
 
         // Try to load from context
@@ -144,7 +146,7 @@ public class BootstrapServlet extends HttpServlet {
             file = new File(path);
         }
 
-        final String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+        final String mimeType = fileTypeMap.getContentType(file);
         response.setContentType(mimeType);
 
         if (inputStream != null) {
@@ -207,9 +209,10 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
 
         for (final String style : stylesheets) {
-            final String contentType = new MimetypesFileTypeMap().getContentType(style);
+            final String contentType = fileTypeMap.getContentType(style);
             if (!contentType.equals("text/css"))
-                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
+                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style)
+                        .append("\">");
             else
                 writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
             writer.newLine();
@@ -241,7 +244,8 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
-        writer.append("<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+        writer.append(
+                "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
@@ -251,7 +255,8 @@ public class BootstrapServlet extends HttpServlet {
     protected void addNoScript(final BufferedWriter writer) throws IOException {
         writer.append("<noscript>");
         writer.newLine();
-        writer.append("<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        writer.append(
+                "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         writer.newLine();
         writer.append("Your web browser must have JavaScript enabled");
         writer.newLine();
