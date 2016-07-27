@@ -41,17 +41,29 @@ import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
-public class WebSocketClient {
+public class WebSocketClient implements MessageSender {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private static final String ARRAYBUFFER_TYPE = "arraybuffer";
-
     private final WebSocket webSocket;
+    private final UIBuilder uiBuilder;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final int applicationViewID) {
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final int applicationViewID,
+            final WebSocketDataType webSocketDataType) {
+        this.uiBuilder = uiBuilder;
+
         final Window window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
+        webSocket.setBinaryType(webSocketDataType.getName());
+
+        final MessageReader messageReader;
+        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
+            messageReader = new ArrayBufferReader(this);
+        } else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
+            messageReader = new BlobReader(this);
+        } else {
+            throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
+        }
 
         webSocket.setOnopen(new EventListener() {
 
@@ -77,31 +89,33 @@ public class WebSocketClient {
              */
             @Override
             public void handleEvent(final Event event) {
-                final ArrayBuffer arrayBuffer = (ArrayBuffer) ((MessageEvent) event).getData();
-                try {
-                    final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-                    // Get the first element on the message, always a key of
-                    // element of the Model enum
-                    final BinaryModel type = buffer.readBinaryModel();
-
-                    if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
-                        send(ClientToServerModel.HEARTBEAT.toStringValue());
-                    } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
-                        try {
-                            uiBuilder.updateMainTerminal(buffer);
-                        } catch (final Exception e) {
-                            log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                        }
-                    } else {
-                        log.severe("Unknown model : " + type.getModel());
-                    }
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
-                }
+                messageReader.read((MessageEvent) event);
             }
         });
-        webSocket.setBinaryType(ARRAYBUFFER_TYPE);
+    }
+
+    @Override
+    public void read(final ArrayBuffer arrayBuffer) {
+        try {
+            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+            // Get the first element on the message, always a key of element of the Model enum
+            final BinaryModel type = buffer.readBinaryModel();
+
+            if (type.getModel() == ServerToClientModel.HEARTBEAT) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
+                send(ClientToServerModel.HEARTBEAT.toStringValue());
+            } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
+                try {
+                    uiBuilder.updateMainTerminal(buffer);
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+                }
+            } else {
+                log.severe("Unknown model : " + type.getModel());
+            }
+        } catch (final Exception e) {
+            log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+        }
     }
 
     public void send(final String message) {
@@ -110,6 +124,30 @@ public class WebSocketClient {
 
     public void close() {
         webSocket.close();
+    }
+
+    public enum WebSocketDataType {
+
+        ARRAYBUFFER("arraybuffer"),
+        BLOB("blob");
+
+        private String name;
+
+        private WebSocketDataType(final String name) {
+            this.name = name;
+        }
+
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return getName();
+        }
     }
 
 }
