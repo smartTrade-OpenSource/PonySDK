@@ -57,7 +57,7 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
     }
 
     public PTwinListBox(final String leftCaption, final String rightCaption, final boolean containsEmptyItem) {
-        addStyleName("ptwin-listbox");
+        addStyleName("pony-TwinListBox");
         this.leftCaption = leftCaption;
         this.rightCaption = rightCaption;
         init(containsEmptyItem);
@@ -76,17 +76,17 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
         leftListBox = new PListBox(containsEmptyItem);
         leftListBox.setMultipleSelect(true);
-        leftListBox.addStyleName("left");
+        leftListBox.addStyleName("pony-TwinListBox-Left-ListBox");
 
         rightListBox = new PListBox(containsEmptyItem);
         rightListBox.setMultipleSelect(true);
-        rightListBox.addStyleName("right");
+        rightListBox.addStyleName("pony-TwinListBox-Right-ListBox");
 
         setWidget(1, 0, leftListBox);
         setWidget(1, 2, rightListBox);
 
         switchButton = new PButton("<>");
-        switchButton.addStyleName("switch");
+        switchButton.addStyleName("pony-TwinListBox-Switch-ListBox");
         switchButton.addClickHandler(new PClickHandler() {
 
             @Override

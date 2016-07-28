@@ -45,7 +45,7 @@ public class PBreadCrumbs extends PElement {
 
     public PBreadCrumbs() {
         super("ul");
-        addStyleName("breadcrumbs");
+        addStyleName("pony-BreadCrumbs");
     }
 
     public void addItem(final String item) {

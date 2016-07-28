@@ -46,6 +46,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.ParentWindowRequest;
 import com.ponysdk.core.terminal.request.RequestCallback;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
+import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
@@ -118,7 +119,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                         ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0 + "&" +
                         ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
 
-                socketClient = new WebSocketClient(builder, uiBuilder, applicationViewID);
+                socketClient = new WebSocketClient(builder, uiBuilder, applicationViewID, WebSocketDataType.ARRAYBUFFER);
             } else {
                 final String windowId = Window.Location.getParameter("wid");
                 uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {

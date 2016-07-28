@@ -69,7 +69,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     }
 
     protected void buildUI(final String caption) {
-        addStyleName("pform-field-component");
+        addStyleName("pony-Form-FormField-Component");
 
         formField.addFormFieldListener(this);
         buildCaption(caption);
@@ -85,7 +85,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     protected void buildCaption(final String caption) {
         captionLabel = new PLabel();
-        captionLabel.addStyleName("caption");
+        captionLabel.addStyleName("pony-Page-Header-Caption");
         captionLabel.setVisible(false);
         setCaption(caption);
         add(captionLabel);

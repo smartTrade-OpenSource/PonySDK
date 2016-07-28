@@ -36,9 +36,6 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
-import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
-import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
@@ -67,7 +64,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void init() throws ServletException {
         super.init();
 
-        applicationManager = (AbstractApplicationManager) getServletContext().getAttribute(AbstractApplicationManager.class.getCanonicalName());
+        applicationManager = (AbstractApplicationManager) getServletContext()
+                .getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
         if (log.isInfoEnabled())
             log.info("Initializing Buffer allocation ...");
@@ -82,10 +80,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     @Override
     public void configure(final WebSocketServletFactory factory) {
-        // Add compression capabilities
-        factory.getExtensionFactory().register("deflate-frame", DeflateFrameExtension.class);
-        factory.getExtensionFactory().register("permessage-deflate", PerMessageDeflateExtension.class);
-        factory.getExtensionFactory().register("x-webkit-deflate-frame", XWebkitDeflateFrameExtension.class);
+        // Remove compression capabilities to avoid a max buffer size bug
+        factory.getExtensionFactory().unregister("permessage-deflate");
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((req, resp) -> new WebSocket(req));
@@ -138,7 +134,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
             Application application = SessionManager.get().getApplication(sessionId);
             if (application == null) {
-                application = new Application(request.getSession(), applicationManager.getOptions(), UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
+                application = new Application(request.getSession(), applicationManager.getOptions(),
+                        UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
             }
 
             context.setApplication(application);
