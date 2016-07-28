@@ -71,20 +71,20 @@ public class DefaultPageView implements PageView {
 
     protected void buildHeader() {
         header = new PFlowPanel();
-        header.addStyleName("header");
+        header.addStyleName("pony-Page-Header");
         buildTitle();
     }
 
     protected void buildTitle() {
         title = new PLabel(pageTitle);
         title.setText(pageTitle);
-        title.addStyleName("caption");
+        title.addStyleName("pony-Page-Header-Caption");
         header.add(title);
     }
 
     protected void buildBody() {
         body = new PSimpleLayoutPanel();
-        body.addStyleName("body");
+        body.addStyleName("pony-Page-Body");
     }
 
     @Override

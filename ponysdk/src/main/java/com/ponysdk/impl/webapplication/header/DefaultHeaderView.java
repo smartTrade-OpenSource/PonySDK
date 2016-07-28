@@ -38,10 +38,10 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
         setSizeFull();
 
         final PLabel logo = new PLabel(title);
-        logo.addStyleName("headerLogo");
+        logo.addStyleName("pony-Header-Logo");
 
         final PHorizontalPanel gridLayout = new PHorizontalPanel();
-        gridLayout.addStyleName("defaultHeader");
+        gridLayout.addStyleName("pony-Header");
         gridLayout.add(logo);
         gridLayout.setCellHorizontalAlignment(logo, PHorizontalAlignment.ALIGN_LEFT);
         gridLayout.setCellVerticalAlignment(logo, PVerticalAlignment.ALIGN_MIDDLE);

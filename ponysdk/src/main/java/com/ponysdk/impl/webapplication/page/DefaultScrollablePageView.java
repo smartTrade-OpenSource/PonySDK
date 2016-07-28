@@ -30,6 +30,6 @@ public class DefaultScrollablePageView extends DefaultPageView {
     @Override
     protected void buildBody() {
         body = new PScrollPanel();
-        body.addStyleName("body");
+        body.addStyleName("pony-Page-Body");
     }
 }

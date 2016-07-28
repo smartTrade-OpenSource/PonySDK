@@ -45,7 +45,7 @@ public class PToolbar extends PHorizontalPanel {
 
     public void addSepararator() {
         final PSimplePanel separator = new PSimplePanel();
-        separator.addStyleName("ptoolbar-separator");
+        separator.addStyleName("pony-Toolbar-Separator");
         add(separator);
     }
 

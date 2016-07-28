@@ -150,7 +150,7 @@ public class PNotificationManager {
 
     private static void showHumanizedNotification(final int windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -162,7 +162,7 @@ public class PNotificationManager {
 
     private static void showHumanizedNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -174,7 +174,7 @@ public class PNotificationManager {
 
     private static void showWarningNotification(final int windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -185,7 +185,7 @@ public class PNotificationManager {
 
     private static void showWarningNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -197,7 +197,7 @@ public class PNotificationManager {
     private static void showErrorNotification(final int windowID, final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(false);
         popupPanel.setGlassEnabled(false);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -208,7 +208,7 @@ public class PNotificationManager {
     private static void showErrorNotification(final IsPWidget content) {
         final PPopupPanel popupPanel = new PPopupPanel(false);
         popupPanel.setGlassEnabled(false);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
         popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
@@ -221,7 +221,7 @@ public class PNotificationManager {
         div2.setWidget(content);
 
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("tray");
         popupPanel.setWidget(div2);
         displayAtBottomRight(popupPanel, "closing");
@@ -233,7 +233,7 @@ public class PNotificationManager {
         div2.setWidget(content);
 
         final PPopupPanel popupPanel = new PPopupPanel(true);
-        popupPanel.addStyleName("notification");
+        popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("tray");
         popupPanel.setWidget(div2);
         displayAtBottomRight(popupPanel, "closing");

@@ -49,12 +49,12 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void selectRow(final int row) {
-        getRowFormatter().addStyleName(row + 1, "selected");
+        getRowFormatter().addStyleName(row + 1, "pony-SimpleList-Row-Selected");
     }
 
     @Override
     public void unSelectRow(final int row) {
-        getRowFormatter().removeStyleName(row + 1, "selected");
+        getRowFormatter().removeStyleName(row + 1, "pony-SimpleList-Row-Selected");
     }
 
     @Override

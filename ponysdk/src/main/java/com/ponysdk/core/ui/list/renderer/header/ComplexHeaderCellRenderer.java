@@ -86,12 +86,13 @@ public class ComplexHeaderCellRenderer
 
     protected void buildGrid() {
         panel = new PGrid(2, 1);
-        panel.addStyleName("header");
+        panel.addStyleName("pony-ComplexList-ComplexHeader");
         panel.setWidget(1, 0, formField.asWidget());
     }
 
     protected void buildCaption(final String s) {
         caption = new PLabel(s);
+        caption.addStyleName("sortable");
         caption.addClickHandler((PClickEvent) -> {
             caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
             final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);

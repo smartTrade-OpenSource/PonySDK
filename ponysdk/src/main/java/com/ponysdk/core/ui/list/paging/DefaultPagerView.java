@@ -53,7 +53,7 @@ public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHan
     }
 
     private void initUI() {
-        addStyleName("pager");
+        addStyleName("pony-Page-Navigation");
 
         startMenuItem.addClickHandler(this);
         previousMenuItem.addClickHandler(this);
@@ -116,7 +116,7 @@ public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHan
     public void setSelectedPage(final int pageIndex) {
         final PAnchor item = items.get(pageIndex);
         item.setEnabled(false);
-        item.addStyleName("selected");
+        item.addStyleName("pony-Page-Navigation-selectedItem");
     }
 
     @Override

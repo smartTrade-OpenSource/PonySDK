@@ -46,7 +46,7 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
 
     protected PSimplePanel buildBody() {
         final PSimplePanel panel = new PSimpleLayoutPanel();
-        panel.addStyleName("body");
+        panel.addStyleName("pony-Page-Body");
         return panel;
     }
 

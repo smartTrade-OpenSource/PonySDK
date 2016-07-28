@@ -49,7 +49,7 @@ public class PClosableDialogBox extends PPopupPanel {
         super(false);
         setModal(modal);
 
-        setStyleName("pclosable-dialog");
+        setStyleName("pony-closable-dialog-box");
 
         captionContainer = new PSimplePanel();
         closeContainer = new PSimplePanel();
