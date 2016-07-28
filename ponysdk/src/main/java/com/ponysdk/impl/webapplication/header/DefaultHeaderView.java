@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.header;
 
-
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
@@ -39,8 +38,10 @@ public class DefaultHeaderView extends PSimplePanel implements HeaderView {
         setSizeFull();
 
         final PLabel logo = new PLabel(title);
+        logo.addStyleName("headerLogo");
 
-        PHorizontalPanel gridLayout = new PHorizontalPanel();
+        final PHorizontalPanel gridLayout = new PHorizontalPanel();
+        gridLayout.addStyleName("defaultHeader");
         gridLayout.add(logo);
         gridLayout.setCellHorizontalAlignment(logo, PHorizontalAlignment.ALIGN_LEFT);
         gridLayout.setCellVerticalAlignment(logo, PVerticalAlignment.ALIGN_MIDDLE);

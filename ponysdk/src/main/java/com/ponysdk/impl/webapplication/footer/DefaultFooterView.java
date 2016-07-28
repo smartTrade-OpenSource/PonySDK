@@ -33,8 +33,9 @@ public class DefaultFooterView extends PSimplePanel implements FooterView {
 
     public DefaultFooterView(final String copyright) {
         setSizeFull();
-        PVerticalPanel content = new PVerticalPanel();
+        final PVerticalPanel content = new PVerticalPanel();
         content.setSizeFull();
+        addStyleName("footer");
 
         final PLabel label = new PLabel(copyright);
         content.add(label);

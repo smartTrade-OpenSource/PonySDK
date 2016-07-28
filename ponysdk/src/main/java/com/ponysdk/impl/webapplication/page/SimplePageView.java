@@ -32,7 +32,6 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
 
     public SimplePageView(final String pageTitle) {
         setSizeFull();
-        addStyleName("page");
         body = buildBody();
         setWidget(body);
     }
