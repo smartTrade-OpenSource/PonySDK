@@ -25,20 +25,15 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
  * HTML component.
  */
 public class PElement extends PComplexPanel {
-
-    private static final Logger log = LoggerFactory.getLogger(PElement.class);
 
     private final String tagName;
 
@@ -54,12 +49,6 @@ public class PElement extends PComplexPanel {
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.TAG, tagName);
-    }
-
-    @Override
-    public void insert(final PWidget child, final int beforeIndex) {
-        log.warn("Use directly add(PWidget) function, we can't insert where we want in a PElement");
-        super.add(child);
     }
 
     @Override
