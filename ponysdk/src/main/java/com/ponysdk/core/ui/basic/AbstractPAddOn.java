@@ -106,14 +106,6 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
         callTerminalMethod("setLog", logLevel);
     }
 
-    protected void callBindedMethod(final String methodName, final JsonObjectBuilder args) {
-        callTerminalMethod(methodName, args.build());
-    }
-
-    protected void callBindedMethod(final String methodName, final JsonArrayBuilder args) {
-        callTerminalMethod(methodName, args.build());
-    }
-
     protected void callTerminalMethod(final String methodName, final Object... args) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(METHOD_PROPERTY_NAME, methodName);
