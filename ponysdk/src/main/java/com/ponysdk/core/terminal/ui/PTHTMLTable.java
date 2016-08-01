@@ -28,12 +28,12 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentC
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 
-abstract class PTHTMLTable extends PTPanel<HTMLTable> {
+public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
@@ -44,8 +44,7 @@ abstract class PTHTMLTable extends PTPanel<HTMLTable> {
         // ServerToClientModel.COLUMN
         final int cell = buffer.readBinaryModel().getIntValue();
 
-        // uiObject.getCellFormatter().addStyleName(row, cell,
-        // "pony-PFlextable-Cell");
+        uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
         uiObject.setWidget(row, cell, w);
     }
 

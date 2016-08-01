@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.celltable;
 
+import java.util.Iterator;
+
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PWidget;
-
-import java.util.Iterator;
 
 public class SimpleTable extends PElement {
 
@@ -48,8 +48,10 @@ public class SimpleTable extends PElement {
     }
 
     public void addWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
-        if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
-        if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
+        if (row < 0)
+            throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
+        if (column < 0)
+            throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
         if (row > 0) {
             addBodyWidget(widget, column, row - 1, colspan);
@@ -60,8 +62,10 @@ public class SimpleTable extends PElement {
 
     public void addBodyWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
 
-        if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
-        if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
+        if (row < 0)
+            throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
+        if (column < 0)
+            throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
         PElement newRow;
         final int maxRowIndex = tbody.getWidgetCount();
@@ -83,14 +87,18 @@ public class SimpleTable extends PElement {
         }
 
         newCell.add(widget);
+        newCell.addStyleName("pony-PFlextable-Cell");
 
-        if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
+        if (colspan > 1)
+            newCell.setAttribute("colspan", colspan + "");
     }
 
     public void addHeadWidget(final IsPWidget widget, final int column, final int row, final int colspan) {
 
-        if (row < 0) throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
-        if (column < 0) throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
+        if (row < 0)
+            throw new IndexOutOfBoundsException("row (" + row + ") < 0)");
+        if (column < 0)
+            throw new IndexOutOfBoundsException("column (" + column + ") < 0)");
 
         PElement newRow;
         final int maxRowIndex = thead.getWidgetCount() - 1;
@@ -112,8 +120,10 @@ public class SimpleTable extends PElement {
         }
 
         newCell.add(widget);
+        newCell.addStyleName("pony-PFlextable-Cell");
 
-        if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
+        if (colspan > 1)
+            newCell.setAttribute("colspan", colspan + "");
     }
 
     @Override
@@ -123,7 +133,8 @@ public class SimpleTable extends PElement {
     }
 
     public void clear(final int from) {
-        if (from < 0) throw new IndexOutOfBoundsException("row (" + from + ") < 0)");
+        if (from < 0)
+            throw new IndexOutOfBoundsException("row (" + from + ") < 0)");
 
         if (from == 0) {
             thead.clear();
@@ -223,9 +234,11 @@ public class SimpleTable extends PElement {
         final PElement parentElement = beforeIndex == 0 ? thead : tbody;
 
         if (beforeIndex < 0 || beforeIndex >= parentElement.getWidgetCount() + (beforeIndex == 0 ? 0 : 1)) {
-            if (beforeIndex < 0) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
-            else throw new IndexOutOfBoundsException(
-                    "beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
+            if (beforeIndex < 0)
+                throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
+            else
+                throw new IndexOutOfBoundsException(
+                        "beforeIndex (" + beforeIndex + ") >= size (" + parentElement.getWidgetCount() + ")");
         }
     }
 
