@@ -42,11 +42,12 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
- * A panel that stacks its children vertically, displaying only one at a time, with a header for
- * each child which the user can click to display.
+ * A panel that stacks its children vertically, displaying only one at a time,
+ * with a header for each child which the user can click to display.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which
- * it is run have an explicit &lt;!DOCTYPE&gt; declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that
+ * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
+ * declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -60,130 +61,140 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * <dd>applied to each child widget
  * </dl>
  */
-public class PStackLayoutPanel extends PComposite
-        implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
+public class PStackLayoutPanel extends PWidget implements HasPWidgets,
+		HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>,
+		PAnimatedLayout {
 
-    private final PWidgetCollection children = new PWidgetCollection(this);
+	private final PWidgetCollection children = new PWidgetCollection(this);
 
-    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+	private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
 
-    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
-    private final PUnit unit;
-    private Duration animationDuration;
+	private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
+	private final PUnit unit;
+	private Duration animationDuration;
 
-    public PStackLayoutPanel(final PUnit unit) {
-        super();
-        this.unit = unit;
-    }
+	public PStackLayoutPanel(final PUnit unit) {
+		super();
+		this.unit = unit;
+	}
 
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
-    }
+	@Override
+	protected void enrichOnInit(final Parser parser) {
+		super.enrichOnInit(parser);
+		parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
+	}
 
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.STACKLAYOUT_PANEL;
-    }
+	@Override
+	protected WidgetType getWidgetType() {
+		return WidgetType.STACKLAYOUT_PANEL;
+	}
 
-    public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
-        child.removeFromParent();
-        children.add(child);
-        adopt(child);
+	public void add(final PWidget child, final String header,
+			final boolean asHtml, final double headerSize) {
+		child.removeFromParent();
+		children.add(child);
+		adopt(child);
 
-        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
-                new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
-        child.attach(windowID);
-    }
+		child.saveAdd(child.getID(), ID, new ServerBinaryModel(
+				ServerToClientModel.HTML, header), new ServerBinaryModel(
+				ServerToClientModel.SIZE, headerSize));
+		child.attach(windowID);
+	}
 
-    @Override
-    public boolean remove(final PWidget child) {
-        if (child.getParent() != this) {
-            return false;
-        }
-        orphan(child);
-        children.remove(child);
-        child.saveRemove(child.getID(), ID);
-        return true;
-    }
+	@Override
+	public boolean remove(final PWidget child) {
+		if (child.getParent() != this) {
+			return false;
+		}
+		orphan(child);
+		children.remove(child);
+		child.saveRemove(child.getID(), ID);
+		return true;
+	}
 
-    @Override
-    public Iterator<PWidget> iterator() {
-        return children.iterator();
-    }
+	@Override
+	public Iterator<PWidget> iterator() {
+		return children.iterator();
+	}
 
-    @Override
-    public void add(final PWidget w) {
-        assert false : "Single-argument add() is not supported for this widget";
-    }
+	@Override
+	public void add(final PWidget w) {
+		assert false : "Single-argument add() is not supported for this widget";
+	}
 
-    @Override
-    public void add(final IsPWidget w) {
-        add(w.asWidget());
-    }
+	@Override
+	public void add(final IsPWidget w) {
+		add(w.asWidget());
+	}
 
-    @Override
-    public void clear() {
-        final Iterator<PWidget> it = iterator();
-        while (it.hasNext()) {
-            it.next();
-            it.remove();
-        }
-    }
+	@Override
+	public void clear() {
+		final Iterator<PWidget> it = iterator();
+		while (it.hasNext()) {
+			it.next();
+			it.remove();
+		}
+	}
 
-    private void adopt(final PWidget child) {
-        assert child.getParent() == null;
-        child.setParent(this);
-    }
+	private void adopt(final PWidget child) {
+		assert child.getParent() == null;
+		child.setParent(this);
+	}
 
-    private void orphan(final PWidget child) {
-        assert child.getParent() == this;
-        child.setParent(null);
-    }
+	private void orphan(final PWidget child) {
+		assert child.getParent() == this;
+		child.setParent(null);
+	}
 
-    @Override
-    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
-        beforeSelectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
-    }
+	@Override
+	public void addBeforeSelectionHandler(
+			final PBeforeSelectionHandler<Integer> handler) {
+		beforeSelectionHandlers.add(handler);
+		saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
+	}
 
-    @Override
-    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
-        beforeSelectionHandlers.remove(handler);
-    }
+	@Override
+	public void removeBeforeSelectionHandler(
+			final PBeforeSelectionHandler<Integer> handler) {
+		beforeSelectionHandlers.remove(handler);
+	}
 
-    @Override
-    public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
-        selectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SELECTION);
-    }
+	@Override
+	public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
+		selectionHandlers.add(handler);
+		saveAddHandler(HandlerModel.HANDLER_SELECTION);
+	}
 
-    @Override
-    public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
-        selectionHandlers.remove(handler);
-    }
+	@Override
+	public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
+		selectionHandlers.remove(handler);
+	}
 
-    public void showWidget(final PWidget widget) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID()));
-    }
+	public void showWidget(final PWidget widget) {
+		saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID,
+				widget.getID()));
+	}
 
-    @Override
-    public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
-    }
+	@Override
+	public void animate(final Duration duration) {
+		saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE,
+				duration.toMillis()));
+	}
 
-    public Duration getAnimationDuration() {
-        return animationDuration;
-    }
+	public Duration getAnimationDuration() {
+		return animationDuration;
+	}
 
-    /**
-     * Set the duration of the animated transition between children.
-     */
-    public void setAnimationDuration(final Duration duration) {
-        if (Objects.equals(animationDuration, duration)) return;
-        animationDuration = duration;
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
-    }
+	/**
+	 * Set the duration of the animated transition between children.
+	 */
+	public void setAnimationDuration(final Duration duration) {
+		if (Objects.equals(animationDuration, duration))
+			return;
+		animationDuration = duration;
+		saveUpdate((writer) -> writer.writeModel(
+				ServerToClientModel.ANIMATION_DURATION,
+				(int) duration.toMillis()));
+	}
 
 }
