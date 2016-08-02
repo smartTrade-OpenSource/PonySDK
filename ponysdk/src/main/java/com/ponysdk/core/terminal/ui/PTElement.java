@@ -23,13 +23,15 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTElement extends PTComplexPanel<HTMLPanel> {
+public class PTElement extends PTComplexPanel<MyWidget> {
 
     private static final String EMPTY = "";
     private String tag;
@@ -42,15 +44,15 @@ public class PTElement extends PTComplexPanel<HTMLPanel> {
     }
 
     @Override
-    protected HTMLPanel createUIObject() {
-        return new HTMLPanel(tag, EMPTY);
+    protected MyWidget createUIObject() {
+        return new MyWidget(tag, EMPTY);
     }
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
-            uiObject.add(asWidget(ptObject));
+            uiObject.insert(asWidget(ptObject), uiObject.getElement(), binaryModel.getIntValue(), true);
         } else {
             buffer.rewind(binaryModel);
             super.add(buffer, ptObject);
@@ -68,6 +70,19 @@ public class PTElement extends PTComplexPanel<HTMLPanel> {
             return true;
         }
         return super.update(buffer, binaryModel);
+    }
+
+}
+
+final class MyWidget extends HTMLPanel {
+
+    public MyWidget(final String tag, final String html) {
+        super(tag, html);
+    }
+
+    @Override
+    protected void insert(final Widget child, final Element container, final int beforeIndex, final boolean domInsert) {
+        super.insert(child, container, beforeIndex, domInsert);
     }
 
 }
