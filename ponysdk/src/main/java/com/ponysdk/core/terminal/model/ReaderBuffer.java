@@ -85,9 +85,17 @@ public class ReaderBuffer {
             case LONG:
                 // TODO Read really a long
                 // return new BinaryModel(key, getLong(), size);
+                size += ValueTypeModel.INTEGER.getSize();
+                final int messageLongSize = getInt();
+                size += messageLongSize;
+                return new BinaryModel(key, Long.parseLong(getString(messageLongSize)), size);
             case DOUBLE:
                 // TODO Read really a double
                 // return new BinaryModel(key, getDouble(), size);
+                size += ValueTypeModel.INTEGER.getSize();
+                final int messageDoubleSize = getInt();
+                size += messageDoubleSize;
+                return new BinaryModel(key, Double.parseDouble(getString(messageDoubleSize)), size);
             case STRING:
                 size += ValueTypeModel.INTEGER.getSize();
                 final int messageSize = getInt();
