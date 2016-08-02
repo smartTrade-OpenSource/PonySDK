@@ -23,18 +23,20 @@
 
 package com.ponysdk.core.ui.rich;
 
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users
  * for a value or informs them of something.
  */
-public class POptionPane {
+public class POptionPane implements IsPWidget {
 
     final PDialogBox dialogBox;
 
@@ -56,14 +58,12 @@ public class POptionPane {
     }
 
     public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType,
-            final PMessageType messageType) {
+            final POptionType optionType, final PMessageType messageType) {
         return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
     public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType, final PMessageType messageType,
-            final String... options) {
+            final POptionType optionType, final PMessageType messageType, final String... options) {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
@@ -118,6 +118,11 @@ public class POptionPane {
         return dialogBox;
     }
 
+    @Override
+    public PWidget asWidget() {
+        return getDialogBox();
+    }
+
     public enum POption {
         CANCEL_OPTION("CANCEL"),
         CLOSED_OPTION("CLOSED"),
@@ -165,6 +170,7 @@ public class POptionPane {
         }
     }
 
+    @FunctionalInterface
     public interface PActionHandler {
 
         void onAction(PDialogBox dialogBox, String option);

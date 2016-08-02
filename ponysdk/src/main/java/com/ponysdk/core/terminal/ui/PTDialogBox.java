@@ -40,6 +40,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         if (ServerToClientModel.POPUP_CAPTION.equals(binaryModel.getModel())) {
             final DialogBox dialogBox = cast();
             dialogBox.setHTML(binaryModel.getStringValue());
+            return true;
         }
         return super.update(buffer, binaryModel);
     }
