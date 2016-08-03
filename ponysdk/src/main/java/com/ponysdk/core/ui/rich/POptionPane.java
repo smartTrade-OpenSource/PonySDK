@@ -67,6 +67,7 @@ public class POptionPane implements IsPWidget {
         final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
+        dialogBox.addStyleName("pony-DialogBox");
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
         dialogBox.setTitle(title);
@@ -77,7 +78,7 @@ public class POptionPane implements IsPWidget {
         final PLabel content = new PLabel(message);
         panel.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName("controls");
+        controlsPanel.addStyleName("dialogControls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {
@@ -92,7 +93,6 @@ public class POptionPane implements IsPWidget {
         panel.setCellHorizontalAlignment(content, PHorizontalAlignment.ALIGN_CENTER);
 
         dialogBox.setWidget(panel);
-        dialogBox.show();
         dialogBox.center();
 
         return optionPane;
