@@ -70,7 +70,8 @@ public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHan
     public void addPageIndex(final int pageIndex) {
         final PAnchor item = new PAnchor(String.valueOf(pageIndex + 1));
         item.setData(pageIndex);
-        insert(item, 4 + items.values().size());
+        // TODO Rework
+        insert(item, 2 + items.values().size());
         registrations.add(item.addClickHandler(this));
         items.put(pageIndex, item);
     }
