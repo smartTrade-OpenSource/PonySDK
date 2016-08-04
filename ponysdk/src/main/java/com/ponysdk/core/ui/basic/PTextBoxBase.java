@@ -31,10 +31,10 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
@@ -59,6 +59,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
         if (!EMPTY.equals(text)) parser.parse(ServerToClientModel.TEXT, this.text);
         if (!EMPTY.equals(placeholder)) parser.parse(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }

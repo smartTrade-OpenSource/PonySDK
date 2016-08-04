@@ -52,7 +52,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * configured:
  * </p>
  * <p>
- * 
+ *
  * <pre>
  * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
  * oracle.add(&quot;Cat&quot;);
@@ -105,6 +105,7 @@ public class PSuggestBox extends PWidget
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.ORACLE, suggestOracle.getID());
 
         // TODO nciaravola

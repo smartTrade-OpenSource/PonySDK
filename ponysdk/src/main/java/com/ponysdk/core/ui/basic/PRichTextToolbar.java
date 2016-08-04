@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 
 public class PRichTextToolbar extends PWidget {
 
@@ -37,6 +37,7 @@ public class PRichTextToolbar extends PWidget {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.WIDGET_ID, richTextArea.getID());
     }
 
