@@ -123,8 +123,6 @@ public class PWindow extends PObject {
                 stackedInstructions.poll().run();
             }
 
-            PScript.registerWindow(ID);
-
             final POpenEvent e = new POpenEvent(this);
             openHandlers.forEach(handler -> handler.onOpen(e));
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {

@@ -32,8 +32,8 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.PWindowManager.RegisterWindowListener;
 
 /**
  * This class allows to execute native Java-script code.
@@ -49,18 +49,28 @@ public class PScript extends PObject {
 
     private static PScript get(final int windowID) {
         final UIContext uiContext = UIContext.get();
-        PScript script = uiContext.getAttribute(SCRIPT_KEY + windowID);
+        final PScript script = uiContext.getAttribute(SCRIPT_KEY + windowID);
         if (script == null) {
-            script = new PScript();
-            uiContext.setAttribute(SCRIPT_KEY + windowID, script);
-            if (PWindowManager.getWindow(windowID) != null) script.attach(windowID);
+            final PScript newScript = new PScript();
+            uiContext.setAttribute(SCRIPT_KEY + windowID, newScript);
+            if (PWindowManager.getWindow(windowID) != null) {
+                newScript.attach(windowID);
+            } else {
+                PWindowManager.addWindowListener(new RegisterWindowListener() {
+
+                    @Override
+                    public void registered(final int registeredWindowID) {
+                        if (windowID == registeredWindowID) newScript.attach(windowID);
+                    }
+
+                    @Override
+                    public void unregistered(final int windowID) {
+                    }
+                });
+            }
+            return newScript;
         }
         return script;
-    }
-
-    static void registerWindow(final int windowID) {
-        final PScript script = UIContext.get().getAttribute(SCRIPT_KEY + windowID);
-        if (script != null) script.attach(windowID);
     }
 
     public static void execute(final int windowID, final String js) {
@@ -93,10 +103,6 @@ public class PScript extends PObject {
 
     public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
         get(window.getID()).executeScript(js, callback, period);
-    }
-
-    @Override
-    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override
