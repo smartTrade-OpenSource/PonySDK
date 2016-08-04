@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -64,14 +64,16 @@ public class TabPanelPageActivity extends SamplePageActivity {
 
             @Override
             public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onBeforeSelection, tab index : " + event.getSelectedItem());
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
 
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onSelection, tab index : " + event.getSelectedItem());
             }
         });
 

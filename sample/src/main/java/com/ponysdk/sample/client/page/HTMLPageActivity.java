@@ -79,7 +79,7 @@ public class HTMLPageActivity extends SamplePageActivity {
 
             @Override
             public void onContextMenu(final PContextMenuEvent event) {
-                PNotificationManager.showHumanizedNotification("Context menu triggered");
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered");
             }
         }, PContextMenuEvent.TYPE);
 
@@ -110,6 +110,6 @@ public class HTMLPageActivity extends SamplePageActivity {
     }
 
     protected void logEvent(final String message, final PMouseEvent<?> clickEvent) {
-        PNotificationManager.showHumanizedNotification(message);
+        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), message);
     }
 }

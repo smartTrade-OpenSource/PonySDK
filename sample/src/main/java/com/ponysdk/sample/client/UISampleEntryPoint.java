@@ -248,11 +248,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         boxContainer.add(new PDateBox(new PDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
         boxContainer.add(new PDatePicker());
-        boxContainer.add(new PDecoratedPopupPanel(false));
-        boxContainer.add(new PDecoratedPopupPanel(true));
+        boxContainer.add(new PDecoratedPopupPanel(PWindow.getMain().getID(), false));
+        boxContainer.add(new PDecoratedPopupPanel(PWindow.getMain().getID(), true));
         boxContainer.add(new PDecoratorPanel());
-        boxContainer.add(new PDialogBox());
-        boxContainer.add(new PDialogBox(true));
+        boxContainer.add(new PDialogBox(PWindow.getMain().getID()));
+        boxContainer.add(new PDialogBox(PWindow.getMain().getID(), true));
         boxContainer.add(new PDisclosurePanel("Disclosure"));
         boxContainer.add(createDockLayoutPanel());
         boxContainer.add(new PElement("a"));
@@ -280,8 +280,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(new PPasswordTextBox());
         boxContainer.add(new PPasswordTextBox("Password"));
 
-        boxContainer.add(new PPopupPanel());
-        boxContainer.add(new PPopupPanel(true));
+        boxContainer.add(new PPopupPanel(PWindow.getMain().getID()));
+        boxContainer.add(new PPopupPanel(PWindow.getMain().getID(), true));
 
         boxContainer.add(new PPushButton(new PImage())); // FIXME Test with
         // image
@@ -352,7 +352,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -376,7 +376,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -409,7 +409,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PFlexTable;
@@ -39,6 +38,7 @@ import com.ponysdk.core.ui.rich.PConfirmDialog;
 import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.POptionPane.PActionHandler;
 import com.ponysdk.core.ui.rich.POptionPane.POptionType;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class DialogBoxPageActivity extends SamplePageActivity {
 
@@ -63,7 +63,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PPopupPanel popupPanel = new PPopupPanel();
+                final PPopupPanel popupPanel = new PPopupPanel(getView().asWidget().getWindowID());
                 final PVerticalPanel content = new PVerticalPanel();
                 final PButton closeButton = new PButton("Close");
                 closeButton.addClickHandler(new PClickHandler() {
@@ -89,7 +89,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PClosableDialogBox dialogBox = new PClosableDialogBox("Custom caption");
+                final PClosableDialogBox dialogBox = new PClosableDialogBox(getView().asWidget().getWindowID(), "Custom caption");
                 dialogBox.setDraggable(true);
                 dialogBox.setContent(new PLabel("Content of a popup"));
                 dialogBox.center();
@@ -102,7 +102,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final POptionPane dialodBox = POptionPane.showConfirmDialog(new PActionHandler() {
+                final POptionPane dialodBox = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
@@ -128,7 +128,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                POptionPane.showConfirmDialog(new PActionHandler() {
+                POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
@@ -147,7 +147,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                PConfirmDialog.show("Question ?", new PLabel("This is a confirm dialog box"));
+                PConfirmDialog.show(getView().asWidget().getWindowID(), "Question ?", new PLabel("This is a confirm dialog box"));
             }
         });
 

@@ -135,7 +135,8 @@ public class FormPageActivity extends SamplePageActivity {
             @Override
             public void onClick(final PClickEvent clickEvent) {
                 final boolean isValid = form.isValid();
-                PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "The form is valid? " + (isValid ? "YES" : "NO"));
             }
         });
 
@@ -145,7 +146,7 @@ public class FormPageActivity extends SamplePageActivity {
             @Override
             public void onClick(final PClickEvent clickEvent) {
                 form.reset();
-                PNotificationManager.showHumanizedNotification("The form has been reseted");
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
             }
         });
 

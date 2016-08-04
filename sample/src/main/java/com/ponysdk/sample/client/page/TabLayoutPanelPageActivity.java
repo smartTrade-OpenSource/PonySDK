@@ -69,14 +69,16 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
             @Override
             public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onBeforeSelection, tab index : " + event.getSelectedItem());
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
 
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onSelection, tab index : " + event.getSelectedItem());
             }
         });
 

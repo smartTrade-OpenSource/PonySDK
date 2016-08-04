@@ -30,9 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.sample.server.TradingServiceImpl;
 import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
@@ -48,224 +45,228 @@ import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.rich.PNotificationManager;
+import com.ponysdk.impl.webapplication.page.PageActivity;
+import com.ponysdk.sample.server.TradingServiceImpl;
 
 public class MarketPageActivity extends PageActivity {
 
-	private static Logger log = LoggerFactory.getLogger(MarketPageActivity.class);
+    private static Logger log = LoggerFactory.getLogger(MarketPageActivity.class);
 
-	protected PFlowPanel currentDrag;
+    protected PFlowPanel currentDrag;
 
-	protected final PFlowPanel boxContainer = new PFlowPanel();
+    protected final PFlowPanel boxContainer = new PFlowPanel();
 
-	public MarketPageActivity() {
-		super("Markets", "Trading");
-	}
+    public MarketPageActivity() {
+        super("Markets", "Trading");
+    }
 
-	@Override
-	protected void onInitialization() {
-	}
+    @Override
+    protected void onInitialization() {
+    }
 
-	@Override
-	protected void onFirstShowPage() {
-		log.info("Showing market page");
-		//
-		// final FindCurrenciesCommand currenciesCommand = new
-		// FindCurrenciesCommand();
-		//
-		// for (final MarketData md : currenciesCommand.execute()) {
-		// boxContainer.add(buildFXBox(md.currency));
-		// }
+    @Override
+    protected void onFirstShowPage() {
+        log.info("Showing market page");
+        //
+        // final FindCurrenciesCommand currenciesCommand = new
+        // FindCurrenciesCommand();
+        //
+        // for (final MarketData md : currenciesCommand.execute()) {
+        // boxContainer.add(buildFXBox(md.currency));
+        // }
 
-		final PScrollPanel scrollPanel = new PScrollPanel();
-		scrollPanel.setWidget(boxContainer);
-		scrollPanel.setSizeFull();
+        final PScrollPanel scrollPanel = new PScrollPanel();
+        scrollPanel.setWidget(boxContainer);
+        scrollPanel.setSizeFull();
 
-		view.setWidget(scrollPanel);
+        view.setWidget(scrollPanel);
 
-		final List<String> asList = Arrays.asList("EURUSD", "USDEUR", "EURAUD");
-		for (int i = 0; i < 1; i++) {
-			for (final String currency : asList) {
-				final PFlowPanel box = new PFlowPanel();
-				box.addStyleName("widget");
-				boxContainer.add(box);
+        final List<String> asList = Arrays.asList("EURUSD", "USDEUR", "EURAUD");
+        for (int i = 0; i < 1; i++) {
+            for (final String currency : asList) {
+                final PFlowPanel box = new PFlowPanel();
+                box.addStyleName("widget");
+                boxContainer.add(box);
 
-				buildFXBox(box, currency);
-			}
-		}
+                buildFXBox(box, currency);
+            }
+        }
 
-		final TradingServiceImpl t = new TradingServiceImpl();
-		t.start();
-	}
+        final TradingServiceImpl t = new TradingServiceImpl();
+        t.start();
+    }
 
-	@Override
-	protected void onShowPage(final Place place) {
-	}
+    @Override
+    protected void onShowPage(final Place place) {
+    }
 
-	@Override
-	protected void onLeavingPage() {
-	}
+    @Override
+    protected void onLeavingPage() {
+    }
 
-	private PWidget buildFXBox(final PFlowPanel box, final String currency) {
-		final PFlowPanel background = new PFlowPanel();
-		background.addStyleName("background");
-		box.add(background);
+    private PWidget buildFXBox(final PFlowPanel box, final String currency) {
+        final PFlowPanel background = new PFlowPanel();
+        background.addStyleName("background");
+        box.add(background);
 
-		final PFlowPanel headInline = new PFlowPanel();
-		headInline.addStyleName("head_inline");
+        final PFlowPanel headInline = new PFlowPanel();
+        headInline.addStyleName("head_inline");
 
-		final PFlowPanel icon = new PFlowPanel();
-		icon.addStyleName("icon");
-		headInline.add(icon);
+        final PFlowPanel icon = new PFlowPanel();
+        icon.addStyleName("icon");
+        headInline.add(icon);
 
-		final PLabel header = new PLabel(currency);
-		header.addStyleName("header");
-		headInline.add(header);
+        final PLabel header = new PLabel(currency);
+        header.addStyleName("header");
+        headInline.add(header);
 
-		final PAnchor close = new PAnchor();
-		close.addStyleName("close");
-		headInline.add(close);
+        final PAnchor close = new PAnchor();
+        close.addStyleName("close");
+        headInline.add(close);
 
-		box.add(headInline);
+        box.add(headInline);
 
-		final PHTML buy = new PHTML("<div></div>");
-		buy.addStyleName("buy");
-		buy.addClickHandler(clickEvent -> {
-			PNotificationManager.showHumanizedNotification("Buy clicked!");
-		});
-		box.add(buy);
+        final PHTML buy = new PHTML("<div></div>");
+        buy.addStyleName("buy");
+        buy.addClickHandler(clickEvent -> {
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Buy clicked!");
+        });
+        box.add(buy);
 
-		final PLabel buyPipHead = new PLabel("buy");
-		buyPipHead.addStyleName("buy_pip_head");
-		box.add(buyPipHead);
+        final PLabel buyPipHead = new PLabel("buy");
+        buyPipHead.addStyleName("buy_pip_head");
+        box.add(buyPipHead);
 
-		final PLabel buyNum = new PLabel("1.22");
-		buyNum.addStyleName("buy_num");
-		box.add(buyNum);
+        final PLabel buyNum = new PLabel("1.22");
+        buyNum.addStyleName("buy_num");
+        box.add(buyNum);
 
-		final PFlowPanel buyPipNum = new PFlowPanel();
-		buyPipNum.addStyleName("buy_pip_num");
+        final PFlowPanel buyPipNum = new PFlowPanel();
+        buyPipNum.addStyleName("buy_pip_num");
 
-		final PElement buyPipNumStrong = new PElement("strong");
-		buyPipNum.add(buyPipNumStrong);
+        final PElement buyPipNumStrong = new PElement("strong");
+        buyPipNum.add(buyPipNumStrong);
 
-		box.add(buyPipNum);
+        box.add(buyPipNum);
 
-		final PFlowPanel buyDirection = new PFlowPanel();
-		buyDirection.addStyleName("buy_direction");
-		box.add(buyDirection);
+        final PFlowPanel buyDirection = new PFlowPanel();
+        buyDirection.addStyleName("buy_direction");
+        box.add(buyDirection);
 
-		final PHTML sell = new PHTML("<div></div>");
-		sell.addStyleName("sell");
-		sell.addClickHandler((clickEvent) -> PNotificationManager.showHumanizedNotification("Sell clicked!"));
-		box.add(sell);
+        final PHTML sell = new PHTML("<div></div>");
+        sell.addStyleName("sell");
+        sell.addClickHandler(
+                (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Sell clicked!"));
+        box.add(sell);
 
-		final PLabel sellPipHead = new PLabel("offer");
-		sellPipHead.addStyleName("sell_pip_head");
-		box.add(sellPipHead);
+        final PLabel sellPipHead = new PLabel("offer");
+        sellPipHead.addStyleName("sell_pip_head");
+        box.add(sellPipHead);
 
-		final PLabel sellNum = new PLabel("1.45");
-		sellNum.addStyleName("sell_num");
-		box.add(sellNum);
+        final PLabel sellNum = new PLabel("1.45");
+        sellNum.addStyleName("sell_num");
+        box.add(sellNum);
 
-		final PFlowPanel sellPipNum = new PFlowPanel();
-		sellPipNum.addStyleName("sell_pip_num");
+        final PFlowPanel sellPipNum = new PFlowPanel();
+        sellPipNum.addStyleName("sell_pip_num");
 
-		final PElement sellPipNumStrong = new PElement("strong");
-		sellPipNum.add(sellPipNumStrong);
+        final PElement sellPipNumStrong = new PElement("strong");
+        sellPipNum.add(sellPipNumStrong);
 
-		box.add(sellPipNum);
+        box.add(sellPipNum);
 
-		final PLabel amtLabel = new PLabel("EUR");
-		amtLabel.addStyleName("amtlabel");
-		box.add(amtLabel);
+        final PLabel amtLabel = new PLabel("EUR");
+        amtLabel.addStyleName("amtlabel");
+        box.add(amtLabel);
 
-		final PFlowPanel sellDirection = new PFlowPanel();
-		sellDirection.addStyleName("sell_direction");
-		box.add(sellDirection);
+        final PFlowPanel sellDirection = new PFlowPanel();
+        sellDirection.addStyleName("sell_direction");
+        box.add(sellDirection);
 
-		final PLabel spread = new PLabel();
-		spread.addStyleName("spread");
-		box.add(spread);
+        final PLabel spread = new PLabel();
+        spread.addStyleName("spread");
+        box.add(spread);
 
-		final PTextBox textBox = new PTextBox();
-		textBox.setStyleName("input");
+        final PTextBox textBox = new PTextBox();
+        textBox.setStyleName("input");
 
-		final PAnchor selector = new PAnchor();
-		selector.addStyleName("selector");
+        final PAnchor selector = new PAnchor();
+        selector.addStyleName("selector");
 
-		box.addDomHandler(event -> {
-		}, PDragStartEvent.TYPE);
+        box.addDomHandler(event -> {
+        } , PDragStartEvent.TYPE);
 
-		box.addDomHandler(event -> {
-			box.removeStyleName("dragenter");
-			final PWidget source = event.getDragSource();
-			if (source != null && source != box) {
-				final int dropIndex = boxContainer.getWidgetIndex(box);
-				boxContainer.remove(source);
-				boxContainer.insert(source, dropIndex);
-			}
-		}, PDropEvent.TYPE);
+        box.addDomHandler(event -> {
+            box.removeStyleName("dragenter");
+            final PWidget source = event.getDragSource();
+            if (source != null && source != box) {
+                final int dropIndex = boxContainer.getWidgetIndex(box);
+                boxContainer.remove(source);
+                boxContainer.insert(source, dropIndex);
+            }
+        } , PDropEvent.TYPE);
 
-		box.addDomHandler(event -> {
-			if (currentDrag == null || !currentDrag.equals(box)) {
-				box.addStyleName("dragenter");
-				if (currentDrag != null)
-					currentDrag.removeStyleName("dragenter");
-				currentDrag = box;
-			}
-		}, PDragEnterEvent.TYPE);
+        box.addDomHandler(event -> {
+            if (currentDrag == null || !currentDrag.equals(box)) {
+                box.addStyleName("dragenter");
+                if (currentDrag != null)
+                    currentDrag.removeStyleName("dragenter");
+                currentDrag = box;
+            }
+        } , PDragEnterEvent.TYPE);
 
-		box.addDomHandler(event -> {
-			if (!currentDrag.equals(box)) {
-				box.removeStyleName("dragenter");
-			}
-		}, PDragLeaveEvent.TYPE);
+        box.addDomHandler(event -> {
+            if (!currentDrag.equals(box)) {
+                box.removeStyleName("dragenter");
+            }
+        } , PDragLeaveEvent.TYPE);
 
-		UIContext.get().addDataListener(new DataListener() {
+        UIContext.get().addDataListener(new DataListener() {
 
-			private int lastBuy;
-			private int lastSell;
+            private int lastBuy;
+            private int lastSell;
 
-			@Override
-			public void onData(final Object data) {
-				if (data instanceof MarketData) {
-					final MarketData msg = (MarketData) data;
-					final int spreadValue = Math.abs(msg.sell - msg.buy);
+            @Override
+            public void onData(final Object data) {
+                if (data instanceof MarketData) {
+                    final MarketData msg = (MarketData) data;
+                    final int spreadValue = Math.abs(msg.sell - msg.buy);
 
-					if (lastBuy < msg.buy) {
-						buyDirection.removeStyleName("down");
-						buyDirection.addStyleName("up");
-					} else {
-						buyDirection.removeStyleName("up");
-						buyDirection.addStyleName("down");
-					}
-					if (lastSell < msg.sell) {
-						sellDirection.removeStyleName("down");
-						sellDirection.addStyleName("up");
-					} else {
-						sellDirection.removeStyleName("up");
-						sellDirection.addStyleName("down");
-					}
+                    if (lastBuy < msg.buy) {
+                        buyDirection.removeStyleName("down");
+                        buyDirection.addStyleName("up");
+                    } else {
+                        buyDirection.removeStyleName("up");
+                        buyDirection.addStyleName("down");
+                    }
+                    if (lastSell < msg.sell) {
+                        sellDirection.removeStyleName("down");
+                        sellDirection.addStyleName("up");
+                    } else {
+                        sellDirection.removeStyleName("up");
+                        sellDirection.addStyleName("down");
+                    }
 
-					lastBuy = msg.buy;
-					lastSell = msg.sell;
-					buyPipNumStrong.setInnerText(lastBuy + "");
-					sellPipNumStrong.setInnerText(lastSell + "");
-					spread.setText(spreadValue + "");
-				}
-			}
-		});
+                    lastBuy = msg.buy;
+                    lastSell = msg.sell;
+                    buyPipNumStrong.setInnerText(lastBuy + "");
+                    sellPipNumStrong.setInnerText(lastSell + "");
+                    spread.setText(spreadValue + "");
+                }
+            }
+        });
 
-		close.addClickHandler(new PClickHandler() {
+        close.addClickHandler(new PClickHandler() {
 
-			@Override
-			public void onClick(final PClickEvent event) {
-				box.removeFromParent();
-			}
-		});
+            @Override
+            public void onClick(final PClickEvent event) {
+                box.removeFromParent();
+            }
+        });
 
-		return box;
-	}
+        return box;
+    }
 
 }
