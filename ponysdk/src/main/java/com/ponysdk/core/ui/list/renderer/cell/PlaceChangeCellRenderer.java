@@ -49,8 +49,9 @@ public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
 
     @Override
     public PWidget render(final int row, final String rawValue) {
-        if (rawValue != null) {
-            final PAnchor anchor = new PAnchor(getValue(rawValue));
+        final String value = getValue(rawValue);
+        if (value != null) {
+            final PAnchor anchor = new PAnchor(rawValue);
             anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
             return anchor;
         } else {
@@ -59,7 +60,7 @@ public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
     }
 
     public String getValue(final String value) {
-        return value != null ? value : nullDisplay;
+        return value;
     }
 
     @Override
