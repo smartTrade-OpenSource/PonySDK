@@ -62,8 +62,8 @@ public abstract class AbstractPAddOn extends PObject implements PAddOn {
                 PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
 
                     @Override
-                    public void registered(final int windowID) {
-                        init();
+                    public void registered(final int registeredWindowID) {
+                        if (windowID == registeredWindowID) init();
                     }
 
                     @Override

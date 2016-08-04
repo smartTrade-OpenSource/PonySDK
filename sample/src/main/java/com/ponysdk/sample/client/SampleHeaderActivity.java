@@ -56,7 +56,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         optionsAnchor.ensureDebugId("options_anchor");
         // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = new PPopupPanel();
+        popup = new PPopupPanel(getView().asWidget().getWindowID());
         // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
         final PVerticalPanel panel = new PVerticalPanel();
@@ -81,7 +81,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                 // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 popup.hide();
 
-                final POptionPane optionPane = POptionPane.showConfirmDialog(new PActionHandler() {
+                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {

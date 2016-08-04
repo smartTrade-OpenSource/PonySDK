@@ -33,7 +33,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
@@ -67,10 +66,6 @@ public class PFileUpload extends PWidget
     protected void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_CHANGE);
-    }
-
-    @Override
-    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override

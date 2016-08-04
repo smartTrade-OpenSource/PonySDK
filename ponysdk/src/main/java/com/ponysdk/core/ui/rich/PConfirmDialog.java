@@ -24,7 +24,13 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 public class PConfirmDialog extends PDialogBox {
@@ -32,37 +38,36 @@ public class PConfirmDialog extends PDialogBox {
     private PButton okButton;
     private PButton cancelButton;
 
-    public static PDialogBox show(final String windowCaption, final String message, final String okCaption, final String cancelCaption,
-                                  final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowCaption, new PLabel(message), okCaption, cancelCaption, confirmDialogHandler);
+    public PConfirmDialog(final int windowID) {
+        super(windowID);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption,
-                                  final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
-        confirmDialog.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
-            if (offsetHeight > windowHeight) {
-                content.setHeight(windowHeight - 100 + "px");
-                confirmDialog.setHeight(windowHeight - 100 + "px");
-            }
-            confirmDialog.setWidth(offsetWidth + 35 + "px");
-            confirmDialog.center();
-        });
+    public static PConfirmDialog show(final int windowID, final String windowCaption, final String message, final String okCaption,
+            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        return show(windowID, windowCaption, new PLabel(message), okCaption, cancelCaption, confirmDialogHandler);
+    }
+
+    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content, final String okCaption,
+            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        final PConfirmDialog confirmDialog = buildPopup(windowID, windowCaption, content, okCaption, cancelCaption,
+                confirmDialogHandler);
+        confirmDialog.center();
         return confirmDialog;
-
     }
 
-    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption, final String cancelCaption,
-                                            final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = new PConfirmDialog();
-        confirmDialog.setStyleName("pconfirm-dialog");
+    public static PConfirmDialog buildPopup(final int windowID, final String windowCaption, final PWidget content,
+            final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        final PConfirmDialog confirmDialog = new PConfirmDialog(windowID);
+        confirmDialog.setStyleName("pony-DialogBox");
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
+
+        // Build content
         final PVerticalPanel dialogContent = new PVerticalPanel();
         dialogContent.setWidth("100%");
         dialogContent.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName("controls");
+        controlsPanel.setStyleName("dialogControls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
         controlsPanel.setWidth("100%");
 
@@ -89,21 +94,24 @@ public class PConfirmDialog extends PDialogBox {
             controlsPanel.add(okButton);
             confirmDialog.setOkButton(okButton);
         }
+
         dialogContent.add(controlsPanel);
         dialogContent.setCellHorizontalAlignment(controlsPanel, PHorizontalAlignment.ALIGN_CENTER);
         dialogContent.setCellHorizontalAlignment(content, PHorizontalAlignment.ALIGN_CENTER);
         confirmDialog.setCaption(windowCaption);
         confirmDialog.setWidget(dialogContent);
+
         return confirmDialog;
     }
 
     // show a popup which have a ok button hiding the popup by default
-    public static PDialogBox show(final String windowCaption, final PWidget content) {
-        return show(windowCaption, content, PString.get("dialog.ok"), null, null);
+    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content) {
+        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, null);
     }
 
-    public static PDialogBox show(final String windowCaption, final PWidget content, final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
+    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content,
+            final PConfirmDialogHandler confirmDialogHandler) {
+        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 
     @Override

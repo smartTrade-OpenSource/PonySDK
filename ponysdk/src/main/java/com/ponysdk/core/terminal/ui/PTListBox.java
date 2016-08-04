@@ -84,7 +84,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             return true;
         }
         if (ServerToClientModel.ITEM_INSERTED.equals(binaryModel.getModel())) {
-            final String item = binaryModel.getStringValue();
+            final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             final BinaryModel indexModel = buffer.readBinaryModel();
             if (ServerToClientModel.INDEX.equals(indexModel.getModel())) {
                 uiObject.insertItem(item, indexModel.getIntValue());
@@ -114,7 +114,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             return true;
         }
         if (ServerToClientModel.ITEM_UPDATED.equals(binaryModel.getModel())) {
-            final String item = binaryModel.getStringValue();
+            final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             uiObject.setItemText(index, item);

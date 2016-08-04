@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,10 +26,10 @@ package com.ponysdk.impl.webapplication.notification;
 import java.util.Date;
 
 import com.ponysdk.core.ui.eventbus.BusinessEvent;
-import com.ponysdk.impl.webapplication.notification.renderer.NotificationTypeRenderer;
-import com.ponysdk.impl.webapplication.notification.renderer.PLabelRenderer;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.core.ui.rich.PNotificationManager.Notification;
+import com.ponysdk.impl.webapplication.notification.renderer.NotificationTypeRenderer;
+import com.ponysdk.impl.webapplication.notification.renderer.PLabelRenderer;
 
 public class DefaultNotificationView extends LogConsolePanel implements NotificationView {
 
@@ -56,13 +56,16 @@ public class DefaultNotificationView extends LogConsolePanel implements Notifica
     public void addEventNotification(final BusinessEvent<?> event) {
         switch (event.getLevel()) {
             case INFO:
-                PNotificationManager.notify(notificationTypeRenderer.getWidget(event.getBusinessMessage()), Notification.HUMANIZED);
+                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                        Notification.HUMANIZED);
                 break;
             case WARNING:
-                PNotificationManager.notify(notificationTypeRenderer.getWidget(event.getBusinessMessage()), Notification.WARNING_MESSAGE);
+                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                        Notification.WARNING_MESSAGE);
                 break;
             case ERROR:
-                PNotificationManager.notify(notificationTypeRenderer.getWidget(event.getBusinessMessage()), Notification.ERROR_MESSAGE);
+                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                        Notification.ERROR_MESSAGE);
                 break;
             default:
                 break;

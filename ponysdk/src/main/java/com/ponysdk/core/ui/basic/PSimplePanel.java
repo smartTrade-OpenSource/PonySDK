@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 
 /**
  * Base class for panels that contain only one widget.
@@ -44,10 +43,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SIMPLE_PANEL;
-    }
-
-    @Override
-    protected void enrichOnInit(final Parser parser) {
     }
 
     @Override

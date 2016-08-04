@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,13 +28,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FileUploadPageActivity extends SamplePageActivity {
@@ -56,7 +56,8 @@ public class FileUploadPageActivity extends SamplePageActivity {
 
             @Override
             public void onSubmitComplete() {
-                PNotificationManager.showTrayNotification("File uploaded, submit file '" + fileUpload.getFileName() + "'");
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "File uploaded, submit file '" + fileUpload.getFileName() + "'");
             }
         });
 

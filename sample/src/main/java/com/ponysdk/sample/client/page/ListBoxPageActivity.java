@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -71,7 +71,8 @@ public class ListBoxPageActivity extends SamplePageActivity {
                 roleListBox.setSelectedValue(1);
                 roleListBox.setSelectedValue(2);
 
-                PNotificationManager.showHumanizedNotification("Selected items " + roleListBox.getSelectedItems());
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
+                        "Selected items " + roleListBox.getSelectedItems());
             }
         });
         final PButton unSelectedRole = new PButton("Selected roles [1,2]");
@@ -81,7 +82,8 @@ public class ListBoxPageActivity extends SamplePageActivity {
             public void onClick(final PClickEvent event) {
                 roleListBox.setSelectedValue(1, false);
                 roleListBox.setSelectedValue(2, false);
-                PNotificationManager.showHumanizedNotification("Unselected items " + roleListBox.getSelectedItems());
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
+                        "Unselected items " + roleListBox.getSelectedItems());
             }
         });
         table.setWidget(1, 0, roleListBox);

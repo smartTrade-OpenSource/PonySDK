@@ -40,33 +40,35 @@ public class POptionPane implements IsPWidget {
 
     final PDialogBox dialogBox;
 
-    public POptionPane() {
-        this(new PDialogBox());
+    public POptionPane(final int windowID) {
+        this(new PDialogBox(windowID));
     }
 
     public POptionPane(final PDialogBox dialogBox) {
         this.dialogBox = dialogBox;
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message) {
-        return showConfirmDialog(handler, message, "Message", POptionType.DEFAULT_OPTION);
+    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message) {
+        return showConfirmDialog(windowID, handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType) {
-        return showConfirmDialog(handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
+    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
+            final String title, final POptionType optionType) {
+        return showConfirmDialog(windowID, handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final PActionHandler handler, final String message, final String title,
-            final POptionType optionType, final PMessageType messageType) {
-        return showOptionDialog(handler, message, title, optionType, messageType, getOptions(optionType));
+    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
+            final String title, final POptionType optionType, final PMessageType messageType) {
+        return showOptionDialog(windowID, handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final PActionHandler handler, final String message, final String title,
+    public static POptionPane showOptionDialog(final int windowID, final PActionHandler handler, final String message,
+            final String title,
             final POptionType optionType, final PMessageType messageType, final String... options) {
-        final POptionPane optionPane = new POptionPane();
+        final POptionPane optionPane = new POptionPane(windowID);
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
+        dialogBox.addStyleName("pony-DialogBox");
         dialogBox.setAnimationEnabled(false);
         dialogBox.setGlassEnabled(true);
         dialogBox.setTitle(title);
@@ -77,7 +79,7 @@ public class POptionPane implements IsPWidget {
         final PLabel content = new PLabel(message);
         panel.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
-        controlsPanel.setStyleName("controls");
+        controlsPanel.addStyleName("dialogControls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {
@@ -92,7 +94,6 @@ public class POptionPane implements IsPWidget {
         panel.setCellHorizontalAlignment(content, PHorizontalAlignment.ALIGN_CENTER);
 
         dialogBox.setWidget(panel);
-        dialogBox.show();
         dialogBox.center();
 
         return optionPane;

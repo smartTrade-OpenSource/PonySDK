@@ -304,8 +304,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
     }
 
     protected void showCreatePonyPopup() {
-        final PDialogBox dialogBox = PConfirmDialog.show("Create pony", createPonyActivityPanel, "Create", "Cancel",
-                new PConfirmDialogHandler() {
+        final PDialogBox dialogBox = PConfirmDialog.show(getView().asWidget().getWindowID(), "Create pony", createPonyActivityPanel,
+                "Create", "Cancel", new PConfirmDialogHandler() {
 
                     @Override
                     public void onCancel() {

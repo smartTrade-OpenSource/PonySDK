@@ -96,6 +96,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     protected void enrichOnInit(final Parser parser) {
+        super.enrichOnInit(parser);
         if (html != null)
             parser.parse(ServerToClientModel.HTML, html);
         else

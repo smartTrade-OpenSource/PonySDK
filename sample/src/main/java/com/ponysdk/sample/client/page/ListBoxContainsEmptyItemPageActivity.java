@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -54,7 +54,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             @Override
             public void onChange(final PChangeEvent event) {
                 if (listBox.getSelectedIndex() != -1) {
-                    PNotificationManager.showTrayNotification("Item selected : " + listBox.getSelectedItem());
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                            "Item selected : " + listBox.getSelectedItem());
                 }
             }
         });
@@ -73,7 +74,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification("Item selected : " + multiListBox.getSelectedItems());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "Item selected : " + multiListBox.getSelectedItems());
             }
         });
 

@@ -31,62 +31,62 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.rich.PBreadCrumbs;
-import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.core.ui.rich.PBreadCrumbs.ItemLevel;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class BreadCrumbsPageActivity extends SamplePageActivity {
 
-	protected int level = 6;
+    protected int level = 6;
 
-	public BreadCrumbsPageActivity() {
-		super("BreadCrumbs", "Rich UI Components");
-	}
+    public BreadCrumbsPageActivity() {
+        super("BreadCrumbs", "Rich UI Components");
+    }
 
-	@Override
-	protected void onFirstShowPage() {
-		super.onFirstShowPage();
+    @Override
+    protected void onFirstShowPage() {
+        super.onFirstShowPage();
 
-		final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = new PFlowPanel();
 
-		final PBreadCrumbs breadCrumbs = new PBreadCrumbs();
+        final PBreadCrumbs breadCrumbs = new PBreadCrumbs();
 
-		breadCrumbs.addItem("level 1");
-		breadCrumbs.addItem("level 2");
-		breadCrumbs.addItem("level 3");
-		breadCrumbs.addItem("level 4");
-		breadCrumbs.addItem("level 5");
-		breadCrumbs.addItem("location");
+        breadCrumbs.addItem("level 1");
+        breadCrumbs.addItem("level 2");
+        breadCrumbs.addItem("level 3");
+        breadCrumbs.addItem("level 4");
+        breadCrumbs.addItem("level 5");
+        breadCrumbs.addItem("location");
 
-		breadCrumbs.addSelectionHandler(new PSelectionHandler<PBreadCrumbs.ItemLevel>() {
+        breadCrumbs.addSelectionHandler(new PSelectionHandler<PBreadCrumbs.ItemLevel>() {
 
-			@Override
-			public void onSelection(final PSelectionEvent<ItemLevel> event) {
-				level = event.getSelectedItem().getLevel();
-				PNotificationManager.showHumanizedNotification("Selected level : " + level);
-			}
-		});
+            @Override
+            public void onSelection(final PSelectionEvent<ItemLevel> event) {
+                level = event.getSelectedItem().getLevel();
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
+            }
+        });
 
-		final PFlowPanel inputPanel = new PFlowPanel();
-		final PTextBox input = new PTextBox();
-		final PButton add = new PButton("Add Level");
-		add.addClickHandler(new PClickHandler() {
+        final PFlowPanel inputPanel = new PFlowPanel();
+        final PTextBox input = new PTextBox();
+        final PButton add = new PButton("Add Level");
+        add.addClickHandler(new PClickHandler() {
 
-			@Override
-			public void onClick(final PClickEvent event) {
-				if (input.getText().isEmpty())
-					breadCrumbs.addItem("level " + ++level);
-				else
-					breadCrumbs.addItem(input.getText());
-				input.setText("");
-			}
-		});
-		inputPanel.add(input);
-		inputPanel.add(add);
+            @Override
+            public void onClick(final PClickEvent event) {
+                if (input.getText().isEmpty())
+                    breadCrumbs.addItem("level " + ++level);
+                else
+                    breadCrumbs.addItem(input.getText());
+                input.setText("");
+            }
+        });
+        inputPanel.add(input);
+        inputPanel.add(add);
 
-		panel.add(breadCrumbs);
-		panel.add(inputPanel);
+        panel.add(breadCrumbs);
+        panel.add(inputPanel);
 
-		examplePanel.setWidget(panel);
+        examplePanel.setWidget(panel);
 
-	}
+    }
 }

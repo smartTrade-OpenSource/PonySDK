@@ -30,11 +30,11 @@ import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
@@ -90,13 +90,14 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private PPositionCallback positionCallback;
 
-    public PPopupPanel(final boolean autoHide) {
+    public PPopupPanel(final int windowID, final boolean autoHide) {
         this.visible = false;
         this.autoHide = autoHide;
+        PPopupManager.get(windowID).registerPopup(this);
     }
 
-    public PPopupPanel() {
-        this(false);
+    public PPopupPanel(final int windowID) {
+        this(windowID, false);
     }
 
     @Override
@@ -200,25 +201,21 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.WIDGET_POSITION.toStringValue())) {
             final JsonArray widgetInfo = instruction.getJsonArray(ClientToServerModel.WIDGET_POSITION.toStringValue());
-
-            final Integer windowWidth = ((JsonNumber) widgetInfo.get(0)).intValue();
-            final Integer windowHeight = ((JsonNumber) widgetInfo.get(1)).intValue();
-            final Integer clientWith = ((JsonNumber) widgetInfo.get(2)).intValue();
-            final Integer clientHeight = ((JsonNumber) widgetInfo.get(3)).intValue();
+            int i = 0;
+            final int windowWidth = ((JsonNumber) widgetInfo.get(i++)).intValue();
+            final int windowHeight = ((JsonNumber) widgetInfo.get(i++)).intValue();
+            final int clientWith = ((JsonNumber) widgetInfo.get(i++)).intValue();
+            final int clientHeight = ((JsonNumber) widgetInfo.get(i++)).intValue();
 
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_POSITION_AND_SHOW));
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             this.showing = false;
-            fireOnClose();
+            listeners.forEach(handler -> handler.onClose(new PCloseEvent(this)));
         } else {
             super.onClientData(instruction);
         }
-    }
-
-    private void fireOnClose() {
-        listeners.forEach(handler -> handler.onClose(new PCloseEvent(this)));
     }
 
     public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {

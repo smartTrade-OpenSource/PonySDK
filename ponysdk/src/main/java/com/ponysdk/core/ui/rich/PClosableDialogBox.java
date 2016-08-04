@@ -41,12 +41,12 @@ public class PClosableDialogBox extends PPopupPanel {
 
     private final PSimplePanel contentContainer;
 
-    public PClosableDialogBox(final String caption) {
-        this(false, new PLabel(caption), new PImage("images/close_16.png"));
+    public PClosableDialogBox(final int windowID, final String caption) {
+        this(windowID, false, new PLabel(caption), new PImage("images/close_16.png"));
     }
 
-    public PClosableDialogBox(final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
-        super(false);
+    public PClosableDialogBox(final int windowID, final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
+        super(windowID, false);
         setModal(modal);
 
         setStyleName("pony-closable-dialog-box");
