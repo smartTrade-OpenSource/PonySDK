@@ -37,12 +37,11 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
  * </p>
  *
  * @param <V>
- * @param <W>
  */
-public interface CellRenderer<V, W extends IsPWidget> {
+public interface CellRenderer<D, W extends IsPWidget> {
 
-    W render(final int row, final V value);
+    W render(final int row, final D value);
 
-    void update(final V value, Cell<V, W> previous);
+    void update(final D value, Cell<D, W> previous);
 
 }

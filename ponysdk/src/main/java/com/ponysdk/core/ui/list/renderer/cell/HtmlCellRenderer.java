@@ -26,16 +26,35 @@ package com.ponysdk.core.ui.list.renderer.cell;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 
-public class RefreshableLabelCellRenderer<V> implements CellRenderer<V, PHTML> {
+public class HtmlCellRenderer<D> implements CellRenderer<D, PHTML> {
 
-    @Override
-    public PHTML render(final int row, final V value) {
-        return new PHTML(value == null ? "-" : value.toString());
+    private static String DASH = "-";
+
+    protected String nullDisplay = DASH;
+
+    public HtmlCellRenderer() {
+    }
+
+    public HtmlCellRenderer(final String nullDisplay) {
+        this.nullDisplay = nullDisplay;
     }
 
     @Override
-    public void update(final V value, final Cell<V, PHTML> previous) {
-        previous.getW().setText(value == null ? "-" : value.toString());
+    public PHTML render(final int row, final D value) {
+        return new PHTML(getValue(value));
+    }
+
+    protected String getValue(final D value) {
+        return value != null ? value.toString() : nullDisplay;
+    }
+
+    @Override
+    public final void update(final D value, final Cell<D, PHTML> previous) {
+        previous.getWidget().setText(getValue(value));
+    }
+
+    public void setNullDisplay(final String nullDisPlay) {
+        this.nullDisplay = nullDisPlay;
     }
 
 }

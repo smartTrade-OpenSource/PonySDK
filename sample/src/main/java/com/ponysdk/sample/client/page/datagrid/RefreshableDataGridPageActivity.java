@@ -29,14 +29,11 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
-import com.ponysdk.core.ui.list.refreshable.Cell;
-import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
+import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.renderer.cell.HtmlCellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
-import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.sample.client.page.SamplePageActivity;
 
@@ -83,82 +80,55 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
     protected void onPonyStock(final PonyStock data) {
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock> newCountDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock> countDescriptor = new DataGridColumnDescriptor<>();
+    protected IdentityDataGridColumnDescriptor<PonyStock> newCountDescriptor() {
+        final IdentityDataGridColumnDescriptor<PonyStock> countDescriptor = new IdentityDataGridColumnDescriptor<>();
         countDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Stock"));
-        countDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        countDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
+        countDescriptor.setCellRenderer(new HtmlCellRenderer<PonyStock>() {
 
             @Override
-            public PHTML render(final int row, final PonyStock value) {
-                return new PHTML(value.getCount().toString());
+            protected String getValue(final PonyStock value) {
+                return value.getCount().toString();
             }
-
-            @Override
-            public void update(final PonyStock value, final Cell<PonyStock, PHTML> previous) {
-                previous.getW().setText(value.getCount().toString());
-            }
-
         });
         return countDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock> newPriceDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock> priceDescriptor = new DataGridColumnDescriptor<>();
+    protected IdentityDataGridColumnDescriptor<PonyStock> newPriceDescriptor() {
+        final IdentityDataGridColumnDescriptor<PonyStock> priceDescriptor = new IdentityDataGridColumnDescriptor<>();
         priceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Price"));
-        priceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        priceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
+        priceDescriptor.setCellRenderer(new HtmlCellRenderer<PonyStock>() {
 
             @Override
-            public PHTML render(final int row, final PonyStock value) {
-                return new PHTML(value.getPrice().toString());
+            protected String getValue(final PonyStock value) {
+                return value.getPrice().toString();
             }
-
-            @Override
-            public void update(final PonyStock value, final Cell<PonyStock, PHTML> previous) {
-                previous.getW().setText(value.getPrice().toString());
-            }
-
         });
         return priceDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock> newRaceDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock> raceDescriptor = new DataGridColumnDescriptor<>();
+    protected IdentityDataGridColumnDescriptor<PonyStock> newRaceDescriptor() {
+        final IdentityDataGridColumnDescriptor<PonyStock> raceDescriptor = new IdentityDataGridColumnDescriptor<>();
         raceDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Race"));
-        raceDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        raceDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
+        raceDescriptor.setCellRenderer(new HtmlCellRenderer<PonyStock>() {
 
             @Override
-            public PHTML render(final int row, final PonyStock value) {
-                return new PHTML(value.getRace());
-            }
-
-            @Override
-            public void update(final PonyStock value, final Cell<PonyStock, PHTML> previous) {
-                // no update
+            protected String getValue(final PonyStock value) {
+                return value.getRace();
             }
 
         });
         return raceDescriptor;
     }
 
-    protected DataGridColumnDescriptor<PonyStock, PonyStock> newIDDescriptor() {
-        final DataGridColumnDescriptor<PonyStock, PonyStock> idDescriptor = new DataGridColumnDescriptor<>();
+    protected IdentityDataGridColumnDescriptor<PonyStock> newIDDescriptor() {
+        final IdentityDataGridColumnDescriptor<PonyStock> idDescriptor = new IdentityDataGridColumnDescriptor<>();
         idDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("ID"));
-        idDescriptor.setValueProvider(new IdentityValueProvider<PonyStock>());
-        idDescriptor.setCellRenderer(new CellRenderer<PonyStock, PHTML>() {
+        idDescriptor.setCellRenderer(new HtmlCellRenderer<PonyStock>() {
 
             @Override
-            public PHTML render(final int row, final PonyStock value) {
-                return new PHTML(value.getId().toString());
+            protected String getValue(final PonyStock value) {
+                return value.getId().toString();
             }
-
-            @Override
-            public void update(final PonyStock value, final Cell<PonyStock, PHTML> previous) {
-                // no update
-            }
-
         });
         return idDescriptor;
     }

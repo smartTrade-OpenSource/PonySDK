@@ -23,15 +23,19 @@
 
 package com.ponysdk.core.ui.list.refreshable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * Extends {@link DataGridActivity} Capable of moving columns and refreshing a
@@ -65,7 +69,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         throw new RuntimeException("Use removeByKey(key)");
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setData(final K key, final D data) {
         Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
         if (map == null) {
@@ -87,9 +91,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
                 cell.setData(data);
                 cell.setRow(row);
                 cell.setValue(descriptor.getValueProvider().getValue(data));
-                cell.setW(descriptor.getCellRenderer().render(row, cell.getValue()));
+                cell.setWidget(descriptor.getCellRenderer().render(row, cell.getValue()));
                 map.put(descriptor, cell);
-                view.addWidget(cell.getW(), cell.getCol(), cell.getRow() + 1, 1);
+                view.addWidget(cell.getWidget(), cell.getCol(), cell.getRow() + 1, 1);
             }
             view.addWidget(new PSimplePanel(), col, row + 1, 1);
         } else {
