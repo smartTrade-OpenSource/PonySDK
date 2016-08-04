@@ -92,7 +92,7 @@ public class Txn {
         return txnContext.getParser();
     }
 
-    public void addTnxListener(final TxnListener txnListener) {
+    public void addTxnListener(final TxnListener txnListener) {
         this.txnListeners.add(txnListener);
     }
 
