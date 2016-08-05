@@ -23,19 +23,41 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import javax.validation.constraints.NotNull;
+
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 
-public class RefreshableLabelCellRenderer<V> implements CellRenderer<V, PHTML> {
+public class HtmlCellRenderer<D> implements CellRenderer<D, PHTML> {
 
-    @Override
-    public PHTML render(final int row, final V value) {
-        return new PHTML(value == null ? "-" : value.toString());
+    private static String DASH = "-";
+
+    protected String nullDisplay = DASH;
+
+    public HtmlCellRenderer() {
+    }
+
+    public HtmlCellRenderer(final String nullDisplay) {
+        this.nullDisplay = nullDisplay;
     }
 
     @Override
-    public void update(final V value, final Cell<V, PHTML> previous) {
-        previous.getW().setText(value == null ? "-" : value.toString());
+    public PHTML render(final int row, final D rawValue) {
+        final String value = rawValue != null ? getValue(rawValue) : null;
+        return new PHTML(value != null ? value : nullDisplay);
+    }
+
+    protected String getValue(@NotNull final D value) {
+        return value.toString();
+    }
+
+    @Override
+    public final void update(final D value, final Cell<D, PHTML> previous) {
+        previous.getWidget().setText(getValue(value));
+    }
+
+    public void setNullDisplay(final String nullDisPlay) {
+        this.nullDisplay = nullDisPlay;
     }
 
 }

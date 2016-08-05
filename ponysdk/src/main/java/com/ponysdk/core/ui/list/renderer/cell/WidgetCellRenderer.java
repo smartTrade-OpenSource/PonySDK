@@ -23,23 +23,36 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PLabel;
+import javax.validation.constraints.NotNull;
 
-public abstract class AbstractCellRenderer<V, W extends IsPWidget> implements CellRenderer<V, W> {
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.place.Place;
+
+public abstract class WidgetCellRenderer<D> implements CellRenderer<D, PWidget> {
 
     private static String DASH = "-";
 
     protected String nullDisplay = DASH;
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public final W render(final int row, final V value) {
-        if (value == null) return (W) new PLabel(nullDisplay);
-        return render0(row, value);
+    public WidgetCellRenderer() {
     }
 
-    public abstract W render0(int row, V value);
+    public WidgetCellRenderer(final Place place, final String nullDisplay) {
+        this.nullDisplay = nullDisplay;
+    }
+
+    @Override
+    public PWidget render(final int row, final D rawValue) {
+        final String value = rawValue != null ? getValue(rawValue) : null;
+        return value != null ? render0(row, rawValue) : new PLabel(nullDisplay);
+    }
+
+    protected abstract PWidget render0(int row, D rawValue);
+
+    public String getValue(@NotNull final D value) {
+        return value.toString();
+    }
 
     public void setNullDisplay(final String nullDisPlay) {
         this.nullDisplay = nullDisPlay;

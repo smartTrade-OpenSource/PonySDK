@@ -27,10 +27,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.list.refreshable.Cell;
-
-public class DateCellRenderer extends AbstractCellRenderer<Date, PLabel> {
+public class DateCellRenderer extends LabelCellRenderer<Date> {
 
     private final DateFormat dateFormat;
 
@@ -39,15 +36,22 @@ public class DateCellRenderer extends AbstractCellRenderer<Date, PLabel> {
     }
 
     public DateCellRenderer(final String format) {
-        this.dateFormat = new SimpleDateFormat(format);
+        this(new SimpleDateFormat(format));
+    }
+
+    public DateCellRenderer(final DateFormat dateFormat, final String nullDisplay) {
+        this(dateFormat);
+        setNullDisplay(nullDisplay);
+    }
+
+    public DateCellRenderer(final String format, final String nullDisplay) {
+        this(format);
+        setNullDisplay(nullDisplay);
     }
 
     @Override
-    public PLabel render0(final int rowCount, final Date value) {
-        return new PLabel(dateFormat.format(value));
+    public String getValue(final Date value) {
+        return value != null ? dateFormat.format(value) : nullDisplay;
     }
 
-    @Override
-    public void update(final Date value, final Cell<Date, PLabel> previous) {
-    }
 }

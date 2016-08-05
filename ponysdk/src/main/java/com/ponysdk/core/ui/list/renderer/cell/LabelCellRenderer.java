@@ -23,17 +23,41 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import javax.validation.constraints.NotNull;
+
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 
-public class LabelCellRenderer<D> extends AbstractCellRenderer<D, PLabel> {
+public class LabelCellRenderer<D> implements CellRenderer<D, PLabel> {
 
-    @Override
-    public PLabel render0(final int rowCount, final D value) {
-        return new PLabel(value.toString());
+    private static String DASH = "-";
+
+    protected String nullDisplay = DASH;
+
+    public LabelCellRenderer() {
+    }
+
+    public LabelCellRenderer(final String nullDisplay) {
+        this.nullDisplay = nullDisplay;
     }
 
     @Override
-    public void update(final D value, final Cell<D, PLabel> previous) {
+    public PLabel render(final int row, final D rawValue) {
+        final String value = rawValue != null ? getValue(rawValue) : null;
+        return new PLabel(value != null ? value : nullDisplay);
     }
+
+    protected String getValue(@NotNull final D value) {
+        return value.toString();
+    }
+
+    @Override
+    public final void update(final D value, final Cell<D, PLabel> previous) {
+        previous.getWidget().setText(getValue(value));
+    }
+
+    public void setNullDisplay(final String nullDisPlay) {
+        this.nullDisplay = nullDisPlay;
+    }
+
 }

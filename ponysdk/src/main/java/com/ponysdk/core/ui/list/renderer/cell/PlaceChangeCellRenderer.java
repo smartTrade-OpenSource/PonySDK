@@ -24,11 +24,17 @@
 package com.ponysdk.core.ui.list.renderer.cell;
 
 import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.place.PlaceChangeRequest;
 
-public class PlaceChangeCellRenderer extends AbstractCellRenderer<String, PAnchor> {
+public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
+
+    private static String DASH = "-";
+
+    protected String nullDisplay = DASH;
 
     private final Place place;
 
@@ -36,14 +42,34 @@ public class PlaceChangeCellRenderer extends AbstractCellRenderer<String, PAncho
         this.place = place;
     }
 
-    @Override
-    public PAnchor render0(final int row, final String value) {
-        final PAnchor anchor = new PAnchor(value);
-        anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
-        return anchor;
+    public PlaceChangeCellRenderer(final Place place, final String nullDisplay) {
+        this(place);
+        this.nullDisplay = nullDisplay;
     }
 
     @Override
-    public void update(final String value, final Cell<String, PAnchor> previous) {
+    public PWidget render(final int row, final String rawValue) {
+        final String value = getValue(rawValue);
+        if (value != null) {
+            final PAnchor anchor = new PAnchor(rawValue);
+            anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
+            return anchor;
+        } else {
+            return new PLabel(nullDisplay);
+        }
     }
+
+    public String getValue(final String value) {
+        return value;
+    }
+
+    @Override
+    public final void update(final String value, final Cell<String, PWidget> previous) {
+        // Need to change the type of the element
+    }
+
+    public void setNullDisplay(final String nullDisPlay) {
+        this.nullDisplay = nullDisPlay;
+    }
+
 }

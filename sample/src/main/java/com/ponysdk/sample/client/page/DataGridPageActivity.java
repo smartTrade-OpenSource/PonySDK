@@ -54,6 +54,7 @@ import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.DefaultSimpleListView;
+import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.dataprovider.RemoteDataProvider;
 import com.ponysdk.core.ui.list.paging.DefaultPagerView;
 import com.ponysdk.core.ui.list.paging.Pager;
@@ -70,7 +71,6 @@ import com.ponysdk.core.ui.list.selector.DefaultInfoSelectorView;
 import com.ponysdk.core.ui.list.selector.Selector;
 import com.ponysdk.core.ui.list.selector.SelectorCheckBox;
 import com.ponysdk.core.ui.list.valueprovider.BeanValueProvider;
-import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.rich.PConfirmDialog;
 import com.ponysdk.sample.client.datamodel.Pony;
 
@@ -171,9 +171,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         };
 
-        final DataGridColumnDescriptor<Pony, Pony> selectColumnDescriptor = new DataGridColumnDescriptor<>();
+        final IdentityDataGridColumnDescriptor<Pony> selectColumnDescriptor = new IdentityDataGridColumnDescriptor<>();
         selectColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Select"));
-        selectColumnDescriptor.setValueProvider(new IdentityValueProvider<Pony>());
         final CellRenderer<Pony, SelectorCheckBox<Pony>> selectCellRenderer = new CellRenderer<Pony, SelectorCheckBox<Pony>>() {
 
             @Override
@@ -209,7 +208,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         selectColumnDescriptor.setCellRenderer(selectCellRenderer);
         selectColumnDescriptor.setSubCellRenderer(selectCellRenderer);
 
-        final DataGridColumnDescriptor<Pony, Pony> descriptor = new DataGridColumnDescriptor<>();
+        final IdentityDataGridColumnDescriptor<Pony> descriptor = new IdentityDataGridColumnDescriptor<>();
         descriptor.setHeaderCellRenderer(new HeaderCellRenderer() {
 
             @Override

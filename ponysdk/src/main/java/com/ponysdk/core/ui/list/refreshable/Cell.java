@@ -27,18 +27,18 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 
 public class Cell<D, W extends IsPWidget> {
 
-    private W w;
+    private W widget;
     private D data;
     private Object value;
     private int row;
     private int col;
 
-    public W getW() {
-        return w;
+    public W getWidget() {
+        return widget;
     }
 
-    public void setW(final W w) {
-        this.w = w;
+    public void setWidget(final W widget) {
+        this.widget = widget;
     }
 
     public D getData() {
