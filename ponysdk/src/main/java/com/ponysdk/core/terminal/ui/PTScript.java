@@ -43,7 +43,7 @@ public class PTScript extends AbstractPTObject {
 
     public static native Object evalWithCallback(String script) /*-{
                                                                 var r = $wnd.eval(script);
-                                                                if (typeof r=="object") return JSON.stringify(r);
+                                                                if (typeof r=="object") return null; // JSON.stringify(r);
                                                                 else return r;
                                                                 }-*/;
 
