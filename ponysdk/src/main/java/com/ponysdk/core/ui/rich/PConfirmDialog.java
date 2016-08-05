@@ -64,12 +64,9 @@ public class PConfirmDialog extends PDialogBox {
 
         // Build content
         final PVerticalPanel dialogContent = new PVerticalPanel();
-        dialogContent.setWidth("100%");
         dialogContent.add(content);
         final PHorizontalPanel controlsPanel = new PHorizontalPanel();
         controlsPanel.setStyleName("dialogControls");
-        controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
-        controlsPanel.setWidth("100%");
 
         if (cancelCaption != null) {
             final PButton cancelButton = new PButton(cancelCaption);
@@ -80,6 +77,7 @@ public class PConfirmDialog extends PDialogBox {
                 confirmDialog.hide();
             });
             controlsPanel.add(cancelButton);
+            controlsPanel.setCellHorizontalAlignment(cancelButton, PHorizontalAlignment.ALIGN_CENTER);
             confirmDialog.setCancelButton(cancelButton);
         }
         if (okCaption != null) {
@@ -92,6 +90,7 @@ public class PConfirmDialog extends PDialogBox {
             });
 
             controlsPanel.add(okButton);
+            controlsPanel.setCellHorizontalAlignment(okButton, PHorizontalAlignment.ALIGN_CENTER);
             confirmDialog.setOkButton(okButton);
         }
 
