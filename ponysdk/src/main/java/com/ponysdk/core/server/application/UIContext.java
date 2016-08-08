@@ -23,6 +23,25 @@
 
 package com.ponysdk.core.server.application;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -33,23 +52,17 @@ import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
+import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.Event.Type;
+import com.ponysdk.core.ui.eventbus.EventBus;
+import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.ui.eventbus.RootEventBus;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.weak.WeakHashMap;
 import com.ponysdk.core.writer.ModelWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -86,7 +99,6 @@ public class UIContext {
     private int streamRequestCounter = 0;
     private Map<String, Permission> permissions = new HashMap<>();
     private int lastReceived = -1;
-    private int nextSent = 0;
     private long lastSyncErrorTimestamp = 0;
     private TerminalDataReceiver terminalDataReceiver;
     private boolean living = true;
@@ -95,9 +107,6 @@ public class UIContext {
         this.application = context.getApplication();
         this.ID = uiContextCount.incrementAndGet();
         this.context = context;
-
-        this.context.setUIContext(this);
-        this.application.registerUIContext(this);
 
         this.communicationSanityChecker = new CommunicationSanityChecker(this);
         this.communicationSanityChecker.start();
@@ -123,7 +132,8 @@ public class UIContext {
         get().getEventBus().removeHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source,
+            final H handler) {
         return get().getEventBus().addHandlerToSource(type, source, handler);
     }
 
@@ -244,7 +254,8 @@ public class UIContext {
                 log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
                 if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                    final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue()).intValue();
+                    final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
+                            .intValue();
                     final PObject gcObject = weakReferences.get(parentObjectID);
                     log.warn("" + gcObject);
                 }
@@ -301,7 +312,7 @@ public class UIContext {
             writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
             writer.writeModel(ServerToClientModel.OBJECT_ID, 0);
             writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -314,7 +325,7 @@ public class UIContext {
             writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
             writer.writeModel(ServerToClientModel.OBJECT_ID, 0);
             writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -335,7 +346,7 @@ public class UIContext {
     public void close() {
         try (ModelWriter writer = Txn.getWriter()) {
             writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
     }
 
@@ -354,8 +365,10 @@ public class UIContext {
      * If the value passed in is null, this has the same effect as calling
      * <code>removeAttribute()<code>.
      *
-     * @param name  the name to which the object is bound; cannot be null
-     * @param value the object to be bound
+     * @param name
+     *            the name to which the object is bound; cannot be null
+     * @param value
+     *            the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null)
@@ -369,7 +382,8 @@ public class UIContext {
      * the session does not have an object bound with the specified name, this
      * method does nothing.
      *
-     * @param name the name of the object to remove from this session
+     * @param name
+     *            the name of the object to remove from this session
      */
 
     public Object removeAttribute(final String name) {
@@ -380,7 +394,8 @@ public class UIContext {
      * Returns the object bound with the specified name in this session, or
      * <code>null</code> if no object is bound under the name.
      *
-     * @param name a string specifying the name of the object
+     * @param name
+     *            a string specifying the name of the object
      * @return the object with the specified name
      */
     @SuppressWarnings("unchecked")
@@ -410,10 +425,6 @@ public class UIContext {
         return true;
     }
 
-    int getAndIncrementNextSentSeqNum() {
-        return nextSent++;
-    }
-
     public void stackIncomingMessage(final int receivedSeqNum, final JsonObject data) {
         incomingMessageQueue.put(receivedSeqNum, data);
     }
@@ -439,7 +450,6 @@ public class UIContext {
         return lastSyncErrorTimestamp;
     }
 
-
     public void onDestroy() {
         begin();
         try {
@@ -458,7 +468,6 @@ public class UIContext {
             end();
         }
     }
-
 
     private void doDestroy() {
         // log.info("Destroying UIContext ViewID #{} from the Session #{}",
@@ -499,10 +508,10 @@ public class UIContext {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UIContext uiContext = (UIContext) o;
+        final UIContext uiContext = (UIContext) o;
         return ID == uiContext.ID;
     }
 

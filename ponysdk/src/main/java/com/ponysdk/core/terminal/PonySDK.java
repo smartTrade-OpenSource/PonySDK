@@ -37,7 +37,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -56,9 +55,10 @@ import elemental.client.Browser;
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
-    private static final UIBuilder uiBuilder = new UIBuilder();
+
     private static PonySDK INSTANCE;
-    private int applicationViewID;
+
+    private final UIBuilder uiBuilder = new UIBuilder();
 
     private WebSocketClient socketClient;
 
@@ -99,30 +99,31 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                     }
                 });
 
-                Integer viewID = null;
-                final Storage storage = Storage.getSessionStorageIfSupported();
-                if (storage != null) {
-                    final String v = storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
-                    if (v != null && !v.isEmpty())
-                        viewID = Integer.parseInt(v);
-                }
+                /*
+                 * Integer viewID = null;
+                 * final Storage storage = Storage.getSessionStorageIfSupported();
+                 * if (storage != null) {
+                 * final String v =
+                 * storage.getItem(ClientToServerModel.APPLICATION_VIEW_ID.toStringValue());
+                 * if (v != null && !v.isEmpty())
+                 * viewID = Integer.parseInt(v);
+                 * }
+                 *
+                 * if (log.isLoggable(Level.INFO))
+                 * log.info("View ID : " + viewID);
+                 *
+                 * applicationViewID = viewID != null ? viewID : 0;
+                 */
 
-                if (log.isLoggable(Level.INFO))
-                    log.info("View ID : " + viewID);
-
-                applicationViewID = viewID != null ? viewID : 0;
-
-                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") +
-                        "ws?" +
-                        ClientToServerModel.APPLICATION_VIEW_ID.toStringValue() + "=" + UIBuilder.sessionID + "&" +
-                        ClientToServerModel.APPLICATION_START.toStringValue() + "&" +
-                        ClientToServerModel.APPLICATION_SEQ_NUM.toStringValue() + "=" + 0 + "&" +
+                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?" +
                         ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
 
-                socketClient = new WebSocketClient(builder, uiBuilder, applicationViewID, WebSocketDataType.ARRAYBUFFER);
+                socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
             } else {
-                final String windowId = Window.Location.getParameter("wid");
-                uiBuilder.init(applicationViewID, new ParentWindowRequest(windowId, new RequestCallback() {
+                final int uiContextId = Integer
+                        .parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+                final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
+                uiBuilder.init(uiContextId, new ParentWindowRequest(windowId, new RequestCallback() {
 
                     /**
                      * Message from Main terminal to the matching terminal
@@ -140,6 +141,10 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
         }
 
         started = true;
+    }
+
+    public static int getUIContextID() {
+        return constructor().uiBuilder.getUIContextID();
     }
 
     /**

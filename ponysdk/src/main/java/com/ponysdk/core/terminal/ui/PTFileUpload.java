@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -98,11 +99,13 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                 }
             });
         } else if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+            final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.getUIContextID() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
                     + buffer.readBinaryModel().getIntValue();
             getFrame().setUrl(action);
         } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
-            final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+            final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.getUIContextID() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
                     + buffer.readBinaryModel().getIntValue();
             uiObject.setAction(action);
             uiObject.submit();

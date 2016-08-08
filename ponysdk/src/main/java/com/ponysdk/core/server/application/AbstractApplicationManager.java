@@ -27,13 +27,13 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
 
-import com.ponysdk.core.ui.basic.PWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
@@ -54,8 +54,10 @@ public abstract class AbstractApplicationManager {
         }
     }
 
-    public void startApplication(final TxnContext context) throws Exception {
+    public UIContext startApplication(final TxnContext context) throws Exception {
         final UIContext uiContext = new UIContext(context);
+        context.setUIContext(uiContext);
+        context.getApplication().registerUIContext(uiContext);
 
         uiContext.begin();
         try {
@@ -86,6 +88,8 @@ public abstract class AbstractApplicationManager {
         } finally {
             uiContext.end();
         }
+
+        return uiContext;
     }
 
     public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {

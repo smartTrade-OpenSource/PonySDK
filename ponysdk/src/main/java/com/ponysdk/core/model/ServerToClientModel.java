@@ -27,6 +27,7 @@ public enum ServerToClientModel {
 
     HEARTBEAT(ValueTypeModel.NULL),
     OBJECT_ID(ValueTypeModel.INTEGER),
+    BEGIN_OBJECT(ValueTypeModel.NULL),
 
     TYPE_CREATE(ValueTypeModel.INTEGER),
     TYPE_UPDATE(ValueTypeModel.INTEGER),
@@ -38,6 +39,7 @@ public enum ServerToClientModel {
     TYPE_HISTORY(ValueTypeModel.STRING),
     TYPE_REMOVE_HANDLER(ValueTypeModel.NULL),
 
+    UI_CONTEXT_ID(ValueTypeModel.INTEGER),
     NATIVE(ValueTypeModel.JSON_OBJECT),
     DATE(ValueTypeModel.LONG),
     VALUE(ValueTypeModel.STRING),
@@ -196,7 +198,6 @@ public enum ServerToClientModel {
     LOADING_ON_REQUEST(ValueTypeModel.BOOLEAN),
     SET_COL_SPAN(ValueTypeModel.INTEGER),
     SET_ROW_SPAN(ValueTypeModel.INTEGER),
-    APPLICATION_SEQ_NUM(ValueTypeModel.INTEGER),
     KEY_FILTER(ValueTypeModel.JSON_OBJECT),
     POPUP_POSITION_AND_SHOW(ValueTypeModel.NULL),
     ROOT_ID(ValueTypeModel.STRING),

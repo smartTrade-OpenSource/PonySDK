@@ -94,8 +94,7 @@ public class Parser {
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
 
         if (socketBuffer.position() == 0) {
-            socketBuffer.putShort(ServerToClientModel.APPLICATION_SEQ_NUM.getValue());
-            socketBuffer.putInt(UIContext.get().getAndIncrementNextSentSeqNum());
+            socketBuffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
         }
     }
 

@@ -47,22 +47,19 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
-    private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) {
+    private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Application ponyApplicationSession = (Application) req.getSession()
-                    .getAttribute(Application.class.getCanonicalName());
-            final Integer ponySessionID = Integer.parseInt(req.getParameter("ponySessionID"));
-            final UIContext ponySession = ponyApplicationSession.getUIContext(ponySessionID);
-            final StreamHandler streamHandler = ponySession
-                    .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
-            streamHandler.onStream(req, resp);
+            final Application application = SessionManager.get().getApplication(req.getSession());
+            if (application != null) {
+                final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+                final UIContext uiContext = application.getUIContext(uiContextID);
+                final StreamHandler streamHandler = uiContext.removeStreamListener(
+                        Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+                streamHandler.onStream(req, resp);
+            }
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
-            try {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            } catch (final IOException e1) {
-                log.error("Request failure", e1);
-            }
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

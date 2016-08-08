@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -41,8 +42,9 @@ public class PTStreamResource extends AbstractPTObject {
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-        final String action = GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&"
-                + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+        final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                + PonySDK.getUIContextID() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                + streamRequestId;
         frame = new Frame();
         frame.setWidth("0px");
         frame.setHeight("0px");
