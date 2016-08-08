@@ -9,13 +9,14 @@ var Addon = function (pony, params) {
     }
     this.options = {};
     this.initialized = false;
+    this.attached = false;
 };
 
 Addon.prototype.onInit = function () {
     if (!this.initialized) {
         this.init();
+        this.initialized = true;
     }
-    this.initialized = true;
 };
 
 Addon.prototype.init = function () {
@@ -23,8 +24,11 @@ Addon.prototype.init = function () {
 };
 
 Addon.prototype.onAttached = function () {
-    this.jqelement = $(this.element).attr("id", this.id);
-    this.initDom();
+    if (!this.attached)  {
+        this.jqelement = $(this.element).attr("id", this.id);
+        this.initDom();
+        this.attached = true;
+    }
 };
 
 Addon.prototype.initDom = function () {
