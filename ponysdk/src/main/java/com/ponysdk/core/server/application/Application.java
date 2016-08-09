@@ -41,87 +41,91 @@ import com.ponysdk.core.useragent.UserAgent;
  */
 public class Application {
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(Application.class);
 
-    private final Map<Integer, UIContext> uiContexts = new ConcurrentHashMap<>();
+	private final Map<Integer, UIContext> uiContexts = new ConcurrentHashMap<>();
 
-    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-    private final ApplicationManagerOption options;
+	private final ApplicationManagerOption options;
 
-    private final UserAgent userAgent;
+	private final UserAgent userAgent;
 
-    private final HttpSession session;
+	private final HttpSession session;
 
-    public Application(final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
-        this.options = options;
-        this.session = session;
-        this.userAgent = userAgent;
-    }
+	public Application(final HttpSession session,
+			final ApplicationManagerOption options, final UserAgent userAgent) {
+		this.options = options;
+		this.session = session;
+		this.userAgent = userAgent;
+	}
 
-    void registerUIContext(final UIContext uiContext) {
-        uiContexts.put(uiContext.getID(), uiContext);
-    }
+	public void registerUIContext(final UIContext uiContext) {
+		uiContexts.put(uiContext.getID(), uiContext);
+	}
 
-    void unregisterUIContext(final int uiContextID) {
-        uiContexts.remove(uiContextID);
-        if (uiContexts.isEmpty()) {
-            log.info("Invalidate session, all ui contexts have been destroyed");
-            session.invalidate();
-        }
-    }
+	void unregisterUIContext(final int uiContextID) {
+		uiContexts.remove(uiContextID);
+		if (uiContexts.isEmpty()) {
+			log.info("Invalidate session, all ui contexts have been destroyed");
+			session.invalidate();
+		}
+	}
 
-    public UIContext getUIContext(final int uiContextID) {
-        return uiContexts.get(uiContextID);
-    }
+	public UIContext getUIContext(final int uiContextID) {
+		return uiContexts.get(uiContextID);
+	}
 
-    public Collection<UIContext> getUIContexts() {
-        return uiContexts.values();
-    }
+	public Collection<UIContext> getUIContexts() {
+		return uiContexts.values();
+	}
 
-    public void pushToClients(final Object message) {
-        for (final UIContext uiContext : getUIContexts()) {
-            if (log.isDebugEnabled())
-                log.debug("Pushing to {}", uiContext);
-            try {
-                uiContext.pushToClient(message);
-            } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
-            }
-        }
-    }
+	public void pushToClients(final Object message) {
+		for (final UIContext uiContext : getUIContexts()) {
+			if (log.isDebugEnabled())
+				log.debug("Pushing to {}", uiContext);
+			try {
+				uiContext.pushToClient(message);
+			} catch (final Throwable throwable) {
+				log.error("Cannot flush message on the session {}",
+						uiContext.getContext(), throwable);
+			}
+		}
+	}
 
-    public void setAttribute(final String name, final Object value) {
-        attributes.put(name, value);
-    }
+	public void setAttribute(final String name, final Object value) {
+		attributes.put(name, value);
+	}
 
-    @SuppressWarnings("unchecked")
-    public <T> T getAttribute(final String name) {
-        return (T) attributes.get(name);
-    }
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(final String name) {
+		return (T) attributes.get(name);
+	}
 
-    public ApplicationManagerOption getOptions() {
-        return options;
-    }
+	public ApplicationManagerOption getOptions() {
+		return options;
+	}
 
-    public String getName() {
-        return options.getApplicationName();
-    }
+	public String getName() {
+		return options.getApplicationName();
+	}
 
-    public String getID() {
-        return options.getApplicationID();
-    }
+	public String getID() {
+		return options.getApplicationID();
+	}
 
-    public HttpSession getSession() {
-        return session;
-    }
+	public HttpSession getSession() {
+		return session;
+	}
 
-    public UserAgent getUserAgent() {
-        return userAgent;
-    }
+	public UserAgent getUserAgent() {
+		return userAgent;
+	}
 
-    @Override
-    public String toString() {
-        return "Application [" + options + ", ID=" + getID() + ", name=" + getName() + "]";
-    }
+	@Override
+	public String toString() {
+		return "Application [" + options + ", ID=" + getID() + ", name="
+				+ getName() + "]";
+	}
 }

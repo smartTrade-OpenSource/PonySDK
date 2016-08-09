@@ -36,28 +36,31 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTStreamResource extends AbstractPTObject {
 
-    private Frame frame;
+	private Frame frame;
 
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        final int streamRequestId = buffer.readBinaryModel().getIntValue();
+	@Override
+	public void addHandler(final ReaderBuffer buffer,
+			final HandlerModel handlerModel, final UIBuilder uiService) {
+		final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-        final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                + PonySDK.getUIContextID() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
-                + streamRequestId;
-        frame = new Frame();
-        frame.setWidth("0px");
-        frame.setHeight("0px");
-        frame.getElement().getStyle().setProperty("visibility", "hidden");
-        frame.getElement().getStyle().setProperty("position", "fixed");
-        RootPanel.get().add(frame);
+		final String action = GWT.getHostPageBaseURL() + "stream?"
+				+ ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+				+ PonySDK.uiContextId + "&"
+				+ ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+				+ streamRequestId;
+		frame = new Frame();
+		frame.setWidth("0px");
+		frame.setHeight("0px");
+		frame.getElement().getStyle().setProperty("visibility", "hidden");
+		frame.getElement().getStyle().setProperty("position", "fixed");
+		RootPanel.get().add(frame);
 
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-            @Override
-            public void execute() {
-                frame.setUrl(action);
-            }
-        });
-    }
+			@Override
+			public void execute() {
+				frame.setUrl(action);
+			}
+		});
+	}
 }

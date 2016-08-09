@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -43,115 +44,121 @@ import elemental.html.Window;
 
 public class WebSocketClient implements MessageSender {
 
-    private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
+	private static final Logger log = Logger.getLogger(WebSocketClient.class
+			.getName());
 
-    private final WebSocket webSocket;
-    private final UIBuilder uiBuilder;
+	private final WebSocket webSocket;
+	private final UIBuilder uiBuilder;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
-        this.uiBuilder = uiBuilder;
+	public WebSocketClient(final String url, final UIBuilder uiBuilder,
+			final WebSocketDataType webSocketDataType) {
+		this.uiBuilder = uiBuilder;
 
-        final Window window = Browser.getWindow();
-        webSocket = window.newWebSocket(url);
-        webSocket.setBinaryType(webSocketDataType.getName());
+		final Window window = Browser.getWindow();
+		webSocket = window.newWebSocket(url);
+		webSocket.setBinaryType(webSocketDataType.getName());
 
-        final MessageReader messageReader;
-        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
-            messageReader = new ArrayBufferReader(this);
-        } else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
-            messageReader = new BlobReader(this);
-        } else {
-            throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
-        }
+		final MessageReader messageReader;
+		if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
+			messageReader = new ArrayBufferReader(this);
+		} else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
+			messageReader = new BlobReader(this);
+		} else {
+			throw new IllegalArgumentException("Wrong reader type : "
+					+ webSocketDataType);
+		}
 
-        webSocket.setOnopen(new EventListener() {
+		webSocket.setOnopen(new EventListener() {
 
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-            }
-        });
-        webSocket.setOnclose(new EventListener() {
+			@Override
+			public void handleEvent(final Event event) {
+				if (log.isLoggable(Level.INFO))
+					log.info("WebSoket connected");
+			}
+		});
+		webSocket.setOnclose(new EventListener() {
 
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-                uiBuilder.onCommunicationError(new Exception("Websocket connection lost."));
-            }
-        });
-        //webSocket.setOnerror(this);
-        webSocket.setOnmessage(new EventListener() {
+			@Override
+			public void handleEvent(final Event event) {
+				if (log.isLoggable(Level.INFO))
+					log.info("WebSoket disconnected");
+				uiBuilder.onCommunicationError(new Exception(
+						"Websocket connection lost."));
+			}
+		});
+		// webSocket.setOnerror(this);
+		webSocket.setOnmessage(new EventListener() {
 
-            /**
-             * Message from server to Main terminal
-             */
-            @Override
-            public void handleEvent(final Event event) {
-                messageReader.read((MessageEvent) event);
-            }
-        });
-    }
+			/**
+			 * Message from server to Main terminal
+			 */
+			@Override
+			public void handleEvent(final Event event) {
+				messageReader.read((MessageEvent) event);
+			}
+		});
+	}
 
-    @Override
-    public void read(final ArrayBuffer arrayBuffer) {
-        try {
-            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-            // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = buffer.readBinaryModel();
+	@Override
+	public void read(final ArrayBuffer arrayBuffer) {
+		try {
+			final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+			// Get the first element on the message, always a key of element of
+			// the Model enum
+			final BinaryModel type = buffer.readBinaryModel();
 
-            if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
-                send(ClientToServerModel.HEARTBEAT.toStringValue());
-            } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
-                final int uiContextID = type.getModel() == ServerToClientModel.UI_CONTEXT_ID ? type.getIntValue() : 0;
-                if (uiBuilder.getUIContextID() == 0) {
-                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "UI Builder init on uiContext #" + uiContextID);
-                    uiBuilder.init(uiContextID, new WebSocketRequestBuilder(WebSocketClient.this));
-                }
-            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
-                try {
-                    uiBuilder.updateMainTerminal(buffer);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
-            } else {
-                log.severe("Unknown model : " + type.getModel());
-            }
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
-        }
-    }
+			if (type.getModel() == ServerToClientModel.HEARTBEAT) {
+				if (log.isLoggable(Level.FINE))
+					log.log(Level.FINE, "Heart beat");
+				send(ClientToServerModel.HEARTBEAT.toStringValue());
+			} else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
+				PonySDK.uiContextId = type.getIntValue();
+				uiBuilder
+				.init(new WebSocketRequestBuilder(WebSocketClient.this));
+			} else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
+				try {
+					uiBuilder.updateMainTerminal(buffer);
+				} catch (final Exception e) {
+					log.log(Level.SEVERE, "Error while processing the "
+							+ buffer, e);
+				}
+			} else {
+				log.severe("Unknown model : " + type.getModel());
+			}
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+		}
+	}
 
-    public void send(final String message) {
-        webSocket.send(message);
-    }
+	public void send(final String message) {
+		webSocket.send(message);
+	}
 
-    public void close() {
-        webSocket.close();
-    }
+	public void close() {
+		webSocket.close();
+	}
 
-    public enum WebSocketDataType {
+	public enum WebSocketDataType {
 
-        ARRAYBUFFER("arraybuffer"),
-        BLOB("blob");
+		ARRAYBUFFER("arraybuffer"), BLOB("blob");
 
-        private String name;
+		private String name;
 
-        private WebSocketDataType(final String name) {
-            this.name = name;
-        }
+		private WebSocketDataType(final String name) {
+			this.name = name;
+		}
 
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return name;
+		}
 
-        @Override
-        public String toString() {
-            return getName();
-        }
-    }
+		@Override
+		public String toString() {
+			return getName();
+		}
+	}
 
 }

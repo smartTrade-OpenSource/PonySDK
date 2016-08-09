@@ -38,81 +38,87 @@ import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(AbstractApplicationManager.class);
 
-    private final ApplicationManagerOption options;
+	private final ApplicationManagerOption options;
 
-    protected AbstractApplicationManager(final ApplicationManagerOption options) {
-        this.options = options;
-        log.info(options.toString());
-    }
+	protected AbstractApplicationManager(final ApplicationManagerOption options) {
+		this.options = options;
+		log.info(options.toString());
+	}
 
-    private static void process(final UIContext uiContext, final JsonArray applicationInstructions) {
-        for (int i = 0; i < applicationInstructions.size(); i++) {
-            final JsonObject item = applicationInstructions.getJsonObject(i);
-            uiContext.fireClientData(item);
-        }
-    }
+	private static void process(final UIContext uiContext,
+			final JsonArray applicationInstructions) {
+		for (int i = 0; i < applicationInstructions.size(); i++) {
+			final JsonObject item = applicationInstructions.getJsonObject(i);
+			uiContext.fireClientData(item);
+		}
+	}
 
-    public UIContext startApplication(final TxnContext context) throws Exception {
-        final UIContext uiContext = new UIContext(context);
-        context.setUIContext(uiContext);
-        context.getApplication().registerUIContext(uiContext);
+	public void startApplication(final TxnContext txnContext) throws Exception {
+		final UIContext uiContext = txnContext.getUIContext();
+		uiContext.begin();
+		try {
+			final Txn txn = Txn.get();
+			txn.begin(txnContext);
+			try {
 
-        uiContext.begin();
-        try {
-            final Txn txn = Txn.get();
-            txn.begin(context);
-            try {
+				final int receivedSeqNum = txnContext.getSeqNum();
+				uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
 
-                final int receivedSeqNum = context.getSeqNum();
-                uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
+				PWindow.initialize();
 
-                PWindow.initialize();
+				final EntryPoint entryPoint = initializeUIContext(uiContext);
 
-                final EntryPoint entryPoint = initializeUIContext(uiContext);
+				final String historyToken = txnContext.getHistoryToken();
 
-                final String historyToken = context.getHistoryToken();
+				if (historyToken != null && !historyToken.isEmpty()) {
+					uiContext.getHistory().newItem(historyToken, false);
+				}
 
-                if (historyToken != null && !historyToken.isEmpty()) {
-                    uiContext.getHistory().newItem(historyToken, false);
-                }
+				entryPoint.start(uiContext);
 
-                entryPoint.start(uiContext);
+				txn.commit();
+			} catch (final Throwable e) {
+				log.error("Cannot send instructions to the browser "
+						+ txnContext, e);
+				txn.rollback();
+			}
+		} finally {
+			uiContext.end();
+		}
+	}
 
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser " + context, e);
-                txn.rollback();
-            }
-        } finally {
-            uiContext.end();
-        }
+	public void fireInstructions(final JsonObject jsonObject,
+			final TxnContext context) throws Exception {
+		final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS
+				.toStringValue();
+		if (jsonObject.containsKey(applicationInstructions)) {
+			final int key = 1;
 
-        return uiContext;
-    }
+			final Application applicationSession = context.getApplication();
+			if (applicationSession == null)
+				throw new Exception(
+						"Invalid session, please reload your application (viewID #"
+								+ key + ").");
 
-    public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
-        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-        if (jsonObject.containsKey(applicationInstructions)) {
-            final int key = 1;
+			final UIContext uiContext = context.getUIContext();
+			if (uiContext == null)
+				throw new Exception(
+						"Invalid session (no UIContext found), please reload your application (viewID #"
+								+ key + ").");
 
-            final Application applicationSession = context.getApplication();
-            if (applicationSession == null)
-                throw new Exception("Invalid session, please reload your application (viewID #" + key + ").");
+			uiContext.execute(() -> process(uiContext,
+					jsonObject.getJsonArray(applicationInstructions)));
+		}
+	}
 
-            final UIContext uiContext = context.getUIContext();
-            if (uiContext == null)
-                throw new Exception("Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
+	protected abstract EntryPoint initializeUIContext(
+			final UIContext ponySession) throws ServletException;
 
-            uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
-        }
-    }
-
-    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
-
-    public ApplicationManagerOption getOptions() {
-        return options;
-    }
+	public ApplicationManagerOption getOptions() {
+		return options;
+	}
 
 }
