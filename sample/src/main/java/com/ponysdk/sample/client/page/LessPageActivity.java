@@ -25,11 +25,19 @@ package com.ponysdk.sample.client.page;
 
 import java.util.regex.Pattern;
 
-import com.ponysdk.core.ui.basic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -254,7 +262,7 @@ public class LessPageActivity extends SamplePageActivity {
         final StringTextBoxFormField ff = new StringTextBoxFormField();
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
-        ff.getWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
+        ff.asWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
 
             @Override
             public void onValueChange(final PValueChangeEvent<String> event) {
