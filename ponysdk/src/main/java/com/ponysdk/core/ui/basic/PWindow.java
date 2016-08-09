@@ -35,6 +35,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
@@ -104,8 +105,10 @@ public class PWindow extends PObject {
     }
 
     public void open() {
-        if (!opened)
+        if (!opened) {
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
+            Txn.get().flush();
+        }
     }
 
     public void close() {

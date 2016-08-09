@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -70,7 +71,8 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
         url = buffer.readBinaryModel().getStringValue();
         if (url == null)
-            url = GWT.getHostPageBaseURL() + "?wid=" + objectId;
+            url = GWT.getHostPageBaseURL() + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.getUIContextID();
 
         name = buffer.readBinaryModel().getStringValue();
         if (name == null)

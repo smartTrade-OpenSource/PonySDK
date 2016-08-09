@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -73,8 +74,8 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
-            // ServerToClientModel.STREAM_REQUEST_ID
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + "ponySessionID=" + UIBuilder.sessionID + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.getUIContextID() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
                     + buffer.readBinaryModel().getIntValue());
         } else {
             super.addHandler(buffer, handlerModel, uiService);

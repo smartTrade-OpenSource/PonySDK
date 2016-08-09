@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
 
@@ -84,7 +86,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.getExtensionFactory().unregister("permessage-deflate");
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.setCreator((req, resp) -> new WebSocket(req));
+        factory.setCreator((request, response) -> new WebSocket(request, response));
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
@@ -115,9 +117,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         private TxnContext context;
         private Session session;
 
-        WebSocket(final ServletUpgradeRequest req) {
-            log.info(req.getHeader("User-Agent"));
-            this.request = new PRequest(req);
+        WebSocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
+            log.info(request.getHeader("User-Agent"));
+            this.request = new PRequest(request);
         }
 
         @Override
@@ -136,6 +138,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             if (application == null) {
                 application = new Application(request.getSession(), applicationManager.getOptions(),
                         UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
+                SessionManager.get().registerApplication(application);
             }
 
             context.setApplication(application);
@@ -143,12 +146,17 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             if (log.isInfoEnabled())
                 log.info("Creating a new application, {}", application.toString());
             try {
-                applicationManager.startApplication(context);
+                final UIContext uiContext = applicationManager.startApplication(context);
+
+                if (isSessionOpen()) {
+                    final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(6);
+                    socketBuffer.putShort(ServerToClientModel.UI_CONTEXT_ID.getValue());
+                    socketBuffer.putInt(uiContext.getID());
+                    flush(socketBuffer);
+                }
             } catch (final Exception e) {
                 log.error("Cannot process WebSocket instructions", e);
             }
-
-            // listener.onOpen();
         }
 
         @Override

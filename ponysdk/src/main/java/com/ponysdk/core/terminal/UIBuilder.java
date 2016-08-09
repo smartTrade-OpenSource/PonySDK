@@ -78,16 +78,18 @@ import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
-    private final static Logger log = Logger.getLogger(UIBuilder.class.getName());
+    private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private static final EventBus rootEventBus = new SimpleEventBus();
-    public static int sessionID;
+
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
     private final List<JSONObject> stackedErrors = new ArrayList<>();
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
+
+    private int uiContextID;
     private SimplePanel loadingMessageBox;
     private PopupPanel communicationErrorMessagePanel;
     private Timer timer;
@@ -97,18 +99,18 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private CommunicationErrorHandler communicationErrorHandler;
 
     public UIBuilder() {
+    }
+
+    public void init(final int uiContextID, final RequestBuilder requestBuilder) {
+        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
+
+        this.uiContextID = uiContextID;
+        this.requestBuilder = requestBuilder;
+
         History.addValueChangeHandler(this);
 
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
-    }
-
-    public void init(final int ID, final RequestBuilder builder) {
-        if (log.isLoggable(Level.INFO))
-            log.info("Init request builder");
-
-        UIBuilder.sessionID = ID;
-        requestBuilder = builder;
 
         loadingMessageBox = new SimplePanel();
 
@@ -402,7 +404,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
-        requestData.put(ClientToServerModel.APPLICATION_VIEW_ID, sessionID);
 
         if (!stackedErrors.isEmpty()) {
             final JSONArray errors = new JSONArray();
@@ -571,6 +572,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
             log.severe("Deprecated UIBuilder#executeInstruction() method, don't use it : " + instruction);
         }
+    }
+
+    public int getUIContextID() {
+        return uiContextID;
     }
 
 }

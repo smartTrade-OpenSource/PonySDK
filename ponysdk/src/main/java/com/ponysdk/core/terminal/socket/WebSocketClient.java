@@ -48,8 +48,7 @@ public class WebSocketClient implements MessageSender {
     private final WebSocket webSocket;
     private final UIBuilder uiBuilder;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final int applicationViewID,
-            final WebSocketDataType webSocketDataType) {
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
 
         final Window window = Browser.getWindow();
@@ -70,7 +69,6 @@ public class WebSocketClient implements MessageSender {
             @Override
             public void handleEvent(final Event event) {
                 if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-                uiBuilder.init(applicationViewID, new WebSocketRequestBuilder(WebSocketClient.this));
             }
         });
         webSocket.setOnclose(new EventListener() {
@@ -104,7 +102,13 @@ public class WebSocketClient implements MessageSender {
             if (type.getModel() == ServerToClientModel.HEARTBEAT) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
                 send(ClientToServerModel.HEARTBEAT.toStringValue());
-            } else if (type.getModel() == ServerToClientModel.APPLICATION_SEQ_NUM) {
+            } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
+                final int uiContextID = type.getModel() == ServerToClientModel.UI_CONTEXT_ID ? type.getIntValue() : 0;
+                if (uiBuilder.getUIContextID() == 0) {
+                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "UI Builder init on uiContext #" + uiContextID);
+                    uiBuilder.init(uiContextID, new WebSocketRequestBuilder(WebSocketClient.this));
+                }
+            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
                 try {
                     uiBuilder.updateMainTerminal(buffer);
                 } catch (final Exception e) {
