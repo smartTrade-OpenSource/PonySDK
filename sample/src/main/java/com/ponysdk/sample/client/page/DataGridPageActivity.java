@@ -108,7 +108,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
                 final Pony father = dataGrid.getVisibleItem(i);
-                final List<Pony> copy = new ArrayList<Pony>();
+                final List<Pony> copy = new ArrayList<>();
                 for (int j = 0; j < 3; j++) {
                     final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(),
                             father.getRace());
@@ -139,13 +139,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
 
-        final Pager<Pony> pager = new Pager<Pony>(new DefaultPagerView());
-        dataGrid = new DataGridActivity<Pony>(new DefaultSimpleListView());
+        final Pager<Pony> pager = new Pager<>(new DefaultPagerView());
+        dataGrid = new DataGridActivity<>(new DefaultSimpleListView());
 
         final DefaultActionSelectorView actionSelectorView = new DefaultActionSelectorView();
         final DefaultInfoSelectorView infoSelectorView = new DefaultInfoSelectorView();
         final CompositeSelectorView selectorView = new CompositeSelectorView(actionSelectorView, infoSelectorView);
-        final Selector<Pony> selector = new Selector<Pony>(selectorView);
+        final Selector<Pony> selector = new Selector<>(selectorView);
 
         final RemoteDataProvider<Pony> dataProvider = new RemoteDataProvider<Pony>(pager, dataGrid) {
 
@@ -177,7 +177,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
             @Override
             public SelectorCheckBox<Pony> render(final int row, final Pony value) {
-                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<Pony>();
+                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<>();
                 selectorCheckBox.setData(value);
                 selectorCheckBox.addSelectableListener(selector);
                 selector.registerSelectable(selectorCheckBox);

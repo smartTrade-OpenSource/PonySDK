@@ -85,7 +85,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     protected void buildCaption(final String caption) {
         captionLabel = new PLabel();
-        captionLabel.addStyleName("pony-Page-Header-Caption");
+        captionLabel.addStyleName("caption");
         captionLabel.setVisible(false);
         setCaption(caption);
         add(captionLabel);

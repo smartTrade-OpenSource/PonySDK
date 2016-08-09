@@ -44,7 +44,7 @@ import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 
-    protected List<PWindow> windows = new ArrayList<PWindow>();
+    protected List<PWindow> windows = new ArrayList<>();
 
     private PTextBox urlTextBox;
     private PTextBox nameTextBox;

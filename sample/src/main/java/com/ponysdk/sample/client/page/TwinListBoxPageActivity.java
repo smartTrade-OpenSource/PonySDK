@@ -39,7 +39,7 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PTwinListBox<String> twinListBox = new PTwinListBox<String>("From", "To");
+        final PTwinListBox<String> twinListBox = new PTwinListBox<>("From", "To");
 
         final PListBox leftListBox = twinListBox.getLeftListBox();
         leftListBox.addItem("Item1");

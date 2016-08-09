@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -88,15 +88,14 @@ public final class FilteringTools {
     }
 
     public static BeanComparator getPropertyComparator(final String propertyName) {
-        return new BeanComparator((null != propertyName) ? propertyName : "name");
+        return new BeanComparator(null != propertyName ? propertyName : "name");
     }
 
     public static <U> BeanComparator getPropertyComparator(final String propertyName, final Comparator<U> comparator) {
-        return new BeanComparator((null != propertyName) ? propertyName : "name", comparator) {
+        return new BeanComparator(null != propertyName ? propertyName : "name", comparator) {
 
             private static final long serialVersionUID = 5957817419869265091L;
 
-            @SuppressWarnings("unchecked")
             @Override
             public int compare(final Object o1, final Object o2) {
                 final String property = getProperty();
@@ -216,12 +215,16 @@ public final class FilteringTools {
      * <code>values</code> can be used to retrieve the corresponding data as a
      * Collection. E.g. <code>attribute1.mapAttribute.keys.attribute2</code>
      *
-     * @param <T>          the type of the data obtained with the propertyPath that is
-     *                     tested against the patternName
-     * @param datas        the list of data to be filtered
-     * @param propertyPath the chain of attribute representing a path deep into the data
-     *                     objects
-     * @param patternName  a string used to filter data
+     * @param <T>
+     *            the type of the data obtained with the propertyPath that is
+     *            tested against the patternName
+     * @param datas
+     *            the list of data to be filtered
+     * @param propertyPath
+     *            the chain of attribute representing a path deep into the data
+     *            objects
+     * @param patternName
+     *            a string used to filter data
      * @return the list of filtered data
      */
     public static <T> List<T> filter(final List<T> datas, final String propertyPath, final String patternName) {
@@ -406,11 +409,11 @@ public final class FilteringTools {
     }
 
     public static <T> List<T> getPage(final int pageSize, final int page, final List<T> result) {
-        if ((result == null) || (result.size() == 0)) {
+        if (result == null || result.size() == 0) {
             return result;
         }
         if (result.size() < pageSize) return result;
-        if ((page * pageSize) > result.size()) {
+        if (page * pageSize > result.size()) {
             // return last page
             final int lastPage = result.size() / pageSize;
             return result.subList(lastPage * pageSize, result.size());

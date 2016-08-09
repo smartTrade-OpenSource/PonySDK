@@ -27,15 +27,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.terminal.PUnit;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class JavascriptPageActivity extends SamplePageActivity {
 
-    private final List<String> commands = new ArrayList<String>();
+    private final List<String> commands = new ArrayList<>();
     private PFlowPanel history;
 
     private int commandIndex = 0;

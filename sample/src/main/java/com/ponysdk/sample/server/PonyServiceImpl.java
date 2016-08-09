@@ -25,8 +25,8 @@ public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.Pony
 
     private static AtomicLong id = new AtomicLong();
 
-    private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<Long, Pony>();
-    private final List<PonyStock> stocks = new ArrayList<PonyStock>();
+    private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<>();
+    private final List<PonyStock> stocks = new ArrayList<>();
 
     public PonyServiceImpl() {
         final Random rdm = new Random();
