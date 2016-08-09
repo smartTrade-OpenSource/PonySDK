@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
 
-public class DateBoxFormField extends FormField<Date, PDateBox> {
+public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField() {
         this(new PDateBox(), new DateConverter());

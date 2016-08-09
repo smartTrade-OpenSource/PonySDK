@@ -28,7 +28,7 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
 
 public interface FormFieldListener {
 
-    void afterReset(FormField<?, ? extends IsPWidget> formField);
+    void afterReset(AbstractFormField<?, ? extends IsPWidget> formField);
 
-    void afterValidation(FormField<?, ? extends IsPWidget> formField, ValidationResult validationResult);
+    void afterValidation(AbstractFormField<?, ? extends IsPWidget> formField, ValidationResult validationResult);
 }

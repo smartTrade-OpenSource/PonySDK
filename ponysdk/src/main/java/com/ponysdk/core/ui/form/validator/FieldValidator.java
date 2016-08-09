@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.form.validator;
 
 /**
- * Validates a {@link com.ponysdk.core.ui.form.formfield.FormField}
+ * Validates a {@link com.ponysdk.core.ui.form.formfield.AbstractFormField}
  */
 @FunctionalInterface
 public interface FieldValidator {

@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 
-public class ListBoxFormField<T> extends FormField<T, PListBox> {
+public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField() {
         this(new PListBox(), null);

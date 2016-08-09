@@ -24,15 +24,15 @@
 package com.ponysdk.core.ui.form.validator;
 
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.form.formfield.FormField;
+import com.ponysdk.core.ui.form.formfield.AbstractFormField;
 
 public class TwinFieldValidator implements FieldValidator {
 
-    private final FormField<String, ? extends PWidget> twinFormField;
+    private final AbstractFormField<String, ? extends PWidget> twinFormField;
 
     private final String errorMessage;
 
-    public TwinFieldValidator(final String errorMessage, final FormField<String, ? extends PWidget> twinFormField) {
+    public TwinFieldValidator(final String errorMessage, final AbstractFormField<String, ? extends PWidget> twinFormField) {
         this.errorMessage = errorMessage;
         this.twinFormField = twinFormField;
     }

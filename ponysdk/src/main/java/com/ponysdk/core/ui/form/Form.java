@@ -26,42 +26,42 @@ package com.ponysdk.core.ui.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
 
 /**
- * A list of {@link com.ponysdk.core.ui.form.formfield.FormField} validated or reset altogether
+ * A list of {@link com.ponysdk.core.ui.form.formfield.FormField} validated or
+ * reset altogether
  */
 public class Form {
 
-    protected final List<FormField<?, ? extends IsPWidget>> formFields = new ArrayList<>();
+	protected final List<FormField> formFields = new ArrayList<>();
 
-    public void addFormField(final FormField<?, ? extends IsPWidget> formField) {
-        formFields.add(formField);
-    }
+	public void addFormField(final FormField formField) {
+		formFields.add(formField);
+	}
 
-    public void removeFormField(final FormField<?, ? extends IsPWidget> formField) {
-        formFields.remove(formField);
-    }
+	public void removeFormField(final FormField formField) {
+		formFields.remove(formField);
+	}
 
-    public boolean isValid() {
-        boolean valid = true;
-        for (final FormField<?, ? extends IsPWidget> formField : formFields) {
-            final ValidationResult result = formField.isValid();
-            if (!result.isValid()) {
-                valid = false;
-            }
-        }
-        return valid;
-    }
+	public boolean isValid() {
+		boolean valid = true;
+		for (final FormField formField : formFields) {
+			final ValidationResult result = formField.isValid();
+			if (!result.isValid()) {
+				valid = false;
+			}
+		}
+		return valid;
+	}
 
-    public void reset() {
-        formFields.forEach((formField) -> reset());
-    }
+	public void reset() {
+		formFields.forEach((formField) -> reset());
+	}
 
-    public List<FormField<?, ? extends IsPWidget>> getFormFields() {
-        return formFields;
-    }
+	public List<FormField> getFormFields() {
+		return formFields;
+	}
 
 }
