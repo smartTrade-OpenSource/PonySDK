@@ -23,7 +23,6 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
-import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -32,6 +31,7 @@ import com.ponysdk.core.ui.celltable.SimpleTableView;
 import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
 import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.sample.client.datamodel.PonyStock;
 
 public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
@@ -48,7 +48,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
         addForm();
 
-        dataGrid = new RefreshableDataGrid<Long, PonyStock>(new SimpleTableView());
+        dataGrid = new RefreshableDataGrid<>(new SimpleTableView());
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());

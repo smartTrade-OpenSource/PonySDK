@@ -28,13 +28,13 @@ import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 /**
  * Defines a {@link com.google.gwt.user.cellview.client.DataGrid} column
  * By default an IdentityDataGridColumnDescriptor has an IdentityValueProvider
- * 
+ *
  * @param <D>
  */
 public class IdentityDataGridColumnDescriptor<D> extends DataGridColumnDescriptor<D, D> {
 
     public IdentityDataGridColumnDescriptor() {
-        this.valueProvider = new IdentityValueProvider<D>();
+        this.valueProvider = new IdentityValueProvider<>();
     }
 
 }

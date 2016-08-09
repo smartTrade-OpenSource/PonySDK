@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,17 +29,17 @@ import com.ponysdk.sample.client.datamodel.User;
 
 public class UserLoggedInEvent extends BusinessEvent<UserLoggedInHandler> {
 
-    public static final Event.Type<UserLoggedInHandler> TYPE = new Event.Type<UserLoggedInHandler>();
+    public static final Event.Type<UserLoggedInHandler> TYPE = new Event.Type<>();
 
     private final User user;
 
-    public UserLoggedInEvent(Object sourceComponent, User user) {
+    public UserLoggedInEvent(final Object sourceComponent, final User user) {
         super(sourceComponent);
         this.user = user;
     }
 
     @Override
-    protected void dispatch(UserLoggedInHandler handler) {
+    protected void dispatch(final UserLoggedInHandler handler) {
         handler.onUserLoggedIn(this);
     }
 

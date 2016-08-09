@@ -14,7 +14,7 @@ import com.ponysdk.sample.client.activity.MarketData;
 public class TradingServiceImpl /** implements TradingService **/
 {
 
-    private final List<MarketData> marketDatas = new ArrayList<MarketData>();
+    private final List<MarketData> marketDatas = new ArrayList<>();
 
     public TradingServiceImpl() {
         marketDatas.add(new MarketData("EurUSD", 0, 0));
