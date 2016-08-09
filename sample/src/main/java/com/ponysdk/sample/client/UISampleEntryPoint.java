@@ -303,7 +303,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(createPTextBox());
         boxContainer.add(new PToolbar());
         boxContainer.add(createTree());
-        boxContainer.add(new PTwinListBox<Object>());
+        boxContainer.add(new PTwinListBox<>());
         boxContainer.add(new PVerticalPanel());
 
         PWindow.getMain().add(boxContainer);

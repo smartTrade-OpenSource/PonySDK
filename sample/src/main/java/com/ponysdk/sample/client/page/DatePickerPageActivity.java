@@ -109,7 +109,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
     }
 
     private List<Date> dates(final String... d) {
-        final List<Date> dates = new ArrayList<Date>();
+        final List<Date> dates = new ArrayList<>();
         for (final String s : d) {
             try {
                 dates.add(f.parse(s));

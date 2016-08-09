@@ -28,13 +28,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.celltable.SimpleTableView;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.sample.client.datamodel.PonyStock;
 
 public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
@@ -63,7 +63,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
         actions.setWidget(0, 0, addRow);
 
-        dataGrid = new SortableRefreshableDataGrid<Long, PonyStock>(new Comparator<PonyStock>() {
+        dataGrid = new SortableRefreshableDataGrid<>(new Comparator<PonyStock>() {
 
             @Override
             public int compare(final PonyStock o1, final PonyStock o2) {
@@ -92,7 +92,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
     private class SortableRefreshableDataGrid<K, D> extends RefreshableDataGrid<K, D> {
 
-        private final List<D> datas = new ArrayList<D>();
+        private final List<D> datas = new ArrayList<>();
 
         private final Comparator<D> comparator;
 

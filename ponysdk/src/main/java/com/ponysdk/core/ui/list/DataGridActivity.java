@@ -84,7 +84,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         view.addWidget(widget, column, row, colSpan);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public void insertSubList(final D fatherData, final List<D> datas) {
         if (datas.isEmpty()) return;
 
@@ -100,7 +99,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             this.view.insertRow(subRow + 1);
             this.view.addRowStyle(subRow + 1, "pony-SimpleList-SubRow");
             int col = 0;
-            for (final DataGridColumnDescriptor field : this.columnDescriptors) {
+            for (final DataGridColumnDescriptor<D, ?> field : this.columnDescriptors) {
                 this.view.addWidget(field.renderSubCell(subRow + 1, data), col++, subRow + 1, 1);
             }
             this.view.addWidget(new PSimplePanel(), col, subRow + 1, 1);

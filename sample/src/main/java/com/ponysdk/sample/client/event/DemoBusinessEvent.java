@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -35,13 +35,13 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
         void onEvent(DemoBusinessEvent event);
     }
 
-    public static final Event.Type<DemoBusinessEventHandler> TYPE = new Event.Type<DemoBusinessEventHandler>();
+    public static final Event.Type<DemoBusinessEventHandler> TYPE = new Event.Type<>();
 
-    public DemoBusinessEvent(Object sourceComponent) {
+    public DemoBusinessEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
-    public DemoBusinessEvent(String message) {
+    public DemoBusinessEvent(final String message) {
         super(null);
         setBusinessMessage(message);
     }
@@ -52,7 +52,7 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
     }
 
     @Override
-    protected void dispatch(DemoBusinessEventHandler handler) {
+    protected void dispatch(final DemoBusinessEventHandler handler) {
         handler.onEvent(this);
     }
 
