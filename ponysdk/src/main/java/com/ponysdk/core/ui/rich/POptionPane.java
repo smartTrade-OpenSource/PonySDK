@@ -63,8 +63,7 @@ public class POptionPane implements IsPWidget {
     }
 
     public static POptionPane showOptionDialog(final int windowID, final PActionHandler handler, final String message,
-            final String title,
-            final POptionType optionType, final PMessageType messageType, final String... options) {
+            final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
         final POptionPane optionPane = new POptionPane(windowID);
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
@@ -87,6 +86,7 @@ public class POptionPane implements IsPWidget {
             button.ensureDebugId("optionpane[" + option + "]");
             button.addClickHandler(clickEvent -> handler.onAction(dialogBox, option));
             controlsPanel.add(button);
+            controlsPanel.setCellHorizontalAlignment(button, PHorizontalAlignment.ALIGN_CENTER);
         }
 
         panel.add(controlsPanel);
