@@ -24,18 +24,17 @@
 package com.ponysdk.core.ui.list.renderer.header;
 
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.form.formfield.AbstractFormField;
+import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.list.FilterListener;
 import com.ponysdk.core.ui.list.Sortable;
 
 public class FilterableHeaderCellRenderer extends ComplexHeaderCellRenderer {
 
-    public FilterableHeaderCellRenderer(final String caption, final AbstractFormField<?, ? extends PWidget> formField, final String key) {
+    public FilterableHeaderCellRenderer(final String caption, final FormField formField, final String key) {
         this(caption, formField, key, null);
     }
 
-    public FilterableHeaderCellRenderer(final String caption, final AbstractFormField<?, ? extends PWidget> formField, final String key,
+    public FilterableHeaderCellRenderer(final String caption, final FormField formField, final String key,
             final FilterListener filterListener) {
         super(caption, formField, key, filterListener);
     }

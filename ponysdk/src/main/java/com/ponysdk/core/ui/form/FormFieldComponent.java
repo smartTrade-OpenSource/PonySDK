@@ -23,21 +23,20 @@
 
 package com.ponysdk.core.ui.form;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.form.formfield.AbstractFormField;
+import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.formfield.FormFieldListener;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
 import com.ponysdk.core.ui.list.Resetable;
 import com.ponysdk.core.ui.list.Validable;
 
 /**
- * Rendering of a {@link com.ponysdk.core.ui.form.formfield.AbstractFormField}
+ * Rendering of a {@link com.ponysdk.core.ui.form.formfield.FormField}
  */
 public class FormFieldComponent extends PFlowPanel implements FormFieldListener, Validable, Resetable {
 
-    protected final AbstractFormField<?, ? extends IsPWidget> formField;
+    protected final FormField formField;
 
     protected PFlowPanel container = new PFlowPanel();
     protected PLabel captionLabel;
@@ -52,16 +51,15 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
         BOTTOM
     }
 
-    public FormFieldComponent(final AbstractFormField<?, ? extends IsPWidget> formField) {
+    public FormFieldComponent(final FormField formField) {
         this(null, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final AbstractFormField<?, ? extends IsPWidget> formField) {
+    public FormFieldComponent(final String caption, final FormField formField) {
         this(caption, CaptionOrientation.TOP, formField);
     }
 
-    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation,
-            final AbstractFormField<?, ? extends IsPWidget> formField) {
+    public FormFieldComponent(final String caption, final CaptionOrientation captionOrientation, final FormField formField) {
         this.formField = formField;
         add(container);
         buildUI(caption);
@@ -123,12 +121,12 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     }
 
     @Override
-    public void afterReset(final AbstractFormField<?, ? extends IsPWidget> formField) {
+    public void afterReset(final FormField formField) {
         clearError();
     }
 
     @Override
-    public void afterValidation(final AbstractFormField<?, ? extends IsPWidget> formField, final ValidationResult validationResult) {
+    public void afterValidation(final FormField formField, final ValidationResult validationResult) {
         if (validationResult.isValid()) {
             clearError();
         } else {

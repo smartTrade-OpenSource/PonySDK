@@ -262,7 +262,7 @@ public class LessPageActivity extends SamplePageActivity {
         final StringTextBoxFormField ff = new StringTextBoxFormField();
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
-        ff.asWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
+        ff.getWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
 
             @Override
             public void onValueChange(final PValueChangeEvent<String> event) {

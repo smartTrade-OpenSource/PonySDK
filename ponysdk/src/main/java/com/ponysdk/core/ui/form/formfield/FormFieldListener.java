@@ -23,12 +23,11 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
 
 public interface FormFieldListener {
 
-    void afterReset(AbstractFormField<?, ? extends IsPWidget> formField);
+    void afterReset(FormField formField);
 
-    void afterValidation(AbstractFormField<?, ? extends IsPWidget> formField, ValidationResult validationResult);
+    void afterValidation(FormField formField, ValidationResult validationResult);
 }
