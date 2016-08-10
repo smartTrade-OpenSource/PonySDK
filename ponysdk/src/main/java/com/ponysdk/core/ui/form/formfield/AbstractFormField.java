@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.form.formfield;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
@@ -35,77 +36,81 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or
  * reset
  */
-public abstract class AbstractFormField<T, W extends PWidget> implements
-		FormField {
+public abstract class AbstractFormField<T, W extends IsPWidget> implements FormField {
 
-	protected final W widget;
-	private final Set<FormFieldListener> listeners = new HashSet<>();
-	protected DataConverter<String, T> dataProvider;
-	private FieldValidator validator;
+    protected final W widget;
+    private final Set<FormFieldListener> listeners = new HashSet<>();
+    protected DataConverter<String, T> dataProvider;
+    private FieldValidator validator;
 
-	public AbstractFormField(final W widget,
-			final DataConverter<String, T> dataProvider) {
-		this.widget = widget;
-		this.dataProvider = dataProvider;
-	}
+    public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider) {
+        this.widget = widget;
+        this.dataProvider = dataProvider;
+    }
 
-	@Override
-	public ValidationResult isValid() {
-		ValidationResult result;
+    @Override
+    public ValidationResult isValid() {
+        ValidationResult result;
 
-		if (validator == null)
-			result = ValidationResult.newOKValidationResult();
-		else
-			result = validator.isValid(getStringValue());
+        if (validator == null)
+            result = ValidationResult.newOKValidationResult();
+        else
+            result = validator.isValid(getStringValue());
 
-		fireAfterValidation(result);
+        fireAfterValidation(result);
 
-		return result;
-	}
+        return result;
+    }
 
-	public void setValidator(final FieldValidator validator) {
-		this.validator = validator;
-	}
+    public void setValidator(final FieldValidator validator) {
+        this.validator = validator;
+    }
 
-	public void addFormFieldListener(final FormFieldListener listener) {
-		listeners.add(listener);
-	}
+    @Override
+    public void addFormFieldListener(final FormFieldListener listener) {
+        listeners.add(listener);
+    }
 
-	@Override
-	public void reset() {
-		reset0();
-		fireAfterReset();
-	}
+    @Override
+    public void reset() {
+        reset0();
+        fireAfterReset();
+    }
 
-	private void fireAfterReset() {
-		for (final FormFieldListener listener : listeners) {
-			listener.afterReset(this);
-		}
-	}
+    private void fireAfterReset() {
+        for (final FormFieldListener listener : listeners) {
+            listener.afterReset(this);
+        }
+    }
 
-	private void fireAfterValidation(final ValidationResult result) {
-		for (final FormFieldListener listener : listeners) {
-			listener.afterValidation(this, result);
-		}
-	}
+    private void fireAfterValidation(final ValidationResult result) {
+        for (final FormFieldListener listener : listeners) {
+            listener.afterValidation(this, result);
+        }
+    }
 
-	@Override
-	public W asWidget() {
-		return widget;
-	}
+    @Override
+    public PWidget asWidget() {
+        return widget.asWidget();
+    }
 
-	public void setDataProvider(final DataConverter<String, T> dataProvider) {
-		this.dataProvider = dataProvider;
-	}
+    public W getWidget() {
+        return widget;
+    }
 
-	protected abstract String getStringValue();
+    public void setDataProvider(final DataConverter<String, T> dataProvider) {
+        this.dataProvider = dataProvider;
+    }
 
-	protected abstract void reset0();
+    protected abstract String getStringValue();
 
-	public abstract T getValue();
+    protected abstract void reset0();
 
-	public abstract void setValue(final T value);
+    @Override
+    public abstract T getValue();
 
-	public abstract void setEnabled(final boolean enabled);
+    public abstract void setValue(final T value);
+
+    public abstract void setEnabled(final boolean enabled);
 
 }

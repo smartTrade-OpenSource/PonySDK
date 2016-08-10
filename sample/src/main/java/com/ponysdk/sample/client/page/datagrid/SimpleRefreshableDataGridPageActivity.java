@@ -71,11 +71,11 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         final LongTextBoxFormField keyRowFormField = new LongTextBoxFormField();
         final IntegerTextBoxFormField toRowFormField = new IntegerTextBoxFormField();
 
-        addRowFormField.asWidget().setPlaceholder("Row index (add)");
-        removeRowFormField.asWidget().setPlaceholder("Row index (remove)");
-        removeRowByKeyFormField.asWidget().setPlaceholder("Row key (remove)");
-        keyRowFormField.asWidget().setPlaceholder("Row key (move)");
-        toRowFormField.asWidget().setPlaceholder("Row index (move)");
+        addRowFormField.getWidget().setPlaceholder("Row index (add)");
+        removeRowFormField.getWidget().setPlaceholder("Row index (remove)");
+        removeRowByKeyFormField.getWidget().setPlaceholder("Row key (remove)");
+        keyRowFormField.getWidget().setPlaceholder("Row key (move)");
+        toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
         final PButton addButton = new PButton("Add a row");
         addButton.addClickHandler(new PClickHandler() {
