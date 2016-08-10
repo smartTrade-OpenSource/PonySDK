@@ -39,6 +39,7 @@ public enum ClientToServerModel {
     TYPE_HISTORY,
 
     WIDGET_POSITION,
+    POPUP_POSITION,
     EVENT_INFO,
     DOM_HANDLER_TYPE,
 

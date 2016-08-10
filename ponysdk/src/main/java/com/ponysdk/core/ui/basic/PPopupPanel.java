@@ -74,19 +74,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private final boolean autoHide;
     private final List<PCloseHandler> listeners = new ArrayList<>();
-    private boolean glassEnabled;
 
     private boolean animationEnabled;
 
-    private boolean center;
-
     private boolean showing;
-
-    private int leftPosition;
-
-    private int topPosition;
-
-    private String glassStyleName;
 
     private PPositionCallback positionCallback;
 
@@ -134,7 +125,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void center() {
-        this.center = true;
         this.showing = true;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_CENTER));
     }
@@ -164,12 +154,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
-    public boolean isGlassEnabled() {
-        return glassEnabled;
-    }
-
     public void setGlassEnabled(final boolean glassEnabled) {
-        this.glassEnabled = glassEnabled;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
     }
 
@@ -178,12 +163,9 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setPopupPosition(final int left, final int top) {
-        leftPosition = left;
-        topPosition = top;
-
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_POSITION_LEFT, leftPosition);
-            writer.writeModel(ServerToClientModel.POPUP_POSITION_TOP, topPosition);
+            writer.writeModel(ServerToClientModel.POPUP_POSITION_LEFT, left);
+            writer.writeModel(ServerToClientModel.POPUP_POSITION_TOP, top);
         });
     }
 
@@ -199,8 +181,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(ClientToServerModel.WIDGET_POSITION.toStringValue())) {
-            final JsonArray widgetInfo = instruction.getJsonArray(ClientToServerModel.WIDGET_POSITION.toStringValue());
+        if (instruction.containsKey(ClientToServerModel.POPUP_POSITION.toStringValue())) {
+            final JsonArray widgetInfo = instruction.getJsonArray(ClientToServerModel.POPUP_POSITION.toStringValue());
             int i = 0;
             final int windowWidth = ((JsonNumber) widgetInfo.get(i++)).intValue();
             final int windowHeight = ((JsonNumber) widgetInfo.get(i++)).intValue();
@@ -224,29 +206,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         setVisible(true);
     }
 
-    public boolean isAutoHide() {
-        return autoHide;
-    }
-
-    public String getGlassStyleName() {
-        return glassStyleName;
-    }
-
     public void setGlassStyleName(final String glassStyleName) {
-        this.glassStyleName = glassStyleName;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
-    }
-
-    public boolean isCenter() {
-        return center;
-    }
-
-    public PPositionCallback getPositionCallback() {
-        return positionCallback;
-    }
-
-    public int getLeftPosition() {
-        return leftPosition;
     }
 
     /**
