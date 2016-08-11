@@ -12,9 +12,9 @@ public class CheckBoxFormField extends FormField<Boolean> {
         this(new PCheckBox());
     }
 
-    public CheckBoxFormField(final PCheckBox textBox) {
+    public CheckBoxFormField(final PCheckBox checkBox) {
         super(null);
-        this.checkBox = textBox;
+        this.checkBox = checkBox;
     }
 
     @Override
