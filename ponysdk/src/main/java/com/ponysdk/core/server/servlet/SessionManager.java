@@ -25,6 +25,7 @@ package com.ponysdk.core.server.servlet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,6 +39,8 @@ public class SessionManager {
 
     private final Map<String, Application> applicationsBySessionID = new ConcurrentHashMap<>();
 
+    private final List<ApplicationListener> listeners = new ArrayList<>();
+
     public static SessionManager get() {
         return INSTANCE;
     }
@@ -47,8 +50,7 @@ public class SessionManager {
     }
 
     public Application getApplication(final HttpSession session) {
-        if (session == null)
-            return null;
+        if (session == null) return null;
         return getApplication(session.getId());
     }
 
@@ -58,6 +60,16 @@ public class SessionManager {
 
     public void registerApplication(final Application application) {
         applicationsBySessionID.put(application.getSession().getId(), application);
+        listeners.forEach(listener -> listener.onApplicationCreated(application));
+    }
+
+    public void unregisterApplication(final Application application) {
+        applicationsBySessionID.remove(application.getSession().getId());
+        listeners.forEach(listener -> listener.onApplicationDestroyed(application));
+    }
+
+    public void addApplicationListener(final ApplicationListener listener) {
+        listeners.add(listener);
     }
 
 }
