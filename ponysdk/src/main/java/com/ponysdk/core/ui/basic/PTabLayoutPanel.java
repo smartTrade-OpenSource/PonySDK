@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -105,14 +105,39 @@ public class PTabLayoutPanel extends PComplexPanel
         insert(asWidgetOrNull(widget), asWidgetOrNull(tabWidget), beforeIndex);
     }
 
-    public void insert(final PWidget widget, final PWidget tabWidget, final int beforeIndex) {
-        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
-                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+    public void insert(final PWidget child, final PWidget tabWidget, final int beforeIndex) {
+        assertNotMe(child);
+
+        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+            child.removeFromParent();
+
+            children.insert(child, beforeIndex);
+            adopt(child);
+
+            child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
+                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+            tabWidget.attach(windowID);
+            child.attach(windowID);
+        } else {
+            throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
+                    + child.getWindowID() + ", new window : " + windowID);
+        }
     }
 
-    public void insert(final PWidget widget, final String tabText, final int beforeIndex) {
-        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
-                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+    public void insert(final PWidget child, final String tabText, final int beforeIndex) {
+        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+            child.removeFromParent();
+
+            children.insert(child, beforeIndex);
+            adopt(child);
+
+            child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
+                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+            child.attach(windowID);
+        } else {
+            throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
+                    + child.getWindowID() + ", new window : " + windowID);
+        }
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {
@@ -124,11 +149,11 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     public void add(final PWidget widget, final String tabText) {
-        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText));
+        insert(widget, tabText, getWidgetCount());
     }
 
     public void add(final PWidget widget, final PWidget tabWidget) {
-        saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()));
+        insert(widget, tabWidget, getWidgetCount());
     }
 
     public void selectTab(final int index) {
