@@ -108,11 +108,22 @@ public class PTextBox extends PTextBoxBase {
      *            replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.writeModel(ServerToClientModel.MASK, pattern);
             writer.writeModel(ServerToClientModel.VISIBILITY, showMask);
             writer.writeModel(ServerToClientModel.REPLACEMENT_STRING, freeSymbol);
         });
+    }
+
+    /**
+     * Sets a filter to the textbox. Value sets to the textbox will be filtered. <br>
+     * Example: ([a-zA-Z0-9])
+     *
+     * @param regExp
+     *            the regular expression to use as filter.
+     */
+    public void setFilter(final String regExp) {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.REGEX_FILTER, regExp));
     }
 
 }

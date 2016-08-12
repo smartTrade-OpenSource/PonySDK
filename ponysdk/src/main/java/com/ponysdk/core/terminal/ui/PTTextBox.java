@@ -23,19 +23,28 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.dom.client.DropEvent;
+import com.google.gwt.event.dom.client.DropHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextBox;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.widget.mask.TextBoxMaskedDecorator;
 
-public class PTTextBox extends PTTextBoxBase<TextBox> {
+public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler, DropHandler {
 
     private TextBoxMaskedDecorator maskDecorator;
+    private RegExp regExp;
 
     @Override
     protected TextBox createUIObject() {
-        return new TextBox();
+        return new ExtendedTextBox();
     }
 
     @Override
@@ -67,7 +76,68 @@ public class PTTextBox extends PTTextBoxBase<TextBox> {
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
             return true;
         }
+        if (ServerToClientModel.REGEX_FILTER.equals(binaryModel.getModel())) {
+            regExp = RegExp.compile(binaryModel.getStringValue());
+            uiObject.addKeyPressHandler(this);
+            uiObject.addDropHandler(this);
+            uiObject.sinkEvents(Event.ONPASTE);
+            return true;
+        }
         return super.update(buffer, binaryModel);
+    }
+
+    @Override
+    public void onKeyPress(final KeyPressEvent event) {
+        if (!match(event.getCharCode())) uiObject.cancelKey();
+    }
+
+    @Override
+    public void onDrop(final DropEvent event) {
+        filterText();
+    }
+
+    /**
+     * Indicates if the character typed in the text box matches the regular expression.
+     *
+     * @param key
+     *            the key character typed in the text box.
+     * @return true if the character matches the regular expression, false otherwise.
+     */
+    private boolean match(final char key) {
+        if (regExp == null) return true;
+        return regExp.exec(String.valueOf(key)) != null;
+    }
+
+    /**
+     * Filters text set in the text box in a deferred action.
+     */
+    private void filterText() {
+        if (regExp == null) return;
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                final String pasteText = uiObject.getText();
+                final StringBuilder filteredText = new StringBuilder();
+                for (final char c : pasteText.toCharArray()) {
+                    if (match(c)) filteredText.append(c);
+                }
+                uiObject.setText(filteredText.toString());
+            }
+        });
+    }
+
+    private class ExtendedTextBox extends TextBox {
+
+        @Override
+        public void onBrowserEvent(final Event event) {
+            super.onBrowserEvent(event);
+            switch (event.getTypeInt()) {
+                case Event.ONPASTE:
+                    filterText();
+                    break;
+            }
+        }
     }
 
 }

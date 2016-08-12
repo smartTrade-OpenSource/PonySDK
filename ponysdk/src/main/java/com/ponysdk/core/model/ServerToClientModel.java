@@ -96,6 +96,7 @@ public enum ServerToClientModel {
     ANIMATION(ValueTypeModel.BOOLEAN),
     MAX_LENGTH(ValueTypeModel.INTEGER),
     VISIBLE_LENGTH(ValueTypeModel.INTEGER),
+    REGEX_FILTER(ValueTypeModel.STRING),
     MASK(ValueTypeModel.STRING),
     VISIBILITY(ValueTypeModel.BOOLEAN),
     REPLACEMENT_STRING(ValueTypeModel.STRING),
