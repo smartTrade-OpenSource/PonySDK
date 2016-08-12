@@ -23,14 +23,6 @@
 
 package com.ponysdk.core.weak;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.writer.ModelWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -39,6 +31,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.PWindowManager;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class WeakHashMap implements Map<Integer, PObject> {
 
@@ -142,15 +144,20 @@ public class WeakHashMap implements Map<Integer, PObject> {
             final Reference<PObject> removedObject = referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
-            try (final ModelWriter writer = Txn.getWriter()) {
-                final PObject pObject = removedObject.get();
-                if (pObject == null) continue;
-                final int windowID = pObject.getWindowID();
-                if (windowID != PWindow.getMain().getID()) {
-                    writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+            final PObject pObject = removedObject.get();
+            if (pObject == null) continue;
+            final int windowID = pObject.getWindowID();
+
+            if (PWindowManager.getWindow(windowID) != null) {
+                try (final ModelWriter writer = Txn.getWriter()) {
+                    if (windowID != PWindow.getMain().getID()) {
+                        if (PWindowManager.getWindow(windowID) == null) {
+                            writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+                        }
+                    }
+                    writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
+                } catch (final IOException e) {
                 }
-                writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
-            } catch (IOException e) {
             }
         }
     }
