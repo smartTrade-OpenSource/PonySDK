@@ -106,14 +106,14 @@ public class PWindow extends PObject {
 
     public void open() {
         if (!opened) {
+            PWindowManager.preregisterWindow(this);
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
             Txn.get().flush();
         }
     }
 
     public void close() {
-        if (opened)
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
+        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
     }
 
     @Override
@@ -161,10 +161,8 @@ public class PWindow extends PObject {
     }
 
     public void add(final IsPWidget widget) {
-        if (PWindowManager.getWindow(ID) == this)
-            add0(widget);
-        else
-            stackedInstructions.add(() -> add0(widget));
+        if (PWindowManager.getWindow(ID) == this) add0(widget);
+        else stackedInstructions.add(() -> add0(widget));
     }
 
     private void add0(final IsPWidget widget) {

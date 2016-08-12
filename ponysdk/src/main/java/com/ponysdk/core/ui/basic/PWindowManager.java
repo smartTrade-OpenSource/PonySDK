@@ -39,7 +39,8 @@ public class PWindowManager {
 
     private static final String ROOT = "WindowManager";
 
-    private final Map<Integer, PWindow> windows = new HashMap<>();
+    private final Map<Integer, PWindow> preregisteredWindows = new HashMap<>();
+    private final Map<Integer, PWindow> registeredWindows = new HashMap<>();
     private final List<RegisterWindowListener> listeners = new ArrayList<>();
 
     private PWindowManager() {
@@ -53,6 +54,10 @@ public class PWindowManager {
             session.setAttribute(ROOT, windowManager);
         }
         return windowManager;
+    }
+
+    public static void preregisterWindow(final PWindow pWindow) {
+        get().preregisteredWindows.put(pWindow.getID(), pWindow);
     }
 
     static void registerWindow(final PWindow window) {
@@ -72,7 +77,7 @@ public class PWindowManager {
             log.debug("Window ID is not already set, so no Window is associated");
             return null;
         } else {
-            final PWindow window = PWindowManager.get().windows.get(windowID);
+            final PWindow window = PWindowManager.get().registeredWindows.get(windowID);
             if (window != null) {
                 log.debug("Window ID is set on window #" + windowID);
                 return window;
@@ -84,12 +89,13 @@ public class PWindowManager {
     }
 
     private void registerWindow0(final PWindow window) {
-        windows.put(window.getID(), window);
+        registeredWindows.put(window.getID(), window);
         listeners.forEach(listener -> listener.registered(window.getID()));
     }
 
     private void unregisterWindow0(final PWindow window) {
-        windows.remove(window.getID());
+        preregisteredWindows.remove(window.getID());
+        registeredWindows.remove(window.getID());
     }
 
     private void addWindowListener0(final RegisterWindowListener listener) {
@@ -97,7 +103,7 @@ public class PWindowManager {
     }
 
     public void closeAll() {
-        windows.forEach((id, window) -> window.close());
+        registeredWindows.forEach((id, window) -> window.close());
     }
 
     interface RegisterWindowListener {
