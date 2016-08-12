@@ -23,6 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -31,18 +39,12 @@ import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import javax.json.JsonObject;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * A rich text editor that allows complex styling and formatting.there is a
  * formatter interface, accessed via {@link #getFormatter()}. A browser that
  * does not support rich text editing at all will return <code>null</code> for
  * both of these, while one that supports only the basic functionality will
- * return <code>null</code> for the latter.
- * <h3>CSS Style Rules</h3>
+ * return <code>null</code> for the latter. <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
  * <dd>Applied to the rich text element.</dd>
@@ -50,8 +52,6 @@ import java.util.regex.Pattern;
  */
 public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
 
-    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
-    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
     private final Formatter formatter = new Formatter();
     private String html;
@@ -81,7 +81,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
     }
 
     public Formatter getFormatter() {

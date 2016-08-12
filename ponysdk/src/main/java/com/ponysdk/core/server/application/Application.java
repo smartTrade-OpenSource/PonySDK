@@ -75,6 +75,15 @@ public class Application {
         }
     }
 
+    public void destroy() {
+        uiContexts.values().forEach(context ->
+        context.destroyFromApplication()
+                );
+        uiContexts.clear();
+        session.invalidate();
+        SessionManager.get().unregisterApplication(this);
+    }
+
     public UIContext getUIContext(final int uiContextID) {
         return uiContexts.get(uiContextID);
     }
@@ -108,14 +117,6 @@ public class Application {
         return options;
     }
 
-    public String getName() {
-        return options.getApplicationName();
-    }
-
-    public String getID() {
-        return options.getApplicationID();
-    }
-
     public HttpSession getSession() {
         return session;
     }
@@ -126,7 +127,7 @@ public class Application {
 
     @Override
     public String toString() {
-        return "Application [" + options + ", ID=" + getID() + ", name="
-                + getName() + "]";
+        return "Application [options=" + options + ", userAgent=" + userAgent + ", session=" + session + "]";
     }
+
 }

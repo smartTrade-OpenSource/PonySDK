@@ -24,8 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.json.JsonObject;
 
@@ -37,15 +35,12 @@ import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
- * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable}
- * when they are clicked, or open a cascading sub-menu. Each menu item is
+ * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are
+ * clicked, or open a cascading sub-menu. Each menu item is
  * assigned a unique DOM id in order to support ARIA. See
  * {com.google.gwt.user.client.ui.Accessibility} for more information.
  */
 public class PMenuItem extends PMenuSubElement implements PHasHTML {
-
-    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
-    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
     private String text;
 
@@ -82,10 +77,8 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     public PMenuItem(final String text, final boolean asHTML) {
-        if (asHTML)
-            this.html = text;
-        else
-            this.text = text;
+        if (asHTML) this.html = text;
+        else this.text = text;
     }
 
     @Override
@@ -97,10 +90,8 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null)
-            parser.parse(ServerToClientModel.HTML, html);
-        else
-            parser.parse(ServerToClientModel.TEXT, text);
+        if (html != null) parser.parse(ServerToClientModel.HTML, html);
+        else parser.parse(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -128,7 +119,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
     }
 
     public void setCommand(final Runnable cmd) {

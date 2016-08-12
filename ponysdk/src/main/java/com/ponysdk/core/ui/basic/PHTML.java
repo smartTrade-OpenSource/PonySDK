@@ -24,8 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -36,9 +34,9 @@ import com.ponysdk.core.ui.basic.event.PHasHTML;
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
  * element, causing it to be displayed with block layout.
  * <p>
- * If you only need a simple label (text, but not HTML), then the {@link PLabel}
- * widget is more appropriate, as it disallows the use of HTML, which can lead
- * to potential security issues if not used properly.
+ * If you only need a simple label (text, but not HTML), then the {@link PLabel} widget is more
+ * appropriate, as it disallows the use of HTML, which can lead to potential security issues if not
+ * used properly.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
@@ -46,9 +44,6 @@ import com.ponysdk.core.ui.basic.event.PHasHTML;
  * </ul>
  */
 public class PHTML extends PLabel implements PHasHTML {
-
-    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
-    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
     private String html;
     private boolean wordWrap = false;
@@ -70,7 +65,7 @@ public class PHTML extends PLabel implements PHasHTML {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        if (html != null) parser.parse(ServerToClientModel.HTML, html);
         if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, wordWrap);
     }
 
@@ -88,7 +83,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
     }
 
     public boolean isWordWrap() {

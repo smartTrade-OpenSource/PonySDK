@@ -66,12 +66,12 @@ import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * <p>
- * Provides a way to identify a user across more than one page request or visit
- * to a Web site and to store information about that user.
+ * Provides a way to identify a user across more than one page request or visit to a Web site and to
+ * store information about that user.
  * </p>
  * <p>
- * There is ONE unique UIContext for each screen displayed. Each UIContext is
- * bound to the current {@link Application} .
+ * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
+ * {@link Application} .
  * </p>
  */
 public class UIContext {
@@ -371,10 +371,8 @@ public class UIContext {
      *            the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
-        if (value == null)
-            removeAttribute(name);
-        else
-            attributes.put(name, value);
+        if (value == null) removeAttribute(name);
+        else attributes.put(name, value);
     }
 
     /**
@@ -391,8 +389,8 @@ public class UIContext {
     }
 
     /**
-     * Returns the object bound with the specified name in this session, or
-     * <code>null</code> if no object is bound under the name.
+     * Returns the object bound with the specified name in this session, or <code>null</code> if no
+     * object is bound under the name.
      *
      * @param name
      *            a string specifying the name of the object
@@ -454,6 +452,21 @@ public class UIContext {
         begin();
         try {
             doDestroy();
+        } finally {
+            end();
+        }
+    }
+
+    void destroyFromApplication() {
+        begin();
+        try {
+            living = false;
+            communicationSanityChecker.stop();
+
+            for (final UIContextListener listener : uiContextListeners) {
+                listener.onUIContextDestroyed(this);
+            }
+            context.close();
         } finally {
             end();
         }

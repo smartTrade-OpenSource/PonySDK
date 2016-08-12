@@ -24,25 +24,19 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
- * A widget that represents a simple &lt;a&gt; element.
- * <h3>CSS Style Rules</h3>
+ * A widget that represents a simple &lt;a&gt; element. <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Anchor { }</li>
  * </ul>
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
-
-    private static final Pattern PATTERN = Pattern.compile("\"", Pattern.LITERAL);
-    private static final String REPLACEMENT = Matcher.quoteReplacement("\\\"");
 
     private String text;
     private String html;
@@ -54,7 +48,8 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Creates an anchor with its text specified.
      *
-     * @param text the anchor's text
+     * @param text
+     *            the anchor's text
      */
     public PAnchor(final String text) {
         this(text, null);
@@ -63,8 +58,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Creates an anchor with its text and href (target URL) specified.
      *
-     * @param text the anchor's text
-     * @param href the url to which it will link
+     * @param text
+     *            the anchor's text
+     * @param href
+     *            the url to which it will link
      */
     public PAnchor(final String text, final String href) {
         this.text = text;
@@ -76,7 +73,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         super.enrichOnInit(parser);
         if (text != null) parser.parse(ServerToClientModel.TEXT, text);
         if (href != null) parser.parse(ServerToClientModel.HREF, href);
-        if (html != null) parser.parse(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT));
+        if (html != null) parser.parse(ServerToClientModel.HTML, html);
     }
 
     @Override
@@ -96,13 +93,13 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     /**
      * Sets the anchor's href (the url to which it links).
      *
-     * @param href the anchor's href
+     * @param href
+     *            the anchor's href
      */
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
-
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HREF, this.href));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HREF, href));
     }
 
     @Override
@@ -114,7 +111,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, text));
     }
 
     @Override
@@ -126,7 +123,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, PATTERN.matcher(html).replaceAll(REPLACEMENT)));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
     }
 
 }
