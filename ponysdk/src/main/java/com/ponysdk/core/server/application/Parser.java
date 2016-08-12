@@ -107,8 +107,8 @@ public class Parser {
         if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled())
-                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
+                if (log.isDebugEnabled()) log.debug("A consecutive update on the same id " + lastUpdatedID
+                        + ", so we concatenate the instructions");
                 return;
             } else {
                 lastUpdatedID = newUpdatedID;
@@ -194,13 +194,25 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final String value) {
-        if (log.isDebugEnabled())
-            log.debug("Writing in the buffer : " + model + " => " + value + " (size : " + (value != null ? value.length() : 0) + ")");
+        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
+                + (value != null ? value.length() : 0) + ")");
         final ByteBuffer socketBuffer = buffer.getSocketBuffer();
         socketBuffer.putShort(model.getValue());
-        final ByteBuffer utf8StringBuffer = UTF8StringToByteBuffer(value);
-        socketBuffer.putInt(utf8StringBuffer != null ? utf8StringBuffer.capacity() : 0);
-        if (utf8StringBuffer != null) socketBuffer.put(utf8StringBuffer);
+
+        try {
+            if (value != null) {
+                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                socketBuffer.putInt(bytes.length);
+                for (final byte b : bytes) {
+                    socketBuffer.put(b);
+                }
+            }
+            else {
+                socketBuffer.putInt(0);
+            }
+        } catch (final UnsupportedEncodingException e) {
+            log.error("Cannot convert string");
+        }
     }
 
 }
