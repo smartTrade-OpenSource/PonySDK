@@ -35,6 +35,9 @@ public enum ClientToServerModel {
     NATIVE,
     APPLICATION_INSTRUCTIONS,
     APPLICATION_ERRORS,
+    COOKIES,
+    COOKIE_NAME,
+    COOKIE_VALUE,
 
     TYPE_HISTORY,
 

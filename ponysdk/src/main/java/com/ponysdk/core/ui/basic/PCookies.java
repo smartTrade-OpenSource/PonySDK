@@ -23,13 +23,18 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.model.ServerToClientModel;
 
 public class PCookies {
 
@@ -37,9 +42,14 @@ public class PCookies {
 
     private final Map<String, String> cachedCookies = new HashMap<>();
 
-    public void cacheCookie(final String name, final String value) {
-        cachedCookies.put(name, value);
+    private boolean isInitialized = false;
+
+    public interface CookiesListener {
+
+        void onInitialized();
     }
+
+    private CookiesListener listener;
 
     public String getCookie(final String name) {
         return cachedCookies.get(name);
@@ -71,4 +81,32 @@ public class PCookies {
         parser.endObject();
     }
 
+    public void onClientData(final JsonObject event) {
+        final JsonArray cookies = event.getJsonArray(ClientToServerModel.COOKIES.toStringValue());
+
+        for (int i = 0; i < cookies.size(); i++) {
+            final JsonObject object = cookies.getJsonObject(i);
+
+            final String key = object.getString(ClientToServerModel.COOKIE_NAME.toStringValue());
+            final String value = object.getString(ClientToServerModel.COOKIE_VALUE.toStringValue());
+
+            cachedCookies.put(key, value);
+        }
+
+        isInitialized = true;
+
+        if (listener != null) listener.onInitialized();
+    }
+
+    public boolean isInitialized() {
+        return isInitialized;
+    }
+
+    public void setListener(final CookiesListener listener) {
+        this.listener = listener;
+    }
+
+    public Collection<String> getNames() {
+        return cachedCookies.keySet();
+    }
 }

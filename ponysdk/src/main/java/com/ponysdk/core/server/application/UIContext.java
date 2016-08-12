@@ -248,25 +248,31 @@ public class UIContext {
                 return;
             }
 
-            final PObject object = weakReferences.get(objectID);
+            //Cookies
+            if (objectID == 0) {
+                cookies.onClientData(jsonObject);
+            } else {
+                final PObject object = weakReferences.get(objectID);
 
-            if (object == null) {
-                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                if (object == null) {
+                    log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
 
-                if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                    final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                            .intValue();
-                    final PObject gcObject = weakReferences.get(parentObjectID);
-                    log.warn("" + gcObject);
+                    if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
+                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
+                                .intValue();
+                        final PObject gcObject = weakReferences.get(parentObjectID);
+                        log.warn("" + gcObject);
+                    }
+
+                    return;
                 }
 
-                return;
+                if (terminalDataReceiver != null) {
+                    terminalDataReceiver.onDataReceived(object, jsonObject);
+                }
+                object.onClientData(jsonObject);
             }
 
-            if (terminalDataReceiver != null) {
-                terminalDataReceiver.onDataReceived(object, jsonObject);
-            }
-            object.onClientData(jsonObject);
         }
     }
 
