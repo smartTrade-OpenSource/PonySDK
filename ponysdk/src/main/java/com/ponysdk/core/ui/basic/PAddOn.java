@@ -107,8 +107,8 @@ public abstract class PAddOn extends PObject {
                     } else if (object instanceof JsonObjectBuilder) {
                         arrayBuilder.add(((JsonObjectBuilder) object).build());
                     } else if (object instanceof Collection) {
-                        ((Collection) object).toArray();
-                        System.err.println("OHEH");
+                        throw new IllegalArgumentException(
+                                "Collections are not supported for PAddOn, you need to convert it to JsonArray on primitive array");
                     } else {
                         arrayBuilder.add(object.toString());
                     }
