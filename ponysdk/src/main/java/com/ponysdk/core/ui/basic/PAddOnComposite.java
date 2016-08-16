@@ -27,39 +27,26 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 
-import java.util.Objects;
+/**
+ * AddOn are used to bind server side object with javascript object
+ */
+public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implements IsPWidget {
 
-public abstract class PAddOnComposite<T extends PWidget> extends AbstractPAddOn implements IsPWidget {
     protected T widget;
 
     public PAddOnComposite(final T widget) {
         this.widget = widget;
 
-        if (widget.getAddon() != null && !Objects.equals(widget.getAddon(), this)) {
-            throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon " + widget.getAddon());
-        }
+        if (!this.widget.isAddonAlreadyBound(this)) {
+            this.widget.bindAddon(this);
 
-        this.widget.bind(this);
-
-
-        if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
-            attach(widget.getWindowID());
+            if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
+                attach(widget.getWindowID());
+            } else {
+                widget.setAttachListener(() -> attach(widget.getWindowID()));
+            }
         } else {
-            widget.setAttachListener(() -> attach(widget.getWindowID()));
-
-            PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
-
-                @Override
-                public void registered(final int windowID) {
-                    if (windowID == widget.getWindowID()) {
-                        attach(widget.getWindowID());
-                    }
-                }
-
-                @Override
-                public void unregistered(final int windowID) {
-                }
-            });
+            throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon");
         }
     }
 
