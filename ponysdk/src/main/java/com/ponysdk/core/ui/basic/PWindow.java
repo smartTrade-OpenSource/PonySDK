@@ -47,7 +47,7 @@ public class PWindow extends PObject {
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
-    private final Queue<Runnable> stackedInstructions = new LinkedList<>();
+    private final Queue<Runnable> stackedWindowsInstructions = new LinkedList<>();
     private String url;
     private String name;
     private String features;
@@ -122,16 +122,14 @@ public class PWindow extends PObject {
             PWindowManager.registerWindow(this);
             this.opened = true;
 
-            while (!stackedInstructions.isEmpty()) {
-                stackedInstructions.poll().run();
+            while (!stackedWindowsInstructions.isEmpty()) {
+                stackedWindowsInstructions.poll().run();
             }
 
             final POpenEvent e = new POpenEvent(this);
             openHandlers.forEach(handler -> handler.onOpen(e));
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
-            getPRootLayoutPanel().clear();
-            getPRootPanel().clear();
             this.opened = false;
             final PCloseEvent e = new PCloseEvent(this);
             closeHandlers.forEach(handler -> handler.onClose(e));
@@ -162,7 +160,7 @@ public class PWindow extends PObject {
 
     public void add(final IsPWidget widget) {
         if (PWindowManager.getWindow(ID) == this) add0(widget);
-        else stackedInstructions.add(() -> add0(widget));
+        else stackedWindowsInstructions.add(() -> add0(widget));
     }
 
     private void add0(final IsPWidget widget) {
