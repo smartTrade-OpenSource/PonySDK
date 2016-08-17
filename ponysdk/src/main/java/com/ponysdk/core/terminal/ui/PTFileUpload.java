@@ -43,98 +43,96 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTFileUpload extends PTWidget<FormPanel> {
 
-	private static Frame frame;
+    private static Frame frame;
 
-	private final FileUpload fileUpload = new FileUpload();
+    private final FileUpload fileUpload = new FileUpload();
 
-	private static Frame getFrame() {
-		/* Frame for stream resource handling */
-		if (frame == null) {
-			frame = new Frame();
-			frame.setWidth("0px");
-			frame.setHeight("0px");
-			frame.getElement().getStyle().setProperty("visibility", "hidden");
-			frame.getElement().getStyle().setProperty("position", "fixed");
-		}
-		return frame;
-	}
+    private static Frame getFrame() {
+        /* Frame for stream resource handling */
+        if (frame == null) {
+            frame = new Frame();
+            frame.setWidth("0px");
+            frame.setHeight("0px");
+            frame.getElement().getStyle().setProperty("visibility", "hidden");
+            frame.getElement().getStyle().setProperty("position", "fixed");
+        }
+        return frame;
+    }
 
-	@Override
-	public void create(final ReaderBuffer buffer, final int objectId,
-			final UIBuilder uiService) {
-		super.create(buffer, objectId, uiService);
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId,
+            final UIBuilder uiService) {
+        super.create(buffer, objectId, uiService);
 
-		uiObject.setEncoding(FormPanel.ENCODING_MULTIPART);
-		uiObject.setMethod(FormPanel.METHOD_POST);
-		final VerticalPanel panel = new VerticalPanel();
-		panel.setSize("100%", "100%");
-		uiObject.setWidget(panel);
-		panel.add(fileUpload);
+        uiObject.setEncoding(FormPanel.ENCODING_MULTIPART);
+        uiObject.setMethod(FormPanel.METHOD_POST);
+        final VerticalPanel panel = new VerticalPanel();
+        panel.setSize("100%", "100%");
+        uiObject.setWidget(panel);
+        panel.add(fileUpload);
 
-		uiObject.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+        uiObject.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-			@Override
-			public void onSubmitComplete(final SubmitCompleteEvent event) {
-				final PTInstruction instruction = new PTInstruction(objectId);
-				instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE);
-				uiService.sendDataToServer(uiObject, instruction);
-			}
-		});
-	}
+            @Override
+            public void onSubmitComplete(final SubmitCompleteEvent event) {
+                final PTInstruction instruction = new PTInstruction(objectId);
+                instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE);
+                uiService.sendDataToServer(uiObject, instruction);
+            }
+        });
+    }
 
-	@Override
-	protected FormPanel createUIObject() {
-		return new FormPanel();
-	}
+    @Override
+    protected FormPanel createUIObject() {
+        return new FormPanel();
+    }
 
-	@Override
-	public void addHandler(final ReaderBuffer buffer,
-			final HandlerModel handlerModel, final UIBuilder uiService) {
-		if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
-			fileUpload.addChangeHandler(new ChangeHandler() {
+    @Override
+    public void addHandler(final ReaderBuffer buffer,
+            final HandlerModel handlerModel, final UIBuilder uiService) {
+        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
+            fileUpload.addChangeHandler(new ChangeHandler() {
 
-				@Override
-				public void onChange(final ChangeEvent event) {
-					final PTInstruction eventInstruction = new PTInstruction(
-							getObjectID());
-					eventInstruction.put(ClientToServerModel.HANDLER_CHANGE,
-							fileUpload.getFilename());
-					uiService.sendDataToServer(fileUpload, eventInstruction);
-				}
-			});
-		} else if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
-			final String action = GWT.getHostPageBaseURL() + "stream?"
-					+ ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-					+ PonySDK.uiContextId + "&"
-					+ ClientToServerModel.STREAM_REQUEST_ID.toStringValue()
-					+ "=" + buffer.readBinaryModel().getIntValue();
-			getFrame().setUrl(action);
-		} else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST
-				.equals(handlerModel)) {
-			final String action = GWT.getHostPageBaseURL() + "stream?"
-					+ ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-					+ PonySDK.uiContextId + "&"
-					+ ClientToServerModel.STREAM_REQUEST_ID.toStringValue()
-					+ "=" + buffer.readBinaryModel().getIntValue();
-			uiObject.setAction(action);
-			uiObject.submit();
-		} else {
-			super.addHandler(buffer, handlerModel, uiService);
-		}
-	}
+                @Override
+                public void onChange(final ChangeEvent event) {
+                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
+                    uiService.sendDataToServer(fileUpload, eventInstruction);
+                }
+            });
+        } else if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
+            // ServerToClientModel.STREAM_REQUEST_ID
+            final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-	@Override
-	public boolean update(final ReaderBuffer buffer,
-			final BinaryModel binaryModel) {
-		if (ServerToClientModel.NAME.equals(binaryModel.getModel())) {
-			fileUpload.setName(binaryModel.getStringValue());
-			return true;
-		}
-		if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
-			fileUpload.setEnabled(binaryModel.getBooleanValue());
-			return true;
-		}
-		return super.update(buffer, binaryModel);
-	}
+            final String action = GWT.getHostPageBaseURL() + "stream?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+            getFrame().setUrl(action);
+        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+            // ServerToClientModel.STREAM_REQUEST_ID
+            final int streamRequestId = buffer.readBinaryModel().getIntValue();
+
+            final String action = GWT.getHostPageBaseURL() + "stream?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+            uiObject.setAction(action);
+            uiObject.submit();
+        } else {
+            super.addHandler(buffer, handlerModel, uiService);
+        }
+    }
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (ServerToClientModel.NAME.equals(binaryModel.getModel())) {
+            fileUpload.setName(binaryModel.getStringValue());
+            return true;
+        }
+        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+            fileUpload.setEnabled(binaryModel.getBooleanValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
+    }
 
 }
