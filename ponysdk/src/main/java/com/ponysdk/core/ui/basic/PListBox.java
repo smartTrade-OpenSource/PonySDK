@@ -73,11 +73,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public PListBox(final boolean containsEmptyItem) {
         this.containsEmptyItem = containsEmptyItem;
-    }
-
-    @Override
-    protected void init0() {
-        super.init0();
         if (this.containsEmptyItem) addItem(EMPTY, null);
     }
 
