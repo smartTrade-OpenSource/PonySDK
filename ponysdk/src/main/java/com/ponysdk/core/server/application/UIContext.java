@@ -316,7 +316,6 @@ public class UIContext {
 
         try (ModelWriter writer = Txn.getWriter()) {
             writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
-            writer.writeModel(ServerToClientModel.OBJECT_ID, 0);
             writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         } catch (final IOException e) {
         }
@@ -329,7 +328,7 @@ public class UIContext {
 
         try (ModelWriter writer = Txn.getWriter()) {
             writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
-            writer.writeModel(ServerToClientModel.OBJECT_ID, 0);
+            writer.writeModel(ServerToClientModel.OBJECT_ID, objectID);
             writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         } catch (final IOException e) {
         }

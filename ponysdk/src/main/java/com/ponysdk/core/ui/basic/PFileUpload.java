@@ -28,11 +28,11 @@ import java.util.List;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
@@ -94,8 +94,7 @@ public class PFileUpload extends PWidget
     }
 
     public void submit() {
-        final StreamResource streamResource = new StreamResource();
-        streamResource.embed(streamHandler, this);
+        UIContext.get().stackEmbededStreamRequest(streamHandler, getID());
     }
 
     public String getName() {

@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.page.addon;
 
-import com.ponysdk.core.ui.basic.AbstractPAddOn;
+import com.ponysdk.core.ui.basic.PAddOn;
 
-public class LoggerAddOn extends AbstractPAddOn {
+public class LoggerAddOn extends PAddOn {
 
     public void log(final String value) {
         if (value != null)

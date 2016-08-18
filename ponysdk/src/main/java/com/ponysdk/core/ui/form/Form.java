@@ -35,33 +35,33 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
  */
 public class Form {
 
-	protected final List<FormField> formFields = new ArrayList<>();
+    protected final List<FormField> formFields = new ArrayList<>();
 
-	public void addFormField(final FormField formField) {
-		formFields.add(formField);
-	}
+    public void addFormField(final FormField formField) {
+        formFields.add(formField);
+    }
 
-	public void removeFormField(final FormField formField) {
-		formFields.remove(formField);
-	}
+    public void removeFormField(final FormField formField) {
+        formFields.remove(formField);
+    }
 
-	public boolean isValid() {
-		boolean valid = true;
-		for (final FormField formField : formFields) {
-			final ValidationResult result = formField.isValid();
-			if (!result.isValid()) {
-				valid = false;
-			}
-		}
-		return valid;
-	}
+    public boolean isValid() {
+        boolean valid = true;
+        for (final FormField formField : formFields) {
+            final ValidationResult result = formField.isValid();
+            if (!result.isValid()) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
 
-	public void reset() {
-		formFields.forEach((formField) -> reset());
-	}
+    public void reset() {
+        formFields.forEach(FormField::reset);
+    }
 
-	public List<FormField> getFormFields() {
-		return formFields;
-	}
+    public List<FormField> getFormFields() {
+        return formFields;
+    }
 
 }

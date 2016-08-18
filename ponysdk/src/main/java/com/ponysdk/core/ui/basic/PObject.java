@@ -63,10 +63,6 @@ public abstract class PObject {
         UIContext.get().registerObject(this);
     }
 
-    protected boolean attach(final PWindow window) {
-        return attach(window.getID());
-    }
-
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
             this.windowID = windowID;

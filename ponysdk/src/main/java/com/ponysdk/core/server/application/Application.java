@@ -36,14 +36,11 @@ import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.useragent.UserAgent;
 
 /**
- * <p>
  * Wrapper of the HTTPSession, and contains the UIContexts.
- * </p>
  */
 public class Application {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Map<Integer, UIContext> uiContexts = new ConcurrentHashMap<>();
 
@@ -55,8 +52,7 @@ public class Application {
 
     private final HttpSession session;
 
-    public Application(final HttpSession session,
-            final ApplicationManagerOption options, final UserAgent userAgent) {
+    public Application(final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
         this.options = options;
         this.session = session;
         this.userAgent = userAgent;
@@ -76,9 +72,7 @@ public class Application {
     }
 
     public void destroy() {
-        uiContexts.values().forEach(context ->
-        context.destroyFromApplication()
-                );
+        uiContexts.values().forEach(context -> context.destroyFromApplication());
         uiContexts.clear();
         session.invalidate();
         SessionManager.get().unregisterApplication(this);
@@ -98,8 +92,7 @@ public class Application {
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}",
-                        uiContext.getContext(), throwable);
+                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
             }
         }
     }

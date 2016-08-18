@@ -25,63 +25,66 @@ package com.ponysdk.core.model;
 
 public enum ClientToServerModel {
 
-    HEARTBEAT,
+    HEARTBEAT("0"),
 
-    OBJECT_ID,
+    OBJECT_ID("1"),
 
-    UI_CONTEXT_ID,
-    WINDOW_ID,
+    UI_CONTEXT_ID("2"),
+    WINDOW_ID("3"),
 
-    NATIVE,
-    APPLICATION_INSTRUCTIONS,
-    APPLICATION_ERRORS,
-    COOKIES,
-    COOKIE_NAME,
-    COOKIE_VALUE,
+    NATIVE("4"),
+    APPLICATION_INSTRUCTIONS("5"),
+    APPLICATION_ERRORS("6"),
+    COOKIES("7"),
+    COOKIE_NAME("8"),
+    COOKIE_VALUE("9"),
 
-    TYPE_HISTORY,
+    TYPE_HISTORY("a"),
 
-    WIDGET_POSITION,
-    POPUP_POSITION,
-    EVENT_INFO,
-    DOM_HANDLER_TYPE,
+    WIDGET_POSITION("b"),
+    POPUP_POSITION("c"),
+    EVENT_INFO("d"),
+    DOM_HANDLER_TYPE("e"),
 
-    ERROR_MSG,
-    YEAR,
-    MONTH,
-    DAY,
+    ERROR_MSG("f"),
+    YEAR("g"),
+    MONTH("h"),
+    DAY("i"),
 
-    PARENT_OBJECT_ID,
-    VALUE_KEY,
-    REPLACEMENT_STRING,
-    COMMAND_ID,
-    STREAM_REQUEST_ID,
-    SIZE,
-    DRAG_SRC,
-    START_DATE,
-    END_DATE,
-    KEY_FILTER,
-    RESULT,
+    PARENT_OBJECT_ID("j"),
+    VALUE_KEY("k"),
+    REPLACEMENT_STRING("l"),
+    COMMAND_ID("m"),
+    STREAM_REQUEST_ID("n"),
+    SIZE("o"),
+    DRAG_SRC("p"),
+    START_DATE("q"),
+    END_DATE("r"),
+    KEY_FILTER("s"),
+    RESULT("t"),
 
-    HANDLER_BOOLEAN_VALUE_CHANGE,
-    HANDLER_DATE_VALUE_CHANGE,
-    HANDLER_STRING_VALUE_CHANGE,
-    HANDLER_BEFORE_SELECTION,
-    HANDLER_CHANGE,
-    HANDLER_COMMAND,
-    HANDLER_CLOSE,
-    HANDLER_OPEN,
-    HANDLER_RESIZE,
-    HANDLER_SELECTION,
-    HANDLER_SHOW_RANGE,
-    HANDLER_STRING_SELECTION,
-    HANDLER_SUBMIT_COMPLETE;
+    HANDLER_BOOLEAN_VALUE_CHANGE("u"),
+    HANDLER_DATE_VALUE_CHANGE("v"),
+    HANDLER_STRING_VALUE_CHANGE("x"),
+    HANDLER_BEFORE_SELECTION("y"),
+    HANDLER_CHANGE("z"),
+    HANDLER_COMMAND("A"),
+    HANDLER_CLOSE("B"),
+    HANDLER_OPEN("C"),
+    HANDLER_RESIZE("D"),
+    HANDLER_SELECTION("E"),
+    HANDLER_SHOW_RANGE("F"),
+    HANDLER_STRING_SELECTION("G"),
+    HANDLER_SUBMIT_COMPLETE("H");
 
-    ClientToServerModel() {
+    private String key;
+
+    ClientToServerModel(final String key) {
+        this.key = key;
     }
 
     public String toStringValue() {
-        return String.valueOf(ordinal());
+        return key;
     }
 
 }

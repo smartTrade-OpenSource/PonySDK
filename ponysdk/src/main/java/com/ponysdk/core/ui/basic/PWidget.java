@@ -218,10 +218,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         this.parent = parent;
     }
 
-    void bind(final PAddOn addon) {
-        this.addon = addon;
-    }
-
     public void setStyleProperty(final String name, final String value) {
         if (!Objects.equals(safeStyleProperties().put(name, value), value)) {
             saveUpdate((writer) -> {
@@ -497,8 +493,12 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 
-    public PAddOn getAddon() {
-        return addon;
+    void bindAddon(final PAddOn addon) {
+        this.addon = addon;
+    }
+
+    boolean isAddonAlreadyBound(final PAddOn addon) {
+        return this.addon != null && !Objects.equals(this.addon, addon);
     }
 
     @Override

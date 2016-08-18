@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpSession;
-
 import com.ponysdk.core.server.application.Application;
 
 public class SessionManager {
@@ -47,11 +45,6 @@ public class SessionManager {
 
     public Collection<Application> getApplications() {
         return new ArrayList<>(applicationsBySessionID.values());
-    }
-
-    public Application getApplication(final HttpSession session) {
-        if (session == null) return null;
-        return getApplication(session.getId());
     }
 
     public Application getApplication(final String sessionID) {

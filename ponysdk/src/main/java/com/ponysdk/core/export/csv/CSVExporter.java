@@ -30,12 +30,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;
 import com.ponysdk.core.export.xml.XMLExporter;
 import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.server.application.UIContext;
 
 public class CSVExporter<T> implements Exporter<T> {
 
@@ -58,8 +58,7 @@ public class CSVExporter<T> implements Exporter<T> {
 
     @Override
     public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
-        final StreamResource streamResource = new StreamResource();
-        streamResource.open((req, response) -> {
+        UIContext.get().stackStreamRequest((req, response) -> {
             try {
                 response.reset();
                 response.setContentType("text/csv");

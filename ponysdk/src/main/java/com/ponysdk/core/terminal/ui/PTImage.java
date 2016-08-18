@@ -35,71 +35,65 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTImage extends PTWidget<Image> {
 
-	private String url;
-	private int left = -1;
-	private int top = -1;
-	private int width = -1;
-	private int height = -1;
+    private String url;
+    private int left = -1;
+    private int top = -1;
+    private int width = -1;
+    private int height = -1;
 
-	@Override
-	public void create(final ReaderBuffer buffer, final int objectId,
-			final UIBuilder uiService) {
-		final BinaryModel urlModel = buffer.readBinaryModel();
-		if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
-			final BinaryModel leftModel = buffer.readBinaryModel();
-			url = urlModel.getStringValue();
-			if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
-				left = leftModel.getIntValue();
-				top = buffer.readBinaryModel().getIntValue();
-				width = buffer.readBinaryModel().getIntValue();
-				height = buffer.readBinaryModel().getIntValue();
-			} else {
-				buffer.rewind(leftModel);
-			}
-		} else {
-			buffer.rewind(urlModel);
-		}
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId,
+            final UIBuilder uiService) {
+        final BinaryModel urlModel = buffer.readBinaryModel();
+        if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
+            final BinaryModel leftModel = buffer.readBinaryModel();
+            url = urlModel.getStringValue();
+            if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
+                left = leftModel.getIntValue();
+                top = buffer.readBinaryModel().getIntValue();
+                width = buffer.readBinaryModel().getIntValue();
+                height = buffer.readBinaryModel().getIntValue();
+            } else {
+                buffer.rewind(leftModel);
+            }
+        } else {
+            buffer.rewind(urlModel);
+        }
 
-		super.create(buffer, objectId, uiService);
-	}
+        super.create(buffer, objectId, uiService);
+    }
 
-	@Override
-	protected Image createUIObject() {
-		if (url != null) {
-			return left != -1 ? new Image(url, left, top, width, height)
-					: new Image(url);
-		} else {
-			return new Image();
-		}
-	}
+    @Override
+    protected Image createUIObject() {
+        if (url != null) {
+            return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
+        } else {
+            return new Image();
+        }
+    }
 
-	@Override
-	public void addHandler(final ReaderBuffer buffer,
-			final HandlerModel handlerModel, final UIBuilder uiService) {
-		if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
-			cast().setUrl(
-					GWT.getHostPageBaseURL()
-							+ "stream?"
-							+ ClientToServerModel.UI_CONTEXT_ID.toStringValue()
-							+ "="
-							+ PonySDK.uiContextId
-							+ "&"
-							+ ClientToServerModel.STREAM_REQUEST_ID
-									.toStringValue() + "="
-							+ buffer.readBinaryModel().getIntValue());
-		} else {
-			super.addHandler(buffer, handlerModel, uiService);
-		}
-	}
+    @Override
+    public void addHandler(final ReaderBuffer buffer,
+            final HandlerModel handlerModel, final UIBuilder uiService) {
+        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+            // ServerToClientModel.STREAM_REQUEST_ID
+            final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-	@Override
-	public boolean update(final ReaderBuffer buffer,
-			final BinaryModel binaryModel) {
-		if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
-			cast().setUrl(binaryModel.getStringValue());
-			return true;
-		}
-		return super.update(buffer, binaryModel);
-	}
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
+        } else {
+            super.addHandler(buffer, handlerModel, uiService);
+        }
+    }
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
+            cast().setUrl(binaryModel.getStringValue());
+            return true;
+        }
+        return super.update(buffer, binaryModel);
+    }
 
 }

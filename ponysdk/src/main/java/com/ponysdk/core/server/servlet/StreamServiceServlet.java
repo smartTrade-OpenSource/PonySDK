@@ -49,7 +49,7 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Application application = SessionManager.get().getApplication(req.getSession());
+            final Application application = SessionManager.get().getApplication(req.getSession().getId());
             if (application != null) {
                 final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
                 final UIContext uiContext = application.getUIContext(uiContextID);
