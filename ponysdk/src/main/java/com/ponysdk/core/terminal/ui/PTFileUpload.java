@@ -30,7 +30,6 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -43,21 +42,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTFileUpload extends PTWidget<FormPanel> {
 
-    private static Frame frame;
-
     private final FileUpload fileUpload = new FileUpload();
-
-    private static Frame getFrame() {
-        /* Frame for stream resource handling */
-        if (frame == null) {
-            frame = new Frame();
-            frame.setWidth("0px");
-            frame.setHeight("0px");
-            frame.getElement().getStyle().setProperty("visibility", "hidden");
-            frame.getElement().getStyle().setProperty("position", "fixed");
-        }
-        return frame;
-    }
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId,
@@ -100,14 +85,6 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                     uiService.sendDataToServer(fileUpload, eventInstruction);
                 }
             });
-        } else if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
-            // ServerToClientModel.STREAM_REQUEST_ID
-            final int streamRequestId = buffer.readBinaryModel().getIntValue();
-
-            final String action = GWT.getHostPageBaseURL() + "stream?"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
-            getFrame().setUrl(action);
         } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
