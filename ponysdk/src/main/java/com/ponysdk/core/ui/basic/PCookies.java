@@ -93,9 +93,10 @@ public class PCookies {
             cachedCookies.put(key, value);
         }
 
-        isInitialized = true;
-
-        if (listener != null) listener.onInitialized();
+        if (!isInitialized) {
+            isInitialized = true;
+            if (listener != null) listener.onInitialized();
+        }
     }
 
     public boolean isInitialized() {
