@@ -31,11 +31,11 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.export.ExportableField;
 import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.export.util.PropertyUtil;
 import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.server.application.UIContext;
 
 public class XMLExporter<T> implements Exporter<T> {
 
@@ -67,8 +67,7 @@ public class XMLExporter<T> implements Exporter<T> {
 
     public void exportXMLString(final String fileName, final String content) throws Exception {
         // Set MIME type to binary data to prevent opening of PDF in browser window
-        final StreamResource streamResource = new StreamResource();
-        streamResource.open((req, response) -> {
+        UIContext.get().stackStreamRequest((req, response) -> {
             response.reset();
             response.setContentType("application/xml");
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);

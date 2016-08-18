@@ -31,10 +31,10 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.StreamResource;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -128,8 +128,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     public void setStream(final StreamHandler streamListener) {
-        final StreamResource streamResource = new StreamResource();
-        streamResource.embed(streamListener, this);
+        UIContext.get().stackEmbededStreamRequest(streamListener, getID());
     }
 
     @Override
