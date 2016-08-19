@@ -144,23 +144,20 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 final StatusCodeException codeException = (StatusCodeException) exception;
                 if (codeException.getStatusCode() == 0) return;
             }
-            log.log(Level.SEVERE, "Cannot inititialize the application : " + exception.getMessage() + "\n" + exception
+            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
                     + "\nPlease reload your application", exception);
-            return;
         }
 
-        if (communicationErrorHandler != null) {
-            if (exception instanceof StatusCodeException) {
-                final StatusCodeException statusCodeException = (StatusCodeException) exception;
-                communicationErrorHandler.onCommunicationError(String.valueOf(statusCodeException.getStatusCode()),
-                        statusCodeException.getMessage());
+        if (exception instanceof StatusCodeException) {
+            final StatusCodeException statusCodeException = (StatusCodeException) exception;
+            if (communicationErrorHandler != null) {
+                communicationErrorHandler.onCommunicationError(statusCodeException.getStatusCode(), statusCodeException.getMessage());
             } else {
-                communicationErrorHandler.onCommunicationError("x", exception.getMessage());
+                showCommunicationErrorMessage(statusCodeException);
             }
         } else {
-            if (exception instanceof StatusCodeException) {
-                final StatusCodeException statusCodeException = (StatusCodeException) exception;
-                showCommunicationErrorMessage(statusCodeException);
+            if (communicationErrorHandler != null) {
+                communicationErrorHandler.onCommunicationError(500, exception.getMessage());
             } else {
                 log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
                         exception);
