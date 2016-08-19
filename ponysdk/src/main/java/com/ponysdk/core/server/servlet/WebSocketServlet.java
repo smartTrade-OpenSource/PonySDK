@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
@@ -85,7 +86,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.getExtensionFactory().unregister("permessage-deflate");
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.setCreator((request, response) -> new WebSocket(request, response));
+        factory.setCreator((request, response) -> {
+            if (request.getSession() != null) {
+                return new WebSocket(request, response, monitor, buffers, applicationManager);
+            } else {
+                log.error("No HTTP session found");
+                return null;
+            }
+        });
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
@@ -96,7 +104,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         this.monitor = monitor;
     }
 
-    public static class Buffer {
+    public static final class Buffer {
 
         final ByteBuffer socketBuffer;
 
@@ -110,15 +118,23 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     }
 
-    public class WebSocket implements WebSocketListener {
+    public static final class WebSocket implements WebSocketListener {
 
         private final PRequest request;
         private TxnContext context;
         private Session session;
 
-        WebSocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
+        private final WebsocketMonitor monitor;
+        private final BlockingQueue<Buffer> buffers;
+        private final AbstractApplicationManager applicationManager;
+
+        WebSocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response, final WebsocketMonitor monitor,
+                final BlockingQueue<Buffer> buffers, final AbstractApplicationManager applicationManager) {
             log.info(request.getHeader("User-Agent"));
             this.request = new PRequest(request);
+            this.monitor = monitor;
+            this.buffers = buffers;
+            this.applicationManager = applicationManager;
         }
 
         @Override
@@ -164,8 +180,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
 
         @Override
-        public void onWebSocketClose(final int arg0, final String arg1) {
-            log.info("WebSoket closed {} / {}", arg0, arg1);
+        public void onWebSocketClose(final int statusCode, final String reason) {
+            log.info("WebSoket closed {}, reason : {}", NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
             if (context != null && context.getUIContext() != null && context.getUIContext().isLiving()) {
                 context.getUIContext().onDestroy();
             }
@@ -281,6 +297,52 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         final boolean isSessionOpen() {
             return session != null && session.isOpen();
+        }
+
+        private static enum NiceStatusCode {
+
+            NORMAL(StatusCode.NORMAL, "Normal closure"),
+            SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
+            PROTOCOL(StatusCode.PROTOCOL, "Protocol error"),
+            BAD_DATA(StatusCode.BAD_DATA, "Received bad data"),
+            UNDEFINED(StatusCode.UNDEFINED, "Undefined"),
+            NO_CODE(StatusCode.NO_CODE, "No code present"),
+            NO_CLOSE(StatusCode.NO_CLOSE, "Abnormal connection closed"),
+            ABNORMAL(StatusCode.ABNORMAL, "Abnormal connection closed"),
+            BAD_PAYLOAD(StatusCode.BAD_PAYLOAD, "Not consistent message"),
+            POLICY_VIOLATION(StatusCode.POLICY_VIOLATION, "Received message violates policy"),
+            MESSAGE_TOO_LARGE(StatusCode.MESSAGE_TOO_LARGE, "Message too big"),
+            REQUIRED_EXTENSION(StatusCode.REQUIRED_EXTENSION, "Required extension not sent"),
+            SERVER_ERROR(StatusCode.SERVER_ERROR, "Server error"),
+            SERVICE_RESTART(StatusCode.SERVICE_RESTART, "Server restart"),
+            TRY_AGAIN_LATER(StatusCode.TRY_AGAIN_LATER, "Server overload"),
+            FAILED_TLS_HANDSHAKE(StatusCode.POLICY_VIOLATION, "Failure handshake");
+
+            private int statusCode;
+            private String message;
+
+            private NiceStatusCode(final int statusCode, final String message) {
+                this.statusCode = statusCode;
+                this.message = message;
+            }
+
+            public int getStatusCode() {
+                return statusCode;
+            }
+
+            public String getMessage() {
+                return message;
+            }
+
+            public static final String getMessage(final int statusCode) {
+                for (final NiceStatusCode niceStatusCode : values()) {
+                    if (niceStatusCode.getStatusCode() == statusCode) {
+                        return statusCode + " : " + niceStatusCode.getMessage();
+                    }
+                }
+                log.error("No matching status code found for {}", statusCode);
+                return String.valueOf(statusCode);
+            }
         }
     }
 }
