@@ -106,16 +106,31 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     public static final class Buffer {
 
-        final ByteBuffer socketBuffer;
+        private final ByteBuffer socketBuffer;
 
         private Buffer() {
             socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
         }
 
-        public ByteBuffer getSocketBuffer() {
-            return socketBuffer;
+        public int position() {
+            return socketBuffer.position();
         }
 
+        public void put(final byte value) {
+            socketBuffer.put(value);
+        }
+
+        public void putShort(final short value) {
+            socketBuffer.putShort(value);
+        }
+
+        public void putInt(final int value) {
+            socketBuffer.putInt(value);
+        }
+
+        private ByteBuffer getRawBuffer() {
+            return socketBuffer;
+        }
     }
 
     public static final class WebSocket implements WebSocketListener {
@@ -241,7 +256,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 if (context.getUIContext().isLiving()) {
                     if (isSessionOpen()) {
                         try {
-                            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+                            final ByteBuffer socketBuffer = buffer.getRawBuffer();
 
                             flush(socketBuffer);
                             socketBuffer.clear();
