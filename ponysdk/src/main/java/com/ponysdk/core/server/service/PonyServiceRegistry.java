@@ -37,19 +37,23 @@ public class PonyServiceRegistry {
 
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
-    public static void registerPonyService(final PonyService service) {
+    public static final void registerPonyService(final PonyService service) {
 
         final Set<Class<?>> classes = new HashSet<>();
 
         getGeneralizations(service.getClass(), classes);
 
         classes.stream().filter(PonyService.class::isAssignableFrom).forEach(clazz -> {
-            registeredServices.put(clazz, service);
-            log.info("Service registered #" + clazz);
+            if (!registeredServices.containsKey(clazz)) {
+                registeredServices.put(clazz, service);
+                log.info("Service registered #{}", clazz);
+            } else {
+                throw new IllegalArgumentException("Already registered service #" + clazz);
+            }
         });
     }
 
-    public static void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
+    private static final void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
         final Class<?> superClass = classObject.getSuperclass();
 
         if (superClass != null) getGeneralizations(superClass, generalizations);
@@ -60,10 +64,12 @@ public class PonyServiceRegistry {
         }
     }
 
-    public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
-        @SuppressWarnings("unchecked")
+    public static final <T extends PonyService> T getPonyService(final Class<T> clazz) {
         final T ponyService = (T) registeredServices.get(clazz);
-        if (ponyService == null) throw new RuntimeException("Service not registered #" + clazz.getCanonicalName());
-        return ponyService;
+        if (ponyService != null) {
+            return ponyService;
+        } else {
+            throw new IllegalArgumentException("Service not registered #" + clazz.getCanonicalName());
+        }
     }
 }
