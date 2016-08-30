@@ -38,15 +38,11 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
-import elemental.events.EventRemover;
 import elemental.html.Window;
 
-public class PTWindow extends AbstractPTObject implements EventListener {
+public class PTWindow extends AbstractPTObject {
 
-    private static final Logger log = Logger
-            .getLogger(PTWindow.class.getName());
-
-    private static final String WINDOW_EVENT_TYPE_BEFORE_UNLOAD = "beforeunload";
+    private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
     private static final String EMPTY = "";
 
@@ -59,15 +55,11 @@ public class PTWindow extends AbstractPTObject implements EventListener {
 
     private boolean ponySDKStarted = false;
 
-    private EventRemover eventRemover;
-
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId,
-            final UIBuilder builder) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
         super.create(buffer, objectId, builder);
 
-        if (log.isLoggable(Level.INFO))
-            log.log(Level.INFO, "PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
 
         uiService = builder;
 
@@ -91,16 +83,19 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     }
 
     @Override
-    public boolean update(final ReaderBuffer buffer,
-            final BinaryModel binaryModel) {
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
-            // WORKAROUND : Add a specific method to handle IE
-            eventRemover = addEventListener(WINDOW_EVENT_TYPE_BEFORE_UNLOAD,
-                    this, true);
-            if (eventRemover == null)
-                eventRemover = window.addEventListener(
-                        WINDOW_EVENT_TYPE_BEFORE_UNLOAD, this, true);
+            window.setOnbeforeunload(new EventListener() {
+
+                @Override
+                public void handleEvent(final Event evt) {
+                    final PTInstruction instruction = new PTInstruction(objectID);
+                    instruction.put(ClientToServerModel.HANDLER_CLOSE);
+                    uiService.sendDataToServer(instruction);
+                    PTWindowManager.get().unregister(PTWindow.this);
+                }
+            });
             return true;
         }
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
@@ -115,20 +110,7 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     }
 
     public void close(final boolean forced) {
-        if (forced)
-            eventRemover.remove();
         window.close();
-    }
-
-    @Override
-    public void handleEvent(final Event event) {
-        if (event.getCurrentTarget() == window
-                && WINDOW_EVENT_TYPE_BEFORE_UNLOAD.equals(event.getType())) {
-            final PTInstruction instruction = new PTInstruction(objectID);
-            instruction.put(ClientToServerModel.HANDLER_CLOSE);
-            uiService.sendDataToServer(instruction);
-            PTWindowManager.get().unregister(this);
-        }
     }
 
     public void postMessage(final ReaderBuffer buffer) {
@@ -136,14 +118,6 @@ public class PTWindow extends AbstractPTObject implements EventListener {
     }
 
     public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
-
-    public native final EventRemover addEventListener(String type,
-            EventListener listener, boolean useCapture) /*-{
-                                                        var handler = @elemental.js.dom.JsElementalMixinBase::getHandlerFor(Lelemental/events/EventListener;)(listener);
-                                                        if (window.addEventListener) return null; // W3C DOM
-                                                        else if (window.attachEvent) window.attachEvent("on" + type, handler); // IE DOM
-                                                        return @elemental.js.dom.JsElementalMixinBase.Remover::create(Lelemental/events/EventTarget;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(window, type, handler, useCapture);
-                                                        }-*/;
 
     public void setReady() {
         ponySDKStarted = true;
