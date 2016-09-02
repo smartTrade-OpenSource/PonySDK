@@ -112,6 +112,4 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     public abstract void setValue(final T value);
 
-    public abstract void setEnabled(final boolean enabled);
-
 }

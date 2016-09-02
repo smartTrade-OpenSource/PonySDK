@@ -36,4 +36,6 @@ public interface FormField extends IsPWidget, Validable, Resetable {
 
     void setValidator(final FieldValidator validator);
 
+    void setEnabled(final boolean enabled);
+
 }
