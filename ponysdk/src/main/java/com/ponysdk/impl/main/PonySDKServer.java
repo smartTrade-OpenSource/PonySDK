@@ -23,13 +23,16 @@
 
 package com.ponysdk.impl.main;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.servlet.*;
-import org.eclipse.jetty.server.Handler;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
 import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -39,10 +42,12 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.DispatcherType;
-import java.net.InetAddress;
-import java.net.URL;
-import java.util.EnumSet;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.ApplicationLoader;
+import com.ponysdk.core.server.servlet.BootstrapServlet;
+import com.ponysdk.core.server.servlet.ServletContextFilter;
+import com.ponysdk.core.server.servlet.StreamServiceServlet;
+import com.ponysdk.core.server.servlet.WebSocketServlet;
 
 public class PonySDKServer {
 
@@ -59,8 +64,6 @@ public class PonySDKServer {
     protected String host = "0.0.0.0";
     protected int port = 80;
 
-    protected ServerConnector serverConnector;
-
     private boolean useSSL = true;
     private int sslPort = 443;
     private String sslKeyStoreFile;
@@ -70,7 +73,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
+    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -78,15 +81,13 @@ public class PonySDKServer {
     }
 
     public void start() throws Exception {
-        serverConnector = createConnector();
-        server.addConnector(serverConnector);
+        server.addConnector(createHttpConnector());
+        if (useSSL) server.addConnector(createHttpsConnector());
 
         final ServletContextHandler context = createWebApp();
 
         final GzipHandler gzip = new GzipHandler();
-        final HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{context});
-        gzip.setHandler(handlers);
+        gzip.setHandler(context);
 
         server.setHandler(gzip);
 
@@ -121,36 +122,12 @@ public class PonySDKServer {
         return context;
     }
 
-    protected ServerConnector createConnector() {
+    protected ServerConnector createHttpConnector() {
         final ServerConnector serverConnector;
         if (useSSL) {
-            // HTTPS
-            URL keyStore = getClass().getResource(sslKeyStoreFile);
-
-            if (keyStore == null) {
-                keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
-            }
-
-            if (keyStore == null) throw new RuntimeException("KeyStore not found #" + sslKeyStoreFile);
-            final SslContextFactory sslContextFactory = new SslContextFactory(keyStore.toExternalForm());
-            sslContextFactory.setKeyStorePassword(sslKeyStorePassphrase);
-            sslContextFactory.setKeyStoreType(sslKeyStoreType);
-            sslContextFactory.setIncludeProtocols(enabledProtocols);
-            if (enabledCipherSuites != null) sslContextFactory.setIncludeCipherSuites(enabledCipherSuites);
-
-            if (needClientAuth) {
-                sslContextFactory.setNeedClientAuth(needClientAuth);
-                if (sslTrustStoreFile != null) {
-                    sslContextFactory.setTrustStorePath(sslTrustStoreFile);
-                    sslContextFactory.setTrustStorePassword(sslTrustStorePassphrase);
-                    sslContextFactory.setTrustStoreType(sslTrustStoreType);
-                }
-            }
-
             final HttpConfiguration httpConfiguration = new HttpConfiguration();
             httpConfiguration.setSecurePort(sslPort);
-
-            serverConnector = new ServerConnector(server, sslContextFactory);
+            serverConnector = new ServerConnector(server, new HttpConnectionFactory(httpConfiguration));
         } else {
             serverConnector = new ServerConnector(server);
         }
@@ -158,7 +135,38 @@ public class PonySDKServer {
         serverConnector.setPort(port);
         serverConnector.setHost(host);
         serverConnector.setReuseAddress(true);
+        return serverConnector;
+    }
 
+    protected ServerConnector createHttpsConnector() {
+        final ServerConnector serverConnector;
+        // HTTPS
+        URL keyStore = getClass().getResource(sslKeyStoreFile);
+
+        if (keyStore == null) {
+            keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
+        }
+
+        if (keyStore == null) throw new RuntimeException("KeyStore not found #" + sslKeyStoreFile);
+        final SslContextFactory sslContextFactory = new SslContextFactory(keyStore.toExternalForm());
+        sslContextFactory.setKeyStorePassword(sslKeyStorePassphrase);
+        sslContextFactory.setKeyStoreType(sslKeyStoreType);
+        sslContextFactory.setIncludeProtocols(enabledProtocols);
+        if (enabledCipherSuites != null) sslContextFactory.setIncludeCipherSuites(enabledCipherSuites);
+
+        if (needClientAuth) {
+            sslContextFactory.setNeedClientAuth(needClientAuth);
+            if (sslTrustStoreFile != null) {
+                sslContextFactory.setTrustStorePath(sslTrustStoreFile);
+                sslContextFactory.setTrustStorePassword(sslTrustStorePassphrase);
+                sslContextFactory.setTrustStoreType(sslTrustStoreType);
+            }
+        }
+
+        serverConnector = new ServerConnector(server, sslContextFactory);
+        serverConnector.setPort(sslPort);
+        serverConnector.setHost(host);
+        serverConnector.setReuseAddress(true);
         return serverConnector;
     }
 
@@ -194,6 +202,10 @@ public class PonySDKServer {
 
     public void setUseSSL(final boolean useSSL) {
         this.useSSL = useSSL;
+    }
+
+    public boolean isUseSSL() {
+        return useSSL;
     }
 
     public void setSslKeyStoreFile(final String sslKeyStoreFile) {

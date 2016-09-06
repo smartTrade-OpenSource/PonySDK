@@ -26,6 +26,7 @@ package com.ponysdk.core.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
@@ -35,6 +36,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
 import elemental.client.Browser;
+import elemental.events.CloseEvent;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.events.MessageEvent;
@@ -44,121 +46,125 @@ import elemental.html.Window;
 
 public class WebSocketClient implements MessageSender {
 
-	private static final Logger log = Logger.getLogger(WebSocketClient.class
-			.getName());
+    private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-	private final WebSocket webSocket;
-	private final UIBuilder uiBuilder;
+    private final WebSocket webSocket;
+    private final UIBuilder uiBuilder;
 
-	public WebSocketClient(final String url, final UIBuilder uiBuilder,
-			final WebSocketDataType webSocketDataType) {
-		this.uiBuilder = uiBuilder;
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
+        this.uiBuilder = uiBuilder;
 
-		final Window window = Browser.getWindow();
-		webSocket = window.newWebSocket(url);
-		webSocket.setBinaryType(webSocketDataType.getName());
+        final Window window = Browser.getWindow();
+        webSocket = window.newWebSocket(url);
+        webSocket.setBinaryType(webSocketDataType.getName());
 
-		final MessageReader messageReader;
-		if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
-			messageReader = new ArrayBufferReader(this);
-		} else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
-			messageReader = new BlobReader(this);
-		} else {
-			throw new IllegalArgumentException("Wrong reader type : "
-					+ webSocketDataType);
-		}
+        final MessageReader messageReader;
+        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
+            messageReader = new ArrayBufferReader(this);
+        } else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
+            messageReader = new BlobReader(this);
+        } else {
+            throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
+        }
 
-		webSocket.setOnopen(new EventListener() {
+        webSocket.setOnopen(new EventListener() {
 
-			@Override
-			public void handleEvent(final Event event) {
-				if (log.isLoggable(Level.INFO))
-					log.info("WebSoket connected");
-			}
-		});
-		webSocket.setOnclose(new EventListener() {
+            @Override
+            public void handleEvent(final Event event) {
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+            }
+        });
+        webSocket.setOnclose(new EventListener() {
 
-			@Override
-			public void handleEvent(final Event event) {
-				if (log.isLoggable(Level.INFO))
-					log.info("WebSoket disconnected");
-				uiBuilder.onCommunicationError(new Exception(
-						"Websocket connection lost."));
-			}
-		});
-		// webSocket.setOnerror(this);
-		webSocket.setOnmessage(new EventListener() {
+            @Override
+            public void handleEvent(final Event event) {
+                if (event instanceof CloseEvent) {
+                    final CloseEvent closeEvent = (CloseEvent) event;
+                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + closeEvent.getCode());
+                    uiBuilder.onCommunicationError(new StatusCodeException(closeEvent.getCode(), closeEvent.getReason()));
+                } else {
+                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
+                    uiBuilder.onCommunicationError(new Exception("Websocket connection closed"));
+                }
+            }
+        });
+        webSocket.setOnerror(new EventListener() {
 
-			/**
-			 * Message from server to Main terminal
-			 */
-			@Override
-			public void handleEvent(final Event event) {
-				messageReader.read((MessageEvent) event);
-			}
-		});
-	}
+            @Override
+            public void handleEvent(final Event event) {
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
+                uiBuilder.onCommunicationError(new Exception("Websocket error"));
+            }
+        });
+        webSocket.setOnmessage(new EventListener() {
 
-	@Override
-	public void read(final ArrayBuffer arrayBuffer) {
-		try {
-			final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-			// Get the first element on the message, always a key of element of
-			// the Model enum
-			final BinaryModel type = buffer.readBinaryModel();
+            /**
+             * Message from server to Main terminal
+             */
+            @Override
+            public void handleEvent(final Event event) {
+                messageReader.read((MessageEvent) event);
+            }
+        });
+    }
 
-			if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-				if (log.isLoggable(Level.FINE))
-					log.log(Level.FINE, "Heart beat");
-				send(ClientToServerModel.HEARTBEAT.toStringValue());
-			} else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
-				PonySDK.uiContextId = type.getIntValue();
-				uiBuilder
-				.init(new WebSocketRequestBuilder(WebSocketClient.this));
-			} else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
-				try {
-					uiBuilder.updateMainTerminal(buffer);
-				} catch (final Exception e) {
-					log.log(Level.SEVERE, "Error while processing the "
-							+ buffer, e);
-				}
-			} else {
-				log.severe("Unknown model : " + type.getModel());
-			}
-		} catch (final Exception e) {
-			log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
-		}
-	}
+    @Override
+    public void read(final ArrayBuffer arrayBuffer) {
+        try {
+            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+            // Get the first element on the message, always a key of element of the Model enum
+            final BinaryModel type = buffer.readBinaryModel();
 
-	public void send(final String message) {
-		webSocket.send(message);
-	}
+            if (type.getModel() == ServerToClientModel.HEARTBEAT) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
+                send(ClientToServerModel.HEARTBEAT.toStringValue());
+            } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
+                PonySDK.uiContextId = type.getIntValue();
+                uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
+            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
+                try {
+                    uiBuilder.updateMainTerminal(buffer);
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+                }
+            } else {
+                log.severe("Unknown model : " + type.getModel());
+            }
+        } catch (final Exception e) {
+            log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+        }
+    }
 
-	public void close() {
-		webSocket.close();
-	}
+    public void send(final String message) {
+        webSocket.send(message);
+    }
 
-	public enum WebSocketDataType {
+    public void close() {
+        webSocket.close();
+    }
 
-		ARRAYBUFFER("arraybuffer"), BLOB("blob");
+    public enum WebSocketDataType {
 
-		private String name;
+        ARRAYBUFFER("arraybuffer"),
+        BLOB("blob");
 
-		private WebSocketDataType(final String name) {
-			this.name = name;
-		}
+        private String name;
 
-		/**
-		 * @return the name
-		 */
-		public String getName() {
-			return name;
-		}
+        private WebSocketDataType(final String name) {
+            this.name = name;
+        }
 
-		@Override
-		public String toString() {
-			return getName();
-		}
-	}
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return getName();
+        }
+    }
 
 }

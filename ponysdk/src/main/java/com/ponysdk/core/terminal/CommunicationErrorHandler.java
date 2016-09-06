@@ -31,5 +31,5 @@ import org.timepedia.exporter.client.Exportable;
 @ExportClosure
 public interface CommunicationErrorHandler extends Exportable {
 
-    void onCommunicationError(String code, String message);
+    void onCommunicationError(int code, String message);
 }

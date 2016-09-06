@@ -24,7 +24,6 @@
 package com.ponysdk.core.server.application;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 
 import javax.json.JsonObject;
 
@@ -54,24 +53,6 @@ public class Parser {
         this.socket = socket;
     }
 
-    private static ByteBuffer UTF8StringToByteBuffer(final String value) {
-        try {
-            return value != null ? ByteBuffer.wrap(value.getBytes(ENCODING_CHARSET)) : null;
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot convert string");
-        }
-
-        /*
-         * CharsetEncoder UTF8Encoder =
-         * Charset.forName(ENCODING_CHARSET).newEncoder(); try { return
-         * UTF8Encoder.encode(value != null ? CharBuffer.wrap(value) :
-         * CharBuffer.wrap("")); } catch (final CharacterCodingException e) {
-         * log.error("Cannot convert string"); }
-         */
-
-        return null;
-    }
-
     public void reset() {
         if (buffer != null) {
             socket.flush(buffer);
@@ -83,24 +64,21 @@ public class Parser {
     public int getPosition() {
         if (buffer == null) buffer = socket.getBuffer();
         if (buffer == null) return -1;
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        return socketBuffer.position();
+        return buffer.position();
     }
 
     public void beginObject() {
         if (buffer == null) buffer = socket.getBuffer();
         if (buffer == null) return;
 
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-
-        if (socketBuffer.position() == 0) {
-            socketBuffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
+        if (buffer.position() == 0) {
+            buffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
         }
     }
 
     public void endObject() {
         if (buffer == null) return;
-        if (buffer.getSocketBuffer().position() >= 4096) reset();
+        if (buffer.position() >= 4096) reset();
     }
 
     public void parse(final ServerToClientModel model, final Object value) {
@@ -159,9 +137,8 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model);
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(model.getValue());
+        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " (position : " + buffer.position() + ")");
+        buffer.putShort(model.getValue());
     }
 
     private void parse(final ServerToClientModel model, final boolean value) {
@@ -169,24 +146,21 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final byte value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(model.getValue());
-        socketBuffer.put(value);
+        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.putShort(model.getValue());
+        buffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final short value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(model.getValue());
-        socketBuffer.putShort(value);
+        log.error("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.putShort(model.getValue());
+        buffer.putShort(value);
     }
 
     private void parse(final ServerToClientModel model, final int value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(model.getValue());
-        socketBuffer.putInt(value);
+        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.putShort(model.getValue());
+        buffer.putInt(value);
     }
 
     private void parse(final ServerToClientModel model, final JsonObject jsonObject) {
@@ -195,20 +169,18 @@ public class Parser {
 
     private void parse(final ServerToClientModel model, final String value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
-                + (value != null ? value.length() : 0) + ")");
-        final ByteBuffer socketBuffer = buffer.getSocketBuffer();
-        socketBuffer.putShort(model.getValue());
+                + (value != null ? value.length() : 0) + ")" + " (position : " + buffer.position() + ")");
+        buffer.putShort(model.getValue());
 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                socketBuffer.putInt(bytes.length);
+                buffer.putInt(bytes.length);
                 for (final byte b : bytes) {
-                    socketBuffer.put(b);
+                    buffer.put(b);
                 }
-            }
-            else {
-                socketBuffer.putInt(0);
+            } else {
+                buffer.putInt(0);
             }
         } catch (final UnsupportedEncodingException e) {
             log.error("Cannot convert string");

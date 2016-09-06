@@ -87,6 +87,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((request, response) -> {
+            // Force session creation if there is no session
+            request.getHttpServletRequest().getSession(true);
             if (request.getSession() != null) {
                 return new WebSocket(request, response, monitor, buffers, applicationManager);
             } else {
@@ -106,16 +108,31 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     public static final class Buffer {
 
-        final ByteBuffer socketBuffer;
+        private final ByteBuffer socketBuffer;
 
         private Buffer() {
             socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
         }
 
-        public ByteBuffer getSocketBuffer() {
-            return socketBuffer;
+        public int position() {
+            return socketBuffer.position();
         }
 
+        public void put(final byte value) {
+            socketBuffer.put(value);
+        }
+
+        public void putShort(final short value) {
+            socketBuffer.putShort(value);
+        }
+
+        public void putInt(final int value) {
+            socketBuffer.putInt(value);
+        }
+
+        private ByteBuffer getRawBuffer() {
+            return socketBuffer;
+        }
     }
 
     public static final class WebSocket implements WebSocketListener {
@@ -241,7 +258,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 if (context.getUIContext().isLiving()) {
                     if (isSessionOpen()) {
                         try {
-                            final ByteBuffer socketBuffer = buffer.getSocketBuffer();
+                            final ByteBuffer socketBuffer = buffer.getRawBuffer();
 
                             flush(socketBuffer);
                             socketBuffer.clear();

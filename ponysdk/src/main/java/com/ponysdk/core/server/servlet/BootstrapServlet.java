@@ -119,6 +119,7 @@ public class BootstrapServlet extends HttpServlet {
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
             throws IOException {
+        // Force session creation if there is no session
         request.getSession();
 
         // Try to load from context
