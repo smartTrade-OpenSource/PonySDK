@@ -33,9 +33,8 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
- * The panel to which all other widgets must ultimately be added. RootPanels are
- * never created directly. Rather, they are accessed via
- * {@link PRootPanel#get(int)} .
+ * The panel to which all other widgets must ultimately be added. RootPanels are never created
+ * directly. Rather, they are accessed via {@link PRootPanel#get(int)} .
  * <p>
  * Most applications will add widgets to the default root panel in their
  * {@link EntryPoint#start(UIContext)} methods.
@@ -84,7 +83,7 @@ public class PRootPanel extends PAbsolutePanel {
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.ROOT_ID, id);
+        if (id != null) parser.parse(ServerToClientModel.ROOT_ID, id);
     }
 
     @Override
@@ -93,12 +92,12 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     /**
-     * Clears the rootPanel. If clearDom is true, then also remove any DOM
-     * elements that are not widgets.
+     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not
+     * widgets.
      * <p>
      * By default {@link #clear()} will only remove children that are widgets.
-     * This method also provides the option to remove all children including the
-     * non-widget DOM elements that are directly added.
+     * This method also provides the option to remove all children including the non-widget DOM
+     * elements that are directly added.
      *
      * @param clearDom
      *            if {@code true} this method will also remove any DOM elements
@@ -106,9 +105,6 @@ public class PRootPanel extends PAbsolutePanel {
      */
     public void clear(final boolean clearDom) {
         clear();
-
-        if (clearDom) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom));
-        }
+        if (clearDom) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom));
     }
 }
