@@ -65,11 +65,9 @@ public class PTWindow extends AbstractPTObject {
 
         url = buffer.readBinaryModel().getStringValue();
         if (url == null)
-            url = GWT.getHostPageBaseURL() + "?"
-                    + ClientToServerModel.WINDOW_ID.toStringValue() + "="
-                    + objectId + "&"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId;
+            url = GWT.getHostPageBaseURL() + "?" +
+                    ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&" +
+                    ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId;
 
         name = buffer.readBinaryModel().getStringValue();
         if (name == null)
@@ -89,17 +87,13 @@ public class PTWindow extends AbstractPTObject {
             window.setOnbeforeunload(new EventListener() {
 
                 @Override
-                public void handleEvent(final Event evt) {
+                public void handleEvent(final Event event) {
                     final PTInstruction instruction = new PTInstruction(objectID);
                     instruction.put(ClientToServerModel.HANDLER_CLOSE);
                     uiService.sendDataToServer(instruction);
                     PTWindowManager.get().unregister(PTWindow.this);
                 }
             });
-            return true;
-        }
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
-            window.postMessage(binaryModel.getStringValue(), "*");
             return true;
         }
         if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
@@ -114,10 +108,8 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public void postMessage(final ReaderBuffer buffer) {
-        postMessage(buffer, window);
+        window.postMessage(buffer.getMessage(), "*");
     }
-
-    public native void postMessage(final ReaderBuffer buffer, Window window) /*-{window.onDataReceived(buffer);}-*/;
 
     public void setReady() {
         ponySDKStarted = true;

@@ -191,6 +191,10 @@ public class ReaderBuffer {
             if (result) rewind(binaryModel);
         }
     }
+    
+    public ArrayBuffer getMessage() {
+        return message;
+    }
 
     @Override
     public String toString() {
@@ -199,4 +203,5 @@ public class ReaderBuffer {
                 ", position=" + position +
                 "}";
     }
+    
 }

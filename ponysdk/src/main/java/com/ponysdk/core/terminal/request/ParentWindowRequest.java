@@ -29,6 +29,12 @@ import java.util.logging.Logger;
 import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import elemental.client.Browser;
+import elemental.events.Event;
+import elemental.events.EventListener;
+import elemental.events.MessageEvent;
+import elemental.html.ArrayBuffer;
+
 public class ParentWindowRequest implements RequestBuilder {
 
     private static final Logger log = Logger.getLogger(ParentWindowRequest.class.getName());
@@ -38,7 +44,14 @@ public class ParentWindowRequest implements RequestBuilder {
     public ParentWindowRequest(final String windowID, final RequestCallback callback) {
         this.callback = callback;
 
-        exportOnDataReceived();
+        Browser.getWindow().setOnmessage(new EventListener() {
+
+            @Override
+            public void handleEvent(final Event event) {
+                final ArrayBuffer buffer = (ArrayBuffer) ((MessageEvent) event).getData();
+                onDataReceived(new ReaderBuffer(buffer));
+            }
+        });
 
         setReadyWindow(windowID);
     }
@@ -68,18 +81,8 @@ public class ParentWindowRequest implements RequestBuilder {
     /**
      * From Main terminal to the matching window terminal
      */
-    public native void exportOnDataReceived() /*-{
-                                              var that = this;
-                                              $wnd.onDataReceived = function(buffer) {
-                                              $entry(that.@com.ponysdk.core.terminal.request.ParentWindowRequest::onDataReceived(Lcom/ponysdk/core/terminal/model/ReaderBuffer;)(buffer));
-                                              }
-                                              }-*/;
-
-    /**
-     * From Main terminal to the matching window terminal
-     */
     public void onDataReceived(final ReaderBuffer buffer) {
-        if (log.isLoggable(Level.FINE)) log.fine("Data received from main terminal");
+        if (log.isLoggable(Level.FINE)) log.fine("Data received from main terminal " + buffer.toString());
         callback.onDataReceived(buffer);
     }
 
