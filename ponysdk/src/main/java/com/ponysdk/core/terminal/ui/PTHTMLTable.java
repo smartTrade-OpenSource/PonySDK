@@ -44,7 +44,7 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
         // ServerToClientModel.COLUMN
         final int cell = buffer.readBinaryModel().getIntValue();
 
-        uiObject.getCellFormatter().addStyleName(row, cell, "pony-PFlextable-Cell");
+        uiObject.getCellFormatter().addStyleName(row, cell, "ptc");
         uiObject.setWidget(row, cell, w);
     }
 
