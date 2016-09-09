@@ -85,8 +85,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
 
-    private final Set<Integer> preventedEvents = new HashSet<>();
-    private final Set<Integer> stoppedEvents = new HashSet<>();
+    private Set<Integer> preventedEvents;
+    private Set<Integer> stoppedEvents;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -96,10 +96,12 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             return true;
         }
         if (ServerToClientModel.PREVENT_EVENT.equals(binaryModel.getModel())) {
+            if (preventedEvents == null) preventedEvents = new HashSet<>();
             preventedEvents.add(binaryModel.getIntValue());
             return true;
         }
         if (ServerToClientModel.STOP_EVENT.equals(binaryModel.getModel())) {
+            if (stoppedEvents == null) stoppedEvents = new HashSet<>();
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
         }
@@ -473,22 +475,16 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void preventEvent(final DomEvent<?> event) {
-        if (preventedEvents.isEmpty())
-            return;
-
-        final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
-        if (preventedEvents.contains(typeInt)) {
-            event.preventDefault();
+        if (preventedEvents != null && preventedEvents.isEmpty()) {
+            final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
+            if (preventedEvents.contains(typeInt)) event.preventDefault();
         }
     }
 
     private void stopEvent(final DomEvent<?> event) {
-        if (stoppedEvents.isEmpty())
-            return;
-
-        final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
-        if (stoppedEvents.contains(typeInt)) {
-            event.stopPropagation();
+        if (stoppedEvents != null && stoppedEvents.isEmpty()) {
+            final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
+            if (stoppedEvents.contains(typeInt)) event.stopPropagation();
         }
     }
 }

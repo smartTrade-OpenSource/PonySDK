@@ -81,6 +81,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private static final EventBus rootEventBus = new SimpleEventBus();
 
+    private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
+
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
@@ -275,7 +277,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
         // ServerToClientModel.WIDGET_TYPE
-        final WidgetType widgetType = WidgetType.values()[buffer.readBinaryModel().getByteValue()];
+        final WidgetType widgetType = WIDGET_TYPES[buffer.readBinaryModel().getByteValue()];
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
