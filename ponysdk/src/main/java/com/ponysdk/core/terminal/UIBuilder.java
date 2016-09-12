@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -81,6 +80,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private static final EventBus rootEventBus = new SimpleEventBus();
+
+    private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
 
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
@@ -167,8 +168,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     public void updateMainTerminal(final ReaderBuffer buffer) {
         while (buffer.hasRemaining()) {
-            // Detect if the message is not for the main terminal but for a
-            // specific window
+            // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel windowIdModel = buffer.readBinaryModel();
             if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
                 // Event on a specific window
@@ -177,7 +177,31 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
                 if (window != null && window.isReady()) {
                     log.log(Level.FINE, "The main terminal send the buffer to window " + requestedWindowId);
-                    window.postMessage(buffer);
+
+                    final int startPosition = buffer.getIndex();
+
+                    // Type
+                    final BinaryModel type = buffer.readBinaryModel();
+
+                    while (buffer.hasRemaining()) {
+                        final BinaryModel model = buffer.readBinaryModel();
+                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
+                            if (model.getIntValue() != requestedWindowId) {
+                                buffer.rewind(model);
+                                break;
+                            } else {
+                                // Type
+                                buffer.readBinaryModel();
+                            }
+                        } else if (model.isBeginKey()) {
+                            buffer.rewind(model);
+                            break;
+                        }
+                    }
+
+                    final int endPosition = buffer.getIndex();
+
+                    window.postMessage(new ReaderBuffer(buffer.getMessage().slice(startPosition, endPosition)));
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
 
@@ -209,39 +233,51 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    public void update(final ReaderBuffer buffer) {
-        if (buffer.hasRemaining()) {
-            final BinaryModel binaryModel = buffer.readBinaryModel();
-
-            if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
-                final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
-                processUpdate(buffer, ptObject);
-            } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
-                processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
-                processAdd(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
-                processGC(binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
-                processRemove(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
-                processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
-            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
-                processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
-            } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
-                processHistory(buffer, binaryModel.getStringValue());
-            } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
-                processClose();
+    public void updatWindowTerminal(final ReaderBuffer buffer) {
+        while (buffer.hasRemaining()) {
+            // Remove useless WINDOW_ID binary model
+            final BinaryModel windowIdModel = buffer.readBinaryModel();
+            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
+                update(buffer);
             } else {
-                log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
-                buffer.avoidBlock();
+                buffer.rewind(windowIdModel);
+                update(buffer);
             }
+        }
+    }
+
+    private void update(final ReaderBuffer buffer) {
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (BinaryModel.NULL.equals(binaryModel)) return;
+
+        if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
+            final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
+            processUpdate(buffer, ptObject);
+        } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
+            processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
+        } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
+            processAdd(buffer, getPTObject(binaryModel.getIntValue()));
+        } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
+            processGC(binaryModel.getIntValue());
+        } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
+            processRemove(buffer, binaryModel.getIntValue());
+        } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
+            processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
+        } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
+            processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
+        } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
+            processHistory(buffer, binaryModel.getStringValue());
+        } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
+            processClose();
+        } else {
+            log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
+            buffer.avoidBlock();
         }
     }
 
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
         // ServerToClientModel.WIDGET_TYPE
-        final WidgetType widgetType = WidgetType.values()[buffer.readBinaryModel().getByteValue()];
+        final WidgetType widgetType = WIDGET_TYPES[buffer.readBinaryModel().getByteValue()];
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
@@ -528,20 +564,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final PTWindow window = PTWindowManager.getWindow(windowID);
         if (window != null) window.setReady();
         else log.warning("Window " + windowID + " doesn't exist");
-    }
-
-    // FIXME REMOVE
-    @Deprecated
-    public void executeInstruction(final JavaScriptObject jso) {
-        final JSONObject data = new JSONObject(jso);
-
-        JSONArray jsonArray = data.isArray();
-        if (jsonArray == null) jsonArray = data.isObject().get(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue()).isArray();
-
-        for (int i = 0; i < jsonArray.size(); i++) {
-            final PTInstruction instruction = new PTInstruction(jsonArray.get(i).isObject().getJavaScriptObject());
-            log.severe("Deprecated UIBuilder#executeInstruction() method, don't use it : " + instruction);
-        }
     }
 
 }

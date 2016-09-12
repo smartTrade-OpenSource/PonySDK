@@ -62,6 +62,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
         return result;
     }
 
+    @Override
     public void setValidator(final FieldValidator validator) {
         this.validator = validator;
     }
@@ -110,7 +111,5 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     public abstract T getValue();
 
     public abstract void setValue(final T value);
-
-    public abstract void setEnabled(final boolean enabled);
 
 }

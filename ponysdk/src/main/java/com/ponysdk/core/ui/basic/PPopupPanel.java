@@ -30,6 +30,9 @@ import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -71,6 +74,8 @@ import com.ponysdk.core.ui.basic.event.PCloseHandler;
  * </dl>
  */
 public class PPopupPanel extends PSimplePanel implements HasPAnimation {
+
+    private static final Logger log = LoggerFactory.getLogger(PPopupPanel.class);
 
     private final boolean autoHide;
     private final List<PCloseHandler> listeners = new ArrayList<>();
@@ -133,6 +138,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         if (!showing) {
             this.showing = true;
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_SHOW));
+        } else {
+            log.warn("The popup is already opened : {}", this);
         }
     }
 
@@ -140,6 +147,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         if (showing) {
             this.showing = false;
             saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_HIDE));
+        } else {
+            log.warn("The popup is already hidden : {}", this);
         }
     }
 

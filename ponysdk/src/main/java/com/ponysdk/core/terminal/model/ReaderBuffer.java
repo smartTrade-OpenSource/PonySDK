@@ -42,13 +42,18 @@ public class ReaderBuffer {
 
     private static final byte TRUE = 1;
 
+    private static final ServerToClientModel[] SERVER_TO_CLIENT_MODELS = ServerToClientModel.values();
+
     private final ArrayBuffer message;
     private final Window window;
     private int position;
+    private final Uint8Array array;
 
     public ReaderBuffer(final ArrayBuffer message) {
         this.message = message;
         this.window = Browser.getWindow();
+
+        this.array = window.newUint8Array(message, 0, message.getByteLength());
     }
 
     private static native String fromCharCode(ArrayBuffer buf) /*-{return $wnd.decode(buf);}-*/;
@@ -57,13 +62,9 @@ public class ReaderBuffer {
         return position;
     }
 
-    private int getByteLength() {
-        return message.getByteLength();
-    }
-
     public BinaryModel readBinaryModel() {
         if (!hasRemaining()) return BinaryModel.NULL;
-        final ServerToClientModel key = ServerToClientModel.values()[getShort()];
+        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
         int size = ValueTypeModel.SHORT.getSize();
 
         switch (key.getTypeModel()) {
@@ -113,41 +114,40 @@ public class ReaderBuffer {
 
     private boolean getBoolean() {
         final int size = ValueTypeModel.BOOLEAN.getSize();
-        final Uint8Array arrayType = window.newUint8Array(message, position, size);
+        final boolean result = array.intAt(position) == TRUE;
         position += size;
-        return arrayType.intAt(0) == TRUE;
+        return result;
     }
 
     private byte getByte() {
         final int size = ValueTypeModel.BYTE.getSize();
-        final Uint8Array arrayType = window.newUint8Array(message, position, size);
+        final byte result = (byte) array.intAt(position);
         position += size;
-        return (byte) arrayType.intAt(0);
+        return result;
     }
 
     private short getShort() {
         final int size = ValueTypeModel.SHORT.getSize();
-        final Uint8Array arrayType = window.newUint8Array(message, position, size);
-
-        position += size;
 
         int result = 0;
-        for (int i = 0; i < arrayType.length(); i++) {
-            result = (result << 8) + arrayType.intAt(i);
+        for (int i = position; i < position + size; i++) {
+            result = (result << 8) + array.intAt(i);
         }
+
+        position += size;
 
         return (short) result;
     }
 
     private int getInt() {
         final int size = ValueTypeModel.INTEGER.getSize();
-        final Uint8Array arrayType = window.newUint8Array(message, position, size);
-        position += size;
 
         int result = 0;
-        for (int i = 0; i < arrayType.length(); i++) {
-            result = (result << 8) + arrayType.intAt(i);
+        for (int i = position; i < position + size; i++) {
+            result = (result << 8) + array.intAt(i);
         }
+
+        position += size;
 
         return result;
     }
@@ -176,7 +176,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasRemaining() {
-        return position < getByteLength();
+        return position < message.getByteLength();
     }
 
     /**
@@ -192,6 +192,10 @@ public class ReaderBuffer {
         }
     }
 
+    public ArrayBuffer getMessage() {
+        return message;
+    }
+
     @Override
     public String toString() {
         return "ReaderBuffer {" +
@@ -199,4 +203,5 @@ public class ReaderBuffer {
                 ", position=" + position +
                 "}";
     }
+
 }

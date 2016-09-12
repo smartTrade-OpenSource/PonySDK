@@ -54,150 +54,125 @@ import elemental.client.Browser;
 @Export(value = "ponysdk")
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
-	private static final Logger log = Logger.getLogger(PonySDK.class.getName());
+    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
-	private static PonySDK INSTANCE;
+    private static PonySDK INSTANCE;
 
-	private final UIBuilder uiBuilder = new UIBuilder();
+    private final UIBuilder uiBuilder = new UIBuilder();
 
-	private WebSocketClient socketClient;
+    private WebSocketClient socketClient;
 
-	private boolean started = false;
+    private boolean started = false;
 
-	public static Integer uiContextId;
+    public static Integer uiContextId;
 
-	private PonySDK() {
-	}
+    private PonySDK() {
+    }
 
-	@ExportConstructor
-	public static PonySDK constructor() {
-		if (INSTANCE == null) {
-			INSTANCE = new PonySDK();
-			GWT.setUncaughtExceptionHandler(INSTANCE);
-			if (log.isLoggable(Level.INFO))
-				log.info("Creating PonySDK instance");
-		}
-		return INSTANCE;
-	}
+    @ExportConstructor
+    public static PonySDK constructor() {
+        if (INSTANCE == null) {
+            INSTANCE = new PonySDK();
+            GWT.setUncaughtExceptionHandler(INSTANCE);
+            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
+        }
+        return INSTANCE;
+    }
 
-	@Export
-	public void start() {
-		if (started)
-			return;
+    @Export
+    public void start() {
+        if (started) return;
 
-		try {
-			if (log.isLoggable(Level.INFO))
-				log.info("Starting PonySDK instance");
-			final elemental.html.Window window = Browser.getWindow();
-			final elemental.html.Window opener = window.getOpener();
+        try {
+            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
+            final elemental.html.Window window = Browser.getWindow();
+            final elemental.html.Window opener = window.getOpener();
 
-			if (opener == null) {
-				Window.addCloseHandler(new CloseHandler<Window>() {
+            if (opener == null) {
+                Window.addCloseHandler(new CloseHandler<Window>() {
 
-					@Override
-					public void onClose(final CloseEvent<Window> event) {
-						socketClient.close();
-						PTWindowManager.closeAll();
-					}
-				});
+                    @Override
+                    public void onClose(final CloseEvent<Window> event) {
+                        socketClient.close();
+                        PTWindowManager.closeAll();
+                    }
+                });
 
-				final String builder = GWT.getHostPageBaseURL().replaceFirst(
-						"http", "ws")
-						+ "ws?"
-						+ ClientToServerModel.TYPE_HISTORY.toStringValue()
-						+ "=" + History.getToken();
+                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?" +
+                        ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
 
-				socketClient = new WebSocketClient(builder, uiBuilder,
-						WebSocketDataType.ARRAYBUFFER);
-			} else {
-				uiContextId = Integer.parseInt(Window.Location
-						.getParameter(ClientToServerModel.UI_CONTEXT_ID
-								.toStringValue()));
+                socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
+            } else {
+                uiContextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
 
-				final String windowId = Window.Location
-						.getParameter(ClientToServerModel.WINDOW_ID
-								.toStringValue());
-				uiBuilder.init(new ParentWindowRequest(windowId,
-						new RequestCallback() {
+                final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
+                uiBuilder.init(new ParentWindowRequest(windowId, new RequestCallback() {
 
-					/**
-					 * Message from Main terminal to the matching
-					 * terminal
-					 */
-					@Override
-					public void onDataReceived(final ReaderBuffer buffer) {
-						uiBuilder.update(buffer);
-					}
+                    /**
+                     * Message from Main terminal to the matching terminal
+                     */
+                    @Override
+                    public void onDataReceived(final ReaderBuffer buffer) {
+                        uiBuilder.updatWindowTerminal(buffer);
+                    }
 
-				}));
-			}
+                }));
+            }
 
-		} catch (final Throwable e) {
-			log.log(Level.SEVERE,
-					"Loading application has failed #" + e.getMessage(), e);
-		}
+        } catch (final Throwable e) {
+            log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
+        }
 
-		started = true;
-	}
+        started = true;
+    }
 
-	/**
-	 * From other terminal to the server
-	 */
-	@Export
-	public void sendDataToServer(final String jsObject) {
-		uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
-	}
+    /**
+     * From other terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final String jsObject) {
+        uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
+    }
 
-	/**
-	 * From Main terminal to the server
-	 */
-	@Export
-	public void sendDataToServer(final int objectID,
-			final JavaScriptObject jsObject) {
-		final PTInstruction instruction = new PTInstruction(objectID);
-		instruction.put(ClientToServerModel.NATIVE, jsObject);
-		uiBuilder.sendDataToServer(instruction);
-	}
+    /**
+     * From Main terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
+        final PTInstruction instruction = new PTInstruction(objectID);
+        instruction.put(ClientToServerModel.NATIVE, jsObject);
+        uiBuilder.sendDataToServer(instruction);
+    }
 
-	/**
-	 * From Main terminal to the server
-	 */
-	@Export
-	public void sendDataToServer(final String objectID,
-			final JavaScriptObject jsObject) {
-		sendDataToServer(Integer.parseInt(objectID), jsObject);
-	}
+    /**
+     * From Main terminal to the server
+     */
+    @Export
+    public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
+        sendDataToServer(Integer.parseInt(objectID), jsObject);
+    }
 
-	@Export
-	public void setReadyWindow(final int windowID) {
-		uiBuilder.setReadyWindow(windowID);
-	}
+    @Export
+    public void setReadyWindow(final int windowID) {
+        uiBuilder.setReadyWindow(windowID);
+    }
 
-	@Export
-	public void registerCommunicationError(
-			final CommunicationErrorHandler communicationErrorClosure) {
-		uiBuilder.registerCommunicationError(communicationErrorClosure);
-	}
+    @Export
+    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+        uiBuilder.registerCommunicationError(communicationErrorClosure);
+    }
 
-	@Export
-	public void registerAddOnFactory(final String signature,
-			final JavascriptAddOnFactory javascriptAddOnFactory) {
-		uiBuilder.registerJavascriptAddOnFactory(signature,
-				javascriptAddOnFactory);
-	}
+    @Export
+    public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
+        uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
+    }
 
-	@Export
-	@Deprecated
-	public void executeInstruction(final JavaScriptObject jso) {
-		uiBuilder.executeInstruction(jso);
-	}
+    @Override
+    public void onUncaughtException(final Throwable e) {
+        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
 
-	@Override
-	public void onUncaughtException(final Throwable e) {
-		log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-
-		final PTInstruction instruction = new PTInstruction();
-		instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-		uiBuilder.sendDataToServer(instruction);
-	}
+        final PTInstruction instruction = new PTInstruction();
+        instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
+        uiBuilder.sendDataToServer(instruction);
+    }
 }

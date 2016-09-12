@@ -4,6 +4,9 @@ package com.ponysdk.core.ui.basic;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -19,6 +22,21 @@ public abstract class PAddOn extends PObject {
 
     private static final String ARGUMENTS_PROPERTY_NAME = "arg";
     private static final String METHOD_PROPERTY_NAME = "m";
+
+    private final static Map<Level, Byte> LOG_LEVEL = new HashMap<>();
+
+    static {
+        byte level = 0;
+        LOG_LEVEL.put(Level.OFF, level++);
+        LOG_LEVEL.put(Level.SEVERE, level++);
+        LOG_LEVEL.put(Level.WARNING, level++);
+        LOG_LEVEL.put(Level.INFO, level++);
+        LOG_LEVEL.put(Level.CONFIG, level++);
+        LOG_LEVEL.put(Level.FINE, level++);
+        LOG_LEVEL.put(Level.FINER, level++);
+        LOG_LEVEL.put(Level.FINEST, level++);
+        LOG_LEVEL.put(Level.ALL, level++);
+    }
 
     @Override
     public boolean attach(final int windowID) {
@@ -120,6 +138,10 @@ public abstract class PAddOn extends PObject {
         }
 
         update(builder.build());
+    }
+
+    public void setLogLevel(final Level logLevel) {
+        callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
     }
 
 }

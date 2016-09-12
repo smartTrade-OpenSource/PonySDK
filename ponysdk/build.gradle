@@ -162,7 +162,9 @@ task gwtc(dependsOn: classes, type: JavaExec) {
             'gwt',
             '-localWorkers',
             Runtime.getRuntime().availableProcessors(),
-            'com.ponysdk.core.PonyTerminal'
+            'com.ponysdk.core.PonyTerminal',
+            //'-style', 'DETAILED',
+            //'-optimize', '0'
     ]
 
     maxHeapSize = '512M'
