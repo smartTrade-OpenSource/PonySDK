@@ -81,6 +81,8 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
+    private static final DomHandlerType[] DOM_HANDLER_TYPES = DomHandlerType.values();
+
     private static final String HUNDRED_PERCENT = "100%";
 
     private final static Logger log = Logger.getLogger(PTWidget.class.getName());
@@ -112,7 +114,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_DOM.equals(handlerModel)) {
             // ServerToClientModel.DOM_HANDLER_CODE
-            final DomHandlerType domHandlerType = DomHandlerType.values()[buffer.readBinaryModel().getByteValue()];
+            final DomHandlerType domHandlerType = DOM_HANDLER_TYPES[buffer.readBinaryModel().getByteValue()];
             addDomHandler(buffer, domHandlerType, uiService);
         } else {
             super.addHandler(buffer, handlerModel, uiService);
