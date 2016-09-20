@@ -23,26 +23,20 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PSuggestBox;
-import com.ponysdk.ui.server.basic.PSuggestBox.PMultiWordSuggestOracle;
-import com.ponysdk.ui.server.basic.PSuggestOracle.PSuggestion;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PSuggestBox;
+import com.ponysdk.core.ui.basic.PSuggestBox.PMultiWordSuggestOracle;
+import com.ponysdk.core.ui.basic.PSuggestOracle.PSuggestion;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
 
@@ -74,15 +68,15 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         });
 
         final Query query = new Query();
-        final FindPonysCommand command = new FindPonysCommand(query);
-        final Result<List<Pony>> ponys = command.execute();
+        // final FindPonysCommand command = new FindPonysCommand(query);
+        // final Result<List<Pony>> ponys = command.execute();
 
-        final List<String> datas = new ArrayList<String>();
-        for (final Pony pony : ponys.getData()) {
-            datas.add(pony.getName());
-        }
-        suggestOracle.addAll(datas);
-        suggestOracle.setDefaultSuggestions(datas.subList(0, 5));
+        // final List<String> datas = new ArrayList<String>();
+        // for (final Pony pony : ponys.getData()) {
+        // datas.add(pony.getName());
+        // }
+        // suggestOracle.addAll(datas);
+        // suggestOracle.setDefaultSuggestions(datas.subList(0, 5));
 
         panel.add(suggestBox);
 
@@ -113,10 +107,10 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
                     oracle.clear();
                 } else if (item.equals(4)) {
                     current++;
-                    final Result<List<Pony>> ponys = command.execute();
-                    for (final Pony pony : ponys.getData()) {
-                        suggestOracle.add(pony.getName() + " " + current);
-                    }
+                    // final Result<List<Pony>> ponys = command.execute();
+                    // for (final Pony pony : ponys.getData()) {
+                    // suggestOracle.add(pony.getName() + " " + current);
+                    // }
                 }
             }
         });

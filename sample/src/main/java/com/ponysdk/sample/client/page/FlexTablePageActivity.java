@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,14 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.ponysdk.core.socket.ConnectionListener;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPusher;
-import com.ponysdk.ui.server.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
 
 public class FlexTablePageActivity extends SamplePageActivity {
 
@@ -42,8 +37,6 @@ public class FlexTablePageActivity extends SamplePageActivity {
 
     @Override
     protected void onFirstShowPage() {
-        final PPusher pusher = PPusher.initialize();
-
         super.onFirstShowPage();
 
         final PFlexTable table = new PFlexTable();
@@ -62,41 +55,43 @@ public class FlexTablePageActivity extends SamplePageActivity {
             }
         }
 
-        pusher.addConnectionListener(new ConnectionListener() {
-
-            final Timer timer = new Timer();
-
-            @Override
-            public void onOpen() {
-
-                timer.scheduleAtFixedRate(new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        pusher.execute(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                for (int r = 0; r < 100; r++) {
-                                    for (int c = 0; c < 10; c++) {
-                                        final int d = (int) (Math.random() * 255);
-                                        final int d2 = (int) (Math.random() * 255);
-                                        final int d3 = (int) (Math.random() * 255);
-                                        labels[r][c].setText(d + "");
-                                        labels[r][c].setStyleProperty("backgroundColor", "rgb(" + d + "," + d2 + "," + d3 + ")");
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }, 0, 300);
-            }
-
-            @Override
-            public void onClose() {
-                timer.cancel();
-            }
-        });
+        /*
+         * UIContext.get().addConnectionListener(new ConnectionListener() {
+         * 
+         * final Timer timer = new Timer();
+         * 
+         * @Override
+         * public void onOpen() {
+         * 
+         * timer.scheduleAtFixedRate(new TimerTask() {
+         * 
+         * @Override
+         * public void run() {
+         * UIContext.get().execute(new Runnable() {
+         * 
+         * @Override
+         * public void run() {
+         * for (int r = 0; r < 100; r++) {
+         * for (int c = 0; c < 10; c++) {
+         * final int d = (int) (Math.random() * 255);
+         * final int d2 = (int) (Math.random() * 255);
+         * final int d3 = (int) (Math.random() * 255);
+         * labels[r][c].setText(d + "");
+         * labels[r][c].setStyleProperty("backgroundColor", "rgb(" + d + "," + d2 + "," + d3 + ")");
+         * }
+         * }
+         * }
+         * });
+         * }
+         * }, 0, 300);
+         * }
+         * 
+         * @Override
+         * public void onClose() {
+         * timer.cancel();
+         * }
+         * });
+         */
 
         final PScrollPanel scrollPanel = new PScrollPanel();
         scrollPanel.setWidget(table);

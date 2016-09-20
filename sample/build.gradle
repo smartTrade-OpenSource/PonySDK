@@ -1,15 +1,3 @@
-apply plugin: 'java'
-
-sourceCompatibility = 1.6
-
-ext{
-	srcSample = 'src/main/java'
-	srcGenerated = 'src-generated/main/java'
-	srcTrading = 'src-trading/main/java'
-	ponysdkPath = project.rootDir.path + '/../' + 'ponysdk'
-	packageOutputDirName = buildDir.name + '/package'
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -22,157 +10,48 @@ repositories {
 
 configurations {
 	java2html
+	spring
+    jetty
 	compile {
-		extendsFrom java2html
+		extendsFrom java2html,jetty
 	}
 	runtime {
-		extendsFrom java2html
+		extendsFrom java2html, spring
 	}
 }
 
 dependencies {
-	java2html 'de.java2html:java2html:1.0'
 	compile project(':ponysdk')
-	compile fileTree (dir: 'libs', includes: ['*.jar']) 
-	runtime project(':ponysdk')
+
+	java2html 'de.java2html:java2html:5.0'
+    spring 'org.springframework:spring-aop:4.2.3.RELEASE'
+    spring 'org.springframework:spring-expression:4.2.3.RELEASE'
+
+    jetty 'org.eclipse.jetty.websocket:websocket-client:9.3.9.v20160517'
+
 }
 
-sourceSets {
-	main {
-		java {
-			srcDir srcSample
-			srcDir srcGenerated
-			srcDir srcTrading
-		}
-	}
+task runCodeServer(type: JavaExec) {
+  classpath = project(':ponysdk').configurations.gwtdev
+  classpath += sourceSets.main.runtimeClasspath
+  main = 'com.google.gwt.dev.codeserver.CodeServer'
+  args = ['-src', '../ponysdk/src/main/java', 'com.ponysdk.core' +
+          '.PonyTerminal']
+  jvmArgs = ['-server', '-Xmx1024m']
 }
 
-task cleanGenerated(type: Delete){
-  delete srcGenerated
+task runSampleSpring(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  main = 'com.ponysdk.impl.main.MainSpring'
+  jvmArgs = ['-server', '-Xmx128m']
 }
 
-task cleanDebug(type: Delete) {
-  delete 'debug'
+task runSampleTrading(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  main = 'com.ponysdk.impl.main.Main'
+  jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
+             '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
+             '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less' ]
 }
-
-task generateServices{
-}
-
-task generateSkeleton(type: JavaExec) {
-	description = 'Generate skeletons'
-	main = 'com.ponysdk.generator.Generator'
-	inputs.dir file('src/main/resources/spec')
-	outputs.dir file(srcGenerated)
-	classpath {
-		[
-			project(':ponysdk').sourceSets.main.output,
-			project(':ponysdk').configurations.sl4j
-		]
-	}
-	args = [
-		'src/main/resources/spec',
-		srcGenerated
-		]
-}
-
-task generateProxyBuilder(type: JavaExec) {
-	description = 'Generate spring proxybuilder'
-	main = 'com.ponysdk.spring.ProxyBuilderGenerator'
-	inputs.dir file('src/main/resources/spec')
-	outputs.dir file(srcGenerated)
-	classpath {
-		[
-			project(':ponysdk').sourceSets.main.output,
-			project(':ponysdk').configurations.sl4j,
-			project(':ponysdk').configurations.spring
-		]
-	}
-	args = [
-		'src/main/resources/spec',
-		srcGenerated
-		]
-}
-
-task generateSkeleton2(type: JavaExec) {
-	description = 'Generate skeletons trading sample'
-	main = 'com.ponysdk.generator.Generator'
-	inputs.dir file('src-trading/main/resources/spec')
-	outputs.dir file(srcGenerated)
-	classpath {
-		[
-			project(':ponysdk').sourceSets.main.output,
-			project(':ponysdk').configurations.sl4j
-		]
-	}
-	args = [
-		'src-trading/main/resources/spec',
-		srcGenerated
-		]
-}
-
-task copyAllLibs << {
-	project(':ponysdk').copyLib(configurations.java2html, 'libs/java2html');
-}
-
-task createWrapper(type: Wrapper) {
-    gradleVersion = '1.7'
-}
-
-task createPackage << {
-
-	project.ext.ponysdkWarResourcesPath = ponysdkPath + '/' + project(':ponysdk').warResources
-
-	println 'Building war'
-	println 'ponysdk path: ' + ponysdkPath
-	println 'ponysdk war path: ' + ponysdkWarResourcesPath
-	
-	
-	copy {
-		from configurations.java2html
-		from project(':ponysdk').configurations.sl4j
-		from project(':ponysdk').configurations.spring
-		from project(':ponysdk').configurations.gwt
-		from project(':ponysdk').buildDir.path + '/libs'
-		into packageOutputDirName + '/lib'
-	}
-	copy {
-		from sourceSets.main.java
-		from sourceSets.main.output
-		into packageOutputDirName + '/war/WEB-INF/classes'
-	}
-	copy {
-		from 'etc'
-		into packageOutputDirName + '/etc'
-	}
-	copy {
-		from ponysdkWarResourcesPath
-		into packageOutputDirName + '/war'
-	}
-
-	delete packageOutputDirName + '/start.bat'
-	delete packageOutputDirName + '/start.sh'
-
-	def f = new File(packageOutputDirName + '/start.bat')
-	def writer = f.newWriter("UTF-8", true)
-	writer.write("java -server -cp .;etc/;lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
-	writer.write("pause\n")
-	writer.close()
-
-	f = new File(packageOutputDirName + '/start.sh')
-	writer = f.newWriter("UTF-8", true)
-	writer.write("java -server -cp .:etc/:lib/* com.ponysdk.core.main.Main port=8081 contextName=sample war=war/\n")
-	writer.close()
-}
-
-jar {
-	doLast {
-		tasks.createPackage.execute()
-	}
-}
-
-assemble.dependsOn(copyAllLibs)
-generateServices.dependsOn(generateSkeleton)
-generateServices.dependsOn(generateSkeleton2)
-generateServices.dependsOn(generateProxyBuilder)
-compileJava.dependsOn(generateServices)
-generateServices.dependsOn(cleanGenerated)

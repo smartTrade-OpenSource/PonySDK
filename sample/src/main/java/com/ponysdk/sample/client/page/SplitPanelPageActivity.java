@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,17 +23,17 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent.LayoutResizeData;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSplitLayoutPanel;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeEvent.LayoutResizeData;
-import com.ponysdk.ui.server.basic.event.PLayoutResizeHandler;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
 
 public class SplitPanelPageActivity extends SamplePageActivity {
 
@@ -71,9 +71,9 @@ public class SplitPanelPageActivity extends SamplePageActivity {
             public void onLayoutResize(final PLayoutResizeEvent resizeEvent) {
                 for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
                     if (data.w == south) {
-                        PNotificationManager.showTrayNotification("South size: " + data.size);
+                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "South size: " + data.size);
                     } else if (data.w == east) {
-                        PNotificationManager.showTrayNotification("East size: " + data.size);
+                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "East size: " + data.size);
                     }
                 }
             }

@@ -13,24 +13,20 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.Application;
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.core.servlet.SessionManager;
-import com.ponysdk.impl.query.memory.FilteringTools;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.PPusher;
 
-public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyService {
+public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.PonyService **/
+{
 
     private static Logger log = LoggerFactory.getLogger(PonyServiceImpl.class);
 
     private static AtomicLong id = new AtomicLong();
 
-    private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<Long, Pony>();
-    private final List<PonyStock> stocks = new ArrayList<PonyStock>();
+    private final ConcurrentHashMap<Long, Pony> ponyByID = new ConcurrentHashMap<>();
+    private final List<PonyStock> stocks = new ArrayList<>();
 
     public PonyServiceImpl() {
         final Random rdm = new Random();
@@ -57,22 +53,18 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
         }
 
         final Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                final Random rdm = new Random();
-                while (true) {
-                    try {
-                        final int index = rdm.nextInt(stocks.size());
-                        final float newPrice = rdm.nextFloat() * 100;
-                        final PonyStock stock = stocks.get(index);
-                        stock.setPrice(newPrice);
-                        pushData(stock);
-                        Thread.sleep(1000);
-                    } catch (final Exception e) {
-                        log.error("", e);
-                    }
+        executor.execute(() -> {
+            final Random rdm = new Random();
+            while (true) {
+                try {
+                    final int index = rdm.nextInt(stocks.size());
+                    final float newPrice = rdm.nextFloat() * 100;
+                    final PonyStock stock = stocks.get(index);
+                    stock.setPrice(newPrice);
+                    pushData(stock);
+                    Thread.sleep(1000);
+                } catch (final Exception e) {
+                    log.error("", e);
                 }
             }
         });
@@ -81,42 +73,39 @@ public class PonyServiceImpl implements com.ponysdk.sample.service.pony.PonyServ
     protected void pushData(final PonyStock stock) {
         final Collection<Application> applications = SessionManager.get().getApplications();
         for (final Application application : applications) {
-            for (final UIContext uiContext : application.getUIContexts()) {
-                final PPusher pusher = uiContext.getPusher();
-                if (pusher != null) pusher.pushToClient(stock);
-            }
+            application.pushToClients(stock);
         }
     }
+    //
+    // @Override
+    // public Result<List<Pony>> findPonys(final Query query) throws Exception {
+    // log.info("Looking for pony with criterion #" + query.getCriteria());
+    // final List<Pony> datas = new ArrayList<Pony>(ponyByID.values());
+    // return FilteringTools.select(query, datas);
+    // }
 
-    @Override
-    public Result<List<Pony>> findPonys(final Query query) throws Exception {
-        log.info("Looking for pony with criterion #" + query.getCriteria());
-        final List<Pony> datas = new ArrayList<Pony>(ponyByID.values());
-        return FilteringTools.select(query, datas);
-    }
+    // @Override
+    // public Pony createPony(final Pony pony) throws Exception {
+    // pony.setId(id.incrementAndGet());
+    // addPony(pony);
+    // return pony;
+    // }
 
-    @Override
-    public Pony createPony(final Pony pony) throws Exception {
-        pony.setId(id.incrementAndGet());
-        addPony(pony);
-        return pony;
-    }
-
-    @Override
-    public Void deletePony(final Long id) throws Exception {
-        ponyByID.remove(id);
-        return null;
-    }
-
-    @Override
-    public Result<List<Pony>> findPonyChilds(final Long fatherID) throws Exception {
-        final Pony father = ponyByID.get(fatherID);
-        final List<Pony> subPonyList = new ArrayList<Pony>();
-        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 1", 1, father.getRace()));
-        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 2", 2, father.getRace()));
-        subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 3", 3, father.getRace()));
-        return new Result<List<Pony>>(subPonyList);
-    }
+    // @Override
+    // public Void deletePony(final Long id) throws Exception {
+    // ponyByID.remove(id);
+    // return null;
+    // }
+    //
+    // @Override
+    // public Result<List<Pony>> findPonyChilds(final Long fatherID) throws Exception {
+    // final Pony father = ponyByID.get(fatherID);
+    // final List<Pony> subPonyList = new ArrayList<Pony>();
+    // subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 1", 1, father.getRace()));
+    // subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 2", 2, father.getRace()));
+    // subPonyList.add(new Pony(id.incrementAndGet(), father.getName() + " child 3", 3, father.getRace()));
+    // return new Result<List<Pony>>(subPonyList);
+    // }
 
     private void addPony(final Pony pony) {
         ponyByID.put(pony.getId(), pony);

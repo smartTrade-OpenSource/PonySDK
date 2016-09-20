@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,58 +26,53 @@ package com.ponysdk.sample.client.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.core.server.service.query.Query;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.FormFieldComponent;
+import com.ponysdk.core.ui.form.event.SubmitFormEvent;
+import com.ponysdk.core.ui.form.event.SubmitFormHandler;
+import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.ListBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.TextBoxFormField;
+import com.ponysdk.core.ui.form.validator.IntegerFieldValidator;
+import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.core.ui.list.DataGridActivity;
+import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.DefaultSimpleListView;
+import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.dataprovider.RemoteDataProvider;
+import com.ponysdk.core.ui.list.paging.DefaultPagerView;
+import com.ponysdk.core.ui.list.paging.Pager;
+import com.ponysdk.core.ui.list.refreshable.Cell;
+import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
+import com.ponysdk.core.ui.list.renderer.cell.LabelCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.ComplexHeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.FilterableHeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
+import com.ponysdk.core.ui.list.selector.CompositeSelectorView;
+import com.ponysdk.core.ui.list.selector.DefaultActionSelectorView;
+import com.ponysdk.core.ui.list.selector.DefaultInfoSelectorView;
+import com.ponysdk.core.ui.list.selector.Selector;
+import com.ponysdk.core.ui.list.selector.SelectorCheckBox;
+import com.ponysdk.core.ui.list.valueprovider.BeanValueProvider;
+import com.ponysdk.core.ui.rich.PConfirmDialog;
 import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.command.pony.CreatePonyCommand;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.sample.event.pony.PonyCreatedEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PConfirmDialogHandler;
-import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.server.form.event.SubmitFormEvent;
-import com.ponysdk.ui.server.form.event.SubmitFormHandler;
-import com.ponysdk.ui.server.form2.Form;
-import com.ponysdk.ui.server.form2.FormFieldComponent;
-import com.ponysdk.ui.server.form2.formfield.IntegerTextBoxFormField;
-import com.ponysdk.ui.server.form2.formfield.ListBoxFormField;
-import com.ponysdk.ui.server.form2.formfield.StringTextBoxFormField;
-import com.ponysdk.ui.server.form2.formfield.TextBoxFormField;
-import com.ponysdk.ui.server.form2.validator.IntegerFieldValidator;
-import com.ponysdk.ui.server.form2.validator.NotEmptyFieldValidator;
-import com.ponysdk.ui.server.list2.DataGridActivity;
-import com.ponysdk.ui.server.list2.DataGridColumnDescriptor;
-import com.ponysdk.ui.server.list2.DefaultSimpleListView;
-import com.ponysdk.ui.server.list2.dataprovider.RemoteDataProvider;
-import com.ponysdk.ui.server.list2.paging.DefaultPagerView;
-import com.ponysdk.ui.server.list2.paging.Pager;
-import com.ponysdk.ui.server.list2.renderer.cell.CellRenderer;
-import com.ponysdk.ui.server.list2.renderer.cell.LabelCellRenderer;
-import com.ponysdk.ui.server.list2.renderer.header.ComplexHeaderCellRenderer;
-import com.ponysdk.ui.server.list2.renderer.header.FilterableHeaderCellRenderer;
-import com.ponysdk.ui.server.list2.renderer.header.HeaderCellRenderer;
-import com.ponysdk.ui.server.list2.renderer.header.StringHeaderCellRenderer;
-import com.ponysdk.ui.server.list2.selector.CompositeSelectorView;
-import com.ponysdk.ui.server.list2.selector.DefaultActionSelectorView;
-import com.ponysdk.ui.server.list2.selector.DefaultInfoSelectorView;
-import com.ponysdk.ui.server.list2.selector.Selector;
-import com.ponysdk.ui.server.list2.selector.SelectorCheckBox;
-import com.ponysdk.ui.server.list2.valueprovider.BeanValueProvider;
-import com.ponysdk.ui.server.list2.valueprovider.IdentityValueProvider;
-import com.ponysdk.ui.server.rich.PConfirmDialog;
 
 public class DataGridPageActivity extends SamplePageActivity implements SubmitFormHandler {
 
@@ -113,9 +108,10 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
                 final Pony father = dataGrid.getVisibleItem(i);
-                final List<Pony> copy = new ArrayList<Pony>();
+                final List<Pony> copy = new ArrayList<>();
                 for (int j = 0; j < 3; j++) {
-                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(), father.getRace());
+                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(),
+                            father.getRace());
                     copy.add(p);
                 }
                 dataGrid.insertSubList(father, copy);
@@ -143,43 +139,45 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         // Register handler
         addHandler(SubmitFormEvent.TYPE, this);
 
-        final Pager<Pony> pager = new Pager<Pony>(new DefaultPagerView());
-        dataGrid = new DataGridActivity<Pony>(new DefaultSimpleListView());
+        final Pager<Pony> pager = new Pager<>(new DefaultPagerView());
+        dataGrid = new DataGridActivity<>(new DefaultSimpleListView());
 
         final DefaultActionSelectorView actionSelectorView = new DefaultActionSelectorView();
         final DefaultInfoSelectorView infoSelectorView = new DefaultInfoSelectorView();
         final CompositeSelectorView selectorView = new CompositeSelectorView(actionSelectorView, infoSelectorView);
-        final Selector<Pony> selector = new Selector<Pony>(selectorView);
+        final Selector<Pony> selector = new Selector<>(selectorView);
 
         final RemoteDataProvider<Pony> dataProvider = new RemoteDataProvider<Pony>(pager, dataGrid) {
 
             @Override
             protected List<Pony> getData(final Query query) {
-                final Result<List<Pony>> result = new FindPonysCommand(query).execute();
-                final List<Pony> data = result.getData();
-                final int fullSize = result.getFullSize();
-                pager.process(fullSize);
-                selector.reset();
-                selector.setPageSize(data.size());
-                selector.setFullSize(fullSize);
-                return data;
+                // final Result<List<Pony>> result = new
+                // FindPonysCommand(query).execute();
+                // final List<Pony> data = result.getData();
+                // final int fullSize = result.getFullSize();
+                // pager.process(fullSize);
+                // selector.reset();
+                // selector.setPageSize(data.size());
+                // selector.setFullSize(fullSize);
+                // return data;
+                return null;
             }
 
             @Override
             protected List<Pony> getFullData(final Query query) {
-                return new FindPonysCommand(query).execute().getData();
+                return null;
+                // return new FindPonysCommand(query).execute().getData();
             }
 
         };
 
-        final DataGridColumnDescriptor<Pony, Pony> selectColumnDescriptor = new DataGridColumnDescriptor<Pony, Pony>();
+        final IdentityDataGridColumnDescriptor<Pony> selectColumnDescriptor = new IdentityDataGridColumnDescriptor<>();
         selectColumnDescriptor.setHeaderCellRenderer(new StringHeaderCellRenderer("Select"));
-        selectColumnDescriptor.setValueProvider(new IdentityValueProvider<Pony>());
-        final CellRenderer<Pony> selectCellRenderer = new CellRenderer<Pony>() {
+        final CellRenderer<Pony, SelectorCheckBox<Pony>> selectCellRenderer = new CellRenderer<Pony, SelectorCheckBox<Pony>>() {
 
             @Override
-            public IsPWidget render(final int row, final Pony value) {
-                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<Pony>();
+            public SelectorCheckBox<Pony> render(final int row, final Pony value) {
+                final SelectorCheckBox<Pony> selectorCheckBox = new SelectorCheckBox<>();
                 selectorCheckBox.setData(value);
                 selectorCheckBox.addSelectableListener(selector);
                 selector.registerSelectable(selectorCheckBox);
@@ -202,21 +200,26 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
                 return selectorCheckBox;
             }
+
+            @Override
+            public void update(final Pony value, final Cell<Pony, SelectorCheckBox<Pony>> previous) {
+            }
         };
         selectColumnDescriptor.setCellRenderer(selectCellRenderer);
         selectColumnDescriptor.setSubCellRenderer(selectCellRenderer);
 
-        final DataGridColumnDescriptor<Pony, Pony> descriptor = new DataGridColumnDescriptor<Pony, Pony>();
+        final IdentityDataGridColumnDescriptor<Pony> descriptor = new IdentityDataGridColumnDescriptor<>();
         descriptor.setHeaderCellRenderer(new HeaderCellRenderer() {
 
             @Override
-            public IsPWidget render() {
+            public PLabel render() {
                 return new PLabel();
             }
         });
 
-        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
-        final ComplexHeaderCellRenderer nameHeaderCellRender = new FilterableHeaderCellRenderer("Name", new StringTextBoxFormField(), "name");
+        final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<>();
+        final ComplexHeaderCellRenderer nameHeaderCellRender = new FilterableHeaderCellRenderer("Name", new StringTextBoxFormField(),
+                "name");
         nameHeaderCellRender.addFilterListener(dataProvider);
         nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRender);
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
@@ -229,17 +232,19 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         for (int i = 0; i < 30; i++)
             ageListBox.addItem(i + " year", i);
 
-        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<>();
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
-        final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age", new ListBoxFormField<Integer>(ageListBox), "age");
+        final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age",
+                new ListBoxFormField<Integer>(ageListBox), "age");
         ageHeaderCellRender.addFilterListener(dataProvider);
         ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
         ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
         ageColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
 
-        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<Pony, String>();
+        final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<>();
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
-        final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(), "race");
+        final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(),
+                "race");
         raceHeaderCellRender.addFilterListener(dataProvider);
         raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
         raceColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
@@ -275,7 +280,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             }
 
         });
-        addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
+        // addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
         formContainer.setWidget(0, 2, addPonyButton);
 
         formContainer.setWidget(0, 3, pager.asWidget());
@@ -293,31 +298,23 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
     @Override
     public void onSubmitForm(final SubmitFormEvent event) {
         //
-        // final Result<List<Pony>> result = new FindPonysCommand(new Query()).execute();
+        // final Result<List<Pony>> result = new FindPonysCommand(new
+        // Query()).execute();
     }
 
     protected void showCreatePonyPopup() {
-        final PDialogBox dialogBox = PConfirmDialog.show("Create pony", createPonyActivityPanel, "Create", "Cancel", new PConfirmDialogHandler() {
+        final PDialogBox dialogBox = PConfirmDialog.show(getView().asWidget().getWindowID(), "Create pony", createPonyActivityPanel,
+                "Create", "Cancel", new PConfirmDialogHandler() {
 
-            @Override
-            public void onCancel() {}
-
-            @Override
-            public boolean onOK(final PDialogBox p) {
-                if (createPony.isValid()) {
-                    final Pony pony = new Pony(null, nameFormField.getValue(), ageFormField.getValue(), raceFormField.getValue());
-                    final CreatePonyCommand command = new CreatePonyCommand(pony);
-                    final Pony newPony = command.execute();
-                    if (command.isSuccessfull()) {
-                        final PonyCreatedEvent event = new PonyCreatedEvent(this, newPony);
-                        event.setBusinessMessage("Pony '" + newPony.getName() + "' has been added");
-                        fireEvent(event);
+                    @Override
+                    public void onCancel() {
                     }
-                    return true;
-                }
-                return false;
-            }
-        });
+
+                    @Override
+                    public boolean onOK(final PDialogBox p) {
+                        return createPony.isValid();
+                    }
+                });
 
         dialogBox.center();
     }
@@ -340,7 +337,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         createPonyActivityPanel = new PFlexTable();
         createPonyActivityPanel.setWidget(0, 0, new PLabel("Add a pony"));
-        createPonyActivityPanel.getFlexCellFormatter().setColSpan(0, 0, 3);
+        createPonyActivityPanel.getCellFormatter().setColSpan(0, 0, 3);
         createPonyActivityPanel.setWidget(1, 0, new FormFieldComponent("Name", nameFormField));
         createPonyActivityPanel.setWidget(1, 1, new FormFieldComponent("Race", raceFormField));
         createPonyActivityPanel.setWidget(1, 2, new FormFieldComponent("Age", ageFormField));

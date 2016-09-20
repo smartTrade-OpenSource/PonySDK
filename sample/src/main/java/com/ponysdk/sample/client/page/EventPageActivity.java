@@ -23,16 +23,16 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.event.BusinessEvent.Level;
+import com.ponysdk.core.ui.eventbus.BusinessEvent.Level;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PNotificationManager.Notification;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
+import com.ponysdk.core.ui.rich.PNotificationManager.Notification;
 
 public class EventPageActivity extends SamplePageActivity {
 
@@ -47,9 +47,9 @@ public class EventPageActivity extends SamplePageActivity {
 
         final PVerticalPanel panel = new PVerticalPanel();
 
-        // Send 'info' business event
+        // Send 'info' business eventbus
         final PHorizontalPanel infoPanel = new PHorizontalPanel();
-        final PTextBox textField = new PTextBox("This is an info event");
+        final PTextBox textField = new PTextBox("This is an info eventbus");
         final PButton ok = new PButton("send [INFO]");
         ok.addClickHandler(new PClickHandler() {
 
@@ -64,9 +64,9 @@ public class EventPageActivity extends SamplePageActivity {
         infoPanel.add(textField);
         infoPanel.add(ok);
 
-        // Send 'warn' business event
+        // Send 'warn' business eventbus
         final PHorizontalPanel warningPanel = new PHorizontalPanel();
-        final PTextBox textField2 = new PTextBox("This is a warning event");
+        final PTextBox textField2 = new PTextBox("This is a warning eventbus");
         final PButton ok2 = new PButton("send [WARN]");
 
         ok2.addClickHandler(new PClickHandler() {
@@ -85,7 +85,7 @@ public class EventPageActivity extends SamplePageActivity {
 
         // Send 'error' business level
         final PHorizontalPanel errorPanel = new PHorizontalPanel();
-        final PTextBox textField3 = new PTextBox("This is an error event");
+        final PTextBox textField3 = new PTextBox("This is an error eventbus");
         final PButton ok3 = new PButton("send [ERROR]");
 
         ok3.addClickHandler(new PClickHandler() {

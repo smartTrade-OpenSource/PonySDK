@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,19 +23,20 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.sample.client.page.addon.ReverseTextInput;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPasswordTextBox;
-import com.ponysdk.ui.server.basic.PTerminalScheduledCommand;
-import com.ponysdk.ui.server.basic.PTextArea;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import java.time.Duration;
+
+import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPasswordTextBox;
+import com.ponysdk.core.ui.basic.PTextArea;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class BasicTextBoxPageActivity extends SamplePageActivity {
 
@@ -78,6 +79,12 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         });
         panel.add(button);
 
+        final String pattern = "[a-zA-Z0-9]";
+        final PTextBox filtered = new PTextBox();
+        filtered.setFilter(pattern);
+        panel.add(new PLabel("Filtered text box ( " + pattern + " ):"));
+        panel.add(filtered);
+
         final PTextBox masked = new PTextBox();
         final PTextBox maskedTextBox = new PTextBox();
         final PTextBox replacement = new PTextBox();
@@ -87,10 +94,12 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                if (masked.getText().isEmpty()) return;
+                if (masked.getText().isEmpty())
+                    return;
 
                 String replaceChar = " ";
-                if (!replacement.getText().isEmpty()) replaceChar = replacement.getText().substring(0, 1);
+                if (!replacement.getText().isEmpty())
+                    replaceChar = replacement.getText().substring(0, 1);
                 maskedTextBox.applyMask(masked.getText(), showMask.getValue(), replaceChar);
             }
         });
@@ -111,18 +120,10 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         panel.add(new PLabel("Text area:"));
         panel.add(textArea);
         panel.add(maskPanel);
-
         panel.add(new PLabel("AddOn test (javascript reverse)"));
-        final PTextBox boxToReverse = new PTextBox();
-        new ReverseTextInput(boxToReverse);
-        final PTerminalScheduledCommand deffered = new PTerminalScheduledCommand() {
 
-            @Override
-            protected void run() {
-                panel.add(boxToReverse);
-            }
-        };
-        deffered.schedule(1500);
+        final PTextBox boxToReverse = new PTextBox();
+        PScheduler.schedule(() -> panel.add(boxToReverse), Duration.ofMillis(1500));
 
         examplePanel.setWidget(panel);
     }

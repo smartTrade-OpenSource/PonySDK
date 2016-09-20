@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,21 +26,22 @@ package com.ponysdk.sample.client.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PKeyCodes;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PKeyUpEvent;
-import com.ponysdk.ui.server.basic.event.PKeyUpFilterHandler;
-import com.ponysdk.ui.terminal.PUnit;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class JavascriptPageActivity extends SamplePageActivity {
 
-    private final List<String> commands = new ArrayList<String>();
+    private final List<String> commands = new ArrayList<>();
     private PFlowPanel history;
 
     private int commandIndex = 0;
@@ -95,7 +96,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         commands.add(js);
         history.add(new PLabel("> " + js));
         inputTextBox.setText("");
-        PScript.get().execute(js, new ExecutionCallback() {
+        PScript.execute(PWindow.getMain(), js, new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {

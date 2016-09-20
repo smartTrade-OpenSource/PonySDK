@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,19 +23,19 @@
 
 package com.ponysdk.sample.client.event;
 
-import com.ponysdk.core.event.BusinessEvent;
-import com.ponysdk.core.event.Event;
+import com.ponysdk.core.ui.eventbus.BusinessEvent;
+import com.ponysdk.core.ui.eventbus.Event;
 
 public class AuthenticationFailedEvent extends BusinessEvent<AuthenticationFailedHandler> {
 
-    public static final Event.Type<AuthenticationFailedHandler> TYPE = new Event.Type<AuthenticationFailedHandler>();
+    public static final Event.Type<AuthenticationFailedHandler> TYPE = new Event.Type<>();
 
-    public AuthenticationFailedEvent(Object sourceComponent) {
+    public AuthenticationFailedEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    protected void dispatch(AuthenticationFailedHandler handler) {
+    protected void dispatch(final AuthenticationFailedHandler handler) {
         handler.onAuthenticationFailed(this);
     }
 

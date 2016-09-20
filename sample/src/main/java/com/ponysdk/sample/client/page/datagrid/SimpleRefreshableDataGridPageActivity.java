@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,18 +23,17 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.celltable.SimpleTableView;
+import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.DataListener;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.celltable.SimpleTableView;
-import com.ponysdk.ui.server.form2.formfield.IntegerTextBoxFormField;
-import com.ponysdk.ui.server.form2.formfield.LongTextBoxFormField;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGrid;
 
-public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity implements DataListener {
+public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
     private RefreshableDataGrid<Long, PonyStock> dataGrid;
 
@@ -49,7 +48,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
         addForm();
 
-        dataGrid = new RefreshableDataGrid<Long, PonyStock>(new SimpleTableView());
+        dataGrid = new RefreshableDataGrid<>(new SimpleTableView());
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());
@@ -72,11 +71,11 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         final LongTextBoxFormField keyRowFormField = new LongTextBoxFormField();
         final IntegerTextBoxFormField toRowFormField = new IntegerTextBoxFormField();
 
-        addRowFormField.getTextBox().setPlaceholder("Row index (add)");
-        removeRowFormField.getTextBox().setPlaceholder("Row index (remove)");
-        removeRowByKeyFormField.getTextBox().setPlaceholder("Row key (remove)");
-        keyRowFormField.getTextBox().setPlaceholder("Row key (move)");
-        toRowFormField.getTextBox().setPlaceholder("Row index (move)");
+        addRowFormField.getWidget().setPlaceholder("Row index (add)");
+        removeRowFormField.getWidget().setPlaceholder("Row index (remove)");
+        removeRowByKeyFormField.getWidget().setPlaceholder("Row key (remove)");
+        keyRowFormField.getWidget().setPlaceholder("Row key (move)");
+        toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
         final PButton addButton = new PButton("Add a row");
         addButton.addClickHandler(new PClickHandler() {

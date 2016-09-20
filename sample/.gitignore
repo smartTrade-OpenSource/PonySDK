@@ -1,9 +1,5 @@
 build
-.gradle
 bin
-classes
-log
-gwt-unitCache
 src-generated
-libs
-debug
+.classpath
+/sample.iml

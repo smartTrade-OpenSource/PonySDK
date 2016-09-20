@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,26 +28,27 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PScript.ExecutionCallback;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
-import com.ponysdk.ui.server.form2.Form;
-import com.ponysdk.ui.server.form2.FormFieldComponent;
-import com.ponysdk.ui.server.form2.formfield.StringTextBoxFormField;
-import com.ponysdk.ui.server.form2.validator.FieldValidator;
-import com.ponysdk.ui.server.form2.validator.ValidationResult;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.FormFieldComponent;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.validator.FieldValidator;
+import com.ponysdk.core.ui.form.validator.ValidationResult;
 
 public class LessPageActivity extends SamplePageActivity {
 
@@ -80,10 +81,11 @@ public class LessPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PScript.get().execute("window.colors = {};");
+        PScript.execute(PWindow.getMain(), "window.colors = {};");
 
         final PFlowPanel layout = new PFlowPanel();
-        layout.add(new PLabel("Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
+        layout.add(new PLabel(
+                "Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
         layout.add(new PLabel("Customize the sample by changing this variables :"));
 
         final Form form = new Form();
@@ -211,10 +213,12 @@ public class LessPageActivity extends SamplePageActivity {
         js.append("window.colors.grayLighter = \"#" + grayLighter.getValue() + "\";");
         js.append("window.colors.white = \"#" + white.getValue() + "\";");
         js.append("less.refresh();");
-        PScript.get().execute(js.toString(), new ExecutionCallback() {
+
+        PScript.execute(PWindow.getMain(), js.toString(), new ExecutionCallback() {
 
             @Override
-            public void onSuccess(final String msg) {}
+            public void onSuccess(final String msg) {
+            }
 
             @Override
             public void onFailure(final String msg) {
@@ -258,7 +262,7 @@ public class LessPageActivity extends SamplePageActivity {
         final StringTextBoxFormField ff = new StringTextBoxFormField();
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
-        ff.getTextBox().addValueChangeHandler(new PValueChangeHandler<String>() {
+        ff.getWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
 
             @Override
             public void onValueChange(final PValueChangeEvent<String> event) {

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,16 +28,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.celltable.SimpleTableView;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.sample.client.datamodel.PonyStock;
-import com.ponysdk.ui.server.basic.DataListener;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.celltable.SimpleTableView;
-import com.ponysdk.ui.server.list2.refreshable.RefreshableDataGrid;
 
-public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity implements DataListener {
+public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
     private SortableRefreshableDataGrid<Long, PonyStock> dataGrid;
     private boolean added = false;
@@ -64,7 +63,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
         actions.setWidget(0, 0, addRow);
 
-        dataGrid = new SortableRefreshableDataGrid<Long, PonyStock>(new Comparator<PonyStock>() {
+        dataGrid = new SortableRefreshableDataGrid<>(new Comparator<PonyStock>() {
 
             @Override
             public int compare(final PonyStock o1, final PonyStock o2) {
@@ -93,7 +92,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
     private class SortableRefreshableDataGrid<K, D> extends RefreshableDataGrid<K, D> {
 
-        private final List<D> datas = new ArrayList<D>();
+        private final List<D> datas = new ArrayList<>();
 
         private final Comparator<D> comparator;
 

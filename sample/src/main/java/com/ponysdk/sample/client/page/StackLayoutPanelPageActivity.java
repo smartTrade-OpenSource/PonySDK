@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,24 +23,24 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.UIContext;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PStackLayoutPanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
-    private final PVerticalPanel header1Child = new PVerticalPanel();;
+    private final PVerticalPanel header1Child = new PVerticalPanel();
 
-    private final PVerticalPanel header2Child = new PVerticalPanel();;
+    private final PVerticalPanel header2Child = new PVerticalPanel();
 
     public StackLayoutPanelPageActivity() {
         super("Stack Layout Panel", "Lists and Menus");

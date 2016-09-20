@@ -23,12 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPushButton;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PImage;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPushButton;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class CustomButtonPageActivity extends SamplePageActivity {
 

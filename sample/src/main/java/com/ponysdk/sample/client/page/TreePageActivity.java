@@ -23,24 +23,19 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.List;
-
-import com.ponysdk.core.UIContext;
-import com.ponysdk.core.query.Query;
-import com.ponysdk.core.query.Result;
-import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.sample.command.pony.FindPonysCommand;
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PImage;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PTree;
-import com.ponysdk.ui.server.basic.PTreeItem;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PImage;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class TreePageActivity extends SamplePageActivity {
 
@@ -77,7 +72,7 @@ public class TreePageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                secondItem.setState(secondItem.getState() ? false : true);
+                secondItem.setState(!secondItem.getState());
             }
         });
 
@@ -88,14 +83,14 @@ public class TreePageActivity extends SamplePageActivity {
         tree.addItem(thirdItem);
 
         final Query query = new Query();
-        final FindPonysCommand command = new FindPonysCommand(query);
-        final Result<List<Pony>> ponys = command.execute();
-
-        for (final Pony pony : ponys.getData()) {
-            firstItem.addItem(pony.getName());
-            secondItem.addItem(pony.getName());
-            thirdItem.addItem(pony.getName());
-        }
+        // final FindPonysCommand command = new FindPonysCommand(query);
+        // final Result<List<Pony>> ponys = command.execute();
+        //
+        // for (final Pony pony : ponys.getData()) {
+        // firstItem.addItem(pony.getName());
+        // secondItem.addItem(pony.getName());
+        // thirdItem.addItem(pony.getName());
+        // }
 
         panel.add(tree);
 

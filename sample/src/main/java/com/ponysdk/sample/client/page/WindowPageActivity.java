@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -26,25 +26,25 @@ package com.ponysdk.sample.client.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlexTable;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PRootLayoutPanel;
-import com.ponysdk.ui.server.basic.PScript;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWindow;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PCloseEvent;
-import com.ponysdk.ui.server.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PRootLayoutPanel;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 
-    protected List<PWindow> windows = new ArrayList<PWindow>();
+    protected List<PWindow> windows = new ArrayList<>();
 
     private PTextBox urlTextBox;
     private PTextBox nameTextBox;
@@ -114,13 +114,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             @Override
             public void onClick(final PClickEvent event) {
                 for (final PWindow window : windows) {
-                    window.acquire();
-                    try {
-                        PNotificationManager.showHumanizedNotification("Hello from opener");
-                        window.flush();
-                    } finally {
-                        window.release();
-                    }
+                    PNotificationManager.showHumanizedNotification(window, "Hello from opener");
                 }
             }
         });
@@ -152,17 +146,15 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
     private static class MyWindow extends PWindow {
 
         private int count = 1;
-        private PScript script;
         private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
             super(null, name, features);
         }
 
-        @Override
+        // @Override
         protected void onLoad() {
-            script = PScript.get();
-            rootLayoutPanel = PRootLayoutPanel.get();
+            rootLayoutPanel = PWindow.getMain().getPRootLayoutPanel();
 
             final PFlowPanel flow = new PFlowPanel();
             final PButton addMessage = new PButton("Add message");
@@ -170,7 +162,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    flow.add(new PLabel("Hello " + (count++)));
+                    flow.add(new PLabel("Hello " + count++));
                 }
             });
             final PButton clearMessage = new PButton("Clear message");
@@ -183,36 +175,18 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
                     }
                 }
             });
-            final PButton postMessage = new PButton("Post message");
-            postMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    MyWindow.this.postOpenerCommand(new SayHelloCommand());
-                }
-            });
             final PButton execJs = new PButton("Exec javascript");
             execJs.addClickHandler(new PClickHandler() {
 
                 @Override
                 public void onClick(final PClickEvent event) {
-                    script.execute("alert('from the popup');");
+                    PScript.execute(PWindow.getMain(), "alert('from the popup');");
                 }
             });
             flow.add(addMessage);
             flow.add(clearMessage);
-            flow.add(postMessage);
             flow.add(execJs);
             rootLayoutPanel.add(flow);
-        }
-
-        private class SayHelloCommand implements Runnable {
-
-            @Override
-            public void run() {
-                PNotificationManager.showHumanizedNotification("Hello from popup");
-            }
-
         }
 
     }
@@ -222,7 +196,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         final PWindow source = (PWindow) closeEvent.getSource();
         final boolean remove = windows.remove(source);
         if (remove) {
-            PNotificationManager.showTrayNotification("Window #" + source.getID() + " closed.");
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Window #" + source.getID() + " closed.");
         }
     }
 }

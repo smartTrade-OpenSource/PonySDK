@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,12 +30,12 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ponysdk.core.StreamResource;
-import com.ponysdk.core.event.StreamHandler;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 public class StreamResourcePageActivity extends SamplePageActivity {
 
@@ -55,8 +55,7 @@ public class StreamResourcePageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                final StreamResource streamResource = new StreamResource();
-                streamResource.open(new StreamHandler() {
+                UIContext.get().stackStreamRequest(new StreamHandler() {
 
                     @Override
                     public void onStream(final HttpServletRequest request, final HttpServletResponse response) {

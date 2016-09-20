@@ -23,14 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PGrid;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class GridPageActivity extends SamplePageActivity implements PClickHandler {
 

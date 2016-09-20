@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,16 +29,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
+import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.ui.server.basic.PDateBox;
-import com.ponysdk.ui.server.basic.PDatePicker;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PShowRangeEvent;
-import com.ponysdk.ui.server.basic.event.PShowRangeHandler;
-import com.ponysdk.ui.server.basic.event.PValueChangeEvent;
-import com.ponysdk.ui.server.basic.event.PValueChangeHandler;
 
 public class DatePickerPageActivity extends SamplePageActivity {
 
@@ -75,7 +75,8 @@ public class DatePickerPageActivity extends SamplePageActivity {
 
             @Override
             public void onShowRange(final PShowRangeEvent<Date> event) {
-                PNotificationManager.showTrayNotification("Range <" + event.getStart() + "," + event.getEnd() + ">");
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "Range <" + event.getStart() + "," + event.getEnd() + ">");
                 if (middecember.after(event.getStart()) && middecember.before(event.getEnd())) {
                     datePicker.setTransientEnabledOnDates(false, dates("12/21/2013", "12/22/2013", "12/23/2013", "12/24/2013"));
                 }
@@ -108,7 +109,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
     }
 
     private List<Date> dates(final String... d) {
-        final List<Date> dates = new ArrayList<Date>();
+        final List<Date> dates = new ArrayList<>();
         for (final String s : d) {
             try {
                 dates.add(f.parse(s));

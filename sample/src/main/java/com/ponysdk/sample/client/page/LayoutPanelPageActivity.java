@@ -23,15 +23,17 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PLayoutPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.terminal.PUnit;
-import com.ponysdk.ui.terminal.basic.PHorizontalAlignment;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PLayoutPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+
+import java.time.Duration;
 
 public class LayoutPanelPageActivity extends SamplePageActivity {
 
@@ -72,7 +74,7 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
                 layoutPanel.setWidgetTopHeight(rightPane, 50, 100, PUnit.PX);
                 layoutPanel.setWidgetRightWidth(leftPane, 50, 200, PUnit.PX);
                 layoutPanel.setWidgetBottomHeight(leftPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(2000);
+                layoutPanel.animate(Duration.ofSeconds(2));
             }
         }, PClickEvent.TYPE);
 
@@ -85,7 +87,7 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
                 layoutPanel.setWidgetTopHeight(leftPane, 50, 100, PUnit.PX);
                 layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
                 layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(2000);
+                layoutPanel.animate(Duration.ofSeconds(2));
             }
         }, PClickEvent.TYPE);
 

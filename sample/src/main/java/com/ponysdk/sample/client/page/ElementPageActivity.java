@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,13 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PElement;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ElementPageActivity extends SamplePageActivity {
 
@@ -49,7 +49,7 @@ public class ElementPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent event) {
-                PNotificationManager.showTrayNotification("Link clicked");
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Link clicked");
             }
         });
 

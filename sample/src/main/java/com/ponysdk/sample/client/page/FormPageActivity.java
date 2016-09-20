@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,25 +23,28 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.form.DefaultFormView;
-import com.ponysdk.ui.server.form.FormActivity;
-import com.ponysdk.ui.server.form.FormConfiguration;
-import com.ponysdk.ui.server.form.FormField;
-import com.ponysdk.ui.server.form.FormView;
-import com.ponysdk.ui.server.form.renderer.DateBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.FormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.ListBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TextAreaFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TextBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.renderer.TwinListBoxFormFieldRenderer;
-import com.ponysdk.ui.server.form.validator.DoubleFieldValidator;
-import com.ponysdk.ui.server.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.FormFieldComponent;
+import com.ponysdk.core.ui.form.FormFieldComponent.CaptionOrientation;
+import com.ponysdk.core.ui.form.formfield.CheckBoxFormField;
+import com.ponysdk.core.ui.form.formfield.DateBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.validator.CompositeFieldValidator;
+import com.ponysdk.core.ui.form.validator.DoubleFieldValidator;
+import com.ponysdk.core.ui.form.validator.EmailFieldValidator;
+import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
+import com.ponysdk.core.ui.form.validator.TwinFieldValidator;
+import com.ponysdk.core.ui.form.validator.UncheckedFieldValidator;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FormPageActivity extends SamplePageActivity {
 
@@ -53,77 +56,131 @@ public class FormPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel layout = new PVerticalPanel();
+        final PFlexTable panel = new PFlexTable();
 
-        final FormView formView = new DefaultFormView();
-        final FormConfiguration formConfiguration = new FormConfiguration();
-        formConfiguration.setName("Form");
-        final FormActivity formActivity = new FormActivity(formConfiguration, formView);
+        final Form form = new Form();
 
-        final FormField field1 = new FormField("field1");
-        formActivity.addFormField(field1);
-        field1.addValidator(new NotEmptyFieldValidator());
-        field1.addValidator(new DoubleFieldValidator());
+        final StringTextBoxFormField field1 = new StringTextBoxFormField();
+        field1.setValidator(new NotEmptyFieldValidator());
+        final StringTextBoxFormField field2 = new StringTextBoxFormField();
+        field2.setValidator(new DoubleFieldValidator());
+        final StringTextBoxFormField field3 = new StringTextBoxFormField();
+        field3.setValidator(new CompositeFieldValidator(new NotEmptyFieldValidator(), new DoubleFieldValidator()));
+        final StringTextBoxFormField field4 = new StringTextBoxFormField();
+        field4.setValidator(new CompositeFieldValidator(new NotEmptyFieldValidator(), new EmailFieldValidator()));
+        final CheckBoxFormField field5 = new CheckBoxFormField();
+        field5.setValidator(new UncheckedFieldValidator());
 
-        final FormFieldRenderer field2Renderer = new TextBoxFormFieldRenderer("field2");
-        final FormField field2 = new FormField(field2Renderer);
-        formActivity.addFormField(field2);
+        final PListBox listBox = new PListBox(true);
+        listBox.addItem("Item 1");
+        listBox.addItem("Item 2");
+        listBox.addItem("Item 3");
+        listBox.addItem("Item 4");
+        listBox.addItem("Item 5");
+        listBox.addItem("Item 6");
 
-        final ListBoxFormFieldRenderer field3Renderer = new ListBoxFormFieldRenderer("field3");
-        field3Renderer.addItem("Choice 1", 1);
-        field3Renderer.addItem("Choice 2", 2);
-        field3Renderer.addItem("Choice 3", 3);
-        field3Renderer.addItem("Choice 4", 4);
-        final FormField field3 = new FormField(field3Renderer);
-        formActivity.addFormField(field3);
+        final StringListBoxFormField field6 = new StringListBoxFormField(listBox);
+        field6.setValidator(new NotEmptyFieldValidator());
 
-        final FormFieldRenderer field4Renderer = new DateBoxFormFieldRenderer("field4");
-        final FormField field4 = new FormField(field4Renderer);
-        formActivity.addFormField(field4);
+        final DateBoxFormField field7 = new DateBoxFormField();
+        field7.setValidator(new NotEmptyFieldValidator());
 
-        final FormFieldRenderer field5Renderer = new TextAreaFormFieldRenderer("field5");
-        final FormField field5 = new FormField(field5Renderer);
-        formActivity.addFormField(field5);
+        final DateBoxFormField field8 = new DateBoxFormField();
+        field7.setValidator(new NotEmptyFieldValidator());
 
-        final TwinListBoxFormFieldRenderer<String> field6Renderer = new TwinListBoxFormFieldRenderer<String>("field6");
-        final FormField field6 = new FormField(field6Renderer);
-        formActivity.addFormField(field6);
+        final StringTextBoxFormField field9 = new StringTextBoxFormField();
+        field9.setValidator(new NotEmptyFieldValidator());
 
-        field6Renderer.addItem("Choice 1");
-        field6Renderer.addItem("Choice 2");
-        field6Renderer.addItem("Choice 3");
-        field6Renderer.addItem("Choice 4");
-        field6Renderer.addItem("Choice 5");
-        field6Renderer.addItem("Choice 6");
-        field6Renderer.setSelectedItem("Choice 2");
-        field6Renderer.setSelectedItem("Choice 3");
+        final StringTextBoxFormField field10 = new StringTextBoxFormField();
+        field10.setValidator(new TwinFieldValidator("Field doesn't match", field9));
 
-        final PSimplePanel formLayout = new PSimplePanel();
-        layout.add(formLayout);
-        formActivity.start(formLayout);
+        form.addFormField(field1);
+        form.addFormField(field2);
+        form.addFormField(field3);
+        form.addFormField(field4);
+        form.addFormField(field5);
+        form.addFormField(field6);
+        form.addFormField(field7);
+        form.addFormField(field8);
+        form.addFormField(field9);
+        form.addFormField(field10);
+
+        final FormFieldComponent formFieldComponent1 = new FormFieldComponent("field1", field1);
+        final FormFieldComponent formFieldComponent2 = new FormFieldComponent("field2", field2);
+        final FormFieldComponent formFieldComponent3 = new FormFieldComponent("field3", field3);
+        final FormFieldComponent formFieldComponent4 = new FormFieldComponent("field4", field4);
+        final FormFieldComponent formFieldComponent5 = new FormFieldComponent("field5", field5);
+        final FormFieldComponent formFieldComponent6 = new FormFieldComponent("field6", field6);
+        final FormFieldComponent formFieldComponent7 = new FormFieldComponent("field7", field7);
+        final FormFieldComponent formFieldComponent8 = new FormFieldComponent("field8", field8);
+        final FormFieldComponent formFieldComponent9 = new FormFieldComponent("field9", field9);
+        final FormFieldComponent formFieldComponent10 = new FormFieldComponent("field10", field10);
+
+        final PFlexTable formLayout = new PFlexTable();
+        formLayout.addStyleName("cell-top");
+        formLayout.setWidget(0, 0, formFieldComponent1);
+        formLayout.setWidget(0, 1, formFieldComponent2);
+        formLayout.setWidget(1, 0, formFieldComponent3);
+        formLayout.setWidget(1, 1, formFieldComponent4);
+        formLayout.setWidget(2, 0, formFieldComponent5);
+        formLayout.setWidget(2, 1, formFieldComponent6);
+        formLayout.setWidget(3, 0, formFieldComponent7);
+        formLayout.setWidget(3, 1, formFieldComponent8);
+        formLayout.setWidget(4, 0, formFieldComponent9);
+        formLayout.setWidget(4, 1, formFieldComponent10);
 
         final PButton validateButton = new PButton("Validate");
         validateButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final boolean isValid = formActivity.isValid();
-                PNotificationManager.showTrayNotification("The form is valid? " + (isValid ? "YES" : "NO"));
+                final boolean isValid = form.isValid();
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "The form is valid? " + (isValid ? "YES" : "NO"));
             }
         });
-        layout.add(validateButton);
 
         final PButton resetButton = new PButton("Reset");
         resetButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                formActivity.reset();
+                form.reset();
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
             }
         });
-        layout.add(resetButton);
 
-        examplePanel.setWidget(layout);
+        final PListBox captionOriantationList = new PListBox(true);
+        for (final CaptionOrientation captionOriantation : CaptionOrientation.values()) {
+            captionOriantationList.addItem(captionOriantation.name(), captionOriantation);
+        }
+        captionOriantationList.addChangeHandler(new PChangeHandler() {
+
+            @Override
+            public void onChange(final PChangeEvent event) {
+                final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
+
+                formFieldComponent1.setCaptionOrientation(captionOriantation);
+                formFieldComponent2.setCaptionOrientation(captionOriantation);
+                formFieldComponent3.setCaptionOrientation(captionOriantation);
+                formFieldComponent4.setCaptionOrientation(captionOriantation);
+                formFieldComponent5.setCaptionOrientation(captionOriantation);
+                formFieldComponent6.setCaptionOrientation(captionOriantation);
+                formFieldComponent7.setCaptionOrientation(captionOriantation);
+                formFieldComponent8.setCaptionOrientation(captionOriantation);
+            }
+        });
+
+        panel.setWidget(0, 0, validateButton);
+        panel.getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_LEFT);
+        panel.setWidget(0, 1, resetButton);
+        panel.getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
+        panel.setWidget(0, 2, captionOriantationList);
+        panel.getCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_RIGHT);
+        panel.setWidget(1, 0, formLayout);
+        panel.getCellFormatter().setColSpan(1, 0, 3);
+
+        examplePanel.setWidget(panel);
     }
 
 }

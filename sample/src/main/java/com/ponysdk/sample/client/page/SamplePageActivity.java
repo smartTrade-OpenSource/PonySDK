@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -32,14 +32,14 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.place.Place;
+import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
 import com.ponysdk.impl.webapplication.page.PageActivity;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PScrollPanel;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PTabLayoutPanel;
-import com.ponysdk.ui.server.basic.PWidget;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 
 import de.java2html.converter.JavaSource2HTMLConverter;
 import de.java2html.javasource.JavaSource;
@@ -66,13 +66,16 @@ public class SamplePageActivity extends PageActivity {
     }
 
     @Override
-    protected void onInitialization() {}
+    protected void onInitialization() {
+    }
 
     @Override
-    protected void onShowPage(final Place place) {}
+    protected void onShowPage(final Place place) {
+    }
 
     @Override
-    protected void onLeavingPage() {}
+    protected void onLeavingPage() {
+    }
 
     @Override
     protected void onFirstShowPage() {
@@ -98,8 +101,7 @@ public class SamplePageActivity extends PageActivity {
 
         tabPanel.add(codePanel, "Source Code");
 
-        pageView.setWidget(tabPanel);
-
+        view.setWidget(tabPanel);
     }
 
     protected String getSource() {

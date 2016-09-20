@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,150 +23,142 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.impl.theme.PonySDKTheme;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.sample.client.page.addon.BasicAddOn;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class BasicButtonPageActivity extends SamplePageActivity {
 
-    protected PButton normalButton;
+	protected PButton normalButton;
 
-    protected PButton showLoadingOnRequestButton;
+	protected PButton showLoadingOnRequestButton;
 
-    protected PButton disabledOnRequestButton;
+	protected PButton disabledOnRequestButton;
 
-    protected PButton comboOnRequestButton;
+	protected PButton comboOnRequestButton;
 
-    protected PButton disabledButton;
+	protected PButton disabledButton;
 
-    private BasicAddOn basicAddOn;
+	public BasicButtonPageActivity() {
+		super("Basic Button", "Widgets");
+	}
 
-    public BasicButtonPageActivity() {
-        super("Basic Button", "Widgets");
-    }
+	@Override
+	protected void onFirstShowPage() {
+		super.onFirstShowPage();
 
-    @Override
-    protected void onFirstShowPage() {
-        super.onFirstShowPage();
+		final PVerticalPanel panel = new PVerticalPanel();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+		panel.add(buildButtonPanel());
+		panel.add(buildThemeSelectorPanel());
 
-        panel.add(buildButtonPanel());
-        panel.add(buildThemeSelectorPanel());
+		examplePanel.setWidget(panel);
+	}
 
-        basicAddOn = new BasicAddOn();
-        basicAddOn.send("initialization done");
+	private PWidget buildThemeSelectorPanel() {
+		final PHorizontalPanel panel = new PHorizontalPanel();
+		panel.setSpacing(10);
 
-        examplePanel.setWidget(panel);
-    }
+		final PListBox styleListBox = new PListBox(false);
 
-    private PWidget buildThemeSelectorPanel() {
-        final PHorizontalPanel panel = new PHorizontalPanel();
-        panel.setSpacing(10);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_WHITE);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_BLACK);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_BLUE);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_GRAY);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_GREEN);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_ORANGE);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_PINK);
+		// styleListBox.addItem(PonySDKTheme.BUTTON_ROSY);
+		// styleListBox.addItem("pony-PButton accent");
 
-        final PListBox styleListBox = new PListBox(false, false);
+		styleListBox.addChangeHandler(new PChangeHandler() {
 
-        styleListBox.addItem(PonySDKTheme.BUTTON_WHITE);
-        styleListBox.addItem(PonySDKTheme.BUTTON_BLACK);
-        styleListBox.addItem(PonySDKTheme.BUTTON_BLUE);
-        styleListBox.addItem(PonySDKTheme.BUTTON_GRAY);
-        styleListBox.addItem(PonySDKTheme.BUTTON_GREEN);
-        styleListBox.addItem(PonySDKTheme.BUTTON_ORANGE);
-        styleListBox.addItem(PonySDKTheme.BUTTON_PINK);
-        styleListBox.addItem(PonySDKTheme.BUTTON_ROSY);
-        styleListBox.addItem("pony-PButton accent");
+			@Override
+			public void onChange(final PChangeEvent event) {
+				final String styleName = styleListBox.getSelectedItem();
 
-        styleListBox.addChangeHandler(new PChangeHandler() {
+				normalButton.setStyleName(styleName);
+				disabledOnRequestButton.setStyleName(styleName);
+				showLoadingOnRequestButton.setStyleName(styleName);
+				comboOnRequestButton.setStyleName(styleName);
+				disabledButton.setStyleName(styleName);
+			}
+		});
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final String styleName = styleListBox.getSelectedItem();
+		panel.add(new PLabel("Select the button style : "));
+		panel.add(styleListBox);
 
-                normalButton.setStyleName(styleName);
-                disabledOnRequestButton.setStyleName(styleName);
-                showLoadingOnRequestButton.setStyleName(styleName);
-                comboOnRequestButton.setStyleName(styleName);
-                disabledButton.setStyleName(styleName);
-            }
-        });
+		return panel;
+	}
 
-        panel.add(new PLabel("Select the button style : "));
-        panel.add(styleListBox);
+	private PHorizontalPanel buildButtonPanel() {
+		final PHorizontalPanel panel = new PHorizontalPanel();
+		panel.setSpacing(10);
 
-        final PLabel label = new PLabel(UIContext.get().getSession().getUserAgent().toString());
-        panel.add(label);
+		normalButton = new PButton("Normal Button");
+		panel.add(normalButton);
 
-        return panel;
-    }
+		disabledButton = new PButton("Disabled Button");
+		disabledButton.setEnabled(false);
+		panel.add(disabledButton);
 
-    private PHorizontalPanel buildButtonPanel() {
-        final PHorizontalPanel panel = new PHorizontalPanel();
-        panel.setSpacing(10);
+		showLoadingOnRequestButton = new PButton("Show loading on request");
+		showLoadingOnRequestButton.showLoadingOnRequest(true);
+		showLoadingOnRequestButton.addClickHandler(new PClickHandler() {
 
-        normalButton = new PButton("Normal Button");
-        panel.add(normalButton);
+			@Override
+			public void onClick(final PClickEvent event) {
+				fireEvent(new DemoBusinessEvent("Button clicked"));
+				try {
+					Thread.sleep(5000);
+				} catch (final InterruptedException e) {
+				}
+			}
+		});
 
-        disabledButton = new PButton("Disabled Button");
-        disabledButton.setEnabled(false);
-        panel.add(disabledButton);
+		panel.add(showLoadingOnRequestButton);
 
-        showLoadingOnRequestButton = new PButton("Show loading on request");
-        showLoadingOnRequestButton.showLoadingOnRequest(true);
-        showLoadingOnRequestButton.addClickHandler(new PClickHandler() {
+		disabledOnRequestButton = new PButton("Disabled on request");
+		disabledOnRequestButton.setEnabledOnRequest(false);
+		disabledOnRequestButton.addClickHandler(new PClickHandler() {
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {}
-            }
-        });
+			@Override
+			public void onClick(final PClickEvent event) {
+				fireEvent(new DemoBusinessEvent("Button clicked"));
+				try {
+					Thread.sleep(5000);
+				} catch (final InterruptedException e) {
+				}
+			}
+		});
 
-        panel.add(showLoadingOnRequestButton);
+		panel.add(disabledOnRequestButton);
 
-        disabledOnRequestButton = new PButton("Disabled on request");
-        disabledOnRequestButton.setEnabledOnRequest(false);
-        disabledOnRequestButton.addClickHandler(new PClickHandler() {
+		comboOnRequestButton = new PButton("Show loading and disable on request");
+		comboOnRequestButton.setEnabledOnRequest(false);
+		comboOnRequestButton.showLoadingOnRequest(true);
+		comboOnRequestButton.addClickHandler(new PClickHandler() {
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {}
-            }
-        });
+			@Override
+			public void onClick(final PClickEvent event) {
+				fireEvent(new DemoBusinessEvent("Button clicked"));
+				try {
+					Thread.sleep(5000);
+				} catch (final InterruptedException e) {
+				}
+			}
+		});
 
-        panel.add(disabledOnRequestButton);
+		panel.add(comboOnRequestButton);
 
-        comboOnRequestButton = new PButton("Show loading and disable on request");
-        comboOnRequestButton.setEnabledOnRequest(false);
-        comboOnRequestButton.showLoadingOnRequest(true);
-        comboOnRequestButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {}
-            }
-        });
-
-        panel.add(comboOnRequestButton);
-
-        return panel;
-    }
+		return panel;
+	}
 }

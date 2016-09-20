@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,25 +23,26 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.time.Duration;
 import java.util.Arrays;
 
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PDockLayoutPanel;
-import com.ponysdk.ui.server.basic.PHorizontalPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PSimpleLayoutPanel;
-import com.ponysdk.ui.server.basic.PSimplePanel;
-import com.ponysdk.ui.server.basic.PTabLayoutPanel;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PBeforeSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PBeforeSelectionHandler;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.terminal.PUnit;
-import com.ponysdk.ui.terminal.basic.PVerticalAlignment;
+import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
@@ -62,20 +63,22 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         final PTabLayoutPanel tabPanel = new PTabLayoutPanel();
         tabPanel.setSizeFull();
         tabPanel.setAnimationVertical(false);
-        tabPanel.setAnimationDuration(1000);
+        tabPanel.setAnimationDuration(Duration.ofMillis(1000));
 
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
 
             @Override
             public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onBeforeSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onBeforeSelection, tab index : " + event.getSelectedItem());
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
 
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification("onSelection, tab index : " + event.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "onSelection, tab index : " + event.getSelectedItem());
             }
         });
 
@@ -128,7 +131,7 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
     protected void addTabContent(final PTabLayoutPanel tabPanel) {
         final PSimpleLayoutPanel tabContent = new PSimpleLayoutPanel();
-        tabContent.setStyleProperty("background-color", colors[tabCount % colors.length]);
+        tabContent.setStyleProperty("backgroundColor", colors[tabCount % colors.length]);
 
         final int tabIndex = tabCount;
         final PLabel label = new PLabel("content-" + tabIndex);

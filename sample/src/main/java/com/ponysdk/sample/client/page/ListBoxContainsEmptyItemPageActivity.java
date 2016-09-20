@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,11 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
 
@@ -54,12 +54,14 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             @Override
             public void onChange(final PChangeEvent event) {
                 if (listBox.getSelectedIndex() != -1) {
-                    PNotificationManager.showTrayNotification("Item selected : " + listBox.getSelectedItem());
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                            "Item selected : " + listBox.getSelectedItem());
                 }
             }
         });
 
-        final PListBox multiListBox = new PListBox(true, true);
+        final PListBox multiListBox = new PListBox(true);
+        multiListBox.setMultipleSelect(true);
         multiListBox.setVisibleItemCount(10);
         multiListBox.addItem("Altai horseBengin");
         multiListBox.addItem("American Warmblood");
@@ -72,7 +74,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification("Item selected : " + multiListBox.getSelectedItems());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "Item selected : " + multiListBox.getSelectedItems());
             }
         });
 

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,18 +23,18 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PCheckBox;
-import com.ponysdk.ui.server.basic.PEvent;
-import com.ponysdk.ui.server.basic.PHTML;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PContextMenuEvent;
-import com.ponysdk.ui.server.basic.event.PContextMenuHandler;
-import com.ponysdk.ui.server.basic.event.PDoubleClickEvent;
-import com.ponysdk.ui.server.basic.event.PDoubleClickHandler;
-import com.ponysdk.ui.server.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
+import com.ponysdk.core.ui.basic.event.PContextMenuHandler;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
+import com.ponysdk.core.ui.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.model.PEventType;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class HTMLPageActivity extends SamplePageActivity {
 
@@ -50,7 +50,8 @@ public class HTMLPageActivity extends SamplePageActivity {
         verticalPanel.setSpacing(10);
 
         final PHTML htmlBold = new PHTML("<b>Pony Bold</b> and <font color='red'>Pony Red</font> using HTML");
-        final PHTML htmlClickable = new PHTML("<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
+        final PHTML htmlClickable = new PHTML(
+                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
         htmlClickable.addClickHandler(new PClickHandler() {
 
             @Override
@@ -60,7 +61,8 @@ public class HTMLPageActivity extends SamplePageActivity {
 
         });
 
-        final PHTML htmlDoubleClickable = new PHTML("<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>double click me!</span> using HTML and CSS");
+        final PHTML htmlDoubleClickable = new PHTML(
+                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>double click me!</span> using HTML and CSS");
         htmlDoubleClickable.addDoubleClickHandler(new PDoubleClickHandler() {
 
             @Override
@@ -70,13 +72,14 @@ public class HTMLPageActivity extends SamplePageActivity {
 
         });
 
-        final PHTML htmlWithContextMenu = new PHTML("<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
-        htmlWithContextMenu.preventEvent(PEvent.ONCONTEXTMENU);
+        final PHTML htmlWithContextMenu = new PHTML(
+                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
+        htmlWithContextMenu.preventEvent(PEventType.ONCONTEXTMENU);
         htmlWithContextMenu.addDomHandler(new PContextMenuHandler() {
 
             @Override
             public void onContextMenu(final PContextMenuEvent event) {
-                PNotificationManager.showHumanizedNotification("Context menu triggered");
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered");
             }
         }, PContextMenuEvent.TYPE);
 
@@ -107,6 +110,6 @@ public class HTMLPageActivity extends SamplePageActivity {
     }
 
     protected void logEvent(final String message, final PMouseEvent<?> clickEvent) {
-        PNotificationManager.showHumanizedNotification(message);
+        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), message);
     }
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,11 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PListBox;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PTwinListBox;
-import com.ponysdk.ui.server.basic.event.PChangeEvent;
-import com.ponysdk.ui.server.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.rich.PNotificationManager;
+import com.ponysdk.core.ui.rich.PTwinListBox;
 
 public class TwinListBoxPageActivity extends SamplePageActivity {
 
@@ -39,7 +39,7 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PTwinListBox<String> twinListBox = new PTwinListBox<String>("From", "To");
+        final PTwinListBox<String> twinListBox = new PTwinListBox<>("From", "To");
 
         final PListBox leftListBox = twinListBox.getLeftListBox();
         leftListBox.addItem("Item1");
@@ -52,7 +52,8 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification("Item selected : " + leftListBox.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "Item selected : " + leftListBox.getSelectedItem());
             }
         });
 
@@ -66,7 +67,8 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification("Item selected : " + rightListBox.getSelectedItem());
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                        "Item selected : " + rightListBox.getSelectedItem());
             }
         });
 
@@ -74,7 +76,7 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification("Item changed");
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Item changed");
             }
         });
 

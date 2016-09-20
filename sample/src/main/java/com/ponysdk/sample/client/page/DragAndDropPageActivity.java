@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,22 +23,22 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PDragEnterEvent;
-import com.ponysdk.ui.server.basic.event.PDragEnterHandler;
-import com.ponysdk.ui.server.basic.event.PDragLeaveEvent;
-import com.ponysdk.ui.server.basic.event.PDragLeaveHandler;
-import com.ponysdk.ui.server.basic.event.PDragStartEvent;
-import com.ponysdk.ui.server.basic.event.PDragStartHandler;
-import com.ponysdk.ui.server.basic.event.PDropEvent;
-import com.ponysdk.ui.server.basic.event.PDropHandler;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartHandler;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PDropHandler;
 
 public class DragAndDropPageActivity extends SamplePageActivity {
 
-    private final PFlowPanel boxContainer = new PFlowPanel();;
+    private final PFlowPanel boxContainer = new PFlowPanel();
 
     public DragAndDropPageActivity() {
         super("Drag and Drop", "Extra");
@@ -75,7 +75,8 @@ public class DragAndDropPageActivity extends SamplePageActivity {
         box.addDomHandler(new PDragStartHandler() {
 
             @Override
-            public void onDragStart(final PDragStartEvent event) {}
+            public void onDragStart(final PDragStartEvent event) {
+            }
         }, PDragStartEvent.TYPE);
 
         box.addDomHandler(new PDropHandler() {

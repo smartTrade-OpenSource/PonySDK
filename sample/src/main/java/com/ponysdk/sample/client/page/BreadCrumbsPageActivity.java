@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,17 +23,16 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.impl.theme.PonySDKTheme;
-import com.ponysdk.ui.server.basic.PButton;
-import com.ponysdk.ui.server.basic.PFlowPanel;
-import com.ponysdk.ui.server.basic.PNotificationManager;
-import com.ponysdk.ui.server.basic.PTextBox;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PSelectionEvent;
-import com.ponysdk.ui.server.basic.event.PSelectionHandler;
-import com.ponysdk.ui.server.breadcrumbs.PBreadCrumbs;
-import com.ponysdk.ui.server.breadcrumbs.PBreadCrumbs.ItemLevel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.rich.PBreadCrumbs;
+import com.ponysdk.core.ui.rich.PBreadCrumbs.ItemLevel;
+import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class BreadCrumbsPageActivity extends SamplePageActivity {
 
@@ -63,20 +62,21 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
             @Override
             public void onSelection(final PSelectionEvent<ItemLevel> event) {
                 level = event.getSelectedItem().getLevel();
-                PNotificationManager.showHumanizedNotification("Selected level : " + level);
+                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
             }
         });
 
         final PFlowPanel inputPanel = new PFlowPanel();
         final PTextBox input = new PTextBox();
         final PButton add = new PButton("Add Level");
-        add.setStyleName(PonySDKTheme.BUTTON_BLUE);
         add.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                if (input.getText().isEmpty()) breadCrumbs.addItem("level " + ++level);
-                else breadCrumbs.addItem(input.getText());
+                if (input.getText().isEmpty())
+                    breadCrumbs.addItem("level " + ++level);
+                else
+                    breadCrumbs.addItem(input.getText());
                 input.setText("");
             }
         });

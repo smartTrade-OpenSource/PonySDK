@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,56 +23,49 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.UIContext;
-import com.ponysdk.impl.theme.PonySDKTheme;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PPopupPanel.PPositionCallback;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.rich.POptionPane;
+import com.ponysdk.core.ui.rich.POptionPane.PActionHandler;
+import com.ponysdk.core.ui.rich.POptionPane.POption;
+import com.ponysdk.core.ui.rich.POptionPane.POptionType;
 import com.ponysdk.impl.webapplication.header.HeaderActivity;
-import com.ponysdk.impl.webapplication.header.HeaderView;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.ui.server.basic.IsPWidget;
-import com.ponysdk.ui.server.basic.PAnchor;
-import com.ponysdk.ui.server.basic.PDialogBox;
-import com.ponysdk.ui.server.basic.PLabel;
-import com.ponysdk.ui.server.basic.PPopupPanel;
-import com.ponysdk.ui.server.basic.PPopupPanel.PPositionCallback;
-import com.ponysdk.ui.server.basic.PVerticalPanel;
-import com.ponysdk.ui.server.basic.PWidget;
-import com.ponysdk.ui.server.basic.event.PClickEvent;
-import com.ponysdk.ui.server.basic.event.PClickHandler;
-import com.ponysdk.ui.server.basic.event.PCloseEvent;
-import com.ponysdk.ui.server.basic.event.PCloseHandler;
-import com.ponysdk.ui.server.rich.POptionPane;
-import com.ponysdk.ui.server.rich.POptionPane.PActionHandler;
-import com.ponysdk.ui.server.rich.POptionPane.POption;
-import com.ponysdk.ui.server.rich.POptionPane.POptionType;
 
 public class SampleHeaderActivity extends HeaderActivity implements PClickHandler {
 
     private PPopupPanel popup;
 
     @Override
-    public IsPWidget buildView() {
-        final HeaderView view = getHeaderView();
-        final User user = UIContext.get().getApplicationAttribute(UISampleEntryPoint.USER);
-        view.addActionWidget(createUserAccountMenu(user));
-        return view;
+    public void buildView() {
+        // view.addActionWidget(createUserAccountMenu(user));
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {
         final PAnchor optionsAnchor = new PAnchor(userLogged.getLogin());
         optionsAnchor.ensureDebugId("options_anchor");
-        optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
+        // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = new PPopupPanel();
-        popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
+        popup = new PPopupPanel(getView().asWidget().getWindowID());
+        // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
         final PVerticalPanel panel = new PVerticalPanel();
         final PLabel userName = new PLabel(userLogged.getName());
-        userName.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_NAME);
+        // userName.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_NAME);
         panel.add(userName);
 
         final PLabel userLogin = new PLabel(userLogged.getLogin());
-        userLogin.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_LOGIN);
+        // userLogin.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_LOGIN);
         panel.add(userLogin);
 
         final PAnchor signOutAnchor = new PAnchor("Sign out");
@@ -85,10 +78,10 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 popup.hide();
 
-                final POptionPane optionPane = POptionPane.showConfirmDialog(new PActionHandler() {
+                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
@@ -102,7 +95,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                     }
                 }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
 
-                optionPane.getDialogBox().ensureDebugId("sign_out_dialog");
+                optionPane.asWidget().ensureDebugId("sign_out_dialog");
             }
         });
 
@@ -113,11 +106,12 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                 if (popup.isShowing()) {
                     popup.hide();
                 } else {
-                    optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                    // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                     popup.setPopupPositionAndShow(new PPositionCallback() {
 
                         @Override
-                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth, final int windowHeight) {
+                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
+                                final int windowHeight) {
                             final int left = windowWidth - 250;
                             popup.setPopupPosition(left, 26);
 
@@ -135,7 +129,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
             @Override
             public void onClose(final PCloseEvent closeEvent) {
-                optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
                 // PClickEvent.TYPE);
             }
@@ -146,6 +140,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
     @Override
     public void onClick(final PClickEvent event) {
-        if (popup.isShowing()) popup.hide();
+        if (popup.isShowing())
+            popup.hide();
     }
 }
