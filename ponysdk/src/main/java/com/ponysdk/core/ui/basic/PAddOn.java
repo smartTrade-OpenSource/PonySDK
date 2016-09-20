@@ -38,6 +38,15 @@ public abstract class PAddOn extends PObject {
         LOG_LEVEL.put(Level.ALL, level++);
     }
 
+    private JsonObject args;
+
+    public PAddOn() {
+    }
+
+    public PAddOn(final JsonObject args) {
+        this.args = args;
+    }
+
     @Override
     public boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
@@ -73,6 +82,10 @@ public abstract class PAddOn extends PObject {
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
         parser.parse(ServerToClientModel.FACTORY, getSignature());
+        if (args != null) {
+            parser.parse(ServerToClientModel.NATIVE, args);
+            args = null;//free memory
+        }
     }
 
     public String getSignature() {

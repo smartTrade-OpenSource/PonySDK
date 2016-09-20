@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
@@ -34,7 +36,8 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
 
     protected T widget;
 
-    public PAddOnComposite(final T widget) {
+    public PAddOnComposite(final T widget, final JsonObject args) {
+        super(args);
         this.widget = widget;
 
         if (!this.widget.isAddonAlreadyBound(this)) {
@@ -48,6 +51,10 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
         } else {
             throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon");
         }
+    }
+
+    public PAddOnComposite(final T widget) {
+        this(widget, null);
     }
 
     @Override

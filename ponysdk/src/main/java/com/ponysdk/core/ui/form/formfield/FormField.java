@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.list.Resetable;
@@ -30,12 +31,12 @@ import com.ponysdk.core.ui.list.Validable;
 
 public interface FormField extends IsPWidget, Validable, Resetable {
 
-    Object getValue();
-
     void addFormFieldListener(final FormFieldListener listener);
 
     void setValidator(final FieldValidator validator);
 
     void setEnabled(final boolean enabled);
+
+    HasPValue<?> asHasPValue();
 
 }

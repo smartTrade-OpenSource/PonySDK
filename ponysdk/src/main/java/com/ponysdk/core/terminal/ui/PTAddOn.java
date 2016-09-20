@@ -61,6 +61,13 @@ public class PTAddOn extends AbstractPTObject {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+            params.put("args", binaryModel.getJsonObject());
+        } else {
+            buffer.rewind(binaryModel);
+        }
+
         try {
             addOn = factory.newAddOn(params.getJavaScriptObject());
             addOn.onInit();

@@ -150,4 +150,8 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
         formField.reset();
     }
 
+    public FormField getFormField() {
+        return formField;
+    }
+
 }

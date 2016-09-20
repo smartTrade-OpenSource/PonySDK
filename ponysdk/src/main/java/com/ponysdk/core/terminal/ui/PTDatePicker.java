@@ -45,7 +45,11 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
 
     private static Date asDate(final String timestamp) {
-        return new Date(Long.parseLong(timestamp));
+        try {
+            return new Date(Long.parseLong(timestamp));
+        } catch (final NumberFormatException e) {
+            return null;
+        }
     }
 
     private static Date asDate(final long timestamp) {

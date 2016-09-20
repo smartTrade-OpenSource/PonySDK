@@ -30,6 +30,7 @@ import java.util.List;
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
 import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PGrid;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -113,9 +114,11 @@ public class ComplexHeaderCellRenderer
 
     @Override
     public List<Criterion> getCriteria() {
-        if (formField.getValue() != null) {
+        final HasPValue<?> hasPValue = formField.asHasPValue();
+
+        if (hasPValue != null && hasPValue.getValue() != null) {
             final Criterion criterion = new Criterion(key);
-            criterion.setValue(formField.getValue());
+            criterion.setValue(hasPValue.getValue());
             criterion.setSortingType(sortingType);
             return Collections.singletonList(criterion);
         }

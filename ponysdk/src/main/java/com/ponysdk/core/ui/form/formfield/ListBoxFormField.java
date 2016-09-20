@@ -67,12 +67,6 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     }
 
     @Override
-    public void setValue(final T value) {
-        if (dataProvider != null) widget.setSelectedItem(dataProvider.from(value));
-        else widget.setSelectedValue(value);
-    }
-
-    @Override
     protected String getStringValue() {
         return widget.getSelectedItem();
     }
@@ -80,6 +74,12 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     @Override
     public void setEnabled(final boolean enabled) {
         widget.setEnabled(enabled);
+    }
+
+    @Override
+    public void setValue(final T value) {
+        if (dataProvider != null) widget.setSelectedItem(dataProvider.from(value));
+        else widget.setSelectedValue(value);
     }
 
 }

@@ -242,13 +242,22 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         }
     }
 
+    public void setAttribute(final String name) {
+        setAttribute(name, null);
+    }
+
     public void setAttribute(final String name, final String value) {
-        if (!Objects.equals(safeElementAttributes().put(name, value), value)) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-                writer.writeModel(ServerToClientModel.ATTRIBUTE_VALUE, value);
-            });
+        if (name == null) return;
+
+        if (!safeElementAttributes().containsKey(name)) {
+            safeElementAttributes().put(name, value);
+        } else if (Objects.equals(safeElementAttributes().put(name, value), value)) {
+            return;
         }
+        saveUpdate((writer) -> {
+            writer.writeModel(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
+            writer.writeModel(ServerToClientModel.ATTRIBUTE_VALUE, value);
+        });
     }
 
     public void removeAttribute(final String name) {

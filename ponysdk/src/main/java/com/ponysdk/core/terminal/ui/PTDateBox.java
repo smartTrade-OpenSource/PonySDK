@@ -62,7 +62,7 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final MyDateBox dateBox = cast();
         if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
-            dateBox.getTextBox().setText(binaryModel.getStringValue());
+            dateBox.getTextBox().setValue(binaryModel.getStringValue());
             return true;
         }
         if (ServerToClientModel.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {

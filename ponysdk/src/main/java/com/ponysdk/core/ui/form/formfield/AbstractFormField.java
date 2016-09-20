@@ -23,11 +23,17 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
@@ -36,12 +42,13 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or
  * reset
  */
-public abstract class AbstractFormField<T, W extends IsPWidget> implements FormField {
+public abstract class AbstractFormField<T, W extends IsPWidget> implements FormField, HasPValue<T> {
 
     protected final W widget;
     private final Set<FormFieldListener> listeners = new HashSet<>();
     protected DataConverter<String, T> dataProvider;
     private FieldValidator validator;
+    private ListenerCollection<PValueChangeHandler<T>> handlers;
 
     public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider) {
         this.widget = widget;
@@ -108,8 +115,32 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     protected abstract void reset0();
 
     @Override
-    public abstract T getValue();
+    public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
+        if (handlers == null) {
+            handlers = new ListenerCollection<>();
+        }
+        handlers.add(handler);
+    }
 
-    public abstract void setValue(final T value);
+    @Override
+    public boolean removeValueChangeHandler(final PValueChangeHandler<T> handler) {
+        if (handlers == null) return false;
+        return handlers.remove(handler);
+    }
+
+    @Override
+    public Collection<PValueChangeHandler<T>> getValueChangeHandlers() {
+        return Collections.unmodifiableCollection(handlers);
+    }
+
+    protected void fireValueChange(final T value) {
+        if (handlers == null) return;
+        handlers.forEach(handler -> handler.onValueChange(new PValueChangeEvent<>(this, value)));
+    }
+
+    @Override
+    public HasPValue<T> asHasPValue() {
+        return this;
+    }
 
 }

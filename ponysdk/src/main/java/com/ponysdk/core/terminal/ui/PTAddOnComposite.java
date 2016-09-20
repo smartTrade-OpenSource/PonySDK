@@ -36,6 +36,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -62,7 +63,12 @@ public class PTAddOnComposite extends PTAddOn {
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
-        final BinaryModel binaryModel = buffer.readBinaryModel();
+        BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+            params.put("args", binaryModel.getJsonObject());
+            binaryModel = buffer.readBinaryModel();
+        }
+
         final int widgetID = binaryModel.getIntValue();
         final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
         widget = object.cast();

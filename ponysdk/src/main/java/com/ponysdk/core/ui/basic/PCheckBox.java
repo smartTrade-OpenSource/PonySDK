@@ -23,15 +23,20 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-
-import javax.json.JsonObject;
-import java.util.*;
 
 /**
  * A standard check box widget. This class also serves as a base class for
@@ -113,7 +118,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Override
     public void setValue(final Boolean value) {
         if (Objects.equals(this.value, value)) return;
-        this.value = value;
+        this.value = Boolean.TRUE.equals(value);
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE_CHECKBOX, this.value));
     }
 
