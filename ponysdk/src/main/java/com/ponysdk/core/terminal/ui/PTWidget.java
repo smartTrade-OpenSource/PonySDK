@@ -477,14 +477,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void preventEvent(final DomEvent<?> event) {
-        if (preventedEvents != null && preventedEvents.isEmpty()) {
+        if (preventedEvents != null && !preventedEvents.isEmpty()) {
             final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
             if (preventedEvents.contains(typeInt)) event.preventDefault();
         }
     }
 
     private void stopEvent(final DomEvent<?> event) {
-        if (stoppedEvents != null && stoppedEvents.isEmpty()) {
+        if (stoppedEvents != null && !stoppedEvents.isEmpty()) {
             final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
             if (stoppedEvents.contains(typeInt)) event.stopPropagation();
         }
