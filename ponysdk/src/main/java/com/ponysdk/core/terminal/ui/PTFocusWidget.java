@@ -25,8 +25,8 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.DomHandlerType;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
