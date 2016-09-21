@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal;
+package com.ponysdk.core.model;
 
 public enum DomHandlerType {
     CLICK,

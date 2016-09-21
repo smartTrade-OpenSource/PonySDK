@@ -39,11 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.terminal.DomHandlerType;
 import com.ponysdk.core.ui.basic.event.HasPHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;

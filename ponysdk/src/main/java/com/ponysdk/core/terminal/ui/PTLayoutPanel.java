@@ -27,8 +27,8 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.alignment.PTAlignment;
@@ -59,7 +59,7 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         if (ServerToClientModel.UNIT.equals(binaryModel.getModel())) {
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            final Unit unit = PUnit.getUnit(PUnit.values()[binaryModel.getByteValue()]);
+            final Unit unit = getUnit(PUnit.values()[binaryModel.getByteValue()]);
 
             final BinaryModel key1 = buffer.readBinaryModel();
             final BinaryModel key2 = buffer.readBinaryModel();
@@ -104,6 +104,30 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
             return true;
         }
         return super.update(buffer, binaryModel);
+    }
+
+    private static final Unit getUnit(final PUnit u) {
+        switch (u) {
+            case PX:
+                return Unit.PX;
+            case EM:
+                return Unit.EM;
+            case PCT:
+                return Unit.PCT;
+            case CM:
+                return Unit.CM;
+            case EX:
+                return Unit.EX;
+            case IN:
+                return Unit.IN;
+            case MM:
+                return Unit.MM;
+            case PC:
+                return Unit.PC;
+            case PT:
+                return Unit.PT;
+        }
+        return null;
     }
 
 }

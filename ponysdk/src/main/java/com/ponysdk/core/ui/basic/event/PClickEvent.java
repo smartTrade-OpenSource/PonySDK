@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic.event;
 
 
-import com.ponysdk.core.terminal.DomHandlerType;
+import com.ponysdk.core.model.DomHandlerType;
 
 public class PClickEvent extends PMouseEvent<PClickHandler> {
 

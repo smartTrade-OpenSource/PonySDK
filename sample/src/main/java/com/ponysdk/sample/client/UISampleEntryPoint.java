@@ -28,10 +28,10 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;

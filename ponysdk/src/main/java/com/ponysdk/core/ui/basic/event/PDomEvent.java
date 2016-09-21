@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import com.ponysdk.core.terminal.DomHandlerType;
+import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 
