@@ -30,10 +30,10 @@ import java.util.Map;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;

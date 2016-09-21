@@ -24,8 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
 

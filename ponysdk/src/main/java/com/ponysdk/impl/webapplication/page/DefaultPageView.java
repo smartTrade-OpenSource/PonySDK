@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;

@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.terminal.PUnit;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PCheckBox;

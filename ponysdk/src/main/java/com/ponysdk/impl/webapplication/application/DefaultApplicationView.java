@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import com.ponysdk.core.terminal.PUnit;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.ui.basic.*;
 
 public class DefaultApplicationView implements ApplicationView {
