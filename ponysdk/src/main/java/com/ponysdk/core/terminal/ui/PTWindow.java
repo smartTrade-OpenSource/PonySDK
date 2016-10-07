@@ -72,7 +72,6 @@ public class PTWindow extends AbstractPTObject {
         name = buffer.readBinaryModel().getStringValue();
         if (name == null)
             name = EMPTY;
-
         features = buffer.readBinaryModel().getStringValue();
         if (features == null)
             features = EMPTY;
@@ -95,9 +94,11 @@ public class PTWindow extends AbstractPTObject {
                 }
             });
             return true;
-        }
-        if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
             close(false);
+            return true;
+        } else if (ServerToClientModel.WINDOW_TITLE.equals(binaryModel.getModel())) {
+            setTitle(binaryModel.getStringValue(), window);
             return true;
         }
         return false;
@@ -116,7 +117,7 @@ public class PTWindow extends AbstractPTObject {
         setTitle(name, window);//workaround to set title on google chrome
 
         final PTInstruction instruction = new PTInstruction(objectID);
-        instruction.put(ClientToServerModel.HANDLER_OPEN);
+        instruction.put(ClientToServerModel.HANDLER_OPEN, url);
         uiService.sendDataToServer(instruction);
     }
 

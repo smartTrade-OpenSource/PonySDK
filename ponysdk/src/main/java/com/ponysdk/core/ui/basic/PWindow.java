@@ -116,9 +116,14 @@ public class PWindow extends PObject {
         if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
     }
 
+    public void setTitle(final String title) {
+        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_TITLE, title));
+    }
+
     @Override
     public void onClientData(final JsonObject event) {
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
+            url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             PWindowManager.registerWindow(this);
             this.opened = true;
 
@@ -169,6 +174,10 @@ public class PWindow extends PObject {
 
     public boolean isOpened() {
         return opened;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public static class TargetAttribut {
