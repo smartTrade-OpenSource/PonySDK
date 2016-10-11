@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -214,17 +215,24 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 try {
                     context.getUIContext().notifyMessageReceived();
 
-                    if (!ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
-                        request.setText(text);
-
-                        if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
-
-                        applicationManager.fireInstructions(context.getJsonObject(), context);
-                    } else {
+                    if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                         if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal");
+                    } else {
+                        request.setText(text);
+                        final JsonObject jsonObject = context.getJsonObject();
+                        if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
+                            final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
+                            final long end = System.currentTimeMillis();
+                            if (log.isInfoEnabled()) log.info("Ping measurement : " + (end - start) + " ms");
+                        } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                            if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
+                            applicationManager.fireInstructions(jsonObject, context);
+                        } else {
+                            log.error("Unknow message from terminal : " + text);
+                        }
                     }
                 } catch (final Throwable e) {
-                    log.error("Cannot process message from the browser: {}", text, e);
+                    log.error("Cannot process message from the terminal : {}", text, e);
                 } finally {
                     if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
                 }
@@ -295,12 +303,28 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
 
         /**
-         * Send heart beat to the terminal
+         * Send heart beat to the client
          */
         public void sendHeartBeat() {
             if (isSessionOpen()) {
                 final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
                 socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
+                flush(socketBuffer);
+            }
+        }
+
+        /**
+         * Send round trip to the client
+         */
+        public void sendRoundTrip() {
+            if (isSessionOpen()) {
+                final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(19);
+                socketBuffer.putShort(ServerToClientModel.PING_SERVER.getValue());
+                final byte[] startServer = String.valueOf(System.currentTimeMillis()).getBytes();
+                socketBuffer.putInt(startServer.length);
+                for (final byte b : startServer) {
+                    socketBuffer.put(b);
+                }
                 flush(socketBuffer);
             }
         }

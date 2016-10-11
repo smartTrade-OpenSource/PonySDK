@@ -26,6 +26,7 @@ package com.ponysdk.core.model;
 public enum ServerToClientModel {
 
     HEARTBEAT(ValueTypeModel.NULL),
+    PING_SERVER(ValueTypeModel.LONG),
     OBJECT_ID(ValueTypeModel.INTEGER),
     BEGIN_OBJECT(ValueTypeModel.NULL),
 
