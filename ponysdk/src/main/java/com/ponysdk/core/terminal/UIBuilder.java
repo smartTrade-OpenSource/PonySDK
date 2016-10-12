@@ -381,20 +381,19 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void processGC(final int objectId) {
-        final PTObject ptObject = unRegisterObject(objectId);
+        final PTObject ptObject = unregisterObject(objectId);
         if (ptObject != null) ptObject.gc(this);
         else log.warning("Cannot GC a garbaged object #" + objectId);
     }
 
-    private PTObject unRegisterObject(final int objectId) {
+    private PTObject unregisterObject(final Integer objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
         if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
     }
 
-    public void sendDataToServer(final Widget widget,
-            final PTInstruction instruction) {
+    public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
@@ -434,7 +433,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private Timer scheduleLoadingMessageBox() {
-
         if (loadingMessageBox == null) return null;
 
         final Timer timer = new Timer() {
@@ -449,7 +447,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void showCommunicationErrorMessage(final StatusCodeException caught) {
-
         final VerticalPanel content = new VerticalPanel();
         final HorizontalPanel actionPanel = new HorizontalPanel();
         actionPanel.setSize("100%", "100%");
@@ -510,7 +507,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    public PTObject getPTObject(final int id) {
+    public PTObject getPTObject(final Integer id) {
         final PTObject ptObject = objectByID.get(id);
         if (ptObject == null) log.warning("PTObject #" + id + " not found");
         return ptObject;
@@ -534,8 +531,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     @Override
-    public void onHttpResponseReceivedEvent(
-            final HttpResponseReceivedEvent event) {
+    public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
         if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
         hideLoadingMessageBox();
     }
