@@ -48,7 +48,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     private final Set<FormFieldListener> listeners = new HashSet<>();
     protected DataConverter<String, T> dataProvider;
     private FieldValidator validator;
-    private ListenerCollection<PValueChangeHandler<T>> handlers;
+    protected ListenerCollection<PValueChangeHandler<T>> handlers;
 
     public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider) {
         this.widget = widget;
@@ -59,10 +59,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     public ValidationResult isValid() {
         ValidationResult result;
 
-        if (validator == null)
-            result = ValidationResult.newOKValidationResult();
-        else
-            result = validator.isValid(getStringValue());
+        if (validator == null) result = ValidationResult.newOKValidationResult();
+        else result = validator.isValid(getStringValue());
 
         fireAfterValidation(result);
 
@@ -116,16 +114,13 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) {
-            handlers = new ListenerCollection<>();
-        }
+        if (handlers == null) handlers = new ListenerCollection<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) return false;
-        return handlers.remove(handler);
+        return handlers != null ? handlers.remove(handler) : false;
     }
 
     @Override
