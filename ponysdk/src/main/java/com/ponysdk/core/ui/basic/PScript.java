@@ -48,29 +48,33 @@ public class PScript extends PObject {
     }
 
     private static PScript get(final int windowID) {
-        final UIContext uiContext = UIContext.get();
-        final PScript script = uiContext.getAttribute(SCRIPT_KEY + windowID);
-        if (script == null) {
-            final PScript newScript = new PScript();
-            uiContext.setAttribute(SCRIPT_KEY + windowID, newScript);
-            if (PWindowManager.getWindow(windowID) != null) {
-                newScript.attach(windowID);
-            } else {
-                PWindowManager.addWindowListener(new RegisterWindowListener() {
+        if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            final UIContext uiContext = UIContext.get();
+            final PScript script = uiContext.getAttribute(SCRIPT_KEY + windowID);
+            if (script == null) {
+                final PScript newScript = new PScript();
+                uiContext.setAttribute(SCRIPT_KEY + windowID, newScript);
+                if (PWindowManager.getWindow(windowID) != null) {
+                    newScript.attach(windowID);
+                } else {
+                    PWindowManager.addWindowListener(new RegisterWindowListener() {
 
-                    @Override
-                    public void registered(final int registeredWindowID) {
-                        if (windowID == registeredWindowID) newScript.attach(windowID);
-                    }
+                        @Override
+                        public void registered(final int registeredWindowID) {
+                            if (windowID == registeredWindowID) newScript.attach(windowID);
+                        }
 
-                    @Override
-                    public void unregistered(final int windowID) {
-                    }
-                });
+                        @Override
+                        public void unregistered(final int windowID) {
+                        }
+                    });
+                }
+                return newScript;
             }
-            return newScript;
+            return script;
+        } else {
+            throw new IllegalArgumentException("PScript need to be executed on a window");
         }
-        return script;
     }
 
     public static void execute(final int windowID, final String js) {
