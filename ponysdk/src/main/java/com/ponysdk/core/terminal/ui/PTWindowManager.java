@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,10 +53,14 @@ public class PTWindowManager {
     }
 
     public static void closeAll() {
-        final Collection<PTWindow> values = get().windows.values();
+        final Collection<PTWindow> values = new ArrayList<>(get().windows.values());
         for (final PTWindow window : values) {
             window.close(true);
         }
+    }
+
+    public Collection<PTWindow> getWindows() {
+        return new ArrayList<>(windows.values());
     }
 
     public void register(final PTWindow window) {
