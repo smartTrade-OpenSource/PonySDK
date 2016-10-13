@@ -225,7 +225,8 @@ public enum ServerToClientModel {
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    TEXTBOX_ID(ValueTypeModel.INTEGER),
+    WINDOW_TITLE(ValueTypeModel.STRING);
 
     private final ValueTypeModel type;
 
