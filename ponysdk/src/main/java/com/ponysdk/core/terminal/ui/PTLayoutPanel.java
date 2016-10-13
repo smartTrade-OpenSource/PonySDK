@@ -24,14 +24,13 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.ui.alignment.PTAlignment;
+import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
 
 public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
@@ -43,17 +42,15 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            uiObject.setWidgetHorizontalPosition(w, alignment);
+            uiObject.setWidgetHorizontalPosition(w, AlignmentConverter.asAlignment(binaryModel));
             return true;
         }
         if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final Alignment alignment = PTAlignment.getAlignement(PTAlignment.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            uiObject.setWidgetVerticalPosition(w, alignment);
+            uiObject.setWidgetVerticalPosition(w, AlignmentConverter.asAlignment(binaryModel));
             return true;
         }
         if (ServerToClientModel.UNIT.equals(binaryModel.getModel())) {
@@ -129,5 +126,4 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         }
         return null;
     }
-
 }

@@ -23,7 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -32,8 +34,6 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;

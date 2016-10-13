@@ -64,10 +64,6 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent
  * <dd>applied to all child content widgets
  * </dl>
- * A TabLayoutPanel must have a <code>barHeight</code> attribute with a double
- * value, and may have a <code>barUnit</code> attribute with a
- * {com.google.gwt.dom.client.Style.Unit Style.Unit} value. <code>barUnit</code>
- * defaults to PX.
  * <p>
  * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements.
  * Each tab can have one widget child and one of two types of header elements. A

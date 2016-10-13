@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.rich;
 
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 public class PToolbar extends PHorizontalPanel {
 

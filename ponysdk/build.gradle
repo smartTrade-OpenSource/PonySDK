@@ -104,22 +104,19 @@ dependencies {
     testCompile 'junit:junit:4.10'
 
     runtime 'org.ow2.asm:asm:5.0.3'
-
     runtime 'com.google.gwt:gwt-codeserver:2.7.0'
-
 
 }
 
 jar {
     baseName = 'ponysdk'
-    from sourceSets.main.output
-    from sourceSets.test.output
-    from gwtOutputDirName
-
-    metaInf {
-        from 'src/main/resources/META-INF'
-        from buildInfoOutputDirName
+    into('ponyterminal') {
+        from gwtOutputDirName + '/ponyterminal'
     }
+    
+    exclude('*.devmode.js')
+    exclude('*compilation-mappings.txt')
+
     manifest {
         def cmd = "git rev-parse HEAD"
         def proc = cmd.execute()
@@ -170,7 +167,6 @@ task gwtc(dependsOn: classes, type: JavaExec) {
     maxHeapSize = '512M'
 }
 
-// custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allJava
@@ -202,43 +198,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
         attributes("Date": timestamp + " / " + new Date().toGMTString())
     }
 }
-task myJavadoc(type: Javadoc) {
-    source = sourceSets.main.allJava
-    exclude '**/com/ponysdk/core/terminal/**'
-}
-
-
-task javadocJar(type: Jar, dependsOn: myJavadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-    /**
-     title = 'PonySDK javadoc'
-     excludes = ['com.ponysdk.ui.terminal']
-     doLast {copy {from javadocResources
-     into buildDir.name + '/docs/javadoc';}}**/
-
-    manifest {
-        def cmd = "git rev-parse HEAD"
-        def proc = cmd.execute()
-        ext.revision = proc.text.trim()
-        ext.timestamp = (int) (new Date().getTime() / 1000)
-
-        attributes("Manifest-Version": "1.0")
-        attributes("Created-By": "PonySDK")
-        attributes("Built-By": "PonySDK")
-        attributes("License-Title": "Apache License 2.0")
-        attributes("Specification-Title": "PonySDK")
-        attributes("Specification-Version": version)
-        attributes("Specification-Vendor": "PonySDK")
-        attributes("Implementation-Title": "PonySDK")
-        attributes("Implementation-Version": version)
-        attributes("Implementation-Vendor-Id": "com.ponysdk")
-        attributes("Implementation-Vendor": "PonySDK")
-        attributes("Revision": revision)
-        attributes("Classifier": "javadocs")
-        attributes("Date": timestamp + " / " + new Date().toGMTString())
-    }
-}
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
@@ -249,10 +208,8 @@ test {
     }
 }
 
-// add javadoc/source jar tasks as artifacts
 artifacts {
     archives sourcesJar
-    archives javadocJar
 }
 
 jar.dependsOn('gwtc')

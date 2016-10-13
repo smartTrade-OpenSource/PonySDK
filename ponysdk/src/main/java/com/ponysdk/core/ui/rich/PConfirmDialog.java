@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
 import com.ponysdk.core.ui.basic.PDialogBox;
@@ -31,7 +32,6 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 public class PConfirmDialog extends PDialogBox {
 

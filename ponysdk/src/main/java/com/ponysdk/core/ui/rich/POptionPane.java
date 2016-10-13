@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.rich;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
@@ -30,7 +31,6 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users

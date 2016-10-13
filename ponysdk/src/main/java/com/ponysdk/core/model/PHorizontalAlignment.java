@@ -21,30 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic.alignment;
-
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
+package com.ponysdk.core.model;
 
 public enum PHorizontalAlignment {
     ALIGN_LEFT,
     ALIGN_CENTER,
     ALIGN_RIGHT;
 
-    public HorizontalAlignmentConstant asHorizontalAlignmentConstant() {
-        switch (this) {
-            case ALIGN_LEFT:
-                return HasHorizontalAlignment.ALIGN_LEFT;
-            case ALIGN_CENTER:
-                return HasHorizontalAlignment.ALIGN_CENTER;
-            case ALIGN_RIGHT:
-                return HasHorizontalAlignment.ALIGN_RIGHT;
-            default:
-                throw new IllegalArgumentException("Undefined alignement");
-        }
-    }
-
     public byte getValue() {
         return (byte) ordinal();
+    }
+
+    public static PHorizontalAlignment fromByte(final byte byteValue) {
+        return PHorizontalAlignment.values()[byteValue];
     }
 }

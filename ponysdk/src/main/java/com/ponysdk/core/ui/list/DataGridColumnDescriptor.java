@@ -28,12 +28,6 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.ValueProvider;
 
-/**
- * Defines a {@link com.google.gwt.user.cellview.client.DataGrid} column
- *
- * @param <D>
- * @param <V>
- */
 public class DataGridColumnDescriptor<D, V> {
 
     protected HeaderCellRenderer headerCellRenderer;

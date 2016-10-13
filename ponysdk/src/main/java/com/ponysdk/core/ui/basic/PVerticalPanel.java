@@ -25,10 +25,10 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 /**
  * A panel that lays all of its widgets out in a single vertical column.

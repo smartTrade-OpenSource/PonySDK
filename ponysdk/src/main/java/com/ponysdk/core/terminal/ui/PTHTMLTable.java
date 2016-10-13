@@ -24,14 +24,11 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.HTMLTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
-import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
+import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
 
 public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
 
@@ -111,9 +108,9 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
             final int cellColumn = buffer.readBinaryModel().getIntValue();
-            final VerticalAlignmentConstant asVerticalAlignmentConstant = PTVerticalAlignment.values()[binaryModel
-                    .getByteValue()].asVerticalAlignmentConstant();
-            uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, asVerticalAlignmentConstant);
+
+            uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn,
+                    AlignmentConverter.asVerticalAlignmentConstant(binaryModel));
             return true;
         }
         if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
@@ -121,9 +118,8 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
             final int cellColumn = buffer.readBinaryModel().getIntValue();
-            final HorizontalAlignmentConstant asHorizontalAlignmentConstant = PTHorizontalAlignment.values()[binaryModel
-                    .getByteValue()].asHorizontalAlignmentConstant();
-            uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn, asHorizontalAlignmentConstant);
+            uiObject.getCellFormatter().setHorizontalAlignment(cellRow, cellColumn,
+                    AlignmentConverter.asHorizontalAlignmentConstant(binaryModel));
             return true;
         }
         if (ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME.equals(binaryModel.getModel())) {

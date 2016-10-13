@@ -193,8 +193,6 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<head>");
         writer.newLine();
-        writer.append("<!-- Powered by PonySDK http://www.ponysdk.com -->");
-        writer.newLine();
         writer.append("<title>").append(application.getApplicationName()).append("</title>");
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");

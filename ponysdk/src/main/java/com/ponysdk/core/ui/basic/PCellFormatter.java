@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 public class PCellFormatter {
 

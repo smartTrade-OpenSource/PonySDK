@@ -23,11 +23,11 @@
 
 package com.ponysdk.impl.webapplication.footer;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
 
 public class DefaultFooterView extends PSimplePanel implements FooterView {
 

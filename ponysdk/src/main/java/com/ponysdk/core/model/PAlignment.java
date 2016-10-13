@@ -21,9 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic.alignment;
-
-import com.google.gwt.layout.client.Layout.Alignment;
+package com.ponysdk.core.model;
 
 /**
  * Used to specify the alignment of child elements within a layer.
@@ -45,19 +43,11 @@ public enum PAlignment {
      */
     STRETCH;
 
-    public static Alignment getAlignement(final PAlignment alignment) {
-        switch (alignment) {
-            case BEGIN:
-                return Alignment.BEGIN;
-            case END:
-                return Alignment.END;
-            case STRETCH:
-                return Alignment.STRETCH;
-        }
-        return null;
-    }
-
     public byte getValue() {
         return (byte) ordinal();
+    }
+
+    public static PAlignment fromByte(final byte byteValue) {
+        return PAlignment.values()[byteValue];
     }
 }

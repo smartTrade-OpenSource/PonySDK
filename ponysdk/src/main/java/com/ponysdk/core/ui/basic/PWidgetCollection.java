@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,12 +29,11 @@ import java.util.NoSuchElementException;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 
 /**
- * A simple collection of widgets to be used by {com.google.gwt.user.client.ui.Panel panels} and
- * {com.google.gwt.user.client.ui.Composite composites}.
  * <p>
- * The main purpose of this specialized collection is to implement {@link java.util.Iterator#remove()} in a
+ * The main purpose of this specialized collection is to implement
+ * {@link java.util.Iterator#remove()} in a
  * way that delegates removal to its panel. This makes it much easier for the panel to implement an
- * {com.google.gwt.user.client.ui.HasWidgets#iterator() iterator} that supports removal of widgets.
+ * iterator that supports removal of widgets.
  * </p>
  */
 public class PWidgetCollection implements Iterable<PWidget> {
@@ -54,11 +53,11 @@ public class PWidgetCollection implements Iterable<PWidget> {
     }
 
     public boolean contains(final PWidget w) {
-        return (indexOf(w) != -1);
+        return indexOf(w) != -1;
     }
 
     public PWidget get(final int index) {
-        if ((index < 0) || (index >= size)) {
+        if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -76,8 +75,8 @@ public class PWidgetCollection implements Iterable<PWidget> {
     }
 
     public void insert(final PWidget w, final int beforeIndex) {
-        if ((beforeIndex < 0) || (beforeIndex > size)) {
-            if ((beforeIndex < 0)) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
+        if (beforeIndex < 0 || beforeIndex > size) {
+            if (beforeIndex < 0) throw new IndexOutOfBoundsException("(beforeIndex (" + beforeIndex + ") < 0)");
             else throw new IndexOutOfBoundsException("beforeIndex (" + beforeIndex + ") > size (" + size + ")");
         }
 
@@ -106,7 +105,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
     }
 
     public void remove(final int index) {
-        if ((index < 0) || (index >= size)) {
+        if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -135,7 +134,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
         @Override
         public boolean hasNext() {
-            return index < (size - 1);
+            return index < size - 1;
         }
 
         @Override
@@ -148,7 +147,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
         @Override
         public void remove() {
-            if ((index < 0) || (index >= size)) {
+            if (index < 0 || index >= size) {
                 throw new IllegalStateException();
             }
             parent.remove(array[index--]);

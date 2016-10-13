@@ -23,10 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;

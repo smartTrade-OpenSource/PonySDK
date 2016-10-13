@@ -37,8 +37,7 @@ import com.ponysdk.core.ui.basic.event.PHasHTML;
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are
  * clicked, or open a cascading sub-menu. Each menu item is
- * assigned a unique DOM id in order to support ARIA. See
- * {com.google.gwt.user.client.ui.Accessibility} for more information.
+ * assigned a unique DOM id in order to support ARIA.
  */
 public class PMenuItem extends PMenuSubElement implements PHasHTML {
 

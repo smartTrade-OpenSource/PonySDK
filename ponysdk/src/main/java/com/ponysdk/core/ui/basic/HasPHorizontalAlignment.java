@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
+import com.ponysdk.core.model.PHorizontalAlignment;
 
 /**
  * Characteristic interface which indicates that a widget can be aligned horizontally.

@@ -23,14 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
 
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
@@ -61,37 +58,11 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
             return true;
         }
         if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final PTHorizontalAlignment horizontalAlignment = PTHorizontalAlignment.values()[binaryModel.getIntValue()];
-            switch (horizontalAlignment) {
-                case ALIGN_LEFT:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-                    break;
-                case ALIGN_CENTER:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-                    break;
-                case ALIGN_RIGHT:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-                    break;
-                default:
-                    break;
-            }
+            uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel));
             return true;
         }
         if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final PTVerticalAlignment verticalAlignment = PTVerticalAlignment.values()[binaryModel.getIntValue()];
-            switch (verticalAlignment) {
-                case ALIGN_TOP:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-                    break;
-                case ALIGN_MIDDLE:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-                    break;
-                case ALIGN_BOTTOM:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-                    break;
-                default:
-                    break;
-            }
+            uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel));
             return true;
         }
 

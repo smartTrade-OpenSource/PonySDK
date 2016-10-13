@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.ui.basic.alignment.PVerticalAlignment;
+import com.ponysdk.core.model.PVerticalAlignment;
 
 /**
  * Characteristic interface which indicates that a widget has an associated vertical alignment.

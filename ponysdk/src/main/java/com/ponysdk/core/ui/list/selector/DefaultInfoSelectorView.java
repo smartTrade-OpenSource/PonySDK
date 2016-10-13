@@ -24,12 +24,12 @@
 package com.ponysdk.core.ui.list.selector;
 
 import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.alignment.PHorizontalAlignment;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {
 

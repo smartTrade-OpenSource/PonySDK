@@ -26,9 +26,9 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.ui.alignment.PTHorizontalAlignment;
-import com.ponysdk.core.terminal.ui.alignment.PTVerticalAlignment;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -61,7 +61,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
             return true;
         }
         if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final PTHorizontalAlignment horizontalAlignment = PTHorizontalAlignment.values()[binaryModel.getByteValue()];
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -78,7 +78,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
             return true;
         }
         if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            final PTVerticalAlignment verticalAlignment = PTVerticalAlignment.values()[binaryModel.getByteValue()];
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
