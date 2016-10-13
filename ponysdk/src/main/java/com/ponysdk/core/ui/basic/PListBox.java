@@ -293,7 +293,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setSelectedValue(final Object value, final boolean selected) {
         for (int i = 0; i < items.size(); i++) {
-            if (value.equals(items.get(i).value)) {
+            if (Objects.equals(value, items.get(i).value)) {
                 setSelectedIndex(i, selected);
                 break;
             }
