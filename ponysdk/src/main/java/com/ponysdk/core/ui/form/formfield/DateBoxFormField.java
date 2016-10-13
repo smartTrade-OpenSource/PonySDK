@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
 
@@ -50,6 +51,12 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter) {
         super(widget, dataConverter);
+    }
+
+    @Override
+    public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
+        if (handlers == null) widget.addValueChangeHandler(event -> fireValueChange(getValue()));
+        super.addValueChangeHandler(handler);
     }
 
     @Override

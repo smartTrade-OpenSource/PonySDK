@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.form.formfield;
 
 import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 
 public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
@@ -32,9 +33,14 @@ public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
         this(new PTextBox(), dataProvider);
     }
 
-    public TextBoxFormField(final PTextBox widget,
-            final DataConverter<String, T> dataProvider) {
+    public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider) {
         super(widget, dataProvider);
+    }
+
+    @Override
+    public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
+        if (handlers == null) widget.addValueChangeHandler(event -> fireValueChange(getValue()));
+        super.addValueChangeHandler(handler);
     }
 
     @Override
