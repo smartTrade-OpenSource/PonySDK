@@ -112,6 +112,10 @@ public class PWindow extends PObject {
         }
     }
 
+    public void print() {
+        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.PRINT));
+    }
+
     public void close() {
         if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
     }

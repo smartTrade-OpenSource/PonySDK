@@ -226,7 +226,8 @@ public enum ServerToClientModel {
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
     TEXTBOX_ID(ValueTypeModel.INTEGER),
-    WINDOW_TITLE(ValueTypeModel.STRING);
+    WINDOW_TITLE(ValueTypeModel.STRING),
+    PRINT(ValueTypeModel.NULL);
 
     private final ValueTypeModel type;
 

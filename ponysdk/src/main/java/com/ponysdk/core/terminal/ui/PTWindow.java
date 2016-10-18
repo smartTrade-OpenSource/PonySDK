@@ -94,11 +94,14 @@ public class PTWindow extends AbstractPTObject {
                 }
             });
             return true;
-        } else if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
-            close(false);
+        } else if (ServerToClientModel.PRINT.equals(binaryModel.getModel())) {
+            window.print();
             return true;
         } else if (ServerToClientModel.WINDOW_TITLE.equals(binaryModel.getModel())) {
             setTitle(binaryModel.getStringValue(), window);
+            return true;
+        } else if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
+            close(false);
             return true;
         }
         return false;
@@ -126,7 +129,7 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public final native void setTitle(String title, Window window) /*-{
-                                                                            window.document.title = title;
-                                                                            }-*/;
+                                                                   window.document.title = title;
+                                                                   }-*/;
 
 }
