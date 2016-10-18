@@ -93,8 +93,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                     @Override
                     public void onClose(final CloseEvent<Window> event) {
-                        socketClient.close();
-                        PTWindowManager.closeAll();
+                        close();
                     }
                 });
 
@@ -175,4 +174,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
         instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
         uiBuilder.sendDataToServer(instruction);
     }
+
+    @Export
+    public void close() {
+        socketClient.close();
+        PTWindowManager.closeAll();
+    }
+
 }

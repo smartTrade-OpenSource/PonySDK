@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,10 @@ public class PWindowManager {
 
     public static void addWindowListener(final RegisterWindowListener listener) {
         get().addWindowListener0(listener);
+    }
+
+    public static final Collection<Integer> getWindowIds() {
+        return get().registeredWindows.keySet();
     }
 
     public static PWindow getWindow(final int windowID) {
