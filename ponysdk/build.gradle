@@ -1,5 +1,4 @@
 ext {
-    srcTerminal = ""
     resourcesCoreTest = "src/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
