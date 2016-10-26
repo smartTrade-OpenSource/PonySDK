@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.servlet.BufferManager.Buffer;
 import com.ponysdk.core.server.servlet.WebSocketServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet.Buffer;
 
 public class Parser {
 
@@ -53,32 +53,22 @@ public class Parser {
         this.socket = socket;
     }
 
-    public void reset() {
+    public void beginObject() {
+        if (buffer == null) buffer = socket.getBuffer();
+        if (buffer.position() == 0) buffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
+    }
+
+    public void endObject() {
+        if (buffer == null) return;
+        if (buffer.position() >= 4096) flush();
+    }
+
+    public void flush() {
         if (buffer != null) {
             socket.flush(buffer);
             buffer = null;
             lastUpdatedID = -1;
         }
-    }
-
-    public int getPosition() {
-        if (buffer == null) buffer = socket.getBuffer();
-        if (buffer == null) return -1;
-        return buffer.position();
-    }
-
-    public void beginObject() {
-        if (buffer == null) buffer = socket.getBuffer();
-        if (buffer == null) return;
-
-        if (buffer.position() == 0) {
-            buffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
-        }
-    }
-
-    public void endObject() {
-        if (buffer == null) return;
-        if (buffer.position() >= 4096) reset();
     }
 
     public void parse(final ServerToClientModel model, final Object value) {
@@ -146,7 +136,8 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final byte value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.put(value);
     }
@@ -158,7 +149,8 @@ public class Parser {
     }
 
     private void parse(final ServerToClientModel model, final int value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.putInt(value);
     }

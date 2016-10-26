@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -264,16 +263,15 @@ public abstract class PObject {
 
     private void writeUpdate(final ModelWriterCallback callback) {
         if (PWindowManager.getWindow(windowID) != null) {
-            try (final ModelWriter writer = Txn.getWriter()) {
-                if (windowID != PWindow.getMain().getID()) {
-                    writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-                }
-                writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
-
-                callback.doWrite(writer);
-            } catch (final IOException e) {
-                // TODO Error ???
+            final ModelWriter writer = Txn.getWriter();
+            writer.beginObject();
+            if (windowID != PWindow.getMain().getID()) {
+                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
             }
+            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+
+            callback.doWrite(writer);
+            writer.endObject();
         } else {
             if (log.isWarnEnabled()) log.warn("Update : The attached window #" + windowID + " doesn't exist", toString());
         }

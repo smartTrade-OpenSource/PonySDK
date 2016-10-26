@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.weak;
 
-import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -149,15 +148,16 @@ public class WeakHashMap implements Map<Integer, PObject> {
             final int windowID = pObject.getWindowID();
 
             if (PWindowManager.getWindow(windowID) != null) {
-                try (final ModelWriter writer = Txn.getWriter()) {
-                    if (windowID != PWindow.getMain().getID()) {
-                        if (PWindowManager.getWindow(windowID) == null) {
-                            writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-                        }
+
+                final ModelWriter writer = Txn.getWriter();
+                writer.beginObject();
+                if (windowID != PWindow.getMain().getID()) {
+                    if (PWindowManager.getWindow(windowID) == null) {
+                        writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
                     }
-                    writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
-                } catch (final IOException e) {
                 }
+                writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
+                writer.endObject();
             }
         }
     }
