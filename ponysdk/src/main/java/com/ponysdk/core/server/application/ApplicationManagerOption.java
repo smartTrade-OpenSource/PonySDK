@@ -61,6 +61,8 @@ public class ApplicationManagerOption {
 
     private String clientConfigFile;
 
+    private boolean debugMode;
+
     public ApplicationManagerOption() {
         applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
@@ -194,6 +196,14 @@ public class ApplicationManagerOption {
 
     public void setClientConfigFile(final String clientConfigFile) {
         this.clientConfigFile = clientConfigFile;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(final boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     @Override

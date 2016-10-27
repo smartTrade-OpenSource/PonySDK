@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module rename-to='ponyterminal'>
+<module rename-to='ponyterminaldebug'>
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="elemental.Elemental" />
@@ -17,7 +17,12 @@
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
 
     <inherits name="com.google.gwt.core.StackTrace" />
-    <set-property name="compiler.stackMode" value="strip" />
+    <set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
+
+    <inherits name="com.google.gwt.user.Debug" />
+    <set-property name="gwt.enableDebugId" value="true" />
 
 <!-- 	<script src="ponysdk.js" /> -->
 

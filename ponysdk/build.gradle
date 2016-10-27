@@ -112,7 +112,10 @@ jar {
     into('ponyterminal') {
         from gwtOutputDirName + '/ponyterminal'
     }
-    
+    into('ponyterminaldebug') {
+        from gwtOutputDirName + '/ponyterminaldebug'
+    }
+
     exclude('*.devmode.js')
     exclude('*compilation-mappings.txt')
 
@@ -166,6 +169,34 @@ task gwtc(dependsOn: classes, type: JavaExec) {
     maxHeapSize = '512M'
 }
 
+task gwtcDebug(dependsOn: classes, type: JavaExec) {
+    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
+    outputs.files fileTree(gwtOutputDirName)
+    description = "GWT compile to JavaScript (debug mode)"
+    main = 'com.google.gwt.dev.Compiler'
+    workingDir = buildDir
+
+    classpath {
+        [
+                sourceSets.main.java.srcDirs,
+                configurations.compile,
+                configurations.gwtdev
+        ]
+    }
+
+    args = [
+            '-war',
+            'gwt',
+            '-localWorkers',
+            Runtime.getRuntime().availableProcessors(),
+            'com.ponysdk.core.PonyTerminalDebug',
+            '-style', 'DETAILED',
+            '-optimize', '0'
+    ]
+
+    maxHeapSize = '512M'
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allJava
@@ -212,3 +243,4 @@ artifacts {
 }
 
 jar.dependsOn('gwtc')
+jar.dependsOn('gwtcDebug')
