@@ -44,7 +44,7 @@ import com.ponysdk.ui.terminal.WidgetType;
 /**
  * Push data to clients using WebSocket.
  */
-public class PPusher extends PObject implements ConnectionListener {
+public class PPusher extends PObject {
 
     private static final Logger log = LoggerFactory.getLogger(PPusher.class);
 
@@ -233,26 +233,7 @@ public class PPusher extends PObject implements ConnectionListener {
         }
     }
 
-    @Override
-    public void onClose() {
-        begin();
-        try {
-            final Txn txn = Txn.get();
-            txn.begin(txnContext);
-            try {
-                doClose();
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot process open socket", e);
-                txn.rollback();
-            }
-        } finally {
-            end();
-        }
-    }
-
-    @Override
-    public void onOpen() {
+    public void open() {
         begin();
         try {
             final Txn txn = Txn.get();
@@ -276,7 +257,7 @@ public class PPusher extends PObject implements ConnectionListener {
         }
     }
 
-    public void doClose() {
+    public void onClose() {
         pusherState = PusherState.STOPPED;
         for (final ConnectionListener listener : connectionListeners) {
             listener.onClose();

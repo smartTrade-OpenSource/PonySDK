@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.Application;
 import com.ponysdk.core.UIContext;
-import com.ponysdk.core.socket.ConnectionListener;
 import com.ponysdk.ui.server.basic.PPusher;
 import com.ponysdk.ui.terminal.Dictionnary;
 import com.ponysdk.ui.terminal.Dictionnary.APPLICATION;
@@ -57,7 +56,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
     public static class JettyWebSocket implements OnTextMessage, com.ponysdk.core.socket.WebSocket {
 
         protected Connection connection;
-        protected ConnectionListener connectionListener;
+        protected PPusher pusher;
         protected UIContext uiContext;
         private final int maxIdleTime;
 
@@ -71,7 +70,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
             log.info("Connection received from: " + connection.toString());
             this.connection = connection;
             this.connection.setMaxIdleTime(maxIdleTime);
-            this.connectionListener.onOpen();
+            this.pusher.open();
         }
 
         @Override
@@ -80,14 +79,14 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.WebSocketServl
         }
 
         @Override
-        public void addConnectionListener(final ConnectionListener connectionListener) {
-            this.connectionListener = connectionListener;
+        public void addConnectionListener(final PPusher pusher) {
+            this.pusher = pusher;
         }
 
         @Override
         public void onClose(final int closeCode, final String message) {
             log.info("Connection lost from: " + connection.toString() + ". Code: " + closeCode + ". Message: " + message);
-            connectionListener.onClose();
+            pusher.onClose();
             uiContext.destroy();
         }
 

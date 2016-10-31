@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
-version = '0.7.5.0'
+version = '0.7.6.0'
 
 ext{
     srcCore = "src-core/main/java"
