@@ -87,7 +87,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             final PVerticalPanel categoryPanel = new PVerticalPanel();
             categoryPanel.setHeight("1px");
             categoryPanel.setWidth("100%");
-            categoryPanel.ensureDebugId("category_" + categoryNode.name);
+            categoryPanel.ensureDebugId("category_" + categoryNode.name.replace(" ", "_"));
 
             categoryNode.ui = categoryPanel;
             layoutPanel.add(categoryPanel, categoryNode.name, true, headerWidth);
@@ -142,7 +142,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
 
         final PComplexPanel categoryPanel = categoriesByNode.get(categoryNode);
         final PAnchor item = new PAnchor(menuItem.getName());
-        item.ensureDebugId("page_" + menuItem.getName());
+        item.ensureDebugId("page_" + menuItem.getName().replace(" ", "_"));
         applyPadding(itemNode, item);
         item.addClickHandler(new PClickHandler() {
 
