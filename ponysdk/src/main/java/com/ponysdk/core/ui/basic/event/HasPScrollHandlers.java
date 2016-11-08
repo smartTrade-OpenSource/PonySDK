@@ -21,24 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.model;
+package com.ponysdk.core.ui.basic.event;
 
-public enum HandlerModel {
+import com.ponysdk.core.ui.basic.event.PScrollEvent.PScrollHandler;
 
-    HANDLER_DOM,
-    HANDLER_EMBEDED_STREAM_REQUEST,
-    HANDLER_CHANGE,
-    HANDLER_POPUP_POSITION,
-    HANDLER_RESIZE,
-    HANDLER_STRING_VALUE_CHANGE,
-    HANDLER_COMMAND,
-    HANDLER_BEFORE_SELECTION,
-    HANDLER_SELECTION,
-    HANDLER_STRING_SELECTION,
-    HANDLER_STREAM_REQUEST,
-    HANDLER_SCROLL;
+public interface HasPScrollHandlers {
 
-    public byte getValue() {
-        return (byte) ordinal();
-    }
+    void addScrollHandler(PScrollHandler handler);
+
+    void removeScrollHandler(PScrollHandler handler);
+
 }

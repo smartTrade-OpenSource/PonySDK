@@ -77,7 +77,12 @@ public enum ClientToServerModel {
     HANDLER_STRING_SELECTION("G"),
     HANDLER_SUBMIT_COMPLETE("H"),
 
-    PING_SERVER("I");
+    PING_SERVER("I"),
+    
+    HANDLER_SCROLL_HEIGHT("J"),
+    HANDLER_SCROLL_WIDTH("K"),
+    HANDLER_SCROLL_VERTICAL("L"),
+    HANDLER_SCROLL_HORIZONTAL("M");
 
     private String key;
 

@@ -208,6 +208,7 @@ public enum ServerToClientModel {
     VISIBLE_LINES(ValueTypeModel.INTEGER),
     CHARACTER_WIDTH(ValueTypeModel.INTEGER),
     HORIZONTAL_SCROLL_POSITION(ValueTypeModel.INTEGER),
+    VERTICAL_SCROLL_POSITION(ValueTypeModel.INTEGER),
     SCROLL_TO(ValueTypeModel.INTEGER),
     LIMIT(ValueTypeModel.INTEGER),
     SUGGESTION(ValueTypeModel.STRING),
