@@ -83,7 +83,7 @@ import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PToolbar;
@@ -351,7 +351,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -375,7 +375,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -408,7 +408,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
@@ -510,15 +510,20 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static final PTextBox createPTextBox() {
         final PTextBox pTextBox = new PTextBox();
 
-        final PKeyUpFilterHandler keyUpHandler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
+        pTextBox.addKeyUpHandler(new PKeyUpHandler() {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent.getEventID() + "');");
             }
-        };
 
-        pTextBox.addDomHandler(keyUpHandler, PKeyUpEvent.TYPE);
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[] {
+                        PKeyCodes.ENTER
+                };
+            }
+        });
         return pTextBox;
     }
 

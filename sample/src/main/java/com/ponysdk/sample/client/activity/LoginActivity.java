@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
@@ -58,11 +58,18 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
 
         view.addLoginClickHandler(clickEvent -> doLogin());
 
-        view.asWidget().addDomHandler(new PKeyPressFilterHandler(PKeyCodes.ENTER) {
+        view.asWidget().addKeyPressHandler(new PKeyPressHandler() {
 
             @Override
             public void onKeyPress(final PKeyPressEvent keyPressEvent) {
                 doLogin();
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[] {
+                        PKeyCodes.ENTER
+                };
             }
         });
     }

@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -29,27 +29,32 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
-public abstract class PKeyUpFilterHandler implements PKeyUpHandler {
+public interface PKeyFilterHandler extends EventHandler {
 
-    private final JsonObject jsonObject;
-
-    public PKeyUpFilterHandler(final PKeyCodes... keyCodes) {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-
-        for (final PKeyCodes code : keyCodes) {
-            builder.add(code.getCode());
-        }
-
-        final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        jsonObjectBuilder.add(ClientToServerModel.KEY_FILTER.toStringValue(), builder.build());
-
-        jsonObject = jsonObjectBuilder.build();
+    default PKeyCodes[] getFilteredKeys() {
+        return null;
     }
 
-    public JsonObject asJsonObject() {
-        return jsonObject;
+    default JsonObject getJsonFilteredKeys() {
+        final PKeyCodes[] listeningKeys = getFilteredKeys();
+
+        if (listeningKeys != null) {
+            final JsonArrayBuilder builder = Json.createArrayBuilder();
+
+            for (final PKeyCodes code : listeningKeys) {
+                builder.add(code.getCode());
+            }
+
+            final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+            jsonObjectBuilder.add(ClientToServerModel.KEY_FILTER.toStringValue(), builder.build());
+
+            return jsonObjectBuilder.build();
+        }
+
+        return null;
     }
 
 }

@@ -25,10 +25,9 @@ package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
+@FunctionalInterface
 public interface HasPKeyUpHandlers {
 
     HandlerRegistration addKeyUpHandler(PKeyUpHandler handler);
-
-    HandlerRegistration addKeyUpHandler(PKeyUpFilterHandler handler);
 
 }

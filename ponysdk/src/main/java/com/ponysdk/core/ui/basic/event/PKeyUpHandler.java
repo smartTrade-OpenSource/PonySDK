@@ -23,10 +23,9 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import com.ponysdk.core.ui.eventbus.EventHandler;
-
 @FunctionalInterface
-public interface PKeyUpHandler extends EventHandler {
+public interface PKeyUpHandler extends PKeyFilterHandler {
 
     void onKeyUp(PKeyUpEvent keyUpEvent);
+
 }

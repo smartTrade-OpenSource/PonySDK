@@ -36,7 +36,7 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class JavascriptPageActivity extends SamplePageActivity {
@@ -68,7 +68,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         history.add(new PLabel("> With PonySDK, you can also execute native javascript"));
         history.add(new PLabel("> Try it out.. "));
 
-        inputTextBox.addKeyUpHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP) {
+        inputTextBox.addKeyUpHandler(new PKeyUpHandler() {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
@@ -86,6 +86,13 @@ public class JavascriptPageActivity extends SamplePageActivity {
                         inputTextBox.setText(commands.get(commands.size() - commandIndex));
                     }
                 }
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[] {
+                        PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP
+                };
             }
         });
 

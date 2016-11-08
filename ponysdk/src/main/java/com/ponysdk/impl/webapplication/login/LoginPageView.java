@@ -25,7 +25,7 @@ package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 
 public interface LoginPageView extends IsPWidget {
 
@@ -35,9 +35,9 @@ public interface LoginPageView extends IsPWidget {
 
     Boolean isRememberMe();
 
-    void addLoginShortcutListener(PKeyUpFilterHandler handler);
+    void addLoginShortcutListener(PKeyUpHandler handler);
 
-    void addPasswordShortcutListener(PKeyUpFilterHandler handler);
+    void addPasswordShortcutListener(PKeyUpHandler handler);
 
     void addLoginClickHandler(PClickHandler handler);
 
