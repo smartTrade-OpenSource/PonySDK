@@ -35,7 +35,7 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PGrid;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.formfield.FormFieldListener;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
@@ -74,11 +74,18 @@ public class ComplexHeaderCellRenderer
         buildGrid();
         buildCaption(s);
 
-        formField.asWidget().addDomHandler(new PKeyUpFilterHandler(PKeyCodes.ENTER) {
+        formField.asWidget().addKeyUpHandler(new PKeyUpHandler() {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 filterListeners.forEach(FilterListener::onFilterChange);
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[] {
+                        PKeyCodes.ENTER
+                };
             }
         });
 

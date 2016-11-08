@@ -33,8 +33,6 @@ import com.ponysdk.core.ui.basic.event.HasPDragOverHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDragStartHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDropHandlers;
 import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPMouseDownHandlers;
 import com.ponysdk.core.ui.basic.event.HasPMouseOutHandlers;
 import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
@@ -57,12 +55,6 @@ import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PDropHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
-import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
 import com.ponysdk.core.ui.basic.event.PMouseDownHandler;
 import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
@@ -80,7 +72,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 public class PFocusPanel extends PSimplePanel
         implements HasPDragEndHandlers, HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers,
         HasPDropHandlers, HasPMouseOverHandlers, HasPMouseOutHandlers, HasPMouseDownHandlers, HasPMouseUpHandlers, HasPClickHandlers,
-        HasPKeyUpHandlers, HasPKeyPressHandlers, HasPFocusHandlers, HasPBlurHandlers {
+        HasPFocusHandlers, HasPBlurHandlers {
 
     @Override
     protected WidgetType getWidgetType() {
@@ -95,26 +87,6 @@ public class PFocusPanel extends PSimplePanel
     @Override
     public HandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
         return addDomHandler(handler, PDragEnterEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
-        return addDomHandler(handler, PKeyUpEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyUpHandler(final PKeyUpFilterHandler handler) {
-        return addDomHandler(handler);
-    }
-
-    @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler);
     }
 
     @Override

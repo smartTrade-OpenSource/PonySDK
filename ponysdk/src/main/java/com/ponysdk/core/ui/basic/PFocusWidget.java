@@ -30,8 +30,6 @@ import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PBlurHandler;
@@ -41,12 +39,6 @@ import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
 import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
-import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOverHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -55,8 +47,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
  * Abstract base class for most widgets that can receive keyboard focus.
  */
 public abstract class PFocusWidget extends PWidget
-        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPKeyUpHandlers,
-        HasPKeyPressHandlers, HasPFocusHandlers, HasPBlurHandlers {
+        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPFocusHandlers, HasPBlurHandlers {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -67,26 +58,6 @@ public abstract class PFocusWidget extends PWidget
     @Override
     public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
-        return addDomHandler(handler, PKeyUpEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyUpHandler(final PKeyUpFilterHandler handler) {
-        return addDomHandler(handler);
-    }
-
-    @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addKeyPressHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler);
     }
 
     @Override

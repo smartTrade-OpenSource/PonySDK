@@ -45,6 +45,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.HasPHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -59,9 +61,9 @@ import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
 import com.ponysdk.core.ui.basic.event.PMouseEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
@@ -81,7 +83,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * support for receiving events from the browser and being added directly to
  * {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers {
+public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
 
@@ -341,13 +343,20 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return handlerRegistration;
     }
 
-    public HandlerRegistration addDomHandler(final PKeyPressFilterHandler handler) {
-        return addDomHandler(handler, PKeyPressEvent.TYPE,
-                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
+    @Override
+    public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
+        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        if (filteredKeys != null) return addDomHandler(handler, PKeyPressEvent.TYPE,
+                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
+        else return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
-    public HandlerRegistration addDomHandler(final PKeyUpFilterHandler handler) {
-        return addDomHandler(handler, PKeyUpEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, handler.asJsonObject()));
+    @Override
+    public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
+        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        if (filteredKeys != null) return addDomHandler(handler, PKeyUpEvent.TYPE,
+                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
+        else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {

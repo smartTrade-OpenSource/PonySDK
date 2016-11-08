@@ -27,7 +27,7 @@ import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpFilterHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
 public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPageView> implements PClickHandler {
@@ -43,12 +43,19 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPa
 
     public void setLoginPageView(final LoginPageView view) {
         this.view = view;
-        final PKeyUpFilterHandler keyPressHandler = new PKeyUpFilterHandler(PKeyCodes.ENTER) {
+        final PKeyUpHandler keyPressHandler = new PKeyUpHandler() {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
                 view.clearMessages();
                 sendLogon(view.getLogin(), view.getPassword());
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[] {
+                        PKeyCodes.ENTER
+                };
             }
         };
         view.addLoginShortcutListener(keyPressHandler);
