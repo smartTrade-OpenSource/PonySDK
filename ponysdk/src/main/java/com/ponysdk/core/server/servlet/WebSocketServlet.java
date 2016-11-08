@@ -24,12 +24,7 @@
 package com.ponysdk.core.server.servlet;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
@@ -48,6 +43,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.BufferManager.Buffer;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
 
@@ -56,12 +52,11 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private static final long serialVersionUID = 1L;
-    private static final int NUMBER_OF_BUFFERS = 50;
-    private static final int DEFAULT_BUFFER_SIZE = 512000;
-    private final BlockingQueue<Buffer> buffers = new ArrayBlockingQueue<>(NUMBER_OF_BUFFERS);
     private int maxIdleTime = 1000000;
     private AbstractApplicationManager applicationManager;
     private WebsocketMonitor monitor;
+
+    private BufferManager bufferManager;
 
     @Override
     public void init() throws ServletException {
@@ -70,15 +65,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         applicationManager = (AbstractApplicationManager) getServletContext()
                 .getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
-        if (log.isInfoEnabled())
-            log.info("Initializing Buffer allocation ...");
-
-        for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
-            buffers.add(new Buffer());
-        }
-
-        if (log.isInfoEnabled())
-            log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * buffers.size());
+        bufferManager = new BufferManager();
     }
 
     @Override
@@ -91,7 +78,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             // Force session creation if there is no session
             request.getHttpServletRequest().getSession(true);
             if (request.getSession() != null) {
-                return new WebSocket(request, response, monitor, buffers, applicationManager);
+                return new WebSocket(request, response, monitor, bufferManager, applicationManager);
             } else {
                 log.error("No HTTP session found");
                 return null;
@@ -107,35 +94,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         this.monitor = monitor;
     }
 
-    public static final class Buffer {
-
-        private final ByteBuffer socketBuffer;
-
-        private Buffer() {
-            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-        }
-
-        public int position() {
-            return socketBuffer.position();
-        }
-
-        public void put(final byte value) {
-            socketBuffer.put(value);
-        }
-
-        public void putShort(final short value) {
-            socketBuffer.putShort(value);
-        }
-
-        public void putInt(final int value) {
-            socketBuffer.putInt(value);
-        }
-
-        private ByteBuffer getRawBuffer() {
-            return socketBuffer;
-        }
-    }
-
     public static final class WebSocket implements WebSocketListener {
 
         private final PRequest request;
@@ -143,15 +101,15 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         private Session session;
 
         private final WebsocketMonitor monitor;
-        private final BlockingQueue<Buffer> buffers;
+        private final BufferManager bufferManager;
         private final AbstractApplicationManager applicationManager;
 
         WebSocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response, final WebsocketMonitor monitor,
-                final BlockingQueue<Buffer> buffers, final AbstractApplicationManager applicationManager) {
+                final BufferManager bufferManager, final AbstractApplicationManager applicationManager) {
             log.info(request.getHeader("User-Agent"));
             this.request = new PRequest(request);
             this.monitor = monitor;
-            this.buffers = buffers;
+            this.bufferManager = bufferManager;
             this.applicationManager = applicationManager;
         }
 
@@ -181,10 +139,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 context.setUIContext(uiContext);
                 application.registerUIContext(uiContext);
 
-                final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(6);
-                socketBuffer.putShort(ServerToClientModel.UI_CONTEXT_ID.getValue());
-                socketBuffer.putInt(uiContext.getID());
-                flush(socketBuffer);
+                final Buffer buffer = getBuffer();
+                buffer.putShort(ServerToClientModel.UI_CONTEXT_ID.getValue());
+                buffer.putInt(uiContext.getID());
+                flush(buffer);
                 applicationManager.startApplication(context);
 
             } catch (final Exception e) {
@@ -250,55 +208,27 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         }
 
         public Buffer getBuffer() {
-            try {
-                return buffers.poll(5, TimeUnit.SECONDS);
-            } catch (final InterruptedException e) {
-                log.error("Cannot poll buffer", e);
-                return null;
-            }
+            return bufferManager.allocate();
         }
 
         /**
          * Send to the terminal
          */
         public void flush(final Buffer buffer) {
-            if (buffer != null) {
-                if (context.getUIContext().isLiving()) {
-                    if (isSessionOpen()) {
-                        try {
-                            final ByteBuffer socketBuffer = buffer.getRawBuffer();
-
-                            flush(socketBuffer);
-                            socketBuffer.clear();
-
-                            buffers.put(buffer);
-                        } catch (final Throwable t) {
-                            log.error("Cannot flush to WebSocket", t);
-                        }
-                    } else {
-                        if (log.isDebugEnabled()) log.debug("Session is down");
+            if (context.getUIContext().isLiving() && isSessionOpen()) {
+                final ByteBuffer socketBuffer = buffer.getRawBuffer();
+                if (socketBuffer.position() != 0) {
+                    if (monitor != null) monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
+                    socketBuffer.flip();
+                    try {
+                        final Future<Void> future = session.getRemote().sendBytesByFuture(socketBuffer);
+                        bufferManager.release(buffer, future);
+                    } finally {
+                        if (monitor != null) monitor.onAfterFlush(WebSocket.this);
                     }
-                } else {
-                    throw new IllegalStateException("UI Context has been destroyed");
                 }
             } else {
-                if (log.isInfoEnabled()) log.info("Already flushed");
-            }
-        }
-
-        private void flush(final ByteBuffer socketBuffer) {
-            if (socketBuffer.position() != 0) {
-                if (monitor != null) monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
-                socketBuffer.flip();
-                try {
-                    final Future<Void> sendBytesByFuture = session.getRemote().sendBytesByFuture(socketBuffer);
-                    sendBytesByFuture.get(25, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    log.error("Cannot stream data", e);
-                } finally {
-                    if (monitor != null)
-                        monitor.onAfterFlush(WebSocket.this);
-                }
+                throw new IllegalStateException("UI Context has been destroyed");
             }
         }
 
@@ -307,9 +237,9 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          */
         public void sendHeartBeat() {
             if (isSessionOpen()) {
-                final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(2);
-                socketBuffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
-                flush(socketBuffer);
+                final Buffer buffer = getBuffer();
+                buffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
+                flush(buffer);
             }
         }
 

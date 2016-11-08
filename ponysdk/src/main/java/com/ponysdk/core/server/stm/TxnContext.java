@@ -56,7 +56,7 @@ public class TxnContext implements TxnListener {
     }
 
     void flush() {
-        parser.reset();
+        parser.flush();
     }
 
     @Override
