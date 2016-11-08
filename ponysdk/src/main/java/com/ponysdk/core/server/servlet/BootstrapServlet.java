@@ -204,16 +204,19 @@ public class BootstrapServlet extends HttpServlet {
 
         addToMeta(writer);
         writer.newLine();
-        writer.append("<script type=\"text/javascript\" src=\"ponyterminal/ponyterminal.nocache.js\"></script>");
+
+        String ponyTerminalJsFileName;
+        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        writer.append("<script type=\"text/javascript\" src=\"" + ponyTerminalJsFileName + "\"></script>");
         writer.newLine();
 
         for (final String style : stylesheets) {
             final String contentType = fileTypeMap.getContentType(style);
-            if (!contentType.equals("text/css"))
-                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style)
-                        .append("\">");
-            else
-                writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
+            if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
+                .append("\" href=\"").append(style).append("\">");
+            else writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style)
+                .append("\">");
             writer.newLine();
         }
 
@@ -244,7 +247,7 @@ public class BootstrapServlet extends HttpServlet {
 
     protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
         writer.append(
-                "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+            "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
@@ -255,7 +258,7 @@ public class BootstrapServlet extends HttpServlet {
         writer.append("<noscript>");
         writer.newLine();
         writer.append(
-                "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         writer.newLine();
         writer.append("Your web browser must have JavaScript enabled");
         writer.newLine();
