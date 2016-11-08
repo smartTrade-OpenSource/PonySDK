@@ -126,7 +126,7 @@ public class CommunicationSanityChecker {
                     if (log.isDebugEnabled()) log.debug(
                             "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
                             uiContext);
-                    uiContext.sendHeartBeat();
+                    //uiContext.sendHeartBeat();
                 }
                 break;
             case SUSPECT:
@@ -152,7 +152,8 @@ public class CommunicationSanityChecker {
                 break;
         }
 
-        // uiContext.sendHeartBeat();
+        uiContext.sendHeartBeat();
+        uiContext.sendRoundTrip();
     }
 
     protected enum CommunicationState {

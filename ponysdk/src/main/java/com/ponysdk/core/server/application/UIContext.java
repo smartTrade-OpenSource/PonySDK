@@ -499,7 +499,6 @@ public class UIContext {
         }
         // log.info("UIContext destroyed ViewID #{} from the Session #{}",
         // uiContextID, application.getSession().getId());
-
     }
 
     public void sendHeartBeat() {
@@ -507,7 +506,18 @@ public class UIContext {
         try {
             context.sendHeartBeat();
         } catch (final Throwable e) {
-            log.error("Cannot send server heartbeat to client", e);
+            log.error("Cannot send server heart beat to client", e);
+        } finally {
+            end();
+        }
+    }
+
+    public void sendRoundTrip() {
+        begin();
+        try {
+            context.sendRoundTrip();
+        } catch (final Throwable e) {
+            log.error("Cannot send server round trip to client", e);
         } finally {
             end();
         }
