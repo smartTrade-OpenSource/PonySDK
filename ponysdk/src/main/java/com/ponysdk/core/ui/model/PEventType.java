@@ -61,7 +61,7 @@ public enum PEventType {
     FOCUSEVENTS(0x00800 | 0x01000),
     KEYEVENTS(0x00080 | 0x00100 | 0x00200),
     MOUSEEVENTS(0x00004 | 0x00008 | 0x00040 | 0x00010 | 0x00020),
-    OUCHEVENTS(0x100000 | 0x200000 | 0x400000 | 0x800000),
+    TOUCHEVENTS(0x100000 | 0x200000 | 0x400000 | 0x800000),
     GESTUREEVENTS(0x1000000 | 0x2000000 | 0x4000000);
 
     private static final Map<Integer, PEventType> eventsByCode = new HashMap<>();
