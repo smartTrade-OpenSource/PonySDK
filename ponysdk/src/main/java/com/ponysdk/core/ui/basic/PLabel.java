@@ -67,7 +67,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
         HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
-    private String text;
+    protected String text;
 
     public PLabel() {
     }
