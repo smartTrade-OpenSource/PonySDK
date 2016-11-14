@@ -156,6 +156,10 @@ public class BufferManager {
             socketBuffer.putInt(value);
         }
 
+        public void putLong(final long value) {
+            socketBuffer.putLong(value);
+        }
+
         public void clear() {
             socketBuffer.clear();
         }

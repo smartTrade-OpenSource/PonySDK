@@ -63,7 +63,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         super.init();
 
         applicationManager = (AbstractApplicationManager) getServletContext()
-                .getAttribute(AbstractApplicationManager.class.getCanonicalName());
+            .getAttribute(AbstractApplicationManager.class.getCanonicalName());
 
         bufferManager = new BufferManager();
     }
@@ -126,7 +126,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             Application application = SessionManager.get().getApplication(request.getSession().getId());
             if (application == null) {
                 application = new Application(request.getSession(), applicationManager.getOptions(),
-                        UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
+                    UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
                 SessionManager.get().registerApplication(application);
             }
 
@@ -248,14 +248,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
          */
         public void sendRoundTrip() {
             if (isSessionOpen()) {
-                final ByteBuffer socketBuffer = ByteBuffer.allocateDirect(19);
-                socketBuffer.putShort(ServerToClientModel.PING_SERVER.getValue());
-                final byte[] startServer = String.valueOf(System.currentTimeMillis()).getBytes();
-                socketBuffer.putInt(startServer.length);
-                for (final byte b : startServer) {
-                    socketBuffer.put(b);
-                }
-                flush(socketBuffer);
+                final Buffer buffer = getBuffer();
+                buffer.putShort(ServerToClientModel.PING_SERVER.getValue());
+                buffer.putLong(System.currentTimeMillis());
+                flush(buffer);
             }
         }
 
