@@ -27,14 +27,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +43,6 @@ public class BufferManager {
     private static final int MAX_BUFFERS = 1000;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
-    private final ExecutorCompletionService<Task> service;
-
     private final BlockingQueue<Buffer> bufferPool = new LinkedBlockingQueue<>();
     private final List<Buffer> buffers = new ArrayList<>(MAX_BUFFERS);
 
@@ -58,26 +53,6 @@ public class BufferManager {
             bufferPool.add(new Buffer());
         }
         buffers.addAll(bufferPool);
-
-        service = new ExecutorCompletionService<>(Executors.newSingleThreadExecutor());
-
-        final Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            try {
-                Future<Task> future;
-                while ((future = service.take()) != null) {
-                    final Task task = future.get();
-                    if (task.isDone()) {
-                        task.buffer.clear();
-                        bufferPool.offer(task.buffer);
-                    } else {
-                        service.submit(task);
-                    }
-                }
-            } catch (final Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        });
 
         log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * bufferPool.size());
     }
@@ -102,34 +77,25 @@ public class BufferManager {
         return buffer;
     }
 
-    public void release(final Buffer buffer, final Future<Void> future) {
-        if (future.isDone()) {
-            buffer.clear();
-            bufferPool.offer(buffer);
-        } else {
-            service.submit(new Task(buffer, future));
-        }
+    public void send(final RemoteEndpoint remote, final Buffer buffer) {
+        remote.sendBytes(buffer.getRawBuffer(), new WriteCallback() {
+
+            @Override
+            public void writeSuccess() {
+                release(buffer);
+            }
+
+            @Override
+            public void writeFailed(final Throwable e) {
+                log.error("Can't write the buffer on the websocket", e);
+                release(buffer);
+            }
+        });
     }
 
-    public static final class Task implements Callable<Task> {
-
-        final Buffer buffer;
-        final Future<Void> future;
-
-        public Task(final Buffer buffer, final Future<Void> future) {
-            this.buffer = buffer;
-            this.future = future;
-        }
-
-        @Override
-        public Task call() throws Exception {
-            return this;
-        }
-
-        public boolean isDone() {
-            return future.isDone();
-        }
-
+    public void release(final Buffer buffer) {
+        buffer.clear();
+        bufferPool.offer(buffer);
     }
 
     public static final class Buffer {

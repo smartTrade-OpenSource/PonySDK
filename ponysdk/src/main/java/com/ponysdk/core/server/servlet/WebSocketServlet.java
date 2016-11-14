@@ -24,7 +24,6 @@
 package com.ponysdk.core.server.servlet;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.Future;
 
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
@@ -221,8 +220,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                     if (monitor != null) monitor.onBeforeFlush(WebSocket.this, socketBuffer.position());
                     socketBuffer.flip();
                     try {
-                        final Future<Void> future = session.getRemote().sendBytesByFuture(socketBuffer);
-                        bufferManager.release(buffer, future);
+                        bufferManager.send(session.getRemote(), buffer);
                     } finally {
                         if (monitor != null) monitor.onAfterFlush(WebSocket.this);
                     }
