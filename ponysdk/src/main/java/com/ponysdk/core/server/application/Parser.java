@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.server.application;
 
-import java.io.UnsupportedEncodingException;
-
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
@@ -35,11 +33,6 @@ import com.ponysdk.core.server.servlet.BufferManager.Buffer;
 import com.ponysdk.core.server.servlet.WebSocketServlet;
 
 public class Parser {
-
-    private static final byte TRUE = 1;
-    private static final byte FALSE = 0;
-
-    private static final String ENCODING_CHARSET = "UTF-8";
 
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
@@ -55,7 +48,7 @@ public class Parser {
 
     public void beginObject() {
         if (buffer == null) buffer = socket.getBuffer();
-        if (buffer.position() == 0) buffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
+        if (buffer.position() == 0) buffer.put(ServerToClientModel.BEGIN_OBJECT.getValue());
     }
 
     public void endObject() {
@@ -75,8 +68,8 @@ public class Parser {
         if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled()) log.debug("A consecutive update on the same id " + lastUpdatedID
-                        + ", so we concatenate the instructions");
+                if (log.isDebugEnabled())
+                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
                 return;
             } else {
                 lastUpdatedID = newUpdatedID;
@@ -106,14 +99,10 @@ public class Parser {
                 parse(model, (int) value);
                 break;
             case LONG:
-                // TODO For now, we write String
-                // parse(model, (long) value);
-                parse(model, String.valueOf(value));
+                parse(model, (long) value);
                 break;
             case DOUBLE:
-                // TODO For now, we write String
-                // parse(model, (double) value);
-                parse(model, String.valueOf(value));
+                parse(model, (double) value);
                 break;
             case STRING:
                 parse(model, (String) value);
@@ -128,55 +117,59 @@ public class Parser {
 
     private void parse(final ServerToClientModel model) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
+        buffer.put(model.getValue());
     }
 
     private void parse(final ServerToClientModel model, final boolean value) {
-        parse(model, value ? TRUE : FALSE);
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.put(model.getValue());
+        buffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final byte value) {
         if (log.isDebugEnabled())
             log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
+        buffer.put(model.getValue());
         buffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final short value) {
         log.error("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-        buffer.putShort(value);
+        buffer.put(model.getValue());
+        buffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final int value) {
         if (log.isDebugEnabled())
             log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-        buffer.putInt(value);
+        buffer.put(model.getValue());
+        buffer.put(value);
     }
 
     private void parse(final ServerToClientModel model, final JsonObject jsonObject) {
         parse(model, jsonObject.toString());
     }
 
+    private void parse(final ServerToClientModel model, final long value) {
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.put(model.getValue());
+        buffer.put(value);
+    }
+
+    private void parse(final ServerToClientModel model, final double value) {
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+        buffer.put(model.getValue());
+        buffer.put(value);
+    }
+
     private void parse(final ServerToClientModel model, final String value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
                 + (value != null ? value.length() : 0) + ")" + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-
-        try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                buffer.putInt(bytes.length);
-                for (final byte b : bytes) {
-                    buffer.put(b);
-                }
-            } else {
-                buffer.putInt(0);
-            }
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot convert string");
-        }
+        buffer.put(model.getValue());
+        buffer.put(value);
     }
 
 }

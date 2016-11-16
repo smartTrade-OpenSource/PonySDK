@@ -139,8 +139,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 application.registerUIContext(uiContext);
 
                 final Buffer buffer = getBuffer();
-                buffer.putShort(ServerToClientModel.UI_CONTEXT_ID.getValue());
-                buffer.putInt(uiContext.getID());
+                buffer.put(ServerToClientModel.UI_CONTEXT_ID.getValue());
+                buffer.put(uiContext.getID());
                 flush(buffer);
                 applicationManager.startApplication(context);
 
@@ -236,7 +236,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public void sendHeartBeat() {
             if (isSessionOpen()) {
                 final Buffer buffer = getBuffer();
-                buffer.putShort(ServerToClientModel.HEARTBEAT.getValue());
+                buffer.put(ServerToClientModel.HEARTBEAT.getValue());
                 flush(buffer);
             }
         }
@@ -247,8 +247,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         public void sendRoundTrip() {
             if (isSessionOpen()) {
                 final Buffer buffer = getBuffer();
-                buffer.putShort(ServerToClientModel.PING_SERVER.getValue());
-                buffer.putLong(System.currentTimeMillis());
+                buffer.put(ServerToClientModel.PING_SERVER.getValue());
+                buffer.put(System.currentTimeMillis());
                 flush(buffer);
             }
         }
