@@ -210,6 +210,8 @@ public class BootstrapServlet extends HttpServlet {
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
         writer.append("<script type=\"text/javascript\" src=\"" + ponyTerminalJsFileName + "\"></script>");
         writer.newLine();
+        writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
+        writer.newLine();
 
         for (final String style : stylesheets) {
             final String contentType = fileTypeMap.getContentType(style);

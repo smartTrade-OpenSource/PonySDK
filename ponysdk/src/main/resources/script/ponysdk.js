@@ -95,6 +95,8 @@ function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
 
     pony = new ponysdk();
+    if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
+    else window['pony'] = pony;
 
     document.ponyLoaded = true;
 
@@ -117,6 +119,9 @@ function onPonySDKModuleLoaded() {
     reconnectionCheck.initCheck();
 }
 
+if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
+else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
+
 function notifyConnectionLostListeners() {
     for(var i=0; i<document.onConnectionLostListeners.length; i++) {
         try {
@@ -135,25 +140,25 @@ function decode(buffer) {
     if(textDecoder != null) return textDecoder.decode(buffer);
     else return UTF8.getStringFromBytes(new Uint8Array(buffer));
 }
-
+if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
+else window['decode'] = decode;
 
 var Addon = function (pony, params) {
     this.logLevel = 0;
     this.name = this.getName();
     this.id = params.id;
-    this.args = params.args
     this.widgetId = params.widgetID;
     if (typeof params.widgetElement != 'undefined') {
         this.element = params.widgetElement;
     }
-    this.options = {};
+    this.options = params.args || {};
     this.initialized = false;
     this.attached = false;
 };
 
 Addon.prototype.onInit = function () {
     if (!this.initialized) {
-        this.init(this.args);
+        this.init();
         this.initialized = true;
     }
 };
@@ -224,8 +229,7 @@ Addon.prototype.update = function (d) {
             this[methodName].call(this);
         }
     } catch (e) {
-        if (this.logLevel > 0) console.log(e.stack);
-        throw e;
+        throw "[" + this.name + "#" + this.id + "] Calling '" + methodName + "' throw an exception : " + e.message + "\n";
     }
 };
 
@@ -255,7 +259,7 @@ Addon.globalInit = function (args) {
 Addon._initMethods = {};
 
 Addon.initAddon = function (signature, args) {
-    Addon._initMethods[signature](args);
+    Addon._initMethods[signature](JSON.parse(args));
 };
 
 Addon.registerTerminalAddon = function (className, jsClass) {
@@ -279,23 +283,24 @@ Addon.registerTerminalAddon = function (className, jsClass) {
     }
 };
 
+if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports = Addon;
+else window['Addon'] = Addon;
 
-/*! https://mths.be/fromcodepoint v0.2.1 by @mathias */
+/*! http://mths.be/fromcodepoint v0.2.1 by @mathias */
 if (!String.fromCodePoint) {
-    (function () {
-        var defineProperty = (function () {
+    (function() {
+        var defineProperty = (function() {
             // IE 8 only supports `Object.defineProperty` on DOM elements
             try {
                 var object = {};
                 var $defineProperty = Object.defineProperty;
                 var result = $defineProperty(object, object, object) && $defineProperty;
-            } catch (error) {
-            }
+            } catch(error) {}
             return result;
         }());
         var stringFromCharCode = String.fromCharCode;
         var floor = Math.floor;
-        var fromCodePoint = function (_) {
+        var fromCodePoint = function(_) {
             var MAX_SIZE = 0x4000;
             var codeUnits = [];
             var highSurrogate;
@@ -319,7 +324,7 @@ if (!String.fromCodePoint) {
                 if (codePoint <= 0xFFFF) { // BMP code point
                     codeUnits.push(codePoint);
                 } else { // Astral code point; split in surrogate halves
-                    // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+                    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
                     codePoint -= 0x10000;
                     highSurrogate = (codePoint >> 10) + 0xD800;
                     lowSurrogate = (codePoint % 0x400) + 0xDC00;
@@ -344,12 +349,63 @@ if (!String.fromCodePoint) {
     }());
 }
 
-// UTF8 : Manage UTF-8 strings in ArrayBuffers
-if (typeof module !== 'undefined' && typeof module.require === 'function') {
-    require('string.fromcodepoint');
-    require('string.prototype.codepointat');
+/*! http://mths.be/codepointat v0.2.0 by @mathias */
+if (!String.prototype.codePointAt) {
+    (function() {
+        'use strict'; // needed to support `apply`/`call` with `undefined`/`null`
+        var defineProperty = (function() {
+            // IE 8 only supports `Object.defineProperty` on DOM elements
+            try {
+                var object = {};
+                var $defineProperty = Object.defineProperty;
+                var result = $defineProperty(object, object, object) && $defineProperty;
+            } catch(error) {}
+            return result;
+        }());
+        var codePointAt = function(position) {
+            if (this == null) {
+                throw TypeError();
+            }
+            var string = String(this);
+            var size = string.length;
+            // `ToInteger`
+            var index = position ? Number(position) : 0;
+            if (index != index) { // better `isNaN`
+                index = 0;
+            }
+            // Account for out-of-bounds indices:
+            if (index < 0 || index >= size) {
+                return undefined;
+            }
+            // Get the first code unit
+            var first = string.charCodeAt(index);
+            var second;
+            if ( // check if it’s the start of a surrogate pair
+                first >= 0xD800 && first <= 0xDBFF && // high surrogate
+                size > index + 1 // there is a next code unit
+            ) {
+                second = string.charCodeAt(index + 1);
+                if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
+                    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+                    return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
+                }
+            }
+            return first;
+        };
+        if (defineProperty) {
+            defineProperty(String.prototype, 'codePointAt', {
+                'value': codePointAt,
+                'configurable': true,
+                'writable': true
+            });
+        } else {
+            String.prototype.codePointAt = codePointAt;
+        }
+    }());
 }
 
+// https://github.com/nfroidure/UTF8.js v1.0.0
+// UTF8 : Manage UTF-8 strings in ArrayBuffers
 var _UTF8 = {
     // non UTF8 encoding detection (cf README file for details)
     'isNotUTF8': function (bytes, byteOffset, byteLength) {
@@ -495,5 +551,6 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
     module.exports = UTF8;
 } else {
     UTF8 = _UTF8;
+    window['UTF8'] = UTF8;
 }
 _UTF8 = undefined;
