@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.servlet;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,8 @@ public class BufferManager {
 
     private static final Logger log = LoggerFactory.getLogger(BufferManager.class);
 
-    private static final int NUMBER_OF_BUFFERS = 300;
-    private static final int MAX_BUFFERS = 1000;
+    private static final int NUMBER_OF_BUFFERS = 5;
+    private static final int MAX_BUFFERS = 500;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
     private final BlockingQueue<Buffer> bufferPool = new LinkedBlockingQueue<>();
@@ -100,6 +101,11 @@ public class BufferManager {
 
     public static final class Buffer {
 
+        private static final byte TRUE = 1;
+        private static final byte FALSE = 0;
+
+        private static final String ENCODING_CHARSET = "UTF-8";
+
         private final ByteBuffer socketBuffer;
 
         Buffer() {
@@ -114,16 +120,44 @@ public class BufferManager {
             socketBuffer.put(value);
         }
 
-        public void putShort(final short value) {
+        public void put(final boolean value) {
+            put(value ? TRUE : FALSE);
+        }
+
+        public void put(final short value) {
             socketBuffer.putShort(value);
         }
 
-        public void putInt(final int value) {
+        public void put(final int value) {
             socketBuffer.putInt(value);
         }
 
-        public void putLong(final long value) {
-            socketBuffer.putLong(value);
+        public void put(final long value) {
+            // TODO For now, we write String
+            //socketBuffer.putLong(value);
+            put(String.valueOf(value));
+        }
+
+        public void put(final double value) {
+            // TODO For now, we write String
+            //socketBuffer.putDouble(value);
+            put(String.valueOf(value));
+        }
+
+        public void put(final String value) {
+            try {
+                if (value != null) {
+                    final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                    put(bytes.length);
+                    for (final byte b : bytes) {
+                        put(b);
+                    }
+                } else {
+                    put(0);
+                }
+            } catch (final UnsupportedEncodingException e) {
+                log.error("Cannot convert string");
+            }
         }
 
         public void clear() {
