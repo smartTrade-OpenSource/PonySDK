@@ -161,7 +161,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 communicationErrorHandler.onCommunicationError(500, exception.getMessage());
             } else {
                 log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
-                        exception);
+                    exception);
             }
         }
     }
@@ -201,7 +201,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
                     final int endPosition = buffer.getIndex();
 
-                    window.postMessage(new ReaderBuffer(buffer.getMessage().slice(startPosition, endPosition)));
+                    window.postMessage(buffer.slice(startPosition, endPosition));
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
 
@@ -453,7 +453,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
             content.add(new HTML(
-                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+                "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(new ClickHandler() {
@@ -470,7 +470,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
             content.add(new HTML(
-                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+                "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -493,7 +493,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight) {
                 communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
-                        (Window.getClientHeight() - offsetHeight) / 2);
+                    (Window.getClientHeight() - offsetHeight) / 2);
             }
         });
     }

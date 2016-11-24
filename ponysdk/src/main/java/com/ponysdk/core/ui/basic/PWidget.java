@@ -345,16 +345,16 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         final JsonObject filteredKeys = handler.getJsonFilteredKeys();
-        if (filteredKeys != null) return addDomHandler(handler, PKeyPressEvent.TYPE,
-                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
+        if (filteredKeys != null)
+            return addDomHandler(handler, PKeyPressEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
     @Override
     public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         final JsonObject filteredKeys = handler.getJsonFilteredKeys();
-        if (filteredKeys != null) return addDomHandler(handler, PKeyUpEvent.TYPE,
-                new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
+        if (filteredKeys != null)
+            return addDomHandler(handler, PKeyUpEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
@@ -363,16 +363,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type,
-            final ServerBinaryModel binaryModel) {
+                                                                       final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                    type.getDomHandlerType().getValue());
-            if (windowID != PWindow.EMPTY_WINDOW_ID)
-                executeAddDomHandler(binaryModel1, binaryModel);
-            else
-                stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
+                type.getDomHandlerType().getValue());
+            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(binaryModel1, binaryModel);
+            else stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
         return handlerRegistration;
     }
@@ -505,8 +503,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void removeFromParent() {
-        if (parent instanceof HasPWidgets)
-            ((HasPWidgets) parent).remove(this);
+        if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 
@@ -516,6 +513,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     boolean isAddonAlreadyBound(final PAddOn addon) {
         return this.addon != null && !Objects.equals(this.addon, addon);
+    }
+
+    public PAddOn getAddon() {
+        return addon;
     }
 
     @Override

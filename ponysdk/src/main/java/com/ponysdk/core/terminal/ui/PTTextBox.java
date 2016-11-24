@@ -68,11 +68,10 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
         if (ServerToClientModel.MASK.equals(binaryModel.getModel())) {
             final String mask = binaryModel.getStringValue();
             // ServerToClientModel.VISIBILITY
-            final boolean showMask = binaryModel.getBooleanValue();
+            final boolean showMask = buffer.readBinaryModel().getBooleanValue();
             // ServerToClientModel.REPLACEMENT_STRING
-            final String replace = binaryModel.getStringValue();
-            if (maskDecorator == null)
-                maskDecorator = new TextBoxMaskedDecorator(cast());
+            final String replace = buffer.readBinaryModel().getStringValue();
+            if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
             return true;
         }

@@ -31,10 +31,8 @@ import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
-import elemental.client.Browser;
-import elemental.html.ArrayBuffer;
+import elemental.html.ArrayBufferView;
 import elemental.html.Uint8Array;
-import elemental.html.Window;
 
 public class ReaderBuffer {
 
@@ -44,19 +42,15 @@ public class ReaderBuffer {
 
     private static final ServerToClientModel[] SERVER_TO_CLIENT_MODELS = ServerToClientModel.values();
 
-    private final ArrayBuffer message;
-    private final Window window;
+    private final Uint8Array buffer;
+
     private int position;
-    private final Uint8Array array;
 
-    public ReaderBuffer(final ArrayBuffer message) {
-        this.message = message;
-        this.window = Browser.getWindow();
-
-        this.array = window.newUint8Array(message, 0, message.getByteLength());
+    public ReaderBuffer(final Uint8Array buffer) {
+        this.buffer = buffer;
     }
 
-    private static native String fromCharCode(ArrayBuffer buf) /*-{return $wnd.decode(buf);}-*/;
+    private static native String fromCharCode(ArrayBufferView buffer) /*-{return $wnd.decode(buffer);}-*/;
 
     public int getIndex() {
         return position;
@@ -114,14 +108,14 @@ public class ReaderBuffer {
 
     private boolean getBoolean() {
         final int size = ValueTypeModel.BOOLEAN.getSize();
-        final boolean result = array.intAt(position) == TRUE;
+        final boolean result = buffer.intAt(position) == TRUE;
         position += size;
         return result;
     }
 
     private byte getByte() {
         final int size = ValueTypeModel.BYTE.getSize();
-        final byte result = (byte) array.intAt(position);
+        final byte result = (byte) buffer.intAt(position);
         position += size;
         return result;
     }
@@ -131,7 +125,7 @@ public class ReaderBuffer {
 
         int result = 0;
         for (int i = position; i < position + size; i++) {
-            result = (result << 8) + array.intAt(i);
+            result = (result << 8) + buffer.intAt(i);
         }
 
         position += size;
@@ -144,7 +138,7 @@ public class ReaderBuffer {
 
         int result = 0;
         for (int i = position; i < position + size; i++) {
-            result = (result << 8) + array.intAt(i);
+            result = (result << 8) + buffer.intAt(i);
         }
 
         position += size;
@@ -161,10 +155,10 @@ public class ReaderBuffer {
         }
     }
 
-    private String getString(final int end) {
-        if (end != 0) {
-            final String result = fromCharCode(message.slice(position, position + end));
-            position += end;
+    private String getString(final int size) {
+        if (size != 0) {
+            final String result = fromCharCode(buffer.subarray(position, position + size));
+            position += size;
             return result;
         } else {
             return null;
@@ -176,7 +170,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasRemaining() {
-        return position < message.getByteLength();
+        return position < buffer.getByteLength();
     }
 
     /**
@@ -192,16 +186,8 @@ public class ReaderBuffer {
         }
     }
 
-    public ArrayBuffer getMessage() {
-        return message;
-    }
-
-    @Override
-    public String toString() {
-        return "ReaderBuffer {" +
-                "window=" + window.getName() +
-                ", position=" + position +
-                "}";
+    public Uint8Array slice(final int startPosition, final int endPosition) {
+        return buffer.subarray(startPosition, endPosition);
     }
 
 }

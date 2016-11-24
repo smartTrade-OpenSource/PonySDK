@@ -33,7 +33,7 @@ import elemental.client.Browser;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.events.MessageEvent;
-import elemental.html.ArrayBuffer;
+import elemental.html.Uint8Array;
 
 public class ParentWindowRequest implements RequestBuilder {
 
@@ -48,7 +48,7 @@ public class ParentWindowRequest implements RequestBuilder {
 
             @Override
             public void handleEvent(final Event event) {
-                final ArrayBuffer buffer = (ArrayBuffer) ((MessageEvent) event).getData();
+                final Uint8Array buffer = (Uint8Array) ((MessageEvent) event).getData();
                 onDataReceived(new ReaderBuffer(buffer));
             }
         });
