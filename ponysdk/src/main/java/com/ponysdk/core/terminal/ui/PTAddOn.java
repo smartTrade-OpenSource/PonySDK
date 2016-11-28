@@ -54,9 +54,8 @@ public class PTAddOn extends AbstractPTObject {
         final String signature = buffer.readBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null)
-            throw new IllegalArgumentException("AddOn factory not found for signature: " + signature + ". Addons registered: "
-                    + factories.keySet());
+        if (factory == null) throw new IllegalArgumentException(
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));

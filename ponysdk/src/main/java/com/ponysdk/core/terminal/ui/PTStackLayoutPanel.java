@@ -101,16 +101,15 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
         if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
             uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
-        }
-        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

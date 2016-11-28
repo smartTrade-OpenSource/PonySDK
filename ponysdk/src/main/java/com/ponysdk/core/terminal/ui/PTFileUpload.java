@@ -45,8 +45,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
     private final FileUpload fileUpload = new FileUpload();
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId,
-            final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
 
         uiObject.setEncoding(FormPanel.ENCODING_MULTIPART);
@@ -73,8 +72,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer,
-            final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
             fileUpload.addChangeHandler(new ChangeHandler() {
 
@@ -89,9 +87,8 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-            final String action = GWT.getHostPageBaseURL() + "stream?"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+            final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
             uiObject.setAction(action);
             uiObject.submit();
         } else {
@@ -104,12 +101,12 @@ public class PTFileUpload extends PTWidget<FormPanel> {
         if (ServerToClientModel.NAME.equals(binaryModel.getModel())) {
             fileUpload.setName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             fileUpload.setEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

@@ -49,7 +49,9 @@ public class ParentWindowRequest implements RequestBuilder {
             @Override
             public void handleEvent(final Event event) {
                 final Uint8Array buffer = (Uint8Array) ((MessageEvent) event).getData();
-                onDataReceived(new ReaderBuffer(buffer));
+                final ReaderBuffer readerBuffer = new ReaderBuffer();
+                readerBuffer.init(buffer);
+                onDataReceived(readerBuffer);
             }
         });
 

@@ -146,7 +146,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 if (codeException.getStatusCode() == 0) return;
             }
             log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
-                    + "\nPlease reload your application", exception);
+                    + "\nPlease reload your application",
+                exception);
         }
 
         if (exception instanceof StatusCodeException) {
@@ -248,7 +249,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void update(final ReaderBuffer buffer) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (BinaryModel.NULL.equals(binaryModel)) return;
+        if (binaryModel.getModel() == null) return;
 
         if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
@@ -312,7 +313,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (!BinaryModel.NULL.equals(binaryModel)) {
+                if (binaryModel.getModel() != null) {
                     if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
                     result = ptObject.update(buffer, binaryModel);
                 }

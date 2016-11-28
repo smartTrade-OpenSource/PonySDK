@@ -52,16 +52,15 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

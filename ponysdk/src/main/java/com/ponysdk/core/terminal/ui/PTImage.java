@@ -42,12 +42,11 @@ public class PTImage extends PTWidget<Image> {
     private int height = -1;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId,
-            final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         final BinaryModel urlModel = buffer.readBinaryModel();
         if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
-            final BinaryModel leftModel = buffer.readBinaryModel();
             url = urlModel.getStringValue();
+            final BinaryModel leftModel = buffer.readBinaryModel();
             if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
                 left = leftModel.getIntValue();
                 top = buffer.readBinaryModel().getIntValue();
@@ -73,15 +72,13 @@ public class PTImage extends PTWidget<Image> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer,
-            final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
         } else {
             super.addHandler(buffer, handlerModel, uiService);
         }
@@ -92,8 +89,9 @@ public class PTImage extends PTWidget<Image> {
         if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
             cast().setUrl(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

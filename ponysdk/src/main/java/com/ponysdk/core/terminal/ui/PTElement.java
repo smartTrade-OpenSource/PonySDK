@@ -64,12 +64,12 @@ public class PTElement extends PTComplexPanel<MyWidget> {
         if (ServerToClientModel.INNER_HTML.equals(binaryModel.getModel())) {
             uiObject.getElement().setInnerHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.INNER_TEXT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INNER_TEXT.equals(binaryModel.getModel())) {
             uiObject.getElement().setInnerText(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

@@ -9,12 +9,11 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConst
 import com.ponysdk.core.model.PAlignment;
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
-import com.ponysdk.core.terminal.model.BinaryModel;
 
 public class AlignmentConverter {
 
-    public static HorizontalAlignmentConstant asHorizontalAlignmentConstant(final BinaryModel binaryModel) {
-        final PHorizontalAlignment alignment = PHorizontalAlignment.fromByte(binaryModel.getByteValue());
+    public static HorizontalAlignmentConstant asHorizontalAlignmentConstant(final byte byteValue) {
+        final PHorizontalAlignment alignment = PHorizontalAlignment.fromByte(byteValue);
         switch (alignment) {
             case ALIGN_LEFT:
                 return HasHorizontalAlignment.ALIGN_LEFT;
@@ -27,8 +26,8 @@ public class AlignmentConverter {
         }
     }
 
-    public static VerticalAlignmentConstant asVerticalAlignmentConstant(final BinaryModel binaryModel) {
-        final PVerticalAlignment alignment = PVerticalAlignment.fromByte(binaryModel.getByteValue());
+    public static VerticalAlignmentConstant asVerticalAlignmentConstant(final byte byteValue) {
+        final PVerticalAlignment alignment = PVerticalAlignment.fromByte(byteValue);
         switch (alignment) {
             case ALIGN_TOP:
                 return HasVerticalAlignment.ALIGN_TOP;
@@ -41,8 +40,8 @@ public class AlignmentConverter {
         }
     }
 
-    public static Alignment asAlignment(final BinaryModel binaryModel) {
-        final PAlignment alignment = PAlignment.fromByte(binaryModel.getByteValue());
+    public static Alignment asAlignment(final byte byteValue) {
+        final PAlignment alignment = PAlignment.fromByte(byteValue);
         switch (alignment) {
             case BEGIN:
                 return Alignment.BEGIN;

@@ -35,13 +35,12 @@ abstract class PTButtonBase<T extends ButtonBase> extends PTFocusWidget<T> {
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-
-        return super.update(buffer, binaryModel);
     }
 
 }

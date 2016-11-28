@@ -40,12 +40,12 @@ public class PTHTML extends PTLabel {
         if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             cast().setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
             cast().setWordWrap(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

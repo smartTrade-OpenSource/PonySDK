@@ -57,8 +57,12 @@ public class WebSocketClient implements MessageSender {
 
     private final Window window;
 
+    private final ReaderBuffer readerBuffer;
+
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
+
+        readerBuffer = new ReaderBuffer();
 
         window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
@@ -127,9 +131,9 @@ public class WebSocketClient implements MessageSender {
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
         try {
-            final ReaderBuffer buffer = new ReaderBuffer(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
+            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
             // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = buffer.readBinaryModel();
+            final BinaryModel type = readerBuffer.readBinaryModel();
 
             if (type.getModel() == ServerToClientModel.PING_SERVER) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
@@ -143,10 +147,10 @@ public class WebSocketClient implements MessageSender {
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
             } else {
                 try {
-                    buffer.rewind(type);
-                    uiBuilder.updateMainTerminal(buffer);
+                    readerBuffer.rewind(type);
+                    uiBuilder.updateMainTerminal(readerBuffer);
                 } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+                    log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
                 }
             }
         } catch (final Exception e) {

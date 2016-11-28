@@ -56,19 +56,18 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetSize(w, newSize);
             return true;
-        }
-        if (ServerToClientModel.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
             final boolean hidden = binaryModel.getBooleanValue();
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHidden(w, hidden);
             return true;
-        }
-        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

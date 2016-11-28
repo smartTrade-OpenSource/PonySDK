@@ -50,12 +50,13 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.TAB_TEXT.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
-                uiObject.insert(w, binaryModel.getStringValue(), beforeIndexModel.getIntValue());
+                uiObject.insert(w, value, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
-                uiObject.add(w, binaryModel.getStringValue());
+                uiObject.add(w, value);
             }
         } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
@@ -111,12 +112,12 @@ public class PTTabPanel extends PTWidget<TabPanel> {
         if (ServerToClientModel.SELECTED_INDEX.equals(binaryModel.getModel())) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

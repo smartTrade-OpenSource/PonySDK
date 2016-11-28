@@ -52,20 +52,17 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
         if (ServerToClientModel.BORDER_WIDTH.equals(binaryModel.getModel())) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.SPACING.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SPACING.equals(binaryModel.getModel())) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel));
+        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
-        }
-        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel));
+        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+            uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-
-        return super.update(buffer, binaryModel);
     }
 }

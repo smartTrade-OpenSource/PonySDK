@@ -44,32 +44,26 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
         if (ServerToClientModel.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
             showLoadingOnRequest = binaryModel.getBooleanValue();
             return true;
-        }
-        if (ServerToClientModel.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
             enabledOnRequest = binaryModel.getBooleanValue();
             return true;
-        }
-        if (ServerToClientModel.END_OF_PROCESSING.equals(binaryModel.getModel())) {
-            if (showLoadingOnRequest)
-                uiObject.removeStyleName("pony-Loading");
-            if (!enabledOnRequest)
-                uiObject.setEnabled(enabled);
+        } else if (ServerToClientModel.END_OF_PROCESSING.equals(binaryModel.getModel())) {
+            if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
+            if (!enabledOnRequest) uiObject.setEnabled(enabled);
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
             return true;
-        }
-        if (ServerToClientModel.TABINDEX.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TABINDEX.equals(binaryModel.getModel())) {
             uiObject.setTabIndex(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.FOCUSED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.FOCUSED.equals(binaryModel.getModel())) {
             uiObject.setFocus(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

@@ -90,11 +90,11 @@ public class PTMenuBar extends PTWidget<MenuBar> {
         if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clearItems();
             return true;
-        }
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 }
