@@ -59,8 +59,10 @@ public class SessionManager {
 
     Session unregisterSession(final String sessionID) {
         final Session session = sessionsById.remove(sessionID);
-        for (final SessionListener listener : sessionListeners) {
-            listener.sessionDestroyed(session);
+        if (session != null) {
+            for (final SessionListener listener : sessionListeners) {
+                listener.sessionDestroyed(session);
+            }
         }
         return session;
     }
